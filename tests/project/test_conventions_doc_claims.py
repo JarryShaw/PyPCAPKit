@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
-"""Claims on the *House Conventions* page that the tree can be asked about.
+"""Claims the split *House Conventions* pages make that the tree can be asked about.
 
-:file:`docs/source/contributing/conventions.rst` records design rulings, and most of
-what it records is reasoning -- which no test can check. Some of it is not: a count of
-classes, a per-class classification, a retired name, an exception type. Those are the
-parts that rot silently, because Sphinx builds without ``-W`` and without ``nitpicky``,
-so a page whose every factual claim has gone stale still renders and CI still passes.
+:file:`docs/source/contributing/conventions.rst` used to record every design ruling
+on one 966-line page, and most of what it records is reasoning -- which no test can
+check. Some of it is not: a count of classes, a per-class classification, a retired
+name, an exception type. Those are the parts that rot silently, because Sphinx builds
+without ``-W`` and without ``nitpicky``, so a page whose every factual claim has gone
+stale still renders and CI still passes.
 
-GitHub issue #918 harvested the settled rulings onto that page, and this file pins the
-checkable ones:
+GitHub issue #918 part 1 harvested the settled rulings onto that page; part 2 then
+split it into :file:`docs/source/contributing/conventions/`, one file per
+``.. _label:`` anchor plus the :file:`index.rst` that carries the ``.. important::``
+preamble and the toctree. This file pins the checkable claims, plus the split's own
+structure:
 
-* :class:`ConventionAnchorTests` -- the four ``.. _label:`` anchors the page carries.
-  Three of them are cross-referenced from :mod:`pcapkit` docstrings and from
-  ``tests/corekit/test_sentinel_exports_unit.py``, which slices the file *by* two of
-  them, so a later split of the page into one file per section has to keep every anchor
-  resolving. This is the cheap guard that a split cannot orphan one by accident.
+* :class:`ConventionAnchorTests` -- the four ``.. _label:`` anchors, one now per
+  file. Before the split all four lived on one page, and
+  ``tests/corekit/test_sentinel_exports_unit.py`` sliced the file *between* two of
+  them -- which is exactly what GitHub issue #930 named as the split's concrete
+  blocker, since separating those two anchors into different files made that slice
+  raise :exc:`ValueError`. This class pins the post-split shape: every anchor still
+  exists, lives in exactly its own file, is listed in the index's toctree, and the
+  top-level :file:`docs/source/index.rst` points at the new index page rather than
+  the retired bare document path.
 * :class:`PhaseTwoRemainderTests` -- the three counts the page states about
   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2, measured
   rather than remembered. The page said the phase *"has not happened yet"* for as long
@@ -36,7 +44,8 @@ checkable ones:
   fix alongside it: the four sentinel references #934 part B qualified stay
   qualified, since none of ``AbsentType``, ``NoValueType`` or ``ABSENT`` resolves
   unqualified outside :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module
-  context.
+  context. Both checks scan every split page rather than one file, since either
+  could in principle land on any of them.
 
 Deliberately **not** checked here: whether the page's cross-references resolve. That is
 a property of the built inventory rather than of the source, for the reason
@@ -58,20 +67,31 @@ import aenum
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The page itself. Hard-coded rather than discovered, because the path is *also* what
-#: ``tests/corekit/test_sentinel_exports_unit.py`` hard-codes -- so if the page moves,
-#: both files have to be updated together and a test that found it either way would
-#: hide half of that.
-CONVENTIONS = ROOT / 'docs' / 'source' / 'contributing' / 'conventions.rst'
+#: The directory GitHub issue #918 part 2 split the single-page
+#: :file:`conventions.rst` into. Hard-coded rather than discovered, because the path
+#: is *also* what ``pcapkit/corekit/sentinels.py`` and
+#: ``tests/corekit/test_sentinel_exports_unit.py`` hard-code -- so if the layout
+#: moves again, every one of them has to be updated together, and a test that found
+#: it either way would hide that.
+CONVENTIONS_DIR = ROOT / 'docs' / 'source' / 'contributing' / 'conventions'
 
-#: Every ``.. _label:`` the page is cross-referenced by, and what each is for. The first
-#: three predate #918; ``extension-header-subclassing`` arrived with it.
+#: The index page that carries the toctree and the ``.. important::`` preamble the
+#: single page used to open with.
+INDEX = CONVENTIONS_DIR / 'index.rst'
+
+#: Every ``.. _label:`` anchor, in the narrative order the pre-split page carried
+#: them in -- which is also the order the index's toctree lists the files in. The
+#: first three predate #918; ``extension-header-subclassing`` arrived with it.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
 )
+
+#: Each anchor's own file, one-to-one since the split -- there is no longer a single
+#: shared page to slice between two of them.
+PAGES = {anchor: CONVENTIONS_DIR / f'{anchor}.rst' for anchor in ANCHORS}
 
 #: Number words as the page spells them, so a count can be read back out of the prose.
 #: The page states its figures in words rather than digits, which is house style there.
@@ -83,51 +103,78 @@ NUMBER_WORDS = {
 }
 
 
-def _page() -> 'str':
-    """The page's text.
+def _page(anchor: 'str') -> 'str':
+    """``anchor``'s own page, whole.
 
-    Raises:
-        AssertionError: If the page is not where every reference to it says it is.
-
-    """
-    if not CONVENTIONS.is_file():  # pragma: no cover
-        raise AssertionError(
-            f'conventions.rst not found at {CONVENTIONS}; pcapkit/corekit/sentinels.py '
-            'and tests/corekit/test_sentinel_exports_unit.py both name this path'
-        )
-    return CONVENTIONS.read_text(encoding='utf-8')
-
-
-def _section(anchor: 'str') -> 'str':
-    """The page text from ``anchor`` up to the next anchor, or to the end.
-
-    Sliced by the anchors rather than by line number, following
-    ``tests/corekit/test_sentinel_exports_unit.py``, so an edit elsewhere on the page
-    cannot silently make an assertion read the wrong section.
-
-    A missing anchor fails here with a message naming it, rather than with
-    :meth:`str.index`'s bare ``substring not found`` -- and the *other* anchors are
-    looked up with :meth:`str.find` for the same reason, so one missing label does not
-    make every slice on the page report the wrong thing.
+    The split retired the anchor-to-anchor slice this used to need: each anchor is
+    now the whole of its own file, rather than a range between two markers in one
+    shared page. ``tests/corekit/test_sentinel_exports_unit.py``'s
+    ``_sentinel_section`` made the same change, for the same reason.
 
     Args:
-        anchor: The label to slice from, without the ``.. _`` and ``:``.
+        anchor: One of :data:`ANCHORS`.
 
     Returns:
-        The section's text.
+        The page's text.
 
     Raises:
-        AssertionError: If ``anchor`` is not on the page at all.
+        AssertionError: If the page is not where the split put it.
 
     """
-    text = _page()
-    start = text.find(f'.. _{anchor}:')
-    if start < 0:
-        raise AssertionError(f'anchor .. _{anchor}: is not on {CONVENTIONS.name}; '
-                             'every :ref: pointing at it is now plain text')
-    following = [found for other in ANCHORS
-                 if (found := text.find(f'.. _{other}:')) > start]
-    return text[start:min(following)] if following else text[start:]
+    path = PAGES[anchor]
+    if not path.is_file():  # pragma: no cover
+        raise AssertionError(
+            f'{path.name} not found at {path}; GitHub issue #918 part 2 split it '
+            'out of the single-page conventions.rst -- pcapkit/corekit/sentinels.py '
+            'and tests/corekit/test_sentinel_exports_unit.py both name paths under '
+            'this directory too'
+        )
+    return path.read_text(encoding='utf-8')
+
+
+def _every_page() -> 'str':
+    """Every split page's text, concatenated, index included.
+
+    For the checks that used to scan the single-page file end to end -- a forbidden
+    role, a qualified reference -- and still need to scan across all four sections
+    plus the preamble, since either could in principle land on any of them.
+
+    """
+    return '\n'.join([INDEX.read_text(encoding='utf-8')]
+                     + [_page(anchor) for anchor in ANCHORS])
+
+
+def _toctree_entries(text: 'str') -> 'list[str]':
+    """The entries of the first ``.. toctree::`` directive in ``text``.
+
+    Parsed structurally -- skip the directive's own options (``:maxdepth:`` and the
+    like), then collect non-blank lines until the entry block ends -- rather than
+    searched for a literal substring, following
+    ``tests/project/test_sentinels_doc_page_934_unit.py``'s own copy of this helper,
+    so a reordering or an added option does not misreport what the toctree actually
+    names.
+
+    """
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() == '.. toctree::':
+            break
+    else:
+        raise AssertionError('no ".. toctree::" directive found')
+
+    entries = []  # type: list[str]
+    started = False
+    for line in lines[index + 1:]:
+        stripped = line.strip()
+        if not stripped:
+            if started:
+                break
+            continue
+        if stripped.startswith(':'):
+            continue
+        started = True
+        entries.append(stripped)
+    return entries
 
 
 def _every_enumeration() -> 'dict[type, str]':
@@ -199,38 +246,126 @@ def _every_enumeration() -> 'dict[type, str]':
 
 
 class ConventionAnchorTests(unittest.TestCase):
-    """The labels other files cross-reference, all in the one page."""
+    """The labels other files cross-reference, one now per file."""
+
+    def test_every_page_exists(self) -> 'None':
+        """The split's own four files, plus the index, are all on disk."""
+        for path in [INDEX] + [PAGES[anchor] for anchor in ANCHORS]:
+            with self.subTest(page=path.name):
+                self.assertTrue(path.is_file(), f'{path} does not exist')
 
     def test_every_cross_referenced_anchor_is_present(self) -> 'None':
         """A missing anchor is a dead ``:ref:`` that renders as plain text.
 
         Sphinx is run here without ``-W`` and without ``nitpicky``, so an unresolved
-        reference is not a build failure -- it is a word that used to be a link. This
-        is the assertion a split of the page has to keep passing.
+        reference is not a build failure -- it is a word that used to be a link.
+        Checked against each anchor's own file, since the split gave each anchor
+        exactly one home rather than one shared page.
 
         """
-        text = _page()
         for anchor in ANCHORS:
             with self.subTest(anchor=anchor):
-                # ``assertTrue`` rather than ``assertIn``: the latter dumps the whole
-                # 900-line page into the failure and buries the one line that says
+                text = _page(anchor)
+                # ``assertTrue`` rather than ``assertIn``: the latter dumps the
+                # whole page into the failure and buries the one line that says
                 # which anchor went missing.
                 self.assertTrue(f'.. _{anchor}:' in text,
-                                f'.. _{anchor}: is no longer on {CONVENTIONS.name}')
+                                f'.. _{anchor}: is no longer on {PAGES[anchor].name}')
 
-    def test_the_sentinel_slice_markers_stay_in_one_file_and_in_order(self) -> 'None':
-        """``test_sentinel_exports_unit`` slices between two of the anchors.
+    def test_no_page_carries_a_different_page_s_anchor(self) -> 'None':
+        """Each anchor lives in exactly one file -- the split's whole point.
 
-        It reads ``text.index('.. _sentinel-convention:')`` through
-        ``text.index('.. _registry-protocol:', start)``, so splitting those two
-        sections into separate files breaks it -- not with a wrong answer, but with a
-        :exc:`ValueError` from :meth:`str.index`. Stated here as well so the
-        constraint is discoverable from the page's own tests.
+        Before the split, ``tests/corekit/test_sentinel_exports_unit.py`` sliced one
+        shared page between ``.. _sentinel-convention:`` and
+        ``.. _registry-protocol:`` -- reading ``text.index('.. _sentinel-convention:')``
+        through ``text.index('.. _registry-protocol:', start)``. GitHub issue #930
+        named separating those two anchors into different files as the split's
+        concrete blocker, because that slice would then raise :exc:`ValueError` from
+        :meth:`str.index` rather than a wrong answer. #918 part 2 retired the slice
+        instead of working around it -- ``_sentinel_section`` now reads
+        :file:`sentinel-convention.rst` whole. What used to be a hard constraint on
+        the single page is now a fact about the four files, pinned here so a later
+        merge back into one page, or a bad copy-paste across two of them, does not
+        silently resurrect it.
 
         """
-        text = _page()
-        self.assertLess(text.index('.. _sentinel-convention:'),
-                        text.index('.. _registry-protocol:'))
+        for anchor in ANCHORS:
+            text = _page(anchor)
+            for other in ANCHORS:
+                if other == anchor:
+                    continue
+                with self.subTest(page=anchor, other_anchor=other):
+                    self.assertNotIn(f'.. _{other}:', text,
+                                     f'{PAGES[anchor].name} carries .. _{other}:, '
+                                     f'which belongs in {PAGES[other].name}')
+
+    def test_the_index_toctree_lists_every_page_in_order(self) -> 'None':
+        """The index's toctree is what keeps every page from being an orphan.
+
+        An orphan page still resolves cross-references -- Sphinx's reference
+        inventory does not care whether a page is reachable from a toctree -- but it
+        produces a distinct "document isn't included in any toctree" warning. Order
+        matches :data:`ANCHORS`, the narrative order the single page used to carry
+        the four sections in.
+
+        """
+        entries = _toctree_entries(INDEX.read_text(encoding='utf-8'))
+        self.assertEqual(entries, list(ANCHORS),
+                         f'{INDEX} toctree lists {entries!r}, expected '
+                         f'{list(ANCHORS)!r}')
+
+    def test_the_top_level_index_points_at_the_new_index_page(self) -> 'None':
+        """:file:`docs/source/index.rst` has to name a document, not a directory.
+
+        ``.. toctree::`` entries are docnames, and the bare ``contributing/conventions``
+        entry it used to carry stopped being one the moment the split turned that
+        path into a directory -- Sphinx would report "unknown document" for it,
+        silently, since the build here runs without ``-W``/``-n``. Checked
+        structurally rather than trusted to a nitpicky build alone.
+
+        """
+        text = (ROOT / 'docs' / 'source' / 'index.rst').read_text(encoding='utf-8')
+        self.assertIn('contributing/conventions/index', text,
+                      'docs/source/index.rst no longer points at the split index '
+                      'page')
+        self.assertNotRegex(text, r'(?m)^\s+contributing/conventions\s*$',
+                            'docs/source/index.rst still names the retired bare '
+                            '"contributing/conventions" path, which is now a '
+                            'directory rather than a document')
+
+    def test_the_index_preamble_does_not_claim_to_be_a_ruling_page_itself(self) -> 'None':
+        """The index's own prose has to read true of a hub, not of a page.
+
+        Round 1 of #918 part 2's split moved the ``.. important::`` preamble onto
+        :data:`INDEX` unedited, and its prose was written when the whole thing was
+        one page: *"This page records design rulings"*, and a future one *"is
+        written onto this page"*. Both went false the moment the index stopped
+        carrying any ruling of its own -- the four children do -- and the second
+        is worse than stale, because it is the standing instruction #918 part 3
+        exists to keep alive, now telling a contributor to write onto the wrong
+        file. A cross-review caught this on the first PR revision.
+
+        Checked as a ban on the self-referential singular ``"this page"`` rather
+        than against the exact old sentences, so a future rewrite that
+        reintroduces the same mistake in different words still trips this -- the
+        index legitimately never needs that phrase, since every true statement
+        about ruling content here names a child page, or says "the pages below"
+        / "here" for the set of them. Paired with a positive check that the
+        corrected standing-instruction phrase actually landed, rather than merely
+        that the old one is gone, following :class:`RetiredNameTests`'s two-sided
+        pattern for a retired name elsewhere in this module.
+
+        """
+        text = INDEX.read_text(encoding='utf-8')
+        self.assertNotIn('this page', text.lower(),
+                         f'{INDEX} claims something about "this page" -- the '
+                         'index carries no ruling of its own, so nothing on it '
+                         'should read as self-referential')
+        self.assertIn('the page that covers it', text,
+                      f'{INDEX} no longer points a future ruling at "the page '
+                      'that covers it"; the standing #918 instruction to '
+                      'document a ruling in the same change that implements it '
+                      'is pointing at the wrong target again')
 
 
 class PhaseTwoRemainderTests(unittest.TestCase):
@@ -246,7 +381,7 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                         if not issubclass(cls, EnumLookup)}
         # Whitespace-normalised, because the page wraps its prose at 88 columns and a
         # sentence this reads a figure out of is routinely split across lines.
-        self.note = ' '.join(_section('registry-protocol').split())
+        self.note = ' '.join(_page('registry-protocol').split())
 
     def test_the_walk_found_something_to_count(self) -> 'None':
         """Guards every count below from passing on an empty discovery."""
@@ -342,7 +477,7 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
             One list of cell strings per row.
 
         """
-        section = _section('extension-header-subclassing')
+        section = _page('extension-header-subclassing')
         lines = section[section.index('.. list-table::'):].splitlines()
 
         rows = []  # type: list[list[str]]
@@ -466,7 +601,7 @@ class FailedLookupExceptionTests(unittest.TestCase):
             FEATCode.get('ZZ-NOT-REAL')
         self.assertIsInstance(caught.exception, KeyError)
 
-        section = ' '.join(_section('registry-protocol').split())
+        section = ' '.join(_page('registry-protocol').split())
         at = section.index("``FEATCode.get('ZZ-NOT-REAL')``")
         self.assertIn('EnumKeyError', section[at:at + 300],
                       'the page still describes the name miss without naming '
@@ -522,35 +657,40 @@ class AenumRoleExclusionTests(unittest.TestCase):
 
         Checked as a role, not as the bare word: ``aenum`` still appears as a
         plain double-backtick literal (``` ``aenum.Enum`` ```) and in prose
-        (*"the aenum flavours"*) throughout this page, which is exactly the point
-        of the fix -- only the unresolvable *role* form is banned.
+        (*"the aenum flavours"*) throughout these pages, which is exactly the
+        point of the fix -- only the unresolvable *role* form is banned. Scanned
+        across every split page plus the index, since the six roles #934 part C
+        found could each have landed in any of them.
 
         """
-        text = _page()
+        text = _every_page()
         offenders = self.FORBIDDEN_AENUM_ROLE.findall(text)
         self.assertEqual(offenders, [],
-                         f'{CONVENTIONS.name} names aenum in a role again: '
-                         f'{offenders!r}; GitHub issue #934 part C ruled this '
-                         'unresolvable (conf.py excludes aenum -- zero py: objects '
-                         'in its objects.inv) and converted every such role to a '
-                         'plain literal')
+                         f'the split conventions pages name aenum in a role '
+                         f'again: {offenders!r}; GitHub issue #934 part C ruled '
+                         'this unresolvable (conf.py excludes aenum -- zero py: '
+                         'objects in its objects.inv) and converted every such '
+                         'role to a plain literal')
 
     def test_the_qualified_sentinel_targets_stay_qualified(self) -> 'None':
         """A later edit unqualifying one of these reintroduces #934 part B's miss.
 
         ``AbsentType``, ``NoValueType`` and ``ABSENT`` each resolve only against
         the sentinels page's own module context (GitHub issue #936); written bare
-        anywhere on this page, none of the three resolves at all.
+        anywhere on these pages, none of the three resolves at all. All four
+        qualified references happen to live in
+        :file:`sentinel-convention.rst`, but this scans every split page plus the
+        index so a later move of one does not go unnoticed.
 
         """
-        text = _page()
+        text = _every_page()
         for role, target, count in self.QUALIFIED_SENTINEL_REFS:
             with self.subTest(target=target):
                 needle = f'{role}`{target}`'
                 actual = text.count(needle)
                 self.assertEqual(actual, count,
-                                 f'{needle!r} appears {actual} time(s) in '
-                                 f'{CONVENTIONS.name}, expected {count}')
+                                 f'{needle!r} appears {actual} time(s) across '
+                                 f'the split conventions pages, expected {count}')
 
 
 if __name__ == '__main__':

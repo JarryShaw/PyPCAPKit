@@ -1055,8 +1055,9 @@ class ESPProtocolTests(unittest.TestCase):
         appear after hop-by-hop, routing, and fragmentation extension
         headers"), not a membership assertion -- membership is the
         registry's claim, per
-        ``docs/source/contributing/conventions.rst``'s "being *in* that
-        registry is what makes something an extension header" ruling.
+        ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
+        "being *in* that registry is what makes something an extension
+        header" ruling.
         Rephrasing the placement sentence as "places it among the IPv6
         extension headers" overstated the RFC and contradicted this same
         docstring's ``Note:`` (which says RFC 8200 declines ESP
@@ -1069,8 +1070,9 @@ class ESPProtocolTests(unittest.TestCase):
         also travels directly as an IPv4 payload, exactly as
         :mod:`~pcapkit.protocols.internet.hip` cites its own IPv4
         appendix for the same reason. Per
-        ``docs/source/contributing/conventions.rst``'s "own-protocolhood
-        on its own is not sufficient" ruling (MH is the settling case),
+        ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
+        "own-protocolhood on its own is not sufficient" ruling (MH is the
+        settling case),
         that fact *qualifies* an already-standalone header for a base
         besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
         it does not *make* the header standalone, and the RFC has no

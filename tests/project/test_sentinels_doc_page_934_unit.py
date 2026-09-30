@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """Pins the API page for :mod:`pcapkit.corekit.sentinels` existing and reachable.
 
-GitHub issue #934: :file:`docs/source/contributing/conventions.rst` cross-references
-:mod:`pcapkit.corekit.sentinels` five times (the ``:mod:`` role, at lines 165, 168, 171,
-174 and 261), and none of them used to resolve, because no page under
-:file:`docs/source/` documented that module -- confirmed by an explicit nitpicky
-``sphinx-build`` before this page existed, and again after, to confirm the fix.
+GitHub issue #934: what is now
+:file:`docs/source/contributing/conventions/sentinel-convention.rst` (GitHub
+issue #918 split it out of the single-page :file:`conventions.rst` that carried
+it at the time) cross-references :mod:`pcapkit.corekit.sentinels` five times
+(the ``:mod:`` role, at lines 165, 168, 171, 174 and 261 of the pre-split page),
+and none of them used to resolve, because no page under :file:`docs/source/`
+documented that module -- confirmed by an explicit nitpicky ``sphinx-build``
+before this page existed, and again after, to confirm the fix.
 
 This does **not** re-test Sphinx's cross-reference resolution itself -- as
 :file:`tests/project/test_documentation_claims.py` explains at length, whether a

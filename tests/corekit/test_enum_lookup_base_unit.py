@@ -213,9 +213,9 @@ class BareLookupTests(unittest.TestCase):
         """Including a value that is not also a member name.
 
         ``_Str.get('<angled>')`` is the measurement
-        :file:`docs/source/contributing/conventions.rst` records on
-        :class:`~pcapkit.const.ftp.command.FEATCode`, made here on a class that
-        cannot be overriding ``get``, since it defines none.
+        :file:`docs/source/contributing/conventions/registry-protocol.rst`
+        records on :class:`~pcapkit.const.ftp.command.FEATCode`, made here on a
+        class that cannot be overriding ``get``, since it defines none.
 
         """
         self.assertIs(_Str.get('plain'), _Str.plain)
