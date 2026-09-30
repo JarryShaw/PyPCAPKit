@@ -430,6 +430,7 @@
 <li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Where the registry protocol lives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">How the repository itself is run</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -636,6 +637,113 @@ exists for. So a <code class="docutils literal notranslate"><span class="pre">ge
 following the convention; one that catches a <em>value</em> miss that way is silencing a
 logged error, and needs a reason.</p>
 </section>
+<section id="what-a-get-override-may-and-may-not-do">
+<h2>What a <code class="docutils literal notranslate"><span class="pre">get</span></code> Override May and May Not Do<a class="headerlink" href="#what-a-get-override-may-and-may-not-do" title="Link to this heading">¶</a></h2>
+<p>Three rulings settled what an override owes
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, and the last of them deleted two
+overrides outright. They are collected here because each was reached by the same
+argument: the base’s contract is house-wide, so an override that diverges from it is
+a defect rather than a local judgement about its own callers. The first item below is
+not a ruling but a language constraint, recorded with them because the three rulings
+all presuppose it.</p>
+<p><strong>An override that delegates is a</strong> <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span></code>, and this one is forced by
+Python rather than decided. Zero-argument <code class="xref py py-func docutils literal notranslate"><span class="pre">super()</span></code> binds the enclosing
+function’s <strong>first positional parameter</strong> as its instance, whatever that parameter
+is named – so inside <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span> <span class="pre">def</span> <span class="pre">get(key,</span> <span class="pre">default=NO_DEFAULT)</span></code> it binds
+<code class="docutils literal notranslate"><span class="pre">key</span></code>, the lookup key, and <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super().get(key)</span></code> fails on the key rather
+than reaching the base. On Python 3.13 and newer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">TypeError</span><span class="p">:</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span> <span class="n">obj</span> <span class="p">(</span><span class="n">instance</span> <span class="n">of</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">an</span> <span class="n">instance</span> <span class="ow">or</span>
+<span class="n">subtype</span> <span class="n">of</span> <span class="nb">type</span> <span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>and on 3.10 through 3.12, where CPython words it differently and names neither the
+instance nor the type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">TypeError</span><span class="p">:</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span> <span class="n">obj</span> <span class="n">must</span> <span class="n">be</span> <span class="n">an</span> <span class="n">instance</span> <span class="ow">or</span> <span class="n">subtype</span> <span class="n">of</span> <span class="nb">type</span>
+</pre></div>
+</div>
+<p>Both forms share <code class="docutils literal notranslate"><span class="pre">instance</span> <span class="pre">or</span> <span class="pre">subtype</span> <span class="pre">of</span> <span class="pre">type</span></code>, which is the only part of the
+message anything here relies on – pinning either full sentence would pass on two of
+the five supported versions and fail on the other three.</p>
+<p>Two corollaries worth stating, because the obvious summary of this is wrong in both
+directions. <code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">super():</span> <span class="pre">no</span> <span class="pre">arguments</span></code> is a <em>different</em> failure, raised
+only when the enclosing function takes no parameters at all – no real <code class="docutils literal notranslate"><span class="pre">get</span></code>
+override qualifies, since every one takes <code class="docutils literal notranslate"><span class="pre">key</span></code>. And the <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> is not
+guaranteed either: pass a first argument that <em>is</em> an instance of the class and the
+delegation <strong>silently succeeds</strong>, so a <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> override cannot even be
+relied on to fail loudly. Measured, all three cases, rather than reasoned about.
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is itself a <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span></code>. The
+precedent is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/913">#913</a>, whose
+<code class="docutils literal notranslate"><span class="pre">FEATCode.get</span></code> is <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span> <span class="pre">def</span> <span class="pre">get(cls,</span> <span class="pre">key,</span> <span class="pre">default=NO_DEFAULT)</span></code> ending in
+<code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super().get(key,</span> <span class="pre">default)</span></code>;
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> followed it, which is
+what turned <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> into a classmethod.</p>
+<p>Callers cannot see the switch – <code class="docutils literal notranslate"><span class="pre">Method.get('X')</span></code> binds identically either way –
+so there is no compatibility argument for keeping the <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code>. Two
+<code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> overrides do survive and are still correct:
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s and
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>’s never call <code class="docutils literal notranslate"><span class="pre">super()</span></code> at
+all, so neither meets the condition.</p>
+<p><strong>Raise the way the base raises, which means</strong> <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>.
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/933">#933</a> asked whether two
+overrides raising <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> <strong>without</strong>
+<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> should adopt the base’s. The owner first declined, then reversed
+himself: they should follow the house convention and not be loud.</p>
+<p>Both answers are on the issue deliberately, and the reversal is the ruling. What it
+settles is not the one keyword – it is the tie-breaker. A loud
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> sets <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to
+<code class="docutils literal notranslate"><span class="pre">0</span></code> <strong>process-wide</strong>, the
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> hazard, so loudness is
+paid for by the whole library rather than by the override’s own callers. The argument
+against changing them was that <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> exists on the base for a name miss
+inside a <em>successful</em> call at <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> and these two had no such caller;
+uniformity beat it, because a per-class judgement about present callers cannot price
+a process-wide effect.</p>
+<p><strong>A signature the base advertises has to be honoured, not suppressed.</strong> Re-parenting
+onto <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> gave those same two classes an
+inherited two-argument <code class="docutils literal notranslate"><span class="pre">get(key,</span> <span class="pre">default)</span></code> that their one-argument overrides then
+refused:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'bogus'</span><span class="p">,</span> <span class="s1">'Handover_Accepted'</span><span class="p">)</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">get</span><span class="p">()</span> <span class="n">takes</span> <span class="mi">1</span> <span class="n">positional</span> <span class="n">argument</span> <span class="n">but</span> <span class="mi">2</span> <span class="n">were</span> <span class="n">given</span>
+</pre></div>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span> <span class="pre">#</span> <span class="pre">pylint:</span> <span class="pre">disable=arguments-differ</span></code> pair hid the
+mismatch from <code class="docutils literal notranslate"><span class="pre">mypy</span></code> and <code class="docutils literal notranslate"><span class="pre">pylint</span></code>, and both docstrings disclosed it in prose
+instead. Put to the owner on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> as one of three options
+– widen and delegate, refuse <code class="docutils literal notranslate"><span class="pre">default</span></code> explicitly with an in-library error, or
+leave the disclosure as the settled answer – he took the first. So
+<strong>a suppression plus a docstring is not an answer to a contract the class advertises
+and breaks.</strong> The check that the suppression was load-bearing is the one to repeat
+before believing any such pair: stripping these two yielded
+<code class="docutils literal notranslate"><span class="pre">Signature</span> <span class="pre">of</span> <span class="pre">&quot;get&quot;</span> <span class="pre">incompatible</span> <span class="pre">with</span> <span class="pre">supertype</span> <span class="pre">&quot;EnumLookup&quot;</span>&#160; <span class="pre">[override]</span></code> at both
+lines, with <code class="docutils literal notranslate"><span class="pre">--warn-unused-ignores</span></code> reporting neither as unused.</p>
+<p><strong>And an override that only reimplements the base is deleted, not repaired.</strong> Widening
+those two signatures made them faithful copies of the base. Rather than merge them,
+the owner asked on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/940">#940</a> why the
+two overrides needed to exist at all, if they could simply fall back to the base’s.</p>
+<p>They could. Nine cases per class – name hit, name miss, value hit, value miss and
+every <code class="docutils literal notranslate"><span class="pre">default</span></code> combination – differed from <code class="docutils literal notranslate"><span class="pre">EnumLookup.get.__func__(cls,</span> <span class="pre">...)</span></code>
+in <strong>zero</strong> of them, and neither class carried an alias (<code class="docutils literal notranslate"><span class="pre">__members__</span></code> 6 and 4,
+<code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> 6 and 4) for the <em>“Backport support for original codes”</em> in their
+docstrings to refer to. Offered the choice between merging the widened copies and
+deleting them in a follow-up, he ruled for deleting them outright. Both <code class="docutils literal notranslate"><span class="pre">get</span></code>
+methods and
+both suppressions went with it, and <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> now defines
+no <code class="docutils literal notranslate"><span class="pre">get</span></code> at all.</p>
+<p>The one input where the copies <strong>did</strong> differ is why this matters beyond line count,
+and it is the trap for whoever writes the next override: the base branches on
+<code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">str)</span></code> and treats everything else as a <em>value</em>, while those two
+branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and fell through to the <em>name</em> path for anything
+else. <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> therefore raised a quiet
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> on those two and a loud
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> on the other four of the six
+locally-defined helpers in those two modules, and no prose
+anywhere said so. Re-implementing the dispatch is how an override acquires a
+divergence nobody wrote down; delegating to it is how it does not.</p>
+<p>Taken with the <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> deletion below – an override emptied by #923
+rather than by redundancy – the rule generalises: <strong>an override justifies itself by
+what it adds to the base, and goes when the answer is nothing.</strong></p>
+</section>
 <section id="case-sensitivity-is-rfc-directed">
 <h2>Case Sensitivity Is RFC-Directed<a class="headerlink" href="#case-sensitivity-is-rfc-directed" title="Link to this heading">¶</a></h2>
 <p>The rule, in the owner’s own wording on
@@ -818,19 +926,20 @@ the CSV columns the crawler reads are lower case in every row (<code class="docu
 <code class="docutils literal notranslate"><span class="pre">a</span></code> 18, <code class="docutils literal notranslate"><span class="pre">s/p</span></code> 3, blank 1; <code class="docutils literal notranslate"><span class="pre">o</span></code> 28, <code class="docutils literal notranslate"><span class="pre">m</span></code> 27, <code class="docutils literal notranslate"><span class="pre">h</span></code> 7, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2).</p></td>
 <td><p><strong>open</strong> – see below</p></td>
 </tr>
-<tr class="row-odd"><td><p>The 5 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
+<tr class="row-odd"><td><p>The 6 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ngap</span></code></a> helper enumerations</p></td>
 <td><p>IANA Mobility Header registries, 3GPP TS 38.413</p></td>
 <td><p>Their values are numeric codes, so the criterion is vacuous exactly as for the
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above. <strong>Two</strong> of them define a <code class="docutils literal notranslate"><span class="pre">get</span></code> of their own –
-<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code> – for
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above. <strong>None</strong> of them defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own any
+more. Two did when this audit was taken –
+<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, for
 signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch)
-rather than for case: each does an exact <code class="docutils literal notranslate"><span class="pre">Cls[key]</span></code>, and since #923 each
-answers a name miss with
-<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> rather than
-<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code> and
-<code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> carry no <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they have no string
-lookup to fold. <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> had one when this audit was taken and no
+rather than for case – and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/940">#940</a> deleted both as
+redundant, per the ruling in the section above; each now inherits <code class="docutils literal notranslate"><span class="pre">get</span></code>
+from <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> unchanged. <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>
+and <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> never carried a <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they had no
+string lookup to fold. <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> had one when this audit was taken and no
 longer does: #921 re-parented it onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and #923 retired the exception
 conversion that was the override’s only remaining job, so it now inherits
@@ -1006,6 +1115,7 @@ the next regeneration would discard it.</p>
 <li><a class="reference internal" href="#">Where the registry protocol lives</a><ul>
 <li><a class="reference internal" href="#the-two-tiers-and-what-lives-on-each">The Two Tiers, and What Lives on Each</a></li>
 <li><a class="reference internal" href="#what-a-failed-lookup-raises">What a Failed Lookup Raises</a></li>
+<li><a class="reference internal" href="#what-a-get-override-may-and-may-not-do">What a <code class="docutils literal notranslate"><span class="pre">get</span></code> Override May and May Not Do</a></li>
 <li><a class="reference internal" href="#case-sensitivity-is-rfc-directed">Case Sensitivity Is RFC-Directed</a></li>
 <li><a class="reference internal" href="#the-lenient-criterion-in-two-limbs">The Lenient Criterion, in Two Limbs</a></li>
 <li><a class="reference internal" href="#the-audit-per-class">The Audit, per Class</a></li>

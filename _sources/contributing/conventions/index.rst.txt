@@ -12,7 +12,9 @@ House Conventions
    questions have mostly arisen, and the page was titled *Registry Conventions*
    until `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ widened
    it, then split it. :ref:`extension-header-subclassing` is the first ruling
-   here that governs a protocol class hierarchy rather than a registry.
+   here that governs a protocol class hierarchy rather than a registry, and
+   :ref:`process` the first that governs the repository rather than any of its
+   code.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -29,3 +31,4 @@ House Conventions
    sentinel-convention
    registry-protocol
    extension-header-subclassing
+   process
