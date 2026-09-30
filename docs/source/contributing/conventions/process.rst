@@ -122,9 +122,12 @@ The sections are one per top-level module, plus one for what belongs to no modul
 
    One case the rule does not settle by itself: an entry whose change spans modules --
    the reassembly and extraction ones touch :mod:`pcapkit.foundation` and
-   :mod:`pcapkit.protocols` together. The intent is to file each under the module the
-   change is *about* and name the others in the text, rather than duplicating the
-   entry, but that has not been ruled on. Raised on #918.
+   :mod:`pcapkit.protocols` together. Ruled on
+   `#952 <https://github.com/JarryShaw/PyPCAPKit/issues/952>`__: file it under the
+   module the change is *about*, name the others in the entry's own text, and do
+   **not** duplicate the entry into each section. A reader scanning one module's
+   section wants that module's changes; the same prose appearing twice reads as two
+   separate changes. Raised originally on #918.
 
    The restructure itself belongs to #657, which owns the file and merges last; doing
    it earlier would conflict with every open change that touches an entry.
