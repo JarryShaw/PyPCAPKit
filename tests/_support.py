@@ -809,13 +809,30 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     a re-imported real module is not pollution.
 
     Purge-only is deliberate and stays that way, which is worth stating because
-    the asymmetry reads like an oversight. Dropping a real module is not a change
-    another test can observe: the next one that wants it imports it again and gets
-    the same thing from the same source. Binding something *else* over the name is
-    what cannot be undone by re-importing, so restoration is owed by the helpers
-    that bind, not by this one. Making ~120 call sites pay for a restore none of
-    them needs would also cost a re-import each, which
+    the asymmetry reads like an oversight. Dropping a real module is almost never a
+    change another test can observe: the next one that wants it imports it again and
+    gets an *equivalent* thing from the same source. Binding something *else* over
+    the name is what cannot be undone by re-importing, so restoration is owed by the
+    helpers that bind, not by this one. Making ~120 call sites pay for a restore none
+    of them needs would also cost a re-import each, which
     :func:`tests.conftest.pytest_sessionstart` exists to avoid.
+
+    "Equivalent" rather than "identical", and the gap is not hypothetical: a module
+    that mints a singleton at import time hands back a **fresh** one afterwards, so
+    ``is`` against an object captured before the purge fails.
+    :mod:`pcapkit.corekit.sentinels` is the case in point -- :data:`NULL`,
+    :data:`NO_VALUE`, :data:`NO_DEFAULT` and ``ABSENT`` are module-level instances,
+    and ``tests.corekit.test_sentinel_exports_unit.SentinelExportTests`` asserts
+    identity against them. What keeps that test green is therefore *not* this
+    function's asymmetry being harmless; it is
+    :func:`tests.conftest.restore_module_table` putting the region back around every
+    test. Take the two together rather than reading the paragraph above as a promise
+    that a purge leaves no trace -- under a runner that loads no ``conftest``, it
+    does. Measured on ``b337cdbc2``: ``python -m unittest discover -s tests/corekit``
+    fails 5 of that class's identity subtests, because ``test_module`` sorts first
+    and purges, while the same file alone passes and :program:`pytest` -- the
+    supported runner, and what :file:`.github/workflows/unit-tests.yml` invokes --
+    passes either way.
 
     It is *not* enough for a test that binds anything over a real module name.
     Use :func:`isolate_modules` for a stand-in, which snapshots first and restores
