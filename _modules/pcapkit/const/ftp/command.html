@@ -418,7 +418,13 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/conventions.html">House Conventions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/mint-criterion.html">When an unrecognised value may mint a member</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">Where the registry protocol lives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/pep.html">Help Wanted</a></li>
@@ -484,7 +490,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FEATCode</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Keyword returned in FEAT response line for this command/extension,</span>
-<span class="sd">    c.f., :rfc:`5797#secion-3`.</span>
+<span class="sd">    c.f., :rfc:`5797#section-3`.</span>
 
 <span class="sd">    .. note::</span>
 
@@ -722,7 +728,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Feature code. Keyword returned in FEAT response line for this command/extension,</span>
-        <span class="c1">#: c.f., :rfc:`5797#secion-2.2`.</span>
+        <span class="c1">#: c.f., :rfc:`5797#section-2.2`.</span>
         <span class="n">feat</span><span class="p">:</span> <span class="s1">'Optional[FEATCode]'</span>
         <span class="c1">#: Brief description of command / extension.</span>
         <span class="n">desc</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>

@@ -35,7 +35,7 @@ construction and analysis library.
    :maxdepth: 1
 
    contributing/testing
-   contributing/conventions
+   contributing/conventions/index
    contributing/releasing
    contributing/workflows
    contributing/pep

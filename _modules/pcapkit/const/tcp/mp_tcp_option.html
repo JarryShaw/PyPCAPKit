@@ -418,7 +418,13 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/conventions.html">House Conventions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/mint-criterion.html">When an unrecognised value may mint a member</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">Where the registry protocol lives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/pep.html">Help Wanted</a></li>
@@ -479,31 +485,31 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPOption</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[MPTCPOption] Multipath TCP options [:rfc:`6824`]"""</span>
 
-    <span class="c1">#: Multipath Capable [:rfc:`8684#3.1`]</span>
+    <span class="c1">#: Multipath Capable [:rfc:`8684#section-3.1`]</span>
     <span class="n">MP_CAPABLE</span> <span class="o">=</span> <span class="mh">0x0</span>
 
-    <span class="c1">#: Join Connection [:rfc:`8684#3.2`]</span>
+    <span class="c1">#: Join Connection [:rfc:`8684#section-3.2`]</span>
     <span class="n">MP_JOIN</span> <span class="o">=</span> <span class="mh">0x1</span>
 
-    <span class="c1">#: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684#3.3`]</span>
+    <span class="c1">#: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684#section-3.3`]</span>
     <span class="n">DSS</span> <span class="o">=</span> <span class="mh">0x2</span>
 
-    <span class="c1">#: Add Address [:rfc:`8684#3.4.1`]</span>
+    <span class="c1">#: Add Address [:rfc:`8684#section-3.4.1`]</span>
     <span class="n">ADD_ADDR</span> <span class="o">=</span> <span class="mh">0x3</span>
 
-    <span class="c1">#: Remove Address [:rfc:`8684#3.4.2`]</span>
+    <span class="c1">#: Remove Address [:rfc:`8684#section-3.4.2`]</span>
     <span class="n">REMOVE_ADDR</span> <span class="o">=</span> <span class="mh">0x4</span>
 
-    <span class="c1">#: Change Subflow Priority [:rfc:`8684#3.3.8`]</span>
+    <span class="c1">#: Change Subflow Priority [:rfc:`8684#section-3.3.8`]</span>
     <span class="n">MP_PRIO</span> <span class="o">=</span> <span class="mh">0x5</span>
 
-    <span class="c1">#: Fallback [:rfc:`8684#3.7`]</span>
+    <span class="c1">#: Fallback [:rfc:`8684#section-3.7`]</span>
     <span class="n">MP_FAIL</span> <span class="o">=</span> <span class="mh">0x6</span>
 
-    <span class="c1">#: Fast Close [:rfc:`8684#3.5`]</span>
+    <span class="c1">#: Fast Close [:rfc:`8684#section-3.5`]</span>
     <span class="n">MP_FASTCLOSE</span> <span class="o">=</span> <span class="mh">0x7</span>
 
-    <span class="c1">#: Subflow Reset [:rfc:`8684#3.6`]</span>
+    <span class="c1">#: Subflow Reset [:rfc:`8684#section-3.6`]</span>
     <span class="n">MP_TCPRST</span> <span class="o">=</span> <span class="mh">0x8</span>
 
     <span class="c1">#: [:rfc:`8684`]</span>

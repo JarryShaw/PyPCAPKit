@@ -425,7 +425,13 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing/conventions.html">House Conventions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/mint-criterion.html">When an unrecognised value may mint a member</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/sentinel-convention.html">Naming a sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/registry-protocol.html">Where the registry protocol lives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/pep.html">Help Wanted</a></li>
@@ -794,7 +800,7 @@ names this object in its signature and docstring.</p>
 GitHub issue #937, the leading underscore they carried (<code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code>/
 <code class="docutils literal notranslate"><span class="pre">_Absent</span></code>) hid them from Sphinx automatically, the way it hides every other
 <code class="docutils literal notranslate"><span class="pre">_</span></code>-prefixed name; dropping the underscore for SCREAMING_SNAKE consistency with
-the other three sentinels (see <a class="reference internal" href="../../contributing/conventions.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a>) means Sphinx would
+the other three sentinels (see <a class="reference internal" href="../../contributing/conventions/sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a>) means Sphinx would
 otherwise document them as though they were public. They are documented below
 instead, explicitly marked private, per the maintainer’s ruling on #937: <em>“we can
 change</em> <code class="docutils literal notranslate"><span class="pre">_ABSENT</span></code> <em>to</em> <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> <em>just document it as private type/class in the
@@ -827,8 +833,8 @@ as they were: nothing outside <a class="reference internal" href="../protocols/p
 <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a>, from here or from there, and neither this module’s nor
 that module’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">__all__</span></code> names either one. This docstring, and the
 “Naming a sentinel” section of
-<code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/conventions.rst</span></code>, are what now records
-that fact in place of the leading underscore.</p>
+<code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/conventions/sentinel-convention.rst</span></code>, are
+what now records that fact in place of the leading underscore.</p>
 </dd></dl>
 
 <dl class="py data">

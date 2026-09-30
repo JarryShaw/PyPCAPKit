@@ -1,0 +1,1030 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Where the registry protocol lives" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/registry-protocol.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="get(), get_all(), register() and register_alias() are expected to exist on every registry, per the ruling on#842. They come from EnumRegistry, mixed in ahead of the enum base so that_member_type_ s..." />
+<meta name="description" content="get(), get_all(), register() and register_alias() are expected to exist on every registry, per the ruling on#842. They come from EnumRegistry, mixed in ahead of the enum base so that_member_type_ s..." />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Which bases an IPv6 extension header names" href="extension-header-subclassing.html"><link rel="prev" title="Naming a sentinel" href="sentinel-convention.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Where the registry protocol lives - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.4.html">1.3.4 – 2024-11-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.3.html">1.3.3 – 2024-11-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.1.html">1.3.1 – 2023-12-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.0.html">1.3.0 – 2023-10-04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.2.html">1.2.2 – 2023-09-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.1.html">1.2.1 – 2023-08-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.0.html">1.2.0 – 2023-08-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.1.html">1.1.1 – 2023-08-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.0.html">1.1.0 – 2023-07-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.3.html">1.0.3 – 2023-06-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.2.html">1.0.2 – 2023-06-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.1.html">1.0.1 – 2023-05-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.0.html">1.0.0 – 2023-05-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.3.html">0.16.3 – 2022-10-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.2.html">0.16.2 – 2022-08-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.1.html">0.16.1 – 2022-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.0.html">0.16.0 – 2022-05-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.5.html">0.15.5 – 2020-10-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.4.html">0.15.4 – 2020-08-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.3.html">0.15.3 – 2020-08-17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.2.html">0.15.2 – 2020-06-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.1.html">0.15.1 – 2020-06-18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.0.html">0.15.0 – 2020-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.5.html">0.14.5 – 2019-10-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.4.html">0.14.4 – 2019-09-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.3.html">0.14.3 – 2019-08-08</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.2.html">0.14.2 – 2019-03-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.1.html">0.14.1 – 2019-03-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.0.html">0.14.0 – 2019-03-02</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.3.html">0.13.3 – 2019-02-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.2.html">0.13.2 – 2019-01-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.1.html">0.13.1 – 2019-01-23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">When an unrecognised value may mint a member</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Where the registry protocol lives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">GitHub Actions Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/registry-protocol.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/registry-protocol.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="where-the-registry-protocol-lives">
+<span id="registry-protocol"></span><h1>Where the registry protocol lives<a class="headerlink" href="#where-the-registry-protocol-lives" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>,
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get_all" title="pcapkit.corekit.enum.EnumLookup.get_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_all()</span></code></a>,
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> are expected to exist on
+<strong>every</strong> registry, per the ruling on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>. They come from
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, mixed in ahead of the enum base so that
+<code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still resolves to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LinkType</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>A handful of registries define their own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> to carry extra attributes and so
+do not share the generated template; bringing them onto the base is tracked in
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>.</p>
+<section id="the-two-tiers-and-what-lives-on-each">
+<h2>The Two Tiers, and What Lives on Each<a class="headerlink" href="#the-two-tiers-and-what-lives-on-each" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base any more. Since
+phase 1 of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
+parent, and the line between them is whether the enumeration may <em>grow</em>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, <code class="docutils literal notranslate"><span class="pre">_validate_value</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">register</span></code>, <code class="docutils literal notranslate"><span class="pre">register_alias</span></code>, <code class="docutils literal notranslate"><span class="pre">register_aliases</span></code>,
+<code class="docutils literal notranslate"><span class="pre">_extend</span></code>, <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The owner’s ruling, verbatim: <em>“they may subclass a bare base enum from
+pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
+mutable ones.”</em> So a <strong>closed</strong> set inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
+directly and is never handed a <code class="docutils literal notranslate"><span class="pre">register</span></code> it would have to refuse; an <strong>open</strong>
+registry inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> exactly as before.</p>
+<p>What settled the split is the owner’s own second thought about carrying <code class="docutils literal notranslate"><span class="pre">register</span></code>
+on the base: <em>“if it carries ``register``, then why not ``register_alias``. We might
+be creating a bad ruling.”</em> Following that through leaves
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> holding only three methods, too thin to
+justify a second class – so the two tiers collapse into one, which is the opposite of
+what was ruled.</p>
+<p><strong>Both tiers are plain classes, and that is load-bearing.</strong> Inserting a parent above
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> leaves the member data type exactly where
+it was – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
+<code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from the enum base. Had either tier subclassed
+<code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> in order to “be an enum”, it would have become the member type
+itself and broken <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and flag registries at once.</p>
+<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> is what the base carries
+<em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: <em>“there must
+be some sort of range validation logic for the inherited classes to hook in.”</em> The
+base implementation accepts everything; an override states a range, in the shape the
+generated registries currently spell by hand in <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Three things about it are easy to get wrong:</p>
+<ul>
+<li><p><strong>It guards, it does not convert.</strong> The return type is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> deliberately, so
+that an override cannot normalise a value on its way through and silently change
+what a lookup resolves to.</p></li>
+<li><p><strong>Raise from</strong> <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>.
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> is the fitting one, and because
+it subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> a rejection is caught by <code class="docutils literal notranslate"><span class="pre">get</span></code>’s own <code class="docutils literal notranslate"><span class="pre">except</span></code> and
+falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code> like any other unresolvable value. An override raising
+outside that hierarchy propagates past <code class="docutils literal notranslate"><span class="pre">default</span></code> instead.</p>
+<p>With <strong>no usable</strong> <code class="docutils literal notranslate"><span class="pre">default</span></code>, the rejection reaches the caller <strong>unwrapped</strong>.
+<code class="docutils literal notranslate"><span class="pre">get</span></code> re-raises a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> that is already a
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> exactly as the override raised it,
+and converts only <code class="docutils literal notranslate"><span class="pre">aenum</span></code>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s own “no member carries this
+value”. Two things follow, and both are the point of the discrimination rather
+than side effects: the override’s <strong>own message</strong> survives to the caller instead
+of being replaced by the base’s, and the error is <strong>logged once</strong> rather than
+twice, since <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> logs on
+construction and re-wrapping would construct a second one. So an override should
+say in its message what it rejected and why; that message is what the caller
+sees.</p>
+</li>
+<li><p><strong>A</strong> <code class="docutils literal notranslate"><span class="pre">str</span></code> <strong>key never reaches it.</strong> That path never calls <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>, so it
+resolves only against already-populated lookup tables, where every value present is
+legal by construction. <code class="docutils literal notranslate"><span class="pre">register</span></code> does call it, after its duplicate check.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Re-parenting every non-registry enumeration onto
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> was <strong>phase 2</strong> of
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
+<strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
+<strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
+walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
+<p>It landed in two pull requests rather than one. Seven of the 24 sat in files
+other pull requests were editing around the same time: <code class="docutils literal notranslate"><span class="pre">CommandType</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code> in <a class="reference internal" href="../../pcapkit/const/ftp.html#module-pcapkit.const.ftp.command" title="pcapkit.const.ftp.command"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code></a> and its vendor
+template, both touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/913">#913</a>;
+and <code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code> in <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> plus all four
+<a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> helpers (<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>), both
+files touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a>. The
+first pass (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/921">#921</a>) is
+behaviour-preserving on its own, so the other 17 could land without waiting on
+those files; the remaining seven followed once both had merged
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>).</p>
+</div>
+</section>
+<section id="what-a-failed-lookup-raises">
+<h2>What a Failed Lookup Raises<a class="headerlink" href="#what-a-failed-lookup-raises" title="Link to this heading">¶</a></h2>
+<p>Two rules govern it, and they pull in opposite directions on purpose. The owner’s
+ruling, verbatim, on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>:</p>
+<blockquote>
+<div><p>Either <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> or <code class="docutils literal notranslate"><span class="pre">KeyError</span></code>, that’s depending on how stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code>
+would raise on these circumstances. And we should raise one from
+<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code> rather builtin exceptions.</p>
+</div></blockquote>
+<p>So the <strong>provenance</strong> is in-library and the <strong>shape</strong> is stdlib’s:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> raises
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> for a <strong>name</strong> miss and
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a <strong>value</strong> miss, both
+from <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather than from builtins.</p></li>
+<li><p>The split between the two is not taste. <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>
+and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> on a stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>, so a
+miss by name is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived here and a miss by value is
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived, matching it.</p></li>
+<li><p>That is what keeps the ruling cheap to carry out:
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> derives <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> derives <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>,
+so <strong>only the provenance changed</strong> – every <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">KeyError</span></code> and
+<code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> around a lookup keeps catching, in this tree and in a
+caller’s.</p></li>
+</ul>
+<p>Do not “improve” on the shape by making both misses report identically. Converting
+one into the other is exactly what #923 retired, and it was retired in three places
+at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
+base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
+<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus.get</span></code> raised
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss so that “the
+two ways of getting it wrong reported identically”.</p>
+<p>One asymmetry between the two is deliberate and is <strong>not</strong> visible from the
+exception class: the <strong>name</strong> miss is raised quietly
+(<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>, so nothing is
+logged and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is left alone) while the <strong>value</strong> miss stays
+loud. A name miss is in-library control flow at several call sites, and at
+<code class="docutils literal notranslate"><span class="pre">Method.get</span></code> it is part of a <em>successful</em> call –
+that override catches it in order to mint. A loud error there would put a
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> record on every such call and set
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code> process-wide, which is the
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> defect <code class="docutils literal notranslate"><span class="pre">quiet</span></code>
+exists for. So a <code class="docutils literal notranslate"><span class="pre">get</span></code> override that catches a name miss as control flow is
+following the convention; one that catches a <em>value</em> miss that way is silencing a
+logged error, and needs a reason.</p>
+</section>
+<section id="case-sensitivity-is-rfc-directed">
+<h2>Case Sensitivity Is RFC-Directed<a class="headerlink" href="#case-sensitivity-is-rfc-directed" title="Link to this heading">¶</a></h2>
+<p>The rule, in the owner’s own wording on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>:</p>
+<blockquote>
+<div><p>if RFC states the values are case-insensitive, then our enum should also treat them
+that way. otherwise, we should treat them case sensitive.</p>
+</div></blockquote>
+<p>And the reason a registry’s spelling is never quietly normalised, from the same thread:
+<em>“enum should honour and keep their original writings as in the registrars. case
+in-sensitivity only applies to certain selected ones, where logically it makes sense
+(like ``TransportProtocol``) and/or RFC documentation itself recognises them as
+case-insensitive (like, maybe, FTP/HTTP commands).”</em></p>
+<p>So <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is <strong>case-sensitive</strong>, and that is the
+default every enumeration gets. Case-insensitivity is a per-class <code class="docutils literal notranslate"><span class="pre">get</span></code> override that
+has to cite the RFC or IANA registry making the values case-insensitive; without one it
+is a defect rather than a convenience. That also means no public member is ever renamed
+to make a lookup work – which is what keeps
+<a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">R1_Counter</span> <span class="pre">=</span> <span class="pre">128</span></code> and
+<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span> <span class="pre">=</span> <span class="pre">129</span></code>, two IANA-registered HIP parameters differing only in case, both
+resolvable.</p>
+<p>And a folding override carries <strong>only</strong> the fold. <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> is the
+worked example: since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>,
+forwards <code class="docutils literal notranslate"><span class="pre">default</span></code> verbatim and delegates to <code class="docutils literal notranslate"><span class="pre">super().get()</span></code>, and that is all it
+does. It used to convert the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> as well, and #923’s ruling retired that; the
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/836">#836</a> refusal to extend the
+class at all is untouched by the retirement, since only the exception class moved.
+<code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> went further and no longer exists: conversion was the <em>only</em>
+thing it added over the base, so once that went there was nothing left for an
+override to hold, and the class inherits
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> unchanged. <strong>An override that would
+now be empty is deleted, not kept as a pass-through</strong> – a <code class="docutils literal notranslate"><span class="pre">get</span></code> that only calls
+<code class="docutils literal notranslate"><span class="pre">super().get()</span></code> reads as though it were doing something, and the next reader has
+to diff it against the base to find out that it is not.</p>
+</section>
+<section id="the-lenient-criterion-in-two-limbs">
+<h2>The Lenient Criterion, in Two Limbs<a class="headerlink" href="#the-lenient-criterion-in-two-limbs" title="Link to this heading">¶</a></h2>
+<p>The ruling above leaves one question open, and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> settled it: does a
+specification have to state a <strong>comparison rule</strong> for a registry to be treated
+case-insensitively, or does it also count when the authorities merely <strong>disagree
+about spelling</strong>? The owner’s answer, verbatim:</p>
+<blockquote>
+<div><p>I say lenient. TransportProtocol for example should be case-insensitive. Upper or
+lower cases are being used everywhere in RFC and IANA themselves so that’s an
+indication of case insensitivity.</p>
+</div></blockquote>
+<p>So the test a new registry has to pass has <strong>two limbs</strong>, and satisfying either one
+justifies case-insensitivity:</p>
+<ol class="arabic simple">
+<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> for FTP
+command codes, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a> for FTP FEAT codes, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a>
+for IANA service names.</p></li>
+<li><p><strong>A documented spelling disagreement between the specification and the registry.</strong>
+If the RFC writes a field one way throughout and the live IANA data writes it
+another, then neither authority is treating case as significant, and a lookup that
+does would reject a caller holding the spec’s own spelling.</p></li>
+</ol>
+<p>Limb 2 has to be <strong>measured, not assumed</strong> – count the casings in the registry the
+crawler actually reads, and say how many rows carried each. A guess about which way
+IANA spells a column is not evidence.</p>
+<p>Where neither limb holds, the lookup is case-sensitive and inherits
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> unchanged.</p>
+</section>
+<section id="the-audit-per-class">
+<h2>The Audit, per Class<a class="headerlink" href="#the-audit-per-class" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
+registry added later has something to check itself against. The owner’s scope for it,
+verbatim: <em>“we should audit all registries and then decide if case (in)sensitive.”</em></p>
+<p>The population it covers, with the counting convention spelled out because the
+figures move: <strong>127</strong> <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> subclasses, every
+one of them under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, across 124 files – 117 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued
+(of which 5 are flag registries) and 10 <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code>-valued. Plus <strong>24</strong>
+non-registry enumerations counted by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours and including nested classes: 17 top level (3 of them under
+<a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> itself) and 7 nested, the nested ones being
+<code class="docutils literal notranslate"><span class="pre">FrameType.Flags</span></code> in <a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2" title="pcapkit.protocols.schema.application.httpv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.httpv2</span></code></a> plus its
+6 concrete per-frame subclasses. 151 enumerations in total.</p>
+<p><strong>The</strong> <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><strong>-valued tier, all 117, is case-sensitive, and the criterion is
+vacuous on it rather than merely unmet.</strong> A registry whose values are numbers has
+nothing for case to apply to; the only way a string reaches
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> on one is as a member <em>name</em>, and a name
+is the Python identifier <a class="reference internal" href="../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor.safe_name()</span></code></a> derives from
+the registry’s own name column – it preserves the registrar’s casing exactly, but it
+is not itself a value any specification states a comparison rule for. Measured across
+all 151 enumerations: exactly <strong>one</strong> would collide if names were folded –
+<a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>, on <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> against
+<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> – and <strong>no</strong> enumeration anywhere has two <code class="docutils literal notranslate"><span class="pre">str</span></code> <em>values</em> that
+collide when folded. So folding names is not merely unjustified, it is unsafe in a
+measured case; folding values is safe but unjustified except where the table below
+says otherwise.</p>
+<p>That leaves the classes with something to decide:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 18.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Governing source</p></th>
+<th class="head"><p>What it says</p></th>
+<th class="head"><p>Verdict</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></p></td>
+<td><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a></p></td>
+<td><p><em>“Upper and lower case alphabetic characters are to be treated
+identically.”</em> Limb 1.</p></td>
+<td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fold, correctly</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a></p></td>
+<td><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a>, <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html#section-3.2"><strong>RFC 2389 Section 3.2</strong></a></p></td>
+<td><p><em>“IANA maintains uniqueness of feature names (FEAT codes) based on
+case-insensitive comparison.”</em> Limb 1. Limb 2 holds too: RFC 2389 recommends
+upper case on the wire while the registry spells 5 of its 15 codes lower case
+(measured: of 64 rows, 11 upper-case / 10 distinct, 52 lower-case / 5
+distinct, 1 blank, 0 mixed). Read §3.2 to the end before concluding it
+disagrees: it <em>opens</em> by calling the feature-label <em>“nominally case
+sensitive”</em>, then defers to <em>“the definitions of specific labels”</em>, which
+RFC 5797 §2 above is. Note also that the §2 sentence is wrapped across a
+line break in the RFC’s text file, at <code class="docutils literal notranslate"><span class="pre">case-</span></code> / <code class="docutils literal notranslate"><span class="pre">insensitive</span></code>, so a
+line-oriented grep for the phrase finds nothing.</p></td>
+<td><p><strong>case-insensitive</strong> – was a defect; <code class="docutils literal notranslate"><span class="pre">get</span></code> now folds</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></p></td>
+<td><p><span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
+<td><p><em>“The method token is case-sensitive.”</em> Explicitly the opposite of limb 1.</p></td>
+<td><p><strong>case-sensitive</strong> – was a defect, fixed by
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>
+<td><p>Nothing states a rule; the draft never discusses option-name case.</p></td>
+<td><p><strong>case-sensitive</strong> – already exact-matches, conforms</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a></p></td>
+<td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p></td>
+<td><p>Nothing states a rule. Limb 2 fails on measurement: all 10 rows of the RFC’s
+table and all 10 of the live IANA CSV are upper case, so the authorities
+agree. (RFC 9850 notes the labels <em>“correspond to lowercase labels in the TLS
+key schedule”</em>, but those are a different document’s secret names, not a
+second spelling of the log label.)</p></td>
+<td><p><strong>case-sensitive</strong> – no override, conforms</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code></p></td>
+<td><p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-8.1.1"><strong>RFC 6335 Section 8.1.1</strong></a></p></td>
+<td><p>Nothing states a rule for the <code class="docutils literal notranslate"><span class="pre">Transport</span> <span class="pre">Protocol</span></code> field – only <em>“limited
+to one or more of TCP, UDP, SCTP, and DCCP”</em>. Limb 2 carries it: the RFC and
+its §10.2 templates write the field upper case, the live CSV is lower case in
+all 14,536 rows (<code class="docutils literal notranslate"><span class="pre">tcp</span></code> 6608, <code class="docutils literal notranslate"><span class="pre">udp</span></code> 6357, blank 1467, <code class="docutils literal notranslate"><span class="pre">sctp</span></code> 93,
+<code class="docutils literal notranslate"><span class="pre">dccp</span></code> 11, zero upper-case).</p></td>
+<td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code> folds, and this is the owner’s own example.
+Folding is now the <em>only</em> thing that override adds (#923)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p></td>
+<td><p>–</p></td>
+<td><p>Moot: its <code class="docutils literal notranslate"><span class="pre">get</span></code> takes a port number and refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> outright,
+so there is no string to fold. It does inherit the row above through
+<code class="docutils literal notranslate"><span class="pre">_dispatch</span></code>, which resolves a <code class="docutils literal notranslate"><span class="pre">proto</span></code> string via <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code>.</p></td>
+<td><p><strong>n/a</strong> – int-keyed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, <code class="docutils literal notranslate"><span class="pre">DCCP</span></code></p></td>
+<td><p><span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a></p></td>
+<td><p><em>“case is ignored for comparison purposes, so both “http” and “HTTP” denote
+the same service.”</em> Limb 1, emphatically – and these registries’ <strong>values
+are</strong> service names.</p></td>
+<td><p><strong>unimplemented</strong> – no service-name lookup exists to fold; see below</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code>, <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code></p></td>
+<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a>, <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
+<td><p>Limb 2 holds on measurement: the RFC and registry pages present the kind and
+conformance letters upper case (<code class="docutils literal notranslate"><span class="pre">A</span></code>/<code class="docutils literal notranslate"><span class="pre">P</span></code>/<code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code>/<code class="docutils literal notranslate"><span class="pre">O</span></code>/<code class="docutils literal notranslate"><span class="pre">H</span></code>) while
+the CSV columns the crawler reads are lower case in every row (<code class="docutils literal notranslate"><span class="pre">s</span></code> 26,
+<code class="docutils literal notranslate"><span class="pre">a</span></code> 18, <code class="docutils literal notranslate"><span class="pre">s/p</span></code> 3, blank 1; <code class="docutils literal notranslate"><span class="pre">o</span></code> 28, <code class="docutils literal notranslate"><span class="pre">m</span></code> 27, <code class="docutils literal notranslate"><span class="pre">h</span></code> 7, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2).</p></td>
+<td><p><strong>open</strong> – see below</p></td>
+</tr>
+<tr class="row-odd"><td><p>The 5 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ngap</span></code></a> helper enumerations</p></td>
+<td><p>IANA Mobility Header registries, 3GPP TS 38.413</p></td>
+<td><p>Their values are numeric codes, so the criterion is vacuous exactly as for the
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above. <strong>Two</strong> of them define a <code class="docutils literal notranslate"><span class="pre">get</span></code> of their own –
+<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code> – for
+signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch)
+rather than for case: each does an exact <code class="docutils literal notranslate"><span class="pre">Cls[key]</span></code>, and since #923 each
+answers a name miss with
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> rather than
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code> and
+<code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> carry no <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they have no string
+lookup to fold. <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> had one when this audit was taken and no
+longer does: #921 re-parented it onto
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and #923 retired the exception
+conversion that was the override’s only remaining job, so it now inherits
+<code class="docutils literal notranslate"><span class="pre">get</span></code> unchanged.</p></td>
+<td><p><strong>case-sensitive</strong> – conforms</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">WireGuardKeyLabel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>
+<td><p>The draft names the four labels outright (<em>“The key type is one of
+LOCAL_STATIC_PRIVATE_KEY, …”</em>) and, as for <code class="docutils literal notranslate"><span class="pre">OptionType</span></code> above, never
+discusses their case. Both authorities write them upper case.</p></td>
+<td><p><strong>case-sensitive</strong> – no override, conforms</p></td>
+</tr>
+<tr class="row-odd"><td><p>Every other non-registry enumeration</p></td>
+<td><p>–</p></td>
+<td><p>pcapkit’s own discriminators and bit labels, with no registrar behind them
+at all – <code class="docutils literal notranslate"><span class="pre">Completion</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">httpv1.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">FinalisedState</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketDirection</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketReception</span></code>, and the 7 httpv2
+<code class="docutils literal notranslate"><span class="pre">Flags</span></code>. <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code> is the one with an external source and it points the
+same way: its values are ASN.1 identifiers from 3GPP TS 38.413, and ASN.1
+identifiers are case-significant by construction.</p></td>
+<td><p><strong>case-sensitive</strong> – nothing to cite, nothing to change</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two rows the audit deliberately left open rather than acting on, because each is
+wider than a case fix:</p>
+<ul class="simple">
+<li><p><strong>A service-name lookup on the</strong> <code class="docutils literal notranslate"><span class="pre">AppType</span></code> <strong>transport registries.</strong> This is the
+inverse of every other row: <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a> <em>does</em> make service names
+case-insensitive, and <code class="docutils literal notranslate"><span class="pre">TCP</span></code>/<code class="docutils literal notranslate"><span class="pre">UDP</span></code>/<code class="docutils literal notranslate"><span class="pre">SCTP</span></code>/<code class="docutils literal notranslate"><span class="pre">DCCP</span></code> hold service names as their
+values – but <code class="docutils literal notranslate"><span class="pre">AppType.get</span></code> refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> key, so no service-name
+lookup exists for the rule to apply to. Implementing one is new public API on a
+6,000-member registry where one name maps to many ports, which is a <code class="docutils literal notranslate"><span class="pre">get_all</span></code>
+design question rather than a case fold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code>. By parity with
+<code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code> – an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued enumeration whose <em>names</em> are the
+specification’s own tokens – the measured spelling disagreement above would make
+these two case-insensitive. Nothing looks them up by string today, though: the
+crawler translates the CSV’s lower-case letters to the upper-case member names at
+generation time. Both classes now inherit
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> finished re-parenting
+them, per the note above – so a <code class="docutils literal notranslate"><span class="pre">get</span></code> exists on each, case-sensitive like the
+base’s own. Whether to fold case to match <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s own override is a
+design question for whoever writes the first string-keyed caller, not one this
+audit settles.</p></li>
+</ul>
+<p>One case fold also lives <strong>outside</strong> any <code class="docutils literal notranslate"><span class="pre">get</span></code>, and so escapes this convention
+entirely: <code class="docutils literal notranslate"><span class="pre">_resolve</span></code> in <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> upper-cases its
+<code class="docutils literal notranslate"><span class="pre">value</span></code> before matching it against <a class="reference internal" href="../../pcapkit/const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> member names. <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7296.html"><strong>RFC 7296</strong></a> states no
+comparison rule for IKEv2 transform names – checked, it does not discuss case at all
+– so that fold is a convenience with no citation behind it. It is a protocol-level
+resolver rather than a registry override, which is why the audit records it here
+rather than changing it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The obstacle this page used to record – that the base’s string-key path does not
+fall through to a value lookup, so an <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code> registry would stop
+resolving a valid value that is not also a name – <strong>no longer applies.</strong>
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> now checks <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>
+when the name lookup misses, so such a value resolves:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">FEATCode</span><span class="p">[</span><span class="s1">'base'</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+<span class="go">'&lt;base&gt;'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'&lt;base&gt;'</span> <span class="ow">in</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">_member_map_</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FEATCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'&lt;base&gt;'</span><span class="p">)</span>
+<span class="go">&lt;FEATCode [base]&gt;</span>
+</pre></div>
+</div>
+<p>The example above is <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>’s shape, and it
+still resolves exactly as shown – but since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> that class overrides
+<code class="docutils literal notranslate"><span class="pre">get</span></code> too, so the output is only the base’s because its override delegates an
+exact name-or-value hit straight through. Measure the base on a registry that does
+<strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code> at all. <strong>Five</strong> do –
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
+measures the override rather than the base. The unconditionally clean witness is
+<code class="docutils literal notranslate"><span class="pre">tests/corekit/test_enum_lookup_base_unit.py</span></code>’s own <code class="docutils literal notranslate"><span class="pre">_Str</span></code>, a purpose-built
+closed set carrying <code class="docutils literal notranslate"><span class="pre">angled</span> <span class="pre">=</span> <span class="pre">'&lt;angled&gt;'</span></code> precisely so that the value
+fall-through can be measured on a class that defines no <code class="docutils literal notranslate"><span class="pre">get</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
+before matching, which makes it look as though the base were case-insensitive –
+deliberately, since <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> treats FTP command codes identically
+regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
+case-sensitive instead: <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
+case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
+<code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the
+caller’s exact casing, the same way an unrecognised value always does.</p>
+</div>
+<p>What does survive is narrower and deliberate: a <strong>declared-but-unassigned</strong> <code class="docutils literal notranslate"><span class="pre">str</span></code>
+value resolves through <code class="docutils literal notranslate"><span class="pre">cls(value)</span></code> but not through <code class="docutils literal notranslate"><span class="pre">get(value)</span></code>, because
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> returns it without
+growing either lookup table. <code class="docutils literal notranslate"><span class="pre">FEATCode.get('ZZ-NOT-REAL')</span></code> raises
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> – which <em>is</em> a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, so
+an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">KeyError</span></code> around it is unaffected – while
+<code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> yields an unregistered member. Closing that gap would
+mean calling <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code> for a <code class="docutils literal notranslate"><span class="pre">str</span></code> value too, which reopens the minting hazard
+above – so the asymmetry is intended, and <code class="docutils literal notranslate"><span class="pre">get</span></code>’s own docstring carries the full
+reasoning.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> generates these modules. A change to the shape of a
+generated registry belongs in the crawler or in
+<a class="reference internal" href="../../pcapkit/vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>’s template, never in the generated file alone –
+the next regeneration would discard it.</p>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="extension-header-subclassing.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Which bases an IPv6 extension header names</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="sentinel-convention.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Naming a sentinel</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2026, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Where the registry protocol lives</a><ul>
+<li><a class="reference internal" href="#the-two-tiers-and-what-lives-on-each">The Two Tiers, and What Lives on Each</a></li>
+<li><a class="reference internal" href="#what-a-failed-lookup-raises">What a Failed Lookup Raises</a></li>
+<li><a class="reference internal" href="#case-sensitivity-is-rfc-directed">Case Sensitivity Is RFC-Directed</a></li>
+<li><a class="reference internal" href="#the-lenient-criterion-in-two-limbs">The Lenient Criterion, in Two Limbs</a></li>
+<li><a class="reference internal" href="#the-audit-per-class">The Audit, per Class</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=c7a416f7"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
