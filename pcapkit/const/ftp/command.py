@@ -184,7 +184,7 @@ class FEATCode(EnumRegistry, StrEnum):
 
 
 class CommandType(EnumLookup, IntFlag):
-    """Type of "kind" of command, based on :rfc:`959#section-4.1`.
+    """Type of "kind" of command, based on :rfc:`959#section-4`.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
     issue #930, finishing #877's phase 2. Pure re-parenting as far as
@@ -258,7 +258,7 @@ class Command(EnumRegistry, StrEnum):
         feat: 'Optional[FEATCode]'
         #: Brief description of command / extension.
         desc: 'Optional[str]'
-        #: Type of "kind" of command, based on :rfc:`959#section-4.1`.
+        #: Type of "kind" of command, based on :rfc:`959#section-4`.
         type: 'CommandType'
         #: Expectation for support in modern FTP implementations.
         conf: 'ConformanceRequirement'

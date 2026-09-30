@@ -170,7 +170,7 @@ class {NAME}(EnumRegistry, StrEnum):
                 per :rfc:`9110#section-9.1` -- the method token is
                 case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.
                 Command.get`'s equivalent override, which stays
-                case-insensitive because :rfc:`959#section-4.1` says FTP
+                case-insensitive because :rfc:`959#section-5` says FTP
                 command codes are not. Checked against both member names
                 and values, via the base's own precedence -- name before
                 value -- so a value-only match such as
