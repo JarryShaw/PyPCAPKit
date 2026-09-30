@@ -1038,6 +1038,79 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertIn(str(ESP.__index__()), [str(key) for key in ipv6.extension_headers])
         self.assertIn('ESP', str(ipv6.protochain))
 
+    def test_docstring_cites_the_extension_header_registry(self) -> None:
+        """GitHub issue #931.
+
+        The class docstring's extension-header *membership* claim must
+        rest on IANA's authoritative *IPv6 Extension Header Types*
+        registry (and this package's own registry, generated from it),
+        not the ``protocol-numbers-1.csv`` *IPv6 Extension Header* column
+        that #926 repointed the const generator away from -- that column
+        is a derived signal, not the registry :rfc:`8200#section-4` names
+        as authoritative, and disagreed with it on header 147
+        (``BIT_EMU``).
+
+        :rfc:`4303#section-3.1.1` is cited too, but only for what it
+        actually says: an IPv6-context placement recommendation ("should
+        appear after hop-by-hop, routing, and fragmentation extension
+        headers"), not a membership assertion -- membership is the
+        registry's claim, per
+        ``docs/source/contributing/conventions.rst``'s "being *in* that
+        registry is what makes something an extension header" ruling.
+        Rephrasing the placement sentence as "places it among the IPv6
+        extension headers" overstated the RFC and contradicted this same
+        docstring's ``Note:`` (which says RFC 8200 declines ESP
+        extension-header status); that was caught in review on the
+        second version of this fix.
+
+        The section's separate IPv4-context sentence ("placed after the
+        IP header ... before the next layer protocol") is legitimate
+        prose here too -- it is the primary-source evidence that ESP
+        also travels directly as an IPv4 payload, exactly as
+        :mod:`~pcapkit.protocols.internet.hip` cites its own IPv4
+        appendix for the same reason. Per
+        ``docs/source/contributing/conventions.rst``'s "own-protocolhood
+        on its own is not sufficient" ruling (MH is the settling case),
+        that fact *qualifies* an already-standalone header for a base
+        besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
+        it does not *make* the header standalone, and the RFC has no
+        say in which base is named (``IPsec`` versus ``Internet``) --
+        an earlier revision claimed the RFC "makes it a standalone
+        protocol" and "names ``IPsec`` as the second base", the latter
+        positionally false (``ESP.__bases__`` puts ``IPsec`` first, not
+        second) and unsupported by the cited section; both were caught
+        in review on the third version of this fix. So this test
+        targets the exact wrong phrasing from the earlier rounds rather
+        than banning "IPv4" outright, which would forbid the legitimate
+        use kept above.
+        """
+        import re
+
+        from pcapkit.protocols.internet.esp import ESP
+
+        # Normalise the docstring's line-wrapping before matching, since the
+        # citation may be split across lines by hand-wrapping.
+        doc = ' '.join((ESP.__doc__ or '').split())
+        self.assertNotIn('protocol-numbers-1.csv', doc)
+        self.assertNotIn('among the IPv6 extension headers', doc)
+        self.assertNotIn('second base', doc)
+        self.assertNotIn('directly after an IPv4 header', doc)
+
+        # Pin the claim, not just the phrase: whatever the RFC-placement
+        # parenthetical attached directly to the registry-membership
+        # sentence says, it must not smuggle in IPv4 evidence for that
+        # claim, regardless of how a future revision words it.
+        membership_clause = re.search(r'registry lists ``ESP`` at 50 \((.*?)\)', doc)
+        self.assertIsNotNone(membership_clause, 'could not locate the membership clause')
+        self.assertNotIn('IPv4', membership_clause.group(1))
+
+        self.assertIn('IPv6 Extension Header Types', doc)
+        self.assertIn(':rfc:`4303#section-3.1.1`', doc)
+        self.assertIn('hop-by-hop, routing and fragmentation', doc)
+        self.assertIn('IPv6 header chain', doc)
+        self.assertIn('travels directly as an IPv4 payload', doc)
+        self.assertIn('qualifies it for a base besides', doc)
+
 
 if __name__ == '__main__':
     unittest.main()
