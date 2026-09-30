@@ -31,8 +31,9 @@ structure:
   against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
   already pins the *code* to the ruling; nothing pinned the *page* to the code, which is
   the half that goes stale when a ninth header lands.
-* :class:`RetiredNameTests` -- *"No more ``IPv6_GenericExt`` name."* A ruling that a name
-  must not exist is exactly the kind a later change reintroduces without noticing.
+* :class:`RetiredNameTests` -- the #924 ruling that the ``IPv6_GenericExt`` name goes for
+  good. A ruling that a name must not exist is exactly the kind a later change
+  reintroduces without noticing.
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which named :exc:`KeyError` until #918 and now names
   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
@@ -465,6 +466,106 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         self.assertEqual(done, len(self.non_registry) - len(self.outside),
                          'the page\'s re-parented count is stale')
 
+    def test_the_audit_population_figures_are_the_measured_ones(self) -> 'None':
+        """*The Audit, per Class*'s own population, against the same runtime walk.
+
+        Six figures the section opens with -- the registry count, that every one of
+        them is under :mod:`pcapkit.const`, the file count, the :class:`int`-valued
+        and flag splits, the ``aenum.StrEnum`` count and the grand total -- were
+        prose-only until GitHub issue #949 wired them to the walk. The section says
+        itself that *the figures move*, which is precisely the case that needs a
+        measurement rather than a reader's diligence: #930 moved the non-registry
+        figures once already, and only those had a test.
+
+        Each figure is read out of the page by its own regex and compared, so a stale
+        one fails naming both numbers. Wording is not pinned; the regexes are
+        deliberately loose about the prose between the figures and would survive a
+        rephrasing that kept the claims.
+
+        """
+        from pcapkit.corekit.enum import EnumRegistry
+
+        registries = {cls: name for cls, name in self.enumerations.items()
+                      if issubclass(cls, EnumRegistry) and cls is not EnumRegistry}
+        # ``issubclass(cls, int)`` rather than a check on ``_member_type_``: the flag
+        # registries are ``IntFlag`` subclasses and have to count inside the int tier,
+        # which is what the page's parenthetical "(of which N are flag registries)"
+        # says -- a disjoint reading would make the two figures fail to add up.
+        int_valued = {c: n for c, n in registries.items() if issubclass(c, int)}
+        str_valued = {c: n for c, n in registries.items() if issubclass(c, str)}
+        flags = {c: n for c, n in registries.items()
+                 if issubclass(c, (enum.Flag, aenum.Flag))}
+        files = {cls.__module__ for cls in registries}
+
+        # Guards the rest from passing on a collapsed walk, as
+        # ``test_the_walk_found_something_to_count`` does for the counts above.
+        self.assertGreater(len(registries), 100,
+                           'the registry half of the walk collapsed; the figures below '
+                           'would pass vacuously')
+        neither = sorted(name for cls, name in registries.items()
+                         if not issubclass(cls, (int, str)))
+        self.assertEqual(len(int_valued) + len(str_valued), len(registries),
+                         'a registry is neither int- nor str-valued, so the page\'s '
+                         f'two-tier split no longer partitions the population: {neither}')
+
+        for pattern, measured, what in (
+            (r'\*\*(\d+)\*\* :class:`~pcapkit\.corekit\.enum\.EnumRegistry` subclasses',
+             len(registries), 'EnumRegistry subclasses'),
+            (r'across (\d+) files', len(files), 'files holding a registry'),
+            (r'(\d+) :class:`int`\\?-valued', len(int_valued), 'int-valued registries'),
+            (r'of which (\d+) are flag registries', len(flags), 'flag registries'),
+            (r'(\d+) ``aenum\.StrEnum``\\?-valued', len(str_valued),
+             'str-valued registries'),
+            (r'\*\*(\d+)\*\* non-registry enumerations', len(self.non_registry),
+             'non-registry enumerations'),
+            (r'(\d+) enumerations in total', len(self.enumerations),
+             'enumerations in total'),
+        ):
+            with self.subTest(figure=what):
+                stated = re.search(pattern, self.note)
+                self.assertIsNotNone(
+                    stated, f'the page no longer states how many {what} there are in '
+                            'the shape this test reads; re-derive the figure rather '
+                            'than deleting the check')
+                assert stated is not None  # for type checkers; asserted above
+                self.assertEqual(int(stated.group(1)), measured,
+                                 f'the page says {stated.group(1)} {what}, the tree has '
+                                 f'{measured}')
+
+        # "every one of them under pcapkit.const" is a claim about the *whole*
+        # population, not a count, so a figure comparison cannot reach it.
+        self.assertIn('every one of them under :mod:`pcapkit.const`', self.note,
+                      'the page no longer claims every registry lives under '
+                      'pcapkit.const, so this check is pinning a claim it has dropped')
+        stray = sorted(name for cls, name in registries.items()
+                       if not cls.__module__.startswith('pcapkit.const'))
+        self.assertEqual(stray, [],
+                         'a registry now lives outside pcapkit.const, which the page '
+                         f'says none do: {stray}')
+
+    def test_the_case_differing_hip_parameters_both_resolve(self) -> 'None':
+        """The page's worked reason for never renaming a member to make a lookup work.
+
+        ``R1_Counter`` and ``R1_COUNTER`` are two IANA-registered HIP parameters
+        differing only in case, and the page names both values. Executed rather than
+        read off the page: the claim that matters is that a case-sensitive ``get``
+        keeps both *resolvable*, which a substring match cannot establish.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+
+        for name, value in (('R1_Counter', 128), ('R1_COUNTER', 129)):
+            with self.subTest(member=name):
+                self.assertEqual(Parameter.get(name).value, value,
+                                 f'{name} no longer resolves to {value}, so the page\'s '
+                                 'worked example for case-sensitivity is stale')
+                self.assertIn(f'``{name} = {value}``', self.note,
+                              f'the page no longer states {name} = {value}, the '
+                              'collision that makes renaming a member unacceptable')
+        self.assertNotEqual(Parameter['R1_Counter'], Parameter['R1_COUNTER'],
+                            'the two HIP parameters have collapsed into one member, so '
+                            'the page\'s example of a case-significant registry is gone')
+
 
 class ExtensionHeaderClassificationTests(unittest.TestCase):
     """The page's bases-per-header table against the declarations themselves."""
@@ -581,8 +682,7 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
 
 
 class RetiredNameTests(unittest.TestCase):
-    """*"No more* ``IPv6_GenericExt`` *name. Its an intermediate state and never
-    released."*"""
+    """#924's ruling that ``IPv6_GenericExt`` goes: an unreleased intermediate name."""
 
     def test_the_retired_base_name_is_absent_from_the_package(self) -> 'None':
         """A ruling that a name must not exist needs a test, or it comes back.
@@ -765,6 +865,25 @@ class GetOverrideContractTests(unittest.TestCase):
         from pcapkit.const.http.method import Method
         from pcapkit.const.pcapng.option_type import OptionType
 
+        # Membership before indexing, for all three. `vars(klass)['get']` raises a bare
+        # `KeyError: 'get'` when a class folds its own override into the inherited base
+        # -- which is exactly what GitHub pull request #940 did to the mh/ngap helpers,
+        # so it is a live failure mode rather than a hypothetical one. The KeyError
+        # fails the test either way, so nothing regressed silently; what it does not do
+        # is say *which* class stopped defining `get`, or that the page is now wrong to
+        # list it. The sibling at `test_the_two_redundant_overrides_are_gone` already
+        # does this the right way round, with `assertNotIn('get', vars(klass))`.
+        # Deliberately *not* under `subTest`: a subTest records its failure and lets
+        # the method run on, so the bare `KeyError` this guard exists to pre-empt
+        # would still be raised by the indexing below and reported alongside it. A
+        # plain assertion aborts here, which is the whole point.
+        for klass in (Method, Command, OptionType):
+            self.assertIn('get', vars(klass),
+                          f'{klass.__name__} no longer defines a get of its own, so '
+                          'the page is wrong to name it among the overrides -- an '
+                          'override folded into the inherited base is what #940 did '
+                          'to the mh/ngap helpers')
+
         self.assertIsInstance(vars(Method)['get'], classmethod,
                               'a delegating override has to be a classmethod -- '
                               'zero-argument super() in a staticmethod binds the '
@@ -888,8 +1007,14 @@ class GetOverrideContractTests(unittest.TestCase):
                          'ruled overrides follow the base here, not the reverse')
 
         flat = self._flat()
-        self.assertIn('not be loud', flat,
-                      "the page no longer quotes #933's reversal")
+        # The *claim*, not his wording. This asserted `'not be loud'` until GitHub issue
+        # #949, which is a fragment of the sentence he typed on the issue rather than
+        # anything the ruling turns on; the substance is that the first answer on #933 is
+        # not the ruling and the second one is. Occurs once on the page, checked.
+        self.assertIn('first declined, then reversed', flat,
+                      "the page no longer records that #933's ruling is the owner's "
+                      'reversal rather than his first answer, which is the whole reason '
+                      'both answers are on the issue')
         # Anchored to the headline sentence, not the bare token. `quiet=True` occurs
         # four times on the page, so `assertIn('``quiet=True``')` was satisfied by a
         # later mention -- inverting the ruling itself to `quiet=False` failed nothing.
@@ -1087,10 +1212,10 @@ class ProcessConventionTests(unittest.TestCase):
     deliberately pins neither against the owner's own phrasing. Quoting him is what
     the page is forbidden to do here -- his instruction on GitHub issue #918 was to
     paraphrase -- and asserting a quoted sentence is separately a trap this module has
-    already been bitten by: a test elsewhere pinned the literal
-    ``'I prefer (2) directly.'`` onto a page, which turned an off-hand reply into a
-    build dependency. Attribution lives in the issue number the page cites; the tests
-    check substance.
+    already been bitten by: tests elsewhere in this file pinned two off-hand replies of
+    his as literal strings, which made a sentence typed into a GitHub thread a CI build
+    dependency. GitHub issue #949 removed the last of those. Attribution lives in the
+    issue number the page cites; the tests check substance.
 
     """
 
@@ -1397,11 +1522,57 @@ class ProcessConventionTests(unittest.TestCase):
             ecosystems, ['pip'],
             'dependabot now watches a different set of ecosystems, so the page\'s claim '
             f'about which labels it applies needs re-deriving: {ecosystems}')
-        self.assertNotIn(
-            '``dependencies`` and ``github_actions``', self.flat,
-            'the page attributes github_actions to dependabot again -- it cannot apply '
-            'that label, since no github-actions ecosystem is configured, and calling a '
-            "hand-applied label automated inverts this section's point")
+        # Derived rather than pinned to one phrasing. The previous form asserted the
+        # single literal ``dependencies`` and ``github_actions``, so a re-attribution
+        # worded any other way -- "dependabot applies ``github_actions``", a comma for
+        # the "and", the two labels in the other order -- slipped straight past it, which
+        # is the weakness GitHub issue #949 asked to be looked at. Every sentence pairing
+        # the tool with the label is checked instead, so the phrasing no longer matters.
+        #
+        # Proximity is not the test, and a first attempt at #949 that used it was wrong:
+        # the section states **twice**, deliberately, that ``github_actions`` is *not*
+        # dependabot's, and both of those sentences name the tool and the label together.
+        # Distinguishing an attribution from a denial by looking for a negation nearby
+        # also failed -- the attributing bullet's own sentence ends "so it never opens a
+        # workflow bump here", so the negation is present in the sentence that makes the
+        # claim as well as in the two that deny it.
+        #
+        # So the page's attribution is *parsed* instead: the one clause that says what
+        # dependabot puts on its pull requests is located, the labels named inside it are
+        # read out, and the set is compared against what the configured ecosystems could
+        # actually produce. Set comparison is what makes it phrasing-independent -- a
+        # comma for the "and", the labels in the other order, a third label added, all
+        # compare the same -- and locating the clause is asserted rather than assumed, so
+        # a rewording that this can no longer read fails loudly instead of passing.
+        ECOSYSTEM_LABELS = {'pip': {'dependencies', 'python'},
+                            'github-actions': {'dependencies', 'github_actions'}}
+        expected = set().union(*(ECOSYSTEM_LABELS[eco] for eco in ecosystems))
+
+        # `findall`, not `search`: a first-match-only read checks one attributing
+        # clause and lets a second, contradicting one through. That is the same
+        # walk-past-the-check defect this whole rewrite exists to remove, so every
+        # clause matching the shape is required to name the same set.
+        clauses = re.findall(r'\*\*dependabot\*\* puts (.+?) on its own pull requests',
+                             self.flat)
+        self.assertTrue(
+            clauses,
+            'the page no longer states which labels dependabot puts on its own pull '
+            'requests in the shape this test reads, so the attribution is unpinned -- '
+            're-derive it rather than dropping the check, because naming a hand-applied '
+            "label as dependabot's is this section's own point stated backwards")
+        for claimed in clauses:
+            self.assertEqual(
+                set(re.findall(r'``([^`]+)``', claimed)), expected,
+                'the page attributes a different set of labels to dependabot than the '
+                f'configured ecosystems {ecosystems} can produce. Claimed: '
+                f'{claimed!r}')
+
+        # And the positive half, which the set comparison above cannot reach: the page
+        # has to say outright that ``github_actions`` is hand-applied. Without this, a
+        # page that simply stopped mentioning the label would satisfy everything above.
+        self.assertIn('hand-applied', self.flat,
+                      'the page no longer says github_actions is hand-applied, so a '
+                      'reader is left to assume the label arrives automatically')
 
         self.assertTrue(templated,
                         'no issue template sets a label any more, so the page is now '
