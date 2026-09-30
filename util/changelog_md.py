@@ -39,7 +39,11 @@ The conversion
 The entries are written in a deliberately small reStructuredText subset, so the
 conversion is six mechanical rules rather than a document converter:
 
-  1. the setext version heading becomes an ATX ``##`` heading;
+  1. a setext heading becomes an ATX heading, one level per underline
+     character: ``=`` (the version heading) is ``##``, ``-`` (a module
+     section) is ``###``, and ``~`` (an ``Added``/``Changed``/``Fixed``
+     subsection) is ``####`` -- the hierarchy the ``1.5.0`` entry's nesting
+     already implies, with no level skipped;
   2. ``:rfc:`NNNN``` -- and ``:rfc:`NNNN#section-3```, the anchored spelling
      Sphinx accepts too -- become Markdown links to the RFC on the IETF
      datatracker;
@@ -254,10 +258,11 @@ _RESIDUAL = (
     # ``(?m)`` matters: the run is followed by a newline rather than end of input,
     # and a bare ``$`` only matches at the very end of the string.
     #
-    # ``=`` belongs in the alternation even though rule 1 handles ``=`` underlines,
-    # because rule 1 requires the underline to be exactly as long as the title
-    # while reStructuredText merely requires it to be no shorter. An over-long
-    # underline therefore falls straight past rule 1 and gets joined like any other.
+    # ``=``, ``-`` and ``~`` all belong in the alternation even though rule 1
+    # handles all three, because rule 1 requires the underline to be exactly
+    # as long as the title while reStructuredText merely requires it to be no
+    # shorter. An over-long underline therefore falls straight past rule 1 and
+    # gets joined like any other.
     (re.compile(r'(?m)\S[ \t]+(?:={3,}|-{3,}|~{3,}|\^{3,}|"{3,})(?:[ \t]|$)'),
      'a setext underline joined into the prose above it'),
 )
@@ -413,16 +418,27 @@ def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
     while index < len(lines):
         line = lines[index]
 
-        # 1. setext heading -> ATX. Only ``=`` is used in these files, and only
-        #    for the version heading, so the underline can be consumed outright.
-        #    The heading is attributed to the title, not to the underline that
-        #    followed it, because the title is what a reader would look for.
-        if (index + 1 < len(lines) and line and set(lines[index + 1]) == {'='}
-                and len(lines[index + 1]) == len(line)):
-            out.append(f'## {line}')
-            origin.append(index + 1)
-            index += 2
-            continue
+        # 1. setext heading -> ATX, one level per underline character: ``=``
+        #    for the version heading, ``-`` for a module section, ``~`` for a
+        #    kind subsection underneath it. The underline is consumed outright
+        #    on an *exact* length match against the title above it -- the
+        #    same narrow test as before, now applied to three characters
+        #    instead of one. reStructuredText itself only requires the
+        #    underline to be no shorter than the title, so an over-long one
+        #    falls straight through this check and is joined into the prose by
+        #    rule 6 like any other unconverted construct, where the residual
+        #    guard's mid-line pattern catches it. The heading is attributed to
+        #    the title, not to the underline that followed it, because the
+        #    title is what a reader would look for.
+        if index + 1 < len(lines) and line and len(lines[index + 1]) == len(line):
+            underline = lines[index + 1]
+            level = {'=': '##', '-': '###', '~': '####'}.get(
+                underline[0] if underline else '')
+            if level and set(underline) == {underline[0]}:
+                out.append(f'{level} {line}')
+                origin.append(index + 1)
+                index += 2
+                continue
 
         # 2. the one role these entries use, in both spellings Sphinx accepts.
         line = _RFC_ROLE.sub(lambda match: rfc_link(match[1], match[2] or ''), line)

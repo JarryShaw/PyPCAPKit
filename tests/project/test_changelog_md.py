@@ -404,11 +404,32 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         )
 
     def test_a_sub_heading_underline_joined_into_the_prose_is_fatal(self) -> None:
-        # Rule 1 only consumes ``=`` underlines, so a ``-`` underlined sub-heading
-        # is joined onto the heading text by rule 6 and would otherwise disappear
-        # into a paragraph.
-        self._reject('\nA sub heading\n-------------\n\nSome prose.\n',
+        # Retargeted from ``-`` to ``^``. Rule 1 used to consume ``=`` alone, so a
+        # ``-`` underlined sub-heading was joined onto its heading text by rule 6 and
+        # would have vanished into a paragraph -- which is what this rejected. The
+        # by-module changelog restructure made ``-`` and ``~`` real heading levels
+        # that rule 1 now converts, so the old input is no longer residual markup and
+        # this test would have passed for the wrong reason. ``^`` is still outside the
+        # supported set while remaining in ``_RESIDUAL``'s alternation, so it exercises
+        # the same guard on a character the converter genuinely does not handle.
+        self._reject('\nA sub heading\n^^^^^^^^^^^^^\n\nSome prose.\n',
                      'setext underline joined')
+
+    def test_the_two_new_sub_heading_levels_become_atx_headings(self) -> None:
+        # The other half of the same change: ``-`` and ``~`` must now *convert*
+        # rather than be rejected, one ATX level deeper each, so that the by-module
+        # sections and their Added/Changed/Fixed subsections survive into
+        # ``CHANGELOG.md``. Without rule 1 handling them this renders
+        # ``A module -------`` as prose and the assertions below fail.
+        index = self.make_tree(
+            entry=ENTRY + '\nA module\n--------\n\nAdded\n~~~~~\n\nSome prose.\n')
+
+        rendered = changelog_md.render(index)
+
+        self.assertIn('### A module', rendered)
+        self.assertIn('#### Added', rendered)
+        self.assertNotIn('A module --------', rendered)
+        self.assertNotIn('Added ~~~~~', rendered)
 
     def test_an_over_long_equals_underline_is_fatal(self) -> None:
         # Rule 1 fires only when the underline is exactly as long as the title,
