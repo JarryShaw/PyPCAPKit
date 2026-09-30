@@ -124,6 +124,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: below used to name a different module here (``pcapkit.corekit.module``,
 #: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
 #: ``pcapkit.protocols.protocol`` respectively); all four now report this one.
+import pcapkit.corekit.sentinels as sentinels
+
 CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
@@ -375,11 +377,44 @@ class SentinelPopulationTests(unittest.TestCase):
         self.assertNotIn('The three sentinels deliberately differ', section)
 
     def test_conventions_doc_records_that_only_the_object_is_exported(self) -> 'None':
-        """The ruling this change implements belongs in the doc that states the rule."""
+        """The ruling this change implements belongs in the doc that states the rule.
+
+        Pinned as the *claim* rather than as wording. The first version asserted the
+        literal ``'ONLY'`` -- the maintainer's own capitalisation, lifted from a block
+        quote of his #911 reply -- so paraphrasing that quote under GitHub issue #949
+        reddened this test without anything about the rule having changed. Asserting
+        someone's emphatic casing is exactly the defect #949 exists to remove, and a
+        test outside :mod:`tests.project` pinning a convention page's prose is how it
+        went unnoticed there.
+
+        So the substance is checked against the tree, which is where the ruling
+        actually takes effect, and the page is only required to name the export
+        boundary (``__all__``, an identifier rather than prose) and the issue that
+        settled it.
+
+        """
         section = _sentinel_section()
 
-        self.assertIn('ONLY', section)
         self.assertIn('#911', section)
+        self.assertIn('__all__', section,
+                      "the page no longer names ``__all__``, so it no longer says "
+                      'where the export boundary is -- #911 ruled that the instance '
+                      'is exported and the type is not, and a reader cannot act on '
+                      'that without being told which list decides it')
+
+        # The ruling itself, against the module it governs rather than against prose:
+        # every public sentinel's instance is exported and its type is not.
+        exported = set(sentinels.__all__)
+        for _, instance_name, type_name in PUBLIC_SENTINELS:
+            with self.subTest(sentinel=instance_name):
+                self.assertIn(instance_name, exported,
+                              f'{instance_name} is a public sentinel but is not in '
+                              f'{CANONICAL_MODULE}.__all__, so #911\'s ruling that '
+                              'the objects are what reach users no longer holds')
+                self.assertNotIn(type_name, exported,
+                                 f'{type_name} is in {CANONICAL_MODULE}.__all__, but '
+                                 '#911 ruled the type stays out of it and remains '
+                                 'reachable only by its dotted path')
 
     def test_conventions_doc_carves_out_the_vendored_bare_object(self) -> 'None':
         """"Why a class and not ``object()``" read as a blanket rule with no exception."""

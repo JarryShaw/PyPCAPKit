@@ -34,15 +34,17 @@ parent, and the line between them is whether the enumeration may *grow*:
                                                     ``_extend``, ``_unregistered_member``
 =================================================== ==============================================================
 
-The owner's ruling, verbatim: *"they may subclass a bare base enum from
-pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
-mutable ones."* So a **closed** set inherits :class:`~pcapkit.corekit.enum.EnumLookup`
+The owner ruled on #877 that a registry may subclass a bare base enum out of
+:mod:`pcapkit.corekit.enum`, with :class:`~pcapkit.corekit.enum.EnumRegistry`
+subclassing that base in turn for use by the mutable ones. So a **closed** set
+inherits :class:`~pcapkit.corekit.enum.EnumLookup`
 directly and is never handed a ``register`` it would have to refuse; an **open**
 registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry` exactly as before.
 
 What settled the split is the owner's own second thought about carrying ``register``
-on the base: *"if it carries ``register``, then why not ``register_alias``. We might
-be creating a bad ruling."* Following that through leaves
+on the base: if the base carries ``register``, there is no principled reason for it
+not to carry ``register_alias`` as well, and the ruling would be the worse for it.
+Following that through leaves
 :class:`~pcapkit.corekit.enum.EnumRegistry` holding only three methods, too thin to
 justify a second class -- so the two tiers collapse into one, which is the opposite of
 what was ruled.
@@ -55,8 +57,8 @@ it was -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
 itself and broken ``int``, ``str`` and flag registries at once.
 
 :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` is what the base carries
-*instead* of ``register``, and it answers the owner's other requirement: *"there must
-be some sort of range validation logic for the inherited classes to hook in."* The
+*instead* of ``register``, and it answers the owner's other requirement: the base has
+to offer range-validation logic for its inheriting classes to hook into. The
 base implementation accepts everything; an override states a range, in the shape the
 generated registries currently spell by hand in ``_missing_``:
 
@@ -118,13 +120,11 @@ Three things about it are easy to get wrong:
 What a Failed Lookup Raises
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two rules govern it, and they pull in opposite directions on purpose. The owner's
-ruling, verbatim, on
-`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__:
-
-   Either ``ValueError`` or ``KeyError``, that's depending on how stdlib's ``Enum``
-   would raise on these circumstances. And we should raise one from
-   ``pcapkit.utilities.exceptions`` rather builtin exceptions.
+Two rules govern it, and they pull in opposite directions on purpose. The owner ruled
+on `#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ that the choice between
+:exc:`ValueError` and :exc:`KeyError` follows whichever stdlib's :class:`~enum.Enum`
+would raise in the same circumstance, and that whichever it is comes from
+:mod:`pcapkit.utilities.exceptions` rather than from builtins.
 
 So the **provenance** is in-library and the **shape** is stdlib's:
 
@@ -148,8 +148,8 @@ one into the other is exactly what #923 retired, and it was retired in three pla
 at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
 base's :exc:`KeyError` into a :exc:`ValueError`, and
 ``FastBindingAcknowledgmentStatus.get`` raised
-:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss so that "the
-two ways of getting it wrong reported identically".
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two
+ways of getting it wrong reported identically.
 
 One asymmetry between the two is deliberate and is **not** visible from the
 exception class: the **name** miss is raised quietly
@@ -286,17 +286,16 @@ what it adds to the base, and goes when the answer is nothing.**
 Case Sensitivity Is RFC-Directed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The rule, in the owner's own wording on
-`#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__:
-
-   if RFC states the values are case-insensitive, then our enum should also treat them
-   that way. otherwise, we should treat them case sensitive.
+The rule, as the owner ruled it on
+`#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__: where the RFC states the
+values are case-insensitive, the enumeration treats them that way too; otherwise it
+treats them as case-sensitive.
 
 And the reason a registry's spelling is never quietly normalised, from the same thread:
-*"enum should honour and keep their original writings as in the registrars. case
-in-sensitivity only applies to certain selected ones, where logically it makes sense
-(like ``TransportProtocol``) and/or RFC documentation itself recognises them as
-case-insensitive (like, maybe, FTP/HTTP commands)."*
+an enumeration honours and keeps the original writing the registrar used, and
+case-insensitivity applies only to the selected registries where it makes logical sense
+-- ``TransportProtocol`` being one -- or where the RFC documentation itself recognises
+the values as case-insensitive, FTP and HTTP commands being the likely candidates.
 
 So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
 default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
@@ -330,11 +329,9 @@ The ruling above leaves one question open, and
 `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__ settled it: does a
 specification have to state a **comparison rule** for a registry to be treated
 case-insensitively, or does it also count when the authorities merely **disagree
-about spelling**? The owner's answer, verbatim:
-
-   I say lenient. TransportProtocol for example should be case-insensitive. Upper or
-   lower cases are being used everywhere in RFC and IANA themselves so that's an
-   indication of case insensitivity.
+about spelling**? The owner ruled for the lenient reading, with ``TransportProtocol``
+as his own example: upper and lower casings are used throughout the RFCs and IANA's own
+data, and that mixed usage is itself an indication of case-insensitivity.
 
 So the test a new registry has to pass has **two limbs**, and satisfying either one
 justifies case-insensitivity:
@@ -358,8 +355,8 @@ The Audit, per Class
 ~~~~~~~~~~~~~~~~~~~~
 
 `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__'s sweep, so that a
-registry added later has something to check itself against. The owner's scope for it,
-verbatim: *"we should audit all registries and then decide if case (in)sensitive."*
+registry added later has something to check itself against. The owner set its scope:
+audit every registry first, and decide case-sensitivity per registry from that.
 
 The population it covers, with the counting convention spelled out because the
 figures move: **127** :class:`~pcapkit.corekit.enum.EnumRegistry` subclasses, every

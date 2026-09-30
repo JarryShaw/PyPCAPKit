@@ -20,9 +20,10 @@ House Conventions
    when a question is answered in a way the code cannot express on its own -- a
    classification, a naming rule, a deliberate asymmetry -- it is written onto
    the page that covers it in the same change that implements it, rather than
-   left in the issue for the next contributor to find. The owner's standing
-   ask, on `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__: *"And
-   any future conventions to be settled - document them as well."*
+   left in the issue for the next contributor to find. That is the owner's
+   standing ask on
+   `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__: every
+   convention settled from here on gets documented here as well.
 
 .. toctree::
    :maxdepth: 1

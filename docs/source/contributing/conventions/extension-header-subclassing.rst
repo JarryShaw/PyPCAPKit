@@ -5,14 +5,11 @@ Which bases an IPv6 extension header names
 
 Every IPv6 extension header in this package subclasses
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
-as well, and which ones do is a ruling rather than an accident. The owner's words,
-on `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__:
-
-   I think on subclassing, we might wanna keep this convention: if the IPv6
-   extension header is only usable as an extension header, then it only inherit
-   from ``IPv6_Ext``, like ``IPv6_Frag``; but if it is useable as a standalone
-   protocol itself, then it herit from both ``IPv6_Ext`` and ``Internet`` (or
-   ``IPsec``), like ``ESP``.
+as well, and which ones do is a ruling rather than an accident. The owner ruled on
+`#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__ that a header usable *only*
+as an extension header inherits ``IPv6_Ext`` and nothing else -- ``IPv6_Frag`` being
+the example -- while one that is usable as a standalone protocol in its own right
+inherits both ``IPv6_Ext`` and ``Internet`` (or ``IPsec``), as ``ESP`` does.
 
 The family as it stands:
 
@@ -40,7 +37,7 @@ The family as it stands:
 
 :class:`~pcapkit.protocols.internet.ipsec.IPsec` is itself an
 :class:`~pcapkit.protocols.internet.internet.Internet` subclass, which is the
-parenthetical *"(or* ``IPsec``\ *)"* in the ruling: naming it satisfies the
+parenthetical ``IPsec`` alternative in the ruling: naming it satisfies the
 convention, and it is the right second base for a header whose standalone form is an
 IPsec one.
 
@@ -74,11 +71,10 @@ whether the same header is also a protocol in its own right.
 The operative test is what the RFCs say
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So the census is read out of the specifications, on the owner's instruction:
-
-   So my suggestion is to read through the RFCs to figure out any of the defined
-   IPv6 extension headers are extension header only or standalone protocol as well.
-   Then we can decide if they should inherit only ``IPv6_Ext`` or additional bases.
+So the census is read out of the specifications, on the owner's instruction: work
+through the RFCs to establish, for each defined IPv6 extension header, whether it is
+extension-header-only or a standalone protocol as well, and decide from that whether it
+inherits ``IPv6_Ext`` alone or names additional bases.
 
 And the limb that decides is **whether a primary source shows the header carried
 directly as an IPv4 payload**:
@@ -139,9 +135,9 @@ The class arrived as ``IPv6_GenericExt``, a fallback parser for an unrecognised
 extension header (`#891 <https://github.com/JarryShaw/PyPCAPKit/issues/891>`__), and
 `#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__ merged that role with
 the shared-base role into one class under the shorter name. No compatibility alias
-was left behind, and that was deliberate. The owner's ruling:
-
-   No more ``IPv6_GenericExt`` name. Its an intermediate state and never released.
+was left behind, and that was deliberate. The owner ruled that the
+``IPv6_GenericExt`` name goes for good: it was an intermediate state, and it was never
+released.
 
 The reasoning is what makes it safe rather than merely decided: the old name existed
 on ``main`` from ``b3551cb63`` to ``93cf940b3`` -- under four hours on one day, and

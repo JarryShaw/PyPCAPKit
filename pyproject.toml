@@ -112,8 +112,8 @@ cli = [ "emoji" ]
 # for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
 crypto = [ "cryptography>=3.4" ]
 # for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Counted among
-# ``all``'s *core addons* by the owner's ruling on #910 -- "everything that
-# makes the library itself work at full functionality" -- even though the
+# ``all``'s *core addons* by the owner's ruling on #910 -- everything needed for
+# the library itself to work at full functionality -- even though the
 # ``pycrate`` this needs is not a free addition:
 #
 #   * Size. ``pycrate`` ships every specification it has ever compiled in one
@@ -221,15 +221,15 @@ PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # moved to ``dev`` instead. Either way, this extra's own requirements are what
 # it is correct against, not whatever ``all`` happens to carry.
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
-# #910: narrowed to *core addons* only -- the owner's own words are "everything
-# that makes the library itself work at full functionality", not "everything an
-# end user might ever want". An earlier ruling on the same issue read the
-# latter and added ``pycrate`` on that basis; the ruling that stuck narrowed it
-# again, this time by kind: ``cli``, ``crypto`` and ``pycrate`` (NGAP) are core
-# addons and stay, and the four 3rd-party capture engines that used to be here
-# -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are "on demand for each
-# one" like ``PyPCAP`` and ``PCAP_CT`` always were, and move out to their own
-# extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
+# #910: narrowed to *core addons* only -- the owner's ruling scopes this to
+# everything needed for the library itself to work at full functionality, rather
+# than everything an end user might conceivably want. An earlier ruling on the
+# same issue read the latter and added ``pycrate`` on that basis; the ruling that
+# stuck narrowed it again, this time by kind: ``cli``, ``crypto`` and ``pycrate``
+# (NGAP) are core addons and stay, and the four 3rd-party capture engines that
+# used to be here -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are
+# installed one at a time on demand, as ``PyPCAP`` and ``PCAP_CT`` always were,
+# and move out to their own extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
 # ``[Scapy]`` / ``[PyShark]`` / ``[PyPCAPFile]``.
 #
 # ``pypcap`` and ``pcap-ct``/``libpcap`` stay out for the reason they always
