@@ -24,7 +24,8 @@ is labelled for, and
 pins it so a later reading of the ruling cannot escalate into deleting the types.
 
 The population is **four**, not the three
-:file:`docs/source/contributing/conventions.rst` documented -- ``ABSENT`` /
+:file:`docs/source/contributing/conventions/sentinel-convention.rst` documented --
+``ABSENT`` /
 ``AbsentType`` in :mod:`pcapkit.protocols.protocol` is the fourth, missed because a
 sweep filtered on capitalised names did not see it when it was still spelled
 ``_Absent``/``_AbsentType``, with a leading underscore. :class:`SentinelPopulationTests`
@@ -127,7 +128,8 @@ CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
 #: as ``(instance name, instance, type)``. Four, not the three
-#: :file:`docs/source/contributing/conventions.rst` used to document -- see the module docstring.
+#: :file:`docs/source/contributing/conventions/sentinel-convention.rst` used to
+#: document -- see the module docstring.
 #: All four now share :data:`CANONICAL_MODULE` as their defining module, which is
 #: why a per-entry module column is no longer part of this tuple -- see
 #: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
@@ -179,25 +181,25 @@ def _star_import(module: 'str') -> 'dict[str, object]':
 
 
 def _sentinel_section() -> 'str':
-    """The "Naming a sentinel" section of :file:`docs/source/contributing/conventions.rst`.
+    """The "Naming a sentinel" section, now its own page.
 
-    Sliced by its own section markers rather than by line number, so an edit
-    elsewhere in the file does not silently make this read the wrong text. That
-    is what survived GitHub pull request #912 moving the file out of
-    :file:`docs/source/` into :file:`docs/source/contributing/`, which landed as
-    ``9806f16aa``; the two-element candidate tuple that straddled the move is
-    gone with it (GitHub issue #920), since its first entry could never match
-    again and read as though both locations were still live.
+    Read whole rather than sliced between two anchors: GitHub issue #918 split
+    the single-page :file:`docs/source/contributing/conventions.rst` into one
+    file per ``.. _label:`` anchor, and the "Naming a sentinel" section *is*
+    :file:`docs/source/contributing/conventions/sentinel-convention.rst` now, so
+    there is no following anchor left in the same file to slice against. That
+    retires the ``text.index('.. _sentinel-convention:')`` /
+    ``text.index('.. _registry-protocol:', start)`` pairing this used before the
+    split -- the two anchors moved into separate files, which is exactly what
+    GitHub issue #930 flagged as the split's concrete blocker before #918
+    resolved it.
 
     """
-    path = ROOT / 'docs/source/contributing/conventions.rst'
+    path = ROOT / 'docs/source/contributing/conventions/sentinel-convention.rst'
     if not path.is_file():  # pragma: no cover
-        raise AssertionError(f'conventions.rst not found at {path}')
+        raise AssertionError(f'sentinel-convention.rst not found at {path}')
 
-    text = path.read_text(encoding='utf-8')
-    start = text.index('.. _sentinel-convention:')
-    end = text.index('.. _registry-protocol:', start)
-    return text[start:end]
+    return path.read_text(encoding='utf-8')
 
 
 class SentinelExportTests(unittest.TestCase):
@@ -221,8 +223,10 @@ class SentinelExportTests(unittest.TestCase):
         """``EnumLookup`` and ``EnumRegistry`` are not sentinels and stay.
 
         ``EnumLookup`` in particular: GitHub issue #906 split it out as a public
-        base and :file:`docs/source/contributing/conventions.rst` cites its ``get``, so dropping
-        it while removing the sentinel type next to it would break that reference.
+        base and
+        :file:`docs/source/contributing/conventions/registry-protocol.rst` cites
+        its ``get``, so dropping it while removing the sentinel type next to it
+        would break that reference.
 
         """
         import pcapkit.corekit.enum as enum
@@ -407,7 +411,9 @@ class SentinelPopulationTests(unittest.TestCase):
 
 
 class SentinelBehaviourTests(unittest.TestCase):
-    """The per-sentinel differences :file:`docs/source/contributing/conventions.rst` documents.
+    """The per-sentinel differences
+    :file:`docs/source/contributing/conventions/sentinel-convention.rst`
+    documents.
 
     Not part of the export change, and asserted here because the doc edit that goes
     with it makes claims about all four -- an undocumented ``__bool__`` or a missing

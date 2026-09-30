@@ -9,8 +9,8 @@ module-level singleton sentinel this package defines for itself -- a value
 whose only job is to be recognised by identity (``value is SENTINEL``), so
 that it can never be confused with a value a caller might legitimately pass.
 See the "Naming a sentinel" section of
-:file:`docs/source/contributing/conventions.rst` for the house rule the four
-below follow.
+:file:`docs/source/contributing/conventions/sentinel-convention.rst` for the
+house rule the four below follow.
 
 Before this module existed, each of the four lived beside the one class that
 used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,
@@ -461,8 +461,8 @@ class AbsentType:
     :data:`ABSENT`, from here or from there, and neither this module's nor
     that module's :attr:`__all__` names either one. This docstring, and the
     "Naming a sentinel" section of
-    :file:`docs/source/contributing/conventions.rst`, are what now records
-    that fact in place of the leading underscore.
+    :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are
+    what now records that fact in place of the leading underscore.
 
     """
 

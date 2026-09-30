@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """Pins :class:`~pcapkit.const.ftp.command.FEATCode` as a documented API target.
 
-GitHub issue #934, part B: :file:`docs/source/contributing/conventions.rst`
-cross-references :class:`~pcapkit.const.ftp.command.FEATCode` three times (the
-``:class:`` role, at what were lines 592, 733 and 740 on ``83c7552b8``), and none of
+GitHub issue #934, part B: what is now
+:file:`docs/source/contributing/conventions/registry-protocol.rst` (GitHub issue
+#918 split it out of the single-page :file:`conventions.rst` that carried it at
+the time) cross-references :class:`~pcapkit.const.ftp.command.FEATCode` three
+times (the ``:class:`` role, at what were lines 592, 733 and 740 on
+``83c7552b8``), and none of
 them used to resolve, because no page under :file:`docs/source/` documented that
 class -- confirmed by an explicit nitpicky ``sphinx-build`` before
 :file:`docs/source/pcapkit/const/ftp.rst` gained an ``autoclass`` directive for it,
@@ -46,10 +49,10 @@ class FEATCodeAPIPageTests(unittest.TestCase):
         """The page declares an ``autoclass`` for the class conventions.rst names.
 
         Without this directive, ``:class:`~pcapkit.const.ftp.command.FEATCode```
-        in :file:`docs/source/contributing/conventions.rst` has no target to
-        resolve against -- the exact defect GitHub issue #934 reports for this
-        class, distinct from the sibling ``sentinels`` module-level miss part A
-        of the same issue fixed.
+        in :file:`docs/source/contributing/conventions/registry-protocol.rst`
+        has no target to resolve against -- the exact defect GitHub issue #934
+        reports for this class, distinct from the sibling ``sentinels``
+        module-level miss part A of the same issue fixed.
 
         """
         text = PAGE.read_text(encoding='utf-8')
