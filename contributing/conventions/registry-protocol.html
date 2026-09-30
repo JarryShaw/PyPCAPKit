@@ -688,7 +688,7 @@ indication of case insensitivity.</p>
 <p>So the test a new registry has to pass has <strong>two limbs</strong>, and satisfying either one
 justifies case-insensitivity:</p>
 <ol class="arabic simple">
-<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> for FTP
+<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> for FTP
 command codes, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a> for FTP FEAT codes, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a>
 for IANA service names.</p></li>
 <li><p><strong>A documented spelling disagreement between the specification and the registry.</strong>
@@ -747,7 +747,7 @@ says otherwise.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></p></td>
-<td><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a></p></td>
+<td><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a></p></td>
 <td><p><em>“Upper and lower case alphabetic characters are to be treated
 identically.”</em> Limb 1.</p></td>
 <td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fold, correctly</p></td>
@@ -811,7 +811,7 @@ are</strong> service names.</p></td>
 <td><p><strong>unimplemented</strong> – no service-name lookup exists to fold; see below</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code>, <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code></p></td>
-<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a>, <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
+<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4"><strong>RFC 959 Section 4</strong></a>, <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
 <td><p>Limb 2 holds on measurement: the RFC and registry pages present the kind and
 conformance letters upper case (<code class="docutils literal notranslate"><span class="pre">A</span></code>/<code class="docutils literal notranslate"><span class="pre">P</span></code>/<code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code>/<code class="docutils literal notranslate"><span class="pre">O</span></code>/<code class="docutils literal notranslate"><span class="pre">H</span></code>) while
 the CSV columns the crawler reads are lower case in every row (<code class="docutils literal notranslate"><span class="pre">s</span></code> 26,
@@ -920,7 +920,7 @@ closed set carrying <code class="docutils literal notranslate"><span class="pre"
 fall-through can be measured on a class that defines no <code class="docutils literal notranslate"><span class="pre">get</span></code>.
 <code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
 before matching, which makes it look as though the base were case-insensitive –
-deliberately, since <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> treats FTP command codes identically
+deliberately, since <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> treats FTP command codes identically
 regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
 case-sensitive instead: <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is

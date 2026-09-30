@@ -1234,7 +1234,7 @@ registered <code class="docutils literal notranslate"><span class="pre">key.uppe
 raised <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">'RETR'</span> <span class="pre">already</span> <span class="pre">in</span> <span class="pre">use</span></code> rather than resolving. Reachable
 from wire data for FTP: <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code> compiles its
 request pattern with <code class="docutils literal notranslate"><span class="pre">re.I</span></code> and passes the match verbatim, and
-<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5.3"><strong>RFC 959 Section 5.3</strong></a> makes FTP commands case-insensitive – “Upper and lower
+<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> makes FTP commands case-insensitive – “Upper and lower
 case alphabetic characters are to be treated identically”, listing
 <code class="docutils literal notranslate"><span class="pre">RETR</span> <span class="pre">Retr</span> <span class="pre">retr</span> <span class="pre">ReTr</span> <span class="pre">rETr</span></code> as the same command – so <code class="docutils literal notranslate"><span class="pre">retr</span> <span class="pre">file.txt</span></code> was a
 valid request this library could not parse. Both <code class="docutils literal notranslate"><span class="pre">get()</span></code> and <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>

@@ -221,7 +221,7 @@ about spelling**? The owner's answer, verbatim:
 So the test a new registry has to pass has **two limbs**, and satisfying either one
 justifies case-insensitivity:
 
-1. **A comparison rule in the governing document.** :rfc:`959#section-4.1` for FTP
+1. **A comparison rule in the governing document.** :rfc:`959#section-5` for FTP
    command codes, :rfc:`5797#section-2` for FTP FEAT codes, :rfc:`6335#section-5.1`
    for IANA service names.
 2. **A documented spelling disagreement between the specification and the registry.**
@@ -278,7 +278,7 @@ That leaves the classes with something to decide:
      - What it says
      - Verdict
    * - :class:`~pcapkit.const.ftp.command.Command`
-     - :rfc:`959#section-4.1`
+     - :rfc:`959#section-5`
      - *"Upper and lower case alphabetic characters are to be treated
        identically."* Limb 1.
      - **case-insensitive** -- ``get``/``_missing_`` fold, correctly
@@ -334,7 +334,7 @@ That leaves the classes with something to decide:
        are** service names.
      - **unimplemented** -- no service-name lookup exists to fold; see below
    * - ``CommandType``, ``ConformanceRequirement``
-     - :rfc:`959#section-4.1`, :rfc:`5797#section-2`
+     - :rfc:`959#section-4`, :rfc:`5797#section-2`
      - Limb 2 holds on measurement: the RFC and registry pages present the kind and
        conformance letters upper case (``A``/``P``/``S``, ``M``/``O``/``H``) while
        the CSV columns the crawler reads are lower case in every row (``s`` 26,
@@ -440,7 +440,7 @@ rather than changing it.
    fall-through can be measured on a class that defines no ``get``.
    ``Command.get`` upper-cases its key
    before matching, which makes it look as though the base were case-insensitive --
-   deliberately, since :rfc:`959#section-4.1` treats FTP command codes identically
+   deliberately, since :rfc:`959#section-5` treats FTP command codes identically
    regardless of case. ``Method.get`` used to fold case the same way, but
    `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__ made it
    case-sensitive instead: :rfc:`9110#section-9.1` says the HTTP method token is
