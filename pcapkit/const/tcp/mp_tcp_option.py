@@ -26,7 +26,8 @@ class MPTCPOption(EnumRegistry, IntEnum):
     #: Join Connection [:rfc:`8684#section-3.2`]
     MP_JOIN = 0x1
 
-    #: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684#section-3.3`]
+    #: Data Sequence Signal (Data ACK and Data Sequence Mapping)
+    #: [:rfc:`8684#section-3.3`]
     DSS = 0x2
 
     #: Add Address [:rfc:`8684#section-3.4.1`]
