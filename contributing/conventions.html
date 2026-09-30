@@ -908,7 +908,7 @@ caller’s.</p></li>
 one into the other is exactly what #923 retired, and it was retired in three places
 at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
 base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
-<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> raised
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> raised
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss so that “the
 two ways of getting it wrong reported identically”.</p>
 <p>One asymmetry between the two is deliberate and is <strong>not</strong> visible from the
