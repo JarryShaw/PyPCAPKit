@@ -670,14 +670,15 @@ there, never leaving <a class="reference internal" href="../pcapkit/protocols/pr
 the mechanical signal of that. The maintainer’s ruling on #937, verbatim: <em>“we can
 change</em> <code class="docutils literal notranslate"><span class="pre">_ABSENT</span></code> <em>to</em> <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> <em>just document it as private type/class in the
 documentation and not for public use is enough.”</em> So privacy is documentation-only from
-here on, carried by this paragraph and by <code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code>’s own docstring
+here on, carried by this paragraph and by
+<a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>’s own docstring
 (<code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>, line 439), which still says so:</p>
 <blockquote>
 <div><p>A distinct class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a> so that the sentinel has a name
 of its own in a traceback or a debugger, and so that a type checker has something
 to name where <code class="docutils literal notranslate"><span class="pre">object()</span></code> would give it nothing. It follows
-<code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>, which does the same job for an unset field default;
-this is a sibling of it rather than a reuse […]</p>
+<a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>, which does the same job for an unset
+field default; this is a sibling of it rather than a reuse […]</p>
 </div></blockquote>
 <p>It remains a deliberate fourth rather than an accident: the leading underscore’s
 absence is also why this table once listed three for as long as it did – a sweep
@@ -690,7 +691,8 @@ instance in its module’s <code class="docutils literal notranslate"><span clas
 The type stays importable by its dotted path, for an annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it
 is <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that no longer offers it. A private sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in
 neither, which is what private means here – dropping its leading underscore did not
-add it to either list, and <code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code> and <code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code> are documented on
+add it to either list, and <a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and
+<a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are documented on
 <a class="reference internal" href="../pcapkit/corekit/sentinels.html"><span class="doc">the sentinels API page</span></a> as private and not for
 public use rather than left off it, since the name alone no longer says so.</p>
 <div class="admonition note">
@@ -816,7 +818,7 @@ what was ruled.</p>
 <a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> leaves the member data type exactly where
 it was – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
 <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from the enum base. Had either tier subclassed
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code> in order to “be an enum”, it would have become the member type
+<code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> in order to “be an enum”, it would have become the member type
 itself and broken <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and flag registries at once.</p>
 <p><a class="reference internal" href="../pcapkit/corekit/enum.html#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> is what the base carries
 <em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: <em>“there must
@@ -842,7 +844,7 @@ outside that hierarchy propagates past <code class="docutils literal notranslate
 <p>With <strong>no usable</strong> <code class="docutils literal notranslate"><span class="pre">default</span></code>, the rejection reaches the caller <strong>unwrapped</strong>.
 <code class="docutils literal notranslate"><span class="pre">get</span></code> re-raises a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> that is already a
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> exactly as the override raised it,
-and converts only <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s own “no member carries this
+and converts only <code class="docutils literal notranslate"><span class="pre">aenum</span></code>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s own “no member carries this
 value”. Two things follow, and both are the point of the discrimination rather
 than side effects: the override’s <strong>own message</strong> survives to the caller instead
 of being replaced by the base’s, and the error is <strong>logged once</strong> rather than
@@ -862,7 +864,7 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
 <strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
 <strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
-walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
+walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
 <p>It landed in two pull requests rather than one. Seven of the 24 sat in files
 other pull requests were editing around the same time: <code class="docutils literal notranslate"><span class="pre">CommandType</span></code> and
 <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code> in <a class="reference internal" href="../pcapkit/const/ftp.html#module-pcapkit.const.ftp.command" title="pcapkit.const.ftp.command"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code></a> and its vendor
@@ -908,7 +910,7 @@ caller’s.</p></li>
 one into the other is exactly what #923 retired, and it was retired in three places
 at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
 base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> raised
+<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus.get</span></code> raised
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss so that “the
 two ways of getting it wrong reported identically”.</p>
 <p>One asymmetry between the two is deliberate and is <strong>not</strong> visible from the
@@ -916,7 +918,7 @@ exception class: the <strong>name</strong> miss is raised quietly
 (<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>, so nothing is
 logged and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is left alone) while the <strong>value</strong> miss stays
 loud. A name miss is in-library control flow at several call sites, and at
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> it is part of a <em>successful</em> call –
+<code class="docutils literal notranslate"><span class="pre">Method.get</span></code> it is part of a <em>successful</em> call –
 that override catches it in order to mint. A loud error there would put a
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> record on every such call and set
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code> process-wide, which is the
@@ -999,9 +1001,9 @@ verbatim: <em>“we should audit all registries and then decide if case (in)sens
 <p>The population it covers, with the counting convention spelled out because the
 figures move: <strong>127</strong> <a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> subclasses, every
 one of them under <a class="reference internal" href="../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, across 124 files – 117 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued
-(of which 5 are flag registries) and 10 <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code>-valued. Plus <strong>24</strong>
+(of which 5 are flag registries) and 10 <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code>-valued. Plus <strong>24</strong>
 non-registry enumerations counted by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> flavours and including nested classes: 17 top level (3 of them under
+<code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours and including nested classes: 17 top level (3 of them under
 <a class="reference internal" href="../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> itself) and 7 nested, the nested ones being
 <code class="docutils literal notranslate"><span class="pre">FrameType.Flags</span></code> in <a class="reference internal" href="../pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2" title="pcapkit.protocols.schema.application.httpv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.httpv2</span></code></a> plus its
 6 concrete per-frame subclasses. 151 enumerations in total.</p>
@@ -1041,7 +1043,7 @@ says otherwise.</p>
 identically.”</em> Limb 1.</p></td>
 <td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fold, correctly</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a></p></td>
 <td><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a>, <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html#section-3.2"><strong>RFC 2389 Section 3.2</strong></a></p></td>
 <td><p><em>“IANA maintains uniqueness of feature names (FEAT codes) based on
 case-insensitive comparison.”</em> Limb 1. Limb 2 holds too: RFC 2389 recommends
@@ -1180,7 +1182,7 @@ rather than changing it.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The obstacle this page used to record – that the base’s string-key path does not
-fall through to a value lookup, so a <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code> registry would stop
+fall through to a value lookup, so an <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code> registry would stop
 resolving a valid value that is not also a name – <strong>no longer applies.</strong>
 <a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> now checks <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>
 when the name lookup misses, so such a value resolves:</p>
@@ -1192,14 +1194,14 @@ when the name lookup misses, so such a value resolves:</p>
 <span class="go">&lt;FEATCode [base]&gt;</span>
 </pre></div>
 </div>
-<p>The example above is <code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code>’s shape, and it
+<p>The example above is <a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>’s shape, and it
 still resolves exactly as shown – but since
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> that class overrides
 <code class="docutils literal notranslate"><span class="pre">get</span></code> too, so the output is only the base’s because its override delegates an
 exact name-or-value hit straight through. Measure the base on a registry that does
 <strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code> at all. <strong>Five</strong> do –
 <a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
-<code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code>,
+<a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>,
 <a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
 <a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
 <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
