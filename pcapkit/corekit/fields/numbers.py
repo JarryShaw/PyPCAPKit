@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 
 import aenum
 
-from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.corekit.fields.field import NO_VALUE, Field
 from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError, ProtocolError
 
 __all__ = [
@@ -81,7 +81,7 @@ class NumberField(Field[int], Generic[_T]):
         return self._bit_length
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
-                 default: 'int | NoValueType' = NoValue, signed: 'Optional[bool]' = None,
+                 default: 'int | NoValueType' = NO_VALUE, signed: 'Optional[bool]' = None,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
@@ -532,7 +532,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue,
+                 default: 'StdlibEnum | AenumEnum | NoValueType' = NO_VALUE,
                  signed: 'Optional[bool]' = None,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,

@@ -11,7 +11,7 @@ So :mod:`pcapkit.corekit.sentinels` is now the single defining module for all
 four -- :class:`~pcapkit.corekit.sentinels.NullType`,
 :class:`~pcapkit.corekit.sentinels.NoValueType`,
 :class:`~pcapkit.corekit.sentinels.NoDefaultType` and
-:class:`~pcapkit.corekit.sentinels._AbsentType`, and their four instances -- and
+:class:`~pcapkit.corekit.sentinels.AbsentType`, and their four instances -- and
 each of the four original modules (:mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
 :mod:`pcapkit.protocols.protocol`) keeps a re-export so that no existing
@@ -68,9 +68,9 @@ import pcapkit.corekit.module as module_module
 import pcapkit.corekit.sentinels as sentinels
 import pcapkit.protocols.protocol as protocol_module
 from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
-from pcapkit.corekit.fields.field import NoValue, NoValueType
+from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
 from pcapkit.corekit.module import NULL, NullType
-from pcapkit.protocols.protocol import _Absent, _AbsentType
+from pcapkit.protocols.protocol import ABSENT, AbsentType
 from tests._support import purge_modules
 
 #: Every sentinel, as ``(instance name, shim module, shim instance, shim type)``.
@@ -80,9 +80,9 @@ from tests._support import purge_modules
 #: in each test below rather than being folded into this tuple a fifth time.
 SHIMMED_SENTINELS = (
     ('NULL', module_module, NULL, NullType),
-    ('NoValue', field_module, NoValue, NoValueType),
+    ('NO_VALUE', field_module, NO_VALUE, NoValueType),
     ('NO_DEFAULT', enum_module, NO_DEFAULT, NoDefaultType),
-    ('_Absent', protocol_module, _Absent, _AbsentType),
+    ('ABSENT', protocol_module, ABSENT, AbsentType),
 )
 
 
@@ -101,9 +101,9 @@ class IdentityAcrossShimsTests(unittest.TestCase):
         """
         for name, shim_instance, canonical_name in (
             ('NULL', NULL, 'NULL'),
-            ('NoValue', NoValue, 'NoValue'),
+            ('NO_VALUE', NO_VALUE, 'NO_VALUE'),
             ('NO_DEFAULT', NO_DEFAULT, 'NO_DEFAULT'),
-            ('_Absent', _Absent, '_Absent'),
+            ('ABSENT', ABSENT, 'ABSENT'),
         ):
             with self.subTest(sentinel=name):
                 self.assertIs(shim_instance, getattr(sentinels, canonical_name))
@@ -121,7 +121,7 @@ class IdentityAcrossShimsTests(unittest.TestCase):
             ('NullType', NullType, 'NullType'),
             ('NoValueType', NoValueType, 'NoValueType'),
             ('NoDefaultType', NoDefaultType, 'NoDefaultType'),
-            ('_AbsentType', _AbsentType, '_AbsentType'),
+            ('AbsentType', AbsentType, 'AbsentType'),
         ):
             with self.subTest(sentinel=name):
                 self.assertIs(shim_type, getattr(sentinels, canonical_name))
@@ -228,7 +228,7 @@ class NoImportCycleTests(unittest.TestCase):
         finally:
             purge_modules(['pcapkit'])
         self.assertTrue(hasattr(fresh, 'NULL'))
-        self.assertTrue(hasattr(fresh, 'NoValue'))
+        self.assertTrue(hasattr(fresh, 'NO_VALUE'))
         self.assertTrue(hasattr(fresh, 'NO_DEFAULT'))
 
     def test_each_consumer_module_still_imports_cleanly_on_its_own(self) -> 'None':
@@ -264,13 +264,13 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
     """
 
     def test_all_names_the_three_public_objects_and_no_types(self) -> 'None':
-        """``_Absent`` stays out too: it is private regardless of which module
+        """``ABSENT`` stays out too: it is private regardless of which module
         defines it."""
         self.assertIn('NULL', sentinels.__all__)
-        self.assertIn('NoValue', sentinels.__all__)
+        self.assertIn('NO_VALUE', sentinels.__all__)
         self.assertIn('NO_DEFAULT', sentinels.__all__)
         for name in ('NullType', 'NoValueType', 'NoDefaultType',
-                     '_Absent', '_AbsentType'):
+                     'ABSENT', 'AbsentType'):
             with self.subTest(name=name):
                 self.assertNotIn(name, sentinels.__all__)
 

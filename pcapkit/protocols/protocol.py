@@ -32,7 +32,7 @@ import aenum
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.sentinels import _Absent, _AbsentType  # pylint: disable=unused-import
+from pcapkit.corekit.sentinels import ABSENT, AbsentType  # pylint: disable=unused-import
 from pcapkit.protocols import data as data_module
 from pcapkit.protocols import schema as schema_module
 from pcapkit.protocols.data.data import Data
@@ -155,7 +155,7 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
         # as a parameter is invisible to :func:`inspect.signature`, so the class
         # says so itself. Read per class in the MRO, for the same reason the
         # methods are: a subclass should not have to repeat its parents'.
-        keywords = klass.__dict__.get('__keywords__', _Absent)
+        keywords = klass.__dict__.get('__keywords__', ABSENT)
         if keywords is None:
             # NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,
             # which is unioned down the MRO. It describes how the class that
@@ -169,7 +169,7 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             # can be checked. A subclass that dispatches in turn says so itself.
             if klass is cls:
                 unchecked = True
-        elif keywords is not _Absent:
+        elif keywords is not ABSENT:
             names.update(keywords)
 
         for method in _KEYWORD_CONSUMERS:

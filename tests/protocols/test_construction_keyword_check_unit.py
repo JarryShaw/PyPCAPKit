@@ -711,8 +711,8 @@ class SentinelTests(unittest.TestCase):
     ``Optional[frozenset[str]]`` and :class:`~pcapkit.protocols.application.http.HTTP`
     sets it -- so the third needs a marker of its own.
 
-    That marker is :data:`~pcapkit.protocols.protocol._Absent`, an instance of
-    :class:`~pcapkit.protocols.protocol._AbsentType` following
+    That marker is :data:`~pcapkit.protocols.protocol.ABSENT`, an instance of
+    :class:`~pcapkit.protocols.protocol.AbsentType` following
     :class:`~pcapkit.corekit.fields.field.NoValueType`, which is how this library
     already spells a singleton marker. It was a bare ``object()`` when #640 was
     first raised; a bare ``object()`` has no name in a traceback, no informative
@@ -723,7 +723,7 @@ class SentinelTests(unittest.TestCase):
 
     :meth:`test_the_absent_marker_is_an_instance_of_its_own_type` and
     :meth:`test_the_absent_marker_cannot_be_confused_with_another_singleton`
-        pin the marker's *shape*. Both name ``_Absent``, so on the bare
+        pin the marker's *shape*. Both name ``ABSENT``, so on the bare
         ``object()`` they fail at the import -- which makes them a check that the
         rename happened, with the substance behind the gate.
 
@@ -735,8 +735,8 @@ class SentinelTests(unittest.TestCase):
         they catch is the mistake this kind of swap actually makes -- comparing
         against a second instance of the right class, which reads correctly and
         typechecks -- measured by mutating the ``.get`` default to a fresh
-        ``_AbsentType()``, at which point both fail with ``TypeError:
-        '_AbsentType' object is not iterable`` from ``names.update(keywords)``
+        ``AbsentType()``, at which point both fail with ``TypeError:
+        'AbsentType' object is not iterable`` from ``names.update(keywords)``
         while both shape tests pass through the mutation unharmed.
 
     So neither pair is sufficient alone: the first pair cannot tell a correct
@@ -747,18 +747,18 @@ class SentinelTests(unittest.TestCase):
 
     def test_the_absent_marker_is_an_instance_of_its_own_type(self) -> None:
         """It has a type of its own, and the falsiness the convention carries."""
-        from pcapkit.corekit.fields.field import NoValue, NoValueType
-        from pcapkit.protocols.protocol import _Absent, _AbsentType
+        from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
+        from pcapkit.protocols.protocol import ABSENT, AbsentType
 
-        self.assertIsInstance(_Absent, _AbsentType)
+        self.assertIsInstance(ABSENT, AbsentType)
 
         # The point of #640's review comment: ``type(object())`` is ``object``,
         # which says nothing about what the value is for.
-        self.assertIsNot(type(_Absent), object)
+        self.assertIsNot(type(ABSENT), object)
 
-        # Falsy, exactly as ``NoValue`` is.
-        self.assertFalse(_Absent)
-        self.assertFalse(NoValue)
+        # Falsy, exactly as ``NO_VALUE`` is.
+        self.assertFalse(ABSENT)
+        self.assertFalse(NO_VALUE)
 
         # And ``@final``. ``typing.final`` only records ``__final__`` on the
         # decorated class from 3.11 on, and 3.10 is in the CI matrix, so the two
@@ -768,17 +768,17 @@ class SentinelTests(unittest.TestCase):
         # decorated at all. ``NoValueType`` is the probe for which case this is,
         # so the two classes cannot drift apart either way.
         if hasattr(NoValueType, '__final__'):
-            self.assertIs(_AbsentType.__final__, True)  # type: ignore[attr-defined]
+            self.assertIs(AbsentType.__final__, True)  # type: ignore[attr-defined]
         else:  # pragma: no cover
-            self.assertFalse(hasattr(_AbsentType, '__final__'))
+            self.assertFalse(hasattr(AbsentType, '__final__'))
 
         # A bare ``object()`` reads as ``<object object at 0x...>``.
-        self.assertEqual(repr(_Absent), '<absent>')
+        self.assertEqual(repr(ABSENT), '<absent>')
 
     def test_the_absent_marker_cannot_be_confused_with_another_singleton(self) -> None:
         """No other singleton in the library answers an ``is`` against it.
 
-        :data:`~pcapkit.corekit.fields.field.NoValue` is the near neighbour and
+        :data:`~pcapkit.corekit.fields.field.NO_VALUE` is the near neighbour and
         the one deliberately *not* reused here: it is documented as the default
         value of :attr:`FieldBase.default
         <pcapkit.corekit.fields.field.FieldBase.default>` and means "no value was
@@ -786,20 +786,20 @@ class SentinelTests(unittest.TestCase):
         between the two would make either site's marker satisfy the other's test.
 
         """
-        from pcapkit.corekit.fields.field import NoValue, NoValueType
-        from pcapkit.protocols.protocol import _Absent, _AbsentType
+        from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
+        from pcapkit.protocols.protocol import ABSENT, AbsentType
 
-        self.assertIsNot(_Absent, NoValue)
-        self.assertNotIsInstance(_Absent, NoValueType)
-        self.assertNotIsInstance(NoValue, _AbsentType)
+        self.assertIsNot(ABSENT, NO_VALUE)
+        self.assertNotIsInstance(ABSENT, NoValueType)
+        self.assertNotIsInstance(NO_VALUE, AbsentType)
 
         # Nor does it compare *equal* to any of them: neither class defines
         # ``__eq__``, so identity is the only way either is ever true, and this
         # says so rather than leaving it to be assumed.
-        for other in (None, NotImplemented, Ellipsis, NoValue, object(), frozenset(), ''):
+        for other in (None, NotImplemented, Ellipsis, NO_VALUE, object(), frozenset(), ''):
             with self.subTest(other=type(other).__name__):
-                self.assertIsNot(_Absent, other)
-                self.assertFalse(_Absent == other)
+                self.assertIsNot(ABSENT, other)
+                self.assertFalse(ABSENT == other)
 
     def test_the_absent_marker_never_reaches_the_accepted_names(self) -> None:
         """A class with no ``__keywords__`` anywhere in its MRO still reads clean.

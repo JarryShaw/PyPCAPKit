@@ -374,7 +374,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         :attr:`Option.length` is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
-        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left
+        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left
         out of it, so the test below has to be on the **value** and not on the
         presence of the key: ``pkt.get('length', 0)`` on its own hands that
         :class:`~pcapkit.corekit.fields.field.NoValueType` straight to
@@ -385,7 +385,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     """
     length = pkt.get('length', 0)
-    if not isinstance(length, int):  # ``NoValue`` (skipped) or :obj:`None` (unset)
+    if not isinstance(length, int):  # ``NO_VALUE`` (skipped) or :obj:`None` (unset)
         return 0
     return length
 
@@ -409,7 +409,7 @@ def pad_subopt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     """
     length = pkt.get('length', 0)
-    if not isinstance(length, int):  # ``NoValue`` (skipped) or :obj:`None` (unset)
+    if not isinstance(length, int):  # ``NO_VALUE`` (skipped) or :obj:`None` (unset)
         return 0
     return length
 

@@ -35,7 +35,7 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.field import NoValue
+from pcapkit.corekit.fields.field import NO_VALUE
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as Data_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as Data_DFFFlags
@@ -1073,7 +1073,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 drop=bool(schema.flags['drop']),
             ),
             seq=schema.seq,
-            seed_id=schema.seed if schema.seed is not NoValue else None,  # type: ignore[comparison-overlap]
+            seed_id=schema.seed if schema.seed is not NO_VALUE else None,  # type: ignore[comparison-overlap]
         )
         return opt
 
