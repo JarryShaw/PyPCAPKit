@@ -14,8 +14,8 @@ split it into :file:`docs/source/contributing/conventions/`, one file per
 preamble and the toctree. This file pins the checkable claims, plus the split's own
 structure:
 
-* :class:`ConventionAnchorTests` -- the four ``.. _label:`` anchors, one now per
-  file. Before the split all four lived on one page, and
+* :class:`ConventionAnchorTests` -- every ``.. _label:`` anchor, one now per
+  file. Before the split the original four lived on one page, and
   ``tests/corekit/test_sentinel_exports_unit.py`` sliced the file *between* two of
   them -- which is exactly what GitHub issue #930 named as the split's concrete
   blocker, since separating those two anchors into different files made that slice
@@ -36,6 +36,14 @@ structure:
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which named :exc:`KeyError` until #918 and now names
   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
+* :class:`GetOverrideContractTests` -- what a ``get`` override owes the base:
+  ``@classmethod`` for delegation, which Python forces rather than anyone ruling
+  (#913's precedent, followed by #908), plus the three rulings part 1 harvested --
+  ``quiet=True`` on the raise (#933), no suppression standing in for an honoured
+  signature (#935), and deletion rather than repair when the override only
+  reimplements the base (#940). Includes the guard for the audit row #940 falsified,
+  which rendered fine and failed nothing while claiming two overrides that no longer
+  exist.
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
   ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
   ``objects.inv`` carries zero ``py:`` objects), converted to plain literals rather
@@ -46,6 +54,13 @@ structure:
   unqualified outside :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module
   context. Both checks scan every split page rather than one file, since either
   could in principle land on any of them.
+
+* :class:`ProcessConventionTests` -- the three *process* rulings #918 harvested onto
+  the fifth page, :file:`process.rst`: what the ``all`` extra carries (#910), what a
+  changelog entry is, and what the issue and pull request labels mean. Grounded in
+  :file:`pyproject.toml`, :file:`docs/source/changelog/1.5.0.rst` and
+  :file:`.github/PULL_REQUEST_TEMPLATE.md` rather than in the owner's phrasing, which
+  that page is required to paraphrase rather than quote.
 
 Deliberately **not** checked here: whether the page's cross-references resolve. That is
 a property of the built inventory rather than of the source, for the reason
@@ -58,6 +73,7 @@ from __future__ import annotations
 
 import enum
 import importlib
+import inspect
 import pathlib
 import pkgutil
 import re
@@ -81,12 +97,18 @@ INDEX = CONVENTIONS_DIR / 'index.rst'
 
 #: Every ``.. _label:`` anchor, in the narrative order the pre-split page carried
 #: them in -- which is also the order the index's toctree lists the files in. The
-#: first three predate #918; ``extension-header-subclassing`` arrived with it.
+#: first three predate #918; ``extension-header-subclassing`` arrived with it, and
+#: ``process`` came last, on the owner's ruling that the three settled *process*
+#: rulings -- the ``all`` extra, what a changelog entry is, and what the labels
+#: mean -- get a page of their own rather than being wedged onto a code-convention
+#: page. Its anchor is the bare file stem like the other four, which is what
+#: :data:`PAGES` below depends on.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
+    'process',
 )
 
 #: Each anchor's own file, one-to-one since the split -- there is no longer a single
@@ -136,7 +158,7 @@ def _every_page() -> 'str':
     """Every split page's text, concatenated, index included.
 
     For the checks that used to scan the single-page file end to end -- a forbidden
-    role, a qualified reference -- and still need to scan across all four sections
+    role, a qualified reference -- and still need to scan across every section
     plus the preamble, since either could in principle land on any of them.
 
     """
@@ -249,7 +271,7 @@ class ConventionAnchorTests(unittest.TestCase):
     """The labels other files cross-reference, one now per file."""
 
     def test_every_page_exists(self) -> 'None':
-        """The split's own four files, plus the index, are all on disk."""
+        """Every page :data:`ANCHORS` names, plus the index, is on disk."""
         for path in [INDEX] + [PAGES[anchor] for anchor in ANCHORS]:
             with self.subTest(page=path.name):
                 self.assertTrue(path.is_file(), f'{path} does not exist')
@@ -284,7 +306,7 @@ class ConventionAnchorTests(unittest.TestCase):
         :meth:`str.index` rather than a wrong answer. #918 part 2 retired the slice
         instead of working around it -- ``_sentinel_section`` now reads
         :file:`sentinel-convention.rst` whole. What used to be a hard constraint on
-        the single page is now a fact about the four files, pinned here so a later
+        the single page is now a fact about the separate files, pinned here so a later
         merge back into one page, or a bad copy-paste across two of them, does not
         silently resurrect it.
 
@@ -306,7 +328,7 @@ class ConventionAnchorTests(unittest.TestCase):
         inventory does not care whether a page is reachable from a toctree -- but it
         produces a distinct "document isn't included in any toctree" warning. Order
         matches :data:`ANCHORS`, the narrative order the single page used to carry
-        the four sections in.
+        its sections in, with pages added since appended in the order they arrived.
 
         """
         entries = _toctree_entries(INDEX.read_text(encoding='utf-8'))
@@ -340,7 +362,7 @@ class ConventionAnchorTests(unittest.TestCase):
         :data:`INDEX` unedited, and its prose was written when the whole thing was
         one page: *"This page records design rulings"*, and a future one *"is
         written onto this page"*. Both went false the moment the index stopped
-        carrying any ruling of its own -- the four children do -- and the second
+        carrying any ruling of its own -- its children do -- and the second
         is worse than stale, because it is the standing instruction #918 part 3
         exists to keep alive, now telling a contributor to write onto the wrong
         file. A cross-review caught this on the first PR revision.
@@ -691,6 +713,828 @@ class AenumRoleExclusionTests(unittest.TestCase):
                 self.assertEqual(actual, count,
                                  f'{needle!r} appears {actual} time(s) across '
                                  f'the split conventions pages, expected {count}')
+
+
+class GetOverrideContractTests(unittest.TestCase):
+    """What a ``get`` override owes the base, as recorded onto *Where the registry
+    protocol lives* by GitHub issue #918 part 1.
+
+    Three of the four items are quoted from the owner on their own threads -- #933 on
+    ``quiet=True``, #935 on an advertised signature that is refused, #940 on deleting
+    an override that only reimplements the base. The fourth, the ``@classmethod``
+    requirement for delegation, is **not** a ruling and is not quoted as one: it is
+    forced by the language, since zero-argument :func:`super` inside a
+    ``@staticmethod`` has nothing to bind, and #913 set the shape that #908 then
+    followed. Each states something the tree can be asked about. The page's
+    half is what rots: the same four claims are already pinned in ``tests/corekit``
+    and ``tests/protocols`` against the *code*, so a later change that moves the code
+    fails there, while a page still describing the old shape fails nothing. This
+    class is the other direction, and it is how the stale audit row this change
+    corrected (*"Two of them define a ``get`` of their own"*, false since #940)
+    would have been caught.
+
+    """
+
+    @staticmethod
+    def _flat() -> 'str':
+        """:meth:`_page`'s ``registry-protocol`` text, whitespace-normalised.
+
+        Runs of whitespace are collapsed so a claim can be matched across the line
+        wraps reStructuredText puts in mid-sentence -- the same normalisation
+        :class:`FailedLookupExceptionTests` uses.
+
+        """
+        return ' '.join(_page('registry-protocol').split())
+
+    def test_a_delegating_override_is_a_classmethod(self) -> 'None':
+        """A delegating override is a ``@classmethod``, because the language says so.
+
+        Not a ruling: zero-argument :func:`super` binds the enclosing function's
+        first positional parameter, so in ``get(key, ...)`` it binds the lookup key
+        and raises :exc:`TypeError` -- ``RuntimeError: super(): no arguments`` needs a
+        function with no parameters at all, which no real override has.
+        #913 set the shape and #908 followed it, producing ``Method.get``. The two
+        surviving ``@staticmethod`` overrides are the stated exception -- neither
+        calls ``super()``, so neither meets the condition. Read through :func:`vars`
+        rather than by attribute access, since both descriptor kinds answer
+        ``Cls.get('X')`` identically, which is the page's own point about callers not
+        seeing the switch.
+
+        """
+        from pcapkit.const.ftp.command import Command
+        from pcapkit.const.http.method import Method
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        self.assertIsInstance(vars(Method)['get'], classmethod,
+                              'a delegating override has to be a classmethod -- '
+                              'zero-argument super() in a staticmethod binds the '
+                              'first positional parameter, so get(key) raises '
+                              'TypeError; #913 set the shape, #908 followed it')
+        for klass in (Command, OptionType):
+            with self.subTest(klass=klass.__name__):
+                self.assertIsInstance(vars(klass)['get'], staticmethod)
+                self.assertNotIn('super()', inspect.getsource(vars(klass)['get'].__func__),
+                                 f'{klass.__name__}.get now delegates, so the page is '
+                                 'wrong to list it as a surviving staticmethod')
+
+        # Execute the three outcomes rather than assert the page names them. The
+        # first draft of this test only grepped for the error string, and the
+        # string it grepped for was the wrong one -- the page claimed
+        # `RuntimeError: super(): no arguments` for a shape that actually raises
+        # `TypeError`, and a prose-only assertion could not tell.
+        class _Base:
+            @classmethod
+            def get(cls, key, default=None):  # noqa: D102
+                return f'base:{key}'
+
+        class _WithParam(_Base):
+            @staticmethod
+            def get(key, default=None):  # noqa: D102
+                return super().get(key)  # type: ignore[misc]
+
+        class _NoParams(_Base):
+            @staticmethod
+            def get():  # type: ignore[override]  # noqa: D102
+                return super().get('x')  # type: ignore[misc]
+
+        with self.assertRaises(TypeError) as caught:
+            _WithParam.get('BASELINE-CONTROL')
+        # Substring chosen to survive CPython's own rewording: 3.10-3.12 say
+        # "obj must be an instance or subtype of type" while 3.13+ say "obj
+        # (instance of str) is not an instance or subtype of type (Cls)". Only
+        # `instance or subtype of type` is common to both, and pinning either
+        # full sentence would fail three of the five required Compat legs --
+        # invisible locally, since this venv is 3.14.
+        self.assertIn('instance or subtype of type', str(caught.exception),
+                      'zero-argument super() in a staticmethod binds the first '
+                      'positional parameter -- the lookup key -- as its instance')
+
+        with self.assertRaises(RuntimeError) as caught_runtime:
+            _NoParams.get()
+        self.assertIn('super(): no arguments', str(caught_runtime.exception),
+                      'the no-parameter case is the one that raises RuntimeError; '
+                      'the page must not attribute it to a get(key) override')
+
+        # And the case that makes a staticmethod override actively unsafe rather
+        # than merely broken: an instance first argument delegates silently.
+        self.assertEqual(_WithParam.get(_WithParam()).split(':')[0], 'base',
+                         'a staticmethod override cannot be relied on to fail '
+                         'loudly, which is why the page says so')
+
+        flat = self._flat()
+        # Each wording pinned by a needle unique to it. The shared substring
+        # ``instance or subtype of type`` occurs **three** times on the page -- both
+        # quoted errors plus the sentence explaining what they share -- so asserting it
+        # pinned neither: corrupting the 3.13+ quote to something false still passed.
+        #
+        # **Fourth instance of one defect shape**, after ``labels: bug`` (a bare token
+        # matched elsewhere), the bare ``26`` (matched by the page's own ``wc -l``
+        # output) and ``quiet=True`` (four occurrences). The rule, stated once here
+        # because it kept being rediscovered: **an assertIn whose needle appears more
+        # than once on the page pins nothing** -- a later occurrence satisfies it and
+        # the claim it guards can be inverted freely. Count occurrences before
+        # asserting, and anchor to something unique.
+        self.assertIn('is not an instance or subtype of type', flat,
+                      'the page no longer shows the 3.13+ wording of what a '
+                      'staticmethod delegation raises')
+        self.assertIn('must be an instance or subtype of type', flat,
+                      'the page no longer records the 3.10-3.12 wording, so a '
+                      'reader on those versions cannot match what they see')
+        self.assertIn('silently succeeds', flat,
+                      'the page no longer records that the TypeError is not '
+                      'guaranteed')
+        self.assertIn('forced by Python rather than decided', flat,
+                      'the page no longer says the classmethod requirement is a '
+                      'language constraint rather than a ruling')
+
+    def test_the_base_raises_a_name_miss_quietly(self) -> 'None':
+        """#933: the owner ruled that overrides follow the base and stay quiet.
+
+        Measured rather than read off the source, because the cost the ruling turns
+        on is the side effect: a loud :class:`BaseError` sets
+        :data:`sys.tracebacklimit` to ``0`` for the whole process (#362), and a
+        quiet one leaves it alone.
+
+        """
+        import sys
+
+        from pcapkit.const.ftp.command import FEATCode
+        from pcapkit.utilities.exceptions import EnumKeyError
+
+        had = hasattr(sys, 'tracebacklimit')
+        before = getattr(sys, 'tracebacklimit', None)
+
+        def _restore() -> 'None':
+            if had:
+                sys.tracebacklimit = before  # type: ignore[assignment]
+            elif hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
+
+        self.addCleanup(_restore)
+
+        # Run the behavioural check unconditionally. An earlier version guarded it
+        # with `if not had:`, which meant a test that had already set
+        # sys.tracebacklimit turned this into a prose-only check that still
+        # reported pass -- silent degradation under test-order pollution rather
+        # than a failure. Clearing it first is safe because _restore puts whatever
+        # was there back.
+        if had:
+            del sys.tracebacklimit
+        with self.assertRaises(EnumKeyError):
+            FEATCode.get('ZZ-NOT-REAL')
+        self.assertFalse(hasattr(sys, 'tracebacklimit'),
+                         'a name miss set sys.tracebacklimit process-wide, so the '
+                         "base's raise is no longer quiet -- GitHub issue #933 "
+                         'ruled overrides follow the base here, not the reverse')
+
+        flat = self._flat()
+        self.assertIn('not be loud', flat,
+                      "the page no longer quotes #933's reversal")
+        # Anchored to the headline sentence, not the bare token. `quiet=True` occurs
+        # four times on the page, so `assertIn('``quiet=True``')` was satisfied by a
+        # later mention -- inverting the ruling itself to `quiet=False` failed nothing.
+        # Third instance of this shape: the `labels: bug` assertion and the bare `26`
+        # both passed the same way, so the rule is now explicit -- never assert a token
+        # that appears more than once on the page it is meant to pin.
+        self.assertIn('Raise the way the base raises, which means** ``quiet=True``', flat,
+                      'the page no longer states the ruling as its headline, so a '
+                      'later mention of quiet=True is doing the work of pinning it')
+
+    def test_the_two_redundant_overrides_are_gone(self) -> 'None':
+        """#940: the owner ruled for deleting the redundant overrides, not widening them.
+
+        Three things at once, because the ruling is only settled if all three hold:
+        neither class defines ``get``, the module defines none at all, and the
+        ``[override]``/``arguments-differ`` pair the old signatures needed went with
+        them. Scoped to that exact pair rather than to ``arguments-differ`` alone,
+        which mh.py still carries four times for ``read`` and ``__post_init__`` --
+        unrelated to any ``get``, and measured before asserting on it.
+
+        """
+        from pcapkit.protocols.internet import mh
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
+
+        for klass in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+            with self.subTest(klass=klass.__name__):
+                self.assertNotIn('get', vars(klass),
+                                 f'{klass.__name__} defines get again; GitHub pull '
+                                 'request #940 deleted it as redundant with '
+                                 'EnumLookup.get')
+
+        source = pathlib.Path(mh.__file__).read_text(encoding='utf-8')
+        self.assertNotIn('def get(', source,
+                         'pcapkit/protocols/internet/mh.py defines a get override '
+                         'again, which the page says it does not')
+        self.assertNotIn('type: ignore[override] # pylint: disable=arguments-differ',
+                         source,
+                         'the signature-mismatch suppression pair is back in mh.py; '
+                         '#935 ruled a suppression is not an answer to a refused '
+                         'signature')
+
+        flat = self._flat()
+        self.assertIn('deleting them outright', flat,
+                      'the page no longer records that #940 ruled for deletion '
+                      'rather than widening')
+        self.assertIn('he took the first', flat,
+                      'the page no longer records which of #935\'s three options '
+                      'was taken')
+        self.assertNotIn('**Two** of them define a ``get`` of their own', flat,
+                         'the audit row claims two mh helpers still override get, '
+                         'which #940 made false')
+
+    def test_a_non_string_key_raises_a_value_miss_on_every_helper(self) -> 'None':
+        """The divergence #940's deletion closed, which is the page's worked reason.
+
+        The base branches on ``isinstance(key, str)`` and treats everything else as
+        a value, so ``get(None)`` is a *value* miss. The deleted overrides branched
+        on :class:`int` and fell through to the name path, making it a ``KeyError``
+        on two of the six and a ``ValueError`` on the other four -- the same figures
+        the page carries, and the ones this method derives below rather than trusts.
+
+        """
+        from pcapkit.utilities.exceptions import EnumValueError
+
+        # Derived, not listed: the population is every EnumLookup subclass those two
+        # modules *define* -- re-exports from pcapkit.const.ngap.* are not helpers of
+        # theirs. An earlier version hard-coded three while its own name said seven
+        # and the page said five; the real answer is six, so it is measured here and
+        # asserted, rather than any of the three being trusted.
+        import inspect
+
+        from pcapkit.corekit.enum import EnumLookup
+        import pcapkit.protocols.application.ngap as ngap_mod
+        import pcapkit.protocols.internet.mh as mh_mod
+
+        helpers = tuple(
+            obj for mod in (mh_mod, ngap_mod) for obj in vars(mod).values()
+            if inspect.isclass(obj) and issubclass(obj, EnumLookup)
+            and obj is not EnumLookup and obj.__module__ == mod.__name__)
+        self.assertEqual(
+            len(helpers), 6,
+            'the mh/ngap helper population changed, so the page\'s count of them is '
+            f'stale: {sorted(k.__name__ for k in helpers)}')
+        self.assertEqual(
+            {k.__name__ for k in helpers},
+            {'FastBindingAcknowledgmentStatus', 'IPv6AddressPrefixCode',
+             'LMAAddressCode', 'LocalizedRoutingStatus', 'Criticality', 'PDUKind'})
+
+        # The page's own figure, which measurement alone does not pin. Round 6 found
+        # this row reading "The 5" against the measured six; the correction landed
+        # unguarded, so it could have regressed exactly as it arrived.
+        self.assertIn(f'The {len(helpers)} :mod:', _page('registry-protocol'),
+                      'the audit table no longer states the measured helper count, '
+                      'which is the figure that was already wrong once')
+
+        for klass in helpers:
+            for key in (None, 1.5):
+                with self.subTest(klass=klass.__name__, key=key):
+                    with self.assertRaises(EnumValueError):
+                        klass.get(key)  # type: ignore[arg-type]
+
+        flat = self._flat()
+        self.assertIn('``isinstance(key, str)`` and treats everything else as a '
+                      '*value*', flat,
+                      "the page no longer records the base's own key dispatch, which "
+                      "is the reason #940's deletion converged the six")
+
+
+def _optional_dependencies() -> 'dict[str, list[str]]':
+    """``pyproject.toml``'s ``[project.optional-dependencies]``, without a TOML library.
+
+    :mod:`tomllib` is 3.11+ and this repository supports 3.10 -- a first version used it
+    and failed the ``Python 3.10`` leg with ``ModuleNotFoundError`` while passing locally
+    on 3.14. ``tomli``, the usual backport, is not a dependency here either
+    (``grep -n tomli pyproject.toml`` finds nothing), so there is nothing to fall back to
+    and adding one for a docs-claims test is not worth it.
+
+    **Verified against** :mod:`tomllib` **rather than asserted.** A second version
+    matched arrays with a non-greedy bracket pattern, which stopped at the first
+    literal ``]`` -- which mis-parsed **3 of the 14** extras, silently:
+
+    * ``vendor`` came back **empty**, because the ``]`` inside ``"requests[socks]"``
+      closed the match early.
+    * ``dev`` silently dropped its last two entries for the same reason.
+    * ``test`` was truncated at a ``]`` inside a *comment* and then picked up a quoted
+      example from the prose, **inventing a dependency called** ``9 skipped``.
+
+    No shipped assertion read those three keys, so no test gave a wrong verdict -- but
+    ``dev`` and ``vendor`` are both described in the page's own prose, so the next
+    assertion to check either would have got wrong data with nothing raised. That is
+    precisely the "renders fine and fails nothing" failure this suite exists to close,
+    which is why it is fixed rather than documented around.
+
+    So: strip ``#`` comments, then track bracket **depth** rather than matching to the
+    first ``]``. Nested brackets inside requirement strings and comments containing ``]``
+    are both handled; anything else in TOML is not attempted, and
+    :meth:`ProcessConventionTests.test_the_extras_reader_agrees_with_tomllib` pins the
+    agreement wherever a real parser is available.
+
+    """
+    text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
+    block = re.search(r'^\[project\.optional-dependencies\]\n(.*?)^\[',
+                      text, re.MULTILINE | re.DOTALL)
+    if block is None:  # pragma: no cover
+        raise AssertionError(
+            'pyproject.toml has no [project.optional-dependencies] section, so the '
+            "page's extras claims have nothing to be checked against")
+
+    # Comments first: a comment may contain ``]`` or a quoted string, and both fooled
+    # the previous version. A ``#`` inside a requirement string is not a comment, so
+    # quoted spans are skipped rather than blindly cut at the first ``#``.
+    stripped = []
+    for line in block.group(1).splitlines():
+        out, quote = [], None
+        for char in line:
+            if quote:
+                out.append(char)
+                if char == quote:
+                    quote = None
+            elif char in '"\'':
+                quote = char
+                out.append(char)
+            elif char == '#':
+                break
+            else:
+                out.append(char)
+        stripped.append(''.join(out))
+    body = '\n'.join(stripped)
+
+    extras = {}
+    for match in re.finditer(r'^([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*\[', body, re.MULTILINE):
+        name = match.group(1)
+        depth, index, quote = 1, match.end(), None
+        while index < len(body) and depth:
+            char = body[index]
+            if quote:
+                if char == quote:
+                    quote = None
+            elif char in '"\'':
+                quote = char
+            elif char == '[':
+                depth += 1
+            elif char == ']':
+                depth -= 1
+            index += 1
+        extras[name] = re.findall(r'"([^"]*)"', body[match.end():index - 1])
+    return extras
+
+
+class ProcessConventionTests(unittest.TestCase):
+    """The three process rulings :file:`process.rst` carries, against the tree.
+
+    Each check pins the *claim the page makes* next to the *fact behind it*, and
+    deliberately pins neither against the owner's own phrasing. Quoting him is what
+    the page is forbidden to do here -- his instruction on GitHub issue #918 was to
+    paraphrase -- and asserting a quoted sentence is separately a trap this module has
+    already been bitten by: a test elsewhere pinned the literal
+    ``'I prefer (2) directly.'`` onto a page, which turned an off-hand reply into a
+    build dependency. Attribution lives in the issue number the page cites; the tests
+    check substance.
+
+    """
+
+    #: The page whose claims this class checks.
+    ANCHOR = 'process'
+
+    #: The changelog entry file the changelog ruling is about. Named rather than
+    #: discovered: this is the 1.5.0 cycle's file, which is the one GitHub pull
+    #: request #657 accumulates into and the one the page cites.
+    CHANGELOG = ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst'
+
+    #: ``.github/PULL_REQUEST_TEMPLATE.md``'s commit-type tickbox list is the tree's
+    #: own manifest of the type labels, so the page is checked against that rather
+    #: than against a list retyped here -- which would only pin this file's memory of
+    #: it.
+    TEMPLATE = ROOT / '.github' / 'PULL_REQUEST_TEMPLATE.md'
+
+    def setUp(self) -> 'None':
+        # Whitespace-normalised, because the page wraps at 88 columns and every
+        # sentence a claim is read out of is routinely split across lines.
+        self.flat = ' '.join(_page(self.ANCHOR).split())
+
+    def test_the_extras_reader_agrees_with_tomllib(self) -> 'None':
+        """:func:`_optional_dependencies` matches a real TOML parser, key for key.
+
+        The reader exists because :mod:`tomllib` is 3.11+ and this repository supports
+        3.10, so the assertions above cannot use it. That makes the reader itself an
+        unverified dependency of every extras claim on the page -- and its second
+        version mis-parsed **3 of the 14** extras silently, inventing a requirement
+        called ``9 skipped`` out of comment prose.
+
+        So wherever a real parser *is* available -- which is every interpreter from 3.11
+        up, including the one this suite usually runs on -- the two are compared
+        directly. On 3.10 there is nothing to compare against and the test skips, which
+        is honest: the reader is then unverified on the one version it was written for,
+        and the CI matrix covers the other four.
+
+        """
+        try:
+            import tomllib
+        except ModuleNotFoundError:  # pragma: no cover
+            self.skipTest('tomllib is 3.11+; no parser available to compare against')
+
+        oracle = tomllib.loads(
+            (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
+        )['project']['optional-dependencies']
+        mine = _optional_dependencies()
+
+        self.assertEqual(
+            set(mine), set(oracle),
+            'the extras reader found a different set of extras than tomllib does')
+        for name in sorted(oracle):
+            with self.subTest(extra=name):
+                self.assertEqual(
+                    mine[name], oracle[name],
+                    f'the extras reader mis-parses {name!r}, so every page claim '
+                    'resting on it is unverified -- nested brackets inside a '
+                    'requirement string and a comment containing "]" are the two '
+                    'shapes that broke it before')
+
+    def test_the_all_extra_is_exactly_the_three_core_addon_extras(self) -> 'None':
+        """``all`` carries core addons only, and the page's listing says what it is.
+
+        Two halves, because either can rot without the other. The tree half asks
+        :file:`pyproject.toml` whether ``all`` is still the union of ``cli``,
+        ``crypto`` and ``NGAP`` and nothing else -- the shape GitHub issue #910's
+        ruling produced, eight requirements down to three. The page half asks whether
+        the ``toml`` block on the page still shows that same list, since a page that
+        prints a stale ``all =`` line is worse than one that prints none.
+
+        """
+        extras = _optional_dependencies()
+
+        core = [requirement for extra in ('cli', 'crypto', 'NGAP')
+                for requirement in extras[extra]]
+        self.assertEqual(sorted(extras['all']), sorted(core),
+                         f"all is {extras['all']!r}, which is no longer the union of "
+                         f'cli/crypto/NGAP {core!r} -- #910 narrowed it to the core '
+                         'addons, so a change here is a change to that ruling')
+
+        # The page prints the literal list, so the literal list is what is checked.
+        listing = 'all    = [ ' + ', '.join(f'"{req}"' for req in extras['all']) + ' ]'
+        self.assertIn(listing, _page(self.ANCHOR),
+                      f'process.rst no longer shows {listing!r}; its toml block has '
+                      "drifted from pyproject.toml's own all extra")
+
+    def test_the_page_keeps_the_engine_and_installability_exclusions_apart(self) -> 'None':
+        """The two exclusion reasons are the part a reader collapses into one.
+
+        #910 excluded the four third-party engines **by kind** -- they are not core
+        addons -- where ``PyPCAP`` and ``PCAP_CT`` were already out for
+        *installability*, which the ruling did not touch. Reading those as one reason
+        is what let the list drift the first time, so the page has to state both. The
+        tree half checks the six engine extras still exist to be excluded from, since
+        a prose distinction about extras that no longer exist is not a distinction.
+
+        """
+        extras = _optional_dependencies()
+
+        for extra in ('DPKT', 'Scapy', 'PyShark', 'PyPCAPFile', 'PyPCAP', 'PCAP_CT'):
+            with self.subTest(extra=extra):
+                self.assertIn(extra, extras,
+                              f'the {extra} extra is gone, so the page names an '
+                              'extra a user cannot install')
+                # Compare *requirements*, not the extra's name against them. The
+                # previous form asked whether 'DPKT' was an element of
+                # ['emoji', 'cryptography>=3.4', 'pycrate'] -- element equality against
+                # a requirement string, so it could never be true and the regression its
+                # own message names was unreachable. Measured: widening `all` back to
+                # the pre-#910 engine set left this green while the sibling assertEqual
+                # caught it.
+                self.assertFalse(
+                    set(extras[extra]) & set(extras['all']),
+                    f"{extra}'s requirements are back inside all, which #910 excluded: "
+                    f"{sorted(set(extras[extra]) & set(extras['all']))}")
+
+        self.assertIn('excluded by kind', self.flat,
+                      'the page no longer says the engines are excluded by kind, '
+                      'which is the half of #910 that changed the list')
+        self.assertIn('installability', self.flat,
+                      'the page no longer separates the installability exclusion '
+                      'the ruling left untouched from the by-kind one it introduced')
+
+    def test_the_page_denies_one_changelog_entry_per_commit(self) -> 'None':
+        """The ruling's substance, in the page's words rather than the owner's.
+
+        The claim is narrow on purpose: entries are grouped by topic and are **not**
+        one per commit. The grouping scheme itself was open when this test was first
+        written and the page then carried a disclaimer saying so; it was ruled shortly
+        afterwards -- a section per top-level module, with the kind headings nested
+        inside -- so the page records the scheme and this checks for it. What is still
+        unruled is narrower: which module an entry spanning several belongs under.
+
+        """
+        self.assertIn('not one line per commit', self.flat,
+                      'the page no longer denies one entry per commit, which is the '
+                      'whole of what the changelog ruling settled')
+        self.assertIn('a section per top-level', self.flat,
+                      'the page no longer records the module grouping the changelog '
+                      'was ruled into')
+        for module in ('const', 'corekit', 'foundation', 'protocols', 'vendor'):
+            with self.subTest(module=module):
+                self.assertTrue((ROOT / 'pcapkit' / module).is_dir(),
+                                f'the page names {module} as a top-level module the '
+                                'changelog groups by, but no such package exists')
+        self.assertIn('spans modules', self.flat,
+                      'the page no longer flags that an entry touching several '
+                      'modules has no ruled home -- without it the scheme reads as '
+                      'more complete than it is')
+
+    def test_the_changelog_file_is_not_shaped_one_entry_per_commit(self) -> 'None':
+        """The tree half: the file already groups, and already merges issues.
+
+        Structural rather than counted. An entry count would be pinned to whatever
+        GitHub pull request #657 had accumulated on the day, and would fail on its
+        next merge for no reason a reader could act on -- so what is checked is that
+        the kind headings are all present and that at least one entry cites two or
+        more issues, which is the property that makes "one entry per commit" false of
+        the file rather than merely discouraged.
+
+        """
+        text = self.CHANGELOG.read_text(encoding='utf-8')
+
+        for kind in ('Added', 'Changed', 'Fixed'):
+            with self.subTest(kind=kind):
+                self.assertIn(f'* **{kind}** --', text,
+                              f'{self.CHANGELOG.name} no longer groups entries under '
+                              f'**{kind}**, which the page describes as its grouping')
+
+        multi = [entry for entry in re.findall(r'(?ms)^\* \*\*.*?(?=^\* \*\*|\Z)', text)
+                 if len(re.findall(r'#\d+', entry)) > 1]
+        self.assertTrue(multi,
+                        f'no entry in {self.CHANGELOG.name} cites more than one '
+                        'issue, so the file is now consistent with one entry per '
+                        'commit and the page describes something else')
+
+    def test_the_page_names_every_commit_type_the_template_ticks(self) -> 'None':
+        """The type labels come from the commit prefixes, so check the manifest.
+
+        :file:`.github/PULL_REQUEST_TEMPLATE.md` is where a contributor actually meets
+        the list, so it is the ground truth rather than a list retyped into this file.
+        Note the label set is a **superset**: ``release`` and ``const`` are type-ish
+        labels with no tickbox, so this is a one-way check by design.
+
+        """
+        types = re.findall(r'^- \[ \] `([a-z]+)` ', self.TEMPLATE.read_text(encoding='utf-8'),
+                           re.MULTILINE)
+        self.assertGreaterEqual(len(types), 8,
+                                f'only {types!r} parsed out of the pull request '
+                                'template; the check below would pass vacuously')
+        for commit_type in types:
+            with self.subTest(commit_type=commit_type):
+                self.assertIn(f'``{commit_type}``', self.flat,
+                              f'process.rst does not name the {commit_type} type '
+                              'label, which the pull request template asks every '
+                              'contributor to tick')
+
+    def test_the_page_pins_its_own_measured_numbers(self) -> 'None':
+        """Every figure the page states that has local ground truth.
+
+        A cross-review corrupted **46** claims on these two pages simultaneously and
+        the suite stayed green, which is the honest measure of how much of the prose
+        was decorative. This closes the subset that has local ground truth: a figure
+        derived from a file in this repository, a path the page cites, a module it
+        names.
+
+        **What stays unpinned, and why, so the gap is stated rather than implied.**
+        Every claim whose ground truth is a GitHub query -- the label count, which
+        default labels are in live use, the ``breaking`` census, the issue and pull
+        request numbers -- cannot be checked here, because this repository's CI has no
+        network. Those are why the page gives the *command* alongside the figure: the
+        command is the pin, run by a reader rather than by CI. Inverting the page's
+        live-use claim about GitHub's default labels still passes this suite, measured,
+        and no offline test can change that.
+
+        """
+        import inspect
+        import re as _re
+
+        changelog = (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst') \
+            .read_text(encoding='utf-8')
+        entries = _re.findall(r'^\* \*\*[A-Za-z]+\*\*', changelog, _re.MULTILINE)
+
+        self.assertIn(f'{len(entries)} entries', self.flat,
+                      f'the page no longer states the entry count, measured at '
+                      f'{len(entries)}')
+
+        # The module list the page prints as the by-module target. The tree half was
+        # already checked; this is the page half, which a corruption inserting a
+        # non-existent module survived.
+        packages = sorted(d.name for d in (ROOT / 'pcapkit').iterdir()
+                          if d.is_dir() and not d.name.startswith('__'))
+        for name in packages:
+            with self.subTest(module=name):
+                self.assertIn(name, self.flat,
+                              f'pcapkit/{name}/ exists but the page does not name it '
+                              'among the modules the changelog groups by')
+        # Only the ``ls -d`` comment block, not the whole page: elsewhere the page
+        # legitimately writes the *distribution* name (``pip install
+        # pypcapkit[Scapy]``), which is not a module and which a looser sweep flagged.
+        listing = _re.search(r'ls -d pcapkit/\*/.*?(?=\n\n\S)',
+                             _page(self.ANCHOR), _re.DOTALL)
+        self.assertIsNotNone(
+            listing, 'the page no longer prints the module listing command, so the '
+                     'by-module target names no modules at all')
+        named = set(_re.findall(r'\b([a-z]{4,12})\b', listing.group(0))) - {
+            'pcapkit', 'sed'}
+        self.assertFalse(
+            named - set(packages),
+            f'the module listing names something that is not a package under '
+            f'pcapkit/: {sorted(named - set(packages))}')
+
+        # Every workflow and config file the page cites by path.
+        for cited in ('.github/workflows/lint.yml', '.github/release.yml',
+                      '.github/ISSUE_TEMPLATE/bug_report.md',
+                      '.github/ISSUE_TEMPLATE/feature_request.md',
+                      '.github/dependabot.yml', 'pyproject.toml'):
+            if cited.rsplit('/', 1)[-1] in self.flat:
+                with self.subTest(path=cited):
+                    self.assertTrue((ROOT / cited).is_file(),
+                                    f'the page cites {cited}, which does not exist')
+
+    def test_the_page_says_the_labels_are_set_by_hand(self) -> 'None':
+        """The one statement the page was asked for outright.
+
+        The owner asked on GitHub issue #918 for the labelling scheme to be explained
+        here, and the thing repeatedly got wrong is agency: several agents have
+        independently reported these labels as automation and acted on that. Nothing
+        in the tree sets them -- :file:`.github/dependabot.yml` configures no
+        ``labels:`` key, so even dependabot's are its own default rather than this
+        repository's instruction -- and a reader who believes otherwise treats a
+        ``review:`` label as evidence instead of as an assertion someone made.
+
+        """
+        self.assertNotIn('labels', (ROOT / '.github' / 'dependabot.yml')
+                         .read_text(encoding='utf-8'),
+                         'dependabot.yml now configures labels, so the page is wrong '
+                         'to say dependabot uses its own defaults')
+        self.assertIn('applied by hand', self.flat,
+                      'process.rst no longer states that the labels are applied by '
+                      'hand, which is the correction it was asked to carry')
+
+        # The issue templates are the second automated path, and the first version of
+        # this test could not see it: it read only dependabot.yml, so it passed while
+        # the page claimed dependabot was the *single* exception. Every template that
+        # sets a label in its front matter has to be named on the page, or the page
+        # understates how many labels arrive without judgement behind them.
+        templated = {}
+        for template in sorted((ROOT / '.github' / 'ISSUE_TEMPLATE').glob('*.md')):
+            for line in template.read_text(encoding='utf-8').splitlines():
+                if line.startswith('labels:'):
+                    templated[template.name] = line.split(':', 1)[1].strip()
+
+        # The dependabot attribution, which had no pin at all -- which is how the page
+        # came to name ``github_actions`` as dependabot-applied when
+        # .github/dependabot.yml configures only ``pip``, so dependabot can never open a
+        # workflow bump here. Saying a hand-applied label is a machine default is this
+        # section's own point stated backwards, and the two places the page mentioned it
+        # disagreed with each other about ``python``.
+        dependabot = (ROOT / '.github' / 'dependabot.yml').read_text(encoding='utf-8')
+        ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
+
+        self.assertEqual(
+            ecosystems, ['pip'],
+            'dependabot now watches a different set of ecosystems, so the page\'s claim '
+            f'about which labels it applies needs re-deriving: {ecosystems}')
+        self.assertNotIn(
+            '``dependencies`` and ``github_actions``', self.flat,
+            'the page attributes github_actions to dependabot again -- it cannot apply '
+            'that label, since no github-actions ecosystem is configured, and calling a '
+            "hand-applied label automated inverts this section's point")
+
+        self.assertTrue(templated,
+                        'no issue template sets a label any more, so the page is now '
+                        'wrong in the other direction -- it names a path that is gone')
+        for name, label in sorted(templated.items()):
+            with self.subTest(template=name):
+                self.assertIn(name, self.flat,
+                              f'{name} applies a label from its front matter, but the '
+                              'page does not name it among the automated paths')
+                # Anchored to the template's own sentence, not a bare substring.
+                # `assertIn('bug', flat)` passed against a page saying `labels:
+                # defect`, because the word `bug` occurs elsewhere ("alongside ``bug``,
+                # ``enhancement``") -- the same coincidence trap the changelog-runs
+                # test already guards against.
+                self.assertIn(f'``labels: {label}``', self.flat,
+                              f'{name} applies {label!r} automatically, but the page '
+                              'does not state that label next to the template that '
+                              'applies it')
+
+    def test_every_issue_link_number_matches_its_own_url(self) -> 'None':
+        """A ``#NNN`` label and the issue or pull number in its own URL must agree.
+
+        Purely local, needing no network, and it closes the largest single class of
+        unpinned claim on these pages: a cross-review corrupted roughly thirty link
+        numbers across both files and not one was caught, because nothing compared the
+        displayed number against the target. A mismatch is invisible to a reader --
+        the text says #918 and the link goes to #919 -- and Sphinx cannot warn, since
+        both halves are well-formed.
+
+        Scans every page rather than one, since a link can land on any of them.
+
+        """
+        pattern = re.compile(
+            r'`#(\d+)\s*<https://github\.com/JarryShaw/PyPCAPKit/'
+            r'(?:issues|pull)/(\d+)>`__')
+        found = pattern.findall(_every_page())
+
+        # A floor, because `assertEqual([], [])` is what an emptied page produces. This
+        # check disables itself silently on any link-style change -- a single-underscore
+        # named reference, or a move to an `:issue:` role, takes the regex to zero
+        # matches while the docstring goes on claiming it closes the largest class of
+        # unpinned claim. The module guards this shape five other times; this one had
+        # been left out.
+        self.assertGreater(
+            len(found), 40,
+            f'only {len(found)} issue links matched the pinned form, so this check is '
+            'no longer examining the pages -- the link style changed and the test went '
+            'quiet rather than red')
+
+        mismatched = [(shown, target) for shown, target in found if shown != target]
+
+        self.assertEqual(
+            mismatched, [],
+            'a link shows one issue number and points at another, which no reader '
+            f'can see and no build can warn about: {mismatched}')
+
+    def test_the_page_describes_the_changelog_kind_runs_as_they_are(self) -> 'None':
+        """The current shape of ``1.5.0.rst``, counted rather than eyeballed.
+
+        The page's first draft said the file was "three flat kind-runs", which came
+        from a comment on #918 that nobody measured. It is not: the entries carry the
+        three kind labels in far more runs than that, blocked near the top and
+        interleaved lower down. The distinction matters because it is the difference
+        between transposing three blocks and regrouping scattered entries, which is
+        what the by-module restructure on #657 actually has to do.
+
+        Pinned two ways, and the difference matters. The **floor** is what makes
+        "three flat runs" unsayable regardless of how the file grows. The **exact**
+        figure is required in the page's prose as well, deliberately: a page that
+        states a measured number has to restate it when the measurement moves, and
+        #657's restructure will move it. So a red test here after a changelog merge is
+        the intended signal to re-measure the sentence, not a brittleness to route
+        around.
+
+        """
+        import itertools
+
+        kinds = re.findall(r'^\* \*\*([A-Za-z]+)\*\*',
+                           (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst')
+                           .read_text(encoding='utf-8'), re.MULTILINE)
+        runs = [kind for kind, _ in itertools.groupby(kinds)]
+
+        self.assertGreater(
+            len(runs), len(set(kinds)),
+            'the changelog entries are now grouped one run per kind, so the page is '
+            'wrong to describe them as interleaved -- and the by-module restructure '
+            'is a smaller job than it says')
+        self.assertGreater(
+            len(runs), 10,
+            f'only {len(runs)} kind-runs, so the page overstates how scattered the '
+            'entries are')
+        # Assert the sentence, not the bare number: the first version of this check
+        # asserted '26' alone, which the ``wc -l`` output in the page's own code block
+        # satisfied -- so it passed with "three flat runs" restored in the prose. A
+        # figure that appears twice on a page cannot pin the claim that uses it.
+        self.assertIn(f'**{len(runs)}** separate runs', self.flat,
+                      'the page no longer states the measured run count in its prose, '
+                      'which is the whole correction to "three flat kind-runs"')
+        self.assertNotIn('three flat', self.flat,
+                         'the page has gone back to calling the file three flat '
+                         'kind-runs, which measurement contradicts')
+
+    def test_the_page_keeps_breaking_additive_and_its_coverage_honest(self) -> 'None':
+        """``breaking`` stacks on a type label, and its history is uneven.
+
+        Both halves are prose claims with no local ground truth -- the label census is
+        a GitHub query, which is why the page gives the command rather than a figure.
+        What is checkable here is that the page has not quietly dropped either point:
+        that the label is additive rather than a category of its own, and that its
+        absence on an old item is weak evidence. The exception type the page cites as
+        its worked example *is* local, so that much is verified rather than described.
+
+        """
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        # Not `issubclass(ProtocolError, Exception)`, which every exception class
+        # satisfies and which therefore verified nothing. The page's claim is that
+        # #811 made a *library* error escape where a bare struct.error used to, so
+        # what is checkable locally is that the type is the library's own.
+        self.assertEqual(ProtocolError.__module__, 'pcapkit.utilities.exceptions',
+                         'the page cites ProtocolError as an in-library exception '
+                         'type, but it no longer comes from '
+                         'pcapkit.utilities.exceptions')
+        self.assertTrue(issubclass(ProtocolError, BaseError),
+                        'ProtocolError no longer descends from the library base, so '
+                        "the page's worked example no longer illustrates what it says")
+
+        self.assertIn('additive', self.flat,
+                      'the page no longer says breaking is additive; its own label '
+                      'description is explicit that it goes alongside the type label')
+        self.assertIn('not applied uniformly', self.flat,
+                      'the page no longer warns that breaking is applied unevenly '
+                      'across history, which is what makes an absence weak evidence')
 
 
 if __name__ == '__main__':

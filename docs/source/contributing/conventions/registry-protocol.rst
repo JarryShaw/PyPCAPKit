@@ -165,6 +165,124 @@ exists for. So a ``get`` override that catches a name miss as control flow is
 following the convention; one that catches a *value* miss that way is silencing a
 logged error, and needs a reason.
 
+What a ``get`` Override May and May Not Do
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Three rulings settled what an override owes
+:meth:`~pcapkit.corekit.enum.EnumLookup.get`, and the last of them deleted two
+overrides outright. They are collected here because each was reached by the same
+argument: the base's contract is house-wide, so an override that diverges from it is
+a defect rather than a local judgement about its own callers. The first item below is
+not a ruling but a language constraint, recorded with them because the three rulings
+all presuppose it.
+
+**An override that delegates is a** ``@classmethod``, and this one is forced by
+Python rather than decided. Zero-argument :func:`super` binds the enclosing
+function's **first positional parameter** as its instance, whatever that parameter
+is named -- so inside ``@staticmethod def get(key, default=NO_DEFAULT)`` it binds
+``key``, the lookup key, and ``return super().get(key)`` fails on the key rather
+than reaching the base. On Python 3.13 and newer::
+
+   TypeError: super(type, obj): obj (instance of str) is not an instance or
+   subtype of type (FastBindingAcknowledgmentStatus).
+
+and on 3.10 through 3.12, where CPython words it differently and names neither the
+instance nor the type::
+
+   TypeError: super(type, obj): obj must be an instance or subtype of type
+
+Both forms share ``instance or subtype of type``, which is the only part of the
+message anything here relies on -- pinning either full sentence would pass on two of
+the five supported versions and fail on the other three.
+
+Two corollaries worth stating, because the obvious summary of this is wrong in both
+directions. ``RuntimeError: super(): no arguments`` is a *different* failure, raised
+only when the enclosing function takes no parameters at all -- no real ``get``
+override qualifies, since every one takes ``key``. And the ``TypeError`` is not
+guaranteed either: pass a first argument that *is* an instance of the class and the
+delegation **silently succeeds**, so a ``@staticmethod`` override cannot even be
+relied on to fail loudly. Measured, all three cases, rather than reasoned about.
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` is itself a ``@classmethod``. The
+precedent is `#913 <https://github.com/JarryShaw/PyPCAPKit/issues/913>`__, whose
+``FEATCode.get`` is ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
+``return super().get(key, default)``;
+`#908 <https://github.com/JarryShaw/PyPCAPKit/issues/908>`__ followed it, which is
+what turned ``Method.get`` into a classmethod.
+
+Callers cannot see the switch -- ``Method.get('X')`` binds identically either way --
+so there is no compatibility argument for keeping the ``@staticmethod``. Two
+``@staticmethod`` overrides do survive and are still correct:
+:class:`~pcapkit.const.ftp.command.Command`'s and
+:class:`~pcapkit.const.pcapng.option_type.OptionType`'s never call ``super()`` at
+all, so neither meets the condition.
+
+**Raise the way the base raises, which means** ``quiet=True``.
+`#933 <https://github.com/JarryShaw/PyPCAPKit/issues/933>`__ asked whether two
+overrides raising :exc:`~pcapkit.utilities.exceptions.EnumKeyError` **without**
+``quiet=True`` should adopt the base's. The owner first declined, then reversed
+himself: they should follow the house convention and not be loud.
+
+Both answers are on the issue deliberately, and the reversal is the ruling. What it
+settles is not the one keyword -- it is the tie-breaker. A loud
+:class:`~pcapkit.utilities.exceptions.BaseError` sets :data:`sys.tracebacklimit` to
+``0`` **process-wide**, the
+`#362 <https://github.com/JarryShaw/PyPCAPKit/issues/362>`__ hazard, so loudness is
+paid for by the whole library rather than by the override's own callers. The argument
+against changing them was that ``quiet=True`` exists on the base for a name miss
+inside a *successful* call at ``Method.get`` and these two had no such caller;
+uniformity beat it, because a per-class judgement about present callers cannot price
+a process-wide effect.
+
+**A signature the base advertises has to be honoured, not suppressed.** Re-parenting
+onto :class:`~pcapkit.corekit.enum.EnumLookup` gave those same two classes an
+inherited two-argument ``get(key, default)`` that their one-argument overrides then
+refused::
+
+   FastBindingAcknowledgmentStatus.get('bogus', 'Handover_Accepted')
+   TypeError: get() takes 1 positional argument but 2 were given
+
+A ``# type: ignore[override] # pylint: disable=arguments-differ`` pair hid the
+mismatch from ``mypy`` and ``pylint``, and both docstrings disclosed it in prose
+instead. Put to the owner on
+`#935 <https://github.com/JarryShaw/PyPCAPKit/issues/935>`__ as one of three options
+-- widen and delegate, refuse ``default`` explicitly with an in-library error, or
+leave the disclosure as the settled answer -- he took the first. So
+**a suppression plus a docstring is not an answer to a contract the class advertises
+and breaks.** The check that the suppression was load-bearing is the one to repeat
+before believing any such pair: stripping these two yielded
+``Signature of "get" incompatible with supertype "EnumLookup"  [override]`` at both
+lines, with ``--warn-unused-ignores`` reporting neither as unused.
+
+**And an override that only reimplements the base is deleted, not repaired.** Widening
+those two signatures made them faithful copies of the base. Rather than merge them,
+the owner asked on `#940 <https://github.com/JarryShaw/PyPCAPKit/pull/940>`__ why the
+two overrides needed to exist at all, if they could simply fall back to the base's.
+
+They could. Nine cases per class -- name hit, name miss, value hit, value miss and
+every ``default`` combination -- differed from ``EnumLookup.get.__func__(cls, ...)``
+in **zero** of them, and neither class carried an alias (``__members__`` 6 and 4,
+``list(cls)`` 6 and 4) for the *"Backport support for original codes"* in their
+docstrings to refer to. Offered the choice between merging the widened copies and
+deleting them in a follow-up, he ruled for deleting them outright. Both ``get``
+methods and
+both suppressions went with it, and :mod:`pcapkit.protocols.internet.mh` now defines
+no ``get`` at all.
+
+The one input where the copies **did** differ is why this matters beyond line count,
+and it is the trap for whoever writes the next override: the base branches on
+``isinstance(key, str)`` and treats everything else as a *value*, while those two
+branched on ``isinstance(key, int)`` and fell through to the *name* path for anything
+else. ``get(None)`` therefore raised a quiet
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` on those two and a loud
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` on the other four of the six
+locally-defined helpers in those two modules, and no prose
+anywhere said so. Re-implementing the dispatch is how an override acquires a
+divergence nobody wrote down; delegating to it is how it does not.
+
+Taken with the ``Criticality.get`` deletion below -- an override emptied by #923
+rather than by redundancy -- the rule generalises: **an override justifies itself by
+what it adds to the base, and goes when the answer is nothing.**
+
 Case Sensitivity Is RFC-Directed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -340,19 +458,20 @@ That leaves the classes with something to decide:
        the CSV columns the crawler reads are lower case in every row (``s`` 26,
        ``a`` 18, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7, ``m [1]`` 2).
      - **open** -- see below
-   * - The 5 :mod:`~pcapkit.protocols.internet.mh` and
+   * - The 6 :mod:`~pcapkit.protocols.internet.mh` and
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
      - Their values are numeric codes, so the criterion is vacuous exactly as for the
-       :class:`int` tier above. **Two** of them define a ``get`` of their own --
-       ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode`` -- for
+       :class:`int` tier above. **None** of them defines a ``get`` of its own any
+       more. Two did when this audit was taken --
+       ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
        signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
-       rather than for case: each does an exact ``Cls[key]``, and since #923 each
-       answers a name miss with
-       :exc:`~pcapkit.utilities.exceptions.EnumKeyError` rather than
-       :exc:`~pcapkit.utilities.exceptions.EnumValueError`. ``LMAAddressCode`` and
-       ``LocalizedRoutingStatus`` carry no ``get`` at all, so they have no string
-       lookup to fold. ``Criticality`` had one when this audit was taken and no
+       rather than for case -- and
+       `#940 <https://github.com/JarryShaw/PyPCAPKit/pull/940>`__ deleted both as
+       redundant, per the ruling in the section above; each now inherits ``get``
+       from :class:`~pcapkit.corekit.enum.EnumLookup` unchanged. ``LMAAddressCode``
+       and ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
+       string lookup to fold. ``Criticality`` had one when this audit was taken and no
        longer does: #921 re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and #923 retired the exception
        conversion that was the override's only remaining job, so it now inherits
