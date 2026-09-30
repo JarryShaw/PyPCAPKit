@@ -36,6 +36,14 @@ structure:
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which named :exc:`KeyError` until #918 and now names
   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
+* :class:`GetOverrideContractTests` -- what a ``get`` override owes the base:
+  ``@classmethod`` for delegation, which Python forces rather than anyone ruling
+  (#913's precedent, followed by #908), plus the three rulings part 1 harvested --
+  ``quiet=True`` on the raise (#933), no suppression standing in for an honoured
+  signature (#935), and deletion rather than repair when the override only
+  reimplements the base (#940). Includes the guard for the audit row #940 falsified,
+  which rendered fine and failed nothing while claiming two overrides that no longer
+  exist.
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
   ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
   ``objects.inv`` carries zero ``py:`` objects), converted to plain literals rather
@@ -58,6 +66,7 @@ from __future__ import annotations
 
 import enum
 import importlib
+import inspect
 import pathlib
 import pkgutil
 import re
@@ -691,6 +700,239 @@ class AenumRoleExclusionTests(unittest.TestCase):
                 self.assertEqual(actual, count,
                                  f'{needle!r} appears {actual} time(s) across '
                                  f'the split conventions pages, expected {count}')
+
+
+class GetOverrideContractTests(unittest.TestCase):
+    """What a ``get`` override owes the base, as recorded onto *Where the registry
+    protocol lives* by GitHub issue #918 part 1.
+
+    Three of the four items are quoted from the owner on their own threads -- #933 on
+    ``quiet=True``, #935 on an advertised signature that is refused, #940 on deleting
+    an override that only reimplements the base. The fourth, the ``@classmethod``
+    requirement for delegation, is **not** a ruling and is not quoted as one: it is
+    forced by the language, since zero-argument :func:`super` inside a
+    ``@staticmethod`` has nothing to bind, and #913 set the shape that #908 then
+    followed. Each states something the tree can be asked about. The page's
+    half is what rots: the same four claims are already pinned in ``tests/corekit``
+    and ``tests/protocols`` against the *code*, so a later change that moves the code
+    fails there, while a page still describing the old shape fails nothing. This
+    class is the other direction, and it is how the stale audit row this change
+    corrected (*"Two of them define a ``get`` of their own"*, false since #940)
+    would have been caught.
+
+    """
+
+    @staticmethod
+    def _flat() -> 'str':
+        """:meth:`_page`'s ``registry-protocol`` text, whitespace-normalised.
+
+        Runs of whitespace are collapsed so a claim can be matched across the line
+        wraps reStructuredText puts in mid-sentence -- the same normalisation
+        :class:`FailedLookupExceptionTests` uses.
+
+        """
+        return ' '.join(_page('registry-protocol').split())
+
+    def test_a_delegating_override_is_a_classmethod(self) -> 'None':
+        """A delegating override is a ``@classmethod``, because the language says so.
+
+        Not a ruling: zero-argument :func:`super` inside a ``@staticmethod`` has no
+        first argument to bind, so a delegating ``@staticmethod`` cannot work at all.
+        #913 set the shape and #908 followed it, producing ``Method.get``. The two
+        surviving ``@staticmethod`` overrides are the stated exception -- neither
+        calls ``super()``, so neither meets the condition. Read through :func:`vars`
+        rather than by attribute access, since both descriptor kinds answer
+        ``Cls.get('X')`` identically, which is the page's own point about callers not
+        seeing the switch.
+
+        """
+        from pcapkit.const.ftp.command import Command
+        from pcapkit.const.http.method import Method
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        self.assertIsInstance(vars(Method)['get'], classmethod,
+                              'a delegating override has to be a classmethod -- '
+                              'zero-argument super() inside a staticmethod raises '
+                              'RuntimeError; #913 set the shape, #908 followed it')
+        for klass in (Command, OptionType):
+            with self.subTest(klass=klass.__name__):
+                self.assertIsInstance(vars(klass)['get'], staticmethod)
+                self.assertNotIn('super()', inspect.getsource(vars(klass)['get'].__func__),
+                                 f'{klass.__name__}.get now delegates, so the page is '
+                                 'wrong to list it as a surviving staticmethod')
+
+        # Execute the three outcomes rather than assert the page names them. The
+        # first draft of this test only grepped for the error string, and the
+        # string it grepped for was the wrong one -- the page claimed
+        # `RuntimeError: super(): no arguments` for a shape that actually raises
+        # `TypeError`, and a prose-only assertion could not tell.
+        class _Base:
+            @classmethod
+            def get(cls, key, default=None):  # noqa: D102
+                return f'base:{key}'
+
+        class _WithParam(_Base):
+            @staticmethod
+            def get(key, default=None):  # noqa: D102
+                return super().get(key)  # type: ignore[misc]
+
+        class _NoParams(_Base):
+            @staticmethod
+            def get():  # type: ignore[override]  # noqa: D102
+                return super().get('x')  # type: ignore[misc]
+
+        with self.assertRaises(TypeError) as caught:
+            _WithParam.get('BASELINE-CONTROL')
+        # Substring chosen to survive CPython's own rewording: 3.10-3.12 say
+        # "obj must be an instance or subtype of type" while 3.13+ say "obj
+        # (instance of str) is not an instance or subtype of type (Cls)". Only
+        # `instance or subtype of type` is common to both, and pinning either
+        # full sentence would fail three of the five required Compat legs --
+        # invisible locally, since this venv is 3.14.
+        self.assertIn('instance or subtype of type', str(caught.exception),
+                      'zero-argument super() in a staticmethod binds the first '
+                      'positional parameter -- the lookup key -- as its instance')
+
+        with self.assertRaises(RuntimeError) as caught_runtime:
+            _NoParams.get()
+        self.assertIn('super(): no arguments', str(caught_runtime.exception),
+                      'the no-parameter case is the one that raises RuntimeError; '
+                      'the page must not attribute it to a get(key) override')
+
+        # And the case that makes a staticmethod override actively unsafe rather
+        # than merely broken: an instance first argument delegates silently.
+        self.assertEqual(_WithParam.get(_WithParam()).split(':')[0], 'base',
+                         'a staticmethod override cannot be relied on to fail '
+                         'loudly, which is why the page says so')
+
+        flat = self._flat()
+        self.assertIn('instance or subtype of type', flat,
+                      'the page no longer shows what a staticmethod delegation '
+                      'actually raises')
+        self.assertIn('must be an instance or subtype of type', flat,
+                      'the page no longer records the 3.10-3.12 wording, so a '
+                      'reader on those versions cannot match what they see')
+        self.assertIn('silently succeeds', flat,
+                      'the page no longer records that the TypeError is not '
+                      'guaranteed')
+        self.assertIn('forced by Python rather than decided', flat,
+                      'the page no longer says the classmethod requirement is a '
+                      'language constraint rather than a ruling')
+
+    def test_the_base_raises_a_name_miss_quietly(self) -> 'None':
+        """#933: the owner ruled that overrides follow the base and stay quiet.
+
+        Measured rather than read off the source, because the cost the ruling turns
+        on is the side effect: a loud :class:`BaseError` sets
+        :data:`sys.tracebacklimit` to ``0`` for the whole process (#362), and a
+        quiet one leaves it alone.
+
+        """
+        import sys
+
+        from pcapkit.const.ftp.command import FEATCode
+        from pcapkit.utilities.exceptions import EnumKeyError
+
+        had = hasattr(sys, 'tracebacklimit')
+        before = getattr(sys, 'tracebacklimit', None)
+
+        def _restore() -> 'None':
+            if had:
+                sys.tracebacklimit = before  # type: ignore[assignment]
+            elif hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
+
+        self.addCleanup(_restore)
+
+        # Run the behavioural check unconditionally. An earlier version guarded it
+        # with `if not had:`, which meant a test that had already set
+        # sys.tracebacklimit turned this into a prose-only check that still
+        # reported pass -- silent degradation under test-order pollution rather
+        # than a failure. Clearing it first is safe because _restore puts whatever
+        # was there back.
+        if had:
+            del sys.tracebacklimit
+        with self.assertRaises(EnumKeyError):
+            FEATCode.get('ZZ-NOT-REAL')
+        self.assertFalse(hasattr(sys, 'tracebacklimit'),
+                         'a name miss set sys.tracebacklimit process-wide, so the '
+                         "base's raise is no longer quiet -- GitHub issue #933 "
+                         'ruled overrides follow the base here, not the reverse')
+
+        flat = self._flat()
+        self.assertIn('not be loud', flat,
+                      "the page no longer quotes #933's reversal")
+        self.assertIn('``quiet=True``', flat)
+
+    def test_the_two_redundant_overrides_are_gone(self) -> 'None':
+        """#940: the owner ruled for deleting the redundant overrides, not widening them.
+
+        Three things at once, because the ruling is only settled if all three hold:
+        neither class defines ``get``, the module defines none at all, and the
+        ``[override]``/``arguments-differ`` pair the old signatures needed went with
+        them. Scoped to that exact pair rather than to ``arguments-differ`` alone,
+        which mh.py still carries four times for ``read`` and ``__post_init__`` --
+        unrelated to any ``get``, and measured before asserting on it.
+
+        """
+        from pcapkit.protocols.internet import mh
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
+
+        for klass in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+            with self.subTest(klass=klass.__name__):
+                self.assertNotIn('get', vars(klass),
+                                 f'{klass.__name__} defines get again; GitHub pull '
+                                 'request #940 deleted it as redundant with '
+                                 'EnumLookup.get')
+
+        source = pathlib.Path(mh.__file__).read_text(encoding='utf-8')
+        self.assertNotIn('def get(', source,
+                         'pcapkit/protocols/internet/mh.py defines a get override '
+                         'again, which the page says it does not')
+        self.assertNotIn('type: ignore[override] # pylint: disable=arguments-differ',
+                         source,
+                         'the signature-mismatch suppression pair is back in mh.py; '
+                         '#935 ruled a suppression is not an answer to a refused '
+                         'signature')
+
+        flat = self._flat()
+        self.assertIn('deleting them outright', flat,
+                      'the page no longer records that #940 ruled for deletion '
+                      'rather than widening')
+        self.assertIn('he took the first', flat,
+                      'the page no longer records which of #935\'s three options '
+                      'was taken')
+        self.assertNotIn('**Two** of them define a ``get`` of their own', flat,
+                         'the audit row claims two mh helpers still override get, '
+                         'which #940 made false')
+
+    def test_a_non_string_key_raises_a_value_miss_on_all_seven(self) -> 'None':
+        """The divergence #940's deletion closed, which is the page's worked reason.
+
+        The base branches on ``isinstance(key, str)`` and treats everything else as
+        a value, so ``get(None)`` is a *value* miss. The deleted overrides branched
+        on :class:`int` and fell through to the name path, making it a ``KeyError``
+        on two of the seven and a ``ValueError`` on the other five.
+
+        """
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode,
+                                                   LMAAddressCode)
+        from pcapkit.utilities.exceptions import EnumValueError
+
+        for klass in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
+                      LMAAddressCode):
+            for key in (None, 1.5):
+                with self.subTest(klass=klass.__name__, key=key):
+                    with self.assertRaises(EnumValueError):
+                        klass.get(key)  # type: ignore[arg-type]
+
+        flat = self._flat()
+        self.assertIn('``isinstance(key, str)`` and treats everything else as a '
+                      '*value*', flat,
+                      "the page no longer records the base's own key dispatch, which "
+                      "is the reason #940's deletion converged the seven")
 
 
 if __name__ == '__main__':
