@@ -28,6 +28,15 @@ checkable ones:
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which named :exc:`KeyError` until #918 and now names
   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
+* :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
+  ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
+  ``objects.inv`` carries zero ``py:`` objects), converted to plain literals rather
+  than roles. A forbidden role needs a test or it comes back, exactly as
+  :class:`RetiredNameTests` guards a retired name. Pins the other half of the same
+  fix alongside it: the four sentinel references #934 part B qualified stay
+  qualified, since none of ``AbsentType``, ``NoValueType`` or ``ABSENT`` resolves
+  unqualified outside :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module
+  context.
 
 Deliberately **not** checked here: whether the page's cross-references resolve. That is
 a property of the built inventory rather than of the source, for the reason
@@ -470,6 +479,78 @@ class FailedLookupExceptionTests(unittest.TestCase):
 
         self.assertNotIn('ZZ-NOT-REAL', FEATCode._member_map_)
         self.assertEqual(FEATCode('ZZ-NOT-REAL').value, 'ZZ-NOT-REAL')
+
+
+class AenumRoleExclusionTests(unittest.TestCase):
+    """GitHub issue #934 part C's ruling: ``aenum`` cannot be cross-referenced.
+
+    ``docs/source/conf.py`` excludes ``aenum`` from ``intersphinx_mapping``
+    deliberately -- its ``objects.inv`` carries zero ``py:`` objects, so no
+    ``:mod:``/``:class:``/``:func:``/etc. role naming it could ever resolve. Part
+    B converted the six such roles this page carried to plain double-backtick
+    literals rather than leaving them promising a link that can never exist. A
+    forbidden role needs a test, or a later edit reintroduces one without
+    noticing -- exactly the failure mode :class:`RetiredNameTests` guards a
+    retired name against.
+
+    The other half of the same fix is pinned alongside it: the four references to
+    ``AbsentType``, ``NoValueType`` and ``ABSENT`` that part B qualified to their
+    real dotted path under ``pcapkit.corekit.sentinels`` have to stay qualified,
+    since none of the three resolves by its bare name outside
+    :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own ``.. module::``
+    context.
+
+    """
+
+    #: Any Sphinx py-domain role whose target starts with ``aenum``, tilde-prefixed
+    #: or not. Matches ``:mod:`aenum``` and ``:class:`~aenum.Enum``` alike; would
+    #: also catch a role type never seen on this page (``:func:`aenum.something```),
+    #: since the ban is on naming ``aenum`` in a role at all, not on the six
+    #: specific roles #934 part C found.
+    FORBIDDEN_AENUM_ROLE = re.compile(r':(?:mod|class|meth|func|attr|exc|obj|data):`~?aenum\b')
+
+    #: The four qualified sentinel references part B's fix relies on: the role,
+    #: the dotted target, and how many times that exact pairing has to appear.
+    QUALIFIED_SENTINEL_REFS = (
+        (':class:', '~pcapkit.corekit.sentinels.AbsentType', 2),
+        (':class:', '~pcapkit.corekit.sentinels.NoValueType', 1),
+        (':data:', '~pcapkit.corekit.sentinels.ABSENT', 1),
+    )
+
+    def test_no_aenum_role_appears(self) -> 'None':
+        """A reintroduced ``:mod:`aenum``` or ``:class:`~aenum.X``` fails here.
+
+        Checked as a role, not as the bare word: ``aenum`` still appears as a
+        plain double-backtick literal (``` ``aenum.Enum`` ```) and in prose
+        (*"the aenum flavours"*) throughout this page, which is exactly the point
+        of the fix -- only the unresolvable *role* form is banned.
+
+        """
+        text = _page()
+        offenders = self.FORBIDDEN_AENUM_ROLE.findall(text)
+        self.assertEqual(offenders, [],
+                         f'{CONVENTIONS.name} names aenum in a role again: '
+                         f'{offenders!r}; GitHub issue #934 part C ruled this '
+                         'unresolvable (conf.py excludes aenum -- zero py: objects '
+                         'in its objects.inv) and converted every such role to a '
+                         'plain literal')
+
+    def test_the_qualified_sentinel_targets_stay_qualified(self) -> 'None':
+        """A later edit unqualifying one of these reintroduces #934 part B's miss.
+
+        ``AbsentType``, ``NoValueType`` and ``ABSENT`` each resolve only against
+        the sentinels page's own module context (GitHub issue #936); written bare
+        anywhere on this page, none of the three resolves at all.
+
+        """
+        text = _page()
+        for role, target, count in self.QUALIFIED_SENTINEL_REFS:
+            with self.subTest(target=target):
+                needle = f'{role}`{target}`'
+                actual = text.count(needle)
+                self.assertEqual(actual, count,
+                                 f'{needle!r} appears {actual} time(s) in '
+                                 f'{CONVENTIONS.name}, expected {count}')
 
 
 if __name__ == '__main__':

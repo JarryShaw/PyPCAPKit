@@ -20,10 +20,18 @@ FTP Command
 
 .. module:: pcapkit.const.ftp.command
 
-This module contains the constant enumeration for **FTP Command**,
-which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.
+This module contains the constant enumeration for **FTP Command**, which is
+automatically generated from :class:`pcapkit.vendor.ftp.command.Command`, plus the
+companion :class:`~pcapkit.const.ftp.command.FEATCode` enumeration it also declares --
+the ``FEAT`` response keywords the ``FEAT code`` column of the same IANA registry
+names, c.f., :rfc:`5797#section-3`.
 
 .. autoclass:: pcapkit.const.ftp.command.Command
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.const.ftp.command.FEATCode
    :members:
    :undoc-members:
    :show-inheritance:

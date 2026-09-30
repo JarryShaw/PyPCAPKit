@@ -203,14 +203,15 @@ there, never leaving :mod:`pcapkit.protocols.protocol` -- and the underscore use
 the mechanical signal of that. The maintainer's ruling on #937, verbatim: *"we can
 change* ``_ABSENT`` *to* ``ABSENT`` *just document it as private type/class in the
 documentation and not for public use is enough."* So privacy is documentation-only from
-here on, carried by this paragraph and by :class:`AbsentType`'s own docstring
+here on, carried by this paragraph and by
+:class:`~pcapkit.corekit.sentinels.AbsentType`'s own docstring
 (:file:`pcapkit/corekit/sentinels.py`, line 439), which still says so:
 
    A distinct class rather than a bare :obj:`object` so that the sentinel has a name
    of its own in a traceback or a debugger, and so that a type checker has something
    to name where ``object()`` would give it nothing. It follows
-   :class:`NoValueType`, which does the same job for an unset field default;
-   this is a sibling of it rather than a reuse [...]
+   :class:`~pcapkit.corekit.sentinels.NoValueType`, which does the same job for an unset
+   field default; this is a sibling of it rather than a reuse [...]
 
 It remains a deliberate fourth rather than an accident: the leading underscore's
 absence is also why this table once listed three for as long as it did -- a sweep
@@ -224,7 +225,8 @@ instance in its module's ``__all__`` and leaves the type out of it (GitHub issue
 The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
 is ``import *`` that no longer offers it. A private sentinel such as ``ABSENT`` is in
 neither, which is what private means here -- dropping its leading underscore did not
-add it to either list, and :class:`AbsentType` and :data:`ABSENT` are documented on
+add it to either list, and :class:`~pcapkit.corekit.sentinels.AbsentType` and
+:data:`~pcapkit.corekit.sentinels.ABSENT` are documented on
 :doc:`the sentinels API page </pcapkit/corekit/sentinels>` as private and not for
 public use rather than left off it, since the name alone no longer says so.
 
@@ -358,7 +360,7 @@ what was ruled.
 :class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type exactly where
 it was -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
 ``_member_type_`` still comes from the enum base. Had either tier subclassed
-:class:`~aenum.Enum` in order to "be an enum", it would have become the member type
+``aenum.Enum`` in order to "be an enum", it would have become the member type
 itself and broken ``int``, ``str`` and flag registries at once.
 
 :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` is what the base carries
@@ -388,7 +390,7 @@ Three things about it are easy to get wrong:
   With **no usable** ``default``, the rejection reaches the caller **unwrapped**.
   ``get`` re-raises a :exc:`ValueError` that is already a
   :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
-  and converts only :mod:`aenum`'s and :mod:`enum`'s own "no member carries this
+  and converts only ``aenum``'s and :mod:`enum`'s own "no member carries this
   value". Two things follow, and both are the point of the discrimination rather
   than side effects: the override's **own message** survives to the caller instead
   of being replaced by the base's, and the error is **logged once** rather than
@@ -407,7 +409,7 @@ Three things about it are easy to get wrong:
    `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, and it is now
    **complete**: the phase landed for 24 of the 24 non-registry enumerations.
    **Zero enumerations remain outside the hierarchy**, measured by the same runtime
-   walk over both the :mod:`enum` and :mod:`aenum` flavours that once found seven.
+   walk over both the :mod:`enum` and ``aenum`` flavours that once found seven.
 
    It landed in two pull requests rather than one. Seven of the 24 sat in files
    other pull requests were editing around the same time: ``CommandType`` and
@@ -454,7 +456,7 @@ Do not "improve" on the shape by making both misses report identically. Converti
 one into the other is exactly what #923 retired, and it was retired in three places
 at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
 base's :exc:`KeyError` into a :exc:`ValueError`, and
-:meth:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get` raised
+``FastBindingAcknowledgmentStatus.get`` raised
 :exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss so that "the
 two ways of getting it wrong reported identically".
 
@@ -463,7 +465,7 @@ exception class: the **name** miss is raised quietly
 (:class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True``, so nothing is
 logged and :data:`sys.tracebacklimit` is left alone) while the **value** miss stays
 loud. A name miss is in-library control flow at several call sites, and at
-:meth:`~pcapkit.const.http.method.Method.get` it is part of a *successful* call --
+``Method.get`` it is part of a *successful* call --
 that override catches it in order to mint. A loud error there would put a
 :data:`logging.CRITICAL` record on every such call and set
 :data:`sys.tracebacklimit` to ``0`` process-wide, which is the
@@ -553,9 +555,9 @@ verbatim: *"we should audit all registries and then decide if case (in)sensitive
 The population it covers, with the counting convention spelled out because the
 figures move: **127** :class:`~pcapkit.corekit.enum.EnumRegistry` subclasses, every
 one of them under :mod:`pcapkit.const`, across 124 files -- 117 :class:`int`-valued
-(of which 5 are flag registries) and 10 :class:`~aenum.StrEnum`-valued. Plus **24**
+(of which 5 are flag registries) and 10 ``aenum.StrEnum``-valued. Plus **24**
 non-registry enumerations counted by a runtime walk over both the :mod:`enum` and
-:mod:`aenum` flavours and including nested classes: 17 top level (3 of them under
+``aenum`` flavours and including nested classes: 17 top level (3 of them under
 :mod:`pcapkit.const` itself) and 7 nested, the nested ones being
 ``FrameType.Flags`` in :mod:`pcapkit.protocols.schema.application.httpv2` plus its
 6 concrete per-frame subclasses. 151 enumerations in total.
@@ -716,7 +718,7 @@ rather than changing it.
 .. note::
 
    The obstacle this page used to record -- that the base's string-key path does not
-   fall through to a value lookup, so a :class:`~aenum.StrEnum` registry would stop
+   fall through to a value lookup, so an ``aenum.StrEnum`` registry would stop
    resolving a valid value that is not also a name -- **no longer applies.**
    :meth:`~pcapkit.corekit.enum.EnumLookup.get` now checks ``_value2member_map_``
    when the name lookup misses, so such a value resolves:
