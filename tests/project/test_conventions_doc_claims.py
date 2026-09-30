@@ -66,9 +66,11 @@ ANCHORS = (
 
 #: Number words as the page spells them, so a count can be read back out of the prose.
 #: The page states its figures in words rather than digits, which is house style there.
+#: ``'zero'`` joined the set with GitHub issue #930, once phase 2 finished and the
+#: outside-the-hierarchy count it counts dropped to none.
 NUMBER_WORDS = {
-    'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7,
-    'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12,
+    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
+    'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12,
 }
 
 
@@ -244,8 +246,14 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                            'pass vacuously')
 
     def test_the_page_states_the_measured_number_outside_the_hierarchy(self) -> 'None':
-        """*"Seven are still outside the hierarchy"* -- against a runtime walk."""
-        stated = re.search(r'\*\*(\w+) are still outside the hierarchy\*\*', self.note)
+        """*"Zero enumerations remain outside the hierarchy"* -- against a runtime walk.
+
+        GitHub issue #930 finished phase 2, so the page's own wording moved from
+        *"are still outside"* -- true while seven remained -- to *"remain outside"*,
+        which reads correctly now that none do.
+        """
+        stated = re.search(r'\*\*(\w+) enumerations remain outside the hierarchy\*\*',
+                           self.note)
         self.assertIsNotNone(stated, 'the page no longer states how many enumerations '
                                      'are outside EnumLookup; the wording this test '
                                      'reads has changed')
@@ -255,13 +263,31 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                          f'{len(self.outside)}: {sorted(self.outside.values())}')
 
     def test_the_page_names_every_enumeration_outside_the_hierarchy(self) -> 'None':
-        """The count alone would pass on a wrong list of the right length."""
+        """The count alone would pass on a wrong list of the right length.
+
+        Vacuous while :attr:`self.outside` is empty -- GitHub issue #930 emptied
+        it, and an empty dict gives the loop below nothing to iterate, so this
+        method cannot fail no matter what the page says right now.
+        ``test_the_page_states_the_measured_number_outside_the_hierarchy`` is
+        what actually pins the empty state; this one is dormant rather than
+        deleted, for whenever a future regression makes :attr:`self.outside`
+        non-empty again, at which point it resumes checking that the page names
+        each one. :meth:`~unittest.TestCase.skipTest` says so explicitly rather
+        than passing silently.
+        """
+        if not self.outside:
+            self.skipTest('self.outside is empty (GitHub issue #930); nothing to check')
         for name in sorted(self.outside.values()):
             with self.subTest(enumeration=name):
                 self.assertIn(name.rsplit('.', maxsplit=1)[-1], self.note)
 
     def test_the_page_states_the_measured_phase_two_progress(self) -> 'None':
-        """*"landed for 17 of the 24 non-registry enumerations"*, both figures."""
+        """*"landed for 24 of the 24 non-registry enumerations"*, both figures.
+
+        17 of 24 until GitHub issue #930 finished phase 2's remaining seven --
+        ``CommandType``, ``ConformanceRequirement``, ``ESPStatus`` and the four
+        Mobility Header helpers -- so both figures now read the same.
+        """
         stated = re.search(r'landed for (\d+) of the (\d+) non-registry enumerations',
                            self.note)
         self.assertIsNotNone(stated, 'the page no longer states phase 2 progress in '

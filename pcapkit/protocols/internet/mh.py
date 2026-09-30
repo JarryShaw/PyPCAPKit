@@ -77,6 +77,7 @@ from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as Enum_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
@@ -565,7 +566,7 @@ class PMIPv6Timestamp(collections.namedtuple('PMIPv6Timestamp', 'seconds fractio
     fraction: int
 
 
-class FastBindingAcknowledgmentStatus(IntEnum):
+class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
     """[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.
 
     Status values of the fast binding acknowledgment (FBack) message, c.f.,
@@ -574,6 +575,23 @@ class FastBindingAcknowledgmentStatus(IntEnum):
     above that it was rejected.
 
     Note:
+        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+        issue #930, finishing #877's phase 2. :meth:`get` and
+        :meth:`_missing_` below are untouched -- #923 already converted
+        :meth:`get`'s own name-miss to the in-library
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, which is exactly
+        the shape the base's own ``get`` uses, so there is nothing to
+        reconcile. Unlike :meth:`~pcapkit.const.reg.apptype.apptype.
+        TransportProtocol.get` and :meth:`~pcapkit.protocols.application.
+        ngap.Criticality.get` in GitHub issue #921, :meth:`get` keeps its
+        ``@staticmethod`` decorator rather than becoming a delegating
+        ``classmethod`` -- it never calls ``super().get(...)``, so the
+        :exc:`RuntimeError` trap a ``staticmethod`` delegating to a
+        ``classmethod`` base would hit does not apply here, and the
+        resulting ``mypy`` ``[override]`` complaint about the signature
+        mismatch (no ``cls``, no ``default``) is silenced rather than
+        resolved by widening the signature.
+
         :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the
@@ -624,8 +642,26 @@ class FastBindingAcknowledgmentStatus(IntEnum):
     Incorrect_interface_identifier_length = 131
 
     @staticmethod
-    def get(key: 'int | str') -> 'FastBindingAcknowledgmentStatus':
+    def get(  # type: ignore[override] # pylint: disable=arguments-differ
+            key: 'int | str') -> 'FastBindingAcknowledgmentStatus':
         """Backport support for original codes.
+
+        Raises quietly on a name miss, matching the base's own
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+        (:mod:`pcapkit.corekit.enum`, the ``EnumKeyError`` raised at its
+        ``str`` branch) rather than diverging from it. This override used
+        to raise loud instead -- logging once at :data:`logging.CRITICAL`
+        and setting :data:`sys.tracebacklimit` to ``0`` process-wide --
+        until GitHub issue #930 converged it onto house convention,
+        settled on GitHub issue #933's follow-up ruling, verbatim: *"Oh
+        wait. I meant, they should follow house convention and not to be
+        loud."* Re-parenting onto
+        :class:`~pcapkit.corekit.enum.EnumLookup` is what makes the
+        convergence reach further than this one method: :meth:`get_all
+        <pcapkit.corekit.enum.EnumLookup.get_all>` did not exist on this
+        class before #930 and is now inherited from the base, which calls
+        this ``get`` internally -- so a name miss reached through
+        ``get_all`` is quiet too, for the same reason.
 
         Args:
             key: Key to get enum item.
@@ -657,7 +693,8 @@ class FastBindingAcknowledgmentStatus(IntEnum):
             return FastBindingAcknowledgmentStatus[key]  # type: ignore[misc]
         except KeyError:
             raise EnumKeyError('%r is not a valid %s' %
-                               (key, FastBindingAcknowledgmentStatus.__name__)) from None
+                               (key, FastBindingAcknowledgmentStatus.__name__),
+                               quiet=True) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':
@@ -676,7 +713,7 @@ class FastBindingAcknowledgmentStatus(IntEnum):
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
-class IPv6AddressPrefixCode(IntEnum):
+class IPv6AddressPrefixCode(EnumLookup, IntEnum):
     """[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.
 
     Option codes of the mobility header IPv6 address/prefix option, which
@@ -684,6 +721,23 @@ class IPv6AddressPrefixCode(IntEnum):
     :rfc:`5568#section-6.4.2`.
 
     Note:
+        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+        issue #930, finishing #877's phase 2. :meth:`get` and
+        :meth:`_missing_` below are untouched -- #923 already converted
+        :meth:`get`'s own name-miss to the in-library
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, which is exactly
+        the shape the base's own ``get`` uses, so there is nothing to
+        reconcile. Unlike :meth:`~pcapkit.const.reg.apptype.apptype.
+        TransportProtocol.get` and :meth:`~pcapkit.protocols.application.
+        ngap.Criticality.get` in GitHub issue #921, :meth:`get` keeps its
+        ``@staticmethod`` decorator rather than becoming a delegating
+        ``classmethod`` -- it never calls ``super().get(...)``, so the
+        :exc:`RuntimeError` trap a ``staticmethod`` delegating to a
+        ``classmethod`` base would hit does not apply here, and the
+        resulting ``mypy`` ``[override]`` complaint about the signature
+        mismatch (no ``cls``, no ``default``) is silenced rather than
+        resolved by widening the signature.
+
         :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`. The identical code space of the neighbor
@@ -725,8 +779,26 @@ class IPv6AddressPrefixCode(IntEnum):
     NAR_Prefix = 4
 
     @staticmethod
-    def get(key: 'int | str') -> 'IPv6AddressPrefixCode':
+    def get(  # type: ignore[override] # pylint: disable=arguments-differ
+            key: 'int | str') -> 'IPv6AddressPrefixCode':
         """Backport support for original codes.
+
+        Raises quietly on a name miss, matching the base's own
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+        (:mod:`pcapkit.corekit.enum`, the ``EnumKeyError`` raised at its
+        ``str`` branch) rather than diverging from it. This override used
+        to raise loud instead -- logging once at :data:`logging.CRITICAL`
+        and setting :data:`sys.tracebacklimit` to ``0`` process-wide --
+        until GitHub issue #930 converged it onto house convention,
+        settled on GitHub issue #933's follow-up ruling, verbatim: *"Oh
+        wait. I meant, they should follow house convention and not to be
+        loud."* Re-parenting onto
+        :class:`~pcapkit.corekit.enum.EnumLookup` is what makes the
+        convergence reach further than this one method: :meth:`get_all
+        <pcapkit.corekit.enum.EnumLookup.get_all>` did not exist on this
+        class before #930 and is now inherited from the base, which calls
+        this ``get`` internally -- so a name miss reached through
+        ``get_all`` is quiet too, for the same reason.
 
         Args:
             key: Key to get enum item.
@@ -758,7 +830,8 @@ class IPv6AddressPrefixCode(IntEnum):
             return IPv6AddressPrefixCode[key]  # type: ignore[misc]
         except KeyError:
             raise EnumKeyError('%r is not a valid %s' %
-                               (key, IPv6AddressPrefixCode.__name__)) from None
+                               (key, IPv6AddressPrefixCode.__name__),
+                               quiet=True) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':
@@ -777,7 +850,7 @@ class IPv6AddressPrefixCode(IntEnum):
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
-class LocalizedRoutingStatus(IntEnum):
+class LocalizedRoutingStatus(EnumLookup, IntEnum):
     """[LocalizedRoutingStatus] Localized Routing Acknowledgment Status Codes.
 
     Status values of the localized routing acknowledgment (LRA) message, c.f.,
@@ -785,6 +858,13 @@ class LocalizedRoutingStatus(IntEnum):
     was processed successfully, values of ``128`` and above that it was rejected.
 
     Note:
+        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+        issue #930, finishing #877's phase 2 -- pure re-parenting as far as
+        ``get``/``get_all`` are concerned, since this class defines no
+        ``get`` of its own to reconcile with the base; its own
+        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
+        not touch that hook.
+
         :rfc:`6705#section-10.2` defines these values inline and IANA keeps no
         registry of them -- neither a dedicated one nor entries in the general
         *Status Codes* registry -- so the enumeration lives here rather than in
@@ -811,11 +891,15 @@ class LocalizedRoutingStatus(IntEnum):
         naming merely an unassigned byte is simply a more likely way to
         reach it. See GitHub issue #880.
 
-        There is no ``get()`` backport here, unlike
+        There is no hand-rolled ``get()`` backport here, unlike
         :class:`FastBindingAcknowledgmentStatus` and
         :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests
         included -- so GitHub issue #880 deleted it outright rather than
-        rebuilding it on the immutable contract.
+        rebuilding it on the immutable contract. GitHub issue #930's
+        re-parenting above gives this class ``get``/``get_all`` again, but as
+        the base's own bare lookup rather than a bespoke override -- it still
+        cannot mint, so an unassigned value raises through ``get`` exactly as
+        it does through the bare constructor.
 
     """
 
@@ -845,13 +929,20 @@ class LocalizedRoutingStatus(IntEnum):
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
-class LMAAddressCode(IntEnum):
+class LMAAddressCode(EnumLookup, IntEnum):
     """[LMAAddressCode] Local Mobility Anchor Address Option Codes.
 
     Option codes of the local mobility anchor address option, which say which
     address family the option carries, c.f., :rfc:`5949#section-6.2.2`.
 
     Note:
+        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+        issue #930, finishing #877's phase 2 -- pure re-parenting as far as
+        ``get``/``get_all`` are concerned, since this class defines no
+        ``get`` of its own to reconcile with the base; its own
+        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
+        not touch that hook.
+
         :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`.
@@ -875,11 +966,15 @@ class LMAAddressCode(IntEnum):
         naming merely an unassigned byte is simply a more likely way to
         reach it. See GitHub issue #880.
 
-        There is no ``get()`` backport here, unlike
+        There is no hand-rolled ``get()`` backport here, unlike
         :class:`FastBindingAcknowledgmentStatus` and
         :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests
         included -- so GitHub issue #880 deleted it outright rather than
-        rebuilding it on the immutable contract.
+        rebuilding it on the immutable contract. GitHub issue #930's
+        re-parenting above gives this class ``get``/``get_all`` again, but as
+        the base's own bare lookup rather than a bespoke override -- it still
+        cannot mint, so an unassigned value raises through ``get`` exactly as
+        it does through the bare constructor.
 
     """
 

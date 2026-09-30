@@ -55,7 +55,7 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag, StrEnum, auto
 
-from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry
+from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type
@@ -195,8 +195,17 @@ class FEATCode(EnumRegistry, StrEnum):
         return cls._unregistered_member(value, value.upper())
 
 
-class CommandType(IntFlag):
-    """Type of "kind" of command, based on :rfc:`959#section-4.1`."""
+class CommandType(EnumLookup, IntFlag):
+    """Type of "kind" of command, based on :rfc:`959#section-4.1`.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #930, finishing #877's phase 2. Pure re-parenting as far as
+    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its
+    own to reconcile with the base -- and its own :meth:`_missing_` range
+    guard below is untouched, since :class:`EnumLookup` does not touch that
+    hook.
+
+    """
 
     undefined = 0
 
@@ -220,8 +229,15 @@ class CommandType(IntFlag):
         return super()._missing_(value)
 
 
-class ConformanceRequirement(IntEnum):
-    """Expectation for support in modern FTP implementations."""
+class ConformanceRequirement(EnumLookup, IntEnum):
+    """Expectation for support in modern FTP implementations.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #930, finishing #877's phase 2 -- pure re-parenting, since this
+    class defines neither ``get`` nor ``_missing_`` of its own to reconcile
+    with the base.
+
+    """
 
     #: Mandatory to implement.
     M = auto()

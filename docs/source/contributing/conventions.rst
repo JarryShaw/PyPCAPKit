@@ -385,22 +385,25 @@ Three things about it are easy to get wrong:
 
 .. note::
 
-   Re-parenting the remaining helper enumerations onto
-   :class:`~pcapkit.corekit.enum.EnumLookup` is **phase 2** of
-   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, and it is **partly
-   done** rather than pending: the phase landed for 17 of the 24 non-registry
-   enumerations. **Seven are still outside the hierarchy**, measured by a runtime
-   walk over both the :mod:`enum` and :mod:`aenum` flavours: ``CommandType`` and
-   ``ConformanceRequirement`` in :mod:`pcapkit.const.ftp.command`, ``ESPStatus`` in
-   :mod:`pcapkit.protocols.internet.esp`, and all four
-   :mod:`pcapkit.protocols.internet.mh` helpers
-   (``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``,
-   ``LMAAddressCode``, ``LocalizedRoutingStatus``). Each sat in a file another pull
-   request held open while phase 2 ran, which is the whole reason the phase was split
-   in two: phase 1 is behaviour-preserving on its own, so it could land while work
-   was still in flight on the files a re-parent touches. Do not read the seven as a
-   ruling against re-parenting them -- they are the remainder of a phase, not an
-   exception to it.
+   Re-parenting every non-registry enumeration onto
+   :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
+   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, and it is now
+   **complete**: the phase landed for 24 of the 24 non-registry enumerations.
+   **Zero enumerations remain outside the hierarchy**, measured by the same runtime
+   walk over both the :mod:`enum` and :mod:`aenum` flavours that once found seven.
+
+   It landed in two pull requests rather than one. Seven of the 24 sat in files
+   other pull requests were editing around the same time: ``CommandType`` and
+   ``ConformanceRequirement`` in :mod:`pcapkit.const.ftp.command` and its vendor
+   template, both touched by `#913 <https://github.com/JarryShaw/PyPCAPKit/pull/913>`__;
+   and ``ESPStatus`` in :mod:`pcapkit.protocols.internet.esp` plus all four
+   :mod:`pcapkit.protocols.internet.mh` helpers (``FastBindingAcknowledgmentStatus``,
+   ``IPv6AddressPrefixCode``, ``LMAAddressCode``, ``LocalizedRoutingStatus``), both
+   files touched by `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__. The
+   first pass (`#921 <https://github.com/JarryShaw/PyPCAPKit/pull/921>`__) is
+   behaviour-preserving on its own, so the other 17 could land without waiting on
+   those files; the remaining seven followed once both had merged
+   (`#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__).
 
 What a Failed Lookup Raises
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -676,11 +679,13 @@ wider than a case fix:
   specification's own tokens -- the measured spelling disagreement above would make
   these two case-insensitive. Nothing looks them up by string today, though: the
   crawler translates the CSV's lower-case letters to the upper-case member names at
-  generation time, and neither class inherits
-  :class:`~pcapkit.corekit.enum.EnumLookup` yet -- both are in the seven phase 2 has
-  not reached, per the note above. Re-parenting them is phase 2 of
-  `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, which is where the
-  question belongs.
+  generation time. Both classes now inherit
+  :class:`~pcapkit.corekit.enum.EnumLookup` --
+  `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ finished re-parenting
+  them, per the note above -- so a ``get`` exists on each, case-sensitive like the
+  base's own. Whether to fold case to match ``TransportProtocol``'s own override is a
+  design question for whoever writes the first string-keyed caller, not one this
+  audit settles.
 
 One case fold also lives **outside** any ``get``, and so escapes this convention
 entirely: ``_resolve`` in :mod:`pcapkit.protocols.internet.esp` upper-cases its

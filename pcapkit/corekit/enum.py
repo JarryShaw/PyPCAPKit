@@ -42,10 +42,14 @@ therefore had no users to serve among the classes being re-parented.
 
 .. note::
 
-   Re-parenting the remaining helper enumerations onto :class:`EnumLookup` is
-   **phase 2** of GitHub issue #877 and has not happened yet: introducing the
-   base is deliberately behaviour-preserving on its own, so that it could land
-   while other work was still in flight on the files the re-parent touches.
+   Re-parenting every non-registry enumeration onto :class:`EnumLookup` was
+   **phase 2** of GitHub issue #877, and it is now **complete**: introducing
+   the base above was deliberately behaviour-preserving on its own, so that it
+   could land while other work was still in flight on the files the re-parent
+   touches, and the phase itself landed in two pull requests for exactly that
+   reason -- #921 for the 17 enumerations that were free to move at once, and
+   `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ for the
+   remaining seven once the files holding them freed up.
 
 The registry tier's own shape is the earlier ruling on GitHub issue #842,
 verbatim: *"to finalise the abstraction idea, get/get_all/register/register_alias

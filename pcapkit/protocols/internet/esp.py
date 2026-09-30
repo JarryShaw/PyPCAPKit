@@ -173,6 +173,7 @@ from pcapkit.const.esp.cipher import Cipher
 from pcapkit.const.esp.integrity import Integrity
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.context import ProtocolContext
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.protocols.data.internet.esp import ESP as Data_ESP
 from pcapkit.protocols.internet.ipsec import IPsec
@@ -454,8 +455,15 @@ INTEGRITY_SUITES = {
 ##############################################################################
 
 
-class ESPStatus(enum.IntEnum):
-    """Outcome of ESP payload processing."""
+class ESPStatus(EnumLookup, enum.IntEnum):
+    """Outcome of ESP payload processing.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #930, finishing #877's phase 2 -- pure re-parenting, since this
+    class defines neither ``get`` nor ``_missing_`` of its own to reconcile
+    with the base.
+
+    """
 
     #: The payload was decrypted and its trailer recovered.
     DECRYPTED = 0

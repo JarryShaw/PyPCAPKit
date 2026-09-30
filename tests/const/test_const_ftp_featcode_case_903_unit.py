@@ -312,16 +312,21 @@ class VendorTemplateParityTests(unittest.TestCase):
 
     def test_the_generated_module_imports_what_the_override_needs(self) -> 'None':
         """``NO_DEFAULT`` is the sentinel the override's own signature carries,
-        so the template has to import it as well as emit the method."""
+        so the template has to import it as well as emit the method.
+
+        ``EnumLookup`` joined the same import with GitHub issue #930, which
+        re-parented ``CommandType`` and ``ConformanceRequirement`` -- the last
+        two of #877's non-registry enumerations -- onto it.
+        """
         from pcapkit.vendor.ftp.command import LINE
 
         rendered = LINE('Command', 'FTP Command', '<ENUM>', '<FEAT>',
                         'pcapkit.vendor.ftp.command')
-        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry',
+        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry',
                       rendered)
 
         import pcapkit.const.ftp.command as generated
-        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry',
+        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry',
                       inspect.getsource(generated))
 
 
