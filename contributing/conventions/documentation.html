@@ -509,10 +509,10 @@ break the rule by being a clause rather than a title. The sweep of
 <code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/</span></code> under this ruling found, of 62 headings, 24 already
 right, 16 needing only re-casing, and <strong>22 to be rewritten</strong>. <em>What a Failed Lookup
 Raises</em> was correctly cased and is now <em>Failed-Lookup Exceptions</em>.</p>
-<p>The line that sweep drew, and the one to keep drawing: a <strong>finite verb</strong> makes
-a heading a sentence and earns a rewrite, while a gerund or infinitive phrase is a
-noun phrase and needs only re-casing – so <em>Running the tests</em> became <em>Running the
-Tests</em> rather than being reworded.</p>
+<p>The line that sweep drew, and the one to keep drawing: a <strong>finite verb</strong> makes a heading
+a sentence and earns a rewrite, while a gerund or infinitive phrase is a noun phrase and
+needs only re-casing – so <em>Running the tests</em> became <em>Running the Tests</em> rather than
+being reworded.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A heading also has to describe the section beneath it, and a rewrite is the moment
@@ -532,14 +532,14 @@ its heading in a build that does not fail on warnings. The sweep re-checked all 
 found none short, which is the standard to hold.</p>
 <p><strong>A heading is a link target, so a rename is a repository-wide sweep</strong> rather than a
 <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code> one. In scope: <code class="docutils literal notranslate"><span class="pre">.rst</span></code> prose, <code class="docutils literal notranslate"><span class="pre">:ref:</span></code> and <code class="docutils literal notranslate"><span class="pre">:doc:</span></code> link text,
-toctree entries, implicit <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`Text`_</span> <span class="pre">`</span></code> references, <strong>and</strong> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-docstrings and the files under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. The first pass reported one
-surviving stale reference; review found <strong>five</strong>, spread across
-<code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>,
+toctree entries, implicit <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`Text`_</span> <span class="pre">`</span></code> references, <strong>and</strong> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings
+and the files under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. Applying that scope to the heading rename took two
+passes: the first reported one surviving stale reference; review found <strong>five</strong>, spread
+across <code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>,
 <code class="file docutils literal notranslate"><span class="pre">tests/corekit/test_sentinel_exports_unit.py</span></code> and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code>. The first of those is a shipped
-module docstring that renders into the API reference, so a reader following it
-searches the page for a string no longer on it.</p>
+module docstring that renders into the API reference, so a reader following it searches
+the page for a string no longer on it.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>Derive the list of old headings from the pre-change file, not from the diff.</strong> A
@@ -625,9 +625,9 @@ grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'Subpack
 <span class="w">     </span>docs/build/html<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># exactly one</span>
 </pre></div>
 </div>
-<p>That is why those root toctrees are <code class="docutils literal notranslate"><span class="pre">:hidden:</span></code>. Without it each of the three
-captions rendered twice on the root page – once inline in the body, once in the
-sidebar – which is the duplication the owner ruled out on #719.</p>
+<p>Those root toctrees are <code class="docutils literal notranslate"><span class="pre">:hidden:</span></code> because, without it, each of the three captions
+rendered twice on the root page – once inline in the body, once in the sidebar – which
+is the duplication the owner ruled out on #719.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For the same reason, do not add an inline <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">contents::</span></code> to a page. The <code class="docutils literal notranslate"><span class="pre">furo</span></code>
@@ -636,9 +636,9 @@ inline directive is a second copy of it; the one in <code class="file docutils l
 has been commented out since 2023 and should stay that way.</p>
 <p>One setting there was decided by measurement rather than by preference:
 <code class="docutils literal notranslate"><span class="pre">toc_object_entries</span></code> carries, in a comment beside it, the figures that settled it,
-so that nobody reopens the question blind. That is worth copying the
-next time a setting is chosen that way, but it is a single precedent and not yet a
-rule the owner has ruled on.</p>
+so that nobody reopens the question blind. That is worth copying the next time a
+setting is chosen that way, but it is a single precedent and not yet a rule the owner
+has ruled on.</p>
 </div>
 </section>
 <section id="paraphrasing-a-ruling">
@@ -658,7 +658,18 @@ describes what was true on the day it merged, and the next change past it can ma
 citation wrong without touching it. The issue is the durable half – where the ruling
 was asked for and given – and it survives the work that implemented it. So cite the
 issue a rule was settled on, and describe a change by what it did rather than by its
-number. Ruled on #719, and the reason every citation on this page is an issue.</p>
+number. Ruled on #719.</p>
+<p><strong>The changelog and</strong> <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> <strong>are both exempt, for related reasons.</strong> A
+changelog entry exists so a reader can find the change, and the pull-request number <em>is</em>
+that pointer; converting it would delete the thing the entry is for –
+<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> is dense with pull-request citations by design.
+A substantial share of the pull requests cited under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> close no issue at
+all – one credits a proposal to an external contributor and closes nothing – and where
+an issue does exist beside a citation, it frequently lacks the fact being cited, which
+lives in the pull request’s own body or review thread instead. Ruled on #719.</p>
+<p>The rule reaches the rest of this directory as well: a sibling page that cites a pull
+request is unconverted, not a third exemption. The changelog and <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> are the
+whole exempt set – nothing else is.</p>
 </section>
 <section id="accuracy">
 <h2>Accuracy<a class="headerlink" href="#accuracy" title="Link to this heading">¶</a></h2>
@@ -668,11 +679,11 @@ charter – and a docstring outliving the thing it described is a demonstrated f
 mode here rather than a hypothetical one.</p>
 <p><strong>Re-derive a count; do not copy one.</strong> Better still, write down the command that
 produces it, as <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> does, so the figure can be rechecked rather than
-trusted. A keyword search is not a sweep: the method the changelog review settled takes
-every cited repository path in each of the forms it gets written in – slash path,
-dotted module, bare filename, and the elided spellings – intersects them with the
-diff since the merge base, and re-measures the intersection. A tense-keyword grep
-misses a claim phrased as a fraction of a total.</p>
+trusted. A keyword search is not a sweep: the reliable method takes every cited
+repository path in each of the forms it gets written in – slash path, dotted module,
+bare filename, and the elided spellings – intersects them with the diff since the
+merge base, and re-measures the intersection. A tense-keyword grep misses a claim
+phrased as a fraction of a total.</p>
 <p><strong>Treat</strong> <code class="docutils literal notranslate"><span class="pre">every</span></code>, <code class="docutils literal notranslate"><span class="pre">all</span></code>, <code class="docutils literal notranslate"><span class="pre">each</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">none</span></code> <strong>as a claim about members, and
 check the members one at a time.</strong> Several of #719’s findings were of exactly that
 shape:</p>
