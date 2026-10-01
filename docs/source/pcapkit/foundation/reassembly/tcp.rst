@@ -295,10 +295,9 @@ Terminology
        shared by every ACK in this dict, while each ACK's own ``raw`` is
        private to it, so a different ACK's segment closing a hole in ``hdl``
        says nothing about whether *this* ACK has received anything at the
-       same sequence numbers -- consulting ``hdl`` for that question
-       previously discarded a fragment's own real bytes whenever a different
-       ACK bucket under the same buffer ID happened to cover the same range
-       first.
+       same sequence numbers -- consulting ``hdl`` for that question would
+       discard a fragment's own real bytes whenever a different ACK bucket
+       under the same buffer ID happens to cover the same range first.
 
        ``gap`` is kept in the same **absolute, inclusive sequence number**
        convention as ``conflict`` above (and as ``hdl``'s own hole

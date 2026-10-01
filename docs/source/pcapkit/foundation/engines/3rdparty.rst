@@ -166,10 +166,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
                     ``_PyLong_AsByteArray`` arity
    ===============  ===============================================================
 
-   Upstream is unmaintained -- one doc-only commit since 1.3.0, and its Python
-   3.12 issue (`pynetwork/pypcap#116
-   <https://github.com/pynetwork/pypcap/issues/116>`_) has been open and
-   uncommented since May 2024 -- so the cap is not expected to lift. Use
+   Upstream is unmaintained, and its Python 3.12 issue (`pynetwork/pypcap#116
+   <https://github.com/pynetwork/pypcap/issues/116>`_) remains open and
+   uncommented, so the cap is not expected to lift. Use
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` on 3.12 and newer.
 
 .. important::

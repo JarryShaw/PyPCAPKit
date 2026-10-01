@@ -59,8 +59,7 @@ Terminology
           does count it -- it is a header length, and the Fragment header is one
           of the extension headers it has walked -- so the adapters subtract it
           back off. All four adapters (``pcap``, ``pcapng``, ``dpkt`` and
-          ``scapy``) agree on the three fields; they used to report three
-          different values for ``tl`` alone, which is what #415 was about.
+          ``scapy``) agree on the three fields.
 
        .. note::
 
@@ -142,9 +141,9 @@ Terminology
           overlapping fragment's disagreement itself -- "this procedure will
           use the more recently arrived copy in the data buffer" -- the
           opposite resolution from TCP's first-write-wins
-          (:rfc:`9293#section-3.10`, fixed for TCP by #443) -- so a contested
+          (:rfc:`9293#section-3.10`) -- so a contested
           range never leaves a hole on its own, and ``conflict`` is what lets
-          a caller tell a clean datagram from a contested one. See #477.
+          a caller tell a clean datagram from a contested one.
 
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms

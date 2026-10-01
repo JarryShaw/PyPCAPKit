@@ -6,9 +6,7 @@ Release Process
    This page records the **operational contract** for cutting a release --
    what a maintainer is expected to touch by hand, what the workflow is
    expected to do unattended, and the precautions that follow from the two
-   being different. Settled on
-   `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__, which also
-   collapsed what used to be four separate approvals into one.
+   being different.
 
    The short version: **the only manual edit is bumping**
    ``pcapkit.__version__``. Everything else -- the ``v*`` tag, the GitHub
@@ -228,18 +226,16 @@ Precautions
 
 .. warning::
 
-   **A half-finished release used to leave a ``v*`` tag that made every retry
-   skip silently.** ``github`` creates the tag; if ``pypi`` or ``conda`` then
-   failed (or was rejected), the tag existed with the upload incomplete, and
-   the next ``workflow_run``-triggered attempt read ``PCAPKIT_TAG_EXISTS=true``
-   with ``ref_name=main`` and skipped every job on that one shared check --
-   the run finished green, because skipped is not failed, and nothing in the
-   UI said a release did not happen. This was
-   `#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__.
+   **Do not gate a release job on whether the ``v*`` tag exists.** ``github``
+   creates the tag before ``pypi`` and ``conda`` upload, so a tag proves nothing
+   about whether the upload finished. A job keyed on ``PCAPKIT_TAG_EXISTS``
+   skips itself on a retry after a partial release, and the run finishes green
+   because skipped is not failed -- so nothing in the UI says the release did
+   not happen.
 
-   Fixed by `Each job past version_check reads its own evidence, not a shared
-   proxy`_ above: ``tag``, ``pypi`` and ``conda`` now check whether *their own*
-   artefact is missing, not whether the ``v*`` tag exists, so an incomplete
+   `Each job past version_check reads its own evidence, not a shared proxy`_
+   above is what prevents it: ``tag``, ``pypi`` and ``conda`` each check whether
+   *their own* artefact is missing rather than whether the ``v*`` tag exists, so an incomplete
    release runs the jobs that did not finish instead of skipping them. A
    half-finished release now self-heals on the next ``workflow_run``-triggered
    attempt, or on re-running the workflow by hand -- see `Recovery`_ below.

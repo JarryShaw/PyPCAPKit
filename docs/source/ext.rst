@@ -229,11 +229,11 @@ The following code snippet shows how to create a new protocol class:
 
 .. important::
 
-   **Declare every construction keyword your protocol accepts.** Since #617,
-   building a protocol *through its constructor* with a keyword that no signature
+   **Declare every construction keyword your protocol accepts.** Building a
+   protocol *through its constructor* with a keyword that no signature
    declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than
-   discarding it, so a misspelling costs an exception instead of a silently wrong
-   field. The accepted set is read from :func:`inspect.signature` -- the union of every
+   discarding it silently, so a misspelling costs an exception instead of a
+   silently wrong field. The accepted set is read from :func:`inspect.signature` -- the union of every
    keyword-taking parameter of ``make``, ``read``, ``pack``, ``unpack``,
    ``__post_init__`` and ``__init__`` anywhere in the class's MRO -- which is
    wider than ``make`` alone because :meth:`ProtocolBase.__post_init__
@@ -280,8 +280,8 @@ The following code snippet shows how to create a new protocol class:
       is the idiom that reaches it, used by this package's own tests and by
       :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` to reach its
       versioned implementation. Covering that would mean interposing on every
-      ``make`` in the tree, which is a larger change than #617 and was deliberately
-      not made. Construct through the constructor to get the check.
+      ``make`` in the tree -- a larger change that was deliberately not made.
+      Construct through the constructor to get the check.
 
 .. note::
 
