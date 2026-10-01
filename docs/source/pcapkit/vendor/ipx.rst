@@ -37,13 +37,13 @@ which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
 
 .. note::
 
-   This crawler no longer crawls. The table it used to scrape was deleted from
-   the Wikipedia article on 2026-08-25, and the registry itself is closed, so
-   the data is now maintained by hand in the ``DATA`` and ``RANGES`` mappings of
+   This crawler no longer crawls. The table was removed from the Wikipedia
+   article, and the registry itself is closed, so the data is now maintained
+   by hand in the ``DATA`` and ``RANGES`` mappings of
    :mod:`pcapkit.vendor.ipx.socket`, and the class defines no ``LINK``. The
    footnote below points at the last revision that still carried the table --
    what the hand-maintained registry was transcribed from, not a page the
-   crawler fetches. See #507.
+   crawler fetches.
 
 .. autoclass:: pcapkit.vendor.ipx.socket.Socket
    :members: FLAG

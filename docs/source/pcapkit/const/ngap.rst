@@ -17,8 +17,7 @@ enumerations include:
 
 Both are automatically generated from |pycrate|_'s compiled NGAP
 specification rather than an IANA-style registry -- see
-:mod:`pcapkit.vendor.ngap.procedure_code`'s module docstring for why, and
-GitHub issue #880 for the ruling.
+:mod:`pcapkit.vendor.ngap.procedure_code`'s module docstring for why.
 
 NGAP Elementary Procedure Codes
 ===============================

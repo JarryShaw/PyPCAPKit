@@ -62,8 +62,8 @@ Command Line Tool
 
    This module requires ``emoji`` package to be installed.
 
-:mod:`pcapkit.__main__` was originally the module file of
-|jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
+:mod:`pcapkit.__main__` provides the CLI, merged in from the now-deprecated
+|jspcapy|_ project.
 
 .. |jspcapy| replace:: ``jspcapy``
 .. _jspcapy: https://github.com/JarryShaw/jspcapy

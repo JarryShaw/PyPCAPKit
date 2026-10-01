@@ -6,8 +6,7 @@ GitHub Actions Workflows
    The eight workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
-   to start. This page is the repository-wide graph, requested on
-   `#897 <https://github.com/JarryShaw/PyPCAPKit/issues/897>`__. It does not
+   to start. This page is the repository-wide graph. It does not
    cover the release *pipeline* itself -- the job-by-job path from a version
    bump to a published package -- which :doc:`releasing` already documents in
    full; this page cross-references that rather than duplicating it.
@@ -167,9 +166,8 @@ re-running the gate a second time.
 ``workflow_run`` edges
 -----------------------
 
-Four in total -- one more than the three named in `#897
-<https://github.com/JarryShaw/PyPCAPKit/issues/897>`__'s own description,
-found by grepping every ``on:`` block rather than trusting that list:
+Four in total, found by grepping every ``on:`` block rather than trusting a
+hand-maintained list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
   completion of **Unit Tests**.
