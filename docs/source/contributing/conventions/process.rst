@@ -1,7 +1,7 @@
 .. _process:
 
-How the repository itself is run
---------------------------------
+Running the Repository
+----------------------
 
 The four pages before this one are about writing library code. The rulings here are
 about running the repository -- what an install carries, what a changelog entry is,
@@ -12,8 +12,8 @@ their own rather than being left in their threads. Each ruling below is **paraph
 rather than quoted**, also on his instruction there; the issue named beside it is
 where the original wording is.
 
-What the ``all`` extra carries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ``all`` Extra
+~~~~~~~~~~~~~~~~~
 
 ``all`` means **core addons only** -- the things that let the library itself run at
 full functionality -- rather than everything a user might conceivably want. The owner
@@ -63,8 +63,8 @@ back to the default engine rather than raising when a requested engine is absent
    ``pypcap``/``pcap-ct`` to it to silence a lint finding; :file:`.github/workflows/lint.yml`
    carries a tracked ``import-error`` count that is deliberate rather than accidental.
 
-What a changelog entry is
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Changelog Entry Granularity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An entry is **not one line per commit**. Group the changes by topic, and give concise
 detail of what actually changed in that version bump. Ruled on
@@ -127,8 +127,8 @@ belongs to none. Nor is the map one-to-one with the package list below --
    The restructure itself belongs to #657, which owns the file and merges last; doing
    it earlier would conflict with every open change that touches an entry.
 
-How the issue and pull request labels work
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Issue and Pull Request Labels
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The owner asked on `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ for
 this to be written down alongside ``breaking``, since ``breaking``'s meaning only
@@ -245,8 +245,8 @@ outlives the commit it was given on is worse than none.
 but nothing applies it automatically, because dependabot is not configured for that
 ecosystem here.
 
-What ``breaking`` marks
-~~~~~~~~~~~~~~~~~~~~~~~
+The ``breaking`` Label
+~~~~~~~~~~~~~~~~~~~~~~
 
 ``breaking`` is **additive** -- it goes on alongside the type label, never instead of
 it. Its own description in the label set says so, and defines it as breaking

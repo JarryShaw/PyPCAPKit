@@ -1,7 +1,7 @@
 Testing
 =======
 
-Running the tests
+Running the Tests
 -----------------
 
 The unit tests need nothing beyond the package itself and the sample captures
@@ -30,7 +30,7 @@ not in the repository. Wireshark's ``tshark`` is only required to exercise the
 :class:`PyShark <pcapkit.foundation.engines.pyshark.PyShark>` engine, and is not
 needed by the test suite.
 
-The option round-trip generator
+The Option Round-Trip Generator
 -------------------------------
 
 One generator works differently from the rest.
