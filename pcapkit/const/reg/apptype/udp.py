@@ -16402,8 +16402,9 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_4415 = 4415, 'reserved', TransportProtocol.udp
 
-    #: [UDP] PJJ Media Player discovery
-    pjj_player_disc = 4416, 'pjj-player-disc', TransportProtocol.udp
+    #: - [TCP] Newmood Media Player
+    #: - [UDP] Newmood Media Player discovery
+    newmood_player = 4416, 'newmood-player', TransportProtocol.udp
 
     #: [UDP] Reserved
     reserved_4417 = 4417, 'reserved', TransportProtocol.udp

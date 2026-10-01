@@ -16944,8 +16944,9 @@ class TCP(AppType):
     #: [TCP] Brocade Virtual Router Request
     brcd_vr_req = 4415, 'brcd-vr-req', TransportProtocol.tcp
 
-    #: [TCP] PJJ Media Player
-    pjj_player = 4416, 'pjj-player', TransportProtocol.tcp
+    #: - [TCP] Newmood Media Player
+    #: - [UDP] Newmood Media Player discovery
+    newmood_player = 4416, 'newmood-player', TransportProtocol.tcp
 
     #: [TCP] Workflow Director Communication
     workflowdir = 4417, 'workflowdir', TransportProtocol.tcp
