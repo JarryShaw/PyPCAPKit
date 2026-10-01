@@ -90,12 +90,12 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         warning**. On an IPv6-typed field the same conversion happens to
         raise instead, because the resulting
         :class:`~ipaddress.IPv4Address`'s version mismatches -- and that
-        asymmetry is exactly what let this slip past #481's otherwise
+        asymmetry is exactly what let this slip past #469's otherwise
         equivalent guard for :meth:`MH._make_opt_mn_id
         <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (c.f. #491).
 
         Every caller checks this *before* dispatching on the value's type,
-        for the same placement reason #481 gives: a correct check in the
+        for the same placement reason #469 gives: a correct check in the
         wrong position does not fire, and that placement mistake has
         already been made twice in this repository's history.
 
@@ -147,7 +147,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         length is the only thing on the wire that carries the family -- must
         convert the argument itself, and that conversion happens **before** the
         schema, so it launders a :obj:`bool` into an
-        :class:`~ipaddress.IPv4Address` that #500's guard in
+        :class:`~ipaddress.IPv4Address` that the guard added for #491 in
         :meth:`_IPAddressField.pre_process` can then only see as a legitimate
         address. Seven such call sites took ``True`` / ``False`` without
         complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::`` where the
@@ -159,7 +159,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         unrelated defect of its own.
 
         Routing every one of them through here rather than giving each its own
-        :func:`isinstance` check is the whole point: #481 added exactly such a
+        :func:`isinstance` check is the whole point: #469 added exactly such a
         check to :meth:`MH._make_opt_mn_id
         <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`, and #491 was the
         same defect surviving at every site that had not been thought of. A
@@ -167,14 +167,14 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         forgotten at the next one.
 
         The :obj:`bool` rejection is the **first** statement here, ahead of any
-        dispatch on the value's type, for the placement reason #481 gives and
+        dispatch on the value's type, for the placement reason #469 gives and
         :func:`_reject_bool` repeats.
 
         This raises :exc:`FieldValueError` and not
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
         even though two sibling guards for the same mistake --
         :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from #481 and
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from #469 and
         :class:`ESP's SecurityAssociation
         <pcapkit.protocols.internet.esp.SecurityAssociation>` from #491 -- raise
         the latter. The layer decides: this is a field-level conversion, so it

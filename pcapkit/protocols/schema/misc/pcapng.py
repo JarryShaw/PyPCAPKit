@@ -316,12 +316,12 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     with one option declaring 65,535 against none present, produced 131,070,000
     octets of zero padding, an amplification of 1,637x linear in the block
     count. See `#594 <https://github.com/JarryShaw/PyPCAPKit/issues/594>`__,
-    and `#593 <https://github.com/JarryShaw/PyPCAPKit/issues/593>`__ for the
+    and `#573 <https://github.com/JarryShaw/PyPCAPKit/issues/573>`__ for the
     32-bit band the field layer's own budget already covers.
 
     The bound has to come from this layer because the field layer cannot see
     it. What distinguishes the crafted case from the legitimate one is not the
-    shortfall's size -- both are inside a 16-bit length, which is why #571's
+    shortfall's size -- both are inside a 16-bit length, which is why #554's
     ``len(buffer) < length`` rejection was declined -- but whether the option
     is inconsistent with the framing the block itself declares. Block Total
     Length is authoritative and cross-checked against its own trailing copy, so
@@ -804,7 +804,7 @@ class Option(EnumSchema[Enum_OptionType]):
         every other registry in the package does -- the lookup that follows
         cannot tell a deliberate replacement from an accidental one, so an
         unreported overwrite is a parser silently swapped out for another. See
-        `#681 <https://github.com/JarryShaw/PyPCAPKit/issues/681>`__ for the
+        `#675 <https://github.com/JarryShaw/PyPCAPKit/issues/675>`__ for the
         guard ``register_protocol`` added first, which this one now matches.
 
         The guard is identity-based: it fires only when the incumbent differs
@@ -1865,8 +1865,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             names them, and a blank line -- found by *reading*, not by
             splitting -- is what starts the next entry. The one-octet
             terminator that must follow a binary field's value, and the warning
-            when it is missing, are unchanged from `#722
-            <https://github.com/JarryShaw/PyPCAPKit/issues/722>`__; walking the
+            when it is missing, are unchanged from `#704
+            <https://github.com/JarryShaw/PyPCAPKit/issues/704>`__; walking the
             buffer whole rather than pre-slicing it also retires that fix's
             newline restoration, which existed only to undo what the slicing
             itself had taken away.
@@ -2016,10 +2016,10 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                         # the reader's position is well defined either way --
                         # exactly length + 1 octets past where the field name
                         # started -- so a bad octet here ends only this
-                        # entry's field collection, matching #722: it does not
+                        # entry's field collection, matching #704: it does not
                         # abort the walk, which keeps looking for the next
-                        # entry's separator from here. See #728's review for
-                        # why an outer abort was considered and rejected as
+                        # entry's separator from here. See #723 for why an
+                        # outer abort was considered and rejected as
                         # the default.
                         terminator = entry_data.read(1)
                         if terminator != b'\n':

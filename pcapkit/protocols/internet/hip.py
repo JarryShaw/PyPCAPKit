@@ -259,10 +259,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
           schema=Schema_HIP, data=Data_HIP):
     """This class implements Host Identity Protocol.
 
-    Double-inherited, per the maintainer's convention on GitHub pull request
-    #924: a header that is *only* usable as an extension header inherits
-    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one
-    that is also usable as a standalone protocol names
+    Double-inherited, per the maintainer's convention given in review of the
+    work for #917: a header that is *only* usable as an extension header
+    inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone,
+    while one that is also usable as a standalone protocol names
     :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is
     both, on two independent grounds:
 

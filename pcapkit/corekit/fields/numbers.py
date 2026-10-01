@@ -54,7 +54,7 @@ class NumberField(Field[int], Generic[_T]):
         ProtocolError: If ``bit_length`` is given negative. Left alone,
             ``(1 << bit_length) - 1`` raises a bare, uncatchable
             :exc:`ValueError` (``negative shift count``) here, before
-            :meth:`__call__`'s own negative-``length`` guard (#828/#829) or
+            :meth:`__call__`'s own negative-``length`` guard (#828) or
             :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s (#805)
             ever see anything -- this one fires at construction time, on the
             argument itself rather than on a resolved wire length. See
@@ -153,7 +153,7 @@ class NumberField(Field[int], Generic[_T]):
                 a bare, uncatchable :exc:`ValueError` (``negative shift
                 count``) when ``bit_length`` was not supplied, before
                 :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see
-                its own :exc:`ProtocolError` guard, #805/#811/#827) or
+                its own :exc:`ProtocolError` guard, #805/#825) or
                 :meth:`build_template` ever sees the value: this method sets
                 ``self._bit_length`` from the resolved length eagerly, as a
                 cache, and shifts by it immediately, so the crash happens on

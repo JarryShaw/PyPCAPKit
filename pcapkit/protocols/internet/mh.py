@@ -581,11 +581,11 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. The owner's final ruling on #935 went the other way,
-        verbatim -- asked *"why must we have the two overrides tho? cant
-        they directly fall back to the base class's?"*, the answer was *"I
-        prefer (2) directly"*, ``(2)`` naming deletion among the ruling's
-        own options. Measured before acting on it: the override's own
+        it outright. A ruling given in review of the work for #935 went the
+        other way, verbatim -- asked *"why must we have the two overrides
+        tho? cant they directly fall back to the base class's?"*, the answer
+        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the
+        ruling's own options. Measured before acting on it: the override's own
         docstring called it a "Backport support for original codes", but
         this class mints no alias -- ``__members__`` and ``list(cls)``
         agree at 6 -- so what the override actually did was resolve an
@@ -698,11 +698,11 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. The owner's final ruling on #935 went the other way,
-        verbatim -- asked *"why must we have the two overrides tho? cant
-        they directly fall back to the base class's?"*, the answer was *"I
-        prefer (2) directly"*, ``(2)`` naming deletion among the ruling's
-        own options. Measured before acting on it: the override's own
+        it outright. A ruling given in review of the work for #935 went the
+        other way, verbatim -- asked *"why must we have the two overrides
+        tho? cant they directly fall back to the base class's?"*, the answer
+        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the
+        ruling's own options. Measured before acting on it: the override's own
         docstring called it a "Backport support for original codes", but
         this class mints no alias -- ``__members__`` and ``list(cls)``
         agree at 4 -- so what the override actually did was resolve an
@@ -838,9 +838,10 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
         -- tests included -- so GitHub issue #880 deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
-        #935 reached separately for the other two, on the owner's ruling
-        there, verbatim: *"I prefer (2) directly"* -- ``(2)`` being deletion
-        of those two overrides rather than widening them to match the base.
+        #935 reached separately for the other two, on a ruling given in
+        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``
+        being deletion of those two overrides rather than widening them to
+        match the base.
         GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
@@ -917,9 +918,10 @@ class LMAAddressCode(EnumLookup, IntEnum):
         :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
         -- tests included -- so GitHub issue #880 deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
-        #935 reached separately for the other two, on the owner's ruling
-        there, verbatim: *"I prefer (2) directly"* -- ``(2)`` being deletion
-        of those two overrides rather than widening them to match the base.
+        #935 reached separately for the other two, on a ruling given in
+        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``
+        being deletion of those two overrides rather than widening them to
+        match the base.
         GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
@@ -2903,13 +2905,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Length fields"* -- so the whole option, which is what every
         ``_read_opt_*`` below reports back as the parsed option's own
         ``.length``, is two octets more. This is the exact ``+2``/``-2``
-        mismatch #398 fixed independently in six places (see the ``Note:``
+        mismatch independently fixed in six places (see the ``Note:``
         on :meth:`_read_opt_pad` below, which explains why a ``Pad1``
         option -- the one option with no ``Option Length`` field at all --
         is this helper's sole exception); collecting the read-side half of
         it into one helper is so a future fix to this arithmetic only has
-        to happen once. Do NOT drop the ``+ 2``: that is precisely the
-        mismatch #398 fixed.
+        to happen once. Do NOT drop the ``+ 2``: that is precisely this
+        mismatch.
 
         The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
         option, whose Option Type and Option Length are one octet each. It
@@ -7972,7 +7974,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 (RFC 4283's ``user@realm`` form) rather than a numeric
                 identifier, so there is no non-arbitrary int-to-text mapping
                 the way there is int-to-address or int-to-octets, and an
-                :obj:`int` is rejected there (c.f. #467, #468).
+                :obj:`int` is rejected there (c.f. #467).
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7994,7 +7996,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 type its subtype's field cannot hold at all: anything but
                 :obj:`str` for ``NAI``, anything but :obj:`bytes`/
                 :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
-                is converted rather than rejected there, per #468 -- or anything
+                is converted rather than rejected there, per #467 -- or anything
                 :class:`ipaddress.IPv6Address` itself does not accept for
                 ``IPv6_Address`` (c.f. #469).
 
@@ -8015,14 +8017,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # exactly the class of leak this handler exists to stop, and which a
             # guard living inside the ``elif isinstance(identifier, int)`` branch
             # could not catch, since the ``IPv6_Address`` dispatch never reaches
-            # it (c.f. #467, #468).
+            # it (c.f. #467).
             try:
                 # ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back
                 # into a named member for the message below -- but its own
                 # ``_missing_`` only auto-extends 9-15 and 16-255, so 0,
                 # negatives and anything above 255 make the constructor itself
                 # raise a bare ``ValueError``, which would defeat the point of
-                # this guard (c.f. #468 review). Caught here and the raw value
+                # this guard (c.f. #467). Caught here and the raw value
                 # used instead rather than let it propagate.
                 subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
             except ValueError:
@@ -8063,7 +8065,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # unguarded, :class:`ipaddress.IPv6Address` raises
                 # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
                 # handler would otherwise ship with its lower bound guarded and its
-                # upper bound leaking (c.f. #467, #468). Checked explicitly rather
+                # upper bound leaking (c.f. #467). Checked explicitly rather
                 # than by wrapping the construction below, because that would also
                 # swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or
                 # ``None`` reaching here -- which is #469's subject, not this one's.
@@ -8080,7 +8082,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # bytes, int or str). The ``try`` wraps only this call, not
                 # the whole branch, so it cannot swallow the ProtocolError
                 # raised above for an out-of-range int, which is also a
-                # ValueError subclass (c.f. #467, #468, #469).
+                # ValueError subclass (c.f. #467, #469).
                 try:
                     identifier = ipaddress.IPv6Address(identifier)
                 except ValueError as error:
@@ -8114,9 +8116,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # width all along -- the pre-#467 defect was never the sizing, it
             # was that ``identifier`` itself stayed an ``int`` afterwards and
             # was handed to ``BytesField`` unconverted, which ``struct.pack()``
-            # cannot do anything with. #468 initially rejected outright instead
+            # cannot do anything with. #467 initially rejected outright instead
             # of noticing that; converting is what this revision does (c.f.
-            # #467, #468). ``bit_length()`` is 0 for 0 itself, which would
+            # #467). ``bit_length()`` is 0 for 0 itself, which would
             # otherwise declare a zero-octet identifier -- collapsing "the
             # identifier's value is 0" into "there is no identifier" -- so the
             # width is floored at one octet, matching what any reasonable

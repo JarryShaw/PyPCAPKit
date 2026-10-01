@@ -368,8 +368,8 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             of, so nothing downstream can question it. Measured before this
             fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and
             reported ``IPv4Address('0.0.0.1')`` with no exception and no
-            warning. This was the fifth site of that defect -- #481, #500,
-            #539 and #540 are the first four -- and the reason it is the fifth
+            warning. This was the fifth site of that defect -- #469, #491,
+            #508 and #540 are the first four -- and the reason it is the fifth
             is that each of those fixed the sites it could see. See #552.
 
         """
@@ -434,7 +434,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             # still raises a plain :exc:`ValueError` for a tail that is not a
             # whole number of 8-octet pairs, which no ``except BaseError`` can
             # catch, and because leaving one of this method's three conversions
-            # unguarded is exactly how #552 came to be the fifth site of #481.
+            # unguarded is exactly how #552 came to be the fifth site of #469.
             pad = self.remainder
             for index in range(0, len(pad), 8):
                 buf_ip = pad[index:index + 4]

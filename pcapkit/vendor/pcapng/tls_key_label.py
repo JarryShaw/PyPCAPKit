@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ['TLSKeyLabel']
 
 #: Hand-carried comment for the ``RSA`` member, copied verbatim from the text
-#: GitHub issue #883 gave it in
+#: GitHub issue #882 gave it in
 #: :class:`pcapkit.protocols.misc.pcapng.TLSKeyLabel` -- ``RSA`` has no row in
 #: :attr:`TLSKeyLabel.LINK`'s registry to generate a comment from (``grep -c
 #: RSA`` on the fetched CSV is 0), so it is carried across rather than
@@ -134,7 +134,7 @@ class TLSKeyLabel(Vendor):
             pref = f"{renm} = '{label}'"
             # NOTE: mirrors the ``# nosec B105`` bandit suppression every
             # such member already carries in
-            # :class:`pcapkit.protocols.misc.pcapng.TLSKeyLabel` as of #883 --
+            # :class:`pcapkit.protocols.misc.pcapng.TLSKeyLabel` as of #882 --
             # bandit's B105 (hardcoded password string) flags a string
             # constant assigned to a name containing ``SECRET``, which eight
             # of these ten labels' names do.

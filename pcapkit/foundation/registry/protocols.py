@@ -887,11 +887,11 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     # up front, before any registry work, so every downstream use -- the
     # ``code.proto`` default and the registries lookup below -- sees members
     # only. Resolution is by the member's own ``name``, case-insensitively --
-    # maintainer ruling on #815 -- via ``__members__`` directly rather than
-    # ``TransportProtocol[name]``: this function's contract is
-    # :exc:`~pcapkit.utilities.exceptions.RegistryError` for anything
-    # unrecognised, composite-spelled or not, and ``__getitem__`` raises a
-    # bare :exc:`KeyError` on a miss instead of that -- both
+    # a ruling given in review of the work for #806 -- via ``__members__``
+    # directly rather than ``TransportProtocol[name]``: this function's
+    # contract is :exc:`~pcapkit.utilities.exceptions.RegistryError` for
+    # anything unrecognised, composite-spelled or not, and ``__getitem__``
+    # raises a bare :exc:`KeyError` on a miss instead of that -- both
     # ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,
     # now that GitHub issue #808 dropped the ``IntFlag`` base that used to
     # make the first of those two silently compose into the value ``3``

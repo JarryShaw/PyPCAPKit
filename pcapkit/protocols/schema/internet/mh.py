@@ -741,7 +741,7 @@ class MNIDOption(Option, code=Enum_Option.MN_ID_OPTION_TYPE):
         # :class:`~pcapkit.corekit.fields.strings.StringField` or
         # :class:`~pcapkit.corekit.fields.strings.BytesField`, and handing either
         # a raw ``int`` is precisely the #467 defect -- ``struct.pack()`` cannot
-        # consume it (c.f. #467, #468).
+        # consume it (c.f. #467).
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address') -> 'None': ...
 
 

@@ -75,7 +75,7 @@ DATA = {
     # NOTE: 0x0000 was never listed as a well-known socket in the scraped
     # registry table, but it is the IPX protocol's own default for the
     # ``dst``/``src`` socket field (an ordinary "unspecified socket"), so it
-    # must be present regardless of what the registry says; see #492, #503.
+    # must be present regardless of what the registry says; see #492.
     #
     # That is a statement about the *scraped table*, not about the number being
     # unsourced. XSIS 028112 Appendix D (cited under RANGES below) reserves it
@@ -252,7 +252,7 @@ RANGES = [
 
 #: Range names from :data:`RANGES` above that name an allocation *policy* for
 #: the pool (who may claim a code, or that nobody has) rather than a specific
-#: assigned protocol. The owner's original ruling on #775/#847 held
+#: assigned protocol. The owner's original ruling on #775/#841 held
 #: ``Registered by Xerox`` out of this set as a real ownership fact rather
 #: than a placeholder. #775's final round converts it too, so this set no
 #: longer decides *whether* a range registers -- only *how its name is

@@ -478,12 +478,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         excludes the Option Type and Opt Data Len fields themselves, so the
         whole option, which is what every ``_read_opt_*`` below reports back
         as the parsed option's own ``.length``, is two octets more. This is
-        the exact ``+2``/``-2`` mismatch #398 fixed independently in six
+        the exact ``+2``/``-2`` mismatch independently fixed in six
         places (see ``Data_PadOption.length`` vs. ``Schema_PadOption.length``
         below, at the surviving explanation of that fix); collecting the
         read-side half of it into one helper is so a future fix to this
         arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
-        precisely the mismatch #398 fixed.
+        precisely this mismatch.
 
         Section 4.2 is the citation because it is what defines the TLV option
         format, and it is where the sentence quoted above actually appears.

@@ -65,7 +65,7 @@ _MAX_ZERO_PAD_LENGTH = 0x40_000
 #: The sum therefore wants a budget, and this is the figure that makes one
 #: *safe*. A budget on its own is not: a capture cut short by its snapshot length
 #: pads legitimately and must keep parsing (#431, and the reasoning that declined
-#: #571), and it pads far more than it reads, so any running budget tight enough
+#: #554), and it pads far more than it reads, so any running budget tight enough
 #: to matter starts refusing real captures. Worse, it refuses them *sometimes* --
 #: measured on this tree with a running budget alone, the same legitimate
 #: 54-octet frame parsed to one result on 37 of 40 calls and to another on calls
@@ -207,7 +207,7 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
 #: sign after it (``'>Xs'``), or any other malformed template -- which is what
 #: makes checking for it a reliable way to tell those cases apart from each
 #: other *before* :func:`struct.calcsize` is asked to size either one. See
-#: #825, #827.
+#: #825.
 _RE_NEGATIVE_LENGTH_TEMPLATE = re.compile(r'^[@=<>!]?-\d+')
 
 
@@ -542,7 +542,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # what keeps the answer a function of *this* read rather than of
         # everything read before it. No shortfall a 16-bit wire length can produce
         # -- which is every shortfall a snapshot-truncated capture, a truncated
-        # option area or an over-long ``ihl`` can produce (#431, #571) -- is ever
+        # option area or an over-long ``ihl`` can produce (#431, #554) -- is ever
         # refused, on the first frame or the ten-thousandth.
         #
         # Nor may those small shortfalls *spend* the budget, which is why they are

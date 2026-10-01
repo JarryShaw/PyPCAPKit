@@ -51,11 +51,12 @@ def get_parser() -> 'ArgumentParser':
 def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     """Copy a target's const file aside before it runs; restore it if it raises.
 
-    The owner's ruling on GitHub issue #872, verbatim: *"an easier path is
-    simply keep a copy before running the sub-vendor and revert if anything
-    failed."* This is that -- at the per-target boundary :func:`run` already
-    owns, which is also exactly where the ruling's ``(b)``, "only discard
-    changes made by a non-zero sub-vendor", wants the discarding to happen.
+    A ruling given in review of the work for #872, verbatim: *"an easier
+    path is simply keep a copy before running the sub-vendor and revert if
+    anything failed."* This is that -- at the per-target boundary
+    :func:`run` already owns, which is also exactly where the ruling's
+    ``(b)``, "only discard changes made by a non-zero sub-vendor", wants
+    the discarding to happen.
 
     It is a *wider* guarantee than protecting the single
     ``open``/``print`` pair :meth:`~pcapkit.vendor.default.Vendor.__init__`

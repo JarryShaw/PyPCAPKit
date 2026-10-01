@@ -276,7 +276,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         integer``. Measured on the 8-octet form, which the old lambda did reach:
         ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that.
 
-        That half is now history: **#598 fixed it**, in
+        That half is now history: **#591 fixed it**, in
         :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix
         belonged, by recomputing ``_need_process`` from the width actually in
         force instead of once from the placeholder. A callable-length
@@ -334,8 +334,8 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
         identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']
         else 0, ...)``. See that function's note for why the ``0`` was wrong, why a
         corrected lambda would not have packed either *at the time*, and why the
-        ``SwitchField`` form is kept now that #598 has made a callable length work.
-        C.f. #576, #598.
+        ``SwitchField`` form is kept now that #591 has made a callable length work.
+        C.f. #576, #591.
 
     """
     if not pkt['flags']['M']:
@@ -409,12 +409,12 @@ class PortEnumField(EnumField):
             A port outside this field's own width is rejected *before* any of
             that, rather than being let through to :meth:`_missing_` and
             caught alongside a genuine miss. Both are a bare :exc:`ValueError`
-            with nothing to tell them apart by type, and GitHub issue #764
+            with nothing to tell them apart by type, and GitHub issue #758
             gave the out-of-range case a deliberate, ``breaking``-tagged
             rejection specifically so it would stop being minted over -- a
             catch keyed on exception type alone cannot see the difference
             between that and :mod:`aenum`'s own "no member has this value",
-            so it would absorb both and quietly revert #764 for these four
+            so it would absorb both and quietly revert #758 for these four
             fields. Checking the width first needs no exception-based
             distinction at all: it asks the same question :meth:`_missing_`
             would eventually ask, and asks it in a way that never manufactures
@@ -432,7 +432,7 @@ class PortEnumField(EnumField):
         value = super(EnumField, self).post_process(value, packet)
         proto = Enum_TransportProtocol.tcp
         if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
-            # NOTE: lets AppType.get() -- unmodified -- raise #764's rejection
+            # NOTE: lets AppType.get() -- unmodified -- raise #758's rejection
             # for a port this field's own width cannot represent, rather than
             # risking it being absorbed below as a foreign miss.
             return self._namespace.get(value, proto=proto)
@@ -444,7 +444,7 @@ class PortEnumField(EnumField):
                 # NOTE: value is already known to be in-width here, so this
                 # ValueError is aenum's own "no member has this value" for an
                 # in-range but unassigned port -- a foreign miss, absorbed --
-                # never #764's out-of-range rejection, which never reaches
+                # never #758's out-of-range rejection, which never reaches
                 # this branch. A pcapkit.utilities.exceptions error is still a
                 # deliberate registry decision and propagates unchanged.
                 if isinstance(error, BaseError):

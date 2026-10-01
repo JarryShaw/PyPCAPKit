@@ -172,7 +172,7 @@ def beholder(
             # whether or not it is registered. So both *unknown* paths preserve
             # the code that arrived; what differs is only that SCTP's is an
             # enumeration the protochain can name, while TCP's is an ``int`` and
-            # renders as ``Raw``. That was #418, closed by #426; this line is
+            # renders as ``Raw``. That was #418; this line is
             # about the *failure* path, which it makes uniform.
             next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)

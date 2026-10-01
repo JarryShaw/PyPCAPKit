@@ -226,7 +226,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         preface came back ``version='2'`` only because ``httpv2.HTTP`` read its
         leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and
         ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back
-        ``version='2'`` the same way. #799/#802 closed the second of those by
+        ``version='2'`` the same way. #799 closed the second of those by
         requiring a frame's declared length to be backed by its buffer, but that
         left the preface *unidentifiable*: a real HTTP/2 connection opening is
         refused by both arms and reported as not-HTTP.
@@ -313,7 +313,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             # version``, so a preface followed by a frame that used to trip the
             # #805 residual (an inner field shortfall, e.g. a 16-octet
             # ``GOAWAY``) had to reach the caller as something it could catch,
-            # not as a bare stdlib error. #811 has since closed that residual at
+            # not as a bare stdlib error. That residual has since been closed at
             # ``FieldBase.length``, so the same ``GOAWAY`` now raises
             # ``ProtocolError`` on its own and is caught by the ``except
             # ProtocolError: raise`` above, never reaching this clause -- but
@@ -377,8 +377,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # closed that particular route -- the same call now raises
         # ``ProtocolError: unknown HTTP version``, the documented answer.
         # Suppressing :exc:`struct.error` on the last arm stays regardless --
-        # #811 kept it deliberately, as defence in depth, rather than retiring
-        # it now that the case it was added for is closed. Whether anything
+        # kept deliberately, as defence in depth, rather than retired now
+        # that the case it was added for is closed. Whether anything
         # can still reach it, and whether it should therefore go, is #825's
         # open question, not settled here.
         #
@@ -396,7 +396,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # field further in, past this guard's reach. Measured: a 16-octet
         # ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)
         # used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``
-        # directly. #811 closed that class at its actual root --
+        # directly. That class was closed at its actual root --
         # :attr:`FieldBase.length
         # <pcapkit.corekit.fields.field.FieldBase.length>` now catches
         # :func:`struct.calcsize`'s failure on a negative-length template and
