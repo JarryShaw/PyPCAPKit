@@ -4,8 +4,7 @@ How to ...
 Basic Samples
 -------------
 
-:mod:`pcapkit` is quite easy to use, with simply three verbs as
-its main interface. Several scenarios are shown as below.
+:mod:`pcapkit` is built around three verbs. A few common scenarios:
 
 1. extract a PCAP file and dump the result to a specific file
    (with no reassembly)
@@ -50,7 +49,7 @@ its main interface. Several scenarios are shown as below.
 CLI Samples
 -----------
 
-The CLI (command line interface) of :mod:`pcapkit` has two different access.
+:mod:`pcapkit`'s CLI (command line interface) can be reached two ways.
 
 * through console scripts
 
@@ -70,14 +69,14 @@ Here are some usage samples:
    .. code-block:: shell
 
       $ pcapkit-cli in --auto-extension --format plist --verbose
-      🚨Loading file 'in.pcap'
+      🚨 Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP
       Frame   6: Ethernet:IPv4:UDP:Raw
-      🍺Report file stored in 'out.plist'
+      🍺 Report file stored in 'out.plist'
 
 2. export to a JSON file
 
@@ -91,27 +90,27 @@ Here are some usage samples:
    .. code-block:: shell
 
       $ pcapkit-cli in --auto-extension --output out.json --format json --verbose
-      🚨Loading file 'in.pcap'
+      🚨 Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP
       Frame   6: Ethernet:IPv4:UDP:Raw
-      🍺Report file stored in 'out.json'
+      🍺 Report file stored in 'out.json'
 
 3. export to a text tree view file (without extension autocorrect)
 
    .. code-block:: shell
 
       $ pcapkit-cli in.pcap --output out.txt --format tree --verbose
-      🚨Loading file 'in.pcap'
+      🚨 Loading file 'in.pcap'
       Frame   1: Ethernet:IPv6:IPv6_ICMP
       Frame   2: Ethernet:IPv6:IPv6_ICMP
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP
       Frame   6: Ethernet:IPv4:UDP:Raw
-      🍺Report file stored in 'out.txt'
+      🍺 Report file stored in 'out.txt'
 
 .. _Xcode: https://developer.apple.com/xcode

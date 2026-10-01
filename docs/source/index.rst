@@ -48,8 +48,8 @@ About
 
 .. note::
 
-   There is a project called |jspcapy|_ works on :mod:`pcapkit`, which is a
-   command line tool for PCAP extraction.
+   There is a project called |jspcapy|_ that works on :mod:`pcapkit`, which is
+   a command line tool for PCAP extraction.
 
    .. |jspcapy| replace:: ``jspcapy``
    .. _jspcapy: https://github.com/JarryShaw/jspcapy
@@ -59,11 +59,10 @@ About
       The |jspcapy|_ project is deprecated and has been merged into the
       :mod:`PyPCAPKit <pcapkit>` project as its CLI support.
 
-Unlike popular PCAP file extractors, such as :mod:`Scapy <scapy>`,
-:mod:`dpkt <dpkt>`, `PyShark`_, and etc, :mod:`pcapkit` is
-designed to be much more comprehensive, which means it is able to provide
-more detailed information about the packet, as well as a more *Pythonic*
-interface for users to interact with.
+Unlike popular PCAP extractors such as :mod:`Scapy <scapy>`,
+:mod:`dpkt <dpkt>` and `PyShark`_, :mod:`pcapkit` aims to be more
+comprehensive: more detailed packet information, and a more *Pythonic*
+interface.
 
 ----------------
 Module Structure
@@ -80,7 +79,7 @@ In :mod:`pcapkit`, all files can be described as following eight parts.
 
   Synthesises file I/O and protocol analysis, coordinates
   information exchange in all network layers, as well as
-  provides the foundamental functions for :mod:`pcapkit`.
+  provides the fundamental functions for :mod:`pcapkit`.
 
 - Protocols (:mod:`pcapkit.protocols`)
 
@@ -114,17 +113,16 @@ In :mod:`pcapkit`, all files can be described as following eight parts.
 Engine Comparison
 -----------------
 
-Due to the general overhead of :mod:`pcapkit`, its extraction procedure takes
-around *0.2* milliseconds per packet, which is already impressive but not enough
-comparing to other popular extraction engines available on the market, given the
-fact that :mod:`pcapkit` is a **comprehensive** packet processing module.
+Being a **comprehensive** packet processor costs speed: :mod:`pcapkit`'s own
+engine takes about *0.2* milliseconds per packet, slower than most of the
+third-party engines below.
 
-Additionally, :mod:`pcapkit` introduced alternative extraction engines to
-accelerate this procedure. By now :mod:`pcapkit` supports `Scapy`_, `DPKT`_,
-`PyShark`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_, selected through
-``engine='scapy'``, ``'dpkt'``, ``'pyshark'``, ``'pypcap'``, ``'pcap_ct'`` and
-``'pypcapfile'`` respectively; ``engine='default'`` (also spelled ``'pcapkit'``)
-is :mod:`pcapkit`'s own parser and the only one with no third-party requirement.
+:mod:`pcapkit` also supports alternative extraction engines for speed:
+`Scapy`_, `DPKT`_, `PyShark`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_,
+selected through ``engine='scapy'``, ``'dpkt'``, ``'pyshark'``, ``'pypcap'``,
+``'pcap_ct'`` and ``'pypcapfile'`` respectively; ``engine='default'`` (also
+spelled ``'pcapkit'``) is :mod:`pcapkit`'s own parser and the only one with no
+third-party requirement.
 
 `PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
 :manpage:`libpcap(3)` interface and both install a top-level :mod:`pcap` module,
@@ -175,9 +173,9 @@ Engine              3.10     3.11     3.12     3.13         3.14     3.15 [*]_
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
 reasons under `Engine prerequisites`_. **Python 3.11 is the last version on which
-every engine can run** -- and even there ``pypcap`` and ``pcap_ct`` are mutually
-exclusive, since both provide the :mod:`pcap` module, so no single environment ever
-has all seven at once.
+every engine can run** -- and even there ``pypcap`` and ``pcap_ct`` remain
+mutually exclusive for the reason given above, so no single environment ever has
+all seven at once.
 
 Test Environment
 ----------------
@@ -255,13 +253,13 @@ Installation
    3.8 and 3.9 are end-of-life and best-effort. Individual *engines* also stop
    earlier than the library does; see `Engine prerequisites`_.
 
-Simply run the following to install the current version from PyPI:
+Run the following to install the current version from PyPI:
 
 .. code-block:: shell
 
    pip install pypcapkit
 
-Or install the latest version from the gi repository:
+Or install the latest version from the git repository:
 
 .. code-block:: shell
 
