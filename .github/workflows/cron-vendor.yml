@@ -2,7 +2,7 @@ name: "Vendor Update"
 
 on:
   schedule:
-    - cron: '0 10 * * 6' # everyday at 10am
+    - cron: '0 10 * * 6' # Saturdays at 10:00 UTC
   # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger
   # already runs the full matrix for this commit; calling it again below with
   # `gate-only: true` re-ran the single-version "Gate" job a second time for
