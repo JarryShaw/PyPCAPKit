@@ -480,12 +480,6 @@
         <article role="main" id="furo-main-content">
           <section id="testing">
 <h1>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This page came out of the project README when that was trimmed down to a
-landing page. It is the only prose copy of the fixture story, so it lives here
-rather than nowhere.</p>
-</div>
 <section id="running-the-tests">
 <h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Link to this heading">¶</a></h2>
 <p>The unit tests need nothing beyond the package itself and the sample captures
@@ -511,7 +505,7 @@ needed by the test suite.</p>
 </section>
 <section id="the-option-round-trip-generator">
 <h2>The option round-trip generator<a class="headerlink" href="#the-option-round-trip-generator" title="Link to this heading">¶</a></h2>
-<p>One of the generators works differently from the rest and is worth knowing about.
+<p>One generator works differently from the rest.
 <code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> does not describe packets it wants; it asks
 the library which option, chunk, parameter, message, frame and block codes it
 registers, and then constructs one of each through the public construction API,
@@ -520,8 +514,8 @@ parses it back, and constructs it again from what was parsed. The
 they record what this version of <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> builds rather than what a
 third-party tool builds.</p>
 <p><code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code> runs the same cases without
-needing a fixture at all, and carries a table of the ones that do not yet close
-the cycle, each named against the defect that stops it.</p>
+needing a fixture at all, and carries a table of the ones that do not close the
+cycle, each named against the defect that stops it.</p>
 </section>
 </section>
 

@@ -514,18 +514,17 @@ construction and analysis library.</p>
 <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> as its formatted output dumper.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>There is a project called <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> works on <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which is a
-command line tool for PCAP extraction.</p>
+<p>There is a project called <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> that works on <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which is
+a command line tool for PCAP extraction.</p>
 <div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 0.8.0: </span>The <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> project is deprecated and has been merged into the
 <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project as its CLI support.</p>
 </div>
 </div>
-<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post268)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, and etc, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is
-designed to be much more comprehensive, which means it is able to provide
-more detailed information about the packet, as well as a more <em>Pythonic</em>
-interface for users to interact with.</p>
+<p>Unlike popular PCAP extractors such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post268)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code> and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> aims to be more
+comprehensive: more detailed packet information, and a more <em>Pythonic</em>
+interface.</p>
 <section id="module-structure">
 <h3>Module Structure<a class="headerlink" href="#module-structure" title="Link to this heading">¶</a></h3>
 <p>In <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, all files can be described as following eight parts.</p>
@@ -537,7 +536,7 @@ standardises and simplifies the usage of this library.</p>
 <li><p>Foundation (<a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>)</p>
 <p>Synthesises file I/O and protocol analysis, coordinates
 information exchange in all network layers, as well as
-provides the foundamental functions for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
+provides the fundamental functions for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
 </li>
 <li><p>Protocols (<a class="reference internal" href="pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>)</p>
 <p>Collection of all protocol family, with detailed
@@ -565,16 +564,15 @@ family extraction and representation.</p>
 </section>
 <section id="engine-comparison">
 <h3>Engine Comparison<a class="headerlink" href="#engine-comparison" title="Link to this heading">¶</a></h3>
-<p>Due to the general overhead of <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, its extraction procedure takes
-around <em>0.2</em> milliseconds per packet, which is already impressive but not enough
-comparing to other popular extraction engines available on the market, given the
-fact that <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is a <strong>comprehensive</strong> packet processing module.</p>
-<p>Additionally, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> introduced alternative extraction engines to
-accelerate this procedure. By now <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>,
-<a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>, selected through
-<code class="docutils literal notranslate"><span class="pre">engine='scapy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dpkt'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code> and
-<code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code> respectively; <code class="docutils literal notranslate"><span class="pre">engine='default'</span></code> (also spelled <code class="docutils literal notranslate"><span class="pre">'pcapkit'</span></code>)
-is <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own parser and the only one with no third-party requirement.</p>
+<p>Being a <strong>comprehensive</strong> packet processor costs speed: <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
+engine takes about <em>0.2</em> milliseconds per packet, slower than most of the
+third-party engines below.</p>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> also supports alternative extraction engines for speed:
+<a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>,
+selected through <code class="docutils literal notranslate"><span class="pre">engine='scapy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dpkt'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code> and <code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code> respectively; <code class="docutils literal notranslate"><span class="pre">engine='default'</span></code> (also
+spelled <code class="docutils literal notranslate"><span class="pre">'pcapkit'</span></code>) is <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own parser and the only one with no
+third-party requirement.</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> are two independent distributions of the same
 <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> interface and both install a top-level <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module,
 so they are two engines rather than one: upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> stops at Python 3.11,
@@ -686,9 +684,9 @@ so only the interpreter half of each verdict in this row was verified.</p>
 </aside>
 <p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> stop at 3.11, and <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> at 3.13, for the
 reasons under <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>. <strong>Python 3.11 is the last version on which
-every engine can run</strong> – and even there <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> are mutually
-exclusive, since both provide the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, so no single environment ever
-has all seven at once.</p>
+every engine can run</strong> – and even there <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> remain
+mutually exclusive for the reason given above, so no single environment ever has
+all seven at once.</p>
 </section>
 <section id="test-environment">
 <h4>Test Environment<a class="headerlink" href="#test-environment" title="Link to this heading">¶</a></h4>
@@ -831,11 +829,11 @@ applied, <code class="docutils literal notranslate"><span class="pre">walrus</sp
 <p>3.8 and 3.9 are end-of-life and best-effort. Individual <em>engines</em> also stop
 earlier than the library does; see <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
 </div>
-<p>Simply run the following to install the current version from PyPI:</p>
+<p>Run the following to install the current version from PyPI:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit
 </pre></div>
 </div>
-<p>Or install the latest version from the gi repository:</p>
+<p>Or install the latest version from the git repository:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JarryShaw/PyPCAPKit.git
 <span class="nb">cd</span><span class="w"> </span>pypcapkit
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.

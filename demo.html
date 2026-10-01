@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/demo.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Basic Samples: pcapkit is quite easy to use, with simply three verbs as its main interface. Several scenarios are shown as below. extract a PCAP file and dump the result to a specific file (with no..." />
-<meta name="description" content="Basic Samples: pcapkit is quite easy to use, with simply three verbs as its main interface. Several scenarios are shown as below. extract a PCAP file and dump the result to a specific file (with no..." />
+<meta property="og:description" content="Basic Samples: pcapkit is built around three verbs. A few common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), extract a PCAP file and fetch IP packet ..." />
+<meta name="description" content="Basic Samples: pcapkit is built around three verbs. A few common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), extract a PCAP file and fetch IP packet ..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Changelog" href="changelog.html"><link rel="prev" title="Customisation &amp; Extensions" href="ext.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -482,8 +482,7 @@
 <h1>How to …<a class="headerlink" href="#how-to" title="Link to this heading">¶</a></h1>
 <section id="basic-samples">
 <h2>Basic Samples<a class="headerlink" href="#basic-samples" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is quite easy to use, with simply three verbs as
-its main interface. Several scenarios are shown as below.</p>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built around three verbs. A few common scenarios:</p>
 <ol class="arabic">
 <li><p>extract a PCAP file and dump the result to a specific file
 (with no reassembly)</p>
@@ -526,7 +525,7 @@ its main interface. Several scenarios are shown as below.</p>
 </section>
 <section id="cli-samples">
 <h2>CLI Samples<a class="headerlink" href="#cli-samples" title="Link to this heading">¶</a></h2>
-<p>The CLI (command line interface) of <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has two different access.</p>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s CLI (command line interface) can be reached two ways.</p>
 <ul>
 <li><p>through console scripts</p>
 <p>Use command name <code class="docutils literal notranslate"><span class="pre">pcapkit-cli</span> <span class="pre">[...]</span></code> directly (as shown in samples).</p>
@@ -542,14 +541,14 @@ module name is <code class="docutils literal notranslate"><span class="pre">pcap
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--auto-extension<span class="w"> </span>--format<span class="w"> </span>plist<span class="w"> </span>--verbose
-🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
+🚨<span class="w"> </span>Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
-🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.plist'</span>
+🍺<span class="w"> </span>Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.plist'</span>
 </pre></div>
 </div>
 </li>
@@ -562,27 +561,27 @@ without it the default tree view is written into whatever file name was
 supplied.</p>
 </div>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--auto-extension<span class="w"> </span>--output<span class="w"> </span>out.json<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>--verbose
-🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
+🚨<span class="w"> </span>Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
-🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.json'</span>
+🍺<span class="w"> </span>Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.json'</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a text tree view file (without extension autocorrect)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span>.pcap<span class="w"> </span>--output<span class="w"> </span>out.txt<span class="w"> </span>--format<span class="w"> </span>tree<span class="w"> </span>--verbose
-🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
+🚨<span class="w"> </span>Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>
 Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
 Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
 Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
-🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.txt'</span>
+🍺<span class="w"> </span>Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">'out.txt'</span>
 </pre></div>
 </div>
 </li>
