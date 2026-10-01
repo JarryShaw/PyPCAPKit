@@ -400,7 +400,55 @@ jobs:
       # `not-installable` ones, deliberately, so that failure is a genuine
       # compile failure against the 3.12+ C API rather than merely "no
       # compiler was present to try".
+      #
+      # `timeout-minutes` bounds this step because an apt stall in it used to
+      # eat the whole job. Per #974, on two docs-only PRs within forty minutes
+      # a PCAP_CT cell fetched its InRelease metadata and then went silent for
+      # 29m52s, until this job's own `timeout-minutes: 30` killed it -- which
+      # surfaces as `cancelled`, and `cancelled` correctly fails the
+      # `Required checks passed` gate, so an unrelated mirror turned a green
+      # docs PR red. The other five PCAP_CT cells of that same run finished,
+      # job and all, in 39-81 seconds.
+      #
+      # 20 minutes rather than the couple of minutes that bounding a stalled
+      # mirror tightly would suggest, because the healthy tail here is
+      # genuinely long. Across 12 runs (230 non-zero observations of this
+      # step) p95 was 338s and the slowest *successful* run 508s, both on
+      # PyShark cells; this change's own CI then produced a healthy 646s
+      # PyShark run, so treat those figures as a floor on the tail rather
+      # than its ceiling -- tshark plus wireshark-common is a large download
+      # and archive.ubuntu.com's throughput varies enormously. A 5-minute cap
+      # would have failed ~4% of healthy legs, which is a worse defect than
+      # the one it fixes. 20 is ~1.9x the largest healthy run yet seen, and
+      # was raised from an initial 15 on review: that 646s observation moved
+      # the known maximum 27% on a single sample, and a bound sized at ~1.4x
+      # a quantity still moving that much risks reproducing this very defect
+      # at smaller scale -- a healthy-but-slow run killed and reported as a
+      # step timeout, still blocking the pull request. 20 stays under both
+      # job budgets (30 here, 45 on `pypcap-parity`), so the headroom is
+      # free. A hang costs 20 minutes instead of 30 and
+      # -- the actual win -- reports as this named step exceeding its timeout
+      # rather than as an opaque job cancellation with no attributable cause.
+      #
+      # Deliberately *not* also passing `-o Acquire::Retries=3 -o
+      # Acquire::http::Timeout=30`, which #974 proposed: both are already the
+      # defaults in the apt that noble ships (verified in 2.8.3, the current
+      # noble-updates version; 2.7.14's tarball is no longer in the pool --
+      # `Retries(_config->FindI("Acquire::Retries", 3))` in
+      # apt-pkg/acquire-item.cc, and `TimeOut(30)` in methods/basehttp.cc,
+      # read back by `ConfigFindI("Timeout", TimeOut)` in methods/http.cc), so
+      # passing them would change no behaviour while reading like protection
+      # this step had gained. Their already being in force is also why the
+      # stall ran to 29m52s instead of failing after 30s and three retries:
+      # whatever hung is not something apt's data timeout governs, since that
+      # value bounds each individual `select()` wait rather than the transfer
+      # as a whole. Wrapping these invocations in `timeout` and retrying is no
+      # safer at these numbers, because a legitimate 646s run cannot be told
+      # from a stall inside any per-attempt budget short enough to be worth
+      # retrying -- the step timeout below is the one guard that holds however
+      # the hang is caused.
       - name: Install this engine's system packages
+        timeout-minutes: 20
         run: |
           set -eu
           ENGINE="${{ matrix.engine }}"
@@ -635,7 +683,19 @@ jobs:
       # libpcap and tshark" step exactly, for the same reason: tshark's
       # postinst otherwise blocks on the "allow non-superusers to capture
       # packets" prompt.
+      #
+      # `timeout-minutes` for the reason #974 gives about `engine-tests`'s own
+      # install step -- see the long note there, which this step shares
+      # wholesale. It was never the leg that stalled, but it installs the
+      # union of the packages that one does (build-essential, libpcap-dev and
+      # tshark together) from the same mirrors with the same absence of any
+      # bound, so the hazard is identical and fixing only the leg that
+      # happened to bite would leave it here. The same 20 applies: this step's
+      # slowest *successful* observed run was 405s, over a smaller sample (22)
+      # than `engine-tests` gives, and its heavier package set should if
+      # anything tail longer than the 646s seen there.
       - name: Install libpcap headers, a C toolchain, and tshark
+        timeout-minutes: 20
         run: |
           sudo apt-get update
           echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
