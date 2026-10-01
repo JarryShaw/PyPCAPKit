@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="The four pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull re..." />
 <meta name="description" content="The four pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull re..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Release Process" href="../releasing.html"><link rel="prev" title="Extension-Header Base Classes" href="extension-header-subclassing.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Writing the Documentation" href="documentation.html"><link rel="prev" title="Extension-Header Base Classes" href="extension-header-subclassing.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Running the Repository - PyPCAPKit</title>
@@ -434,6 +434,7 @@
 <li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -544,16 +545,16 @@ detail of what actually changed in that version bump. Ruled on
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
 <p>Two different things get confused here, so they are named apart:</p>
 <ul class="simple">
-<li><p><strong>A pull request’s commits.</strong> <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/657">#657</a>
-is the shared changelog for the 1.5.0 cycle, and it carries roughly one commit per
-code pull request, deliberately unsquashed so that what is and is not accounted for
-stays readable in its log. That is a property of <em>the pull request</em>, and it is not
-what the ruling is about.</p></li>
+<li><p><strong>A pull request’s commits.</strong> The shared changelog for the 1.5.0 cycle is a
+long-lived pull request of its own, carrying roughly one commit per code pull
+request, deliberately unsquashed so that what is and is not accounted for stays
+readable in its log. That is a property of <em>the pull request</em>, and it is not what
+the ruling is about.</p></li>
 <li><p><strong>A changelog file’s entries.</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> groups its
 entries under a section per top-level module, with <code class="docutils literal notranslate"><span class="pre">Added</span></code>, <code class="docutils literal notranslate"><span class="pre">Changed</span></code> and
-<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> nested inside each, and a single entry routinely cites several issues at
-once – <em>“the Mobility Header registry, completed (#383, #437)”</em> is one bullet, not
-two. That is a property of <em>the file</em>, and it is the axis the ruling governs.</p></li>
+<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> nested inside each, and a single entry routinely cites several changes at
+once – the completed Mobility Header registry is one bullet, not two. That is a
+property of <em>the file</em>, and it is the axis the ruling governs.</p></li>
 </ul>
 <p>Both are measurable rather than matters of memory, which is the point of writing the
 commands down instead of a figure that will be stale by the next merge:</p>
@@ -561,8 +562,11 @@ commands down instead of a figure that will be stale by the next merge:</p>
 grep<span class="w"> </span>-cE<span class="w"> </span><span class="s1">'^\* '</span><span class="w"> </span>docs/source/changelog/1.5.0.rst
 grep<span class="w"> </span>-B1<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^-{3,}$'</span><span class="w"> </span>docs/source/changelog/1.5.0.rst<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-vE<span class="w"> </span><span class="s1">'^-{3,}$|^--$'</span>
 
-<span class="c1"># commits on the pull request -- a different number, about a different thing</span>
-gh<span class="w"> </span>pr<span class="w"> </span>view<span class="w"> </span><span class="m">657</span><span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.commits|length'</span>
+<span class="c1"># commits on the shared changelog pull request -- a different number, about a</span>
+<span class="c1"># different thing</span>
+gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--search<span class="w"> </span><span class="s1">'shared 1.5.0 changelog in:title'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.[].commits|length'</span>
 </pre></div>
 </div>
 <p>The grouping scheme was settled on #918: <strong>a section per top-level module, with</strong>
@@ -591,8 +595,9 @@ module the change is <em>about</em>, name the others in the entry’s own text, 
 <strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
 section wants that module’s changes; the same prose appearing twice reads as two
 separate changes. Raised originally on #918.</p>
-<p>The restructure itself belongs to #657, which owns the file and merges last; doing
-it earlier would conflict with every open change that touches an entry.</p>
+<p>The restructure itself belongs to the shared changelog’s own pull request, which
+owns the file and merges last; doing it earlier would conflict with every open
+change that touches an entry.</p>
 </div>
 </section>
 <section id="issue-and-pull-request-labels">
@@ -728,39 +733,48 @@ public-facing behaviour or API.</p>
 observe the difference without changing their code”</strong>. On the tree, the changes
 carrying it are that kind:</p>
 <ul class="simple">
-<li><p>an exception type a caller catches – <code class="docutils literal notranslate"><span class="pre">#811</span></code> raising
+<li><p>an exception type a caller catches –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a> raising
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> where a bare
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> used to escape, and <code class="docutils literal notranslate"><span class="pre">#783</span></code> raising one where a single-bit
-lookup used to return a member;</p></li>
-<li><p>a public attribute’s meaning – <code class="docutils literal notranslate"><span class="pre">#635</span></code> swapping <code class="docutils literal notranslate"><span class="pre">Frame.len</span></code> and
-<code class="docutils literal notranslate"><span class="pre">Frame.cap_len</span></code> between the PCAP and PCAP-NG readers;</p></li>
-<li><p>a signature or a name a caller writes – <code class="docutils literal notranslate"><span class="pre">#815</span></code> retyping <code class="docutils literal notranslate"><span class="pre">AppType.proto</span></code> and
-giving <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> varargs, <code class="docutils literal notranslate"><span class="pre">#788</span></code> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> at runtime;</p></li>
-<li><p>a path a caller or a script depends on – <code class="docutils literal notranslate"><span class="pre">#350</span></code> naming the examples directories
-apart.</p></li>
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> used to escape, and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/759">#759</a> raising one where a
+single-bit lookup used to return a member;</p></li>
+<li><p>a public attribute’s meaning –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/618">#618</a> swapping <code class="docutils literal notranslate"><span class="pre">Frame.len</span></code>
+and <code class="docutils literal notranslate"><span class="pre">Frame.cap_len</span></code> between the PCAP and PCAP-NG readers;</p></li>
+<li><p>a signature or a name a caller writes –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/806">#806</a> retyping
+<code class="docutils literal notranslate"><span class="pre">AppType.proto</span></code> and giving <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> varargs,
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>
+at runtime;</p></li>
+<li><p>a path a caller or a script depends on – the change that named the examples
+directories apart.</p></li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>A pull request’s prose and its label can disagree, and the label is not
-automatically right.</strong> Both directions have happened here. <code class="docutils literal notranslate"><span class="pre">#783</span></code> and <code class="docutils literal notranslate"><span class="pre">#811</span></code>
-carry the label while their changelog bullets never said so, which a review round
-on #657 caught and corrected. <code class="docutils literal notranslate"><span class="pre">#848</span></code> carries it too, and its own body argues at
-length that the change is <em>not</em> breaking – a review round checked that argument
-and found it right on the facts, so there the label is the half that overstates.
-So when the two conflict, settle it on what a caller can observe, and fix
-whichever of the two is wrong rather than letting the pair stand.</p>
+automatically right.</strong> Both directions have happened here. The <code class="docutils literal notranslate"><span class="pre">#759</span></code> and
+<code class="docutils literal notranslate"><span class="pre">#805</span></code> changes carry the label while their changelog bullets never said so, which
+a review round on the shared changelog caught and corrected. The
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/844">#844</a> change carries it too,
+and its own pull request argues at length that the change is <em>not</em> breaking – a
+review round checked that argument and found it right on the facts, so there the
+label is the half that overstates. So when the two conflict, settle it on what a
+caller can observe, and fix whichever of the two is wrong rather than letting the
+pair stand.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>The label is not applied uniformly across the repository’s history, and a census
-that assumes it is will be wrong.</strong> It is dense on pull requests from <code class="docutils literal notranslate"><span class="pre">#350</span></code>
-upward and effectively absent below: the only earlier carriers are seven
-pre-<code class="docutils literal notranslate"><span class="pre">0.15</span></code> pull requests, <code class="docutils literal notranslate"><span class="pre">#3</span></code> to <code class="docutils literal notranslate"><span class="pre">#28</span></code>, with nothing at all between <code class="docutils literal notranslate"><span class="pre">#28</span></code>
-and <code class="docutils literal notranslate"><span class="pre">#350</span></code>. Three of those seven are distribution rollups (<code class="docutils literal notranslate"><span class="pre">#25</span></code>, <code class="docutils literal notranslate"><span class="pre">#26</span></code>,
-<code class="docutils literal notranslate"><span class="pre">#28</span></code>, each also carrying <code class="docutils literal notranslate"><span class="pre">release</span></code>); the other four are early
-<code class="docutils literal notranslate"><span class="pre">refactor</span></code>/<code class="docutils literal notranslate"><span class="pre">feat</span></code> work from before the project stabilised. On issues it is
-sparser still, appearing only from <code class="docutils literal notranslate"><span class="pre">#775</span></code> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s absence on an old
-pull request is weak evidence at best. The current figures, rather than these:</p>
+that assumes it is will be wrong.</strong> It is dense on pull requests from the
+examples-directory change above onward and effectively absent below it: the only
+earlier carriers are seven pre-<code class="docutils literal notranslate"><span class="pre">0.15</span></code> pull requests, clustered at the very start
+of the numbering, with nothing labelled at all between them and that change. Three
+of those seven are distribution rollups, each also carrying <code class="docutils literal notranslate"><span class="pre">release</span></code>; the other
+four are early <code class="docutils literal notranslate"><span class="pre">refactor</span></code>/<code class="docutils literal notranslate"><span class="pre">feat</span></code> work from before the project stabilised. On
+issues it is sparser still, appearing only from <code class="docutils literal notranslate"><span class="pre">#775</span></code> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s
+absence on an old pull request is weak evidence at best. The current figures, rather
+than these:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span>--label<span class="w"> </span>breaking<span class="w"> </span>--limit<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--json<span class="w"> </span>number<span class="w"> </span>-q<span class="w"> </span><span class="s1">'[.[].number]|sort|@json'</span>
 gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span>--label<span class="w"> </span>breaking<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
@@ -776,12 +790,12 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../releasing.html">
+          <a class="next-page" href="documentation.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Release Process</div>
+                <div class="title">Writing the Documentation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

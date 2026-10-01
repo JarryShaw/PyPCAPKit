@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/extension-header-subclassing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
-<meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
+<meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled, in review of the rename tha..." />
+<meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled, in review of the rename tha..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Running the Repository" href="process.html"><link rel="prev" title="The Registry Protocol" href="registry-protocol.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -434,6 +434,7 @@
 <li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Extension-Header Base Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -485,11 +486,12 @@
 <span id="extension-header-subclassing"></span><h1>Extension-Header Base Classes<a class="headerlink" href="#extension-header-base-classes" title="Link to this heading">¶</a></h1>
 <p>Every IPv6 extension header in this package subclasses
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>. Some name a <strong>second</strong> base
-as well, and which ones do is a ruling rather than an accident. The owner ruled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a> that a header usable <em>only</em>
-as an extension header inherits <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and nothing else – <code class="docutils literal notranslate"><span class="pre">IPv6_Frag</span></code> being
-the example – while one that is usable as a standalone protocol in its own right
-inherits both <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and <code class="docutils literal notranslate"><span class="pre">Internet</span></code> (or <code class="docutils literal notranslate"><span class="pre">IPsec</span></code>), as <code class="docutils literal notranslate"><span class="pre">ESP</span></code> does.</p>
+as well, and which ones do is a ruling rather than an accident. The owner ruled, in
+review of the rename that made <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> the shared base
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>), that a header usable
+<em>only</em> as an extension header inherits <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and nothing else – <code class="docutils literal notranslate"><span class="pre">IPv6_Frag</span></code>
+being the example – while one that is usable as a standalone protocol in its own
+right inherits both <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and <code class="docutils literal notranslate"><span class="pre">Internet</span></code> (or <code class="docutils literal notranslate"><span class="pre">IPsec</span></code>), as <code class="docutils literal notranslate"><span class="pre">ESP</span></code> does.</p>
 <p>The family as it stands:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
@@ -586,10 +588,10 @@ class for it, so nothing implements the classification, but a future one inherit
 <p class="admonition-title">Important</p>
 <p>Own-protocolhood on its own is <strong>not</strong> sufficient, and MH is the case that
 settles it: the alternative reading – that a protocol in its own right qualifies
-whether or not it can appear under IPv4 – was put to the owner explicitly on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a> and not taken, so MH
-and <code class="docutils literal notranslate"><span class="pre">Shim6</span></code> stay extension-only. A header that is a protocol in its own right
-but structurally cannot be an IPv4 payload names <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> alone.</p>
+whether or not it can appear under IPv4 – was put to the owner explicitly in
+review of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> and not
+taken, so MH and <code class="docutils literal notranslate"><span class="pre">Shim6</span></code> stay extension-only. A header that is a protocol in its
+own right but structurally cannot be an IPv4 payload names <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> alone.</p>
 </div>
 </section>
 <section id="explicit-base-declarations">

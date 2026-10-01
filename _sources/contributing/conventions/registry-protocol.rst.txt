@@ -211,8 +211,8 @@ guaranteed either: pass a first argument that *is* an instance of the class and 
 delegation **silently succeeds**, so a ``@staticmethod`` override cannot even be
 relied on to fail loudly. Measured, all three cases, rather than reasoned about.
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` is itself a ``@classmethod``. The
-precedent is `#913 <https://github.com/JarryShaw/PyPCAPKit/pull/913>`__, whose
-``FEATCode.get`` is ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
+precedent is `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__, which made
+``FEATCode.get`` a ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
 ``return super().get(key, default)``;
 `#908 <https://github.com/JarryShaw/PyPCAPKit/issues/908>`__ followed it, which is
 what turned ``Method.get`` into a classmethod.
@@ -263,8 +263,8 @@ lines, with ``--warn-unused-ignores`` reporting neither as unused.
 
 **And an override that only reimplements the base is deleted, not repaired.** Widening
 those two signatures made them faithful copies of the base. Rather than merge them,
-the owner asked on `#940 <https://github.com/JarryShaw/PyPCAPKit/pull/940>`__ why the
-two overrides needed to exist at all, if they could simply fall back to the base's.
+the owner asked, in review of that same widening, why the two overrides needed to
+exist at all, if they could simply fall back to the base's.
 
 They could. Nine cases per class -- name hit, name miss, value hit, value miss and
 every ``default`` combination -- differed from ``EnumLookup.get.__func__(cls, ...)``
@@ -322,7 +322,7 @@ worked example: since
 forwards ``default`` verbatim and delegates to ``super().get()``, and that is all it
 does. It used to convert the base's name-miss :exc:`KeyError` into a
 :exc:`ValueError` as well, and #923's ruling retired that; the
-`#836 <https://github.com/JarryShaw/PyPCAPKit/pull/836>`__ refusal to extend the
+`#808 <https://github.com/JarryShaw/PyPCAPKit/issues/808>`__ refusal to extend the
 class at all is untouched by the retirement, since only the exception class moved.
 ``Criticality.get`` went further and no longer exists: conversion was the *only*
 thing it added over the base, so once that went there was nothing left for an
@@ -481,14 +481,14 @@ That leaves the classes with something to decide:
        audit was taken --
        ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
        signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
-       rather than for case -- and
-       `#940 <https://github.com/JarryShaw/PyPCAPKit/pull/940>`__ deleted both as
-       redundant, per the ruling in the section above; each now inherits ``get``
-       from :class:`~pcapkit.corekit.enum.EnumLookup` unchanged. ``LMAAddressCode``
-       and ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
+       rather than for case -- and both were deleted as redundant rather than widened,
+       on the ruling recorded in the section above and given in review of the widening
+       itself; each now inherits ``get`` from
+       :class:`~pcapkit.corekit.enum.EnumLookup` unchanged. ``LMAAddressCode`` and
+       ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
        string lookup to fold. ``Criticality`` had one when this audit was taken and no
        longer does:
-       `#921 <https://github.com/JarryShaw/PyPCAPKit/pull/921>`__ re-parented it onto
+       `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and #923 retired the exception
        conversion that was the override's only remaining job, so it now inherits
        ``get`` unchanged.

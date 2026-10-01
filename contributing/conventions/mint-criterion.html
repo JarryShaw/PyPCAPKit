@@ -434,6 +434,7 @@
 <li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -523,7 +524,8 @@ ranges record that narrowing in their own comments:
 <p>The test, paraphrased from the maintainer’s ruling: does the upstream registry treat
 the label as the final, concrete assigned name, or only as a notation for a human
 reading the table?</p>
-<p>Settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/847">#847</a> and reaffirmed
+<p>Settled in review of the <code class="docutils literal notranslate"><span class="pre">Socket._missing_</span></code> branch-order fix
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/841">#841</a>) and reaffirmed
 on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> as a core concept of
 the ruling.</p>
 <p>So the question to ask of a range is <strong>what the upstream registry actually did</strong>, not
@@ -568,9 +570,10 @@ will take it. Ask what the label tells you: a party, or a procedure.</p>
 <h2>Suffixed Company Names<a class="headerlink" href="#suffixed-company-names" title="Link to this heading">¶</a></h2>
 <p>The ethertype case looks like an exception to the rule and is not. The maintainer’s
 reasoning, settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> after
-being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/847">#847</a>: a
-proprietary protocol will never have a public name, so the company name is what serves
-that purpose in its place.</p>
+being raised in review of the same <code class="docutils literal notranslate"><span class="pre">Socket._missing_</span></code> fix
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/841">#841</a>): a proprietary protocol
+will never have a public name, so the company name is what serves that purpose in its
+place.</p>
 <p>So the company name is not a note <em>about</em> the code – it is the best name that will ever
 exist <em>for</em> it, which makes it the final concrete assigned name under the test above.
 That is also why <code class="docutils literal notranslate"><span class="pre">DEC</span> <span class="pre">Unassigned</span></code> goes the other way despite carrying the same

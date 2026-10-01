@@ -5,11 +5,12 @@ Extension-Header Base Classes
 
 Every IPv6 extension header in this package subclasses
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
-as well, and which ones do is a ruling rather than an accident. The owner ruled on
-`#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__ that a header usable *only*
-as an extension header inherits ``IPv6_Ext`` and nothing else -- ``IPv6_Frag`` being
-the example -- while one that is usable as a standalone protocol in its own right
-inherits both ``IPv6_Ext`` and ``Internet`` (or ``IPsec``), as ``ESP`` does.
+as well, and which ones do is a ruling rather than an accident. The owner ruled, in
+review of the rename that made ``IPv6_Ext`` the shared base
+(`#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__), that a header usable
+*only* as an extension header inherits ``IPv6_Ext`` and nothing else -- ``IPv6_Frag``
+being the example -- while one that is usable as a standalone protocol in its own
+right inherits both ``IPv6_Ext`` and ``Internet`` (or ``IPsec``), as ``ESP`` does.
 
 The family as it stands:
 
@@ -104,10 +105,10 @@ class for it, so nothing implements the classification, but a future one inherit
 
    Own-protocolhood on its own is **not** sufficient, and MH is the case that
    settles it: the alternative reading -- that a protocol in its own right qualifies
-   whether or not it can appear under IPv4 -- was put to the owner explicitly on
-   `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__ and not taken, so MH
-   and ``Shim6`` stay extension-only. A header that is a protocol in its own right
-   but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
+   whether or not it can appear under IPv4 -- was put to the owner explicitly in
+   review of `#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__ and not
+   taken, so MH and ``Shim6`` stay extension-only. A header that is a protocol in its
+   own right but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
 
 Explicit Base Declarations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
