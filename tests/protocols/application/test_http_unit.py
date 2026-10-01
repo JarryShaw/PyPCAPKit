@@ -2354,15 +2354,14 @@ class HTTPUnitTests(unittest.TestCase):
         ``SettingPair`` instance.
 
         This is a unit-level check on the field wiring, not an end-to-end
-        ``HTTPv2`` round trip: the SETTINGS frame's pack path still dies
-        earlier on ``KeyError: 'flags'``, raised by ``FrameType.post_process``
-        at ``schema/application/httpv2.py:144`` where it reaches the enclosing
-        header's ``flags`` field through a nested packet context that cannot
-        see it (GH-445, fixed by the still-open PR #457), so a real
-        ``SettingsFrame.pack()``/``HTTPv2(...).make()`` round trip through this
-        field remains unreachable until that lands. The
-        ``httpv2-frame/SETTINGS`` entry in ``EXPECTED_FAILURES`` records that
-        same ``KeyError: 'flags'``.
+        ``HTTPv2`` round trip. The round trip itself now passes -- there is
+        no ``EXPECTED_FAILURES`` entry for ``httpv2-frame/SETTINGS``, and
+        the generator's own round trip for it reports ``OK``. What a round
+        trip never exercises is a bare ``SettingsFrame(...).pack()`` called
+        with no enclosing packet: that still raises ``KeyError: 'flags'``,
+        from ``FrameType.post_process``'s ``packet['flags'][name]`` lookup,
+        which has no ``flags`` to read without a real header above it. That
+        is an unsupported invocation, not a defect in the round trip.
         """
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.protocols.schema.application.httpv2 import SettingPair, SettingsFrame

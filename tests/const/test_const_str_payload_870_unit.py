@@ -9,7 +9,7 @@ member's own declared value. ``_value_`` was set correctly (``Method.GET.value
 ``str(Method.GET) == ''``, ``len(str(Method.GET)) == 0`` and, most visibly,
 ``Method.GET == 'GET'`` was :data:`False` for every one of the 40 declared
 members. True on ``main`` at ``60b85e3a4`` (measured), and true since the class
-was first written -- GitHub issue #869 fixed the same inconsistency for an
+was first written -- GitHub pull request #869 fixed the same inconsistency for an
 *unregistered* member's own str payload
 (:meth:`~pcapkit.const.http.method.Method._unregistered_member` now calls the
 base's :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, which
