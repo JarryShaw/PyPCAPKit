@@ -34,10 +34,10 @@ break the rule by being a clause rather than a title. The sweep of
 right, 16 needing only re-casing, and **22 to be rewritten**. *What a Failed Lookup
 Raises* was correctly cased and is now *Failed-Lookup Exceptions*.
 
-The line that sweep drew, and the one to keep drawing: a **finite verb** makes
-a heading a sentence and earns a rewrite, while a gerund or infinitive phrase is a
-noun phrase and needs only re-casing -- so *Running the tests* became *Running the
-Tests* rather than being reworded.
+The line that sweep drew, and the one to keep drawing: a **finite verb** makes a heading
+a sentence and earns a rewrite, while a gerund or infinitive phrase is a noun phrase and
+needs only re-casing -- so *Running the tests* became *Running the Tests* rather than
+being reworded.
 
 .. note::
 
@@ -60,14 +60,14 @@ found none short, which is the standard to hold.
 
 **A heading is a link target, so a rename is a repository-wide sweep** rather than a
 :file:`docs/source/` one. In scope: ``.rst`` prose, ``:ref:`` and ``:doc:`` link text,
-toctree entries, implicit ``` `Text`_ ``` references, **and** :mod:`pcapkit`
-docstrings and the files under :file:`tests/`. The first pass reported one
-surviving stale reference; review found **five**, spread across
-:file:`pcapkit/corekit/sentinels.py`,
+toctree entries, implicit ``` `Text`_ ``` references, **and** :mod:`pcapkit` docstrings
+and the files under :file:`tests/`. Applying that scope to the heading rename took two
+passes: the first reported one surviving stale reference; review found **five**, spread
+across :file:`pcapkit/corekit/sentinels.py`,
 :file:`tests/corekit/test_sentinel_exports_unit.py` and
 :file:`tests/project/test_conventions_doc_claims.py`. The first of those is a shipped
-module docstring that renders into the API reference, so a reader following it
-searches the page for a string no longer on it.
+module docstring that renders into the API reference, so a reader following it searches
+the page for a string no longer on it.
 
 .. warning::
 
@@ -161,9 +161,9 @@ count itself:
    grep -rl 'Subpackages'   --include='*.html' --exclude='documentation.html' \
         docs/build/html | wc -l   # exactly one
 
-That is why those root toctrees are ``:hidden:``. Without it each of the three
-captions rendered twice on the root page -- once inline in the body, once in the
-sidebar -- which is the duplication the owner ruled out on #719.
+Those root toctrees are ``:hidden:`` because, without it, each of the three captions
+rendered twice on the root page -- once inline in the body, once in the sidebar -- which
+is the duplication the owner ruled out on #719.
 
 .. note::
 
@@ -174,9 +174,9 @@ sidebar -- which is the duplication the owner ruled out on #719.
 
    One setting there was decided by measurement rather than by preference:
    ``toc_object_entries`` carries, in a comment beside it, the figures that settled it,
-   so that nobody reopens the question blind. That is worth copying the
-   next time a setting is chosen that way, but it is a single precedent and not yet a
-   rule the owner has ruled on.
+   so that nobody reopens the question blind. That is worth copying the next time a
+   setting is chosen that way, but it is a single precedent and not yet a rule the owner
+   has ruled on.
 
 Paraphrasing a Ruling
 ~~~~~~~~~~~~~~~~~~~~~
@@ -198,7 +198,20 @@ describes what was true on the day it merged, and the next change past it can ma
 citation wrong without touching it. The issue is the durable half -- where the ruling
 was asked for and given -- and it survives the work that implemented it. So cite the
 issue a rule was settled on, and describe a change by what it did rather than by its
-number. Ruled on #719, and the reason every citation on this page is an issue.
+number. Ruled on #719.
+
+**The changelog and** :file:`tests/` **are both exempt, for related reasons.** A
+changelog entry exists so a reader can find the change, and the pull-request number *is*
+that pointer; converting it would delete the thing the entry is for --
+:file:`docs/source/changelog/1.5.0.rst` is dense with pull-request citations by design.
+A substantial share of the pull requests cited under :file:`tests/` close no issue at
+all -- one credits a proposal to an external contributor and closes nothing -- and where
+an issue does exist beside a citation, it frequently lacks the fact being cited, which
+lives in the pull request's own body or review thread instead. Ruled on #719.
+
+The rule reaches the rest of this directory as well: a sibling page that cites a pull
+request is unconverted, not a third exemption. The changelog and :file:`tests/` are the
+whole exempt set -- nothing else is.
 
 Accuracy
 ~~~~~~~~
@@ -210,11 +223,11 @@ mode here rather than a hypothetical one.
 
 **Re-derive a count; do not copy one.** Better still, write down the command that
 produces it, as :ref:`process` does, so the figure can be rechecked rather than
-trusted. A keyword search is not a sweep: the method the changelog review settled takes
-every cited repository path in each of the forms it gets written in -- slash path,
-dotted module, bare filename, and the elided spellings -- intersects them with the
-diff since the merge base, and re-measures the intersection. A tense-keyword grep
-misses a claim phrased as a fraction of a total.
+trusted. A keyword search is not a sweep: the reliable method takes every cited
+repository path in each of the forms it gets written in -- slash path, dotted module,
+bare filename, and the elided spellings -- intersects them with the diff since the
+merge base, and re-measures the intersection. A tense-keyword grep misses a claim
+phrased as a fraction of a total.
 
 **Treat** ``every``, ``all``, ``each`` **and** ``none`` **as a claim about members, and
 check the members one at a time.** Several of #719's findings were of exactly that
