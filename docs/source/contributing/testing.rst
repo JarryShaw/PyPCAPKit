@@ -1,12 +1,6 @@
 Testing
 =======
 
-.. note::
-
-   This page came out of the project README when that was trimmed down to a
-   landing page. It is the only prose copy of the fixture story, so it lives here
-   rather than nowhere.
-
 Running the tests
 -----------------
 
@@ -39,7 +33,7 @@ needed by the test suite.
 The option round-trip generator
 -------------------------------
 
-One of the generators works differently from the rest and is worth knowing about.
+One generator works differently from the rest.
 :file:`examples/generators/options.py` does not describe packets it wants; it asks
 the library which option, chunk, parameter, message, frame and block codes it
 registers, and then constructs one of each through the public construction API,
@@ -49,5 +43,5 @@ they record what this version of :mod:`pcapkit` builds rather than what a
 third-party tool builds.
 
 :file:`tests/protocols/test_option_roundtrip_unit.py` runs the same cases without
-needing a fixture at all, and carries a table of the ones that do not yet close
-the cycle, each named against the defect that stops it.
+needing a fixture at all, and carries a table of the ones that do not close the
+cycle, each named against the defect that stops it.
