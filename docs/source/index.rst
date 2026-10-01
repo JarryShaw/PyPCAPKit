@@ -21,11 +21,13 @@ construction and analysis library.
 
 .. toctree::
    :maxdepth: 1
+   :caption: API Reference
 
    pcapkit/index
 
 .. toctree::
    :maxdepth: 1
+   :caption: Guides & Changelog
 
    ext
    demo
@@ -33,6 +35,7 @@ construction and analysis library.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Contributing
 
    contributing/testing
    contributing/conventions/index
