@@ -859,11 +859,26 @@ lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain is:
                  ->  "Create Release"  (workflow_run, on Vendor Update completing)
 
 Every publishing job — ``github``, ``tag``, ``pypi``, ``conda`` — is gated on
-``startsWith(github.ref_name, 'v') || PCAPKIT_TAG_EXISTS == 'false'``. That gate
-is why ordinary commits do not publish: ``Create Release`` runs on each one, but
-the tag for the current version already exists, so all four jobs skip. Changing
-the version string is what makes ``PCAPKIT_TAG_EXISTS`` false, and the next push
-then tags and publishes. So:
+``startsWith(github.ref_name, 'v')`` or on evidence that its own target still
+needs publishing. Only ``github`` gates on ``PCAPKIT_TAG_EXISTS``, because the
+tag that output answers for is the one ``github`` is about to create. ``tag``,
+``pypi`` and ``conda`` each gate on their own target instead -- whether the
+matching Conda tag exists, whether PyPI's file count for the version has
+reached the expected total, whether Anaconda's upload is complete. Each of
+those three additionally requires ``version_check`` to have succeeded, and
+``github`` -- and, for ``conda``, ``tag`` -- to have succeeded *or skipped*.
+Those conditions open with ``!cancelled()``, which suppresses the ``success()``
+Actions would otherwise prepend; accepting ``skipped`` is then what stops an
+upstream job's legitimate skip cascading into skipping a job whose own evidence
+says it still has work to do. Naming the two states rather than writing "not
+failed" is deliberate: a *cancelled* dependency then skips the job below it
+cleanly, instead of letting it run against an artefact that was never
+produced.
+
+That is why an ordinary commit does not publish: the version string has not
+moved, so each job's own check finds its target already there and all four
+skip. Changing the version string is what flips every one of those checks, and
+the next push then tags and publishes. So:
 
 .. list-table::
    :header-rows: 1
