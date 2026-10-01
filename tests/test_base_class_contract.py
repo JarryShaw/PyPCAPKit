@@ -42,7 +42,7 @@ family needs the same transitional carve-out.
 
 :class:`RegistrationGateTests` is a regression pin, not a new behaviour. Every
 assertion in it already held before part (c), because parts (a) and (b)
-(issues #547 and #570) made registration opt-in on a keyword. It is written down
+(pull requests #547 and #570) made registration opt-in on a keyword. It is written down
 because the ruling promotes it from an accident of where the hook happens to live
 into the specification, and an unasserted specification is one refactor away from
 being untrue. The property worth noticing is the last one: a library-style
