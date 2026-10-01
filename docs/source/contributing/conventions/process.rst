@@ -72,16 +72,16 @@ detail of what actually changed in that version bump. Ruled on
 
 Two different things get confused here, so they are named apart:
 
-*  **A pull request's commits.** `#657 <https://github.com/JarryShaw/PyPCAPKit/pull/657>`__
-   is the shared changelog for the 1.5.0 cycle, and it carries roughly one commit per
-   code pull request, deliberately unsquashed so that what is and is not accounted for
-   stays readable in its log. That is a property of *the pull request*, and it is not
-   what the ruling is about.
+*  **A pull request's commits.** The shared changelog for the 1.5.0 cycle is a
+   long-lived pull request of its own, carrying roughly one commit per code pull
+   request, deliberately unsquashed so that what is and is not accounted for stays
+   readable in its log. That is a property of *the pull request*, and it is not what
+   the ruling is about.
 *  **A changelog file's entries.** :file:`docs/source/changelog/1.5.0.rst` groups its
    entries under a section per top-level module, with ``Added``, ``Changed`` and
-   ``Fixed`` nested inside each, and a single entry routinely cites several issues at
-   once -- *"the Mobility Header registry, completed (#383, #437)"* is one bullet, not
-   two. That is a property of *the file*, and it is the axis the ruling governs.
+   ``Fixed`` nested inside each, and a single entry routinely cites several changes at
+   once -- the completed Mobility Header registry is one bullet, not two. That is a
+   property of *the file*, and it is the axis the ruling governs.
 
 Both are measurable rather than matters of memory, which is the point of writing the
 commands down instead of a figure that will be stale by the next merge:
@@ -92,8 +92,11 @@ commands down instead of a figure that will be stale by the next merge:
    grep -cE '^\* ' docs/source/changelog/1.5.0.rst
    grep -B1 -E '^-{3,}$' docs/source/changelog/1.5.0.rst | grep -vE '^-{3,}$|^--$'
 
-   # commits on the pull request -- a different number, about a different thing
-   gh pr view 657 -R JarryShaw/PyPCAPKit --json commits -q '.commits|length'
+   # commits on the shared changelog pull request -- a different number, about a
+   # different thing
+   gh pr list -R JarryShaw/PyPCAPKit --state all \
+       --search 'shared 1.5.0 changelog in:title' \
+       --json commits -q '.[].commits|length'
 
 The grouping scheme was settled on #918: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
@@ -124,8 +127,9 @@ belongs to none. Nor is the map one-to-one with the package list below --
    section wants that module's changes; the same prose appearing twice reads as two
    separate changes. Raised originally on #918.
 
-   The restructure itself belongs to #657, which owns the file and merges last; doing
-   it earlier would conflict with every open change that touches an entry.
+   The restructure itself belongs to the shared changelog's own pull request, which
+   owns the file and merges last; doing it earlier would conflict with every open
+   change that touches an entry.
 
 Issue and Pull Request Labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,39 +260,48 @@ So the question it answers is not "how big is this change" but **"can a caller
 observe the difference without changing their code"**. On the tree, the changes
 carrying it are that kind:
 
-*  an exception type a caller catches -- ``#811`` raising
+*  an exception type a caller catches --
+   `#805 <https://github.com/JarryShaw/PyPCAPKit/issues/805>`__ raising
    :exc:`~pcapkit.utilities.exceptions.ProtocolError` where a bare
-   :exc:`struct.error` used to escape, and ``#783`` raising one where a single-bit
-   lookup used to return a member;
-*  a public attribute's meaning -- ``#635`` swapping ``Frame.len`` and
-   ``Frame.cap_len`` between the PCAP and PCAP-NG readers;
-*  a signature or a name a caller writes -- ``#815`` retyping ``AppType.proto`` and
-   giving ``register_apptype`` varargs, ``#788`` enforcing ``@final`` at runtime;
-*  a path a caller or a script depends on -- ``#350`` naming the examples directories
-   apart.
+   :exc:`struct.error` used to escape, and
+   `#759 <https://github.com/JarryShaw/PyPCAPKit/issues/759>`__ raising one where a
+   single-bit lookup used to return a member;
+*  a public attribute's meaning --
+   `#618 <https://github.com/JarryShaw/PyPCAPKit/issues/618>`__ swapping ``Frame.len``
+   and ``Frame.cap_len`` between the PCAP and PCAP-NG readers;
+*  a signature or a name a caller writes --
+   `#806 <https://github.com/JarryShaw/PyPCAPKit/issues/806>`__ retyping
+   ``AppType.proto`` and giving ``register_apptype`` varargs,
+   `#778 <https://github.com/JarryShaw/PyPCAPKit/issues/778>`__ enforcing ``@final``
+   at runtime;
+*  a path a caller or a script depends on -- the change that named the examples
+   directories apart.
 
 .. warning::
 
    **A pull request's prose and its label can disagree, and the label is not
-   automatically right.** Both directions have happened here. ``#783`` and ``#811``
-   carry the label while their changelog bullets never said so, which a review round
-   on #657 caught and corrected. ``#848`` carries it too, and its own body argues at
-   length that the change is *not* breaking -- a review round checked that argument
-   and found it right on the facts, so there the label is the half that overstates.
-   So when the two conflict, settle it on what a caller can observe, and fix
-   whichever of the two is wrong rather than letting the pair stand.
+   automatically right.** Both directions have happened here. The ``#759`` and
+   ``#805`` changes carry the label while their changelog bullets never said so, which
+   a review round on the shared changelog caught and corrected. The
+   `#844 <https://github.com/JarryShaw/PyPCAPKit/issues/844>`__ change carries it too,
+   and its own pull request argues at length that the change is *not* breaking -- a
+   review round checked that argument and found it right on the facts, so there the
+   label is the half that overstates. So when the two conflict, settle it on what a
+   caller can observe, and fix whichever of the two is wrong rather than letting the
+   pair stand.
 
 .. note::
 
    **The label is not applied uniformly across the repository's history, and a census
-   that assumes it is will be wrong.** It is dense on pull requests from ``#350``
-   upward and effectively absent below: the only earlier carriers are seven
-   pre-``0.15`` pull requests, ``#3`` to ``#28``, with nothing at all between ``#28``
-   and ``#350``. Three of those seven are distribution rollups (``#25``, ``#26``,
-   ``#28``, each also carrying ``release``); the other four are early
-   ``refactor``/``feat`` work from before the project stabilised. On issues it is
-   sparser still, appearing only from ``#775`` up. So ``breaking``'s absence on an old
-   pull request is weak evidence at best. The current figures, rather than these:
+   that assumes it is will be wrong.** It is dense on pull requests from the
+   examples-directory change above onward and effectively absent below it: the only
+   earlier carriers are seven pre-``0.15`` pull requests, clustered at the very start
+   of the numbering, with nothing labelled at all between them and that change. Three
+   of those seven are distribution rollups, each also carrying ``release``; the other
+   four are early ``refactor``/``feat`` work from before the project stabilised. On
+   issues it is sparser still, appearing only from ``#775`` up. So ``breaking``'s
+   absence on an old pull request is weak evidence at best. The current figures, rather
+   than these:
 
    .. code-block:: shell
 

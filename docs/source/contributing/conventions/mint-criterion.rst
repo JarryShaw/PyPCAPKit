@@ -49,7 +49,8 @@ The test, paraphrased from the maintainer's ruling: does the upstream registry t
 the label as the final, concrete assigned name, or only as a notation for a human
 reading the table?
 
-Settled on `#847 <https://github.com/JarryShaw/PyPCAPKit/pull/847>`__ and reaffirmed
+Settled in review of the ``Socket._missing_`` branch-order fix
+(`#841 <https://github.com/JarryShaw/PyPCAPKit/issues/841>`__) and reaffirmed
 on `#775 <https://github.com/JarryShaw/PyPCAPKit/issues/775>`__ as a core concept of
 the ruling.
 
@@ -98,9 +99,10 @@ Suffixed Company Names
 
 The ethertype case looks like an exception to the rule and is not. The maintainer's
 reasoning, settled on `#775 <https://github.com/JarryShaw/PyPCAPKit/issues/775>`__ after
-being raised on `#847 <https://github.com/JarryShaw/PyPCAPKit/pull/847>`__: a
-proprietary protocol will never have a public name, so the company name is what serves
-that purpose in its place.
+being raised in review of the same ``Socket._missing_`` fix
+(`#841 <https://github.com/JarryShaw/PyPCAPKit/issues/841>`__): a proprietary protocol
+will never have a public name, so the company name is what serves that purpose in its
+place.
 
 So the company name is not a note *about* the code -- it is the best name that will ever
 exist *for* it, which makes it the final concrete assigned name under the test above.
