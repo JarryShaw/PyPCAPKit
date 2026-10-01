@@ -158,6 +158,22 @@ typehints_document_rtype = True
 # and the corruption together; non-``None`` returns are still documented.
 typehints_document_rtype_none = False
 
+# NB: ``False`` stays because ``True`` was measured, not because nobody tried it.
+# ``furo`` renders a sticky page-local TOC drawer on every page, and ``True`` adds
+# every documented object to it: across full builds either way the drawer on
+# ``pcapkit/const/reg.rst`` goes from 5 entries to 12,960, on
+# ``pcapkit/protocols/internet/mh.rst`` from 6 to 1,233, and tree-wide from 729 to
+# 22,261 -- while 120 of the 188 pages stay under 20 either way, so the entries
+# land on precisely the pages already hardest to read. ``True`` also took the build
+# from 109s to 1,052s.
+#
+# Capping the depth does not rescue it. The drawer's depth is a per-document
+# ``:tocdepth:`` field rather than a setting of its own -- though ``rst_prolog``
+# can default that field tree-wide, so a global cap is available. Either way the
+# only depth that keeps ``mh``'s drawer small is 2, and that is *worse* than
+# ``False`` rather than equal to it: it still admits the page's own top-level
+# class, and it drops two genuine headings (``Type Stubs``, ``Auxiliary
+# Functions``) that ``False`` shows.
 toc_object_entries = False
 
 # Add any paths that contain templates here, relative to this directory.
@@ -201,7 +217,7 @@ html_theme_options = {
     "top_of_page_button": "edit",  # None
 
     "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
-    "source_branch": "master",
+    "source_branch": "main",
     "source_directory": "docs/source/",
 
     "light_css_variables": {

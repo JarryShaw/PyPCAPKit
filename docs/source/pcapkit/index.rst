@@ -22,6 +22,7 @@ schema definitions as well as various customisable interfaces.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Subpackages
 
    interface/index
    foundation/index
