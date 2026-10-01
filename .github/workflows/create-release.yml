@@ -118,15 +118,21 @@ concurrency:
 # ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` all open with
 # ``!cancelled() && needs.unit-tests.result != 'failure'`` so that a skipped
 # gate does not cascade-skip them, while an outright failure or a genuine run
-# cancellation still does. ``tag``, ``pypi`` and ``conda`` below do the same for
-# each of their own direct dependencies, but spelled as ``!cancelled() &&
-# (needs.<job>.result == 'success' || needs.<job>.result == 'skipped')`` rather
-# than the sibling files' ``!= 'failure'`` -- ``!= 'failure'`` alone still
-# admits ``cancelled``, and a cancelled ``tag`` would send ``conda`` into its
+# cancellation still does. ``tag``, ``pypi`` and ``conda`` below are stricter
+# about their *publishing* predecessors -- ``github``, and for ``conda`` also
+# ``tag`` -- spelling the guard as ``!cancelled() && (needs.<job>.result ==
+# 'success' || needs.<job>.result == 'skipped')`` rather than the sibling files'
+# ``!= 'failure'``: the two spellings differ only when a predecessor's own
+# result is ``cancelled``, which ``!= 'failure'`` still admits and the equality
+# pair does not. A cancelled ``tag`` would otherwise send ``conda`` into its
 # ``actions/checkout`` with ``ref: conda-<version>+0`` for a tag ``tag`` never
-# pushed, trading a clean skip for a checkout failure. Either spelling bypasses
-# the default ``success()`` GitHub Actions would otherwise prepend to an
-# ``if:`` that does not itself call a status-check function.
+# pushed, trading a clean skip for a checkout failure. ``version_check`` is held
+# to a stricter bar still: all three require ``needs.version_check.result ==
+# 'success'`` with no ``|| 'skipped'``, since it produces the evidence the gates
+# below read, and a skipped or cancelled ``version_check`` leaves them nothing
+# to decide on. Either spelling bypasses the default ``success()`` GitHub
+# Actions would otherwise prepend to an ``if:`` that does not itself call a
+# status-check function.
 #
 # See ``release_status`` at the bottom of this file for the other half: a job
 # that runs whenever the run itself was not cancelled (``if: !cancelled()``,

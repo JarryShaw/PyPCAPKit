@@ -627,6 +627,64 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
                         f'admits `cancelled` -- see this test\'s own docstring',
                     )
 
+    def test_version_check_must_strictly_succeed(self) -> None:
+        """``version_check`` is not one of the *publishing* predecessors the
+        equality-pair escape hatch above exists for -- it produces the
+        evidence ``tag``, ``pypi`` and ``conda`` read, so a skipped or
+        cancelled ``version_check`` must stop them rather than being waved
+        through the way a legitimately-skipped ``github`` or ``tag`` is.
+
+        #960: the comment above ``jobs:`` once read as though the equality
+        pair applied to "each of their own direct dependencies", which is
+        false for ``version_check`` specifically -- a direct dependency of
+        all three, required to have *strictly* succeeded, with no
+        ``|| 'skipped'``. Nothing in this module pinned that before.
+
+        An ``assertNotIn`` over known-bad spellings cannot pin this, because a
+        weakening can keep the ``== 'success'`` literal while meaning the
+        opposite -- ``(!= 'failure' || == 'success')`` is just
+        ``!= 'failure'``, which admits both ``skipped`` and ``cancelled``.
+        Hence two assertions instead: the clause must appear as a top-level
+        ``&&`` conjunct, since vocabulary is not structure and a
+        one-character ``&&``-to-``||`` slip keeps every token while nullifying
+        the gate; and ``version_check.result`` must be referenced exactly
+        once, which closes the rest, since anything added alongside the real
+        clause raises the count however it is spelled.
+
+        Whitespace is stripped first so the pattern cannot be defeated by
+        padding around the property dots. That trade is deliberate: it closes
+        a hole that fails *open*, at the cost of reading an identifier or a
+        literal split across the folded scalar's line break as though it were
+        whole -- which fails *closed*, since Actions rejects the real
+        expression and nothing publishes.
+
+        **Knowingly not closed:** a top-level ``||`` outside the conjunction
+        chain. Appending ``|| github.event_name == 'workflow_dispatch'`` to the
+        end of the condition, or wrapping it in ``true || ...``, bypasses the
+        gate while leaving the compacted clause byte-identical. Conjunction is
+        monotone, so *adding* ``&&`` conjuncts can only strengthen the gate and
+        needs no guard; disjunction is the only remaining weakening, and
+        catching it needs the expression evaluated rather than matched. Tracked
+        as #962.
+
+        """
+        for name in ('tag', 'pypi', 'conda'):
+            with self.subTest(job=name):
+                compact = re.sub(r'\s+', '', declared_if(self.jobs[name]))
+                self.assertIn(
+                    "&&needs.version_check.result=='success'&&", compact,
+                    f'`{name}` does not require `version_check` to have '
+                    f'succeeded as a top-level `&&` conjunct -- a disjunct or '
+                    f'a negation keeps the same tokens while nullifying the '
+                    f'gate',
+                )
+                self.assertEqual(
+                    compact.count('version_check.result'), 1,
+                    f'`{name}` refers to `version_check.result` more than '
+                    f"once; the gate is one comparison, `== 'success'`, and a "
+                    f'second reference can only weaken it',
+                )
+
     def test_conda_checks_its_own_leg_before_uploading(self) -> None:
         """The correctness half for ``conda``: ``anaconda/actions/upload-package``
         has no ``skip-existing``, so the job-level evidence above is only a cost
