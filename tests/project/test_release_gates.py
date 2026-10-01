@@ -118,6 +118,17 @@ invisible to the text layer and obvious to the evaluator, while reversed
 operands are the exact opposite -- they do not change the truth table at all,
 so only the text layer has anything to say about them.
 
+#967: a truth table is only as discriminating as its rows, and #962's could not
+tell ``<evidence> == 'false'`` from ``<evidence> != 'true'``. Every row held the
+evidence outputs at a literal ``'true'`` or ``'false'``, where the two spellings
+agree, and the text layer never looks at *which* comparison is made against an
+output at all -- so the edit was invisible to both layers at once. They diverge
+only on an output that is neither, and for a publishing job that is the
+dangerous direction: ``!= 'true'`` runs where ``== 'false'`` skips, so evidence
+nothing established becomes a publish attempt. :func:`gate_rows` therefore
+carries one row per gated job holding that job's own evidence at ``null``, which
+is the only row in the table that mutation fails.
+
 :func:`evaluate_condition` implements the subset this workflow uses and
 nothing more: ``!``, ``&&``, ``||``, parentheses, ``==``/``!=`` against
 single-quoted literals, ``startsWith``, ``contains``, ``fromJSON``, the
@@ -907,6 +918,7 @@ def release_context(version_check: 'str' = 'success',
                     tag: 'str' = 'success',
                     ref_name: 'str' = 'main',
                     complete: 'tuple[str, ...]' = (),
+                    unknown: 'tuple[str, ...]' = (),
                     cancelled: 'bool' = False,
                     outputs_present: 'bool' = True,
                     event_name: 'str' = 'workflow_run',
@@ -926,6 +938,14 @@ def release_context(version_check: 'str' = 'success',
     other three incomplete, so a gate reading the wrong one reads the opposite
     answer.
 
+    ``unknown`` names the outputs that say *neither*, i.e. that hold
+    :data:`NULL` -- the value Actions serves for an output a job never set. One
+    output at ``null`` while the rest hold literals is the shape a third-party
+    action returning nothing leaves behind, and -- #967 -- the only shape on
+    which ``== 'false'`` and ``!= 'true'`` disagree. An output named in both
+    ``complete`` and ``unknown`` is ``null``: ``unknown`` is applied second, and
+    is written that way so the resolution is stated rather than incidental.
+
     ``outputs_present=False`` is the shape a *skipped* ``version_check``
     leaves behind -- no outputs at all, which Actions serves as ``null``
     rather than as ``''`` or as a zero. ``ref_name`` defaults to ``main``
@@ -934,10 +954,11 @@ def release_context(version_check: 'str' = 'success',
     ['v*']`` trigger.
 
     """
-    outputs = {}  # type: dict[str, str]
+    outputs = {}  # type: dict[str, object]
     if outputs_present:
         outputs = {name: ('true' if name in complete else 'false')
                    for name in GATE_EVIDENCE.values()}
+        outputs.update({name: NULL for name in unknown})
         outputs['PCAPKIT_VERSION'] = '1.5.0'
         outputs['PCAPKIT_PRERELEASE'] = 'false'
         outputs['PCAPKIT_CONDA_LABEL'] = 'main'
@@ -986,10 +1007,31 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
     * **All four corners of the ``startsWith(github.ref_name, 'v') ||
       <evidence> == 'false'`` disjunction**, with the other three evidence
       outputs inverted so that a gate reading the wrong one fails the row.
+    * **This job's own evidence at ``null``**, on a non-``v`` ref and with
+      ``version_check`` otherwise successful. #967: the one shape on which
+      ``== 'false'`` and ``!= 'true'`` disagree, and the only row of this table
+      that tells them apart. Every row above holds the evidence outputs at a
+      literal, where the two spellings agree; the ``its outputs never
+      published`` rows do hold them at ``null``, but only alongside a
+      non-``success`` ``version_check``, where the gate is already false before
+      the evidence clause is reached. The other three outputs stay ``'false'``,
+      so a gate reading somebody else's evidence runs where this row demands a
+      skip, and the row keeps the cross-evidence trap the rows above set.
 
     Held false in every row but the two cancellation rows: ``cancelled()``.
     Holding it *true* elsewhere would make each row pass for any mutation that
     keeps ``!cancelled()``, which is most of them.
+
+    The ``null`` row guards a future change rather than a present bug, and is
+    kept on those terms. Neither curl-based evidence check can produce an empty
+    output as the workflow stands: ``PCAPKIT_PYPI_COMPLETE`` and
+    ``PCAPKIT_CONDA_COMPLETE`` both default ``complete=false`` and only then set
+    ``true``, under ``set -euo pipefail``. ``PCAPKIT_TAG_EXISTS`` and
+    ``PCAPKIT_CONDA_TAG_EXISTS`` are the ones not in this repository's hands:
+    they come from ``mukunku/tag-exists-action@v1.7.0``, in ``version_check``'s
+    ``check_tag`` and ``check_conda_tag`` steps, and ``tag``'s gate reads the
+    second of them. So for one of the three jobs the shape is a third party's
+    to produce, and for the other two it is one rewritten shell step away.
 
     """
     evidence = GATE_EVIDENCE[job]
@@ -1024,6 +1066,9 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
                                 complete=(evidence,) if already else others),
                 ref_name.startswith('v') or not already,
             ))
+
+    rows.append((f'ref_name=main, {evidence}=null',
+                 release_context(unknown=(evidence,)), False))
     return rows
 
 
@@ -1477,6 +1522,14 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
     #: condition only: each says "``github`` runs *as far as its own ``if:``
     #: is concerned*", which is a necessary and not a sufficient condition for
     #: the job running.
+    #:
+    #: ``version_check published no outputs at all`` carries more weight than
+    #: its name suggests. It holds every output at ``null`` while leaving
+    #: ``version_check.result`` at ``success``, which makes it the one row here
+    #: that tells ``== 'false'`` from ``!= 'true'`` -- the #967 hole the three
+    #: downstream tables did have. Both halves of it are load-bearing, and
+    #: ``test_githubs_own_table_tells_equal_false_from_not_equal_true`` is what
+    #: records that rather than leaving it to be rediscovered.
     GITHUB_ROWS = [
         ('a fresh version, not yet tagged', release_context(), True),
         ('the v* tag already exists',
@@ -1526,7 +1579,7 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         runs, which is #888 rather than a fix for it.
 
         """
-        for job, expected in (('tag', 17), ('pypi', 17), ('conda', 21)):
+        for job, expected in (('tag', 18), ('pypi', 18), ('conda', 22)):
             with self.subTest(job=job):
                 rows = gate_rows(job)
                 self.assertEqual(
@@ -1655,10 +1708,13 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: mutations have to be the *small* edits a review round produces -- a
     #: regenerated condition would differ in ways nobody would have typed.
     #:
-    #: The first eight are the mutations #962 names; the rest are this
+    #: The first eight are the mutations #962 names; the next five are this
     #: module's own, covering the clauses the issue only points at -- the
     #: publishing predecessors' equality pair, the ``startsWith``
-    #: short-circuit, and reading somebody else's evidence.
+    #: short-circuit, and reading somebody else's evidence. The last is #967's,
+    #: and is the only row here that the table as #962 left it did not catch at
+    #: all: it is rejected by exactly one scenario -- the ``null`` evidence row
+    #: :func:`gate_rows` grew for it -- and by no text assertion.
     MUTATIONS = [
         ('the && before the version_check clause becomes ||',
          "!cancelled() && needs.version_check.result",
@@ -1710,6 +1766,9 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
         ("the gate reads github's v* tag as its evidence again",
          '<evidence>', 'PCAPKIT_TAG_EXISTS',
          ('evaluator', 'text')),
+        ("the evidence check becomes != 'true', so unknown evidence publishes",
+         "<evidence> == 'false'", "<evidence> != 'true'",
+         ('evaluator',)),
     ]
 
     def _mutate(self, condition: 'str', job: 'str', old: 'str', new: 'str') -> 'str':
@@ -1790,6 +1849,47 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
                         f'mutating `{job}` so that {name} is caught by neither layer: '
                         f'{mutant!r}',
                     )
+
+    def test_githubs_own_table_tells_equal_false_from_not_equal_true(self) -> None:
+        """#967 for ``github``, which the table above cannot reach.
+
+        Both layers are downstream-only -- :func:`gate_rows` keys on
+        :data:`PUBLISHING_PREDECESSORS`, which has no ``github`` entry, and
+        :func:`text_gate_violations` says in its own docstring why ``github``
+        is not a fourth case of the assertions it mirrors. So the same question
+        has to be asked of ``github``'s own table separately, and the answer
+        measured rather than assumed: the hole #967 found in the three
+        downstream tables is *not* in this one.
+        ``TestGateExpressionsEvaluateCorrectly.GITHUB_ROWS`` already
+        discriminates, via ``version_check published no outputs at all`` --
+        which holds every output at ``null`` while leaving
+        ``version_check.result`` at ``success``, so this gate's evidence clause
+        alone decides the row.
+
+        That is a property of that row rather than of the gate, which is why it
+        is pinned here: a row rewritten to fail ``version_check`` as well, or
+        dropped as redundant, would take the discrimination with it and nothing
+        else in this module would notice. The assertion is about the *declared*
+        condition, per the framing on ``GITHUB_ROWS``: the mutation turns a row
+        that definitely skips into one whose ``if:`` no longer says so, and
+        whether the job then runs is the implicit ``success()``'s business.
+
+        """
+        condition = declared_if(self.jobs['github'])
+        evidence = GATE_EVIDENCE['github']
+        mutant = condition.replace(f"{evidence} == 'false'", f"{evidence} != 'true'")
+        self.assertNotEqual(mutant, condition)
+
+        rows = TestGateExpressionsEvaluateCorrectly.GITHUB_ROWS
+        disagreements = [name for name, context, expected in rows
+                         if evaluate_condition(mutant, context) != expected]
+        self.assertTrue(
+            disagreements,
+            f'no row of `GITHUB_ROWS` tells `{evidence} == \'false\'` from '
+            f'`{evidence} != \'true\'`, so `github`\'s gate could be weakened into '
+            f'one that runs on evidence nothing established without this table '
+            f'noticing: {mutant!r}',
+        )
 
 
 class TestTheExpressionEvaluator(unittest.TestCase):
