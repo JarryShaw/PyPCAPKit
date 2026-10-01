@@ -851,12 +851,30 @@ from the same test.
 
 Worth spelling out how that workflow is *reached*, because reading its ``on:``
 block alone suggests it is not reachable from an ordinary commit at all — it
-lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain is:
+lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain is three
+hops, not two: a push to ``main`` triggers **Unit Tests**
+(``unit-tests.yml``), whose completion triggers **Vendor Update**
+(``cron-vendor.yml``) via ``workflow_run`` -- ``cron-vendor.yml`` carries no
+``push`` trigger of its own, deliberately, per its own comment at
+``cron-vendor.yml:6-13`` -- and *that* completion triggers **Create Release**
+itself. :doc:`workflows` draws the repository-wide version of this graph;
+here is just the path that matters for a release:
 
-.. code-block:: text
+.. mermaid::
 
-   push to main  ->  "Vendor Update"   (cron-vendor.yml, which triggers on push to main)
-                 ->  "Create Release"  (workflow_run, on Vendor Update completing)
+   flowchart TD
+       PUSH["push: main"]
+
+       UT["Unit Tests<br/>unit-tests.yml"]
+       VU["Vendor Update<br/>cron-vendor.yml"]
+       CR["Create Release<br/>create-release.yml"]
+
+       PUSH --> UT
+       UT ==>|workflow_run: completed| VU
+       VU ==>|workflow_run: completed| CR
+
+       classDef trig fill:none,stroke-dasharray:2 2
+       class PUSH trig
 
 Every publishing job — ``github``, ``tag``, ``pypi``, ``conda`` — is gated on
 ``startsWith(github.ref_name, 'v')`` or on evidence that its own target still
