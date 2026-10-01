@@ -17,7 +17,7 @@ vendor crawlers include:
 
 Both source the assignment from |pycrate|_'s already-installed, compiled NGAP
 specification rather than fetching a network registry -- see the module
-docstring below for why, and GitHub issue #880 for the ruling.
+docstring below for why.
 
 NGAP Elementary Procedure Codes
 ===============================

@@ -750,11 +750,11 @@ comprehensive implementation can be found in the
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>Declare every construction keyword your protocol accepts.</strong> Since #617,
-building a protocol <em>through its constructor</em> with a keyword that no signature
+<p><strong>Declare every construction keyword your protocol accepts.</strong> Building a
+protocol <em>through its constructor</em> with a keyword that no signature
 declares raises <a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than
-discarding it, so a misspelling costs an exception instead of a silently wrong
-field. The accepted set is read from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> – the union of every
+discarding it silently, so a misspelling costs an exception instead of a
+silently wrong field. The accepted set is read from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> – the union of every
 keyword-taking parameter of <code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code>,
 <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and <code class="docutils literal notranslate"><span class="pre">__init__</span></code> anywhere in the class’s MRO – which is
 wider than <code class="docutils literal notranslate"><span class="pre">make</span></code> alone because <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__post_init__</span></code> hands the same
@@ -792,8 +792,8 @@ discards an undeclared keyword in silence. <code class="docutils literal notrans
 is the idiom that reaches it, used by this package’s own tests and by
 <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its
 versioned implementation. Covering that would mean interposing on every
-<code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree, which is a larger change than #617 and was deliberately
-not made. Construct through the constructor to get the check.</p>
+<code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree – a larger change that was deliberately not made.
+Construct through the constructor to get the check.</p>
 </div>
 </div>
 <div class="admonition note">

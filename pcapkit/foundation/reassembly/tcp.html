@@ -868,10 +868,9 @@ is as following:</p>
 shared by every ACK in this dict, while each ACK’s own <code class="docutils literal notranslate"><span class="pre">raw</span></code> is
 private to it, so a different ACK’s segment closing a hole in <code class="docutils literal notranslate"><span class="pre">hdl</span></code>
 says nothing about whether <em>this</em> ACK has received anything at the
-same sequence numbers – consulting <code class="docutils literal notranslate"><span class="pre">hdl</span></code> for that question
-previously discarded a fragment’s own real bytes whenever a different
-ACK bucket under the same buffer ID happened to cover the same range
-first.</p>
+same sequence numbers – consulting <code class="docutils literal notranslate"><span class="pre">hdl</span></code> for that question would
+discard a fragment’s own real bytes whenever a different ACK bucket
+under the same buffer ID happens to cover the same range first.</p>
 <p><code class="docutils literal notranslate"><span class="pre">gap</span></code> is kept in the same <strong>absolute, inclusive sequence number</strong>
 convention as <code class="docutils literal notranslate"><span class="pre">conflict</span></code> above (and as <code class="docutils literal notranslate"><span class="pre">hdl</span></code>’s own hole
 descriptors), rather than as a per-octet marker aligned with <code class="docutils literal notranslate"><span class="pre">raw</span></code>.

@@ -109,9 +109,9 @@ Terminology
           overlapping fragment's disagreement itself -- "this procedure will
           use the more recently arrived copy in the data buffer" -- the
           opposite resolution from TCP's first-write-wins
-          (:rfc:`9293#section-3.10`, fixed for TCP by #443) -- so a contested
+          (:rfc:`9293#section-3.10`) -- so a contested
           range never leaves a hole on its own, and ``conflict`` is what lets
-          a caller tell a clean datagram from a contested one. See #477.
+          a caller tell a clean datagram from a contested one.
 
    reasm.ipv4.buffer
        Data structure for internal buffering when performing reassembly algorithms

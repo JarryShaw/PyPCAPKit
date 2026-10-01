@@ -5,7 +5,7 @@ IPv6_Ext - IPv6 Extension Header
 
 :mod:`pcapkit.protocols.internet.ipv6_ext` contains
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-only, which serves two roles at once (GitHub issue #917): it is the
+only, which serves two roles at once: it is the
 shared **base class** of all eight IPv6 extension headers this package
 implements -- supplying them the ``extension``-mode contract, i.e. the
 guards that make :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload`,

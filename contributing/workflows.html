@@ -485,8 +485,7 @@
 <p>The eight workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
 the chain that results is not visible from any single file – reading one
 <code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
-to start. This page is the repository-wide graph, requested on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/897">#897</a>. It does not
+to start. This page is the repository-wide graph. It does not
 cover the release <em>pipeline</em> itself – the job-by-job path from a version
 bump to a published package – which <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> already documents in
 full; this page cross-references that rather than duplicating it.</p>
@@ -654,8 +653,8 @@ re-running the gate a second time.</p>
 </section>
 <section id="workflow-run-edges">
 <h2><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> edges<a class="headerlink" href="#workflow-run-edges" title="Link to this heading">¶</a></h2>
-<p>Four in total – one more than the three named in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/897">#897</a>’s own description,
-found by grepping every <code class="docutils literal notranslate"><span class="pre">on:</span></code> block rather than trusting that list:</p>
+<p>Four in total, found by grepping every <code class="docutils literal notranslate"><span class="pre">on:</span></code> block rather than trusting a
+hand-maintained list:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml:14-16</span></code> – <strong>Vendor Update</strong> fires on
 completion of <strong>Unit Tests</strong>.</p></li>

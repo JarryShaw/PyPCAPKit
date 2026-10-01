@@ -484,13 +484,10 @@
 module-level singleton sentinel this package defines for itself – a value
 whose only job is to be recognised by identity (<code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">is</span> <span class="pre">SENTINEL</span></code>), so
 that it can never be confused with a value a caller might legitimately pass.</p>
-<p>Each of the three below used to live beside the one class that consumed it –
-<a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> in <a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a> in
-<a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> in
-<a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> – until GitHub issue #911 moved all four
-definitions here, the private <code class="docutils literal notranslate"><span class="pre">AbsentType</span></code>/<code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> included. Each
-original module keeps a re-export, so every existing <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span>
-<span class="pre">&lt;name&gt;</span></code> keeps working unchanged.</p>
+<p>All four are defined here. The three public ones are also re-exported by
+<a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> and
+<a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> respectively, so <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span> <span class="pre">&lt;name&gt;</span></code>
+resolves from either path.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NullType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NullType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NullType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NullType" title="Link to this definition">¶</a></dt>
@@ -797,16 +794,11 @@ names this object in its signature and docstring.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are <strong>private</strong> – never imported outside
-<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, and named in no module’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code>. Until
-GitHub issue #937, the leading underscore they carried (<code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code>/
-<code class="docutils literal notranslate"><span class="pre">_Absent</span></code>) hid them from Sphinx automatically, the way it hides every other
-<code class="docutils literal notranslate"><span class="pre">_</span></code>-prefixed name; dropping the underscore for SCREAMING_SNAKE consistency with
-the other three sentinels (see <a class="reference internal" href="../../contributing/conventions/sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a>) means Sphinx would
-otherwise document them as though they were public. They are documented below
-instead, explicitly marked private, per the maintainer’s ruling on #937: <em>“we can
-change</em> <code class="docutils literal notranslate"><span class="pre">_ABSENT</span></code> <em>to</em> <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> <em>just document it as private type/class in the
-documentation and not for public use is enough.”</em> Neither is for use outside this
-package.</p>
+<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, and named in no module’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code>. For
+SCREAMING_SNAKE consistency with the other three sentinels (see
+<a class="reference internal" href="../../contributing/conventions/sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a>), neither carries the leading underscore that would
+otherwise hide it from Sphinx automatically, so both are documented below and
+explicitly marked private. Neither is for use outside this package.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.AbsentType">

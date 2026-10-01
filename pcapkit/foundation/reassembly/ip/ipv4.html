@@ -615,9 +615,9 @@ and still carry a non-empty <code class="docutils literal notranslate"><span cla
 overlapping fragment’s disagreement itself – “this procedure will
 use the more recently arrived copy in the data buffer” – the
 opposite resolution from TCP’s first-write-wins
-(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>, fixed for TCP by #443) – so a contested
+(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – so a contested
 range never leaves a hole on its own, and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is what lets
-a caller tell a clean datagram from a contested one. See #477.</p>
+a caller tell a clean datagram from a contested one.</p>
 </div>
 </dd>
 <dt id="term-reasm.ipv4.buffer">reasm.ipv4.buffer<a class="headerlink" href="#term-reasm.ipv4.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms

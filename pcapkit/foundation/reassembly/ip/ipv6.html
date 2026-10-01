@@ -567,8 +567,7 @@ reassembled packet. <a class="reference internal" href="../../../protocols/inter
 does count it – it is a header length, and the Fragment header is one
 of the extension headers it has walked – so the adapters subtract it
 back off. All four adapters (<code class="docutils literal notranslate"><span class="pre">pcap</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapng</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and
-<code class="docutils literal notranslate"><span class="pre">scapy</span></code>) agree on the three fields; they used to report three
-different values for <code class="docutils literal notranslate"><span class="pre">tl</span></code> alone, which is what #415 was about.</p>
+<code class="docutils literal notranslate"><span class="pre">scapy</span></code>) agree on the three fields.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -648,9 +647,9 @@ and still carry a non-empty <code class="docutils literal notranslate"><span cla
 overlapping fragment’s disagreement itself – “this procedure will
 use the more recently arrived copy in the data buffer” – the
 opposite resolution from TCP’s first-write-wins
-(<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>, fixed for TCP by #443) – so a contested
+(<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – so a contested
 range never leaves a hole on its own, and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is what lets
-a caller tell a clean datagram from a contested one. See #477.</p>
+a caller tell a clean datagram from a contested one.</p>
 </div>
 </dd>
 <dt id="term-reasm.ipv6.buffer">reasm.ipv6.buffer<a class="headerlink" href="#term-reasm.ipv6.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms

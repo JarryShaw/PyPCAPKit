@@ -485,9 +485,7 @@
 <p>This page records the <strong>operational contract</strong> for cutting a release –
 what a maintainer is expected to touch by hand, what the workflow is
 expected to do unattended, and the precautions that follow from the two
-being different. Settled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, which also
-collapsed what used to be four separate approvals into one.</p>
+being different.</p>
 <p>The short version: <strong>the only manual edit is bumping</strong>
 <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code>. Everything else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub
 Release, the PyPI and Anaconda uploads, the <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit
@@ -687,17 +685,15 @@ approval it was supposed to wait for.</p>
 <h2>Precautions<a class="headerlink" href="#precautions" title="Link to this heading">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>A half-finished release used to leave a ``v*`` tag that made every retry
-skip silently.</strong> <code class="docutils literal notranslate"><span class="pre">github</span></code> creates the tag; if <code class="docutils literal notranslate"><span class="pre">pypi</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code> then
-failed (or was rejected), the tag existed with the upload incomplete, and
-the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered attempt read <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS=true</span></code>
-with <code class="docutils literal notranslate"><span class="pre">ref_name=main</span></code> and skipped every job on that one shared check –
-the run finished green, because skipped is not failed, and nothing in the
-UI said a release did not happen. This was
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>.</p>
-<p>Fixed by <a class="reference internal" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">Each job past version_check reads its own evidence, not a shared
-proxy</a> above: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> now check whether <em>their own</em>
-artefact is missing, not whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an incomplete
+<p><strong>Do not gate a release job on whether the ``v*`` tag exists.</strong> <code class="docutils literal notranslate"><span class="pre">github</span></code>
+creates the tag before <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> upload, so a tag proves nothing
+about whether the upload finished. A job keyed on <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS</span></code>
+skips itself on a retry after a partial release, and the run finishes green
+because skipped is not failed – so nothing in the UI says the release did
+not happen.</p>
+<p><a class="reference internal" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">Each job past version_check reads its own evidence, not a shared proxy</a>
+above is what prevents it: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
+<em>their own</em> artefact is missing rather than whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an incomplete
 release runs the jobs that did not finish instead of skipping them. A
 half-finished release now self-heals on the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered
 attempt, or on re-running the workflow by hand – see <a class="reference internal" href="#recovery">Recovery</a> below.
