@@ -96,10 +96,61 @@ catch, because none of them executed anything the workflow itself executes:
   interpreter is 3.14 itself, which is exactly how both defects shipped
   despite every earlier test in this module passing.
 
+#962: the same argument, one layer up, now against the ``if:`` expressions
+themselves. Four review rounds on #961 produced twenty mutations of a single
+clause, and each strengthening of the text assertions was defeated by one the
+previous round had not anticipated -- because vocabulary is not structure and
+structure is not meaning. :class:`TestGateExpressionsEvaluateCorrectly`
+**evaluates** each gate instead, over a table of the scenarios a real run can
+be in, so a mutation is caught when it changes the gate's truth table however
+it is spelled: reversed operands, ``contains(fromJSON(...))``, a ``!=``
+negation, a ``true ||`` prefix and a one-character ``&&``-to-``||`` slip all
+land in the same place.
+
+The text assertions **stay** rather than being replaced, settled on #962
+itself. They cost nothing, they fail with a message naming the clause rather
+than naming a scenario row, and an evaluator bug would otherwise leave the
+gates unpinned entirely -- which is #962's own failure mode reintroduced one
+layer down. The two layers also catch genuinely different things, and
+:class:`TestGateMutationsChangeTheTruthTable` records which layer rejects
+which mutation instead of leaving that to be assumed: a ``true ||`` prefix is
+invisible to the text layer and obvious to the evaluator, while reversed
+operands are the exact opposite -- they do not change the truth table at all,
+so only the text layer has anything to say about them.
+
+:func:`evaluate_condition` implements the subset this workflow uses and
+nothing more: ``!``, ``&&``, ``||``, parentheses, ``==``/``!=`` against
+single-quoted literals, ``startsWith``, ``contains``, ``fromJSON``, the
+status-check functions, and ``needs.<job>.result`` /
+``needs.<job>.outputs.<NAME>`` / ``github.*`` lookups. ``contains``,
+``fromJSON`` and ``always()`` appear in no gate on the tree -- they are
+implemented because the mutation table needs them *evaluated* rather than
+rejected, since a parse error would otherwise look like a caught mutation
+while proving nothing about the truth table. Anything outside the subset
+raises :exc:`UnsupportedExpression`, and
+``test_every_declared_if_is_evaluable`` is what makes the file growing past
+that subset a loud failure rather than a silent gap.
+
+Two things the evaluator deliberately does **not** model, both of them runner
+behaviour rather than expression semantics:
+
+* **The implicit ``success()``** Actions prepends to an ``if:`` that calls no
+  status-check function itself. It applies to ``github``, which is why
+  ``test_github_runs_when_its_own_v_tag_is_missing`` evaluates the *declared*
+  condition and says so; it does not apply to ``tag``/``pypi``/``conda``,
+  which all open with ``!cancelled()``, so for those three the declared
+  condition is the whole gate.
+* **The cascade-skip** that skips a job whose ``needs:`` included a skipped
+  job before that job's own ``if:`` is evaluated at all. Escaping it is what
+  ``!cancelled()`` is *for*, and
+  ``test_evidence_gated_jobs_survive_a_legitimately_skipped_predecessor``
+  pins it textually above, because nothing runnable here can observe it.
+
 """
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 import shutil
@@ -399,6 +450,650 @@ def pre_314_interpreter() -> 'Optional[str]':
     return None
 
 
+class UnsupportedExpression(Exception):
+    """Expression syntax :func:`evaluate_condition` does not implement.
+
+    #962 asks for an evaluator over the subset the gates in this workflow
+    actually use, and explicitly not for a GitHub Actions expression
+    implementation. The two agree only while the file stays inside that
+    subset, so leaving it has to be loud: a condition this module cannot parse
+    is a condition it is not checking, and quietly treating one as true or as
+    false would leave the gates unpinned while the suite still reported green
+    -- which is #962's own failure mode, reintroduced one layer down.
+
+    """
+
+
+class _Null:
+    """GitHub Actions' ``null``, which an unset context property evaluates to.
+
+    Kept distinct from :data:`None` so that a scenario row holding ``None`` by
+    mistake cannot be read as a deliberate unset, and so a failure message
+    spells the value the way Actions does.
+
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> 'str':
+        return 'null'
+
+
+#: Actions' ``null``, compared by identity. An unset context property is this
+#: rather than ``''``: ``null == 'false'`` is false, which is what makes a
+#: *skipped* ``version_check`` -- a job that published no outputs at all --
+#: stop the gates below it rather than being read as "evidence says incomplete".
+NULL = _Null()
+
+#: The key under which an evaluation context carries the status-check
+#: functions' answers. Spelled with parentheses so no lookup can reach it:
+#: :data:`_EXPR_TOKEN` cannot produce ``status()`` as a name, so this cannot
+#: collide with a real Actions context root however the workflow grows.
+STATUS = 'status()'
+
+#: One token of the expression subset. ``!=`` precedes ``!`` because a regex
+#: alternation is ordered and ``!`` would otherwise swallow the ``!`` of
+#: ``!=``, turning ``a != b`` into a negation followed by a stray ``=``.
+#: Property paths are tokenised whole, dots and hyphens included, since
+#: ``needs.unit-tests.result`` is one lookup and not an arithmetic expression.
+_EXPR_TOKEN = re.compile(
+    r"""  (?P<space>\s+)
+        | (?P<op>&&|\|\||==|!=|\(|\)|,|!)
+        | (?P<string>'(?:[^']|'')*')
+        | (?P<name>[A-Za-z_][A-Za-z0-9_.-]*)
+    """,
+    re.VERBOSE,
+)
+
+#: A whole-value interpolation, which is the only form any ``if:`` in this
+#: workflow uses. Actions also accepts a bare expression for ``if:``, which
+#: :func:`parse_condition` allows; what it does not allow is a *template* --
+#: two interpolations, or text around one -- since concatenating a condition
+#: out of fragments is outside the subset and must not be guessed at.
+_INTERPOLATION = re.compile(r'^\$\{\{(?P<body>.*)\}\}$', re.DOTALL)
+
+#: ``{name: argument count}`` for the functions evaluated here, matched
+#: case-insensitively the way Actions matches them. ``success`` and ``failure``
+#: are parsed but have no answer without a scenario that says what they
+#: return, so :func:`_call` raises for them rather than guessing -- no gate in
+#: this workflow calls either, and a fabricated answer would quietly decide a
+#: row that nothing had actually modelled.
+_FUNCTIONS = {
+    'always': 0,
+    'cancelled': 0,
+    'success': 0,
+    'failure': 0,
+    'startswith': 2,
+    'contains': 2,
+    'fromjson': 1,
+}
+
+
+def _tokenize(body: 'str') -> 'list[tuple[str, str]]':
+    """``[(kind, text)]`` for ``body``, with whitespace dropped.
+
+    Raises at the first character no token matches rather than skipping it: a
+    dropped character silently turns the expression under test into a
+    different expression, which is the one outcome this module must not have.
+
+    """
+    tokens = []  # type: list[tuple[str, str]]
+    position = 0
+    while position < len(body):
+        match = _EXPR_TOKEN.match(body, position)
+        if match is None:
+            raise UnsupportedExpression(
+                f'cannot tokenise {body[position:position + 24]!r} at offset {position} '
+                f'of {body!r}; see this module\'s docstring for the subset implemented'
+            )
+        position = match.end()
+        if match.lastgroup != 'space':
+            tokens.append((str(match.lastgroup), match.group()))
+    return tokens
+
+
+class _Parser:
+    """Recursive-descent parser for the subset, producing a tuple tree.
+
+    A tree rather than evaluating as it goes, for two reasons. One parse then
+    serves every row of a scenario table, which is most of what the table
+    costs. And ``&&``/``||`` can short-circuit *evaluation* without also
+    short-circuiting the parse, which has to consume its right operand's
+    tokens either way -- conflating the two is how a parser silently accepts
+    an expression it never looked at.
+
+    Precedence, tightest first: ``!``, then ``==``/``!=``, then ``&&``, then
+    ``||``. That is Actions' own order, and it is the whole reason a
+    ``&&``-to-``||`` slip is a weakening rather than a syntax error.
+
+    """
+
+    def __init__(self, tokens: 'list[tuple[str, str]]') -> None:
+        self.tokens = tokens
+        self.index = 0
+
+    def parse(self) -> 'tuple':
+        """The whole token list as one tree, or raise if any token is left over."""
+        node = self.disjunction()
+        if self.index != len(self.tokens):
+            raise UnsupportedExpression(
+                f'{self.tokens[self.index][1]!r} is left over after a complete '
+                f'expression, at token {self.index} of {self.tokens!r}'
+            )
+        return node
+
+    def _peek(self) -> 'Optional[tuple[str, str]]':
+        if self.index < len(self.tokens):
+            return self.tokens[self.index]
+        return None
+
+    def _accept(self, text: 'str') -> 'bool':
+        token = self._peek()
+        if token is not None and token[1] == text:
+            self.index += 1
+            return True
+        return False
+
+    def _expect(self, text: 'str') -> None:
+        if not self._accept(text):
+            raise UnsupportedExpression(f'expected {text!r}, found {self._peek()!r}')
+
+    def disjunction(self) -> 'tuple':
+        node = self.conjunction()
+        while self._accept('||'):
+            node = ('or', node, self.conjunction())
+        return node
+
+    def conjunction(self) -> 'tuple':
+        node = self.comparison()
+        while self._accept('&&'):
+            node = ('and', node, self.comparison())
+        return node
+
+    def comparison(self) -> 'tuple':
+        node = self.unary()
+        for operator, kind in (('==', 'eq'), ('!=', 'ne')):
+            if self._accept(operator):
+                return (kind, node, self.unary())
+        return node
+
+    def unary(self) -> 'tuple':
+        if self._accept('!'):
+            return ('not', self.unary())
+        return self.primary()
+
+    def primary(self) -> 'tuple':
+        token = self._peek()
+        if token is None:
+            raise UnsupportedExpression('the expression ends where a term was expected')
+
+        kind, text = token
+        if text == '(':
+            self.index += 1
+            node = self.disjunction()
+            self._expect(')')
+            return node
+
+        if kind == 'string':
+            self.index += 1
+            # Actions escapes a single quote inside a single-quoted literal by
+            # doubling it, so `'it''s'` is one literal and not two.
+            return ('lit', text[1:-1].replace("''", "'"))
+
+        if kind == 'name':
+            self.index += 1
+            lowered = text.casefold()
+            if lowered in ('true', 'false'):
+                return ('lit', lowered == 'true')
+            if lowered == 'null':
+                return ('lit', NULL)
+            if self._accept('('):
+                return ('call', lowered, self._arguments(text))
+            return ('path', text)
+
+        raise UnsupportedExpression(f'unexpected {text!r} where a term was expected')
+
+    def _arguments(self, name: 'str') -> 'list[tuple]':
+        """The argument list of ``name(...)``, with its arity checked here.
+
+        Checked at parse time rather than at evaluation time so that an
+        unknown function, or a known one called wrongly, fails once for the
+        whole scenario table instead of once per row.
+
+        """
+        arguments = []  # type: list[tuple]
+        if not self._accept(')'):
+            arguments.append(self.disjunction())
+            while self._accept(','):
+                arguments.append(self.disjunction())
+            self._expect(')')
+
+        lowered = name.casefold()
+        if lowered not in _FUNCTIONS:
+            raise UnsupportedExpression(
+                f'`{name}()` is outside the subset this module implements; see '
+                f'the module docstring'
+            )
+        if len(arguments) != _FUNCTIONS[lowered]:
+            raise UnsupportedExpression(
+                f'`{name}()` takes {_FUNCTIONS[lowered]} argument(s), called with '
+                f'{len(arguments)}'
+            )
+        return arguments
+
+
+def parse_condition(condition: 'str') -> 'tuple':
+    """``condition`` -- an ``if:`` value -- as a tree :func:`_evaluate` can walk.
+
+    Strips the surrounding ``${{ ... }}`` when there is one. A value holding
+    more than one interpolation, or text outside it, raises: that is template
+    concatenation rather than an expression, and nothing in this workflow uses
+    it.
+
+    """
+    body = condition.strip()
+    match = _INTERPOLATION.match(body)
+    if match is not None:
+        body = match.group('body')
+    if '${{' in body or '}}' in body:
+        raise UnsupportedExpression(
+            f'{condition!r} is not a single whole-value expression; an `if:` built '
+            f'out of several interpolations is outside the subset'
+        )
+    return _Parser(_tokenize(body)).parse()
+
+
+def _truthy(value: 'object') -> 'bool':
+    """Actions' own truthiness: ``false``, ``''``, ``0`` and ``null`` are false.
+
+    This is what an ``if:`` is finally reduced to, so it is also where a
+    mutation that keeps every token and changes only the *shape* of the
+    expression shows up as a different answer.
+
+    """
+    if value is NULL:
+        return False
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value != ''
+    if isinstance(value, (int, float)):
+        return value != 0
+    return True  # an array or object, e.g. from `fromJSON`, is truthy
+
+
+def _as_string(value: 'object') -> 'str':
+    """``value`` cast to a string the way Actions casts it."""
+    if value is NULL:
+        return ''
+    if isinstance(value, bool):
+        return 'true' if value else 'false'
+    return str(value)
+
+
+def _as_number(value: 'object') -> 'float':
+    """``value`` cast to a number the way Actions casts it for a comparison.
+
+    A non-numeric string becomes ``NaN``, which is never equal to anything --
+    including to itself. That is not a detail: it is why ``'true' == true`` is
+    *false* in Actions, and getting it wrong here would make the evaluator
+    disagree with the runner on exactly the kind of mixed comparison a
+    mutation is likely to introduce.
+
+    """
+    if value is NULL:
+        return 0.0
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, str):
+        if not value.strip():
+            return 0.0
+        try:
+            return float(value.strip())
+        except ValueError:
+            return float('nan')
+    if isinstance(value, (int, float)):
+        return float(value)
+    return float('nan')  # an array or object never equals a scalar
+
+
+def _loose_eq(left: 'object', right: 'object') -> 'bool':
+    """``left == right`` under Actions' rules.
+
+    Same-type operands compare directly, and **string comparison is
+    case-insensitive** -- Actions documents that, and every literal in this
+    workflow is lower case, so it changes no answer here and is implemented
+    only so that the evaluator does not diverge from the runner on a mutation
+    that changes case. Mixed types are cast to a number first, per
+    :func:`_as_number`.
+
+    """
+    if isinstance(left, str) and isinstance(right, str):
+        return left.casefold() == right.casefold()
+    if isinstance(left, bool) and isinstance(right, bool):
+        return left is right
+    if left is NULL and right is NULL:
+        return True
+    return _as_number(left) == _as_number(right)
+
+
+def _lookup(path: 'str', context: 'dict[str, object]') -> 'object':
+    """The value at a dotted context ``path``, or :data:`NULL` if unset.
+
+    An unset *property* is ``null``, which is what Actions serves and what a
+    skipped job's outputs actually look like. An unknown context *root*
+    raises instead: ``steps.foo.bar`` in a job-level ``if:`` is not an unset
+    property, it is an expression this module has never modelled, and
+    answering ``null`` for it would decide a scenario row by accident.
+
+    """
+    parts = path.split('.')
+    if parts[0] not in context:
+        raise UnsupportedExpression(
+            f'`{path}` reads the context root `{parts[0]}`, which no scenario here '
+            f'models; known roots are {sorted(context)}'
+        )
+
+    current = context  # type: object
+    for part in parts:
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        else:
+            return NULL
+    return current
+
+
+def _call(name: 'str', arguments: 'list[object]', context: 'dict[str, object]') -> 'object':
+    """One function call, its arguments already evaluated."""
+    if name == 'always':
+        return True
+    if name in ('cancelled', 'success', 'failure'):
+        status = context.get(STATUS, {})
+        if not isinstance(status, dict) or name not in status:
+            raise UnsupportedExpression(
+                f'this condition calls `{name}()`, which no scenario row says the '
+                f'answer to -- add it to `release_context` rather than letting the '
+                f'row be decided by a default'
+            )
+        return bool(status[name])
+    if name == 'fromjson':
+        return json.loads(_as_string(arguments[0]))
+    if name == 'startswith':
+        # `startsWith` is case-insensitive and casts both operands, same as `==`.
+        return _as_string(arguments[0]).casefold().startswith(_as_string(arguments[1]).casefold())
+    if name == 'contains':
+        haystack, needle = arguments
+        if isinstance(haystack, list):
+            return any(_loose_eq(item, needle) for item in haystack)
+        return _as_string(needle).casefold() in _as_string(haystack).casefold()
+    raise UnsupportedExpression(f'`{name}()` is parsed but not evaluated')  # pragma: no cover
+
+
+def _evaluate(node: 'tuple', context: 'dict[str, object]') -> 'object':
+    """One tree node, returning the *value* and not its truthiness.
+
+    ``&&`` and ``||`` return an operand rather than a boolean, which is what
+    Actions does, and it matters for the ``true ||`` mutation: the answer to
+    ``true || <anything>`` is ``true`` without ``<anything>`` being looked at
+    at all.
+
+    """
+    kind = node[0]
+    if kind == 'lit':
+        return node[1]
+    if kind == 'path':
+        return _lookup(node[1], context)
+    if kind == 'not':
+        return not _truthy(_evaluate(node[1], context))
+    if kind == 'and':
+        left = _evaluate(node[1], context)
+        return _evaluate(node[2], context) if _truthy(left) else left
+    if kind == 'or':
+        left = _evaluate(node[1], context)
+        return left if _truthy(left) else _evaluate(node[2], context)
+    if kind == 'eq':
+        return _loose_eq(_evaluate(node[1], context), _evaluate(node[2], context))
+    if kind == 'ne':
+        return not _loose_eq(_evaluate(node[1], context), _evaluate(node[2], context))
+    if kind == 'call':
+        return _call(node[1], [_evaluate(argument, context) for argument in node[2]], context)
+    raise UnsupportedExpression(f'no evaluation rule for {node!r}')  # pragma: no cover
+
+
+def evaluate_condition(condition: 'str', context: 'dict[str, object]') -> 'bool':
+    """Whether a job carrying this ``if:`` would run in ``context``.
+
+    The answer an ``if:`` finally reduces to, which is the thing #962 asks to
+    be checked -- as opposed to the text that produced it.
+
+    """
+    return _truthy(_evaluate(parse_condition(condition), context))
+
+
+#: The four values a job's ``needs.<job>.result`` can take. The axis #962 is
+#: about: a gate can be weakened without any of these changing what its *text*
+#: says, and walking all four is what notices.
+JOB_RESULTS = ('success', 'failure', 'cancelled', 'skipped')
+
+#: ``{job: output}``, naming the ``version_check`` output each gated job reads
+#: as its own evidence. #888's whole point is that these are four different
+#: questions rather than four spellings of one -- see
+#: :class:`TestEvidenceBasedGating`. The mapping is what lets a scenario row
+#: set one output to ``'true'`` and the rest to ``'false'``, so a gate reading
+#: somebody else's evidence reads the opposite answer and the row fails.
+GATE_EVIDENCE = {
+    'github': 'PCAPKIT_TAG_EXISTS',
+    'tag': 'PCAPKIT_CONDA_TAG_EXISTS',
+    'pypi': 'PCAPKIT_PYPI_COMPLETE',
+    'conda': 'PCAPKIT_CONDA_COMPLETE',
+}
+
+#: ``{job: predecessors}``, naming the *publishing* predecessors each gated job
+#: holds to the ``== 'success' || == 'skipped'`` equality pair.
+#: ``version_check`` is deliberately absent: it is a direct
+#: dependency of all three and is held to the stricter ``== 'success'`` alone,
+#: which is the distinction #960 found the workflow's own comment had blurred.
+#: ``test_the_table_covers_every_declared_dependency`` is what stops this from
+#: going stale against the file's real ``needs:``.
+PUBLISHING_PREDECESSORS = {
+    'tag': ('github',),
+    'pypi': ('github',),
+    'conda': ('github', 'tag'),
+}
+
+
+def release_context(version_check: 'str' = 'success',
+                    github: 'str' = 'success',
+                    tag: 'str' = 'success',
+                    ref_name: 'str' = 'main',
+                    complete: 'tuple[str, ...]' = (),
+                    cancelled: 'bool' = False,
+                    outputs_present: 'bool' = True,
+                    event_name: 'str' = 'workflow_run',
+                    workflow_run_conclusion: 'str' = 'success') -> 'dict[str, object]':
+    """The ``needs``/``github``/status context one scenario row stands for.
+
+    Every default is a value that, on its own, lets a gate run, so a row
+    changes exactly the one thing its name says it changes. That is deliberate
+    and it is what makes a row discriminating: a row holding two clauses false
+    passes for any mutation that keeps either of them, which is how a truth
+    table ends up proving less than it looks like it does.
+
+    ``complete`` names the evidence outputs that say *already published*
+    (``'true'``); every other output says ``'false'``. Naming the true ones
+    rather than passing a whole mapping is what makes the cross-evidence trap
+    free: a row that marks only ``PCAPKIT_PYPI_COMPLETE`` complete leaves the
+    other three incomplete, so a gate reading the wrong one reads the opposite
+    answer.
+
+    ``outputs_present=False`` is the shape a *skipped* ``version_check``
+    leaves behind -- no outputs at all, which Actions serves as ``null``
+    rather than as ``''`` or as a zero. ``ref_name`` defaults to ``main``
+    because a ``workflow_run`` trigger runs against the default branch;
+    ``v1.5.0`` is the other real value, from this workflow's ``push: tags:
+    ['v*']`` trigger.
+
+    """
+    outputs = {}  # type: dict[str, str]
+    if outputs_present:
+        outputs = {name: ('true' if name in complete else 'false')
+                   for name in GATE_EVIDENCE.values()}
+        outputs['PCAPKIT_VERSION'] = '1.5.0'
+        outputs['PCAPKIT_PRERELEASE'] = 'false'
+        outputs['PCAPKIT_CONDA_LABEL'] = 'main'
+
+    return {
+        'needs': {
+            'unit-tests': {'result': 'success'},
+            'version_check': {'result': version_check, 'outputs': outputs},
+            'github': {'result': github},
+            'tag': {'result': tag},
+            'pypi': {'result': 'success'},
+            'conda': {'result': 'success'},
+        },
+        'github': {
+            'ref_name': ref_name,
+            'event_name': event_name,
+            'event': {'workflow_run': {'conclusion': workflow_run_conclusion}},
+        },
+        STATUS: {'cancelled': cancelled},
+    }
+
+
+def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
+    """``[(row name, context, whether the gate must run)]`` for a gated job.
+
+    One axis per row, with everything else held at a running value -- see
+    :func:`release_context`. The rows, and what each is for:
+
+    * **``version_check`` over all four results**, with its outputs still
+      *present*. #962's own axis, and the load-bearing row of the set: a
+      failed job does publish the outputs of the steps that already ran, so
+      holding them present is both realistic and the only way the row notices
+      the clause being deleted outright rather than merely reworded.
+    * **The same four, with its outputs gone**, which is what a *skipped*
+      ``version_check`` actually leaves. Weaker as a guard, and kept because
+      it is the shape the retry case takes.
+    * **Each publishing predecessor over all four results.** ``success`` and a
+      legitimate ``skipped`` both run -- that is #888's escape hatch, and the
+      ``skipped`` row is what stops it being quietly removed again -- while
+      ``failure`` and ``cancelled`` do not. ``cancelled`` is the one
+      ``!= 'failure'`` would admit.
+    * **A cancelled run**, twice: once with everything else running, and once
+      on a ``v*`` tag push with this job's evidence already complete. Either
+      alone catches ``!cancelled()`` becoming ``always()``; the second also
+      catches a ``true ||`` prefix on a row where every inner clause is true.
+    * **All four corners of the ``startsWith(github.ref_name, 'v') ||
+      <evidence> == 'false'`` disjunction**, with the other three evidence
+      outputs inverted so that a gate reading the wrong one fails the row.
+
+    Held false in every row but the two cancellation rows: ``cancelled()``.
+    Holding it *true* elsewhere would make each row pass for any mutation that
+    keeps ``!cancelled()``, which is most of them.
+
+    """
+    evidence = GATE_EVIDENCE[job]
+    rows = []  # type: list[tuple[str, dict[str, object], bool]]
+
+    for result in JOB_RESULTS:
+        rows.append((f'version_check={result}',
+                     release_context(version_check=result),
+                     result == 'success'))
+        if result != 'success':
+            rows.append((f'version_check={result}, its outputs never published',
+                         release_context(version_check=result, outputs_present=False),
+                         False))
+
+    for predecessor in PUBLISHING_PREDECESSORS[job]:
+        for result in JOB_RESULTS:
+            rows.append((f'{predecessor}={result}',
+                         release_context(**{predecessor: result}),
+                         result in ('success', 'skipped')))
+
+    rows.append(('the run was cancelled', release_context(cancelled=True), False))
+    rows.append((f'the run was cancelled on a v* tag push with {evidence}=true',
+                 release_context(cancelled=True, ref_name='v1.5.0', complete=(evidence,)),
+                 False))
+
+    others = tuple(name for name in GATE_EVIDENCE.values() if name != evidence)
+    for ref_name in ('main', 'v1.5.0'):
+        for already in (False, True):
+            rows.append((
+                f'ref_name={ref_name}, {evidence}={str(already).lower()}',
+                release_context(ref_name=ref_name,
+                                complete=(evidence,) if already else others),
+                ref_name.startswith('v') or not already,
+            ))
+    return rows
+
+
+def gate_violations(condition: 'str', job: 'str') -> 'list[str]':
+    """Every row of :func:`gate_rows` on which ``condition`` disagrees with the gate.
+
+    Returns the disagreements rather than asserting them, so the same table
+    can be run against a deliberately mutated condition. That is what lets
+    :class:`TestGateMutationsChangeTheTruthTable` *show* these rows failing
+    without the clauses they protect, instead of asserting that they would.
+
+    """
+    tree = parse_condition(condition)
+    violations = []  # type: list[str]
+    for name, context, expected in gate_rows(job):
+        if _truthy(_evaluate(tree, context)) != expected:
+            violations.append(
+                f'{name}: expected the gate to '
+                f'{"run" if expected else "skip"}, it did not'
+            )
+    return violations
+
+
+def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
+    """The existing text layer for a gated job, as a list rather than as assertions.
+
+    A deliberate mirror of the three assertions
+    :class:`TestEvidenceBasedGating` already makes about these conditions --
+    the evidence it reads, its treatment of each publishing predecessor, and
+    ``version_check`` having strictly succeeded. The mirror exists so that
+    :class:`TestGateMutationsChangeTheTruthTable` can report *which* layer
+    rejects each mutation; #962 settled that the text assertions themselves
+    stay exactly as #961 left them, so they are copied here rather than
+    refactored into a helper the real tests then call.
+    ``test_the_real_conditions_violate_neither_layer`` is what keeps the
+    mirror from drifting away from the original.
+
+    Only the three downstream gates, since those are the three the mirrored
+    assertions are about; ``github`` is the deliberate asymmetry they exist to
+    preserve rather than a fourth case of it.
+
+    """
+    violations = []  # type: list[str]
+
+    if GATE_EVIDENCE[job] not in condition:
+        violations.append(f'does not read its own evidence output {GATE_EVIDENCE[job]}')
+    if 'PCAPKIT_TAG_EXISTS ==' in condition:
+        violations.append("reads github's v* tag as its gating evidence")
+    if 'cancelled()' not in condition and 'always()' not in condition:
+        violations.append('calls no status-check function, so a skipped predecessor '
+                          'cascade-skips it before this condition is even evaluated')
+
+    for predecessor in PUBLISHING_PREDECESSORS[job]:
+        if f"needs.{predecessor}.result == 'success'" not in condition:
+            violations.append(f'does not explicitly accept {predecessor} succeeding')
+        if f"needs.{predecessor}.result == 'skipped'" not in condition:
+            violations.append(f'does not explicitly accept {predecessor} having skipped')
+        if f"needs.{predecessor}.result != 'failure'" in condition:
+            violations.append(f"checks {predecessor} with != 'failure', which admits cancelled")
+
+    compact = re.sub(r'\s+', '', condition)
+    if "&&needs.version_check.result=='success'&&" not in compact:
+        violations.append('does not require version_check to have succeeded as a '
+                          'top-level && conjunct')
+    if compact.count('version_check.result') != 1:
+        violations.append('refers to version_check.result more than once')
+
+    return violations
+
+
 class WorkflowMixin:
     """Reads and scans the workflow once per test."""
 
@@ -658,14 +1353,21 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         whole -- which fails *closed*, since Actions rejects the real
         expression and nothing publishes.
 
-        **Knowingly not closed:** a top-level ``||`` outside the conjunction
-        chain. Appending ``|| github.event_name == 'workflow_dispatch'`` to the
-        end of the condition, or wrapping it in ``true || ...``, bypasses the
-        gate while leaving the compacted clause byte-identical. Conjunction is
-        monotone, so *adding* ``&&`` conjuncts can only strengthen the gate and
-        needs no guard; disjunction is the only remaining weakening, and
-        catching it needs the expression evaluated rather than matched. Tracked
-        as #962.
+        **Not closed by this test:** a top-level ``||`` outside the
+        conjunction chain. Appending ``|| github.event_name ==
+        'workflow_dispatch'`` to the end of the condition, or wrapping it in
+        ``true || ...``, bypasses the gate while leaving the compacted clause
+        byte-identical. Conjunction is monotone, so *adding* ``&&`` conjuncts
+        can only strengthen the gate and needs no guard; disjunction is the
+        only remaining weakening, and catching it needs the expression
+        evaluated rather than matched.
+        :class:`TestGateExpressionsEvaluateCorrectly` is where #962 does that,
+        and ``TestGateMutationsChangeTheTruthTable.MUTATIONS`` is where the
+        ``true ||`` prefix is recorded as caught by the evaluator and missed
+        here. This test stays as #961 left it: it fails with a message naming
+        the clause rather than a scenario row, and it catches the one thing the
+        evaluator cannot -- operands reversed, which keeps the truth table
+        intact.
 
         """
         for name in ('tag', 'pypi', 'conda'):
@@ -738,6 +1440,496 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         block = self.jobs['version_check']
         self.assertIn('linux-64', block)
         self.assertIn('osx-64', block)
+
+
+class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
+    """#962: the gates' ``if:`` conditions *evaluated* over a scenario table,
+    rather than matched as text.
+
+    :class:`TestEvidenceBasedGating` above asserts over the conditions'
+    spelling, and four review rounds on #961 showed where that ends: twenty
+    mutations of one clause, three successive strengthenings, and each
+    strengthening defeated by a mutation the previous round had not thought
+    of. The reason is structural rather than a matter of the assertions not
+    being clever enough -- a gate's job is to produce an answer, and no amount
+    of matching on the text that produces it is the same as checking the
+    answer.
+
+    So this walks the scenarios instead and checks what each condition
+    actually decides. A mutation is then caught when it changes the truth
+    table, whatever it looks like: ``&&``-to-``||``, ``== 'success'`` to
+    ``!= 'failure'``, a ``contains(fromJSON(...))`` membership test, a
+    ``true ||`` prefix outside the conjunction chain -- all of them land on
+    the same rows. :class:`TestGateMutationsChangeTheTruthTable` below is
+    where that claim is demonstrated rather than asserted.
+
+    """
+
+    #: ``(row name, context, whether github must run)``, for the one gate that
+    #: is deliberately asymmetric: ``github``'s own artefact *is* the ``v*``
+    #: tag ``PCAPKIT_TAG_EXISTS`` answers for, so unlike the three jobs below
+    #: it that output is the right question for it -- see
+    #: ``test_github_still_gates_on_the_v_tag_it_creates``.
+    #:
+    #: Its condition calls no status-check function, so Actions additionally
+    #: conjoins the default ``success()`` that this evaluator does not model
+    #: (see the module docstring). These rows are therefore about the declared
+    #: condition only: each says "``github`` runs *as far as its own ``if:``
+    #: is concerned*", which is a necessary and not a sufficient condition for
+    #: the job running.
+    GITHUB_ROWS = [
+        ('a fresh version, not yet tagged', release_context(), True),
+        ('the v* tag already exists',
+         release_context(complete=('PCAPKIT_TAG_EXISTS',)), False),
+        ('a v* tag push, not yet tagged', release_context(ref_name='v1.5.0'), True),
+        ('a v* tag push and the tag already exists',
+         release_context(ref_name='v1.5.0', complete=('PCAPKIT_TAG_EXISTS',)), True),
+        ('version_check published no outputs at all',
+         release_context(outputs_present=False), False),
+    ]
+
+    #: ``(row name, context, whether the release test gate must run)``. Its
+    #: ``if:`` is the workflow's outermost gate: a ``workflow_run`` trigger
+    #: only proceeds when the Vendor Update run that triggered it concluded
+    #: ``success``, and every other trigger proceeds unconditionally. The only
+    #: ``!=`` in the file, and otherwise unevaluated.
+    UNIT_TESTS_ROWS = [
+        ('a v* tag push', release_context(event_name='push'), True),
+        ('Vendor Update succeeded', release_context(), True),
+        ('Vendor Update found nothing to update',
+         release_context(workflow_run_conclusion='skipped'), False),
+        ('Vendor Update failed',
+         release_context(workflow_run_conclusion='failure'), False),
+        ('Vendor Update was cancelled',
+         release_context(workflow_run_conclusion='cancelled'), False),
+    ]
+
+    def _assert_rows(self, job: 'str',
+                     rows: 'list[tuple[str, dict[str, object], bool]]') -> None:
+        condition = declared_if(self.jobs[job])
+        for name, context, expected in rows:
+            with self.subTest(job=job, scenario=name):
+                self.assertEqual(
+                    evaluate_condition(condition, context), expected,
+                    f'`{job}`\'s `if:` ({condition!r}) decides the wrong thing for '
+                    f'{name!r}: it should {"run" if expected else "skip"}',
+                )
+
+    def test_the_tables_are_not_empty(self) -> None:
+        """A table that generated no rows would pass every test below it.
+
+        The same failure mode as ``test_the_scan_found_the_jobs``, and worse
+        here: :func:`gate_violations` reports disagreements, so no rows means
+        no disagreements means a green result for any condition at all,
+        including ``if: false``. Both polarities have to be present too -- a
+        table whose every row expects a skip is satisfied by a gate that never
+        runs, which is #888 rather than a fix for it.
+
+        """
+        for job, expected in (('tag', 17), ('pypi', 17), ('conda', 21)):
+            with self.subTest(job=job):
+                rows = gate_rows(job)
+                self.assertEqual(
+                    len(rows), expected,
+                    f'the scenario table for `{job}` generated {len(rows)} rows, '
+                    f'expected {expected}; if an axis was added or removed on '
+                    f'purpose, this count needs revisiting alongside it',
+                )
+                outcomes = {row[2] for row in rows}
+                self.assertEqual(outcomes, {True, False})
+
+    def test_the_table_covers_every_declared_dependency(self) -> None:
+        """The scenario table has to name the same predecessors the file does.
+
+        :data:`PUBLISHING_PREDECESSORS` is hand-written, so a ``needs:`` added
+        to one of these jobs would otherwise be absent from every row --
+        held at a running default and never varied, which is a gate the table
+        silently stops checking. ``version_check`` is added back here because
+        it is deliberately *not* in that mapping: it is held to the stricter
+        ``== 'success'`` alone, with no ``|| 'skipped'``.
+
+        """
+        for job in ('tag', 'pypi', 'conda'):
+            with self.subTest(job=job):
+                self.assertEqual(
+                    set(declared_needs(self.jobs[job])),
+                    set(PUBLISHING_PREDECESSORS[job]) | {'version_check'},
+                    f'`{job}`\'s `needs:` and the scenario table disagree about its '
+                    f'predecessors, so at least one of them is not being varied',
+                )
+
+    def test_each_downstream_gate_agrees_with_its_truth_table(self) -> None:
+        """The headline assertion: ``tag``, ``pypi`` and ``conda`` decide
+        correctly on every row of :func:`gate_rows`.
+
+        Which includes, as the four rows #962 was opened for, that each one is
+        false for every value of ``needs.version_check.result`` but
+        ``success``.
+
+        """
+        for job in ('tag', 'pypi', 'conda'):
+            with self.subTest(job=job):
+                violations = gate_violations(declared_if(self.jobs[job]), job)
+                self.assertEqual(
+                    violations, [],
+                    f'`{job}`\'s `if:` disagrees with the release gate on '
+                    f'{len(violations)} scenario(s): ' + '; '.join(violations),
+                )
+
+    def test_github_runs_when_its_own_v_tag_is_missing(self) -> None:
+        """``github``'s gate, whose evidence is the ``v*`` tag it creates itself."""
+        self._assert_rows('github', self.GITHUB_ROWS)
+
+    def test_the_release_test_gate_requires_a_successful_vendor_update(self) -> None:
+        """``unit-tests``'s gate, the outermost one in the file."""
+        self._assert_rows('unit-tests', self.UNIT_TESTS_ROWS)
+
+    def test_release_status_runs_unless_the_run_was_cancelled(self) -> None:
+        """``!cancelled()`` on its own, which is the whole of that condition.
+
+        ``test_it_runs_regardless_of_what_upstream_did`` below accepts either
+        ``cancelled()`` or ``always()``, as the escape hatch it checks for; the
+        workflow's own comment says ``!cancelled()`` was chosen over
+        ``always()`` deliberately, so that cancelling a run cancels the report
+        too rather than leaving it to describe a run it cannot fully see.
+        These two rows are what pin that choice.
+
+        """
+        condition = declared_if(self.jobs['release_status'])
+        self.assertTrue(evaluate_condition(condition, release_context()))
+        self.assertFalse(evaluate_condition(condition, release_context(cancelled=True)))
+
+    def test_every_declared_if_is_evaluable(self) -> None:
+        """Nothing in the file may leave the subset :func:`parse_condition` implements.
+
+        The evaluator is only as good as its coverage of the file, and a
+        condition it cannot parse is a condition it is not checking. Failing
+        here, with the offending text in the message, is what keeps that from
+        being a silent gap -- and the fix is to extend the subset, not to
+        exempt the job.
+
+        """
+        for name, block in sorted(self.jobs.items()):
+            condition = declared_if(block)
+            if not condition:
+                continue
+            with self.subTest(job=name):
+                try:
+                    evaluate_condition(condition, release_context())
+                except UnsupportedExpression as error:
+                    self.fail(f'`{name}`\'s `if:` is outside the evaluated subset: {error}')
+
+
+class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
+    """Every mutation, applied to a scratch copy of each real condition, with
+    the layer that rejects it recorded.
+
+    This is the part the three earlier attempts at #961 got wrong: a test that
+    passes against the current file says nothing about what it would catch.
+    So each mutation below is actually applied and actually run, against both
+    layers -- :func:`gate_violations` (the evaluator) and
+    :func:`text_gate_violations` (the assertions
+    :class:`TestEvidenceBasedGating` already makes) -- and the set of layers
+    that rejected it is asserted exactly rather than "at least one did".
+
+    Asserting the exact set is what makes the two layers' division of labour a
+    recorded fact instead of a hope. Two rows carry the whole argument for
+    keeping both:
+
+    * **``true ||`` prefixed onto the whole expression** is rejected by the
+      evaluator alone. It is #961's one knowingly-unclosed residual -- it
+      leaves the compacted clause byte-identical, so no text assertion over
+      the clause can see it -- and closing it is why #962 exists.
+    * **Reversed operands** are rejected by the text layer alone, and *should*
+      be: ``'success' == needs.version_check.result`` has exactly the same
+      truth table, so the evaluator has nothing to say about it and saying
+      something anyway would be wrong. It is a readability regression rather
+      than a weakening. Had the text assertions been replaced instead of kept,
+      nothing would notice it at all.
+
+    """
+
+    #: ``(name, substring, replacement, the layers that must reject it)``.
+    #: ``<evidence>`` stands for the job's own evidence output, so one row
+    #: covers all three jobs. Substitution rather than a rewrite because the
+    #: mutations have to be the *small* edits a review round produces -- a
+    #: regenerated condition would differ in ways nobody would have typed.
+    #:
+    #: The first eight are the mutations #962 names; the rest are this
+    #: module's own, covering the clauses the issue only points at -- the
+    #: publishing predecessors' equality pair, the ``startsWith``
+    #: short-circuit, and reading somebody else's evidence.
+    MUTATIONS = [
+        ('the && before the version_check clause becomes ||',
+         "!cancelled() && needs.version_check.result",
+         "!cancelled() || needs.version_check.result",
+         ('evaluator', 'text')),
+        ('the && after the version_check clause becomes ||',
+         "needs.version_check.result == 'success' &&",
+         "needs.version_check.result == 'success' ||",
+         ('evaluator', 'text')),
+        ("== 'success' becomes != 'failure'",
+         "needs.version_check.result == 'success'",
+         "needs.version_check.result != 'failure'",
+         ('evaluator', 'text')),
+        ("== 'success' also admits 'skipped', unparenthesised",
+         "needs.version_check.result == 'success'",
+         "needs.version_check.result == 'success' || needs.version_check.result == 'skipped'",
+         ('evaluator', 'text')),
+        ("== 'success' also admits 'skipped', parenthesised",
+         "needs.version_check.result == 'success'",
+         "(needs.version_check.result == 'success' || needs.version_check.result == 'skipped')",
+         ('evaluator', 'text')),
+        ('the comparison operands are reversed',
+         "needs.version_check.result == 'success'",
+         "'success' == needs.version_check.result",
+         ('text',)),
+        ("contains(fromJSON(...)) admits 'skipped'",
+         "needs.version_check.result == 'success'",
+         'contains(fromJSON(\'["success","skipped"]\'), needs.version_check.result)',
+         ('evaluator', 'text')),
+        ('the whole expression is prefixed with true ||',
+         '${{ ', '${{ true || ',
+         ('evaluator',)),
+        ('the version_check conjunct is dropped entirely',
+         "needs.version_check.result == 'success' && ", '',
+         ('evaluator', 'text')),
+        ('!cancelled() becomes always()',
+         '!cancelled()', 'always()',
+         ('evaluator',)),
+        ("the publishing predecessor's equality pair becomes != 'failure'",
+         "(needs.github.result == 'success' || needs.github.result == 'skipped')",
+         "needs.github.result != 'failure'",
+         ('evaluator', 'text')),
+        ('a legitimately skipped publishing predecessor is no longer accepted',
+         " || needs.github.result == 'skipped'", '',
+         ('evaluator', 'text')),
+        ("startsWith's prefix is emptied, so every ref matches",
+         "startsWith(github.ref_name, 'v')", "startsWith(github.ref_name, '')",
+         ('evaluator',)),
+        ("the gate reads github's v* tag as its evidence again",
+         '<evidence>', 'PCAPKIT_TAG_EXISTS',
+         ('evaluator', 'text')),
+    ]
+
+    def _mutate(self, condition: 'str', job: 'str', old: 'str', new: 'str') -> 'str':
+        """``condition`` with ``old`` replaced by ``new``, and ``<evidence>`` resolved."""
+        evidence = GATE_EVIDENCE[job]
+        return condition.replace(old.replace('<evidence>', evidence),
+                                 new.replace('<evidence>', evidence))
+
+    def test_the_real_conditions_violate_neither_layer(self) -> None:
+        """Both layers have to be clean on the file as it stands.
+
+        Otherwise every row below reads as "caught" for the wrong reason, and
+        this is also what keeps :func:`text_gate_violations` from drifting
+        away from the assertions in :class:`TestEvidenceBasedGating` it
+        mirrors: if the two ever disagree about the real file, one of them
+        fails here.
+
+        """
+        for job in ('tag', 'pypi', 'conda'):
+            with self.subTest(job=job):
+                condition = declared_if(self.jobs[job])
+                self.assertEqual(gate_violations(condition, job), [])
+                self.assertEqual(text_gate_violations(condition, job), [])
+
+    def test_every_mutation_actually_changes_the_condition(self) -> None:
+        """A mutation whose substring is not in the file mutates nothing.
+
+        And a no-op mutation is reported as caught by no layer, which reads
+        identically to a mutation that defeats both. So the substring has to
+        be checked for presence explicitly -- this is the assertion that
+        stops the table below rotting quietly as the conditions are reworded.
+
+        """
+        for job in ('tag', 'pypi', 'conda'):
+            condition = declared_if(self.jobs[job])
+            for name, old, new, _ in self.MUTATIONS:
+                with self.subTest(job=job, mutation=name):
+                    mutant = self._mutate(condition, job, old, new)
+                    self.assertIn(old.replace('<evidence>', GATE_EVIDENCE[job]), condition)
+                    self.assertNotEqual(mutant, condition)
+
+    def test_each_mutation_is_rejected_by_exactly_the_layers_it_should_be(self) -> None:
+        for job in ('tag', 'pypi', 'conda'):
+            condition = declared_if(self.jobs[job])
+            for name, old, new, expected in self.MUTATIONS:
+                with self.subTest(job=job, mutation=name):
+                    mutant = self._mutate(condition, job, old, new)
+                    rejected = []
+                    if gate_violations(mutant, job):
+                        rejected.append('evaluator')
+                    if text_gate_violations(mutant, job):
+                        rejected.append('text')
+                    self.assertEqual(
+                        tuple(rejected), tuple(expected),
+                        f'mutating `{job}` so that {name} is rejected by '
+                        f'{rejected or "no layer at all"}, expected {list(expected)}: '
+                        f'{mutant!r}',
+                    )
+
+    def test_no_mutation_survives_both_layers(self) -> None:
+        """Stated as the property that actually matters, separately from the
+        bookkeeping above.
+
+        ``test_each_mutation_is_rejected_by_exactly_the_layers_it_should_be``
+        is precise and therefore brittle -- a future row's expectation could
+        be edited to match whatever the code does, which is how a mutation
+        table stops meaning anything. This one cannot be satisfied that way:
+        every mutation has to be caught by *something*.
+
+        """
+        for job in ('tag', 'pypi', 'conda'):
+            condition = declared_if(self.jobs[job])
+            for name, old, new, _ in self.MUTATIONS:
+                with self.subTest(job=job, mutation=name):
+                    mutant = self._mutate(condition, job, old, new)
+                    self.assertTrue(
+                        gate_violations(mutant, job) or text_gate_violations(mutant, job),
+                        f'mutating `{job}` so that {name} is caught by neither layer: '
+                        f'{mutant!r}',
+                    )
+
+
+class TestTheExpressionEvaluator(unittest.TestCase):
+    """The evaluator against hand-written expressions, not against the workflow.
+
+    #962 settled that the text assertions stay partly because an evaluator bug
+    would otherwise leave the gates unpinned while the suite reported green.
+    This class is the other half of that answer: the semantics the gate tables
+    above depend on, each pinned where a mistake in it is a failure here
+    rather than a quietly wrong row there. Like
+    :class:`TestScannerRecognisesTheDefect`, it reads fixtures rather than the
+    repository, so it keeps meaning the same thing after the file moves on.
+
+    """
+
+    def evaluate(self, condition: 'str', **overrides: 'object') -> 'bool':
+        return evaluate_condition(condition, release_context(**overrides))  # type: ignore[arg-type]
+
+    def test_and_binds_tighter_than_or(self) -> None:
+        """The precedence the ``&&``-to-``||`` mutations turn on.
+
+        If ``||`` bound tighter, ``false || true && false`` would be true, and
+        every row that catches a ``&&``-to-``||`` slip would be catching it by
+        accident.
+
+        """
+        self.assertFalse(self.evaluate('${{ false || true && false }}'))
+        self.assertTrue(self.evaluate('${{ false && false || true }}'))
+        self.assertTrue(self.evaluate('${{ true || false && false }}'))
+        self.assertTrue(self.evaluate('${{ (false || true) && true }}'))
+
+    def test_or_short_circuits_without_evaluating_its_right_operand(self) -> None:
+        """Which is exactly what a ``true ||`` prefix does to a whole gate.
+
+        The right operand here would raise if it were evaluated, since
+        ``steps`` is a context no scenario models -- so this passing is proof
+        that it was not.
+
+        """
+        self.assertTrue(self.evaluate("${{ true || steps.nope.outputs.x == 'y' }}"))
+        with self.assertRaises(UnsupportedExpression):
+            self.evaluate("${{ false || steps.nope.outputs.x == 'y' }}")
+
+    def test_a_bare_expression_is_accepted_as_well_as_an_interpolated_one(self) -> None:
+        """Actions accepts both for ``if:``; this workflow only uses the second."""
+        self.assertTrue(self.evaluate("needs.version_check.result == 'success'"))
+        self.assertTrue(self.evaluate("${{ needs.version_check.result == 'success' }}"))
+
+    def test_string_comparison_ignores_case(self) -> None:
+        """Documented Actions behaviour, and the reason the evaluator cannot
+        be relied on to catch a mutation that only changes case -- which is
+        why it is not claimed to.
+
+        """
+        self.assertTrue(self.evaluate("${{ 'SUCCESS' == 'success' }}"))
+        self.assertTrue(self.evaluate("${{ startsWith('V1.5.0', 'v') }}"))
+
+    def test_a_string_never_equals_a_boolean(self) -> None:
+        """``'true' == true`` is false in Actions: mixed types are cast to a
+        number, and a non-numeric string casts to ``NaN``.
+
+        Worth pinning because the evidence outputs are the *strings*
+        ``'true'`` and ``'false'``, so a mutation comparing one to a boolean
+        literal is a plausible edit whose answer is not the obvious one.
+
+        """
+        self.assertFalse(self.evaluate("${{ 'true' == true }}"))
+        self.assertFalse(self.evaluate("${{ 'false' == false }}"))
+        self.assertTrue(self.evaluate("${{ 'false' == 'false' }}"))
+
+    def test_an_unset_property_is_null_and_equals_nothing_useful(self) -> None:
+        """A skipped ``version_check`` publishes no outputs at all, and the
+        gates below it must not read that as "evidence says incomplete".
+
+        """
+        condition = "${{ needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE == 'false' }}"
+        self.assertTrue(self.evaluate(condition))
+        self.assertFalse(self.evaluate(condition, outputs_present=False))
+        self.assertFalse(self.evaluate("${{ needs.nope.result == 'success' }}"))
+
+    def test_an_unknown_context_root_raises_rather_than_answering_null(self) -> None:
+        """An unset property is ``null``; an unmodelled *context* is a gap.
+
+        Answering ``null`` for ``steps.*`` or ``env.*`` would let a scenario
+        row be decided by something the row never described, which is the
+        quiet failure this whole module is about.
+
+        """
+        for condition in ("${{ steps.check_tag.outputs.exists == 'true' }}",
+                          "${{ env.PCAPKIT_VERSION == '1.5.0' }}"):
+            with self.subTest(condition=condition):
+                with self.assertRaises(UnsupportedExpression):
+                    self.evaluate(condition)
+
+    def test_contains_over_a_fromjson_array_is_a_membership_test(self) -> None:
+        """Neither function appears in the workflow. Both are implemented so
+        that the mutation spelling the gate as a membership test is
+        *evaluated* -- a parse error there would look like a caught mutation
+        while proving nothing about the truth table.
+
+        """
+        condition = ('${{ contains(fromJSON(\'["success","skipped"]\'), '
+                     'needs.version_check.result) }}')
+        self.assertTrue(self.evaluate(condition, version_check='skipped'))
+        self.assertFalse(self.evaluate(condition, version_check='failure'))
+        self.assertTrue(self.evaluate("${{ contains('conda-1.5.0+0', 'conda-') }}"))
+
+    def test_always_is_true_and_cancelled_comes_from_the_scenario(self) -> None:
+        self.assertTrue(self.evaluate('${{ always() }}'))
+        self.assertTrue(self.evaluate('${{ always() }}', cancelled=True))
+        self.assertFalse(self.evaluate('${{ !cancelled() }}', cancelled=True))
+
+    def test_a_status_function_no_scenario_models_raises(self) -> None:
+        """``success()`` and ``failure()`` are parsed and not answered.
+
+        No gate in this workflow calls either, and a fabricated answer would
+        decide a scenario row that nothing had modelled. Raising says so;
+        the fix would be to give :func:`release_context` a knob for it.
+
+        """
+        with self.assertRaises(UnsupportedExpression):
+            self.evaluate('${{ success() }}')
+
+    def test_a_doubled_quote_inside_a_literal_is_one_literal(self) -> None:
+        self.assertTrue(self.evaluate("${{ 'it''s' == 'IT''S' }}"))
+
+    def test_syntax_outside_the_subset_raises_rather_than_guessing(self) -> None:
+        """Each of these is a real Actions expression this module does not
+        implement, and each has to fail loudly rather than be approximated.
+
+        """
+        for condition in ('${{ 1 > 2 }}',                       # no ordering operators
+                          "${{ join(needs.*.result, ',') }}",   # no `*` and no `join`
+                          '${{ toJSON(needs) }}',               # not in the subset
+                          '${{ needs.version_check.result == }}',
+                          '${{ startsWith(github.ref_name) }}',  # wrong arity
+                          "${{ 'a' }} && ${{ 'b' }}"):          # a template, not an expression
+            with self.subTest(condition=condition):
+                with self.assertRaises(UnsupportedExpression):
+                    self.evaluate(condition)
 
 
 class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
