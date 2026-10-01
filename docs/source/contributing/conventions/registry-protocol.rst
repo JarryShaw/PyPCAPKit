@@ -17,9 +17,15 @@ Where the registry protocol lives
    class LinkType(EnumRegistry, IntEnum):
        ...
 
-A handful of registries define their own ``__new__`` to carry extra attributes and so
-do not share the generated template; bringing them onto the base is tracked in
-`#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__.
+Six registries define their own ``__new__`` to carry extra attributes and so do not
+share the generated template: :class:`~pcapkit.const.ftp.command.Command`,
+:class:`~pcapkit.const.ftp.return_code.ReturnCode`,
+:class:`~pcapkit.const.http.method.Method`,
+:class:`~pcapkit.const.http.status_code.StatusCode`,
+:class:`~pcapkit.const.pcapng.option_type.OptionType` and
+:class:`~pcapkit.const.reg.apptype.apptype.AppType`. They are on the base regardless --
+`#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__ finished that -- so a
+bespoke ``__new__`` exempts a registry from the template, not from the protocol.
 
 The Two Tiers, and What Lives on Each
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,10 +50,9 @@ registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry` exactly as before.
 What settled the split is the owner's own second thought about carrying ``register``
 on the base: if the base carries ``register``, there is no principled reason for it
 not to carry ``register_alias`` as well, and the ruling would be the worse for it.
-Following that through leaves
-:class:`~pcapkit.corekit.enum.EnumRegistry` holding only three methods, too thin to
-justify a second class -- so the two tiers collapse into one, which is the opposite of
-what was ruled.
+Following that through leaves :class:`~pcapkit.corekit.enum.EnumRegistry` holding only
+three methods, too thin to justify a second class -- so the two tiers collapse into one,
+which is the opposite of what was ruled.
 
 **Both tiers are plain classes, and that is load-bearing.** Inserting a parent above
 :class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type exactly where
@@ -104,19 +109,6 @@ Three things about it are easy to get wrong:
    **Zero enumerations remain outside the hierarchy**, measured by the same runtime
    walk over both the :mod:`enum` and ``aenum`` flavours that once found seven.
 
-   It landed in two pull requests rather than one. Seven of the 24 sat in files
-   other pull requests were editing around the same time: ``CommandType`` and
-   ``ConformanceRequirement`` in :mod:`pcapkit.const.ftp.command` and its vendor
-   template, both touched by `#913 <https://github.com/JarryShaw/PyPCAPKit/pull/913>`__;
-   and ``ESPStatus`` in :mod:`pcapkit.protocols.internet.esp` plus all four
-   :mod:`pcapkit.protocols.internet.mh` helpers (``FastBindingAcknowledgmentStatus``,
-   ``IPv6AddressPrefixCode``, ``LMAAddressCode``, ``LocalizedRoutingStatus``), both
-   files touched by `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__. The
-   first pass (`#921 <https://github.com/JarryShaw/PyPCAPKit/pull/921>`__) is
-   behaviour-preserving on its own, so the other 17 could land without waiting on
-   those files; the remaining seven followed once both had merged
-   (`#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__).
-
 What a Failed Lookup Raises
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -142,6 +134,21 @@ So the **provenance** is in-library and the **shape** is stdlib's:
    so **only the provenance changed** -- every ``except KeyError`` and
    ``except ValueError`` around a lookup keeps catching, in this tree and in a
    caller's.
+
+Which branch a key takes, and what each miss ends in:
+
+.. mermaid::
+
+   flowchart TD
+       GET["get(key, default)"] -->|"isinstance(key, str)"| NAME["_member_map_ lookup"]
+       GET -->|"otherwise"| VALUE["_validate_value(key)<br/>then cls(key)"]
+       NAME -->|"hit"| OK["canonical member"]
+       NAME -->|"miss, key is a registered value"| OK
+       NAME -->|"miss, default is a registered value"| OK
+       NAME -->|"miss, no usable default"| KEYERR["EnumKeyError<br/>quiet, derives KeyError"]
+       VALUE -->|"resolves, or _missing_ answers"| OK
+       VALUE -->|"ValueError, default is a registered value"| OK
+       VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>loud, derives ValueError"]
 
 Do not "improve" on the shape by making both misses report identically. Converting
 one into the other is exactly what #923 retired, and it was retired in three places
@@ -203,7 +210,7 @@ guaranteed either: pass a first argument that *is* an instance of the class and 
 delegation **silently succeeds**, so a ``@staticmethod`` override cannot even be
 relied on to fail loudly. Measured, all three cases, rather than reasoned about.
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` is itself a ``@classmethod``. The
-precedent is `#913 <https://github.com/JarryShaw/PyPCAPKit/issues/913>`__, whose
+precedent is `#913 <https://github.com/JarryShaw/PyPCAPKit/pull/913>`__, whose
 ``FEATCode.get`` is ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
 ``return super().get(key, default)``;
 `#908 <https://github.com/JarryShaw/PyPCAPKit/issues/908>`__ followed it, which is
@@ -295,7 +302,9 @@ And the reason a registry's spelling is never quietly normalised, from the same 
 an enumeration honours and keeps the original writing the registrar used, and
 case-insensitivity applies only to the selected registries where it makes logical sense
 -- ``TransportProtocol`` being one -- or where the RFC documentation itself recognises
-the values as case-insensitive, FTP and HTTP commands being the likely candidates.
+the values as case-insensitive, FTP and HTTP commands being the candidates he named.
+Only FTP survived the audit below: :rfc:`9110#section-9.1` makes the HTTP method token
+case-sensitive outright.
 
 So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
 default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
@@ -445,22 +454,30 @@ That leaves the classes with something to decide:
    * - ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
      - :rfc:`6335#section-5.1`
      - *"case is ignored for comparison purposes, so both "http" and "HTTP" denote
-       the same service."* Limb 1, emphatically -- and these registries' **values
-       are** service names.
+       the same service."* Limb 1, emphatically -- and these registries **derive every
+       member name from the registry's service-name column**, in the registrar's own
+       spelling (``tcpmux``); the *value* is a composite that embeds it
+       (``'tcpmux [1 - tcp]'``), not the bare name.
      - **unimplemented** -- no service-name lookup exists to fold; see below
    * - ``CommandType``, ``ConformanceRequirement``
      - :rfc:`959#section-4`, :rfc:`5797#section-2`
      - Limb 2 holds on measurement: the RFC and registry pages present the kind and
        conformance letters upper case (``A``/``P``/``S``, ``M``/``O``/``H``) while
        the CSV columns the crawler reads are lower case in every row (``s`` 26,
-       ``a`` 18, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7, ``m [1]`` 2).
+       ``a`` 18, ``p`` 16, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7,
+       ``m [1]`` 2). Both tallies cover all 64 rows.
      - **open** -- see below
    * - The 6 :mod:`~pcapkit.protocols.internet.mh` and
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
-     - Their values are numeric codes, so the criterion is vacuous exactly as for the
-       :class:`int` tier above. **None** of them defines a ``get`` of its own any
-       more. Two did when this audit was taken --
+     - ``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``,
+       ``LMAAddressCode``, ``LocalizedRoutingStatus``, ``Criticality`` and ``PDUKind``.
+       **Five** of the six carry numeric codes, so the criterion is vacuous on them
+       exactly as for the :class:`int` tier above; ``PDUKind``'s are :class:`str` ASN.1
+       identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
+       construction, so it lands the same way for a different reason.
+       **None** of the six defines a ``get`` of its own any more. Two did when this
+       audit was taken --
        ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
        signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
        rather than for case -- and
@@ -469,7 +486,8 @@ That leaves the classes with something to decide:
        from :class:`~pcapkit.corekit.enum.EnumLookup` unchanged. ``LMAAddressCode``
        and ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
        string lookup to fold. ``Criticality`` had one when this audit was taken and no
-       longer does: #921 re-parented it onto
+       longer does:
+       `#921 <https://github.com/JarryShaw/PyPCAPKit/pull/921>`__ re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and #923 retired the exception
        conversion that was the override's only remaining job, so it now inherits
        ``get`` unchanged.
@@ -482,12 +500,10 @@ That leaves the classes with something to decide:
      - **case-sensitive** -- no override, conforms
    * - Every other non-registry enumeration
      - --
-     - pcapkit's own discriminators and bit labels, with no registrar behind them
-       at all -- ``Completion``, ``ftp.Type``, ``httpv1.Type``, ``FinalisedState``,
+     - All 14 are pcapkit's own discriminators and bit labels, with no registrar behind
+       them at all -- ``Completion``, ``ftp.Type``, ``httpv1.Type``, ``FinalisedState``,
        ``ESPStatus``, ``PacketDirection``, ``PacketReception``, and the 7 httpv2
-       ``Flags``. ``PDUKind`` is the one with an external source and it points the
-       same way: its values are ASN.1 identifiers from 3GPP TS 38.413, and ASN.1
-       identifiers are case-significant by construction.
+       ``Flags``.
      - **case-sensitive** -- nothing to cite, nothing to change
 
 Two rows the audit deliberately left open rather than acting on, because each is
@@ -495,8 +511,8 @@ wider than a case fix:
 
 * **A service-name lookup on the** ``AppType`` **transport registries.** This is the
   inverse of every other row: :rfc:`6335#section-5.1` *does* make service names
-  case-insensitive, and ``TCP``/``UDP``/``SCTP``/``DCCP`` hold service names as their
-  values -- but ``AppType.get`` refuses a non-:class:`int` key, so no service-name
+  case-insensitive, and ``TCP``/``UDP``/``SCTP``/``DCCP`` take their member names from
+  that column -- but ``AppType.get`` refuses a non-:class:`int` key, so no service-name
   lookup exists for the rule to apply to. Implementing one is new public API on a
   6,000-member registry where one name maps to many ports, which is a ``get_all``
   design question rather than a case fold.
@@ -505,10 +521,10 @@ wider than a case fix:
   specification's own tokens -- the measured spelling disagreement above would make
   these two case-insensitive. Nothing looks them up by string today, though: the
   crawler translates the CSV's lower-case letters to the upper-case member names at
-  generation time. Both classes now inherit
-  :class:`~pcapkit.corekit.enum.EnumLookup` --
-  `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ finished re-parenting
-  them, per the note above -- so a ``get`` exists on each, case-sensitive like the
+  generation time. Both classes inherit
+  :class:`~pcapkit.corekit.enum.EnumLookup`, since
+  `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ completed phase 2's
+  re-parenting, so a ``get`` exists on each, case-sensitive like the
   base's own. Whether to fold case to match ``TransportProtocol``'s own override is a
   design question for whoever writes the first string-keyed caller, not one this
   audit settles.

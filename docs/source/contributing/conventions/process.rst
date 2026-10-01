@@ -6,10 +6,7 @@ How the repository itself is run
 The four pages before this one are about writing library code. The rulings here are
 about running the repository -- what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
-module, which is why they are recorded rather than left to be rediscovered.
-
-The page exists because those three settled questions fit none of the code-convention
-pages, and the owner ruled on
+module, and none fits a code-convention page, so the owner ruled on
 `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ that they get a page of
 their own rather than being left in their threads. Each ruling below is **paraphrased
 rather than quoted**, also on his instruction there; the issue named beside it is
@@ -34,7 +31,7 @@ On the tree, in :file:`pyproject.toml`:
    all    = [ "emoji", "cryptography>=3.4", "pycrate" ]
 
 So ``all`` is exactly the union of those three extras, written out as literals rather
-than referenced -- eight requirements before the ruling, three after it.
+than referenced.
 
 Two groups stay out, and the reasons are **different** rather than two versions of
 one reason. Keeping them apart is what stops the list drifting the way it already did
@@ -98,19 +95,17 @@ commands down instead of a figure that will be stale by the next merge:
    # commits on the pull request -- a different number, about a different thing
    gh pr view 657 -R JarryShaw/PyPCAPKit --json commits -q '.commits|length'
 
-The grouping scheme was settled after that, on #918: **a section per top-level
-module, with** ``Added``/``Changed``/``Fixed`` **nested inside each** -- module
-granularity, not per-file and not per-subpackage. **That restructure has landed.** It
-was a regrouping of scattered entries rather than a transposition of three tidy
-blocks: before it, the entries carried their kind as an inline bold label and those
-labels alternated in dozens of short stretches, blocked near the top of the file and
-thoroughly interleaved below. The file now carries **9** module-level sections holding 155
-entries, and no entry carries an inline kind label any more::
+The grouping scheme was settled on #918: **a section per top-level module, with**
+``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
+per-file and not per-subpackage. The file carries **9** module-level sections holding
+155 entries, and no entry carries an inline kind label::
 
    $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
    0
 
-The sections are one per top-level module, plus one for what belongs to no module:
+Eight of those nine name a module; the ninth, *Project infrastructure*, is for what
+belongs to none. Nor is the map one-to-one with the package list below --
+:mod:`pcapkit.interface` has no 1.5.0 entry, so it has no section of its own:
 
 .. code-block:: shell
 
@@ -166,10 +161,9 @@ The ones that carry meaning here fall into five groups, which stack rather than
 compete: a pull request normally carries one from the first group and as many of the
 rest as apply. **The five groups are not the whole label set** -- the repository also
 has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` and
-``duplicate`` are all in live use -- only ``good first issue`` has never been
-applied. They are documented by
-GitHub rather than here, and are counted rather than listed so this page does not go
-stale every time one is added::
+``duplicate`` are all in live use and only ``good first issue`` has never been applied.
+Those are documented by GitHub rather than here, and are counted rather than listed so
+this page does not go stale every time one is added::
 
    $ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
    29
@@ -215,8 +209,9 @@ commit, so the label and the message agree by construction:
        values
 
 **Issue kind**, for issues rather than pull requests: ``design`` marks a pattern being
-decided rather than a defect or a request, which is the label most of the rulings on
-these pages were settled under; alongside ``bug``, ``enhancement`` and ``question``.
+decided rather than a defect or a request, and a majority of the rulings on these pages
+were filed under it -- though not all, several having been settled on a ``bug`` or
+``enhancement`` thread instead. Alongside ``bug``, ``enhancement`` and ``question``.
 
 **State -- what is happening to it now.** An open issue is meant to carry one of
 these, so that its status is readable without opening it:
@@ -239,7 +234,7 @@ than a category, which is worth checking for rather than assuming away:
        --json number,labels -q '.[]|"#\(.number) \(.labels|map(.name)|join(","))"'
 
 **Review -- the cross-review verdict, at the current head.** Separate from CI, which
-has its own status of its own: ``review: pending`` means no verdict for this head,
+has a status of its own: ``review: pending`` means no verdict for this head,
 either never reviewed or the head moved since; ``review: good-to-go`` and
 ``review: needs-changes`` are the two verdicts. Because they are keyed on the head
 rather than on the pull request, a new push invalidates the label -- a verdict that
@@ -291,9 +286,9 @@ carrying it are that kind:
    pre-``0.15`` pull requests, ``#3`` to ``#28``, with nothing at all between ``#28``
    and ``#350``. Three of those seven are distribution rollups (``#25``, ``#26``,
    ``#28``, each also carrying ``release``); the other four are early
-   ``refactor``/``feat`` work from before the project stabilised. On issues it is sparser still, appearing only from
-   ``#775`` up. So ``breaking``'s absence on an old pull request is weak evidence at
-   best. The current figures, rather than these:
+   ``refactor``/``feat`` work from before the project stabilised. On issues it is
+   sparser still, appearing only from ``#775`` up. So ``breaking``'s absence on an old
+   pull request is weak evidence at best. The current figures, rather than these:
 
    .. code-block:: shell
 
