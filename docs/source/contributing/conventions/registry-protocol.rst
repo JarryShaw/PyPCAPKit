@@ -1,7 +1,7 @@
 .. _registry-protocol:
 
-Where the registry protocol lives
----------------------------------
+The Registry Protocol
+---------------------
 
 :meth:`~pcapkit.corekit.enum.EnumLookup.get`,
 :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`,
@@ -27,8 +27,8 @@ share the generated template: :class:`~pcapkit.const.ftp.command.Command`,
 `#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__ finished that -- so a
 bespoke ``__new__`` exempts a registry from the template, not from the protocol.
 
-The Two Tiers, and What Lives on Each
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Two-Tier Hierarchy
+~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base any more. Since
 phase 1 of `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ it has a
@@ -109,11 +109,12 @@ Three things about it are easy to get wrong:
    **Zero enumerations remain outside the hierarchy**, measured by the same runtime
    walk over both the :mod:`enum` and ``aenum`` flavours that once found seven.
 
-What a Failed Lookup Raises
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Failed-Lookup Exceptions
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two rules govern it, and they pull in opposite directions on purpose. The owner ruled
-on `#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ that the choice between
+Two rules govern which exception a failed lookup raises, and they pull in opposite
+directions on purpose. The owner ruled on
+`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ that the choice between
 :exc:`ValueError` and :exc:`KeyError` follows whichever stdlib's :class:`~enum.Enum`
 would raise in the same circumstance, and that whichever it is comes from
 :mod:`pcapkit.utilities.exceptions` rather than from builtins.
@@ -172,8 +173,8 @@ exists for. So a ``get`` override that catches a name miss as control flow is
 following the convention; one that catches a *value* miss that way is silencing a
 logged error, and needs a reason.
 
-What a ``get`` Override May and May Not Do
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``get`` Override Obligations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Three rulings settled what an override owes
 :meth:`~pcapkit.corekit.enum.EnumLookup.get`, and the last of them deleted two
@@ -290,8 +291,8 @@ Taken with the ``Criticality.get`` deletion below -- an override emptied by #923
 rather than by redundancy -- the rule generalises: **an override justifies itself by
 what it adds to the base, and goes when the answer is nothing.**
 
-Case Sensitivity Is RFC-Directed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RFC-Directed Case Sensitivity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The rule, as the owner ruled it on
 `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__: where the RFC states the

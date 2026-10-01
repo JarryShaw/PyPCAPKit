@@ -11,7 +11,7 @@ GitHub Actions Workflows
    bump to a published package -- which :doc:`releasing` already documents in
    full; this page cross-references that rather than duplicating it.
 
-At a glance
+At a Glance
 -----------
 
 .. list-table::
@@ -89,7 +89,7 @@ At a glance
    push for Create Release -- for the path where no upstream run exists yet to
    chain from.
 
-The graph
+The Graph
 ---------
 
 Solid arrows are direct triggers (``push``, ``pull_request``, ``schedule``,
@@ -163,8 +163,8 @@ read a verdict from. On the ``workflow_run`` path (thick arrows), each reads
 the verdict Unit Tests already reached for that same commit instead of
 re-running the gate a second time.
 
-``workflow_run`` edges
------------------------
+``workflow_run`` Edges
+----------------------
 
 Four in total, found by grepping every ``on:`` block rather than trusting a
 hand-maintained list:
@@ -186,8 +186,8 @@ and ``.head_branch`` (or, for Create Release, ``.conclusion``) itself before
 doing anything with an outward effect; none of the filtering happens in the
 ``on:`` block.
 
-Reusable-workflow calls (``uses:``)
-------------------------------------
+Reusable-Workflow Calls (``uses:``)
+-----------------------------------
 
 A ``uses:`` call is a different relationship from triggering: it runs inside
 the caller's own workflow run, as one of the caller's own jobs, rather than
@@ -211,7 +211,7 @@ not one: ``gate`` (the full suite, one Python version) and ``changelog``
 ``pypcap-parity`` (two), each of which has already run once for this commit
 from Unit Tests' own ``push``/``pull_request`` triggers, so running any of
 them again per caller would test the same commit several times over -- and
-``required-checks`` (see `Required status checks`_ below), gated out by its
+``required-checks`` (see `Required Status Checks`_ below), gated out by its
 own ``if:`` rather than by having already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
 comment (``unit-tests.yml:695-701``): ``create-release.yml`` feeds
@@ -223,8 +223,8 @@ schedule-triggered GitHub Pages run): both ``Changelog drift`` and ``Gate
 ${{ matrix.python-version }}``, ``Integration Python …``, ``Engines Python
 …`` and ``PyPCAP/PyPCAPFile parity Python …`` -- all reporting ``skipped``.
 
-The skip cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
---------------------------------------------------------------------------------
+The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
+-------------------------------------------------------------------------------
 
 The two relationships above compose into a failure mode worth seeing on its
 own graph. Create Release's ``unit-tests`` job -- the ``uses:`` call above --
@@ -297,8 +297,8 @@ skipping because the tag a *previous* run already created still exists): this
 one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude ``success``.
 
-Required status checks
------------------------
+Required Status Checks
+----------------------
 
 Ruleset ``23497679`` on ``main`` requires six contexts, with
 ``strict_required_status_checks_policy: true`` (a branch must be up to date

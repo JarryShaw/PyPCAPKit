@@ -1,7 +1,7 @@
 .. _extension-header-subclassing:
 
-Which bases an IPv6 extension header names
-------------------------------------------
+Extension-Header Base Classes
+-----------------------------
 
 Every IPv6 extension header in this package subclasses
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
@@ -41,8 +41,8 @@ parenthetical ``IPsec`` alternative in the ruling: naming it satisfies the
 convention, and it is the right second base for a header whose standalone form is an
 IPsec one.
 
-The code cannot be used as evidence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Shared-Registry Trap
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Stated before the criterion itself, because it is the part a future reader will get
 wrong.** The obvious way to decide whether a header is "usable as a standalone protocol"
@@ -68,8 +68,8 @@ eight of the implemented headers, plus ``Shim6`` (140) and 253/254. Being *in* t
 registry is what makes something an extension header; it is not evidence about
 whether the same header is also a protocol in its own right.
 
-The operative test is what the RFCs say
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The IPv4-Payload Test
+~~~~~~~~~~~~~~~~~~~~~
 
 So the census is read out of the specifications, on the owner's instruction: work
 through the RFCs to establish, for each defined IPv6 extension header, whether it is
@@ -109,8 +109,8 @@ class for it, so nothing implements the classification, but a future one inherit
    and ``Shim6`` stay extension-only. A header that is a protocol in its own right
    but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
 
-The declaration is what carries the classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Explicit Base Declarations
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Name the second base **explicitly**, even though it is already in the MRO.
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
@@ -128,8 +128,8 @@ RFC ground in the ``#:`` comment beside it. The test walks
 ``IPv6_Ext.__subclasses__()`` rather than a hard-coded list, so a ninth header is
 held to the convention whether or not anyone remembers this page.
 
-The base is named ``IPv6_Ext``, and nothing else
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Retired ``IPv6_GenericExt`` Name
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The class arrived as ``IPv6_GenericExt``, a fallback parser for an unrecognised
 extension header (`#891 <https://github.com/JarryShaw/PyPCAPKit/issues/891>`__), and
@@ -145,8 +145,8 @@ between the two commits -- ``git tag --contains`` names the same tags for both -
 appears in **no** release and the break has no callers to inconvenience. Do not
 reintroduce it as an alias, and do not cite it as a former public name.
 
-ESP is an extension header, and still cannot short-circuit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ESP's Two Facts
+~~~~~~~~~~~~~~~
 
 Two facts about :class:`~pcapkit.protocols.internet.esp.ESP` coexist, and each is
 routinely mistaken for a refutation of the other.

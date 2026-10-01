@@ -1,7 +1,7 @@
 .. _mint-criterion:
 
-When an unrecognised value may mint a member
---------------------------------------------
+Minting an Unrecognised Value
+-----------------------------
 
 121 of the 127 registries under :mod:`pcapkit.const` define ``_missing_``, which decides
 what happens when a value has no member. The six without one --
@@ -42,7 +42,7 @@ ranges record that narrowing in their own comments:
        MISSING -->|"block label names a party"| SUFFIXED["_unregistered_member<br/>label + _0x&lt;code&gt;"]
        MISSING -->|"block label names a procedure"| BARE["_unregistered_member<br/>bare block label"]
 
-The criterion
+The Criterion
 ~~~~~~~~~~~~~
 
 The test, paraphrased from the maintainer's ruling: does the upstream registry treat
@@ -66,7 +66,7 @@ what the generated code happens to look like:
    bare label stands: suffixing one with a code would **manufacture a name nobody
    assigned**, and the value will get its real name if and when something assigns it.
 
-Worked examples
+Worked Examples
 ~~~~~~~~~~~~~~~
 
 *Bare label.* :mod:`pcapkit.const.ipx.socket`'s ``Dynamically Assigned``,
@@ -93,8 +93,8 @@ and neither is suffixed for the reason the next section gives.
    range and is not, because it names only the *mechanism* by which some future party
    will take it. Ask what the label tells you: a party, or a procedure.
 
-Why the company names are suffixed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Suffixed Company Names
+~~~~~~~~~~~~~~~~~~~~~~
 
 The ethertype case looks like an exception to the rule and is not. The maintainer's
 reasoning, settled on `#775 <https://github.com/JarryShaw/PyPCAPKit/issues/775>`__ after
@@ -108,7 +108,7 @@ That is also why ``DEC Unassigned`` goes the other way despite carrying the same
 attribution: there the company holds the block and assigned nothing, so the notation is
 "Unassigned" and the attribution is incidental.
 
-Checking the current state
+Checking the Current State
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The split is measurable rather than a matter of memory. Slice each ``_missing_`` body

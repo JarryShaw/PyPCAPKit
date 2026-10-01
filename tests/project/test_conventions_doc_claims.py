@@ -816,8 +816,8 @@ class AenumRoleExclusionTests(unittest.TestCase):
 
 
 class GetOverrideContractTests(unittest.TestCase):
-    """What a ``get`` override owes the base, as recorded onto *Where the registry
-    protocol lives* by GitHub issue #918 part 1.
+    """What a ``get`` override owes the base, as recorded onto *The
+    Registry Protocol* by GitHub issue #918 part 1.
 
     Three of the four items are quoted from the owner on their own threads -- #933 on
     ``quiet=True``, #935 on an advertised signature that is refused, #940 on deleting

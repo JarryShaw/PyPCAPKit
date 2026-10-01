@@ -183,11 +183,11 @@ def _star_import(module: 'str') -> 'dict[str, object]':
 
 
 def _sentinel_section() -> 'str':
-    """The "Naming a sentinel" section, now its own page.
+    """The "Naming a Sentinel" section, now its own page.
 
     Read whole rather than sliced between two anchors: GitHub issue #918 split
     the single-page :file:`docs/source/contributing/conventions.rst` into one
-    file per ``.. _label:`` anchor, and the "Naming a sentinel" section *is*
+    file per ``.. _label:`` anchor, and the "Naming a Sentinel" section *is*
     :file:`docs/source/contributing/conventions/sentinel-convention.rst` now, so
     there is no following anchor left in the same file to slice against. That
     retires the ``text.index('.. _sentinel-convention:')`` /
@@ -417,7 +417,7 @@ class SentinelPopulationTests(unittest.TestCase):
                                  'reachable only by its dotted path')
 
     def test_conventions_doc_carves_out_the_vendored_bare_object(self) -> 'None':
-        """"Why a class and not ``object()``" read as a blanket rule with no exception."""
+        """"Why a Class and Not ``object()``" read as a blanket rule with no exception."""
         section = _sentinel_section()
 
         self.assertIn('_NOT_FOUND', section)

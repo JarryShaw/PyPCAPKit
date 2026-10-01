@@ -1,6 +1,6 @@
 .. _sentinel-convention:
 
-Naming a sentinel
+Naming a Sentinel
 -----------------
 
 A *sentinel* here is a module-level singleton whose only job is to be recognised by
@@ -75,7 +75,7 @@ public use rather than left off it, since the name alone no longer says so.
    has a ``__repr__`` (``<absent>``) but no singleton guard either. Copy ``NullType``
    when you need a pattern to follow.
 
-Why a class and not ``object()``
+Why a Class and Not ``object()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A bare ``object()`` is just as safe under ``is``, so safety is not the reason. The
@@ -106,8 +106,8 @@ value of a vendored backport is that it can still be diffed against upstream, an
 house-style rewrite destroys that in exchange for a sentinel nobody outside the backport
 ever sees. The rule above is for sentinels this package writes itself.
 
-What to implement, and what not to
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Per-Sentinel Dunder Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The four sentinels deliberately differ, and the differences are **needs, not
 inconsistencies**:
