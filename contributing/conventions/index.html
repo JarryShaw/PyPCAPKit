@@ -486,21 +486,18 @@
 that are not derivable from the code, and that a future maintainer or an
 automated contributor would otherwise have to rediscover by reading a closed
 issue thread. Each ruling names where it was settled.</p>
-<p>Most of them govern <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which is where the settled
-questions have mostly arisen, and the page was titled <em>Registry Conventions</em>
-until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> widened
-it, then split it. <a class="reference internal" href="extension-header-subclassing.html#extension-header-subclassing"><span class="std std-ref">Which bases an IPv6 extension header names</span></a> is the first ruling
-here that governs a protocol class hierarchy rather than a registry, and
-<a class="reference internal" href="process.html#process"><span class="std std-ref">How the repository itself is run</span></a> the first that governs the repository rather than any of its
-code.</p>
+<p><a class="reference internal" href="mint-criterion.html#mint-criterion"><span class="std std-ref">When an unrecognised value may mint a member</span></a> and <a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">Where the registry protocol lives</span></a> govern
+<a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which is where the settled questions have mostly
+arisen. <a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a> governs <a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a>,
+<a class="reference internal" href="extension-header-subclassing.html#extension-header-subclassing"><span class="std std-ref">Which bases an IPv6 extension header names</span></a> a protocol class hierarchy, and
+<a class="reference internal" href="process.html#process"><span class="std std-ref">How the repository itself is run</span></a> the repository rather than any of its code.</p>
 <p><strong>A ruling that stays in its thread is a ruling that gets rediscovered.</strong> So
 when a question is answered in a way the code cannot express on its own – a
 classification, a naming rule, a deliberate asymmetry – it is written onto
 the page that covers it in the same change that implements it, rather than
 left in the issue for the next contributor to find. That is the owner’s
 standing ask on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: every
-convention settled from here on gets documented here as well.</p>
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
 </div>
 <div class="toctree-wrapper compound">
 <ul>

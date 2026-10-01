@@ -483,9 +483,7 @@
 <p>The four pages before this one are about writing library code. The rulings here are
 about running the repository – what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
-module, which is why they are recorded rather than left to be rediscovered.</p>
-<p>The page exists because those three settled questions fit none of the code-convention
-pages, and the owner ruled on
+module, and none fits a code-convention page, so the owner ruled on
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> that they get a page of
 their own rather than being left in their threads. Each ruling below is <strong>paraphrased
 rather than quoted</strong>, also on his instruction there; the issue named beside it is
@@ -505,7 +503,7 @@ the three that qualify to date: the CLI addon, the crypto addon, and <code class
 </pre></div>
 </div>
 <p>So <code class="docutils literal notranslate"><span class="pre">all</span></code> is exactly the union of those three extras, written out as literals rather
-than referenced – eight requirements before the ruling, three after it.</p>
+than referenced.</p>
 <p>Two groups stay out, and the reasons are <strong>different</strong> rather than two versions of
 one reason. Keeping them apart is what stops the list drifting the way it already did
 once:</p>
@@ -564,19 +562,17 @@ grep<span class="w"> </span>-B1<span class="w"> </span>-E<span class="w"> </span
 gh<span class="w"> </span>pr<span class="w"> </span>view<span class="w"> </span><span class="m">657</span><span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.commits|length'</span>
 </pre></div>
 </div>
-<p>The grouping scheme was settled after that, on #918: <strong>a section per top-level
-module, with</strong> <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module
-granularity, not per-file and not per-subpackage. <strong>That restructure has landed.</strong> It
-was a regrouping of scattered entries rather than a transposition of three tidy
-blocks: before it, the entries carried their kind as an inline bold label and those
-labels alternated in dozens of short stretches, blocked near the top of the file and
-thoroughly interleaved below. The file now carries <strong>9</strong> module-level sections holding 155
-entries, and no entry carries an inline kind label any more:</p>
+<p>The grouping scheme was settled on #918: <strong>a section per top-level module, with</strong>
+<code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
+per-file and not per-subpackage. The file carries <strong>9</strong> module-level sections holding
+155 entries, and no entry carries an inline kind label:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
 0
 </pre></div>
 </div>
-<p>The sections are one per top-level module, plus one for what belongs to no module:</p>
+<p>Eight of those nine name a module; the ninth, <em>Project infrastructure</em>, is for what
+belongs to none. Nor is the map one-to-one with the package list below –
+<a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a> has no 1.5.0 entry, so it has no section of its own:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-d<span class="w"> </span>pcapkit/*/<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s|pcapkit/||;s|/||'</span><span class="w">   </span><span class="c1"># const corekit dumpkit foundation</span>
 <span class="w">                                              </span><span class="c1"># interface protocols toolkit</span>
 <span class="w">                                              </span><span class="c1"># utilities vendor</span>
@@ -626,10 +622,9 @@ workflows is a conda channel label, unrelated to these.</p>
 compete: a pull request normally carries one from the first group and as many of the
 rest as apply. <strong>The five groups are not the whole label set</strong> – the repository also
 has GitHub’s own defaults, of which <code class="docutils literal notranslate"><span class="pre">wontfix</span></code>, <code class="docutils literal notranslate"><span class="pre">invalid</span></code>, <code class="docutils literal notranslate"><span class="pre">help</span> <span class="pre">wanted</span></code> and
-<code class="docutils literal notranslate"><span class="pre">duplicate</span></code> are all in live use – only <code class="docutils literal notranslate"><span class="pre">good</span> <span class="pre">first</span> <span class="pre">issue</span></code> has never been
-applied. They are documented by
-GitHub rather than here, and are counted rather than listed so this page does not go
-stale every time one is added:</p>
+<code class="docutils literal notranslate"><span class="pre">duplicate</span></code> are all in live use and only <code class="docutils literal notranslate"><span class="pre">good</span> <span class="pre">first</span> <span class="pre">issue</span></code> has never been applied.
+Those are documented by GitHub rather than here, and are counted rather than listed so
+this page does not go stale every time one is added:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
 29
 </pre></div>
@@ -689,8 +684,9 @@ values</p></td>
 </table>
 </div>
 <p><strong>Issue kind</strong>, for issues rather than pull requests: <code class="docutils literal notranslate"><span class="pre">design</span></code> marks a pattern being
-decided rather than a defect or a request, which is the label most of the rulings on
-these pages were settled under; alongside <code class="docutils literal notranslate"><span class="pre">bug</span></code>, <code class="docutils literal notranslate"><span class="pre">enhancement</span></code> and <code class="docutils literal notranslate"><span class="pre">question</span></code>.</p>
+decided rather than a defect or a request, and a majority of the rulings on these pages
+were filed under it – though not all, several having been settled on a <code class="docutils literal notranslate"><span class="pre">bug</span></code> or
+<code class="docutils literal notranslate"><span class="pre">enhancement</span></code> thread instead. Alongside <code class="docutils literal notranslate"><span class="pre">bug</span></code>, <code class="docutils literal notranslate"><span class="pre">enhancement</span></code> and <code class="docutils literal notranslate"><span class="pre">question</span></code>.</p>
 <p><strong>State – what is happening to it now.</strong> An open issue is meant to carry one of
 these, so that its status is readable without opening it:</p>
 <ul class="simple">
@@ -710,7 +706,7 @@ than a category, which is worth checking for rather than assuming away:</p>
 </pre></div>
 </div>
 <p><strong>Review – the cross-review verdict, at the current head.</strong> Separate from CI, which
-has its own status of its own: <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> means no verdict for this head,
+has a status of its own: <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> means no verdict for this head,
 either never reviewed or the head moved since; <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> and
 <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">needs-changes</span></code> are the two verdicts. Because they are keyed on the head
 rather than on the pull request, a new push invalidates the label – a verdict that
@@ -759,9 +755,9 @@ upward and effectively absent below: the only earlier carriers are seven
 pre-<code class="docutils literal notranslate"><span class="pre">0.15</span></code> pull requests, <code class="docutils literal notranslate"><span class="pre">#3</span></code> to <code class="docutils literal notranslate"><span class="pre">#28</span></code>, with nothing at all between <code class="docutils literal notranslate"><span class="pre">#28</span></code>
 and <code class="docutils literal notranslate"><span class="pre">#350</span></code>. Three of those seven are distribution rollups (<code class="docutils literal notranslate"><span class="pre">#25</span></code>, <code class="docutils literal notranslate"><span class="pre">#26</span></code>,
 <code class="docutils literal notranslate"><span class="pre">#28</span></code>, each also carrying <code class="docutils literal notranslate"><span class="pre">release</span></code>); the other four are early
-<code class="docutils literal notranslate"><span class="pre">refactor</span></code>/<code class="docutils literal notranslate"><span class="pre">feat</span></code> work from before the project stabilised. On issues it is sparser still, appearing only from
-<code class="docutils literal notranslate"><span class="pre">#775</span></code> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s absence on an old pull request is weak evidence at
-best. The current figures, rather than these:</p>
+<code class="docutils literal notranslate"><span class="pre">refactor</span></code>/<code class="docutils literal notranslate"><span class="pre">feat</span></code> work from before the project stabilised. On issues it is
+sparser still, appearing only from <code class="docutils literal notranslate"><span class="pre">#775</span></code> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s absence on an old
+pull request is weak evidence at best. The current figures, rather than these:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span>--label<span class="w"> </span>breaking<span class="w"> </span>--limit<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--json<span class="w"> </span>number<span class="w"> </span>-q<span class="w"> </span><span class="s1">'[.[].number]|sort|@json'</span>
 gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span>--label<span class="w"> </span>breaking<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>

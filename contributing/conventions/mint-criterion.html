@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/mint-criterion.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Every registry under pcapkit.const defines_missing_, which decides what happens when a value has no member. There are two possible behaviours, and which one a given range gets is a design decision,..." />
-<meta name="description" content="Every registry under pcapkit.const defines_missing_, which decides what happens when a value has no member. There are two possible behaviours, and which one a given range gets is a design decision,..." />
+<meta property="og:description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
+<meta name="description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Naming a sentinel" href="sentinel-convention.html"><link rel="prev" title="House Conventions" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -480,70 +480,92 @@
         <article role="main" id="furo-main-content">
           <section id="when-an-unrecognised-value-may-mint-a-member">
 <span id="mint-criterion"></span><h1>When an unrecognised value may mint a member<a class="headerlink" href="#when-an-unrecognised-value-may-mint-a-member" title="Link to this heading">¶</a></h1>
-<p>Every registry under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> defines <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which decides what
-happens when a value has no member. There are two possible behaviours, and which one
-a given range gets is a <strong>design decision, not a style preference</strong>:</p>
+<p>121 of the 127 registries under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> define <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which decides
+what happens when a value has no member. The six without one –
+<a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>’s four transport subclasses – carry
+no declared-but-unassigned range for one to resolve. There are two possible behaviours,
+and which one a given range gets is a <strong>design decision, not a style preference</strong>:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">extend_enum(cls,</span> <span class="pre">name,</span> <span class="pre">value)</span></code> – <em>mint</em></dt><dd><p>Creates a real, permanent member on the class. It is installed in
 <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, so it is visible to iteration,
 lookup and <code class="docutils literal notranslate"><span class="pre">__members__</span></code> from then on, for the life of the process.</p>
 </dd>
-<dt><a class="reference internal" href="../../pcapkit/corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> – <em>unmint</em></dt><dd><p>Returns a member-like object for the value <strong>without</strong> installing it. The
-registry does not grow, and a second lookup of the same value is indistinguishable
-from the first.</p>
+<dt><a class="reference internal" href="../../pcapkit/corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> – <em>unmint</em></dt><dd><p>Returns a member-like object for the value <strong>without</strong> installing it. The registry
+does not grow, and a second lookup of the same value builds an equal but distinct
+object rather than handing back the first.</p>
 </dd>
 </dl>
-<section id="the-criterion">
+<p><strong>Exactly one</strong> <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> in the tree mints:
+<a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>’s, whose values are 128-bit CGA extension
+tags rather than an IANA-style range of codes. 114 unmint, and the remaining six – the
+five flag registries and <a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> – only
+range-check and hand back to <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code>, declaring no unassigned range at
+all. So outside <code class="docutils literal notranslate"><span class="pre">CGAType</span></code> the criterion below decides the <em>name</em> an unregistered member
+carries rather than whether it registers: the registrar’s own label suffixed with the
+individual code, or the bare block label on its own. The two crawlers that generate the
+ranges record that narrowing in their own comments:
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/reg/ethertype.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_ROW_NAMES</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/ipx/socket.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_RANGE_NAMES</span></code>.</p>
+<pre  class="mermaid">
+        flowchart TD
+    LOOKUP[&quot;cls(value) finds no member&quot;] --&gt; MISSING[&quot;_missing_&quot;]
+    MISSING --&gt;|&quot;out of range, or no block covers it&quot;| RAISE[&quot;ValueError&quot;]
+    MISSING --&gt;|&quot;CGAType only&quot;| MINT[&quot;extend_enum&lt;br/&gt;permanent member, registry grows&quot;]
+    MISSING --&gt;|&quot;block label names a party&quot;| SUFFIXED[&quot;_unregistered_member&lt;br/&gt;label + _0x&amp;lt;code&amp;gt;&quot;]
+    MISSING --&gt;|&quot;block label names a procedure&quot;| BARE[&quot;_unregistered_member&lt;br/&gt;bare block label&quot;]
+    </pre><section id="the-criterion">
 <h2>The criterion<a class="headerlink" href="#the-criterion" title="Link to this heading">¶</a></h2>
 <p>The test, paraphrased from the maintainer’s ruling: does the upstream registry treat
-the label as the final, concrete assigned name (<strong>mint</strong>), or only as a notation for a
-human reading the table (<strong>unmint</strong>)?</p>
-<p>Settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a> and reaffirmed
+the label as the final, concrete assigned name, or only as a notation for a human
+reading the table?</p>
+<p>Settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/847">#847</a> and reaffirmed
 on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> as a core concept of
 the ruling.</p>
 <p>So the question to ask of a range is <strong>what the upstream registry actually did</strong>, not
 what the generated code happens to look like:</p>
 <ul class="simple">
-<li><p>The source assigns a <strong>real, specific name</strong> to those codes – minting records
-something the registry genuinely says. <strong>Mint.</strong></p></li>
+<li><p>The source assigns a <strong>real, specific name</strong> to those codes. The name records
+something the registry genuinely says, so it is carried across and suffixed with the
+code it belongs to.</p></li>
 <li><p>The source says only that the codes are spoken for, without naming them –
 <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Private</span> <span class="pre">Use</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Experimental</span> <span class="pre">Use</span></code>, <code class="docutils literal notranslate"><span class="pre">Deprecated</span></code>, <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>
-and <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span></code>. These are written for a human reading the
-table. Minting them <strong>manufactures a name nobody
-assigned</strong>, and the value will get its real name if and when something assigns
-it. <strong>Unmint.</strong></p></li>
+and <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span></code>. These are written for a human reading the table, so the
+bare label stands: suffixing one with a code would <strong>manufacture a name nobody
+assigned</strong>, and the value will get its real name if and when something assigns it.</p></li>
 </ul>
 </section>
 <section id="worked-examples">
 <h2>Worked examples<a class="headerlink" href="#worked-examples" title="Link to this heading">¶</a></h2>
-<p><em>Unmint.</em> <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>,
+<p><em>Bare label.</em> <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code>, <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Experimental</span></code> ranges. Each names <strong>how the socket will be allocated</strong>, not what
 occupies it; the real name arrives with the allocation.</p>
-<p><em>Mint.</em> <a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a>’s company names – <code class="docutils literal notranslate"><span class="pre">Xyplex</span></code>,
+<p><em>Suffixed.</em> <a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a>’s company names – <code class="docutils literal notranslate"><span class="pre">Xyplex</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Datability</span></code>, <code class="docutils literal notranslate"><span class="pre">Qualcomm</span></code>, <code class="docutils literal notranslate"><span class="pre">Motorola</span></code> and forty-two others, 46 names across 50
-range blocks, since four of them hold two blocks each – and, in the same file’s
-neighbour, <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>. A company name
-is the assignment, for the reason in the next section.</p>
-<p>Two further ranges in that file mint without being company names at all:
-<code class="docutils literal notranslate"><span class="pre">IEEE802.3</span> <span class="pre">Length</span> <span class="pre">Field</span></code>, which names a field in a standard, and
+range blocks, since four of them hold two blocks each – and
+<a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>. A company name is the
+assignment, for the reason in the next section.</p>
+<p>Two further ranges in that file carry a suffixed name without being company names at
+all: <code class="docutils literal notranslate"><span class="pre">IEEE802.3</span> <span class="pre">Length</span> <span class="pre">Field</span></code>, which names a field in a standard, and
 <code class="docutils literal notranslate"><span class="pre">Berkeley</span> <span class="pre">Trailer</span> <span class="pre">encap/IP</span></code>, which names an encapsulation. Both are outside the 46,
-and neither mints for the reason the next section gives.</p>
+and neither is suffixed for the reason the next section gives.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Those two groups look alike and the line between them is <strong>not</strong> range-versus-single
-code. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code> covers a range and still mints, because it names <em>who
-registered the socket</em>. <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> also covers a range and does not,
-because it names only the <em>mechanism</em> by which some future party will take it. Ask
-what the label tells you: a party, or a procedure.</p>
+code. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code> covers a range and is still suffixed per socket,
+because it names <em>who registered the socket</em>. <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> also covers a
+range and is not, because it names only the <em>mechanism</em> by which some future party
+will take it. Ask what the label tells you: a party, or a procedure.</p>
 </div>
 </section>
-<section id="why-the-company-names-mint">
-<h2>Why the company names mint<a class="headerlink" href="#why-the-company-names-mint" title="Link to this heading">¶</a></h2>
+<section id="why-the-company-names-are-suffixed">
+<h2>Why the company names are suffixed<a class="headerlink" href="#why-the-company-names-are-suffixed" title="Link to this heading">¶</a></h2>
 <p>The ethertype case looks like an exception to the rule and is not. The maintainer’s
 reasoning, settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> after
-being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a>: a
+being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/847">#847</a>: a
 proprietary protocol will never have a public name, so the company name is what serves
 that purpose in its place.</p>
 <p>So the company name is not a note <em>about</em> the code – it is the best name that will ever
@@ -556,7 +578,10 @@ attribution: there the company holds the block and assigned nothing, so the nota
 <h2>Checking the current state<a class="headerlink" href="#checking-the-current-state" title="Link to this heading">¶</a></h2>
 <p>The split is measurable rather than a matter of memory. Slice each <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body
 and see which call it makes – an <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> walk is reliable where a text search is
-not, because <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and in prose:</p>
+not, because <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and in prose. Match on the
+attribute name as well as on the bare name: <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> is called as a plain
+function, but <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> is called on <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so a walk that inspects
+only <code class="docutils literal notranslate"><span class="pre">ast.Name</span></code> nodes finds every mint and no unmint at all:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ast</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
 
 <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">'pcapkit/const'</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s1">'*.py'</span><span class="p">)):</span>
@@ -565,8 +590,9 @@ not, because <code class="docutils literal notranslate"><span class="pre">extend
     <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">'_missing_'</span><span class="p">:</span>
-            <span class="n">calls</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)}</span>
+            <span class="n">calls</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="k">else</span> <span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">attr</span>
+                     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">)</span>
+                     <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">))}</span>
             <span class="k">if</span> <span class="s1">'extend_enum'</span> <span class="ow">in</span> <span class="n">calls</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">'MINT  '</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
             <span class="k">elif</span> <span class="s1">'_unregistered_member'</span> <span class="ow">in</span> <span class="n">calls</span><span class="p">:</span>
@@ -577,8 +603,10 @@ not, because <code class="docutils literal notranslate"><span class="pre">extend
 <p class="admonition-title">Warning</p>
 <p>Calling <code class="docutils literal notranslate"><span class="pre">Cls(value)</span></code> on a registry whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> mints <strong>mutates the
 class</strong>. A probe is not a read: it installs a member that every later lookup then
-finds. Snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code> before any lookup, and use a
-throwaway process per registry when comparing behaviour across revisions.</p>
+finds. <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a> is the one registry this applies
+to today, but snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code> before any lookup
+regardless, and use a throwaway process per registry when comparing behaviour across
+revisions.</p>
 </div>
 </section>
 </section>
@@ -641,7 +669,7 @@ throwaway process per registry when comparing behaviour across revisions.</p>
 <li><a class="reference internal" href="#">When an unrecognised value may mint a member</a><ul>
 <li><a class="reference internal" href="#the-criterion">The criterion</a></li>
 <li><a class="reference internal" href="#worked-examples">Worked examples</a></li>
-<li><a class="reference internal" href="#why-the-company-names-mint">Why the company names mint</a></li>
+<li><a class="reference internal" href="#why-the-company-names-are-suffixed">Why the company names are suffixed</a></li>
 <li><a class="reference internal" href="#checking-the-current-state">Checking the current state</a></li>
 </ul>
 </li>
@@ -660,5 +688,363 @@ throwaway process per registry when comparing behaviour across revisions.</p>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     </body>
 </html>

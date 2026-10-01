@@ -529,10 +529,10 @@ convention, and it is the right second base for a header whose standalone form i
 IPsec one.</p>
 <section id="the-code-cannot-be-used-as-evidence">
 <h2>The code cannot be used as evidence<a class="headerlink" href="#the-code-cannot-be-used-as-evidence" title="Link to this heading">¶</a></h2>
-<p><strong>This is the part a future reader will get wrong, so it is stated before the
-criterion itself.</strong> The obvious way to decide whether a header is “usable as a
-standalone protocol” is to ask what the library’s own dispatch already allows. That
-answer is useless, and measurably so:</p>
+<p><strong>Stated before the criterion itself, because it is the part a future reader will get
+wrong.</strong> The obvious way to decide whether a header is “usable as a standalone protocol”
+is to ask what the library’s own dispatch already allows. That answer is useless, and
+measurably so:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IPv4</span><span class="o">.</span><span class="n">__proto__</span> <span class="ow">is</span> <span class="n">Internet</span><span class="o">.</span><span class="n">__proto__</span>
@@ -576,9 +576,9 @@ fields”</em> whose addresses are <em>“the addresses that appear in the Sourc
 Destination Address fields in the IPv6 packet carrying the Mobility Header”</em> – there
 is no IPv4 variant of that computation – and the IPv4 equivalent function is not
 protocol 135 at all, since <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5944.html"><strong>RFC 5944</strong></a> carries Mobile IPv4 over UDP port 434.
-<code class="docutils literal notranslate"><span class="pre">Shim6</span></code> (140) has the same shape and the same verdict; this package has never had a
-parser class for it, so nothing implements the classification, but a future one
-inherits <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone.</p>
+<code class="docutils literal notranslate"><span class="pre">Shim6</span></code> (140) has the same shape and the same verdict; this package carries no parser
+class for it, so nothing implements the classification, but a future one inherits
+<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Own-protocolhood on its own is <strong>not</strong> sufficient, and MH is the case that
@@ -614,11 +614,11 @@ the shared-base role into one class under the shorter name. No compatibility ali
 was left behind, and that was deliberate. The owner ruled that the
 <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> name goes for good: it was an intermediate state, and it was never
 released.</p>
-<p>The reasoning is what makes it safe rather than merely decided: the old name existed
-on <code class="docutils literal notranslate"><span class="pre">main</span></code> from <code class="docutils literal notranslate"><span class="pre">b3551cb63</span></code> to <code class="docutils literal notranslate"><span class="pre">93cf940b3</span></code> – under four hours on one day, and
-after the most recent release tag – so it appears in <strong>no</strong> release, and the break
-has no callers to inconvenience. Do not reintroduce it as an alias, and do not cite
-it in prose as a former public name; it was never one.</p>
+<p>What makes that safe rather than merely decided: the old name existed on <code class="docutils literal notranslate"><span class="pre">main</span></code> from
+<code class="docutils literal notranslate"><span class="pre">b3551cb63</span></code> to <code class="docutils literal notranslate"><span class="pre">93cf940b3</span></code>, under four hours on one day, and no release tag falls
+between the two commits – <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">--contains</span></code> names the same tags for both – so it
+appears in <strong>no</strong> release and the break has no callers to inconvenience. Do not
+reintroduce it as an alias, and do not cite it as a former public name.</p>
 </section>
 <section id="esp-is-an-extension-header-and-still-cannot-short-circuit">
 <h2>ESP is an extension header, and still cannot short-circuit<a class="headerlink" href="#esp-is-an-extension-header-and-still-cannot-short-circuit" title="Link to this heading">¶</a></h2>

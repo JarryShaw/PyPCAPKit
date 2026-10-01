@@ -492,9 +492,15 @@
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>A handful of registries define their own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> to carry extra attributes and so
-do not share the generated template; bringing them onto the base is tracked in
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>.</p>
+<p>Six registries define their own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> to carry extra attributes and so do not
+share the generated template: <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnCode</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>. They are on the base regardless –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> finished that – so a
+bespoke <code class="docutils literal notranslate"><span class="pre">__new__</span></code> exempts a registry from the template, not from the protocol.</p>
 <section id="the-two-tiers-and-what-lives-on-each">
 <h2>The Two Tiers, and What Lives on Each<a class="headerlink" href="#the-two-tiers-and-what-lives-on-each" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base any more. Since
@@ -522,10 +528,9 @@ registry inherits <a class="reference internal" href="../../pcapkit/corekit/enum
 <p>What settled the split is the owner’s own second thought about carrying <code class="docutils literal notranslate"><span class="pre">register</span></code>
 on the base: if the base carries <code class="docutils literal notranslate"><span class="pre">register</span></code>, there is no principled reason for it
 not to carry <code class="docutils literal notranslate"><span class="pre">register_alias</span></code> as well, and the ruling would be the worse for it.
-Following that through leaves
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> holding only three methods, too thin to
-justify a second class – so the two tiers collapse into one, which is the opposite of
-what was ruled.</p>
+Following that through leaves <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> holding only
+three methods, too thin to justify a second class – so the two tiers collapse into one,
+which is the opposite of what was ruled.</p>
 <p><strong>Both tiers are plain classes, and that is load-bearing.</strong> Inserting a parent above
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> leaves the member data type exactly where
 it was – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
@@ -577,18 +582,6 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 <strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
 <strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
 walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
-<p>It landed in two pull requests rather than one. Seven of the 24 sat in files
-other pull requests were editing around the same time: <code class="docutils literal notranslate"><span class="pre">CommandType</span></code> and
-<code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code> in <a class="reference internal" href="../../pcapkit/const/ftp.html#module-pcapkit.const.ftp.command" title="pcapkit.const.ftp.command"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code></a> and its vendor
-template, both touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/913">#913</a>;
-and <code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code> in <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> plus all four
-<a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> helpers (<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>,
-<code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>), both
-files touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a>. The
-first pass (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/921">#921</a>) is
-behaviour-preserving on its own, so the other 17 could land without waiting on
-those files; the remaining seven followed once both had merged
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>).</p>
 </div>
 </section>
 <section id="what-a-failed-lookup-raises">
@@ -615,7 +608,19 @@ so <strong>only the provenance changed</strong> – every <code class="docutils 
 <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> around a lookup keeps catching, in this tree and in a
 caller’s.</p></li>
 </ul>
-<p>Do not “improve” on the shape by making both misses report identically. Converting
+<p>Which branch a key takes, and what each miss ends in:</p>
+<pre  class="mermaid">
+        flowchart TD
+    GET[&quot;get(key, default)&quot;] --&gt;|&quot;isinstance(key, str)&quot;| NAME[&quot;_member_map_ lookup&quot;]
+    GET --&gt;|&quot;otherwise&quot;| VALUE[&quot;_validate_value(key)&lt;br/&gt;then cls(key)&quot;]
+    NAME --&gt;|&quot;hit&quot;| OK[&quot;canonical member&quot;]
+    NAME --&gt;|&quot;miss, key is a registered value&quot;| OK
+    NAME --&gt;|&quot;miss, default is a registered value&quot;| OK
+    NAME --&gt;|&quot;miss, no usable default&quot;| KEYERR[&quot;EnumKeyError&lt;br/&gt;quiet, derives KeyError&quot;]
+    VALUE --&gt;|&quot;resolves, or _missing_ answers&quot;| OK
+    VALUE --&gt;|&quot;ValueError, default is a registered value&quot;| OK
+    VALUE --&gt;|&quot;ValueError, no usable default&quot;| VALERR[&quot;EnumValueError&lt;br/&gt;loud, derives ValueError&quot;]
+    </pre><p>Do not “improve” on the shape by making both misses report identically. Converting
 one into the other is exactly what #923 retired, and it was retired in three places
 at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
 base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
@@ -671,7 +676,7 @@ guaranteed either: pass a first argument that <em>is</em> an instance of the cla
 delegation <strong>silently succeeds</strong>, so a <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> override cannot even be
 relied on to fail loudly. Measured, all three cases, rather than reasoned about.
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is itself a <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span></code>. The
-precedent is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/913">#913</a>, whose
+precedent is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/913">#913</a>, whose
 <code class="docutils literal notranslate"><span class="pre">FEATCode.get</span></code> is <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span> <span class="pre">def</span> <span class="pre">get(cls,</span> <span class="pre">key,</span> <span class="pre">default=NO_DEFAULT)</span></code> ending in
 <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super().get(key,</span> <span class="pre">default)</span></code>;
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> followed it, which is
@@ -753,7 +758,9 @@ treats them as case-sensitive.</p>
 an enumeration honours and keeps the original writing the registrar used, and
 case-insensitivity applies only to the selected registries where it makes logical sense
 – <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code> being one – or where the RFC documentation itself recognises
-the values as case-insensitive, FTP and HTTP commands being the likely candidates.</p>
+the values as case-insensitive, FTP and HTTP commands being the candidates he named.
+Only FTP survived the audit below: <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> makes the HTTP method token
+case-sensitive outright.</p>
 <p>So <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is <strong>case-sensitive</strong>, and that is the
 default every enumeration gets. Case-insensitivity is a per-class <code class="docutils literal notranslate"><span class="pre">get</span></code> override that
 has to cite the RFC or IANA registry making the values case-insensitive; without one it
@@ -790,8 +797,8 @@ data, and that mixed usage is itself an indication of case-insensitivity.</p>
 <p>So the test a new registry has to pass has <strong>two limbs</strong>, and satisfying either one
 justifies case-insensitivity:</p>
 <ol class="arabic simple">
-<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> for FTP
-command codes, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a> for FTP FEAT codes, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a>
+<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> for FTP
+command codes, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a> for FTP FEAT codes, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a>
 for IANA service names.</p></li>
 <li><p><strong>A documented spelling disagreement between the specification and the registry.</strong>
 If the RFC writes a field one way throughout and the live IANA data writes it
@@ -849,13 +856,13 @@ says otherwise.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></p></td>
-<td><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a></p></td>
+<td><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a></p></td>
 <td><p><em>“Upper and lower case alphabetic characters are to be treated
 identically.”</em> Limb 1.</p></td>
 <td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fold, correctly</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a></p></td>
-<td><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a>, <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html#section-3.2"><strong>RFC 2389 Section 3.2</strong></a></p></td>
+<td><p><span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a>, <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html#section-3.2"><strong>RFC 2389 Section 3.2</strong></a></p></td>
 <td><p><em>“IANA maintains uniqueness of feature names (FEAT codes) based on
 case-insensitive comparison.”</em> Limb 1. Limb 2 holds too: RFC 2389 recommends
 upper case on the wire while the registry spells 5 of its 15 codes lower case
@@ -869,7 +876,7 @@ line-oriented grep for the phrase finds nothing.</p></td>
 <td><p><strong>case-insensitive</strong> – was a defect; <code class="docutils literal notranslate"><span class="pre">get</span></code> now folds</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></p></td>
-<td><p><span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
+<td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
 <td><p><em>“The method token is case-sensitive.”</em> Explicitly the opposite of limb 1.</p></td>
 <td><p><strong>case-sensitive</strong> – was a defect, fixed by
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
@@ -880,7 +887,7 @@ line-oriented grep for the phrase finds nothing.</p></td>
 <td><p><strong>case-sensitive</strong> – already exact-matches, conforms</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a></p></td>
-<td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p></td>
+<td><p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p></td>
 <td><p>Nothing states a rule. Limb 2 fails on measurement: all 10 rows of the RFC’s
 table and all 10 of the live IANA CSV are upper case, so the authorities
 agree. (RFC 9850 notes the labels <em>“correspond to lowercase labels in the TLS
@@ -889,7 +896,7 @@ second spelling of the log label.)</p></td>
 <td><p><strong>case-sensitive</strong> – no override, conforms</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code></p></td>
-<td><p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-8.1.1"><strong>RFC 6335 Section 8.1.1</strong></a></p></td>
+<td><p><span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-8.1.1"><strong>RFC 6335 Section 8.1.1</strong></a></p></td>
 <td><p>Nothing states a rule for the <code class="docutils literal notranslate"><span class="pre">Transport</span> <span class="pre">Protocol</span></code> field – only <em>“limited
 to one or more of TCP, UDP, SCTP, and DCCP”</em>. Limb 2 carries it: the RFC and
 its §10.2 templates write the field upper case, the live CSV is lower case in
@@ -906,26 +913,34 @@ so there is no string to fold. It does inherit the row above through
 <td><p><strong>n/a</strong> – int-keyed</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, <code class="docutils literal notranslate"><span class="pre">DCCP</span></code></p></td>
-<td><p><span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a></p></td>
+<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a></p></td>
 <td><p><em>“case is ignored for comparison purposes, so both “http” and “HTTP” denote
-the same service.”</em> Limb 1, emphatically – and these registries’ <strong>values
-are</strong> service names.</p></td>
+the same service.”</em> Limb 1, emphatically – and these registries <strong>derive every
+member name from the registry’s service-name column</strong>, in the registrar’s own
+spelling (<code class="docutils literal notranslate"><span class="pre">tcpmux</span></code>); the <em>value</em> is a composite that embeds it
+(<code class="docutils literal notranslate"><span class="pre">'tcpmux</span> <span class="pre">[1</span> <span class="pre">-</span> <span class="pre">tcp]'</span></code>), not the bare name.</p></td>
 <td><p><strong>unimplemented</strong> – no service-name lookup exists to fold; see below</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code>, <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code></p></td>
-<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4"><strong>RFC 959 Section 4</strong></a>, <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
+<td><p><span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4"><strong>RFC 959 Section 4</strong></a>, <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
 <td><p>Limb 2 holds on measurement: the RFC and registry pages present the kind and
 conformance letters upper case (<code class="docutils literal notranslate"><span class="pre">A</span></code>/<code class="docutils literal notranslate"><span class="pre">P</span></code>/<code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code>/<code class="docutils literal notranslate"><span class="pre">O</span></code>/<code class="docutils literal notranslate"><span class="pre">H</span></code>) while
 the CSV columns the crawler reads are lower case in every row (<code class="docutils literal notranslate"><span class="pre">s</span></code> 26,
-<code class="docutils literal notranslate"><span class="pre">a</span></code> 18, <code class="docutils literal notranslate"><span class="pre">s/p</span></code> 3, blank 1; <code class="docutils literal notranslate"><span class="pre">o</span></code> 28, <code class="docutils literal notranslate"><span class="pre">m</span></code> 27, <code class="docutils literal notranslate"><span class="pre">h</span></code> 7, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2).</p></td>
+<code class="docutils literal notranslate"><span class="pre">a</span></code> 18, <code class="docutils literal notranslate"><span class="pre">p</span></code> 16, <code class="docutils literal notranslate"><span class="pre">s/p</span></code> 3, blank 1; <code class="docutils literal notranslate"><span class="pre">o</span></code> 28, <code class="docutils literal notranslate"><span class="pre">m</span></code> 27, <code class="docutils literal notranslate"><span class="pre">h</span></code> 7,
+<code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2). Both tallies cover all 64 rows.</p></td>
 <td><p><strong>open</strong> – see below</p></td>
 </tr>
 <tr class="row-odd"><td><p>The 6 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ngap</span></code></a> helper enumerations</p></td>
 <td><p>IANA Mobility Header registries, 3GPP TS 38.413</p></td>
-<td><p>Their values are numeric codes, so the criterion is vacuous exactly as for the
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above. <strong>None</strong> of them defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own any
-more. Two did when this audit was taken –
+<td><p><code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>,
+<code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> and <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code>.
+<strong>Five</strong> of the six carry numeric codes, so the criterion is vacuous on them
+exactly as for the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above; <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code>’s are <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> ASN.1
+identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
+construction, so it lands the same way for a different reason.
+<strong>None</strong> of the six defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own any more. Two did when this
+audit was taken –
 <code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, for
 signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch)
 rather than for case – and
@@ -934,7 +949,8 @@ redundant, per the ruling in the section above; each now inherits <code class="d
 from <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> unchanged. <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>
 and <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> never carried a <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they had no
 string lookup to fold. <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> had one when this audit was taken and no
-longer does: #921 re-parented it onto
+longer does:
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/921">#921</a> re-parented it onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and #923 retired the exception
 conversion that was the override’s only remaining job, so it now inherits
 <code class="docutils literal notranslate"><span class="pre">get</span></code> unchanged.</p></td>
@@ -949,12 +965,10 @@ discusses their case. Both authorities write them upper case.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Every other non-registry enumeration</p></td>
 <td><p>–</p></td>
-<td><p>pcapkit’s own discriminators and bit labels, with no registrar behind them
-at all – <code class="docutils literal notranslate"><span class="pre">Completion</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">httpv1.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">FinalisedState</span></code>,
+<td><p>All 14 are pcapkit’s own discriminators and bit labels, with no registrar behind
+them at all – <code class="docutils literal notranslate"><span class="pre">Completion</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">httpv1.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">FinalisedState</span></code>,
 <code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketDirection</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketReception</span></code>, and the 7 httpv2
-<code class="docutils literal notranslate"><span class="pre">Flags</span></code>. <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code> is the one with an external source and it points the
-same way: its values are ASN.1 identifiers from 3GPP TS 38.413, and ASN.1
-identifiers are case-significant by construction.</p></td>
+<code class="docutils literal notranslate"><span class="pre">Flags</span></code>.</p></td>
 <td><p><strong>case-sensitive</strong> – nothing to cite, nothing to change</p></td>
 </tr>
 </tbody>
@@ -964,9 +978,9 @@ identifiers are case-significant by construction.</p></td>
 wider than a case fix:</p>
 <ul class="simple">
 <li><p><strong>A service-name lookup on the</strong> <code class="docutils literal notranslate"><span class="pre">AppType</span></code> <strong>transport registries.</strong> This is the
-inverse of every other row: <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a> <em>does</em> make service names
-case-insensitive, and <code class="docutils literal notranslate"><span class="pre">TCP</span></code>/<code class="docutils literal notranslate"><span class="pre">UDP</span></code>/<code class="docutils literal notranslate"><span class="pre">SCTP</span></code>/<code class="docutils literal notranslate"><span class="pre">DCCP</span></code> hold service names as their
-values – but <code class="docutils literal notranslate"><span class="pre">AppType.get</span></code> refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> key, so no service-name
+inverse of every other row: <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a> <em>does</em> make service names
+case-insensitive, and <code class="docutils literal notranslate"><span class="pre">TCP</span></code>/<code class="docutils literal notranslate"><span class="pre">UDP</span></code>/<code class="docutils literal notranslate"><span class="pre">SCTP</span></code>/<code class="docutils literal notranslate"><span class="pre">DCCP</span></code> take their member names from
+that column – but <code class="docutils literal notranslate"><span class="pre">AppType.get</span></code> refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> key, so no service-name
 lookup exists for the rule to apply to. Implementing one is new public API on a
 6,000-member registry where one name maps to many ports, which is a <code class="docutils literal notranslate"><span class="pre">get_all</span></code>
 design question rather than a case fold.</p></li>
@@ -975,10 +989,10 @@ design question rather than a case fold.</p></li>
 specification’s own tokens – the measured spelling disagreement above would make
 these two case-insensitive. Nothing looks them up by string today, though: the
 crawler translates the CSV’s lower-case letters to the upper-case member names at
-generation time. Both classes now inherit
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> finished re-parenting
-them, per the note above – so a <code class="docutils literal notranslate"><span class="pre">get</span></code> exists on each, case-sensitive like the
+generation time. Both classes inherit
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> completed phase 2’s
+re-parenting, so a <code class="docutils literal notranslate"><span class="pre">get</span></code> exists on each, case-sensitive like the
 base’s own. Whether to fold case to match <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s own override is a
 design question for whoever writes the first string-keyed caller, not one this
 audit settles.</p></li>
@@ -986,7 +1000,7 @@ audit settles.</p></li>
 <p>One case fold also lives <strong>outside</strong> any <code class="docutils literal notranslate"><span class="pre">get</span></code>, and so escapes this convention
 entirely: <code class="docutils literal notranslate"><span class="pre">_resolve</span></code> in <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> upper-cases its
 <code class="docutils literal notranslate"><span class="pre">value</span></code> before matching it against <a class="reference internal" href="../../pcapkit/const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> member names. <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7296.html"><strong>RFC 7296</strong></a> states no
+<a class="reference internal" href="../../pcapkit/const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> member names. <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7296.html"><strong>RFC 7296</strong></a> states no
 comparison rule for IKEv2 transform names – checked, it does not discuss case at all
 – so that fold is a convenience with no citation behind it. It is a protocol-level
 resolver rather than a registry override, which is why the audit records it here
@@ -1023,10 +1037,10 @@ closed set carrying <code class="docutils literal notranslate"><span class="pre"
 fall-through can be measured on a class that defines no <code class="docutils literal notranslate"><span class="pre">get</span></code>.
 <code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
 before matching, which makes it look as though the base were case-insensitive –
-deliberately, since <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> treats FTP command codes identically
+deliberately, since <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> treats FTP command codes identically
 regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
-case-sensitive instead: <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
+case-sensitive instead: <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
 case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
 <code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the
 caller’s exact casing, the same way an unrecognised value always does.</p>
@@ -1130,5 +1144,363 @@ the next regeneration would discard it.</p>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     </body>
 </html>
