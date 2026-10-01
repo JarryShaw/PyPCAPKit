@@ -3,19 +3,12 @@ Help Wanted
 
 .. important::
 
-   This page mirrors the `discussion thread
-   <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ started on GitHub.
-   The thread holds the proposals as they were first raised, together with a
-   comment recording which of them have since landed; this page is the
-   maintained copy, kept in step with the code. So where a proposal has been
-   implemented it is described as implemented here, and only the work that is
-   genuinely still open is asked for. Please leave notes in the thread rather
-   than against this page.
-
-As PyPCAPKit reached its *16k* lines of code and *800th* commit, it seemed
-better to record the project's enhancement proposals somewhere durable than to
-leave them scattered. They were raised in the discussion thread, and this page
-is where they are kept up to date.
+   This page is the maintained copy of the project's enhancement proposals, kept
+   in step with the code. The `discussion thread
+   <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ holds them as they
+   were first raised; here an implemented proposal is described as implemented,
+   and only genuinely open work is asked for. Please leave notes in the thread
+   rather than against this page.
 
 Pull requests for anything still open, and new ideas of your own, are very
 welcome. For questions, leave a note in the `discussion thread
@@ -66,16 +59,12 @@ whose *layout* is identical -- it holds the whole of the tag, and
 .. note::
 
    Some of these have an empty, protocol-named file under a
-   ``NotImplemented`` folder. **Those files are not a roadmap.** They were
-   scratch reminders the author left himself before this page existed, so a
-   stub's presence does not mean a protocol is planned or claimed, and its
-   absence does not mean the protocol is unwanted: ``LINUX_SLL``, ``QUIC`` and
-   **DTLS** have no stub and are on the list above, while **NGAP** had none
-   either and is implemented. Take this page as the record and ignore the
-   folder.
-
-   **ESP**, **SCTP** and **NGAP** are no longer listed because they are
-   implemented.
+   ``NotImplemented`` folder. **Those files are not a roadmap.** They are
+   scratch reminders, so a stub's presence does not mean a protocol is planned or
+   claimed, and its absence does not mean the protocol is unwanted:
+   ``LINUX_SLL``, ``QUIC`` and **DTLS** have no stub and are on the list above,
+   while **NGAP** has none either and is implemented. Take this page as the
+   record and ignore the folder.
 
 SCTP
 ~~~~
@@ -106,10 +95,8 @@ TCP has -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
 ESP
 ~~~
 
-**Done.** :class:`~pcapkit.protocols.internet.esp.ESP` -- abandoned in the
-``NotImplemented`` folder for years, because of design flaws within PyPCAPKit
-at the time -- now parses without keys, and decrypts when a Security
-Association is supplied through the protocol keyed
+**Done.** :class:`~pcapkit.protocols.internet.esp.ESP` parses without keys, and
+decrypts when a Security Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
 What is still wanted there is wider algorithm coverage. The two enumerations
@@ -147,7 +134,7 @@ Mobility Header
 ~~~~~~~~~~~~~~~
 
 **Done.**
-:class:`~pcapkit.protocols.internet.mh.MH` now decodes and constructs the whole
+:class:`~pcapkit.protocols.internet.mh.MH` decodes and constructs the whole
 registry: **all 24 registered message data types**, **all 4 CGA extensions**, and
 **all 71 registered options**. Every one of them is registered in
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
@@ -159,41 +146,23 @@ Every message type and every one of those options round-trips byte-for-byte
 through the public API -- ``make`` then ``read`` then ``make`` again reproduces
 the same octets, which
 :file:`tests/protocols/test_option_roundtrip_unit.py` checks for the whole
-registry. The **four CGA extensions round-trip end to end as well**, which they
-could not do for as long as the CGA Parameters option -- the only thing that can
-carry a CGA extension on the wire -- was unparsable. Both of the shared
-field-machinery faults behind that have since been fixed, so no ``mh-extension``
-entry remains in that test's ``EXPECTED_FAILURES``.
+registry. The **four CGA extensions round-trip end to end as well**: the CGA
+Parameters option (type 12) is the only thing that can carry a CGA extension on
+the wire, so registering it reached the whole
+:attr:`~pcapkit.protocols.internet.mh.MH.__extension__` registry with it, and no
+``mh-extension`` entry appears in that test's ``EXPECTED_FAILURES``.
 
-The sub-registries turned out to be the easy half, as predicted: binding
-revocation types and triggers, handoff indicators, access network identifier
-sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
-parameters, DNS update status, traffic selector formats and QoS attributes were
-already generated in full under :doc:`/pcapkit/const/mh`, and **no new
-enumeration or vendor crawler was needed**. Two value sets did have to be added
-to ``mh.py`` itself rather than to :mod:`pcapkit.const.mh`, because IANA
-registers neither: the localized routing acknowledgment status codes of
-:rfc:`6705#section-10.2`
+The sub-registries are the easy half: binding revocation types and triggers,
+handoff indicators, access network identifier sub-options, flow identification
+and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
+traffic selector formats and QoS attributes are all generated in full under
+:doc:`/pcapkit/const/mh`. Two value sets live in ``mh.py`` itself rather than in
+:mod:`pcapkit.const.mh`, because IANA registers neither: the localized routing
+acknowledgment status codes of :rfc:`6705#section-10.2`
 (:class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`) and the local
 mobility anchor address option codes of :rfc:`5949#section-6.2.2`
-(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside the two
-:rfc:`5568` sets that were already there.
-
-The CGA Parameters option (type 12) was the last one left on the generic handler,
-and it is now registered like the rest. It was unreachable rather than
-unimplemented: two faults in shared field machinery stood in the way, both
-outside the mobility header --
-`#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__, a nested schema
-could not reach the enclosing packet's fields by name, and
-`#446 <https://github.com/JarryShaw/PyPCAPKit/issues/446>`__, a
-:class:`~pcapkit.corekit.fields.misc.ForwardMatchField`'s non-consuming bytes
-counted towards the schema's length. Both had to be fixed for this option to
-parse, which is why the half-fix was reverted rather than shipped; they landed
-separately, and ``test_mh_cga_parameters_option_now_parses`` is the pinning test
-renamed to record it. Fixing the option reached the whole
-:attr:`~pcapkit.protocols.internet.mh.MH.__extension__` registry with it, since
-it is the only carrier a CGA extension has -- four ``EXPECTED_FAILURES`` entries
-went green at once.
+(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside two
+:rfc:`5568` sets.
 
 What is left, and why:
 
@@ -284,17 +253,17 @@ complaint and yields nothing useful.
   ``ETHERNET``, ``IPV4`` and ``IPV6``, declared identically in
   :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`.
-* **16 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
+* **17 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
   :attr:`Internet.__proto__
   <pcapkit.protocols.internet.internet.Internet.__proto__>`.
 * **7 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
   RARP, IPv4, IPv6, IPX and both VLAN tags.
-* **7 bindings over 5 port numbers, out of 8182**
-  :class:`~pcapkit.const.reg.apptype.AppType` members -- TCP 20 to FTP-DATA and
-  21 to FTP, port 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
-  The two counts differ because 80 and 8080 are each bound twice, once per
-  transport.
+* **7 bindings over 5 port numbers**, against a
+  :class:`~pcapkit.const.reg.apptype.AppType` registry carrying every IANA
+  service name -- TCP 20 to FTP-DATA and 21 to FTP, port 80 and 8080 to HTTP on
+  both TCP and UDP, and UDP 1701 to L2TP. The two counts differ because 80 and
+  8080 are each bound twice, once per transport.
 * **2 of the 75**
   :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   values, in :attr:`SCTP.__proto__
@@ -303,20 +272,23 @@ complaint and yields nothing useful.
   payload is ``Raw`` until something calls
   :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
 
+Each pair above is measurable, which is why the command is written down rather
+than trusted to stay current:
+
+.. code-block:: shell
+
+   python -c "from pcapkit.protocols.internet.internet import Internet; \
+              from pcapkit.const.reg.transtype import TransType; \
+              print(len(Internet.__proto__), len(list(TransType)))"
+
 Most of those want a dissector written and are covered by the stub list above.
-A handful wanted only a table entry, because the dissector was already there,
-and those have now been made:
+A handful wanted only a table entry, because the dissector was already there:
 
 * **Done.** :class:`~pcapkit.protocols.link.ospf.OSPF` is bound at
   ``TransType`` 89 (``OSPFIGP``) and
-  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701. Binding them
-  turned up three defects that had kept OSPF from parsing anything at all --
-  ``read`` consulted the schema *class* rather than the parsed header,
-  :attr:`~pcapkit.protocols.link.ospf.OSPF.alias` read an ``_info`` that does
-  not exist until ``read`` has returned, and both classes dispatched the
-  remaining payload *length* as if it were a protocol code. ``__index__`` still
-  raises on both, which is correct: neither is reached through a link-layer
-  EtherType.
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
+  ``__index__`` raises on both, which is correct: neither is reached through a
+  link-layer EtherType.
 * **Done.** :class:`~pcapkit.protocols.application.ftp.FTP_DATA` is bound at TCP
   port 20 (IANA ``ftp-data``). It is a thin
   :class:`~pcapkit.protocols.misc.raw.Raw` subclass, so this buys the payload a
@@ -329,19 +301,18 @@ and those have now been made:
   the ``tls`` stub above. Binding it would feed a TLS record to an HTTP parser.
 * **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
   :class:`~pcapkit.protocols.link.s_tag.S_Tag`, and the customer tag ``0x8100``
-  to :class:`~pcapkit.protocols.link.c_tag.C_Tag`. Both subclass the now-abstract
+  to :class:`~pcapkit.protocols.link.c_tag.C_Tag`. Both subclass the abstract
   :class:`~pcapkit.protocols.link.vlan.VLAN`, which carries the shared tag
   layout; the split exists so that a Q-in-Q frame's two tags stay distinct in
-  the parsed output. Fixing the shared ``read`` also fixed the DEI flag, which
-  had been reported as ``bool(pcp)`` rather than read from its own bit.
+  the parsed output.
 * ``LinkType`` ``NULL``, ``LOOP`` and ``RAW`` carry bare IPv4 or IPv6, both of
   which pcapkit dissects. ``NULL`` and ``LOOP`` need their four-octet address
   family word skipped first, and ``RAW`` needs a version sniff.
 
 Three follow-ups the above deliberately left alone:
 
-* ``TransType`` 115 (``L2TP``) stays unbound, and the reason is now structural
-  rather than incidental: it references :rfc:`3931`, i.e. L2TPv3 over IP, and
+* ``TransType`` 115 (``L2TP``) stays unbound, and the reason is structural: it
+  references :rfc:`3931`, i.e. L2TPv3 over IP, and
   **there is no** ``L2TPv3`` **class for it to point at**. What exists is
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing,
   reached over UDP 1701. So the binding waits on a v3 dissector, which is also
@@ -357,21 +328,14 @@ Three follow-ups the above deliberately left alone:
   public import paths, so the misclassification is documented rather than
   fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
   an ``internet`` extraction before either is reached.
-* **Done.** :attr:`UDP.__proto__
-  <pcapkit.protocols.transport.udp.UDP.__proto__>` pointed its HTTP ports at the
-  version-identifying :class:`pcapkit.protocols.application.http.HTTP` while
-  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` pointed
-  the same ports at :class:`pcapkit.protocols.application.httpv1.HTTP`, an
-  asymmetry that predated the 8080 entries. Both now bind the proxy, so a TCP
+* **Done.** :attr:`TCP.__proto__
+  <pcapkit.protocols.transport.tcp.TCP.__proto__>` and :attr:`UDP.__proto__
+  <pcapkit.protocols.transport.udp.UDP.__proto__>` both point their HTTP ports at
+  the version-identifying proxy :class:`pcapkit.protocols.application.http.HTTP`
+  rather than at :class:`pcapkit.protocols.application.httpv1.HTTP`, so a
   segment's HTTP version is decided by its payload rather than asserted by its
-  port number. It waited on
-  `#800 <https://github.com/JarryShaw/PyPCAPKit/issues/800>`__, which replaced
-  the proxy's trial-and-error guess with a positive identification: repointing
-  ahead of that would have routed 231 real HTTP/1.1 fixture frames through a
-  guess path that was known-wrong on non-HTTP input. The separate defect that
-  ``http.HTTP``'s explicit ``version=`` path was unusable --
-  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__ -- had already
-  been fixed and was never part of this.
+  port number. That depends on the proxy identifying the version positively
+  instead of guessing, since a guess path is wrong on non-HTTP input.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
@@ -384,16 +348,14 @@ PCAPNG Support
 **Done.** The builtin default engine parses PCAP-NG files;
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implements the format, with its
 block and option enumerations under :doc:`/pcapkit/const/pcapng`. This closes
-the request in `#35 <https://github.com/JarryShaw/PyPCAPKit/issues/35>`__, which
-the thread raised when only PCAP was supported.
+`#35 <https://github.com/JarryShaw/PyPCAPKit/issues/35>`__.
 
 Maybe Even Faster?
 ------------------
 
-**Partly done.** The measured benchmark this section used to ask for now exists,
-and acting on it cut extraction time on a 1117-frame HTTP capture by about 46%
-with byte-identical output. Four things were wrong on the hot path, none of them
-the ones the thread predicted:
+**Partly done.** A measured benchmark exists, and acting on it cut extraction
+time on a 1117-frame HTTP capture by about 46% with byte-identical output. Four
+things were wrong on the hot path, none of them the ones the thread predicted:
 
 * character-set detection was uncached, and accounted for 30% of an HTTP
   extraction -- 3011 :func:`chardet.detect` calls over 163 distinct
@@ -414,29 +376,29 @@ integration is 0.03% even in the heaviest shape, since every call site is a lazy
 Of the three larger wins this section listed, all outside the parse path, one has
 landed in full and the other two in part:
 
-* **The flow dumper reopens its output file once per frame**
-  (``pcapkit/dumpkit/pcap.py:120``). It no longer *also* rebuilds a whole
+* **The flow dumper reopens its output file once per frame**, in
+  :meth:`PCAPIO.__call__ <pcapkit.dumpkit.pcap.PCAPIO.__call__>`. It does not
+  *also* rebuild a whole
   :class:`~pcapkit.protocols.misc.pcap.frame.Frame` to obtain bytes it already
-  holds: dropping that re-dissection was about 82% of the cost of a flow-traced
-  extraction by itself, and the counterfactual that proposed it had left 330 of
-  331 output files byte-identical. The reopen is what remains.
+  holds; dropping that re-dissection was about 82% of the cost of a flow-traced
+  extraction by itself. The reopen is what remains.
 * **A datagram is submitted for every frame, fragmented or not**, because
-  ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag -- so a capture
-  with no fragments at all still produces one "datagram" per frame. Parsing its
-  payload is no longer part of that cost:
-  :meth:`~pcapkit.protocols.protocol.Protocol.analyze` used to run eagerly on
-  each one, 86% of the IP-reassembly cost plus a 133 ms garbage-collection bill,
-  and :attr:`Datagram.packet
-  <pcapkit.foundation.reassembly.data.ip.Datagram.packet>` is now a
+  :func:`~pcapkit.toolkit.pcap.ipv4_reassembly` filters only on the *DF* flag --
+  so a capture with no fragments at all still produces one
+  "datagram" per frame. Parsing its payload is not part of that cost:
+  :attr:`Datagram.packet
+  <pcapkit.foundation.reassembly.data.ip.Datagram.packet>` is a
   :class:`~pcapkit.foundation.reassembly.data.data.Deferred` parsed on first
-  read. Whether unfragmented frames should be emitted at all is the design
+  read, rather than running
+  :meth:`~pcapkit.protocols.protocol.Protocol.analyze` eagerly on each one,
+  measured at 86% of the IP-reassembly cost plus a 133 ms garbage-collection
+  bill. Whether unfragmented frames should be emitted at all is the design
   question that is left, and it is worth settling deliberately.
 * **Done.** Every option was parsed twice -- 2274 schema unpacks for 1137
   options, the pre-parse always discarded, about 15% of a PCAP-NG extraction.
-  :class:`~pcapkit.corekit.fields.collections.OptionField` now reads only the
-  base schema's type field to choose the option schema, rather than unpacking the
-  whole base schema and throwing it away
-  (``pcapkit/corekit/fields/collections.py:402-420``).
+  :class:`~pcapkit.corekit.fields.collections.OptionField` reads only the base
+  schema's type field to choose the option schema, rather than unpacking the
+  whole base schema and throwing it away.
 
 Two traps for anyone benchmarking this library. ``reassembly=True`` and
 ``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
@@ -446,8 +408,7 @@ process inflates them by up to 73%, so each shape wants its own interpreter.
 Logging Integration
 -------------------
 
-**Done.** :mod:`pcapkit.utilities.logging` is no longer a single flat logger
-with a hard-wired handler. It now provides:
+**Done.** :mod:`pcapkit.utilities.logging` provides:
 
 - a **logger hierarchy** rooted at ``pcapkit``, with every module logging
   through its own child obtained from
@@ -456,26 +417,24 @@ with a hard-wired handler. It now provides:
   ``pcapkit.foundation.extraction``;
 - **library-safe defaults** -- importing :mod:`pcapkit` attaches only a
   :class:`logging.NullHandler` and sets no level, leaving the destination and
-  verbosity to the application. :envvar:`PCAPKIT_DEVMODE` still bootstraps the
-  historical :obj:`sys.stderr` handler at :data:`logging.DEBUG`;
+  verbosity to the application. :envvar:`PCAPKIT_DEVMODE` bootstraps a
+  :obj:`sys.stderr` handler at :data:`logging.DEBUG`;
 - a **runtime configuration API** --
   :func:`~pcapkit.utilities.logging.configure`,
   :func:`~pcapkit.utilities.logging.reset` and
   :func:`~pcapkit.utilities.logging.ensure_output` -- rather than a single
   environment variable read once at import;
 - **levels chosen deliberately**. Registration bookkeeping across
-  :mod:`pcapkit.foundation.registry` moved from ``info`` to ``debug``, since
-  a library announcing its own registry entries is not news to its consumer;
-  and the four :func:`print` calls that were marked
-  ``# pylint: disable=logging-fstring-interpolation`` are now real logger
-  calls;
+  :mod:`pcapkit.foundation.registry` logs at ``debug`` rather than ``info``,
+  since a library announcing its own registry entries is not news to its
+  consumer;
 - **debug coverage of the extraction path** -- extractor construction,
   engine selection and fallback, frame counts, cleanup, reassembly and
   flow-tracing setup -- so that ``DEBUG`` explains what PyPCAPKit did with a
   file without descending into per-field parsing.
 
 See :doc:`/pcapkit/utilities/logging` for the configuration recipes, including
-the one-line restore of the pre-existing :obj:`sys.stderr` output.
+the one-line restore of :obj:`sys.stderr` output.
 
 One item remains wanted, called out there as deliberately out of scope:
 :func:`pcapkit.utilities.warnings.warn` still reports every warning twice, once
@@ -491,9 +450,8 @@ New Engines
 each has a matching :mod:`pcapkit.toolkit` module
 (:mod:`pcapkit.toolkit.pypcapfile`, :mod:`pcapkit.toolkit.pypcap`), a
 ``pyproject.toml`` extra (``PyPCAPFile`` and ``PyPCAP``, neither of which
-``all`` includes -- ``PyPCAP`` for the installability reason below, and
-``PyPCAPFile`` because GitHub issue #910 narrowed ``all`` to core addons
-only), docs
+``all`` includes -- ``all`` carries core addons only, and ``PyPCAP`` also has
+the installability problem below), docs
 under :doc:`/pcapkit/foundation/engines/index`, and tests under
 ``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
 end-to-end against the sample captures: each agrees with the ``default`` engine
@@ -539,13 +497,12 @@ both of the following are worth knowing before reaching for them:
   since May 2024. It does mean ``pip install pypcapkit[PyPCAP]`` can fail to
   build. Since there is no wheel to fall back on, the extra is kept **out of**
   ``all``: otherwise ``pip install pypcapkit[all]`` would demand a compiler and
-  the libpcap development files from every user, and it broke the docs, conda
-  and release workflows -- all of which install ``.[all]``, and some now
-  ``.[all,dev]`` since GitHub issue #910 narrowed ``all`` to core addons only
-  -- on the macOS runner, where :file:`pcap.h` is present but no
+  the libpcap development files from every user, and would break the docs, conda
+  and release workflows -- all of which install ``.[all]`` or ``.[all,dev]`` --
+  on the macOS runner, where :file:`pcap.h` is present but no
   ``libpcap.dylib`` is.
 
-  This is now solved, though not by changing the ``PyPCAP`` extra. `pcap-ct
+  That is solved, though not by changing the ``PyPCAP`` extra. `pcap-ct
   <https://pypi.org/project/pcap-ct/>`__ re-implements the ``pypcap`` API in pure
   Python over :mod:`ctypes`, and it is wired up as a **separate engine**,
   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`, selected with
@@ -575,9 +532,8 @@ reassembly while keeping IPv4 and TCP. Each gap is announced through an
 rather than by silently returning nothing --
 :doc:`/pcapkit/foundation/engines/index` tabulates them.
 
-Adding a further engine no longer means adding handler methods to
-:class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes: the
-engine interface has been refactored since. A new engine subclasses
+Adding a further engine does not mean adding handler methods to
+:class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses
 :class:`pcapkit.foundation.engines.engine.Engine` and implements just two
 methods, :meth:`~pcapkit.foundation.engines.engine.Engine.run`
 and :meth:`~pcapkit.foundation.engines.engine.Engine.read_frame`; subclassing
@@ -591,10 +547,15 @@ each engine has a matching module.
 Test Cases
 ----------
 
-**Largely done.** There is now a systematic test suite under ``tests/`` -- 105
-modules matching ``test_*.py`` -- and it runs in CI against Python 3.10
-through 3.14, plus an allowed-to-fail 3.15 leg, per
-``.github/workflows/unit-tests.yml``.
+**Largely done.** There is a systematic test suite under ``tests/``, and it runs
+in CI against Python 3.10 through 3.14, per
+``.github/workflows/unit-tests.yml``. 3.15 is deliberately excluded there,
+because a leg outside the branch ruleset's required checks cannot block a merge.
+The module count is measurable rather than worth writing down:
+
+.. code-block:: shell
+
+   find tests -name 'test_*.py' | wc -l
 
 The suite is split by what a test needs rather than by what it covers, and
 ``tests/_tiers.py`` enforces the split. The **unit** tier may read only
@@ -610,10 +571,10 @@ What remains wanted is **coverage rather than infrastructure**: the protocols an
 the registered-but-unhandled type codes listed above have no tests because they
 have no implementation yet.
 
-The original ask also included **shipping the suite**, and that is now a
+The original ask also included **shipping the suite**, and the answer is a
 deliberate decision rather than an omission. ``tests`` is excluded from the wheel
 by ``[tool.setuptools.packages.find]`` in ``pyproject.toml``; the sdist does carry
-all 105 modules, so a distribution packager building from source has them. The
+every module, so a distribution packager building from source has them. The
 wheel stays lean because the suite could not run from an installed package
 anyway: the generated sample captures are not shipped, and ``tests/_tiers.py``
 resolves paths from a repository root that an installed package does not have.
@@ -622,7 +583,7 @@ Anyone wanting to run the tests wants the repository, which is where they are.
 Reassembly Beyond IP and TCP
 ----------------------------
 
-**Still open**, and newer than the rest of this page --
+**Still open.**
 :doc:`/pcapkit/foundation/reassembly/index` covers three protocols and no more.
 IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
@@ -670,9 +631,8 @@ Two smaller items in the same subsystem:
   :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
   so UDP, SCTP and IP conversation tracing have nowhere to go.
 
-  It no longer *treats each direction of a connection as a separate flow*,
-  though, and RST is no longer missing from
-  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`. :meth:`TCP.make_bufid
+  It does treat both directions of a connection as one flow, though.
+  :meth:`TCP.make_bufid
   <pcapkit.foundation.traceflow.tcp.TCP.make_bufid>` orders the two endpoints
   canonically, so both halves of a conversation reduce to one buffer ID, one
   label and one output file, and
@@ -682,8 +642,8 @@ Two smaller items in the same subsystem:
   (``trace_bidirectional=False`` on
   :class:`~pcapkit.foundation.extraction.Extractor`,
   :func:`~pcapkit.interface.core.extract` and
-  :func:`~pcapkit.interface.misc.follow_tcp_stream`) restores the older
-  per-direction behaviour.
+  :func:`~pcapkit.interface.misc.follow_tcp_stream`) selects per-direction
+  flows instead.
 
   What ends a bidirectional flow is worth stating, because the obvious answer is
   wrong. A teardown -- a FIN from each endpoint, or a RST from either -- is
@@ -705,10 +665,8 @@ Two smaller items in the same subsystem:
   :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`, which would make
   ``syn and not ack`` a definitive new-connection test on its own.
 
-  **The application layer is wired into flow tracing** as well, though it is a
-  capability rather than a parse to postpone: flow tracing buffered no payload at
-  all, so there was no second parse to defer. Of the two ways of getting one, the
-  tracer **delegates to**
+  **The application layer is wired into flow tracing** as well. Of the two ways
+  of buffering a traced payload, the tracer **delegates to**
   :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than growing a
   per-direction payload buffer of its own. A buffer that concatenated payloads in
   capture order would be silently wrong on the first retransmission or reordered
@@ -755,8 +713,8 @@ Two smaller items in the same subsystem:
   every frame's timestamp to every enabled reassembler would close the gap and
   is worth doing on its own account.
 
-  On the numbers: the 15 seconds this page used to attribute to :rfc:`791` is
-  that RFC's *initial* timer setting, a lower bound which
+  On the numbers: the 15 seconds :rfc:`791` names is that RFC's *initial* timer
+  setting, a lower bound which
   ``TIMER <- MAX(TIMER,TTL)`` then raises toward the 4.25-minute TTL ceiling --
   not a deadline. :rfc:`1122#section-3.3.2` supersedes the scheme outright
   ("The reassembly timeout value SHOULD be a fixed value, not set from the
@@ -868,7 +826,7 @@ rather than as a side effect of a checksum patch.
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
 
-The version in :mod:`pcapkit` is ``1.5.0b3``, and the release is sequenced
+:data:`pcapkit.__version__` is the current version, and the release is sequenced
 against the waves above in two deliberate steps:
 
 #. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.**
@@ -876,11 +834,7 @@ against the waves above in two deliberate steps:
    defect tail in `the issue tracker
    <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
    beta rather than a final release, because the consistency sweep below had not
-   run yet and was expected to find things. It has since found some: the
-   ipv6-route packing test was added only because the fix it covers had shipped
-   untested, and the
-   :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` Source-Route
-   round-trip defect was found sideways while writing it.
+   run yet and was expected to find things.
 #. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
    sweep is described under `Delivery Sequence`_ below — prose against code,
    missing tests, unaligned changes, and packet formats against the
@@ -919,15 +873,7 @@ then tags and publishes. So:
      - prerelease
      - conda label
      - GitHub release
-   * - ``1.5.0a1`` (shipped earlier)
-     - yes
-     - ``dev``
-     - marked prerelease
-   * - ``1.5.0b1`` (step 1)
-     - yes
-     - ``dev``
-     - marked prerelease
-   * - ``1.5.0b3`` (**current**)
+   * - ``1.5.0aN`` / ``1.5.0bN`` (step 1)
      - yes
      - ``dev``
      - marked prerelease
@@ -1017,43 +963,37 @@ nobody has claimed it.
 **Wave 2 or 3 — per-entry coverage of the option and parameter registries.** The
 option, parameter, block and frame registries are *enumerated* today but not
 *implemented* throughout: a code can be registered, and named, and still have no
-working per-entry read/make pair behind it. Measured against the eighteen
-families :file:`examples/generators/options.py` walks, **327 codes are
-registered and 59 of them do not round-trip** — roughly one in six. The goal of
-this item is to close that to zero for every code whose format is actually
-specified.
+working per-entry read/make pair behind it. The goal of this item is to close
+that gap to zero for every code whose format is actually specified.
 
-Where the gap sits, from ``EXPECTED_FAILURES`` in
-:file:`tests/protocols/test_option_roundtrip_unit.py`:
+Both halves of the gap are measurable — the registered codes against the
+eighteen families :file:`examples/generators/options.py` walks, and the shortfall
+against ``EXPECTED_FAILURES`` in
+:file:`tests/protocols/test_option_roundtrip_unit.py` — so the commands are
+written down instead of a pair of figures that will be stale by the next merge:
 
-.. list-table::
-   :header-rows: 1
+.. code-block:: shell
 
-   * - Family
-     - Not round-tripping
-   * - ``pcapng-option``
-     - 30
-   * - ``tcp-mptcp``
-     - 8
-   * - ``ipv4-option``
-     - 6
-   * - ``hip-parameter``
-     - 4
-   * - ``pcapng-block``
-     - 3
-   * - ``tcp-option``, ``pcapng-secrets``
-     - 2 each
-   * - ``hopopt-option``, ``ipv6-opts-option``, ``ipv6-route-type``, ``httpv2-frame``
-     - 1 each
+   # registered codes, and the families they are drawn from
+   python -c "import sys; sys.path.insert(0, 'examples/generators'); import options; \
+              print(len(options.cases()), len(options.FAMILIES))"
+
+   # codes that do not round-trip, grouped by family
+   python -c "import collections, importlib.util, sys; \
+              spec = importlib.util.spec_from_file_location('rt', \
+                  'tests/protocols/test_option_roundtrip_unit.py'); \
+              m = importlib.util.module_from_spec(spec); sys.modules['rt'] = m; \
+              spec.loader.exec_module(m); \
+              print(collections.Counter(k.split('/')[0] for k in m.EXPECTED_FAILURES))"
 
 Two things to be precise about before anyone starts. First, **"does not
-round-trip" is not the same as "unimplemented"** — the 59 are a mix, and at
-least one (``ipv6-route-type/RPL_Source_Route_Header``) is an implemented case
-carrying a tracked defect rather than a missing implementation. The first task
-is to split that list into *missing*, *defective* and *deliberately deferred*,
-because the three want different work. Second, ``pcapng-option``'s 30 is half
-the total on its own, so it is the item that decides whether this is one wave's
-work or several; it deserves sizing before the rest.
+round-trip" is not the same as "unimplemented"** — the entries are a mix, and
+some are an implemented case carrying a tracked defect rather than a missing
+implementation. Each entry names the defect behind it, so the list can be split
+into *missing*, *defective* and *deliberately deferred*, which is the first task,
+because the three want different work. Second, ``pcapng-option`` is the largest
+family by a wide margin, so it is the item that decides whether
+this is one wave's work or several; it deserves sizing before the rest.
 
 This is deliberately **not** the same request as the ``__proto__`` dispatch
 registries. Those name whole protocols, so closing a gap there means
@@ -1061,23 +1001,22 @@ implementing a dissector — bounded by protocol work that already has its own
 waves above. The option and parameter registries are per-entry formats inside
 protocols that already exist, so the work is self-contained and does not wait on
 anything. Their enumerating harness already exists and already fails when a
-registered code has no case, which is how these 59 are known at all; what is
+registered code has no case, which is how the shortfall is known at all; what is
 missing is the implementations behind the codes, not the accounting of them.
 :file:`tests/protocols/test_dispatch_registry_unit.py` gives the ``__proto__``
 family the same accounting for the separate question of whether a registered
 protocol's dispatch reaches it.
 
-**Between wave 1 and wave 2 — a library-wide consistency sweep.** Wave 1 closed
-by clearing defects one at a time, each found because something else was being
-worked on nearby. That is a poor way to find the rest of them, so before wave 2
-starts the library gets swept deliberately, in five strands:
+**Between wave 1 and wave 2 — a library-wide consistency sweep.** Clearing
+defects one at a time, each found because something else was being worked on
+nearby, is a poor way to find the rest of them. So before wave 2 starts the
+library gets swept deliberately, in five strands:
 
 * **Prose against code.** Docstrings, the README, and inline comments checked
-  against what the code now does. Wave 1 produced three separate cases of a
-  docstring outliving the thing it described — one of them survived the fix that
-  invalidated it by under a minute — so this is a known failure mode rather than
-  a hypothetical. Includes the rule that a docstring names the real defining
-  module rather than the re-export.
+  against what the code does. A docstring outliving the thing it described is a
+  demonstrated failure mode here rather than a hypothetical one. Includes the
+  rule that a docstring names the real defining module rather than the
+  re-export.
 * **Missing tests.** Not coverage percentage, which says nothing useful here, but
   named gaps: registry entries with no round-trip case, error paths that no test
   reaches, and behaviour asserted only in prose. The option round-trip harness
@@ -1140,6 +1079,6 @@ keying-context channel and the report-rather-than-raise policy. The
 one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP
 pseudo-header, and the owner has settled how: a **pseudo-protocol class** for the
 IP family, serving both the parsing and the constructing path, rather than a
-back-reference from a parsed protocol to its parent. So that half is no longer
-blocked on an open design question -- it is blocked only on someone defining that
-class, which is a bounded piece of work and the natural first step.
+back-reference from a parsed protocol to its parent. So that half is not blocked
+on an open design question -- only on someone defining that class, which is a
+bounded piece of work and the natural first step.
