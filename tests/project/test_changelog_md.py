@@ -404,11 +404,46 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         )
 
     def test_a_sub_heading_underline_joined_into_the_prose_is_fatal(self) -> None:
-        # Rule 1 only consumes ``=`` underlines, so a ``-`` underlined sub-heading
-        # is joined onto the heading text by rule 6 and would otherwise disappear
-        # into a paragraph.
-        self._reject('\nA sub heading\n-------------\n\nSome prose.\n',
+        # Retargeted from ``-`` to ``^``. Rule 1 used to consume ``=`` alone, so a
+        # ``-`` underlined sub-heading was joined onto its heading text by rule 6 and
+        # would have vanished into a paragraph -- which is what this rejected. The
+        # by-module changelog restructure made ``-`` and ``~`` real heading levels
+        # that rule 1 now converts, so the old input converts cleanly and **this test
+        # failed**: ``_reject`` is built on ``assertRaises(ResidualMarkupError)``, and
+        # nothing raises any more. The retarget was required to keep the guard
+        # exercised, not a tidy-up of a weak assertion. ``^`` is still outside rule 1's
+        # level map while remaining in ``_RESIDUAL``'s alternation, so it tests the
+        # same guard on a character the converter genuinely does not handle.
+        self._reject('\nA sub heading\n^^^^^^^^^^^^^\n\nSome prose.\n',
                      'setext underline joined')
+
+    def test_the_two_new_sub_heading_levels_become_atx_headings(self) -> None:
+        # The other half of the same change: ``-`` and ``~`` must now *convert*
+        # rather than be rejected, one ATX level deeper each, so that the by-module
+        # sections and their Added/Changed/Fixed subsections survive into
+        # ``CHANGELOG.md``. Against the old converter this does not reach the
+        # assertions at all -- ``render()`` raises ``ResidualMarkupError`` on the
+        # joined ``A module --------`` first, which is what makes this a real check
+        # rather than a restatement of current behaviour.
+        index = self.make_tree(
+            entry=ENTRY + '\nA module\n--------\n\nAdded\n~~~~~\n\nSome prose.\n')
+
+        rendered = changelog_md.render(index)
+
+        self.assertIn('### A module', rendered)
+        self.assertIn('#### Added', rendered)
+        self.assertNotIn('A module --------', rendered)
+        self.assertNotIn('Added ~~~~~', rendered)
+
+    def test_an_over_long_sub_heading_underline_is_fatal(self) -> None:
+        # ``_RESIDUAL``'s comment now claims ``=``, ``-`` and ``~`` all need to stay in
+        # its alternation, because rule 1 fires only on an *exact* length match while
+        # reStructuredText merely requires the underline to be no shorter. Only ``=``
+        # was pinned, so the other two thirds of that claim rode on the comment alone.
+        for underline in ('-' * 18, '~' * 18):
+            with self.subTest(underline=underline[0]):
+                self._reject(f'\nA sub heading\n{underline}\n\nSome prose.\n',
+                             'setext underline joined')
 
     def test_an_over_long_equals_underline_is_fatal(self) -> None:
         # Rule 1 fires only when the underline is exactly as long as the title,

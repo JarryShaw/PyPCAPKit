@@ -37,7 +37,7 @@ would not have caught:
   :file:`tests/protocols/test_option_coverage_runtime.py`, and
   :file:`tests/protocols/test_option_roundtrip_unit.py`.
   :file:`examples/generators/dispatch.py:20` and
-  :file:`docs/source/changelog/1.5.0.rst` (lines 691 and 1169) both name it
+  :file:`docs/source/changelog/1.5.0.rst` both name it
   directly, too.
 
 So this module does not re-litigate the width. It just pins isort's own

@@ -81,35 +81,36 @@ Two different things get confused here, so they are named apart:
    stays readable in its log. That is a property of *the pull request*, and it is not
    what the ruling is about.
 *  **A changelog file's entries.** :file:`docs/source/changelog/1.5.0.rst` groups its
-   entries under ``* **Added**``, ``* **Changed**`` and ``* **Fixed**`` today, and a single
-   entry routinely cites several issues at once -- *"the Mobility Header registry,
-   completed (#383, #437)"* is one bullet, not two. That is a property of *the file*,
-   and it is the axis the ruling governs.
+   entries under a section per top-level module, with ``Added``, ``Changed`` and
+   ``Fixed`` nested inside each, and a single entry routinely cites several issues at
+   once -- *"the Mobility Header registry, completed (#383, #437)"* is one bullet, not
+   two. That is a property of *the file*, and it is the axis the ruling governs.
 
 Both are measurable rather than matters of memory, which is the point of writing the
 commands down instead of a figure that will be stale by the next merge:
 
 .. code-block:: shell
 
-   # entries in the file, and the kind headings they group under
-   grep -cE '^\* \*\*' docs/source/changelog/1.5.0.rst
-   grep -oE '^\* \*\*[A-Za-z]+\*\*' docs/source/changelog/1.5.0.rst | sort | uniq -c
+   # entries in the file, and the module sections they group under
+   grep -cE '^\* ' docs/source/changelog/1.5.0.rst
+   grep -B1 -E '^-{3,}$' docs/source/changelog/1.5.0.rst | grep -vE '^-{3,}$|^--$'
 
    # commits on the pull request -- a different number, about a different thing
    gh pr view 657 -R JarryShaw/PyPCAPKit --json commits -q '.commits|length'
 
 The grouping scheme was settled after that, on #918: **a section per top-level
 module, with** ``Added``/``Changed``/``Fixed`` **nested inside each** -- module
-granularity, not per-file and not per-subpackage. The file today is neither shape: its
-80 entries carry the three kind labels in **26** separate runs, roughly blocked for the
-first 40% of the file and thoroughly interleaved after it -- so the restructure is a
-regrouping of scattered entries rather than a transposition of three tidy blocks::
+granularity, not per-file and not per-subpackage. **That restructure has landed.** It
+was a regrouping of scattered entries rather than a transposition of three tidy
+blocks: before it, the entries carried their kind as an inline bold label and those
+labels alternated in dozens of short stretches, blocked near the top of the file and
+thoroughly interleaved below. The file now carries **9** module-level sections holding 155
+entries, and no entry carries an inline kind label any more::
 
-   $ grep -oE '^\* \*\*[A-Za-z]+\*\*' docs/source/changelog/1.5.0.rst \
-       | uniq -c | wc -l
-   26
+   $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
+   0
 
-The target is one section per top-level module:
+The sections are one per top-level module, plus one for what belongs to no module:
 
 .. code-block:: shell
 

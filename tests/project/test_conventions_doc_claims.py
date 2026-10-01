@@ -1379,13 +1379,18 @@ class ProcessConventionTests(unittest.TestCase):
         """
         text = self.CHANGELOG.read_text(encoding='utf-8')
 
+        # Was ``assertIn(f'* **{kind}** --')`` against the inline bold labels the file
+        # used before the by-module restructure. Those labels are gone -- the kinds are
+        # now ``~``-underlined subsections inside each module section -- so the inline
+        # form would fail for a reason that has nothing to do with this claim.
         for kind in ('Added', 'Changed', 'Fixed'):
             with self.subTest(kind=kind):
-                self.assertIn(f'* **{kind}** --', text,
-                              f'{self.CHANGELOG.name} no longer groups entries under '
-                              f'**{kind}**, which the page describes as its grouping')
+                self.assertRegex(
+                    text, rf'(?m)^{kind}\n~+$',
+                    f'{self.CHANGELOG.name} no longer groups entries under a '
+                    f'{kind} subsection, which the page describes as its grouping')
 
-        multi = [entry for entry in re.findall(r'(?ms)^\* \*\*.*?(?=^\* \*\*|\Z)', text)
+        multi = [entry for entry in re.findall(r'(?ms)^\* .*?(?=^\* |\Z)', text)
                  if len(re.findall(r'#\d+', entry)) > 1]
         self.assertTrue(multi,
                         f'no entry in {self.CHANGELOG.name} cites more than one '
@@ -1437,7 +1442,9 @@ class ProcessConventionTests(unittest.TestCase):
 
         changelog = (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst') \
             .read_text(encoding='utf-8')
-        entries = _re.findall(r'^\* \*\*[A-Za-z]+\*\*', changelog, _re.MULTILINE)
+        # ``^\* \*\*Kind\*\*`` before the by-module restructure; the kinds are now
+        # subsection headings, so an entry is simply a column-zero bullet.
+        entries = _re.findall(r'^\* ', changelog, _re.MULTILINE)
 
         self.assertIn(f'{len(entries)} entries', self.flat,
                       f'the page no longer states the entry count, measured at '
@@ -1629,51 +1636,62 @@ class ProcessConventionTests(unittest.TestCase):
             'a link shows one issue number and points at another, which no reader '
             f'can see and no build can warn about: {mismatched}')
 
-    def test_the_page_describes_the_changelog_kind_runs_as_they_are(self) -> 'None':
+    def test_the_page_describes_the_changelog_grouping_as_it_is(self) -> 'None':
         """The current shape of ``1.5.0.rst``, counted rather than eyeballed.
 
-        The page's first draft said the file was "three flat kind-runs", which came
-        from a comment on #918 that nobody measured. It is not: the entries carry the
-        three kind labels in far more runs than that, blocked near the top and
-        interleaved lower down. The distinction matters because it is the difference
-        between transposing three blocks and regrouping scattered entries, which is
-        what the by-module restructure on #657 actually has to do.
+        This replaces a check on the file's *previous* shape. The page used to say the
+        entries carried three inline kind labels in a given number of separate runs,
+        and this test measured those runs and required the figure in the prose. The
+        by-module restructure removed the inline labels outright, so that test did not
+        merely go stale -- it went **vacuous**: its ``re.findall`` matched nothing,
+        ``runs`` was empty, and both of its ``assertGreater`` floors failed before the
+        prose needle was ever reached. A test whose subject has been deleted cannot be
+        repaired by updating a number.
 
-        Pinned two ways, and the difference matters. The **floor** is what makes
-        "three flat runs" unsayable regardless of how the file grows. The **exact**
-        figure is required in the page's prose as well, deliberately: a page that
-        states a measured number has to restate it when the measurement moves, and
-        #657's restructure will move it. So a red test here after a changelog merge is
-        the intended signal to re-measure the sentence, not a brittleness to route
-        around.
+        What is checked now is the shape that actually shipped: one ``-`` underlined
+        section per top-level module plus one for what belongs to none, each carrying
+        ``~`` underlined kind subsections, with no inline kind label left anywhere. The
+        section count is required in the page's prose for the same reason the run count
+        was -- a page that states a measured number has to restate it when the
+        measurement moves.
 
         """
-        import itertools
+        changelog = (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst') \
+            .read_text(encoding='utf-8')
+        lines = changelog.splitlines()
 
-        kinds = re.findall(r'^\* \*\*([A-Za-z]+)\*\*',
-                           (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst')
-                           .read_text(encoding='utf-8'), re.MULTILINE)
-        runs = [kind for kind, _ in itertools.groupby(kinds)]
+        sections = [lines[i] for i in range(len(lines) - 1)
+                    if lines[i].strip() and set(lines[i + 1]) == {'-'}
+                    and len(lines[i + 1]) == len(lines[i])]
+        kinds = [lines[i] for i in range(len(lines) - 1)
+                 if lines[i].strip() and set(lines[i + 1]) == {'~'}
+                 and len(lines[i + 1]) == len(lines[i])]
 
         self.assertGreater(
-            len(runs), len(set(kinds)),
-            'the changelog entries are now grouped one run per kind, so the page is '
-            'wrong to describe them as interleaved -- and the by-module restructure '
-            'is a smaller job than it says')
+            len(sections), 1,
+            'the changelog no longer carries per-module sections, so the by-module '
+            'restructure the page describes has been undone')
         self.assertGreater(
-            len(runs), 10,
-            f'only {len(runs)} kind-runs, so the page overstates how scattered the '
-            'entries are')
-        # Assert the sentence, not the bare number: the first version of this check
-        # asserted '26' alone, which the ``wc -l`` output in the page's own code block
-        # satisfied -- so it passed with "three flat runs" restored in the prose. A
-        # figure that appears twice on a page cannot pin the claim that uses it.
-        self.assertIn(f'**{len(runs)}** separate runs', self.flat,
-                      'the page no longer states the measured run count in its prose, '
-                      'which is the whole correction to "three flat kind-runs"')
-        self.assertNotIn('three flat', self.flat,
-                         'the page has gone back to calling the file three flat '
-                         'kind-runs, which measurement contradicts')
+            len(kinds), len(sections),
+            'there are no more kind subsections than module sections, so the kinds '
+            'are not nested inside the modules the way the page describes')
+        self.assertEqual(
+            [], [k for k in kinds if k not in ('Added', 'Changed', 'Fixed')],
+            'a kind subsection is named something other than Added/Changed/Fixed')
+
+        # The inline form is gone. This is the half that makes the claim falsifiable in
+        # the direction that matters: a partial revert would restore it.
+        self.assertEqual(
+            [], re.findall(r'(?m)^\* \*\*(?:Added|Changed|Fixed)\*\*', changelog),
+            'an entry carries an inline kind label again, so the file is back to the '
+            'shape the page says it left')
+
+        self.assertIn(f'**{len(sections)}** module-level sections', self.flat,
+                      'the page no longer states the measured section count, which is '
+                      'the figure a reader would check the restructure against')
+        self.assertNotIn('separate runs', self.flat,
+                         'the page still describes the entries as kind-label runs, '
+                         'which the restructure removed')
 
     def test_the_page_keeps_breaking_additive_and_its_coverage_honest(self) -> 'None':
         """``breaking`` stacks on a type label, and its history is uneven.
