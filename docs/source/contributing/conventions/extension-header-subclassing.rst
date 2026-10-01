@@ -44,10 +44,10 @@ IPsec one.
 The code cannot be used as evidence
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**This is the part a future reader will get wrong, so it is stated before the
-criterion itself.** The obvious way to decide whether a header is "usable as a
-standalone protocol" is to ask what the library's own dispatch already allows. That
-answer is useless, and measurably so:
+**Stated before the criterion itself, because it is the part a future reader will get
+wrong.** The obvious way to decide whether a header is "usable as a standalone protocol"
+is to ask what the library's own dispatch already allows. That answer is useless, and
+measurably so:
 
 .. code-block:: pycon
 
@@ -96,9 +96,9 @@ fields"* whose addresses are *"the addresses that appear in the Source and
 Destination Address fields in the IPv6 packet carrying the Mobility Header"* -- there
 is no IPv4 variant of that computation -- and the IPv4 equivalent function is not
 protocol 135 at all, since :rfc:`5944` carries Mobile IPv4 over UDP port 434.
-``Shim6`` (140) has the same shape and the same verdict; this package has never had a
-parser class for it, so nothing implements the classification, but a future one
-inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone.
+``Shim6`` (140) has the same shape and the same verdict; this package carries no parser
+class for it, so nothing implements the classification, but a future one inherits
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone.
 
 .. important::
 
@@ -139,11 +139,11 @@ was left behind, and that was deliberate. The owner ruled that the
 ``IPv6_GenericExt`` name goes for good: it was an intermediate state, and it was never
 released.
 
-The reasoning is what makes it safe rather than merely decided: the old name existed
-on ``main`` from ``b3551cb63`` to ``93cf940b3`` -- under four hours on one day, and
-after the most recent release tag -- so it appears in **no** release, and the break
-has no callers to inconvenience. Do not reintroduce it as an alias, and do not cite
-it in prose as a former public name; it was never one.
+What makes that safe rather than merely decided: the old name existed on ``main`` from
+``b3551cb63`` to ``93cf940b3``, under four hours on one day, and no release tag falls
+between the two commits -- ``git tag --contains`` names the same tags for both -- so it
+appears in **no** release and the break has no callers to inconvenience. Do not
+reintroduce it as an alias, and do not cite it as a former public name.
 
 ESP is an extension header, and still cannot short-circuit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
