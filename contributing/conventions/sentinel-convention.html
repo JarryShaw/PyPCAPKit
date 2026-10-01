@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Naming a sentinel" />
+<meta property="og:title" content="Naming a Sentinel" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/sentinel-convention.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="A sentinel here is a module-level singleton whose only job is to be recognised by identity – value is SENTINEL – so that it can never be confused with a value a caller might legitimately pass. The ..." />
 <meta name="description" content="A sentinel here is a module-level singleton whose only job is to be recognised by identity – value is SENTINEL – so that it can never be confused with a value a caller might legitimately pass. The ..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Where the registry protocol lives" href="registry-protocol.html"><link rel="prev" title="When an unrecognised value may mint a member" href="mint-criterion.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="The Registry Protocol" href="registry-protocol.html"><link rel="prev" title="Minting an Unrecognised Value" href="mint-criterion.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Naming a sentinel - PyPCAPKit</title>
+        <title>Naming a Sentinel - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Naming a sentinel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">Where the registry protocol lives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="process.html">How the repository itself is run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/sentinel-convention.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/sentinel-convention.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/sentinel-convention.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/sentinel-convention.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -479,7 +482,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="naming-a-sentinel">
-<span id="sentinel-convention"></span><h1>Naming a sentinel<a class="headerlink" href="#naming-a-sentinel" title="Link to this heading">¶</a></h1>
+<span id="sentinel-convention"></span><h1>Naming a Sentinel<a class="headerlink" href="#naming-a-sentinel" title="Link to this heading">¶</a></h1>
 <p>A <em>sentinel</em> here is a module-level singleton whose only job is to be recognised by
 identity – <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">is</span> <span class="pre">SENTINEL</span></code> – so that it can never be confused with a value a
 caller might legitimately pass. The house rule, from the maintainer, covers the type:
@@ -560,7 +563,7 @@ has a <code class="docutils literal notranslate"><span class="pre">__repr__</spa
 when you need a pattern to follow.</p>
 </div>
 <section id="why-a-class-and-not-object">
-<h2>Why a class and not <code class="docutils literal notranslate"><span class="pre">object()</span></code><a class="headerlink" href="#why-a-class-and-not-object" title="Link to this heading">¶</a></h2>
+<h2>Why a Class and Not <code class="docutils literal notranslate"><span class="pre">object()</span></code><a class="headerlink" href="#why-a-class-and-not-object" title="Link to this heading">¶</a></h2>
 <p>A bare <code class="docutils literal notranslate"><span class="pre">object()</span></code> is just as safe under <code class="docutils literal notranslate"><span class="pre">is</span></code>, so safety is not the reason. The
 reason is legibility: a dedicated class can define <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>, and that repr is what
 appears in a signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a> output and in a traceback. Compare what
@@ -587,8 +590,8 @@ value of a vendored backport is that it can still be diffed against upstream, an
 house-style rewrite destroys that in exchange for a sentinel nobody outside the backport
 ever sees. The rule above is for sentinels this package writes itself.</p>
 </section>
-<section id="what-to-implement-and-what-not-to">
-<h2>What to implement, and what not to<a class="headerlink" href="#what-to-implement-and-what-not-to" title="Link to this heading">¶</a></h2>
+<section id="per-sentinel-dunder-methods">
+<h2>Per-Sentinel Dunder Methods<a class="headerlink" href="#per-sentinel-dunder-methods" title="Link to this heading">¶</a></h2>
 <p>The four sentinels deliberately differ, and the differences are <strong>needs, not
 inconsistencies</strong>:</p>
 <dl class="simple">
@@ -641,7 +644,7 @@ becomes reachable from a copy that is not.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Where the registry protocol lives</div>
+                <div class="title">The Registry Protocol</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -652,7 +655,7 @@ becomes reachable from a copy that is not.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">When an unrecognised value may mint a member</div>
+                <div class="title">Minting an Unrecognised Value</div>
                 
               </div>
             </a>
@@ -686,9 +689,9 @@ becomes reachable from a copy that is not.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Naming a sentinel</a><ul>
-<li><a class="reference internal" href="#why-a-class-and-not-object">Why a class and not <code class="docutils literal notranslate"><span class="pre">object()</span></code></a></li>
-<li><a class="reference internal" href="#what-to-implement-and-what-not-to">What to implement, and what not to</a></li>
+<li><a class="reference internal" href="#">Naming a Sentinel</a><ul>
+<li><a class="reference internal" href="#why-a-class-and-not-object">Why a Class and Not <code class="docutils literal notranslate"><span class="pre">object()</span></code></a></li>
+<li><a class="reference internal" href="#per-sentinel-dunder-methods">Per-Sentinel Dunder Methods</a></li>
 </ul>
 </li>
 </ul>

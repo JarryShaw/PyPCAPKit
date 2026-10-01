@@ -240,7 +240,7 @@ the record structure legible, in the same way :class:`ESP
 <pcapkit.protocols.internet.esp.ESP>` parses without keys. DTLS over UDP is the
 other half of the same work and wants the same dissector.
 
-Registered, But Not Dissected
+Registered, but Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A different shape of gap from the empty stubs, and easy to miss because nothing

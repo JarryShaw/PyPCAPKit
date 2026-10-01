@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Which bases an IPv6 extension header names" />
+<meta property="og:title" content="Extension-Header Base Classes" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/extension-header-subclassing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
 <meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="How the repository itself is run" href="process.html"><link rel="prev" title="Where the registry protocol lives" href="registry-protocol.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Running the Repository" href="process.html"><link rel="prev" title="The Registry Protocol" href="registry-protocol.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Which bases an IPv6 extension header names - PyPCAPKit</title>
+        <title>Extension-Header Base Classes - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">Where the registry protocol lives</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="process.html">How the repository itself is run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/extension-header-subclassing.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/extension-header-subclassing.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/extension-header-subclassing.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/extension-header-subclassing.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -478,8 +481,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="which-bases-an-ipv6-extension-header-names">
-<span id="extension-header-subclassing"></span><h1>Which bases an IPv6 extension header names<a class="headerlink" href="#which-bases-an-ipv6-extension-header-names" title="Link to this heading">¶</a></h1>
+          <section id="extension-header-base-classes">
+<span id="extension-header-subclassing"></span><h1>Extension-Header Base Classes<a class="headerlink" href="#extension-header-base-classes" title="Link to this heading">¶</a></h1>
 <p>Every IPv6 extension header in this package subclasses
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>. Some name a <strong>second</strong> base
 as well, and which ones do is a ruling rather than an accident. The owner ruled on
@@ -527,8 +530,8 @@ inherits both <code class="docutils literal notranslate"><span class="pre">IPv6_
 parenthetical <code class="docutils literal notranslate"><span class="pre">IPsec</span></code> alternative in the ruling: naming it satisfies the
 convention, and it is the right second base for a header whose standalone form is an
 IPsec one.</p>
-<section id="the-code-cannot-be-used-as-evidence">
-<h2>The code cannot be used as evidence<a class="headerlink" href="#the-code-cannot-be-used-as-evidence" title="Link to this heading">¶</a></h2>
+<section id="the-shared-registry-trap">
+<h2>The Shared-Registry Trap<a class="headerlink" href="#the-shared-registry-trap" title="Link to this heading">¶</a></h2>
 <p><strong>Stated before the criterion itself, because it is the part a future reader will get
 wrong.</strong> The obvious way to decide whether a header is “usable as a standalone protocol”
 is to ask what the library’s own dispatch already allows. That answer is useless, and
@@ -550,8 +553,8 @@ eight of the implemented headers, plus <code class="docutils literal notranslate
 registry is what makes something an extension header; it is not evidence about
 whether the same header is also a protocol in its own right.</p>
 </section>
-<section id="the-operative-test-is-what-the-rfcs-say">
-<h2>The operative test is what the RFCs say<a class="headerlink" href="#the-operative-test-is-what-the-rfcs-say" title="Link to this heading">¶</a></h2>
+<section id="the-ipv4-payload-test">
+<h2>The IPv4-Payload Test<a class="headerlink" href="#the-ipv4-payload-test" title="Link to this heading">¶</a></h2>
 <p>So the census is read out of the specifications, on the owner’s instruction: work
 through the RFCs to establish, for each defined IPv6 extension header, whether it is
 extension-header-only or a standalone protocol as well, and decide from that whether it
@@ -589,8 +592,8 @@ and <code class="docutils literal notranslate"><span class="pre">Shim6</span></c
 but structurally cannot be an IPv4 payload names <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> alone.</p>
 </div>
 </section>
-<section id="the-declaration-is-what-carries-the-classification">
-<h2>The declaration is what carries the classification<a class="headerlink" href="#the-declaration-is-what-carries-the-classification" title="Link to this heading">¶</a></h2>
+<section id="explicit-base-declarations">
+<h2>Explicit Base Declarations<a class="headerlink" href="#explicit-base-declarations" title="Link to this heading">¶</a></h2>
 <p>Name the second base <strong>explicitly</strong>, even though it is already in the MRO.
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> derives
 <a class="reference internal" href="../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>, so every one of the eight
@@ -605,8 +608,8 @@ RFC ground in the <code class="docutils literal notranslate"><span class="pre">#
 <code class="docutils literal notranslate"><span class="pre">IPv6_Ext.__subclasses__()</span></code> rather than a hard-coded list, so a ninth header is
 held to the convention whether or not anyone remembers this page.</p>
 </section>
-<section id="the-base-is-named-ipv6-ext-and-nothing-else">
-<h2>The base is named <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code>, and nothing else<a class="headerlink" href="#the-base-is-named-ipv6-ext-and-nothing-else" title="Link to this heading">¶</a></h2>
+<section id="the-retired-ipv6-genericext-name">
+<h2>The Retired <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> Name<a class="headerlink" href="#the-retired-ipv6-genericext-name" title="Link to this heading">¶</a></h2>
 <p>The class arrived as <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code>, a fallback parser for an unrecognised
 extension header (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>), and
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> merged that role with
@@ -620,8 +623,8 @@ between the two commits – <code class="docutils literal notranslate"><span cla
 appears in <strong>no</strong> release and the break has no callers to inconvenience. Do not
 reintroduce it as an alias, and do not cite it as a former public name.</p>
 </section>
-<section id="esp-is-an-extension-header-and-still-cannot-short-circuit">
-<h2>ESP is an extension header, and still cannot short-circuit<a class="headerlink" href="#esp-is-an-extension-header-and-still-cannot-short-circuit" title="Link to this heading">¶</a></h2>
+<section id="esp-s-two-facts">
+<h2>ESP’s Two Facts<a class="headerlink" href="#esp-s-two-facts" title="Link to this heading">¶</a></h2>
 <p>Two facts about <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> coexist, and each is
 routinely mistaken for a refutation of the other.</p>
 <p><strong>It is an extension header.</strong> IANA’s <em>IPv6 Extension Header Types</em> registry lists
@@ -667,7 +670,7 @@ from the extension-header contract or wrongly added to the generic-dispatch set.
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">How the repository itself is run</div>
+                <div class="title">Running the Repository</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -678,7 +681,7 @@ from the extension-header contract or wrongly added to the generic-dispatch set.
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Where the registry protocol lives</div>
+                <div class="title">The Registry Protocol</div>
                 
               </div>
             </a>
@@ -712,12 +715,12 @@ from the extension-header contract or wrongly added to the generic-dispatch set.
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Which bases an IPv6 extension header names</a><ul>
-<li><a class="reference internal" href="#the-code-cannot-be-used-as-evidence">The code cannot be used as evidence</a></li>
-<li><a class="reference internal" href="#the-operative-test-is-what-the-rfcs-say">The operative test is what the RFCs say</a></li>
-<li><a class="reference internal" href="#the-declaration-is-what-carries-the-classification">The declaration is what carries the classification</a></li>
-<li><a class="reference internal" href="#the-base-is-named-ipv6-ext-and-nothing-else">The base is named <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code>, and nothing else</a></li>
-<li><a class="reference internal" href="#esp-is-an-extension-header-and-still-cannot-short-circuit">ESP is an extension header, and still cannot short-circuit</a></li>
+<li><a class="reference internal" href="#">Extension-Header Base Classes</a><ul>
+<li><a class="reference internal" href="#the-shared-registry-trap">The Shared-Registry Trap</a></li>
+<li><a class="reference internal" href="#the-ipv4-payload-test">The IPv4-Payload Test</a></li>
+<li><a class="reference internal" href="#explicit-base-declarations">Explicit Base Declarations</a></li>
+<li><a class="reference internal" href="#the-retired-ipv6-genericext-name">The Retired <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> Name</a></li>
+<li><a class="reference internal" href="#esp-s-two-facts">ESP’s Two Facts</a></li>
 </ul>
 </li>
 </ul>

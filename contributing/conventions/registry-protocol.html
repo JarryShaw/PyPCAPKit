@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Where the registry protocol lives" />
+<meta property="og:title" content="The Registry Protocol" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/registry-protocol.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="get(), get_all(), register() and register_alias() are expected to exist on every registry, per the ruling on#842. They come from EnumRegistry, mixed in ahead of the enum base so that_member_type_ s..." />
 <meta name="description" content="get(), get_all(), register() and register_alias() are expected to exist on every registry, per the ruling on#842. They come from EnumRegistry, mixed in ahead of the enum base so that_member_type_ s..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Which bases an IPv6 extension header names" href="extension-header-subclassing.html"><link rel="prev" title="Naming a sentinel" href="sentinel-convention.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Extension-Header Base Classes" href="extension-header-subclassing.html"><link rel="prev" title="Naming a Sentinel" href="sentinel-convention.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Where the registry protocol lives - PyPCAPKit</title>
+        <title>The Registry Protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Where the registry protocol lives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="process.html">How the repository itself is run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/registry-protocol.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/registry-protocol.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/registry-protocol.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/registry-protocol.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -478,8 +481,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="where-the-registry-protocol-lives">
-<span id="registry-protocol"></span><h1>Where the registry protocol lives<a class="headerlink" href="#where-the-registry-protocol-lives" title="Link to this heading">¶</a></h1>
+          <section id="the-registry-protocol">
+<span id="registry-protocol"></span><h1>The Registry Protocol<a class="headerlink" href="#the-registry-protocol" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>,
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get_all" title="pcapkit.corekit.enum.EnumLookup.get_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_all()</span></code></a>,
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
@@ -501,8 +504,8 @@ share the generated template: <a class="reference internal" href="../../pcapkit/
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>. They are on the base regardless –
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> finished that – so a
 bespoke <code class="docutils literal notranslate"><span class="pre">__new__</span></code> exempts a registry from the template, not from the protocol.</p>
-<section id="the-two-tiers-and-what-lives-on-each">
-<h2>The Two Tiers, and What Lives on Each<a class="headerlink" href="#the-two-tiers-and-what-lives-on-each" title="Link to this heading">¶</a></h2>
+<section id="the-two-tier-hierarchy">
+<h2>The Two-Tier Hierarchy<a class="headerlink" href="#the-two-tier-hierarchy" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base any more. Since
 phase 1 of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
 parent, and the line between them is whether the enumeration may <em>grow</em>:</p>
@@ -584,10 +587,11 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
 </div>
 </section>
-<section id="what-a-failed-lookup-raises">
-<h2>What a Failed Lookup Raises<a class="headerlink" href="#what-a-failed-lookup-raises" title="Link to this heading">¶</a></h2>
-<p>Two rules govern it, and they pull in opposite directions on purpose. The owner ruled
-on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> that the choice between
+<section id="failed-lookup-exceptions">
+<h2>Failed-Lookup Exceptions<a class="headerlink" href="#failed-lookup-exceptions" title="Link to this heading">¶</a></h2>
+<p>Two rules govern which exception a failed lookup raises, and they pull in opposite
+directions on purpose. The owner ruled on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> that the choice between
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> and <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> follows whichever stdlib’s <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>
 would raise in the same circumstance, and that whichever it is comes from
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather than from builtins.</p>
@@ -641,8 +645,8 @@ exists for. So a <code class="docutils literal notranslate"><span class="pre">ge
 following the convention; one that catches a <em>value</em> miss that way is silencing a
 logged error, and needs a reason.</p>
 </section>
-<section id="what-a-get-override-may-and-may-not-do">
-<h2>What a <code class="docutils literal notranslate"><span class="pre">get</span></code> Override May and May Not Do<a class="headerlink" href="#what-a-get-override-may-and-may-not-do" title="Link to this heading">¶</a></h2>
+<section id="get-override-obligations">
+<h2><code class="docutils literal notranslate"><span class="pre">get</span></code> Override Obligations<a class="headerlink" href="#get-override-obligations" title="Link to this heading">¶</a></h2>
 <p>Three rulings settled what an override owes
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, and the last of them deleted two
 overrides outright. They are collected here because each was reached by the same
@@ -748,8 +752,8 @@ divergence nobody wrote down; delegating to it is how it does not.</p>
 rather than by redundancy – the rule generalises: <strong>an override justifies itself by
 what it adds to the base, and goes when the answer is nothing.</strong></p>
 </section>
-<section id="case-sensitivity-is-rfc-directed">
-<h2>Case Sensitivity Is RFC-Directed<a class="headerlink" href="#case-sensitivity-is-rfc-directed" title="Link to this heading">¶</a></h2>
+<section id="rfc-directed-case-sensitivity">
+<h2>RFC-Directed Case Sensitivity<a class="headerlink" href="#rfc-directed-case-sensitivity" title="Link to this heading">¶</a></h2>
 <p>The rule, as the owner ruled it on
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>: where the RFC states the
 values are case-insensitive, the enumeration treats them that way too; otherwise it
@@ -1075,7 +1079,7 @@ the next regeneration would discard it.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Which bases an IPv6 extension header names</div>
+                <div class="title">Extension-Header Base Classes</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -1086,7 +1090,7 @@ the next regeneration would discard it.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Naming a sentinel</div>
+                <div class="title">Naming a Sentinel</div>
                 
               </div>
             </a>
@@ -1120,11 +1124,11 @@ the next regeneration would discard it.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Where the registry protocol lives</a><ul>
-<li><a class="reference internal" href="#the-two-tiers-and-what-lives-on-each">The Two Tiers, and What Lives on Each</a></li>
-<li><a class="reference internal" href="#what-a-failed-lookup-raises">What a Failed Lookup Raises</a></li>
-<li><a class="reference internal" href="#what-a-get-override-may-and-may-not-do">What a <code class="docutils literal notranslate"><span class="pre">get</span></code> Override May and May Not Do</a></li>
-<li><a class="reference internal" href="#case-sensitivity-is-rfc-directed">Case Sensitivity Is RFC-Directed</a></li>
+<li><a class="reference internal" href="#">The Registry Protocol</a><ul>
+<li><a class="reference internal" href="#the-two-tier-hierarchy">The Two-Tier Hierarchy</a></li>
+<li><a class="reference internal" href="#failed-lookup-exceptions">Failed-Lookup Exceptions</a></li>
+<li><a class="reference internal" href="#get-override-obligations"><code class="docutils literal notranslate"><span class="pre">get</span></code> Override Obligations</a></li>
+<li><a class="reference internal" href="#rfc-directed-case-sensitivity">RFC-Directed Case Sensitivity</a></li>
 <li><a class="reference internal" href="#the-lenient-criterion-in-two-limbs">The Lenient Criterion, in Two Limbs</a></li>
 <li><a class="reference internal" href="#the-audit-per-class">The Audit, per Class</a></li>
 </ul>

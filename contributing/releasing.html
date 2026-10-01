@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/releasing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The one manual step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
-<meta name="description" content="The one manual step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="How the repository itself is run" href="conventions/process.html">
+<meta property="og:description" content="The One Manual Step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
+<meta name="description" content="The One Manual Step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Running the Repository" href="conventions/process.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Release Process - PyPCAPKit</title>
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="conventions/mint-criterion.html">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2"><a class="reference internal" href="conventions/sentinel-convention.html">Naming a sentinel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="conventions/registry-protocol.html">Where the registry protocol lives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="conventions/extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="conventions/process.html">How the repository itself is run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/process.html">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/releasing.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/releasing.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/releasing.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/releasing.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -493,7 +496,7 @@ to <code class="docutils literal notranslate"><span class="pre">main</span></cod
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> and is never hand-made.</p>
 </div>
 <section id="the-one-manual-step">
-<h2>The one manual step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
+<h2>The One Manual Step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
 <p>Bumping <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> is done by <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code>, whose
 own docstring is the authority on what it does; summarised here rather than
 duplicated. Given the current version, it works out the next one under
@@ -540,7 +543,7 @@ failing, if that entry’s heading still reads “unreleased”
 convention already asks for, not extra work this process adds.</p>
 </section>
 <section id="two-ways-to-start-a-release">
-<h2>Two ways to start a release<a class="headerlink" href="#two-ways-to-start-a-release" title="Link to this heading">¶</a></h2>
+<h2>Two Ways to Start a Release<a class="headerlink" href="#two-ways-to-start-a-release" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> has two triggers
 (<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:2-9</span></code>), and both are first-class –
 neither is a workaround for the other:</p>
@@ -576,8 +579,8 @@ never a tag.</p>
 the trigger and <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> differ, which is what the guards below
 read.</p>
 </section>
-<section id="each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">
-<h2>Each job past <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reads its own evidence, not a shared proxy<a class="headerlink" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy" title="Link to this heading">¶</a></h2>
+<section id="per-job-evidence-not-a-shared-proxy">
+<h2>Per-Job Evidence, Not a Shared Proxy<a class="headerlink" href="#per-job-evidence-not-a-shared-proxy" title="Link to this heading">¶</a></h2>
 <p>Until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>, every job
 past <code class="docutils literal notranslate"><span class="pre">version_check</span></code> shared one guard:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}</span>
@@ -616,8 +619,8 @@ tag-push path <code class="docutils literal notranslate"><span class="pre">start
 the evidence check, for the reasons in the next section below; on the
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through to whichever evidence that job owns.</p>
 </section>
-<section id="reading-your-own-evidence-is-not-enough-by-itself-though">
-<h2>Reading your own evidence is not enough by itself, though<a class="headerlink" href="#reading-your-own-evidence-is-not-enough-by-itself-though" title="Link to this heading">¶</a></h2>
+<section id="the-skip-cascade-guard">
+<h2>The Skip-Cascade Guard<a class="headerlink" href="#the-skip-cascade-guard" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each depend on <code class="docutils literal notranslate"><span class="pre">github</span></code> (and <code class="docutils literal notranslate"><span class="pre">conda</span></code> also
 on <code class="docutils literal notranslate"><span class="pre">tag</span></code>), and GitHub Actions skips a job whose <code class="docutils literal notranslate"><span class="pre">needs:</span></code> included a job
 that itself skipped – <em>before</em> that job’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is even evaluated –
@@ -649,8 +652,8 @@ pushed, trading a clean skip for a checkout failure; the equality pair skips
 produces the evidence the gates read, so a skipped or cancelled
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> leaves them nothing to decide on.</p>
 </section>
-<section id="the-pipeline-and-why-one-approval-is-enough">
-<h2>The pipeline, and why one approval is enough<a class="headerlink" href="#the-pipeline-and-why-one-approval-is-enough" title="Link to this heading">¶</a></h2>
+<section id="the-release-pipeline">
+<h2>The Release Pipeline<a class="headerlink" href="#the-release-pipeline" title="Link to this heading">¶</a></h2>
 <pre  class="mermaid">
         flowchart TD
     T1[&quot;push: tags v*&lt;br/&gt;ref_name starts with v&quot;] --&gt; UT
@@ -702,7 +705,7 @@ about whether the upload finished. A job keyed on <code class="docutils literal 
 skips itself on a retry after a partial release, and the run finishes green
 because skipped is not failed – so nothing in the UI says the release did
 not happen.</p>
-<p><a class="reference internal" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">Each job past version_check reads its own evidence, not a shared proxy</a>
+<p><a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a>
 above is what prevents it: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
 <em>their own</em> artefact is missing rather than whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an incomplete
 release runs the jobs that did not finish instead of skipping them. A
@@ -716,7 +719,7 @@ checks above somehow disagree with reality.</p>
 </div>
 <p><strong>Do not hand-make a tag to route around a stuck release.</strong> This is a
 narrower rule than “never tag by hand” – pushing a <em>fresh</em> <code class="docutils literal notranslate"><span class="pre">v&lt;version&gt;</span></code>
-tag to start a release, as in <a class="reference internal" href="#two-ways-to-start-a-release">Two ways to start a release</a> above, is fine
+tag to start a release, as in <a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a> above, is fine
 and unchanged by any of this. What is not sanctioned is deleting and
 re-pushing a tag that a stuck run already created, to force a retry. A
 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span></code> of a tag ref that already points at the same commit produces no
@@ -724,7 +727,7 @@ new event (documented GitHub Actions behaviour, not measured here), so the
 only way to make that push fire again is to delete the tag first – which
 both touches a ref the release automation owns, and lands the retry back on
 the tag-push path, where every job’s guard is unconditionally bypassed (see
-<a class="reference internal" href="#two-ways-to-start-a-release">Two ways to start a release</a> above) regardless of what has already gone
+<a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a> above) regardless of what has already gone
 out. Neither is worth the risk of a double upload to an index that cannot
 take one back – and it is no longer necessary either, since a plain re-run
 now self-heals; see <a class="reference internal" href="#recovery">Recovery</a> below.</p>
@@ -750,8 +753,8 @@ sound like they are the point.</p>
 <p>The sanctioned recovery from a failed or partial release run is re-running
 the workflow – nothing more elaborate, and specifically not re-tagging by
 hand, for the reasons above. This is now the actual fix rather than a
-best-effort suggestion: <a class="reference internal" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">Each job past version_check reads its own evidence,
-not a shared proxy</a> above means <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check
+best-effort suggestion: <a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a> above means
+<code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check
 whether <em>their own</em> artefact is missing, so a re-run finishes whichever jobs
 did not complete last time instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere
 existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> was always safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>);
@@ -810,7 +813,7 @@ hand-rolled recovery.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">How the repository itself is run</div>
+                <div class="title">Running the Repository</div>
                 
               </div>
             </a>
@@ -845,11 +848,11 @@ hand-rolled recovery.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Release Process</a><ul>
-<li><a class="reference internal" href="#the-one-manual-step">The one manual step</a></li>
-<li><a class="reference internal" href="#two-ways-to-start-a-release">Two ways to start a release</a></li>
-<li><a class="reference internal" href="#each-job-past-version-check-reads-its-own-evidence-not-a-shared-proxy">Each job past <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reads its own evidence, not a shared proxy</a></li>
-<li><a class="reference internal" href="#reading-your-own-evidence-is-not-enough-by-itself-though">Reading your own evidence is not enough by itself, though</a></li>
-<li><a class="reference internal" href="#the-pipeline-and-why-one-approval-is-enough">The pipeline, and why one approval is enough</a></li>
+<li><a class="reference internal" href="#the-one-manual-step">The One Manual Step</a></li>
+<li><a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a></li>
+<li><a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a></li>
+<li><a class="reference internal" href="#the-skip-cascade-guard">The Skip-Cascade Guard</a></li>
+<li><a class="reference internal" href="#the-release-pipeline">The Release Pipeline</a></li>
 <li><a class="reference internal" href="#precautions">Precautions</a></li>
 <li><a class="reference internal" href="#recovery">Recovery</a></li>
 </ul>

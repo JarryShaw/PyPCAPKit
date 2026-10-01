@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="How the repository itself is run" />
+<meta property="og:title" content="Running the Repository" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/process.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="The four pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull re..." />
 <meta name="description" content="The four pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull re..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Release Process" href="../releasing.html"><link rel="prev" title="Which bases an IPv6 extension header names" href="extension-header-subclassing.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Release Process" href="../releasing.html"><link rel="prev" title="Extension-Header Base Classes" href="extension-header-subclassing.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>How the repository itself is run - PyPCAPKit</title>
+        <title>Running the Repository - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">Where the registry protocol lives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How the repository itself is run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/process.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/process.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/process.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/process.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -478,8 +481,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="how-the-repository-itself-is-run">
-<span id="process"></span><h1>How the repository itself is run<a class="headerlink" href="#how-the-repository-itself-is-run" title="Link to this heading">¶</a></h1>
+          <section id="running-the-repository">
+<span id="process"></span><h1>Running the Repository<a class="headerlink" href="#running-the-repository" title="Link to this heading">¶</a></h1>
 <p>The four pages before this one are about writing library code. The rulings here are
 about running the repository – what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
@@ -488,8 +491,8 @@ module, and none fits a code-convention page, so the owner ruled on
 their own rather than being left in their threads. Each ruling below is <strong>paraphrased
 rather than quoted</strong>, also on his instruction there; the issue named beside it is
 where the original wording is.</p>
-<section id="what-the-all-extra-carries">
-<h2>What the <code class="docutils literal notranslate"><span class="pre">all</span></code> extra carries<a class="headerlink" href="#what-the-all-extra-carries" title="Link to this heading">¶</a></h2>
+<section id="the-all-extra">
+<h2>The <code class="docutils literal notranslate"><span class="pre">all</span></code> Extra<a class="headerlink" href="#the-all-extra" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">all</span></code> means <strong>core addons only</strong> – the things that let the library itself run at
 full functionality – rather than everything a user might conceivably want. The owner
 settled that on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/910">#910</a> and named
@@ -534,8 +537,8 @@ workflows that need full resolution install <code class="docutils literal notran
 carries a tracked <code class="docutils literal notranslate"><span class="pre">import-error</span></code> count that is deliberate rather than accidental.</p>
 </div>
 </section>
-<section id="what-a-changelog-entry-is">
-<h2>What a changelog entry is<a class="headerlink" href="#what-a-changelog-entry-is" title="Link to this heading">¶</a></h2>
+<section id="changelog-entry-granularity">
+<h2>Changelog Entry Granularity<a class="headerlink" href="#changelog-entry-granularity" title="Link to this heading">¶</a></h2>
 <p>An entry is <strong>not one line per commit</strong>. Group the changes by topic, and give concise
 detail of what actually changed in that version bump. Ruled on
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
@@ -592,8 +595,8 @@ separate changes. Raised originally on #918.</p>
 it earlier would conflict with every open change that touches an entry.</p>
 </div>
 </section>
-<section id="how-the-issue-and-pull-request-labels-work">
-<h2>How the issue and pull request labels work<a class="headerlink" href="#how-the-issue-and-pull-request-labels-work" title="Link to this heading">¶</a></h2>
+<section id="issue-and-pull-request-labels">
+<h2>Issue and Pull Request Labels<a class="headerlink" href="#issue-and-pull-request-labels" title="Link to this heading">¶</a></h2>
 <p>The owner asked on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> for
 this to be written down alongside <code class="docutils literal notranslate"><span class="pre">breaking</span></code>, since <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s meaning only
 makes sense against the scheme it sits in.</p>
@@ -716,8 +719,8 @@ outlives the commit it was given on is worse than none.</p>
 but nothing applies it automatically, because dependabot is not configured for that
 ecosystem here.</p>
 </section>
-<section id="what-breaking-marks">
-<h2>What <code class="docutils literal notranslate"><span class="pre">breaking</span></code> marks<a class="headerlink" href="#what-breaking-marks" title="Link to this heading">¶</a></h2>
+<section id="the-breaking-label">
+<h2>The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label<a class="headerlink" href="#the-breaking-label" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">breaking</span></code> is <strong>additive</strong> – it goes on alongside the type label, never instead of
 it. Its own description in the label set says so, and defines it as breaking
 public-facing behaviour or API.</p>
@@ -789,7 +792,7 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Which bases an IPv6 extension header names</div>
+                <div class="title">Extension-Header Base Classes</div>
                 
               </div>
             </a>
@@ -823,11 +826,11 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">How the repository itself is run</a><ul>
-<li><a class="reference internal" href="#what-the-all-extra-carries">What the <code class="docutils literal notranslate"><span class="pre">all</span></code> extra carries</a></li>
-<li><a class="reference internal" href="#what-a-changelog-entry-is">What a changelog entry is</a></li>
-<li><a class="reference internal" href="#how-the-issue-and-pull-request-labels-work">How the issue and pull request labels work</a></li>
-<li><a class="reference internal" href="#what-breaking-marks">What <code class="docutils literal notranslate"><span class="pre">breaking</span></code> marks</a></li>
+<li><a class="reference internal" href="#">Running the Repository</a><ul>
+<li><a class="reference internal" href="#the-all-extra">The <code class="docutils literal notranslate"><span class="pre">all</span></code> Extra</a></li>
+<li><a class="reference internal" href="#changelog-entry-granularity">Changelog Entry Granularity</a></li>
+<li><a class="reference internal" href="#issue-and-pull-request-labels">Issue and Pull Request Labels</a></li>
+<li><a class="reference internal" href="#the-breaking-label">The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label</a></li>
 </ul>
 </li>
 </ul>

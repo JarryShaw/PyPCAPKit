@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="When an unrecognised value may mint a member" />
+<meta property="og:title" content="Minting an Unrecognised Value" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/mint-criterion.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
 <meta name="description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Naming a sentinel" href="sentinel-convention.html"><link rel="prev" title="House Conventions" href="index.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Naming a Sentinel" href="sentinel-convention.html"><link rel="prev" title="House Conventions" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>When an unrecognised value may mint a member - PyPCAPKit</title>
+        <title>Minting an Unrecognised Value - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
@@ -379,6 +380,7 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
@@ -423,14 +425,15 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">When an unrecognised value may mint a member</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a sentinel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">Where the registry protocol lives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Which bases an IPv6 extension header names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="process.html">How the repository itself is run</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -456,12 +459,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/master/docs/source/contributing/conventions/mint-criterion.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/mint-criterion.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/contributing/conventions/mint-criterion.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/mint-criterion.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -478,8 +481,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="when-an-unrecognised-value-may-mint-a-member">
-<span id="mint-criterion"></span><h1>When an unrecognised value may mint a member<a class="headerlink" href="#when-an-unrecognised-value-may-mint-a-member" title="Link to this heading">¶</a></h1>
+          <section id="minting-an-unrecognised-value">
+<span id="mint-criterion"></span><h1>Minting an Unrecognised Value<a class="headerlink" href="#minting-an-unrecognised-value" title="Link to this heading">¶</a></h1>
 <p>121 of the 127 registries under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> define <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which decides
 what happens when a value has no member. The six without one –
 <a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a>,
@@ -516,7 +519,7 @@ ranges record that narrowing in their own comments:
     MISSING --&gt;|&quot;block label names a party&quot;| SUFFIXED[&quot;_unregistered_member&lt;br/&gt;label + _0x&amp;lt;code&amp;gt;&quot;]
     MISSING --&gt;|&quot;block label names a procedure&quot;| BARE[&quot;_unregistered_member&lt;br/&gt;bare block label&quot;]
     </pre><section id="the-criterion">
-<h2>The criterion<a class="headerlink" href="#the-criterion" title="Link to this heading">¶</a></h2>
+<h2>The Criterion<a class="headerlink" href="#the-criterion" title="Link to this heading">¶</a></h2>
 <p>The test, paraphrased from the maintainer’s ruling: does the upstream registry treat
 the label as the final, concrete assigned name, or only as a notation for a human
 reading the table?</p>
@@ -538,7 +541,7 @@ assigned</strong>, and the value will get its real name if and when something as
 </ul>
 </section>
 <section id="worked-examples">
-<h2>Worked examples<a class="headerlink" href="#worked-examples" title="Link to this heading">¶</a></h2>
+<h2>Worked Examples<a class="headerlink" href="#worked-examples" title="Link to this heading">¶</a></h2>
 <p><em>Bare label.</em> <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code>, <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Experimental</span></code> ranges. Each names <strong>how the socket will be allocated</strong>, not what
@@ -561,8 +564,8 @@ range and is not, because it names only the <em>mechanism</em> by which some fut
 will take it. Ask what the label tells you: a party, or a procedure.</p>
 </div>
 </section>
-<section id="why-the-company-names-are-suffixed">
-<h2>Why the company names are suffixed<a class="headerlink" href="#why-the-company-names-are-suffixed" title="Link to this heading">¶</a></h2>
+<section id="suffixed-company-names">
+<h2>Suffixed Company Names<a class="headerlink" href="#suffixed-company-names" title="Link to this heading">¶</a></h2>
 <p>The ethertype case looks like an exception to the rule and is not. The maintainer’s
 reasoning, settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> after
 being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/847">#847</a>: a
@@ -575,7 +578,7 @@ attribution: there the company holds the block and assigned nothing, so the nota
 “Unassigned” and the attribution is incidental.</p>
 </section>
 <section id="checking-the-current-state">
-<h2>Checking the current state<a class="headerlink" href="#checking-the-current-state" title="Link to this heading">¶</a></h2>
+<h2>Checking the Current State<a class="headerlink" href="#checking-the-current-state" title="Link to this heading">¶</a></h2>
 <p>The split is measurable rather than a matter of memory. Slice each <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body
 and see which call it makes – an <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> walk is reliable where a text search is
 not, because <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and in prose. Match on the
@@ -621,7 +624,7 @@ revisions.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Naming a sentinel</div>
+                <div class="title">Naming a Sentinel</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -666,11 +669,11 @@ revisions.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">When an unrecognised value may mint a member</a><ul>
-<li><a class="reference internal" href="#the-criterion">The criterion</a></li>
-<li><a class="reference internal" href="#worked-examples">Worked examples</a></li>
-<li><a class="reference internal" href="#why-the-company-names-are-suffixed">Why the company names are suffixed</a></li>
-<li><a class="reference internal" href="#checking-the-current-state">Checking the current state</a></li>
+<li><a class="reference internal" href="#">Minting an Unrecognised Value</a><ul>
+<li><a class="reference internal" href="#the-criterion">The Criterion</a></li>
+<li><a class="reference internal" href="#worked-examples">Worked Examples</a></li>
+<li><a class="reference internal" href="#suffixed-company-names">Suffixed Company Names</a></li>
+<li><a class="reference internal" href="#checking-the-current-state">Checking the Current State</a></li>
 </ul>
 </li>
 </ul>

@@ -14,8 +14,8 @@ Release Process
    to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
 
-The one manual step
---------------------
+The One Manual Step
+-------------------
 
 Bumping ``pcapkit.__version__`` is done by :file:`util/bump_version.py`, whose
 own docstring is the authority on what it does; summarised here rather than
@@ -65,8 +65,8 @@ failing, if that entry's heading still reads "unreleased"
 (``create-release.yml:395-396``). Both are enforcing work the changelog
 convention already asks for, not extra work this process adds.
 
-Two ways to start a release
-----------------------------
+Two Ways to Start a Release
+---------------------------
 
 ``create-release.yml`` has two triggers
 (``.github/workflows/create-release.yml:2-9``), and both are first-class --
@@ -104,8 +104,8 @@ Both paths converge on the same job graph from ``unit-tests`` onward; only
 the trigger and ``github.ref_name`` differ, which is what the guards below
 read.
 
-Each job past ``version_check`` reads its own evidence, not a shared proxy
--------------------------------------------------------------------------------
+Per-Job Evidence, Not a Shared Proxy
+------------------------------------
 
 Until `#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__, every job
 past ``version_check`` shared one guard:
@@ -150,8 +150,8 @@ tag-push path ``startsWith(github.ref_name, 'v')`` unconditionally bypasses
 the evidence check, for the reasons in the next section below; on the
 ``workflow_run`` path it falls through to whichever evidence that job owns.
 
-Reading your own evidence is not enough by itself, though
--------------------------------------------------------------------------------
+The Skip-Cascade Guard
+----------------------
 
 ``tag``, ``pypi`` and ``conda`` each depend on ``github`` (and ``conda`` also
 on ``tag``), and GitHub Actions skips a job whose ``needs:`` included a job
@@ -186,8 +186,8 @@ pushed, trading a clean skip for a checkout failure; the equality pair skips
 produces the evidence the gates read, so a skipped or cancelled
 ``version_check`` leaves them nothing to decide on.
 
-The pipeline, and why one approval is enough
-----------------------------------------------
+The Release Pipeline
+--------------------
 
 .. mermaid::
 
@@ -245,7 +245,7 @@ Precautions
    because skipped is not failed -- so nothing in the UI says the release did
    not happen.
 
-   `Each job past version_check reads its own evidence, not a shared proxy`_
+   `Per-Job Evidence, Not a Shared Proxy`_
    above is what prevents it: ``tag``, ``pypi`` and ``conda`` each check whether
    *their own* artefact is missing rather than whether the ``v*`` tag exists, so an incomplete
    release runs the jobs that did not finish instead of skipping them. A
@@ -259,7 +259,7 @@ Precautions
 
 **Do not hand-make a tag to route around a stuck release.** This is a
 narrower rule than "never tag by hand" -- pushing a *fresh* ``v<version>``
-tag to start a release, as in `Two ways to start a release`_ above, is fine
+tag to start a release, as in `Two Ways to Start a Release`_ above, is fine
 and unchanged by any of this. What is not sanctioned is deleting and
 re-pushing a tag that a stuck run already created, to force a retry. A
 ``git push`` of a tag ref that already points at the same commit produces no
@@ -267,7 +267,7 @@ new event (documented GitHub Actions behaviour, not measured here), so the
 only way to make that push fire again is to delete the tag first -- which
 both touches a ref the release automation owns, and lands the retry back on
 the tag-push path, where every job's guard is unconditionally bypassed (see
-`Two ways to start a release`_ above) regardless of what has already gone
+`Two Ways to Start a Release`_ above) regardless of what has already gone
 out. Neither is worth the risk of a double upload to an index that cannot
 take one back -- and it is no longer necessary either, since a plain re-run
 now self-heals; see `Recovery`_ below.
@@ -296,8 +296,8 @@ Recovery
 The sanctioned recovery from a failed or partial release run is re-running
 the workflow -- nothing more elaborate, and specifically not re-tagging by
 hand, for the reasons above. This is now the actual fix rather than a
-best-effort suggestion: `Each job past version_check reads its own evidence,
-not a shared proxy`_ above means ``tag``, ``pypi`` and ``conda`` each check
+best-effort suggestion: `Per-Job Evidence, Not a Shared Proxy`_ above means
+``tag``, ``pypi`` and ``conda`` each check
 whether *their own* artefact is missing, so a re-run finishes whichever jobs
 did not complete last time instead of skipping them on the ``v*`` tag's mere
 existence. ``pypi`` was always safe to re-run (``skip-existing: true``);
