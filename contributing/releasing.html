@@ -634,9 +634,20 @@ this run, it <em>skipped</em>.</p>
 <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> each open
 with <code class="docutils literal notranslate"><span class="pre">!cancelled()</span> <span class="pre">&amp;&amp;</span> <span class="pre">needs.unit-tests.result</span> <span class="pre">!=</span> <span class="pre">'failure'</span></code> so that a
 skipped gate does not cascade-skip them, while an outright failure or a
-genuine run cancellation still does. The three jobs here do the same for each
-of their own direct dependencies: <code class="docutils literal notranslate"><span class="pre">!cancelled()</span> <span class="pre">&amp;&amp;</span> <span class="pre">needs.&lt;job&gt;.result</span> <span class="pre">!=</span>
-<span class="pre">'failure'</span></code>.</p>
+genuine run cancellation still does. The three jobs here are stricter about
+their <em>publishing</em> predecessors – <code class="docutils literal notranslate"><span class="pre">github</span></code>, and for <code class="docutils literal notranslate"><span class="pre">conda</span></code> also <code class="docutils literal notranslate"><span class="pre">tag</span></code>:
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span> <span class="pre">&amp;&amp;</span> <span class="pre">(needs.&lt;job&gt;.result</span> <span class="pre">==</span> <span class="pre">'success'</span> <span class="pre">||</span> <span class="pre">needs.&lt;job&gt;.result</span> <span class="pre">==</span>
+<span class="pre">'skipped')</span></code>, not <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code>. The two spellings differ only when a
+predecessor’s own result is <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>, which <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code> still admits
+and the equality pair does not. Concretely: if <code class="docutils literal notranslate"><span class="pre">tag</span></code> is cancelled while the
+run itself is not, <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'failure'</span></code> would let <code class="docutils literal notranslate"><span class="pre">conda</span></code> proceed into its
+<code class="docutils literal notranslate"><span class="pre">actions/checkout</span></code> with <code class="docutils literal notranslate"><span class="pre">ref:</span> <span class="pre">conda-&lt;version&gt;+0</span></code>, a tag <code class="docutils literal notranslate"><span class="pre">tag</span></code> never
+pushed, trading a clean skip for a checkout failure; the equality pair skips
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> outright instead.</p>
+<p><code class="docutils literal notranslate"><span class="pre">version_check</span></code> is the exception, and deliberately so: all three require
+<code class="docutils literal notranslate"><span class="pre">needs.version_check.result</span> <span class="pre">==</span> <span class="pre">'success'</span></code> with no <code class="docutils literal notranslate"><span class="pre">||</span> <span class="pre">'skipped'</span></code>. It
+produces the evidence the gates read, so a skipped or cancelled
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code> leaves them nothing to decide on.</p>
 </section>
 <section id="the-pipeline-and-why-one-approval-is-enough">
 <h2>The pipeline, and why one approval is enough<a class="headerlink" href="#the-pipeline-and-why-one-approval-is-enough" title="Link to this heading">¶</a></h2>

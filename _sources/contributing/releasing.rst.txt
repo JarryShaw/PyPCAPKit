@@ -170,9 +170,21 @@ this run, it *skipped*.
 ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` each open
 with ``!cancelled() && needs.unit-tests.result != 'failure'`` so that a
 skipped gate does not cascade-skip them, while an outright failure or a
-genuine run cancellation still does. The three jobs here do the same for each
-of their own direct dependencies: ``!cancelled() && needs.<job>.result !=
-'failure'``.
+genuine run cancellation still does. The three jobs here are stricter about
+their *publishing* predecessors -- ``github``, and for ``conda`` also ``tag``:
+``!cancelled() && (needs.<job>.result == 'success' || needs.<job>.result ==
+'skipped')``, not ``!= 'failure'``. The two spellings differ only when a
+predecessor's own result is ``cancelled``, which ``!= 'failure'`` still admits
+and the equality pair does not. Concretely: if ``tag`` is cancelled while the
+run itself is not, ``!= 'failure'`` would let ``conda`` proceed into its
+``actions/checkout`` with ``ref: conda-<version>+0``, a tag ``tag`` never
+pushed, trading a clean skip for a checkout failure; the equality pair skips
+``conda`` outright instead.
+
+``version_check`` is the exception, and deliberately so: all three require
+``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
+produces the evidence the gates read, so a skipped or cancelled
+``version_check`` leaves them nothing to decide on.
 
 The pipeline, and why one approval is enough
 ----------------------------------------------
