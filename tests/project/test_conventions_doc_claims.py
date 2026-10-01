@@ -102,7 +102,10 @@ INDEX = CONVENTIONS_DIR / 'index.rst'
 #: ``process`` came last, on the owner's ruling that the three settled *process*
 #: rulings -- the ``all`` extra, what a changelog entry is, and what the labels
 #: mean -- get a page of their own rather than being wedged onto a code-convention
-#: page. Its anchor is the bare file stem like the other four, which is what
+#: page. ``documentation`` came after it, carrying the rulings GitHub issue #719
+#: settled about the prose itself -- heading case, when a Mermaid graph beats a
+#: paragraph, and what a sentence on these pages may claim -- which had until then
+#: lived only in that thread. Every anchor is the bare file stem, which is what
 #: :data:`PAGES` below depends on.
 ANCHORS = (
     'mint-criterion',
@@ -110,6 +113,7 @@ ANCHORS = (
     'registry-protocol',
     'extension-header-subclassing',
     'process',
+    'documentation',
 )
 
 #: Each anchor's own file, one-to-one since the split -- there is no longer a single

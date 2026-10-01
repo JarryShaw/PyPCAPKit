@@ -11,8 +11,10 @@ House Conventions
    :ref:`mint-criterion` and :ref:`registry-protocol` govern
    :mod:`pcapkit.const`, which is where the settled questions have mostly
    arisen. :ref:`sentinel-convention` governs :mod:`pcapkit.corekit`,
-   :ref:`extension-header-subclassing` a protocol class hierarchy, and
-   :ref:`process` the repository rather than any of its code.
+   :ref:`extension-header-subclassing` a protocol class hierarchy,
+   :ref:`process` the repository rather than any of its code, and
+   :ref:`documentation` the prose itself -- on these pages and in the API
+   reference -- rather than any code at all.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -30,3 +32,4 @@ House Conventions
    registry-protocol
    extension-header-subclassing
    process
+   documentation
