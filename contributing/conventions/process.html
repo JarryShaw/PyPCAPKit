@@ -549,16 +549,16 @@ code pull request, deliberately unsquashed so that what is and is not accounted 
 stays readable in its log. That is a property of <em>the pull request</em>, and it is not
 what the ruling is about.</p></li>
 <li><p><strong>A changelog file’s entries.</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> groups its
-entries under <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Added**</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Changed**</span></code> and <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Fixed**</span></code> today, and a single
-entry routinely cites several issues at once – <em>“the Mobility Header registry,
-completed (#383, #437)”</em> is one bullet, not two. That is a property of <em>the file</em>,
-and it is the axis the ruling governs.</p></li>
+entries under a section per top-level module, with <code class="docutils literal notranslate"><span class="pre">Added</span></code>, <code class="docutils literal notranslate"><span class="pre">Changed</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> nested inside each, and a single entry routinely cites several issues at
+once – <em>“the Mobility Header registry, completed (#383, #437)”</em> is one bullet, not
+two. That is a property of <em>the file</em>, and it is the axis the ruling governs.</p></li>
 </ul>
 <p>Both are measurable rather than matters of memory, which is the point of writing the
 commands down instead of a figure that will be stale by the next merge:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># entries in the file, and the kind headings they group under</span>
-grep<span class="w"> </span>-cE<span class="w"> </span><span class="s1">'^\* \*\*'</span><span class="w"> </span>docs/source/changelog/1.5.0.rst
-grep<span class="w"> </span>-oE<span class="w"> </span><span class="s1">'^\* \*\*[A-Za-z]+\*\*'</span><span class="w"> </span>docs/source/changelog/1.5.0.rst<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># entries in the file, and the module sections they group under</span>
+grep<span class="w"> </span>-cE<span class="w"> </span><span class="s1">'^\* '</span><span class="w"> </span>docs/source/changelog/1.5.0.rst
+grep<span class="w"> </span>-B1<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^-{3,}$'</span><span class="w"> </span>docs/source/changelog/1.5.0.rst<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-vE<span class="w"> </span><span class="s1">'^-{3,}$|^--$'</span>
 
 <span class="c1"># commits on the pull request -- a different number, about a different thing</span>
 gh<span class="w"> </span>pr<span class="w"> </span>view<span class="w"> </span><span class="m">657</span><span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.commits|length'</span>
@@ -566,16 +566,17 @@ gh<span class="w"> </span>pr<span class="w"> </span>view<span class="w"> </span>
 </div>
 <p>The grouping scheme was settled after that, on #918: <strong>a section per top-level
 module, with</strong> <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module
-granularity, not per-file and not per-subpackage. The file today is neither shape: its
-80 entries carry the three kind labels in <strong>26</strong> separate runs, roughly blocked for the
-first 40% of the file and thoroughly interleaved after it – so the restructure is a
-regrouping of scattered entries rather than a transposition of three tidy blocks:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -oE '^\* \*\*[A-Za-z]+\*\*' docs/source/changelog/1.5.0.rst \
-    | uniq -c | wc -l
-26
+granularity, not per-file and not per-subpackage. <strong>That restructure has landed.</strong> It
+was a regrouping of scattered entries rather than a transposition of three tidy
+blocks: before it, the entries carried their kind as an inline bold label and those
+labels alternated in dozens of short stretches, blocked near the top of the file and
+thoroughly interleaved below. The file now carries <strong>9</strong> module-level sections holding 155
+entries, and no entry carries an inline kind label any more:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
+0
 </pre></div>
 </div>
-<p>The target is one section per top-level module:</p>
+<p>The sections are one per top-level module, plus one for what belongs to no module:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-d<span class="w"> </span>pcapkit/*/<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s|pcapkit/||;s|/||'</span><span class="w">   </span><span class="c1"># const corekit dumpkit foundation</span>
 <span class="w">                                              </span><span class="c1"># interface protocols toolkit</span>
 <span class="w">                                              </span><span class="c1"># utilities vendor</span>
