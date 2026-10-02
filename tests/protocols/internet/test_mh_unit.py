@@ -1616,12 +1616,12 @@ class MHUnitTests(unittest.TestCase):
         inheritance while their own kept ``@staticmethod`` overrides still
         only accepted one -- calling either with a ``default`` raised
         ``TypeError: get() takes 1 positional argument but 2 were given``.
-        GitHub issue #935's first ruling, verbatim *"I lean on 1"*, widened
-        both signatures to accept ``default`` rather than delete them; asked
-        next, on GitHub pull request #940, *"why must we have the two
-        overrides tho? cant they directly fall back to the base class's?"*,
-        the owner's final ruling there went further, verbatim: *"I prefer (2)
-        directly"* -- deleting both overrides outright. Both classes now
+        GitHub issue #935's first ruling, the owner's lean toward option 1 of
+        that thread, widened both signatures to accept ``default`` rather than
+        delete them. The owner then asked, on GitHub pull request #940, why the
+        two overrides were needed at all when they could fall back to the base
+        class's, and his final ruling there went further: he preferred the
+        second option, deleting both overrides outright. Both classes now
         inherit ``get`` from the base exactly as :class:`LMAAddressCode` and
         :class:`LocalizedRoutingStatus` -- the two pure re-parents already in
         this module -- always have, so ``default`` now works the same way on

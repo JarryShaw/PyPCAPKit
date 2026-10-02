@@ -118,13 +118,14 @@ class InfoFinalEnforcementTests(unittest.TestCase):
     def test_re_finalising_the_same_info_class_only_warns(self) -> None:
         """``@info_final @info_final class X(Info)`` warns and carries on.
 
-        The ruling on #778, in the maintainer's words: a second application to
-        the *same* class "should only warn", where a *subclass* of a finalised
-        class raises. The distinction is that the duplicate is redundant rather
-        than wrong -- the first application already generated the ``__init__``
-        and the ``__builtin__`` set, so there is nothing to refuse and nothing
-        to redo. What the guard must not do is hand back a half-built class, so
-        the returned class is exercised here rather than merely identified.
+        The maintainer's ruling, given on the pull request that implemented #778
+        (#788): applying the decorator a second time to the *same* class should
+        only warn, while a *subclass* of a finalised class should raise. The
+        distinction is that the duplicate is redundant rather than wrong -- the
+        first application already generated the ``__init__`` and the
+        ``__builtin__`` set, so there is nothing to refuse and nothing to redo.
+        What the guard must not do is hand back a half-built class, so the
+        returned class is exercised here rather than merely identified.
 
         """
         from pcapkit.corekit.infoclass import Info, info_final

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 """Phase 1 of GitHub issue #877: the bare lookup base under :class:`EnumRegistry`.
 
-The owner's ruling, verbatim: *"they may subclass a bare base enum from
-pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
-mutable ones."* :class:`~pcapkit.corekit.enum.EnumLookup` is that base, and it
-carries :meth:`~pcapkit.corekit.enum.EnumLookup.get`,
+The owner's ruling on #877: the helper enumerations are to be immutable unless
+the RFC or IANA says otherwise, so they may subclass a bare base enumeration
+defined in :mod:`pcapkit.corekit.enum`, which :class:`EnumRegistry` itself then
+subclasses for the mutable ones. :class:`~pcapkit.corekit.enum.EnumLookup` is
+that base, and it carries :meth:`~pcapkit.corekit.enum.EnumLookup.get`,
 :meth:`~pcapkit.corekit.enum.EnumLookup.get_all` and the overridable
 :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` hook -- not ``register``,
-because the owner's own second thought settled that: *"if it carries ``register``,
-then why not ``register_alias``. We might be creating a bad ruling."*
+because the owner's own second thought on the same thread settled that: a base
+that carried ``register`` would raise the question of why it should not carry
+``register_alias`` too, and he thought a bad ruling might be created that way.
+He then went with the recommendation to keep both on :class:`EnumRegistry`.
 
 What this module pins, and why each part is worth pinning:
 
@@ -223,7 +226,8 @@ class BareLookupTests(unittest.TestCase):
         self.assertIs(_Str.get('<angled>'), _Str.angled)
 
     def test_get_is_case_sensitive(self) -> 'None':
-        """The ruled default: *"otherwise, we should treat them case sensitive."*
+        """The ruled default: case-sensitive, unless the RFC states that the values
+        are case-insensitive (ruled on #877).
 
         Case-insensitivity is a per-class override needing an RFC behind it, so
         the base must not fold case itself. Auditing the existing overrides
@@ -280,11 +284,12 @@ class BareLookupTests(unittest.TestCase):
     def test_flag_composites_remain_the_ruled_exception(self) -> 'None':
         """A ``Flag`` still caches composites, and that is sanctioned.
 
-        The owner's ruling on this issue, verbatim: *"Flag subclasses is the one
-        only exception where we're expecting values to grow and fill due to
-        combinations."* So ``_Flag.get(99)`` composing ``first|second|96`` into
-        ``_value2member_map_`` is :class:`~aenum.Flag`'s own machinery behaving as
-        expected, and the base does not -- and must not -- suppress it.
+        The owner's ruling on this issue is that :class:`~aenum.Flag` subclasses
+        are the one exception to enumerations staying immutable: their values are
+        expected to grow and fill in through combinations. So ``_Flag.get(99)``
+        composing ``first|second|96`` into ``_value2member_map_`` is
+        :class:`~aenum.Flag`'s own machinery behaving as expected, and the base
+        does not -- and must not -- suppress it.
 
         The distinction worth pinning is *which* table moves: no real member is
         added, so ``_member_names_`` and ``__members__`` are untouched while the
@@ -332,7 +337,8 @@ class MemberTypeTests(unittest.TestCase):
 
 
 class ValidateValueTests(unittest.TestCase):
-    """The hook the owner asked for: *"some sort of range validation logic."*"""
+    """The hook the owner asked for on #877: some range validation that
+    inheriting classes can plug into."""
 
     def test_the_default_hook_accepts_everything(self) -> 'None':
         """A base cannot know any subclass's range, so it forbids nothing."""

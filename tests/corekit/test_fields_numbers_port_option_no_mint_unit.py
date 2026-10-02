@@ -23,11 +23,11 @@ member -- built by calling the registry's own storage base's ``__new__``
 directly and skipping the registry's own ``__new__`` (and the
 ``cls.__registry__.add(...)`` / ``cls.__members_ns__[...]`` line inside it)
 entirely, so nothing is ever added to any of its lookup tables. That is the
-owner's ruling on this issue's return type: *"we should even apply to all
-other Enum's legit but unbounded values -- so that we dont create registered
-enums out of unrecognised/unregistered values, unless user/caller explicitly
-created them"* -- tracked more broadly as #775, and applied here only to
-these four call sites.
+owner's ruling on this issue's return type: it is to apply to every other
+enumeration's legitimate but unbounded values as well, so that no registered
+enumeration member is created out of an unrecognised or unregistered value,
+unless the user or caller explicitly created it. That is tracked more broadly
+as #775, and applied here only to these four call sites.
 
 This mirrors :mod:`tests.corekit.test_fields_numbers_unassigned_enum`'s shape:
 the field is tested directly, in isolation from extraction, and the "still

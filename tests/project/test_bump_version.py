@@ -2,9 +2,10 @@
 """Tests for :file:`util/bump_version.py`, the version bump the vendor cron runs.
 
 The script moves ``__version__`` in :file:`pcapkit/__init__.py` on and, since the
-owner asked for it -- *"we have version cited in CITATION.cff, might need to have
-the version_bump.py handle that as well"* -- the ``version`` and ``date-released``
-fields of :file:`CITATION.cff` with it.
+owner asked for it -- he pointed out that the version is also cited in
+:file:`CITATION.cff` and that the bump script might need to handle that as well
+(#625; no issue exists for it) -- the ``version`` and ``date-released`` fields
+of :file:`CITATION.cff` with it.
 
 Why the citation half is tested against a fixture
 -------------------------------------------------

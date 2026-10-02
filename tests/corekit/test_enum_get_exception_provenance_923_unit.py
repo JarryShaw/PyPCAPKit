@@ -2,10 +2,10 @@
 """GitHub issue #923: :meth:`~pcapkit.corekit.enum.EnumLookup.get` raises from
 :mod:`pcapkit.utilities.exceptions`, in stdlib :class:`~enum.Enum`'s shape.
 
-The owner's ruling, verbatim: *"Either ``ValueError`` or ``KeyError``, that's
-depending on how stdlib's ``Enum`` would raise on these circumstances. And we
-should raise one from ``pcapkit.utilities.exceptions`` rather builtin
-exceptions."*
+The owner's ruling, asked for on #921 and recorded on #923: raise whichever of
+:exc:`ValueError` and :exc:`KeyError` stdlib's :class:`~enum.Enum` would raise
+in the same circumstance, and raise it from :mod:`pcapkit.utilities.exceptions`
+rather than as a builtin exception.
 
 Measured on Python 3.14.7, that fixes the shape rather than leaving it open:
 ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises :exc:`ValueError`.
