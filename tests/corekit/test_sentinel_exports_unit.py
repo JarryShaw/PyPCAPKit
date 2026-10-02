@@ -37,12 +37,15 @@ sweep filtered on capitalised names did not see it when it was still spelled
 pins the count and the doc together, so the next sentinel cannot be added to one
 without the other. ``ABSENT`` is private and stays out of :attr:`__all__` in both
 directions -- not under the export ruling, which argues the opposite for an
-object like this one, but under the privacy ruling quoted below, which treats a
+object like this one, but under the privacy ruling stated below, which treats a
 sentinel documented as private as having no place in :attr:`__all__` at all.
 
 A follow-up to this same issue moved all four *definitions* into
-:mod:`pcapkit.corekit.sentinels`, per the owner's later ruling -- *"Okay one module
-for all four it is."* Every assertion above still holds unchanged, since it is about
+:mod:`pcapkit.corekit.sentinels`: the owner chose one shared module over one module
+per sentinel, on #911. The shared module is where the ``<SENTINEL>Type`` naming
+convention and the rules for when to add ``__bool__``, ``__copy__`` or ``__reduce__``
+can sit together, which four near-empty files would scatter.
+Every assertion above still holds unchanged, since it is about
 each original module's ``__all__``, which the re-export shims left untouched; what
 changed is only :attr:`type.__module__` for the four types, which
 :meth:`SentinelExportTests.test_every_sentinel_type_is_still_importable_by_name` now
@@ -53,9 +56,9 @@ GitHub issue #937 later renamed two of the four *objects* to SCREAMING_SNAKE --
 ``NoValue`` to ``NO_VALUE`` and ``_Absent`` to ``ABSENT``, the latter also dropping
 its leading underscore -- so every instance name agrees on one casing. Privacy for
 what is now ``ABSENT`` stopped being signalled by the name at all and became
-documentation-only, per the owner's ruling on GitHub issue #719, verbatim:
-*"we can change* ``_ABSENT`` *to* ``ABSENT`` *just document it as private
-type/class in the documentation and not for public use is enough."*
+documentation-only. GitHub issue #719 is where the owner ruled that the underscore
+can go, because documenting the object and its type as private, and not for public
+use, is enough on its own to carry the privacy.
 :meth:`SentinelExportTests.test_the_private_sentinel_is_exported_neither_way` is what
 now pins that privacy under the new name, since the mechanical underscore signal it
 used to double-check is gone.
@@ -126,8 +129,8 @@ from pcapkit.protocols.protocol import ABSENT, AbsentType
 #: Repository root, for the two tests that read a file rather than import it.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Where all four sentinels are now *defined*, since GitHub issue #911's housing
-#: move -- *"Okay one module for all four it is."* Each entry in :data:`SENTINELS`
+#: Where all four sentinels are now *defined*: the single shared module GitHub
+#: issue #911 chose over one module per sentinel. Each entry in :data:`SENTINELS`
 #: below used to name a different module here (``pcapkit.corekit.module``,
 #: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
 #: ``pcapkit.protocols.protocol`` respectively); all four now report this one.
@@ -324,7 +327,11 @@ class SentinelPopulationTests(unittest.TestCase):
     """There are four, they follow the naming rule, and the docs say so."""
 
     def test_every_sentinel_follows_the_naming_convention(self) -> 'None':
-        """*"Keep the sentinel object's type class naming as* ``<SENTINEL>Type``*."*"""
+        """A sentinel object's type class is named ``<SENTINEL>Type``.
+
+        The house convention set under GitHub issue #857, kept uniform so that a
+        future maintainer adding a sentinel can derive the type's name mechanically.
+        """
         for name, _, type_ in SENTINELS:
             with self.subTest(sentinel=name):
                 self.assertEqual(type_.__name__, _expected_type_name(name))

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Regression tests for GitHub issue #775's tier 1: the miss path must not mint.
 
-The maintainer's ruling on #775, verbatim: *"so that we dont create registered
-enums out of unrecognised/unregistered values, unless user/caller explicitly
-created them"* -- and lookup never counts as asking for a name, only the new
-:meth:`register` classmethod does. Before this change, both ``get()``'s string
+The ruling on #775 is that no registry creates a registered enum out of an
+unrecognised or unregistered value, however legitimate but unbounded the values
+are, unless the user or caller explicitly created it -- and lookup never counts as
+asking for a name, only the new :meth:`register` classmethod does. Before this change, both ``get()``'s string
 path and ``_missing_``'s bounded-but-unassigned range branch called
 :func:`aenum.extend_enum`, permanently growing the registry for a value nobody
 asked to be named. Measured on this tree before the fix:
@@ -24,10 +24,13 @@ they generate) are out of scope and untouched.
 
 Tier 1 fixed the *mechanism* (a lookup should never mint); it did not decide,
 registry by registry, which of the remaining ``_missing_`` bodies mint
-something worth keeping. That is tier 2; the owner's mint/unmint criterion,
-settled on GitHub pull request #847 and confirmed on #775, is verbatim: *"a
-final concrete assigned name -> mint; a notation for the readers -> unmint"*.
-Applied registry by registry to every ``_missing_`` that still called
+something worth keeping. That is tier 2; the owner's mint/unmint criterion was
+settled while fixing #841 and confirmed on #775 as the core of the ruling: a name
+is minted when it is the final concrete name an assignment gave, and left
+unminted when it is only a notation for the readers. A dynamically or statically
+assigned range is as unspecified as any other -- it gets concrete names when
+something assigns them -- so its placeholder is notation, not a name worth
+registering. Applied registry by registry to every ``_missing_`` that still called
 :func:`~aenum.extend_enum` -- measured
 at exactly 89 modules by an AST walk over ``pcapkit/const/*.py`` (not the
 "~92" an earlier pass in this programme estimated) -- the ruling converted 82
@@ -113,33 +116,32 @@ including the deliberate scope decision on the 8 of those 766 branches that
 name a real (if IANA-assigned to a whole span rather than declared
 individually) service rather than a placeholder.
 
-Untouched, per the owner's ruling settling the ``needs: decision`` this PR
-re-opened: :class:`~pcapkit.const.ftp.command.CommandType` keeps ``IntFlag``,
-verbatim: *"okay, let's keep IntFlag if that's how RFC/IANA data is
-constructed (`|` may exist on the CSV data)"* -- measured, 2 occurrences in
+Untouched, per the owner's ruling on #860 settling the ``needs: decision`` that
+issue re-opened: :class:`~pcapkit.const.ftp.command.CommandType` keeps
+``IntFlag``, because that is how the RFC/IANA data is constructed and ``|`` may
+appear in the CSV -- measured, 2 occurrences in
 the generated data join two kinds with ``/`` and would break under a plain
 ``IntEnum``; see :class:`BespokeOpenVocabularyUnmintConvertedTests`'s own
 ``test_commandtype_is_untouched``.
 :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, by contrast,
 *did* change -- on a different ruling than CommandType's, not the same one.
-GitHub PR #836 is what first retired ``|``-composite decoding, verbatim:
-*"since it's no longer a Flag, `|` joined values are no longer parsed and
-accepted, we will treat it as a whole, instead of splitting"* -- and it was
-this issue, #860, that later drew the further consequence once nothing
-decoded a composite any more: *"2-power on TransportProtocol is mainly for
-the consideration of previously `tcp | udp`-alike code. But we dont accept
-this kind of piping anymore in the new logic so I think `auto()` is the
-expected behaviour."* So it now numbers its five members sequentially from
+GitHub issue #808 is what first retired ``|``-composite decoding: once
+``TransportProtocol`` is no longer a ``Flag``, a ``|``-joined value is not parsed
+and accepted but treated as a whole, instead of being split. GitHub issue #860
+later drew the further consequence once nothing decoded a composite any more:
+the power-of-two spacing existed only for the ``tcp | udp``-style code that
+composition served, and since the new logic does not accept that piping, ``auto()``
+is the expected numbering. So it now numbers its five members sequentially from
 0 -- ``undefined`` a direct, explicit ``0``, the rest continuing from it
 via ``auto()`` with no ``_start_`` needed, per the owner's own further
 ruling settling the declaration shape -- rather than by the power-of-two
-spacing that composition used to need; per the owner's own follow-up,
-*"no need to add test around
-that"* for the one behavioural consequence -- and it is a real consequence,
+spacing that composition used to need. The owner also ruled, on #860, that no
+test should pin the one behavioural consequence, since it is an obsolete path
+left by an accepted breaking change -- and it is a real consequence,
 not a refusal: a hand-composed ``tcp | udp`` (or a bare, uncomposed ``3``)
 now silently resolves as ``sctp``'s own value through
 :meth:`AppType._dispatch`, where it used to name no registry at all and
-raise. None of the tests below pin that, per the same instruction.
+raise. None of the tests below pin that, per the same ruling.
 
 GitHub issue #775's final round closes the two mixed registries themselves:
 every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s 52 still-
@@ -798,10 +800,10 @@ class GetNoLongerMintsTests(unittest.TestCase):
         pseudo-member the int path does -- it simply does not resolve, and
         the original key's own error propagates instead. Before #864 this
         resolved via ``cls(default)`` -> ``_missing_`` to an unregistered
-        pseudo-member; that is exactly the cost the owner's ruling accepts
-        ("a default naming a value with no registered member stops
-        resolving, on every registry... today such a default returns an
-        unregistered member via _missing_")."""
+        pseudo-member; that is exactly the cost the owner accepted on #864 in
+        choosing a value-only lookup: a default naming a value with no
+        registered member stops resolving, on every registry, where it used
+        to return an unregistered member via ``_missing_``."""
         from pcapkit.const.arp.hardware import Hardware
 
         before = len(Hardware.__members__)
@@ -1206,10 +1208,13 @@ def _is_hex_suffixed_unregistered_name(name_arg: 'Optional[ast.expr]') -> bool:
 
 
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
-    """GitHub pull request #838's Q1 follow-up, the maintainer's ruling verbatim:
-    *"Q1 - bare it is."* Asked whether the non-minting path should honour the
-    registry's own ``unassigned``/``reserved`` name directly or keep appending
-    the numeric value, he chose the bare name -- safe precisely because a
+    """The naming rule settled under GitHub issue #775's tier 1: a non-minting
+    pseudo-member carries the registry's own ``unassigned``/``reserved`` name
+    bare, with no numeric value appended. Minted members keep their number,
+    because there it is part of the real name (``Motorola_0x8705`` names one
+    EtherType inside Motorola's block). Asked whether the non-minting path should
+    honour the registry's own name directly or keep appending the numeric value,
+    the owner chose the bare name -- safe precisely because a
     pseudo-member built by :meth:`_unregistered_member` never enters
     ``__members__``/``_member_map_``/``_value2member_map_``, so two same-named
     pseudo-members (e.g. ``Chunk._unregistered_member(20, 'Unassigned')`` and
@@ -1922,11 +1927,10 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         so every :class:`Command` row references one by plain attribute
         access and nothing is minted merely by importing the module.
 
-        Deliberately not a literal member count: the owner's own words,
-        *"this might break when IANA updated their list. i dont like this
-        guard on the test cases"* -- a regeneration that correctly picks up
-        a newly-registered FEAT code would fail a hardcoded number for being
-        *right*. The invariant that survives a table update instead: every
+        Deliberately not a literal member count: the owner ruled against
+        that guard on #860, because a hardcoded number breaks whenever IANA
+        updates its list -- a regeneration that correctly picks up
+        a newly-registered FEAT code would fail it for being *right*. The invariant that survives a table update instead: every
         name in ``__members__`` is a real declaration in the generated
         source, not something built by a call at import time. A
         regeneration moves declarations and members together; only an
@@ -2142,10 +2146,10 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
                 self.assertTrue(callable(getattr(cls, 'register_alias', None)))
 
     def test_commandtype_is_untouched(self) -> None:
-        """The owner's ruling also floated ``CommandType`` -> ``IntEnum``.
-        Re-opened as `needs: decision` on #860 and settled the other way,
-        verbatim: *"okay, let's keep IntFlag if that's how RFC/IANA data is
-        constructed (`|` may exist on the CSV data)."* Measured: 2 occurrences
+        """``CommandType`` -> ``IntEnum`` was floated too.
+        Re-opened as `needs: decision` on #860 and settled the other way: it
+        keeps ``IntFlag``, because that is how the RFC/IANA data is constructed
+        and ``|`` may appear in the CSV. Measured: 2 occurrences
         in the generated data join two kinds with ``/``, e.g. access *and*
         parameter, which a plain ``IntEnum`` cannot represent. Pinned here so
         a future change is noticed as a scope change rather than folded
@@ -2645,15 +2649,14 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
 
 class TransportProtocolAutoTests(unittest.TestCase):
     """:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
-    ``auto()`` conversion, #860 step 2 PR 2's other change. The owner's
-    ruling, verbatim: *"since we do not allow `|` anymore, using `auto()`
-    instead of 2-power is the right move (breaking change but accepted)."*
-    And, on the one behavioural consequence -- a hand-composed
+    ``auto()`` conversion, #860 step 2 PR 2's other change. The owner ruled on
+    #860 that, since ``|`` composition is no longer allowed, ``auto()`` in place
+    of power-of-two spacing is the right move -- a breaking change, but an
+    accepted one. On the one behavioural consequence -- a hand-composed
     ``tcp | udp`` now equalling ``sctp`` numerically (``1 | 2 == 3``), where it
-    used to name no member at all and be refused as a whole -- the explicit
-    follow-up settling that no test should pin it: *"No need to add test
-    around that honestly. This is an obsoleted path from a breaking
-    change."* So this class deliberately covers only the values and the
+    used to name no member at all and be refused as a whole -- the same thread
+    settled that no test should pin it: the path is obsolete after the breaking
+    change, and a test would preserve it as though it still mattered. So this class deliberately covers only the values and the
     stale comment's removal, not the composition consequence: no test here
     calls ``_dispatch`` with a composed value at all, unlike
     :meth:`AppTypeUnmintConvertedTests.
@@ -2696,9 +2699,9 @@ class TransportProtocolAutoTests(unittest.TestCase):
             TransportProtocol.get('not-a-real-transport')
 
     def test_stale_power_of_two_comment_is_gone(self) -> None:
-        """The owner's instruction, verbatim: the in-code comment claiming
-        the values "must keep" power-of-two spacing contradicted GitHub
-        PR #836's own ruling once nothing decomposed a composite any
+        """Per GitHub issue #860: the in-code comment claiming
+        the values "must keep" power-of-two spacing contradicted the #808
+        ruling that nothing composes a ``TransportProtocol`` any
         more, and is deleted rather than merely superseded -- checked
         against the generated source itself, not the docstring here, so a
         regeneration that reintroduces it fails this test."""

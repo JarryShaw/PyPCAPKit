@@ -643,9 +643,9 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     """A once-sanctioned divergence, now retired for these three specific
     registries.
 
-    In the owner's words, the const enums used to mirror the built-in "with
-    one exception: they contain the missing then register fallback (mutable
-    enums)". :class:`~pcapkit.const.http.method.Method`,
+    The owner's design intent, recorded on GitHub issue #647, was for the const
+    enums to mirror the built-in enum's behaviour with one exception: a missing
+    value falls back to registering it (the mutable enums). :class:`~pcapkit.const.http.method.Method`,
     :class:`~pcapkit.const.ftp.command.Command`,
     :class:`~pcapkit.const.ftp.command.FEATCode` and
     :class:`~pcapkit.const.reg.apptype.apptype.AppType` (with its four
@@ -850,10 +850,10 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         alone: stock ``ad4805f5f`` still mints at ``max_val * 2``, so
         ``.get('quic')`` there returns ``16``, right after ``dccp``'s ``8``.
         This PR's own intermediate revision, not #808, is what switched an
-        unrecognised name to ``max_val + 1`` instead, minting ``9``. PR
-        #836's own inline comment on ``TransportProtocol.get`` removes the
-        registration entirely regardless of which scheme numbered it: "Do
-        not allow extension of TransportProtocol at all." Unlike
+        unrecognised name to ``max_val + 1`` instead, minting ``9``. The
+        review ruling behind #808 removes the registration from
+        ``TransportProtocol.get`` entirely, regardless of which scheme numbered
+        it: ``TransportProtocol`` is not to be extended at all. Unlike
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
         and :class:`~pcapkit.const.mh.cga_type.CGAType` below,
         ``TransportProtocol`` was never one of :data:`EXPECTED_TO_REGISTER`
@@ -1001,10 +1001,10 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_no_percent_formatting_survives_in_the_issue_804_pair(self) -> None:
         """Neither const module nor either generator still formats with ``%``.
 
-        The maintainer's convention from GitHub issue #783: *"id like to keep
-        f-string convention across the library. only use % substitution when
-        inevitable."* A ``__repr__`` is not an inevitable case, and neither is
-        a ``wrap_comment`` argument.
+        The house convention, set in review of the fix for GitHub issue #759:
+        f-strings across the whole library, with ``%`` substitution only where
+        it is inevitable. A ``__repr__`` is not an inevitable case, and neither
+        is a ``wrap_comment`` argument.
 
         Covers the vendor modules as well as the const ones because the tree
         is generated: a conversion that is not in the template is reverted by
