@@ -787,15 +787,16 @@ jobs:
   # largest of the three some 90x short of 29 GB; no figure was taken for
   # tests/protocols, the largest leg. Measured wall times (this venv, serial):
   # cli 18s, const 268s, dumpkit 39s, foundation 272s, interface 38s, project
-  # 70s, protocols 847s, toolkit 97s, utilities 42s, one leg per matrix cell --
-  # see `timeout-minutes` below for why the job-level budget is no longer 20.
+  # 70s, protocols 847s, toolkit 97s, utilities 42s, vendor 104s, one leg per
+  # matrix cell -- see `timeout-minutes` below for why the job-level budget is
+  # no longer 20.
   #
   # tests/vendor was first left out of ``leg`` because running it this way
   # surfaced an instance of the very defect this job exists to catch (issue
   # #985): a stale VendorRuntimeWarning generation made assertWarnsRegex fail
   # in tests/vendor/test_vendor_snapshot_restore_unit.py. That was fixed by
-  # re-resolving the class fresh per generation, so the directory is now a
-  # leg (vendor 83s, 118 directory tests, measured on this venv).
+  # re-resolving the class fresh per test, so the directory is now a leg (297
+  # tests in the leg, 118 of them tests/vendor's own, measured on this venv).
   #
   # Two directories are deliberately absent from ``leg``, for reasons that
   # are not this job's to fix:
