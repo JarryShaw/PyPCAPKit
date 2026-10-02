@@ -581,11 +581,16 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. A ruling given in review of the work for #935 went the
-        other way, verbatim -- asked *"why must we have the two overrides
-        tho? cant they directly fall back to the base class's?"*, the answer
-        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the
-        ruling's own options. Measured before acting on it: the override's own
+        it outright. A ruling given in review of the work for #935 first
+        leaned toward that widening, then went the other way: delete both
+        ``get`` overrides in this module rather than widen them, so
+        :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode` inherit
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
+        removes the ``# type: ignore[override]`` suppressions the overrides
+        needed, and makes all seven re-parented classes behave alike on
+        ``get``, which had not been literally true. Measured before acting
+        on it: the override's own
         docstring called it a "Backport support for original codes", but
         this class mints no alias -- ``__members__`` and ``list(cls)``
         agree at 6 -- so what the override actually did was resolve an
@@ -698,11 +703,16 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. A ruling given in review of the work for #935 went the
-        other way, verbatim -- asked *"why must we have the two overrides
-        tho? cant they directly fall back to the base class's?"*, the answer
-        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the
-        ruling's own options. Measured before acting on it: the override's own
+        it outright. A ruling given in review of the work for #935 first
+        leaned toward that widening, then went the other way: delete both
+        ``get`` overrides in this module rather than widen them, so
+        :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode` inherit
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
+        removes the ``# type: ignore[override]`` suppressions the overrides
+        needed, and makes all seven re-parented classes behave alike on
+        ``get``, which had not been literally true. Measured before acting
+        on it: the override's own
         docstring called it a "Backport support for original codes", but
         this class mints no alias -- ``__members__`` and ``list(cls)``
         agree at 4 -- so what the override actually did was resolve an
@@ -839,9 +849,8 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         -- tests included -- so GitHub issue #880 deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
         #935 reached separately for the other two, on a ruling given in
-        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``
-        being deletion of those two overrides rather than widening them to
-        match the base.
+        review of that work: delete those two overrides rather than widen
+        them to match the base, as an earlier lean on the issue had it.
         GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
@@ -919,9 +928,8 @@ class LMAAddressCode(EnumLookup, IntEnum):
         -- tests included -- so GitHub issue #880 deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
         #935 reached separately for the other two, on a ruling given in
-        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``
-        being deletion of those two overrides rather than widening them to
-        match the base.
+        review of that work: delete those two overrides rather than widen
+        them to match the base, as an earlier lean on the issue had it.
         GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
