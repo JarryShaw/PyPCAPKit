@@ -693,14 +693,15 @@ repository target the same reusable workflow, with the same input:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml:47</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects <strong>two</strong> of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <strong>seven</strong> jobs,
+<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects <strong>two</strong> of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <strong>eight</strong> jobs,
 not one: <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full suite, one Python version) and <code class="docutils literal notranslate"><span class="pre">changelog</span></code>
 (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its source entry). It skips the other
-<strong>five</strong> – the four matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs),
-<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a Python x engine matrix) and
-<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two), each of which has already run once for this commit
-from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> triggers, so running any of
-them again per caller would test the same commit several times over – and
+<strong>six</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs),
+<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a Python x engine matrix),
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> (ten <code class="docutils literal notranslate"><span class="pre">tests/</span></code> legs),
+each of which has already run once for this commit from Unit Tests’ own
+<code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> triggers, so running any of them again per caller
+would test the same commit several times over – and
 <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status Checks</a> below), gated out by its
 own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
@@ -708,9 +709,10 @@ comment (<code class="docutils literal notranslate"><span class="pre">unit-tests
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
-<span class="pre">(full</span> <span class="pre">suite,</span> <span class="pre">Python</span> <span class="pre">3.14)</span></code> succeeded, with the four matrix jobs – <code class="docutils literal notranslate"><span class="pre">Python</span>
-<span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, <code class="docutils literal notranslate"><span class="pre">Integration</span> <span class="pre">Python</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">Engines</span> <span class="pre">Python</span>
-<span class="pre">…</span></code> and <code class="docutils literal notranslate"><span class="pre">PyPCAP/PyPCAPFile</span> <span class="pre">parity</span> <span class="pre">Python</span> <span class="pre">…</span></code> – all reporting <code class="docutils literal notranslate"><span class="pre">skipped</span></code>.</p>
+<span class="pre">(full</span> <span class="pre">suite,</span> <span class="pre">Python</span> <span class="pre">3.14)</span></code> succeeded, with the four matrix jobs that
+existed then – <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, <code class="docutils literal notranslate"><span class="pre">Integration</span>
+<span class="pre">Python</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">Engines</span> <span class="pre">Python</span> <span class="pre">…</span></code> and <code class="docutils literal notranslate"><span class="pre">PyPCAP/PyPCAPFile</span> <span class="pre">parity</span> <span class="pre">Python</span>
+<span class="pre">…</span></code> – all reporting <code class="docutils literal notranslate"><span class="pre">skipped</span></code>.</p>
 </section>
 <section id="the-skip-cascade-888">
 <h2>The Skip Cascade (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
