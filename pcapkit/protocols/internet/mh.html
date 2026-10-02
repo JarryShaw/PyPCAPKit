@@ -8013,25 +8013,28 @@ untouched, since <code class="xref py py-class docutils literal notranslate"><sp
 <p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
 #930, and briefly again through GitHub issue #935’s first attempt,
 which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. A ruling given in review of the work for #935 went the
-other way, verbatim – asked <em>“why must we have the two overrides
-tho? cant they directly fall back to the base class’s?”</em>, the answer
-was <em>“I prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the
-ruling’s own options. Measured before acting on it: the override’s own
-docstring called it a “Backport support for original codes”, but
-this class mints no alias – <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code>
-agree at 6 – so what the override actually did was resolve an
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and a name by subscript,
-exactly the dual resolution
+it outright. An earlier lean on issue #935 had preferred that
+widening; a later ruling in review of the attempt went the other
+way: delete both <code class="docutils literal notranslate"><span class="pre">get</span></code> overrides in this module rather than widen
+them, so <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> inherit
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> outright. That also
+removes the <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span></code> suppressions the overrides
+needed, and makes all seven re-parented classes behave alike on
+<code class="docutils literal notranslate"><span class="pre">get</span></code>, which had not been literally true. Measured before acting
+on it: the override’s own docstring called it a “Backport support
+for original codes”, but this class mints no alias –
+<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> agree at 6 – so what the override
+actually did was resolve an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and
+a name by subscript, exactly the dual resolution
 <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> already provides for
 every other <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry in this tree. There was
-nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the
-base alone, the same as the five other re-parents #930 finished
-alongside this one – including <a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a>
-and <a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a> below, whose own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code>
-GitHub issue #880 had already deleted outright, for the same
-reason: zero callers depended on anything the base does not
-already do.</p>
+nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the base
+alone, the same as the five other re-parents #930 finished alongside
+this one – including <a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a> below, whose own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code>
+GitHub issue #880 had already deleted outright, for the same reason:
+zero callers depended on anything the base does not already do.</p>
 <p>A behaviour change comes with the deletion, deliberately: the
 override branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and routed every
 other type – <code class="docutils literal notranslate"><span class="pre">None</span></code>, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, … – through the
@@ -8149,26 +8152,30 @@ untouched, since <code class="xref py py-class docutils literal notranslate"><sp
 <p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
 #930, and briefly again through GitHub issue #935’s first attempt,
 which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. A ruling given in review of the work for #935 went the
-other way, verbatim – asked <em>“why must we have the two overrides
-tho? cant they directly fall back to the base class’s?”</em>, the answer
-was <em>“I prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the
-ruling’s own options. Measured before acting on it: the override’s own
-docstring called it a “Backport support for original codes”, but
-this class mints no alias – <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code>
-agree at 4 – so what the override actually did was resolve an
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and a name by subscript,
-exactly the dual resolution
+it outright. An earlier lean on issue #935 had preferred that
+widening; a later ruling in review of the attempt went the other
+way: delete both <code class="docutils literal notranslate"><span class="pre">get</span></code> overrides in this module rather than widen
+them, so <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> inherit
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> outright. That also
+removes the <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span></code> suppressions the overrides
+needed, and makes all seven re-parented classes behave alike on
+<code class="docutils literal notranslate"><span class="pre">get</span></code>, which had not been literally true. Measured before acting
+on it: the override’s own docstring called it a “Backport support
+for original codes”, but this class mints no alias –
+<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> agree at 4 – so what the override
+actually did was resolve an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and
+a name by subscript, exactly the dual resolution
 <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> already provides for
 every other <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry in this tree. There was
-nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the
-base alone, the same as the five other re-parents #930 finished
-alongside this one – including
+nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the base
+alone, the same as the five other re-parents #930 finished alongside
+this one – including
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a> and
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a> below, whose
 own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> GitHub issue #880 had already deleted
-outright, for the same reason: zero callers depended on anything
-the base does not already do.</p>
+outright, for the same reason: zero callers depended on anything the
+base does not already do.</p>
 <p>A behaviour change comes with the deletion, deliberately: the
 override branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and routed every
 other type – <code class="docutils literal notranslate"><span class="pre">None</span></code>, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, … – through the
@@ -8315,10 +8322,9 @@ issue #935, on <a class="reference internal" href="#pcapkit.protocols.internet.m
 – tests included – so GitHub issue #880 deleted it outright rather
 than rebuilding it on the immutable contract, the same conclusion
 #935 reached separately for the other two, on a ruling given in
-review of that work, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code>
-being deletion of those two overrides rather than widening them to
-match the base.
-GitHub issue #930’s re-parenting above gives this class
+review of that work: delete those two overrides rather than widen
+them to match the base, which an earlier lean on the issue had
+preferred. GitHub issue #930’s re-parenting above gives this class
 <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
 than a bespoke override – it still cannot mint, so an unassigned
 value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the bare
@@ -8406,10 +8412,9 @@ issue #935, on <a class="reference internal" href="#pcapkit.protocols.internet.m
 – tests included – so GitHub issue #880 deleted it outright rather
 than rebuilding it on the immutable contract, the same conclusion
 #935 reached separately for the other two, on a ruling given in
-review of that work, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code>
-being deletion of those two overrides rather than widening them to
-match the base.
-GitHub issue #930’s re-parenting above gives this class
+review of that work: delete those two overrides rather than widen
+them to match the base, which an earlier lean on the issue had
+preferred. GitHub issue #930’s re-parenting above gives this class
 <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
 than a bespoke override – it still cannot mint, so an unassigned
 value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the bare
