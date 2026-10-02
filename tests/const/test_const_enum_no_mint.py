@@ -146,14 +146,14 @@ raise. None of the tests below pin that, per the same ruling.
 GitHub issue #775's final round closes the two mixed registries themselves:
 every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s 52
 still-minting range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s
-one (``Registered by Xerox``), now convert to :meth:`~pcapkit.corekit.enum.
-EnumRegistry._unregistered_member` too -- PR #878 scoped the change this way:
-keep the existing hex-suffixed name, since this change is about not
-registering rather than renaming. So each keeps the hex-suffixed name it
-always rendered (``Xyplex_0x0888``, not a bare ``Xyplex``) even though it no
-longer registers -- neither is "mixed" any more, both are wholly converted
-like the 82 in :data:`RULING_CONVERTED_REGISTRIES`, and
-:class:`EtherTypeMixedMintTests` /:class:`IPXSocketMixedMintTests` below are
+one (``Registered by Xerox``), now convert to
+:meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` too -- PR #878
+scoped it this way: keeping the existing hex-suffixed name, since this change
+is about not registering rather than renaming. So each keeps the hex-suffixed
+name it always rendered (``Xyplex_0x0888``, not a bare ``Xyplex``) even though
+it no longer registers -- neither is "mixed" any more, both are wholly
+converted like the 82 in :data:`RULING_CONVERTED_REGISTRIES`, and
+:class:`EtherTypeMixedMintTests`/:class:`IPXSocketMixedMintTests` below are
 retitled in place to prove the formerly-kept probe no longer mints rather than
 that it still does. The one consequence worth naming: this reintroduces the
 exact "manufactured, value-suffixed name" shape :func:`is_manufactured` exists
@@ -594,12 +594,13 @@ ETHERTYPE_UNASSIGNED_PROBES = {
 #: a proprietary protocol has no public name of its own, so the company name
 #: serves as one (#775, #847). #775's final round converts it too, preserving
 #: the hex-suffixed name exactly as the crawler always rendered it (PR #878
-#: scoped it that way: keeping the existing hex-suffixed name, since this
+#: scoped it this way: keeping the existing hex-suffixed name, since this
 #: change is about not registering rather than renaming), so this now pins the
 #: opposite of what its name suggests: that the formerly-kept probe no longer
 #: mints either. Kept as its own constant, distinct from
-#: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because :class:`EtherTypeMixedMintTests`
-#: below still wants it named individually in its own regression test.
+#: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
+#: :class:`EtherTypeMixedMintTests` below still wants it named individually in
+#: its own regression test.
 ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
 #: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's original
@@ -1301,7 +1302,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     check protects against is two *minted* members sharing a name at different
     values, and neither of these 53 calls ever mints, so nothing can collide
     regardless of what the ``name`` argument looks like.
-    :func:`_is_hex_suffixed_ unregistered_name` below is the scoped fix -- an
+    :func:`_is_hex_suffixed_unregistered_name` below is the scoped fix -- an
     exemption keyed on the ``name`` argument's own AST shape, not on which
     file the call lives in, from the sweep only -- not a change to
     :func:`is_manufactured` itself, which stays exactly as tested against
@@ -1541,11 +1542,10 @@ class EtherTypeMixedMintTests(unittest.TestCase):
         exact probe (``Xyplex``, 0x0888) used to prove the ruling *kept*
         minting a real attributed name; GitHub issue #775's final round
         converts it, preserving the hex-suffixed name exactly as the crawler
-        always rendered it -- PR #878 scoped it this way: keep the existing
+        always rendered it -- PR #878 scoped it this way: keeping the existing
         hex-suffixed name, since this change is about not registering rather
-        than renaming. Same shape as
-        :meth:`test_unassigned_rows_do_not_mint` above, just for the one
-        probe that used to be the exception."""
+        than renaming. Same shape as :meth:`test_unassigned_rows_do_not_mint`
+        above, just for the one probe that used to be the exception."""
         from pcapkit.const.reg.ethertype import EtherType
 
         value, name = ETHERTYPE_FORMERLY_KEPT_PROBE
