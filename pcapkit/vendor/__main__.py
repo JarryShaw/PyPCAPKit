@@ -102,18 +102,17 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
 
     A symlinked destination has a related divergence from the pre-#872
     behaviour -- documented against the write path by rounds 4-8 (deleted
-    along with :meth:`~pcapkit.vendor.default.Vendor._write_atomic`, though
-    the underlying behaviour persists here instead): ``open(const_file,
-    'w')`` writes *through* a symlink, into whatever file it points at,
-    leaving the link itself untouched. ``os.replace(backup, const_file)``
-    on restore instead replaces the *link itself* with a regular file.
-    Measured, for ``link.py`` symlinked to ``real.py``: after a failure and
-    restore, ``real.py`` is left however the crawler's failed write left
-    it (truncated, in this case -- nothing here restores the file a
-    symlink used to point at), ``link.py`` is now a regular file holding
-    the backup's content, and ``os.path.islink(link.py)`` is
-    :data:`False`. ``find pcapkit/const -type l`` is still empty, so this
-    remains latent.
+    along with ``_write_atomic``, though the underlying behaviour persists
+    here instead): ``open(const_file, 'w')`` writes *through* a symlink,
+    into whatever file it points at, leaving the link itself untouched.
+    ``os.replace(backup, const_file)`` on restore instead replaces the *link
+    itself* with a regular file. Measured, for ``link.py`` symlinked to
+    ``real.py``: after a failure and restore, ``real.py`` is left however
+    the crawler's failed write left it (truncated, in this case -- nothing
+    here restores the file a symlink used to point at), ``link.py`` is now a
+    regular file holding the backup's content, and
+    ``os.path.islink(link.py)`` is :data:`False`. ``find pcapkit/const
+    -type l`` is still empty, so this remains latent.
 
     Nothing is copied at all when the destination does not exist yet: there
     is no previous file for a failure to discard, so there is nothing this

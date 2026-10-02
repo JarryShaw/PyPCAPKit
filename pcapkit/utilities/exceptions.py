@@ -716,8 +716,8 @@ class EnumKeyError(BaseError, KeyError):
     taste: ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises
     :exc:`ValueError`, so a lookup that misses by *name* is
     :exc:`KeyError`-derived and one that misses by *value* is
-    :exc:`ValueError`-derived. That is a ruling given in review of the
-    re-parenting work for #877, carried out by GitHub issue #923: raise
+    :exc:`ValueError`-derived. That is a ruling given in review of #877's
+    phase-2 re-parenting, carried out by GitHub issue #923: raise
     whichever of the two stdlib :class:`~enum.Enum` would raise in the same
     circumstances, and raise it from this module rather than as a builtin.
 

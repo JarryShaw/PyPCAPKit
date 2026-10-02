@@ -581,30 +581,28 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. A ruling given in review of the work for #935 first
-        leaned toward that widening, then went the other way: delete both
-        ``get`` overrides in this module rather than widen them, so
-        :class:`FastBindingAcknowledgmentStatus` and
+        it outright. An earlier lean on issue #935 had preferred that
+        widening; a later ruling in review of the attempt went the other
+        way: delete both ``get`` overrides in this module rather than widen
+        them, so :class:`FastBindingAcknowledgmentStatus` and
         :class:`IPv6AddressPrefixCode` inherit
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
         removes the ``# type: ignore[override]`` suppressions the overrides
         needed, and makes all seven re-parented classes behave alike on
         ``get``, which had not been literally true. Measured before acting
-        on it: the override's own
-        docstring called it a "Backport support for original codes", but
-        this class mints no alias -- ``__members__`` and ``list(cls)``
-        agree at 6 -- so what the override actually did was resolve an
-        :class:`int` by direct construction and a name by subscript,
-        exactly the dual resolution
+        on it: the override's own docstring called it a "Backport support
+        for original codes", but this class mints no alias --
+        ``__members__`` and ``list(cls)`` agree at 6 -- so what the override
+        actually did was resolve an :class:`int` by direct construction and
+        a name by subscript, exactly the dual resolution
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
         every other :class:`int`-valued registry in this tree. There was
-        nothing left to backport. ``get``/``get_all`` now come from the
-        base alone, the same as the five other re-parents #930 finished
-        alongside this one -- including :class:`LocalizedRoutingStatus`
-        and :class:`LMAAddressCode` below, whose own hand-rolled ``get()``
-        GitHub issue #880 had already deleted outright, for the same
-        reason: zero callers depended on anything the base does not
-        already do.
+        nothing left to backport. ``get``/``get_all`` now come from the base
+        alone, the same as the five other re-parents #930 finished alongside
+        this one -- including :class:`LocalizedRoutingStatus` and
+        :class:`LMAAddressCode` below, whose own hand-rolled ``get()``
+        GitHub issue #880 had already deleted outright, for the same reason:
+        zero callers depended on anything the base does not already do.
 
         A behaviour change comes with the deletion, deliberately: the
         override branched on ``isinstance(key, int)`` and routed every
@@ -703,31 +701,30 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         This class carried its own hand-rolled ``get()`` override through
         #930, and briefly again through GitHub issue #935's first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. A ruling given in review of the work for #935 first
-        leaned toward that widening, then went the other way: delete both
-        ``get`` overrides in this module rather than widen them, so
-        :class:`FastBindingAcknowledgmentStatus` and
+        it outright. An earlier lean on issue #935 had preferred that
+        widening; a later ruling in review of the attempt went the other
+        way: delete both ``get`` overrides in this module rather than widen
+        them, so :class:`FastBindingAcknowledgmentStatus` and
         :class:`IPv6AddressPrefixCode` inherit
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
         removes the ``# type: ignore[override]`` suppressions the overrides
         needed, and makes all seven re-parented classes behave alike on
         ``get``, which had not been literally true. Measured before acting
-        on it: the override's own
-        docstring called it a "Backport support for original codes", but
-        this class mints no alias -- ``__members__`` and ``list(cls)``
-        agree at 4 -- so what the override actually did was resolve an
-        :class:`int` by direct construction and a name by subscript,
-        exactly the dual resolution
+        on it: the override's own docstring called it a "Backport support
+        for original codes", but this class mints no alias --
+        ``__members__`` and ``list(cls)`` agree at 4 -- so what the override
+        actually did was resolve an :class:`int` by direct construction and
+        a name by subscript, exactly the dual resolution
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
         every other :class:`int`-valued registry in this tree. There was
-        nothing left to backport. ``get``/``get_all`` now come from the
-        base alone, the same as the five other re-parents #930 finished
-        alongside this one -- including
+        nothing left to backport. ``get``/``get_all`` now come from the base
+        alone, the same as the five other re-parents #930 finished alongside
+        this one -- including
         :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` and
         :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` below, whose
         own hand-rolled ``get()`` GitHub issue #880 had already deleted
-        outright, for the same reason: zero callers depended on anything
-        the base does not already do.
+        outright, for the same reason: zero callers depended on anything the
+        base does not already do.
 
         A behaviour change comes with the deletion, deliberately: the
         override branched on ``isinstance(key, int)`` and routed every
@@ -850,8 +847,8 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         than rebuilding it on the immutable contract, the same conclusion
         #935 reached separately for the other two, on a ruling given in
         review of that work: delete those two overrides rather than widen
-        them to match the base, as an earlier lean on the issue had it.
-        GitHub issue #930's re-parenting above gives this class
+        them to match the base, which an earlier lean on the issue had
+        preferred. GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
         value raises through ``get`` exactly as it does through the bare
@@ -929,8 +926,8 @@ class LMAAddressCode(EnumLookup, IntEnum):
         than rebuilding it on the immutable contract, the same conclusion
         #935 reached separately for the other two, on a ruling given in
         review of that work: delete those two overrides rather than widen
-        them to match the base, as an earlier lean on the issue had it.
-        GitHub issue #930's re-parenting above gives this class
+        them to match the base, which an earlier lean on the issue had
+        preferred. GitHub issue #930's re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
         value raises through ``get`` exactly as it does through the bare
