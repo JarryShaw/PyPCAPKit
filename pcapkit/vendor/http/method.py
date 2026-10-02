@@ -50,11 +50,11 @@ class {NAME}(EnumRegistry, StrEnum):
 
     .. note::
 
-       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's
-       ruling on GitHub issue #860: *"only IANA registered ones are legit
-       values and we need register to properly create new entries. get will
-       not have sufficient information to create new ones."* Concretely true
-       here -- a bare wire method verb carries no
+       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
+       GitHub issue #860 that ``get`` should not mint: only IANA-registered
+       values are legitimate members, a new one is properly created through
+       :meth:`register`, and ``get`` is not given enough information to create
+       one. Concretely true here -- a bare wire method verb carries no
        :attr:`safe`/:attr:`idempotent`, so minting one used to register a
        permanent member with both hollowed out to their defaults;
        :meth:`register` is the path that can actually supply them.
