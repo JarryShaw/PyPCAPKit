@@ -9,8 +9,8 @@ and what the issue and pull request labels mean. None of them is derivable from 
 module, and none fits a code-convention page, so the owner ruled on
 `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ that they get a page of
 their own rather than being left in their threads. Each ruling below is **paraphrased
-rather than quoted**, also on his instruction there; the issue named beside it is
-where the original wording is.
+rather than quoted**, also on the owner's standing instruction there; the issue named
+beside it is where the original wording is.
 
 The ``all`` Extra
 ~~~~~~~~~~~~~~~~~
