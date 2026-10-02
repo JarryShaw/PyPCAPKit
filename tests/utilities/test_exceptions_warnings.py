@@ -24,22 +24,33 @@ class ExceptionsWarningsTests(unittest.TestCase):
         self.assertTrue(error.eof)
         self.assertEqual(str(error), 'truncated')
 
-    def test_base_error_limits_traceback_in_non_dev_mode(self) -> None:
-        # Only a *loud* error does this: `sys.tracebacklimit` is process-global,
-        # and a quiet error is internal control flow that must not truncate
-        # unrelated tracebacks. See tests/utilities/test_quiet_exceptions.py.
-        original = getattr(sys, 'tracebacklimit', None)
+    def test_base_error_installs_an_excepthook_in_non_dev_mode(self) -> None:
+        # Only a *loud* error does this: the mechanism is process-global, and a
+        # quiet error is internal control flow that must not disturb it. See
+        # tests/utilities/test_quiet_exceptions.py. It used to be
+        # `sys.tracebacklimit = 0`, which is the #719 defect -- a loud error's
+        # own terseness truncated every *other* exception in the process too.
+        # It now installs an exception hook instead, which only shortens the
+        # printing of a BaseError; see
+        # tests/utilities/test_exceptions_excepthook.py for that hook's actual
+        # printing behaviour, end to end.
+        original_limit = getattr(sys, 'tracebacklimit', None)
+        original_hook = sys.excepthook
         try:
+            if hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
             with mock.patch.object(self.exceptions, 'DEVMODE', False):
                 with mock.patch.object(self.exceptions.logger, 'critical'):
                     self.exceptions.BaseError('boom')
-            self.assertEqual(sys.tracebacklimit, 0)
+            self.assertFalse(hasattr(sys, 'tracebacklimit'))
+            self.assertTrue(getattr(sys.excepthook, 'installed_by_pcapkit', False))
         finally:
-            if original is None:
+            if original_limit is None:
                 if hasattr(sys, 'tracebacklimit'):
                     del sys.tracebacklimit
             else:
-                sys.tracebacklimit = original
+                sys.tracebacklimit = original_limit
+            sys.excepthook = original_hook
 
     def test_base_error_devmode_logs_with_verbose_metadata(self) -> None:
         with mock.patch.object(self.exceptions, 'DEVMODE', True):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import sys
 import unittest
 
 from tests._support import (bootstrap_core_modules, install_fake_payload_protocols,
@@ -13,9 +14,40 @@ class DecoratorTests(unittest.TestCase):
         # binds partially-initialised real modules under ``pcapkit.*`` names, and
         # ``_payload_stand_ins`` binds outright stand-ins. See #660.
         isolate_modules(self)
+        self._protect_global_exception_state()
         modules = bootstrap_core_modules()
         self.decorators = modules['decorators']
         self.exceptions = modules['exceptions']
+
+    def _protect_global_exception_state(self) -> None:
+        """Restore ``sys.excepthook`` (and, defensively, ``sys.tracebacklimit``).
+
+        Several tests below construct a loud ``BaseError`` directly --
+        :meth:`test_beholder_wraps_struct_eof_with_no_payload`'s
+        ``StructError('unexpected eof', eof=True)`` does not pass ``quiet=True``,
+        for one -- and a loud error outside development mode installs
+        :mod:`pcapkit.utilities.exceptions`'s own exception hook on first use
+        (GitHub issue #719). This file had no ``tearDown`` before that issue and
+        never needed one: the equivalent side effect at the time,
+        ``sys.tracebacklimit = 0``, was already left unrestored, corrupting
+        every test that ran afterwards in the same process -- the #981 shape,
+        just not previously visible as a failure here. Addressed the way
+        ``isolate_modules`` addresses its own restore: via ``addCleanup``, so it
+        still runs if the rest of ``setUp`` raises partway through.
+
+        """
+        saved_hook = sys.excepthook
+        had_limit = hasattr(sys, 'tracebacklimit')
+        saved_limit = getattr(sys, 'tracebacklimit', None)
+
+        def _restore() -> None:
+            sys.excepthook = saved_hook
+            if had_limit:
+                sys.tracebacklimit = saved_limit
+            elif hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
+
+        self.addCleanup(_restore)
 
     def test_seekset_restores_original_offset(self) -> None:
         class DemoProtocol:
