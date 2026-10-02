@@ -13,10 +13,10 @@ fixed. The scrape is retired in favour of the hand-maintained
 What that leaves worth pinning is the failure mode the issue is actually about:
 a regeneration that quietly drops sockets. :data:`EXPECTED_MEMBERS` spells out
 the enumeration in full, so losing one fails here rather than shipping. The
-value ``0x0000`` in it is the member GitHub issue #503 added for GitHub issue
-#492 -- IPX's own default for the ``dst``/``src`` socket field -- which the old
-crawler had to prepend unconditionally *because* the scrape yielded nothing, and
-which a hand-maintained table has no excuse to lose.
+value ``0x0000`` in it is the member GitHub issue #492 called for -- IPX's own
+default for the ``dst``/``src`` socket field -- which the old crawler had to
+prepend unconditionally *because* the scrape yielded nothing, and which a
+hand-maintained table has no excuse to lose.
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture and, by
 the whole point of the change, makes no network call.
@@ -113,14 +113,15 @@ EXPECTED_RANGES = (
 #: ``0xFFFF`` all resolved under the wrong wide range's name. See
 #: :data:`pcapkit.vendor.ipx.socket.RANGES` for the reordering that fixed it.
 #:
-#: GitHub issue #775/#847's original mint-criterion ruling then converted four
+#: GitHub issue #775's original mint-criterion ruling then converted four
 #: of the five ranges -- ``Experimental``, ``Dynamically Assigned Socket
 #: Numbers``, ``Statically Assigned Socket Numbers`` and ``Dynamically
 #: Assigned`` each name an allocation *policy* for the pool rather than a
 #: specific assignment, so they no longer mint and their bare name carries no
 #: numeric suffix. ``Registered by Xerox`` was the one that stayed at the
-#: time, on the theory that it states a real ownership fact rather than a
-#: status placeholder -- #775's *final* round converts it too, keeping its
+#: time: the ruling on #775 kept it minting on that criterion, because a
+#: proprietary protocol may expose no name of its own, so the company name
+#: serves as its name. #775's *final* round converts it too, keeping its
 #: hex-suffixed name unchanged -- PR #878 scoped the change this way:
 #: preserve the existing name argument exactly, since this is about not
 #: registering rather than about renaming -- so all five ranges resolve
@@ -267,7 +268,7 @@ class IPXSocketVendorTests(unittest.TestCase):
         self.assertEqual(from_data, EXPECTED_MEMBERS)
 
     def test_unspecified_socket_survives_the_retirement(self) -> None:
-        # GitHub issue #503's member, for GitHub issue #492: 0x0000 is IPX's own
+        # The member GitHub issue #492 called for: 0x0000 is IPX's own
         # default for the dst/src socket field, and was never in the scraped
         # table at all.
         self.assertEqual(self.const_module.Socket(0x0000), self.const_module.Socket.Unspecified)
@@ -284,8 +285,8 @@ class IPXSocketVendorTests(unittest.TestCase):
         # 'Dynamically Assigned_0x...'. Pinned separately from
         # test_unlisted_sockets_still_resolve so the regression this issue
         # describes has a test that names it. Bare names, not the numeric-
-        # suffixed ones #841 pinned: GitHub issues #775/#847 converted all
-        # three of these ranges after #841 landed.
+        # suffixed ones #841 pinned: all three of these ranges were
+        # converted under GitHub issue #775's ruling after #841 landed.
         for value, name in (
             (0x0030, 'Experimental'),
             (0x4080, 'Dynamically Assigned Socket Numbers'),
