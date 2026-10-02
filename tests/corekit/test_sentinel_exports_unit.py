@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #911: a sentinel exports its **object**, never its type.
 
-The owner's ruling, verbatim: *"One thing about sentinel types and objects in the
-library: we should ONLY export the objects (like* ``NULL`` *) to users."* That is
-one rule with two directions, and the tree on ``origin/main`` broke it in both:
+GitHub issue #719 is where the owner settled this: a module's :attr:`__all__`
+should list a sentinel's object (like ``NULL``), never its type (like
+``NullType``). Issue #911 carried that ruling out. That is one rule with two
+directions, and the tree on ``origin/main`` broke it in both:
 
 * ``pcapkit.corekit.module.__all__`` was ``['NULL', 'NullType', 'ModuleDescriptor']``
   -- the type is exported;
@@ -31,7 +32,7 @@ sweep filtered on capitalised names did not see it when it was still spelled
 ``_Absent``/``_AbsentType``, with a leading underscore. :class:`SentinelPopulationTests`
 pins the count and the doc together, so the next sentinel cannot be added to one
 without the other. ``ABSENT`` is private and stays out of :attr:`__all__` in both
-directions, which is what the ruling means by "to users".
+directions, consistent with the #719 ruling that only the object goes in.
 
 A follow-up to this same issue moved all four *definitions* into
 :mod:`pcapkit.corekit.sentinels`, per the owner's later ruling -- *"Okay one module

@@ -577,8 +577,8 @@ class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
     final revision: their own kept ``get`` stayed a :class:`staticmethod`
     through #930's re-parenting and briefly again through #935's first attempt
     (which widened it to accept ``default`` rather than delete it), and only
-    the owner's final ruling there -- verbatim, *"I prefer (2) directly"* --
-    deleted it outright, collapsing the seven-way split this
+    the owner's final ruling on #940 -- outright deletion over widening the
+    signature -- removed it, collapsing the seven-way split this
     class used to test as five-plus-two into one uniform case. This class
     was named for the five alone before that ruling, and
     :class:`ReparentedBasesTests` pinned the other two's surviving

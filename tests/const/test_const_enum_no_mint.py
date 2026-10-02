@@ -85,10 +85,9 @@ observed value as its own name rather than any manufactured label:
 initially left minting pending the owner's ruling (this measurement's own
 report flagged them as genuinely ambiguous under the criterion, since
 nothing about them is a manufactured placeholder). The owner's ruling on
-#860, verbatim: *"I think we should not mint on get still actually. For all
-three, only IANA registered ones are legit values and we need register to
-properly create new entries. get will not have sufficient information to
-create new ones."* That reasoning reaches ``get()`` as well as
+#860 settled it: only IANA-registered values are legitimate, and creating a
+new registry entry is :meth:`register`'s job alone -- nothing else has
+enough information to supply one. That reasoning reaches ``get()`` as well as
 ``_missing_`` -- :class:`Command` needs ``feat``/``desc``/``type``/``conf``
 and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
 wire string carries -- so both classes' own ``get()`` (a second, independent
@@ -144,10 +143,10 @@ GitHub issue #775's final round closes the two mixed registries themselves:
 every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s 52 still-
 minting range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s one
 (``Registered by Xerox``), now convert to :meth:`~pcapkit.corekit.enum.
-EnumRegistry._unregistered_member` too -- the owner's ruling, verbatim:
-*"Preserve each branch's existing name argument exactly as the current code
-produces it -- this change is about not registering, not about renaming
-anything."* So each keeps the hex-suffixed name it always rendered
+EnumRegistry._unregistered_member` too -- PR #878 scoped the change this way:
+preserve each branch's existing name argument exactly as the current code
+produces it, since this is about not registering rather than about renaming
+anything. So each keeps the hex-suffixed name it always rendered
 (``Xyplex_0x0888``, not a bare ``Xyplex``) even though it no longer
 registers -- neither is "mixed" any more, both are wholly converted like the
 82 in :data:`RULING_CONVERTED_REGISTRIES`, and :class:`EtherTypeMixedMintTests`
@@ -590,10 +589,10 @@ ETHERTYPE_UNASSIGNED_PROBES = {
 }
 #: The one probe the original ruling held out as "a real ownership fact, keep
 #: minting" -- Xyplex, 0x0888. #775's final round converts it too, preserving
-#: the hex-suffixed name exactly as the crawler always rendered it (the
-#: owner's ruling, verbatim: *"Preserve each branch's existing name argument
-#: exactly as the current code produces it -- this change is about not
-#: registering, not about renaming anything."*), so this now pins the
+#: the hex-suffixed name exactly as the crawler always rendered it (PR #878
+#: scoped it that way: preserving each branch's existing name argument
+#: exactly as the current code produces it, since this is about not
+#: registering rather than about renaming anything), so this now pins the
 #: opposite of what its name suggests: that the formerly-kept probe no
 #: longer mints either. Kept as its own constant, distinct from
 #: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because :class:`EtherTypeMixedMintTests`
@@ -1286,10 +1285,10 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     GitHub issue #775's final round converts the last 53 minting branches --
     all 52 of :class:`~pcapkit.const.reg.ethertype.EtherType`'s and
     :class:`~pcapkit.const.ipx.socket.Socket`'s one -- and deliberately keeps
-    each one's hex-suffixed name unchanged (the owner's ruling, verbatim:
-    *"Preserve each branch's existing name argument exactly as the current
-    code produces it -- this change is about not registering, not about
-    renaming anything."*). That is the exact manufactured, value-suffixed
+    each one's hex-suffixed name unchanged (PR #878 scoped it this way:
+    preserving each branch's existing name argument exactly as the current
+    code produces it, since this is about not registering rather than
+    renaming anything). That is the exact manufactured, value-suffixed
     shape :func:`is_manufactured` exists to flag -- unlike ``'%s_unknown' %
     namespace`` above, the substituted operand here really is ``value``, via
     ``hex(value)[2:].upper().zfill(4)``. Flagging it anyway would be a false
@@ -1536,10 +1535,10 @@ class EtherTypeMixedMintTests(unittest.TestCase):
         exact probe (``Xyplex``, 0x0888) used to prove the ruling *kept*
         minting a real attributed name; GitHub issue #775's final round
         converts it, preserving the hex-suffixed name exactly as the crawler
-        always rendered it -- the owner's ruling, verbatim: *"Preserve each
+        always rendered it -- PR #878 scoped it this way: preserve each
         branch's existing name argument exactly as the current code
-        produces it -- this change is about not registering, not about
-        renaming anything."* Same shape as
+        produces it, since this is about not registering rather than
+        renaming anything. Same shape as
         :meth:`test_unassigned_rows_do_not_mint` above, just for the one
         probe that used to be the exception."""
         from pcapkit.const.reg.ethertype import EtherType
@@ -1872,11 +1871,10 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     (``Unassigned_%d``, ``Unknown_%d``); each minted the literal, exact
     string it was asked to resolve, as its own name. That initially read as
     a case for keeping them minting (the label was never manufactured), but
-    the owner's ruling on #860 settled it the other way, verbatim: *"I think
-    we should not mint on get still actually. For all three, only IANA
-    registered ones are legit values and we need register to properly
-    create new entries. get will not have sufficient information to create
-    new ones."* Concretely: :class:`~pcapkit.const.ftp.command.Command`
+    the owner's ruling on #860 settled it the other way: only IANA-registered
+    values are legitimate, creating a new registry entry is
+    :meth:`register`'s job, and ``get()`` cannot supply what that would
+    take. Concretely: :class:`~pcapkit.const.ftp.command.Command`
     needs ``feat``/``desc``/``type``/``conf`` and
     :class:`~pcapkit.const.http.method.Method` needs
     ``safe``/``idempotent``, neither of which a bare wire string carries, so
@@ -2362,9 +2360,9 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     merely being imported, which does not exist here, since every one of
     these 766 spans mints only on an actual port lookup -- and the owner's
     ruling for the whole ``AppType`` family draws no distinction between a
-    real name and a placeholder: *"only IANA registered ones are legit
-    values and we need register to properly create new entries. get will
-    not have sufficient information to create new ones."* A lookup resolving
+    real name and a placeholder: only IANA-registered values are
+    legitimate, creating a new registry entry is :meth:`register`'s job,
+    and ``get()`` lacks the information to do it. A lookup resolving
     ``TCP(6010)`` after this PR therefore returns an *unregistered* ``x11``
     member -- correct as a service name, but absent from
     ``__members__``/``_value2member_map_`` until someone calls

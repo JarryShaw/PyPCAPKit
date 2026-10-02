@@ -1360,10 +1360,10 @@ class NoDefaultSentinelTests(unittest.TestCase):
         """GitHub issue #911 reversed half of what this used to assert.
 
         It read ``assertIn('NoDefaultType', enum_module.__all__)`` -- the type
-        *and* the object were exported. The owner's ruling: *"we should ONLY
-        export the objects (like* ``NULL`` *) to users"*, so the type is out of
-        :attr:`__all__` while staying importable by its dotted path, which is
-        what the last assertion here pins.
+        *and* the object were exported. GitHub issue #719 settled that only the
+        object belongs in :attr:`__all__`, and #911 carried that out: the type
+        is out of :attr:`__all__` while staying importable by its dotted path,
+        which is what the last assertion here pins.
         """
         import pcapkit.corekit.enum as enum_module
 
