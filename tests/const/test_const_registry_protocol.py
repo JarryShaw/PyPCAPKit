@@ -1361,13 +1361,14 @@ class NoDefaultSentinelTests(unittest.TestCase):
 
         It read ``assertIn('NoDefaultType', enum_module.__all__)`` -- the type
         *and* the object were exported. GitHub issue #719 is where the owner
-        settled that: *"we should ONLY export the objects (like* ``NULL`` *)
-        to* ``__all__`` *, and leave the types (like* ``NullType`` *) out."*
-        Issue #911 carried that out -- and is also where he gave his own
-        "to users" framing for it: *"The general idea is that we only expose
-        the final objects to users."* The type is out of :attr:`__all__`
-        while staying importable by its dotted path, which is what the last
-        assertion here pins.
+        settled the rule behind this: a module's ``__all__`` lists a
+        sentinel's object (such as ``NO_DEFAULT``), and deliberately leaves
+        its type (such as ``NoDefaultType``) out, because the type is not
+        part of the public surface -- exposing only the final object is what
+        keeps the published API to what a caller actually uses. GitHub issue
+        #911 is the issue that ruling's implementing work belongs to. The
+        type is out of :attr:`__all__` while staying importable by its
+        dotted path, which is what the last assertion here pins.
         """
         import pcapkit.corekit.enum as enum_module
 

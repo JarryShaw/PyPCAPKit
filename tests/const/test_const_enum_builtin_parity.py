@@ -652,12 +652,13 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     transport subclasses) were, until GitHub issue #860 step 2, the last
     registries still living that divergence for an *unrecognised* value
     (every numeric registry had already lost it under #775/#847's ruling).
-    The owner's #860 ruling retired it for all of them: *"I think we should
-    not mint on* ``get`` *still actually. For all three, only IANA
-    registered ones are legit values and we need* ``register`` *to properly
-    create new entires [sic].* ``get`` *will not have sufficient
-    information to create new ones."* Stated for the three PR 1 converted,
-    but the reasoning is unconditional and PR 2 applies it to ``AppType``
+    GitHub issue #860 is where the owner retired it for all of them:
+    ``get()`` must not mint, because only ``register()`` may create a new
+    registry entry, and for these registries only IANA-registered values
+    are legitimate -- ``get()`` does not have enough information to build
+    one on its own. Stated for :class:`Method`, :class:`Command` and
+    :class:`FEATCode`, the three registries PR 1 converted, but the
+    reasoning is unconditional and PR 2 applies it to ``AppType``
     identically. Concretely,
     :class:`Command` needs :attr:`~pcapkit.const.ftp.command.Command.feat`/
     :attr:`~pcapkit.const.ftp.command.Command.desc`/
