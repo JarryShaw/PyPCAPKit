@@ -406,10 +406,20 @@ class SentinelPopulationTests(unittest.TestCase):
         boundary (``__all__``, an identifier rather than prose) and the issue that
         settled it.
 
+        The citation is accepted in either markup form. The page now writes it with the
+        ``:issue:`` role configured in ``docs/source/conf.py``, because a bare ``#NNN``
+        resolves to nothing in the built documentation -- so pinning the bare spelling
+        would again redden this test over markup while the ruling it checks is
+        untouched, which is the same defect the paragraph above records.
+
         """
         section = _sentinel_section()
 
-        self.assertIn('#911', section)
+        self.assertTrue(
+            '#911' in section or ':issue:`911`' in section,
+            'the page no longer cites the issue that settled the export boundary, in '
+            'either the bare or the role form, so a reader cannot find the ruling '
+            'behind the rule')
         self.assertIn('__all__', section,
                       "the page no longer names ``__all__``, so it no longer says "
                       'where the export boundary is -- #911 ruled that the instance '

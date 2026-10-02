@@ -7,7 +7,7 @@ Every IPv6 extension header in this package subclasses
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
 as well, and which ones do is a ruling rather than an accident. The owner ruled, in
 review of the rename that made ``IPv6_Ext`` the shared base
-(`#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__), that a header usable
+(:issue:`917`), that a header usable
 *only* as an extension header inherits ``IPv6_Ext`` and nothing else -- ``IPv6_Frag``
 being the example -- while one that is usable as a standalone protocol in its own
 right inherits both ``IPv6_Ext`` and ``Internet`` (or ``IPsec``), as ``ESP`` does.
@@ -106,7 +106,7 @@ class for it, so nothing implements the classification, but a future one inherit
    Own-protocolhood on its own is **not** sufficient, and MH is the case that
    settles it: the alternative reading -- that a protocol in its own right qualifies
    whether or not it can appear under IPv4 -- was put to the owner explicitly in
-   review of `#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__ and not
+   review of :issue:`917` and not
    taken, so MH and ``Shim6`` stay extension-only. A header that is a protocol in its
    own right but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
 
@@ -133,8 +133,8 @@ The Retired ``IPv6_GenericExt`` Name
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The class arrived as ``IPv6_GenericExt``, a fallback parser for an unrecognised
-extension header (`#891 <https://github.com/JarryShaw/PyPCAPKit/issues/891>`__), and
-`#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__ merged that role with
+extension header (:issue:`891`), and
+:issue:`917` merged that role with
 the shared-base role into one class under the shorter name. No compatibility alias
 was left behind, and that was deliberate. The owner ruled that the
 ``IPv6_GenericExt`` name goes for good: it was an intermediate state, and it was never
@@ -160,7 +160,7 @@ Payload (ESP) is not considered an extension header"* -- but that sentence opens
 *"For this purpose,"*, scoping it to the fragmentation discussion it sits in, and the
 sentence after it lists ESP among *"examples of upper-layer headers"*. The library
 follows the registry, on the owner's ruling for
-`#895 <https://github.com/JarryShaw/PyPCAPKit/issues/895>`__, which is why ESP
+:issue:`895`, which is why ESP
 carries the same extension-mode contract as its siblings.
 
 **And it terminates the chain walk.** :rfc:`4303` places ESP's Next Header byte

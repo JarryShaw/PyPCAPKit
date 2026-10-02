@@ -10,9 +10,9 @@ the sentinel object's type class is named ``<SENTINEL>Type``.
 
 That is, the class takes the instance's name in CamelCase with ``Type`` appended. It
 says nothing about the **object**'s own name, which is what let three casings diverge
-with no rule naming any of them wrong. GitHub issue #937 closed that gap: the owner
-ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with no
-backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
+with no rule naming any of them wrong. GitHub issue :issue:`937` closed that gap: the
+owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
+no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
 derives from it mechanically -- title-case each underscore-separated word and append
 ``Type``, no per-sentinel exception needed. The four in the tree follow it:
 
@@ -36,8 +36,8 @@ derives from it mechanically -- title-case each underscore-separated word and ap
      - ``AbsentType``
      - :mod:`pcapkit.corekit.sentinels`
 
-GitHub issue #911's housing ruling -- one module for all four -- is why the table names
-a single defining module. Each of the four modules that *uses* a sentinel keeps a
+GitHub issue :issue:`911`'s housing ruling -- one module for all four -- is why the table
+names a single defining module. Each of the four modules that *uses* a sentinel keeps a
 re-export of it, so ``from <module> import <name>`` keeps working for
 :mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
 :mod:`pcapkit.corekit.enum` and :mod:`pcapkit.protocols.protocol` alike, including a
@@ -48,15 +48,15 @@ renaming a published sentinel again costs every caller for no further gain.
 
 ``ABSENT`` carries no leading underscore even though it is private -- it is read in
 ``_declared_keywords`` and discarded there, never leaving
-:mod:`pcapkit.protocols.protocol`. The owner ruled on #937 that dropping the underscore
-is fine so long as the documentation states that the type and the object are private and
-not for public use, which is what this page and
+:mod:`pcapkit.protocols.protocol`. The owner ruled on :issue:`937` that dropping the
+underscore is fine so long as the documentation states that the type and the object are
+private and not for public use, which is what this page and
 :class:`~pcapkit.corekit.sentinels.AbsentType`'s own docstring do in its place. So
 **privacy here is documentation-only**, and nothing in the name marks it out: when
 adding a sentinel, add it to the table above whether or not it is public.
 
-What reaches users is the **object only**. The owner ruled on GitHub issue #911 that
-the objects alone -- ``NULL`` and its siblings -- are exported to users, so a public
+What reaches users is the **object only**. The owner ruled on GitHub issue :issue:`911`
+that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a public
 sentinel names its instance in its module's ``__all__`` and leaves the type out of it.
 The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
 is ``import *`` that no longer offers it. A private sentinel such as ``ABSENT`` is in

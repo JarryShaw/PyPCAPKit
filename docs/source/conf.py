@@ -69,6 +69,7 @@ extensions = [
     # earns a warning. The typehint rendering comes from the third-party
     # ``sphinx_autodoc_typehints`` below.
     'sphinx.ext.autodoc',
+    'sphinx.ext.extlinks',
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
 
@@ -80,6 +81,38 @@ extensions = [
 
     'sphinxcontrib.mermaid',
 ]
+
+# Opt-in roles for the tracker references that the prose cites constantly. A bare
+# ``#NNN`` renders as literal text -- nothing in Sphinx resolves it -- so every
+# citation in a docstring or an ``.rst`` page is unclickable in the built docs.
+#
+# These are deliberately opt-in per site rather than an automatic ``#NNN`` rule,
+# because no digit-keyed pattern can tell a citation from a packet-diagram label:
+# ``#\d{3}`` will miss four-digit numbers once the tracker reaches them -- there are
+# none yet -- and already misses 17 two-digit ones, while ``#\d+`` catches the 45
+# one-digit RFC diagram labels across ``pcapkit/protocols/internet/hip.py`` (36),
+# ``pcapkit/protocols/transport/sctp.py`` (7) and
+# ``pcapkit/protocols/schema/internet/hip.py`` (2) -- ``DH GROUP ID #1``,
+# ``Gap Ack Block #1`` and the like -- which are not references to anything. A role
+# nobody writes cannot corrupt them.
+#
+# The caption is ``#%s`` for both ``:issue:`` and ``:pr:`` so that converting a bare
+# citation or an explicit link changes the markup and not the rendered text. A
+# citation written as an inline literal is the one exception: it rendered as monospace
+# and now renders as a link in body font. The two roles exist separately because the
+# issue-versus-pull-request distinction is itself a documented convention (see
+# ``contributing/conventions/documentation.rst``), and a single role would flatten it
+# in the source even though GitHub redirects between ``/issues/NNN`` and ``/pull/NNN``
+# either way.
+#
+# ``:discussion:`` is needed because a handful of cited numbers are GitHub
+# Discussions rather than issues -- the issues API returns 404 for them, so
+# ``:issue:`` would link to a page that does not exist.
+extlinks = {
+    'issue': ('https://github.com/JarryShaw/PyPCAPKit/issues/%s', '#%s'),
+    'pr': ('https://github.com/JarryShaw/PyPCAPKit/pull/%s', '#%s'),
+    'discussion': ('https://github.com/JarryShaw/PyPCAPKit/discussions/%s', '#%s'),
+}
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
