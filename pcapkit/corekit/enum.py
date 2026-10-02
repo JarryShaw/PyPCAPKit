@@ -15,23 +15,24 @@ library is meant to inherit from, split by whether the enumeration may *grow*:
 * :class:`EnumRegistry`, a subclass of the above -- adds the **mutating** half:
   :meth:`~EnumRegistry.register`, :meth:`~EnumRegistry.register_alias`,
   :meth:`~EnumRegistry.register_aliases`, :meth:`~EnumRegistry._extend` and
-  :meth:`~EnumRegistry._unregistered_member`. Every generated enumeration under
+  :meth:`~EnumRegistry._unregistered_member`. Every generated registry under
   :mod:`pcapkit.const` inherits from here.
 
-That split is the owner's ruling on GitHub issue #877, verbatim: *"My initial
-thought was to make them immutable - unless RFC/IANA says otherwise. Therefore
-they may subclass a bare base enum from pcapkit.corekit.enum - where
-EnumRegistry subclasses it for using in the other mutable ones."*
+That split follows the rules laid down in GitHub issue #877: a helper enumeration is
+immutable by default, unless RFC or IANA documents its value space as open.
+Such closed sets subclass a bare base enumeration in this module, and
+:class:`EnumRegistry` subclasses that base for the mutable ones.
 
-Which methods land on which tier was settled in the same thread. The owner's own
-second thought is what drew the line: *"if it carries ``register``, then why not
-``register_alias``. We might be creating a bad ruling."* Following that through,
+Which methods land on which tier was settled in the same thread. The deciding
+consideration was that a base carrying ``register`` has no principled reason to
+withhold ``register_alias``, so drawing the line between them risked setting a
+bad precedent. Following that through,
 a base holding both would leave :class:`EnumRegistry` with only
 ``register_aliases``, ``_extend`` and ``_unregistered_member`` -- too thin to
 justify a second class, collapsing the two tiers into one. So all five mutating
-methods stay put, and what the base carries instead is the owner's other requirement,
-verbatim: *"there must be some sort of range validation logic for the inherited
-classes to hook in"* -- which is :meth:`EnumLookup._validate_value`. Legality is
+methods stay put, and what the base carries instead is the other requirement
+from that thread: some range-validation logic that inheriting classes can hook
+into, which is :meth:`EnumLookup._validate_value`. Legality is
 every enumeration's concern; mutation is only the open registries'.
 
 Supporting measurement, taken on this tree at the time of the split: **0** of the
@@ -52,18 +53,20 @@ therefore had no users to serve among the classes being re-parented.
    <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__, for the
    remaining seven once the files holding them freed up.
 
-The registry tier's own shape is the earlier ruling on GitHub issue #842,
-verbatim: *"to finalise the abstraction idea, get/get_all/register/register_alias
-should always exist on the const enums - so they're to be moved to the base
-class. And AppType's sub-base class will do its necessary overrides and
-dispatching logic; AppType subclasses will have their necessary overrides again
-pertaining their different contracts."*
+The registry tier's own shape is the earlier design settled in GitHub issue #842:
+``get``, ``get_all``, ``register`` and ``register_alias`` are to exist on every
+const registry, so the abstraction is finished by moving them to the base class.
+The closed sets split off by #877 are outside that contract.
+``AppType``'s sub-base class carries the overrides and dispatching logic it
+needs, and ``AppType``'s subclasses override again where their contracts
+differ.
 
 That is a three-tier hierarchy, of which this module is **tier one**:
 
 1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry
-   mapping one key to one member. Every generated enumeration under
-   :mod:`pcapkit.const` inherits them from here.
+   mapping one key to one member. The registries under :mod:`pcapkit.const`
+   inherit them from here, apart from the overrides below and a few hand-written
+   ``get`` overrides.
 2. ``AppType``'s sub-base -- overrides all four to route through its
    ``_dispatch``, because a port lookup needs a transport protocol to be
    answerable at all. Landed as of GitHub issue #860: not in this module, but
@@ -84,11 +87,12 @@ crawlers that replace that template wholesale, none of which carried
 ``register``, ``register_alias`` or ``get_all`` at all. Adding one method meant
 editing every bespoke template by hand, which is the cost #775 asks to remove.
 
-The contracts are the maintainer's, verbatim: *"get is a shortcut for ``[]``
-operation and returns the canonical enum. get_all returns all matching enums.
-register mints new enum to the class at runtime with specified names - so we
-don't have to guess blindly. register_alias(es) adds additional alias(es) to a
-given enum's mapping."*
+The contracts are those set out on GitHub issue #842: ``get`` is a shortcut for
+the ``[]`` operation and returns the canonical enumeration member; ``get_all``
+returns every matching member; ``register`` mints a new member on the class at
+runtime under the name the caller specifies, so nothing has to be guessed;
+``register_alias`` (and ``register_aliases``) adds further alias names to a
+given member's mapping.
 
 """
 from typing import TYPE_CHECKING
@@ -160,10 +164,9 @@ class EnumLookup:
     def _validate_value(cls, value: 'Any') -> 'None':
         """Hook: reject ``value`` if this enumeration's contract does not allow it.
 
-        The owner's requirement on GitHub issue #877, verbatim: *"there must be
-        some sort of range validation logic for the inherited classes to hook
-        in."* This is that hook, and it is what the bare tier carries **instead**
-        of ``register``: what values are *legal* is something every enumeration
+        GitHub issue #877 requires some range-validation logic for the inheriting
+        classes to hook into. This is that hook, and it is what the bare tier carries
+        **instead** of ``register``: what values are *legal* is something every enumeration
         has an opinion on, whereas who may *add* one is only an open registry's
         concern.
 
@@ -181,9 +184,9 @@ class EnumLookup:
         type is :obj:`None` deliberately rather than the validated value, so that
         this hook cannot become a converter: a subclass that returned a changed
         value here would silently alter what a lookup resolves to, which is
-        exactly the case-folding the owner's ruling on GitHub issue #877 rules
-        out -- *"enum should honour and keep their original writings as in the
-        registrars."* Case handling belongs in a deliberate ``get`` override with
+        exactly the case-folding the ruling on GitHub issue #877 rules out:
+        an enumeration keeps the original spellings its registrars use.
+        Case handling belongs in a deliberate ``get`` override with
         an RFC behind it, not in a validation hook.
 
         Raise from :mod:`pcapkit.utilities.exceptions`, per the same issue's
@@ -254,12 +257,11 @@ class EnumLookup:
         ``EtherType`` and ``Socket``, so they no longer mint on any path
         either. Registering a member any other way is :meth:`register`'s
         job and nobody else's, which is the ruling #775 exists to carry
-        out: *"so that we dont create registered enums out of
-        unrecognised/unregistered values, unless user/caller explicitly
-        created them"*. A value inside a registry's declared-but-unassigned
-        range still resolves, through that registry's own ``_missing_`` and
-        :meth:`_unregistered_member`, to a member that is deliberately
-        absent from the lookup tables -- true outside the one registry
+        out: an unrecognised or unregistered value does not become a registered
+        member unless a user or caller explicitly creates one. A value inside a
+        registry's declared-but-unassigned range still resolves, through that
+        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a member
+        that is deliberately absent from the lookup tables -- true outside the one registry
         named above, where such a value instead lands in *both* tables,
         exactly as :meth:`register` would leave it -- for a non-``str`` key;
         the ``str`` case is qualified below. Both describe ``key`` resolution
@@ -342,12 +344,11 @@ class EnumLookup:
         given on :meth:`_validate_value` itself.
 
         Both failure paths raise from :mod:`pcapkit.utilities.exceptions`
-        rather than a builtin, per a ruling recorded on GitHub issue #923,
-        verbatim: *"Either ``ValueError`` or ``KeyError``, that's depending on
-        how stdlib's ``Enum`` would raise on these circumstances. And we
-        should raise one from ``pcapkit.utilities.exceptions`` rather builtin
-        exceptions."* The *shape* is unchanged by that ruling and
-        deliberately so -- a name miss
+        rather than a builtin, per the ruling recorded on GitHub issue #923:
+        in-library code raises from ``pcapkit.utilities.exceptions`` rather
+        than a builtin, and whether ``ValueError`` or ``KeyError`` applies
+        follows what stdlib's ``Enum`` raises in the same circumstance. The *shape*
+        is unchanged by that ruling and deliberately so -- a name miss
         stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
         matching ``E['nosuch']`` and ``E(999)`` on a stdlib
         :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete
@@ -435,9 +436,9 @@ class EnumLookup:
         registry inheriting this base unmodified -- that tuple holds exactly one
         entry, since an alias registered by :meth:`register_alias` is a second
         *name* for the canonical member rather than a second member. The method
-        still exists here, per the ruling that all four *"should always exist on
-        the const enums"*, and it is where a registry with genuinely several
-        matches puts them: ``AppType`` overrides it to return every service IANA
+        still exists here, because all four methods are to exist on every const
+        registry (GitHub issue #842), and it is where a registry with genuinely
+        several matches puts them: ``AppType`` overrides it to return every service IANA
         assigns to a port.
 
         Args:
@@ -471,8 +472,8 @@ class EnumRegistry(EnumLookup):
 
     An enumeration inherits from *here* when it may grow at runtime, and from
     :class:`EnumLookup` directly when it may not. The owner's ruling on GitHub
-    issue #877 is what draws that line, verbatim: *"My initial thought was to
-    make them immutable - unless RFC/IANA says otherwise."*
+    issue #877 is what draws that line: an enumeration is immutable unless
+    RFC or IANA says otherwise.
 
     Mixed in ahead of the enum base exactly as before -- ``class
     Foo(EnumRegistry, IntFlag)`` -- and gaining :class:`EnumLookup` as a parent
@@ -486,9 +487,9 @@ class EnumRegistry(EnumLookup):
         """Mint a new member on this registry at runtime, under ``name``.
 
         The caller-named path, and the only one that grows the registry:
-        *"register mints new enum to the class at runtime with specified names -
-        so we don't have to guess blindly"*. Contrast :meth:`get` and
-        ``_missing_``, which resolve without naming anything.
+        it mints a new member on the class at runtime under the ``name`` the
+        caller specifies, so nothing has to be guessed (GitHub issue #842).
+        Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.
 
         Refuses a ``value`` that already has a member. Without this guard,
         :func:`~aenum.extend_enum` does not mint anything for an already-taken
@@ -577,15 +578,17 @@ class EnumRegistry(EnumLookup):
     def register_alias(cls, value: 'Any', name: 'str') -> 'Self':
         """Add ``name`` as a further name for the member already at ``value``.
 
-        Per the ruling, an alias *"adds additional alias(es) to a given enum's
-        mapping"* -- so it needs an enum to be given, and this refuses a value
-        no member carries rather than falling through to :meth:`register`.
-        Asked whether that should hold generally, the maintainer's answer was
-        *"actually i think it should always be for an existing member"*, and on
-        what an alias means away from ``AppType``: *"For non-AppType registries,
-        'Alias' is custom/caller-opt-in names, which are not recorded in IANA
-        registrars"*. Minting under the name of an aliasing call would
-        manufacture exactly the unrecorded member #775 removes.
+        Per GitHub issue #842, an alias adds a further name to a given member's
+        mapping -- so it needs an existing member to attach to, and this refuses a
+        value no member carries rather than falling through to :meth:`register`.
+        #842 settled on an alias always attaching to an existing member, leaving
+        open whether ``AppType`` or a concrete enumeration might need to alias a
+        value no member carries. ``AppType``'s override does not: it requires the
+        port to already carry a member of that very registry. What an alias means
+        also differs away from ``AppType``: on every other registry it is a custom
+        name the caller opts into, not one recorded by the IANA registrars.
+        Minting under the name of an aliasing call would manufacture exactly the
+        unrecorded member #775 removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
@@ -593,12 +596,14 @@ class EnumRegistry(EnumLookup):
         absent from that table, so a successful call proves nothing about
         whether a member exists.
 
-        An alias adds a *name*, not a member: ``__members__`` grows by one while
-        ``_member_names_``, iteration and ``_value2member_map_`` are untouched.
-        Calls :meth:`_extend` directly rather than :meth:`register`, which
+        On this base, an alias adds a *name*, not a member: ``__members__`` grows
+        by one while ``_member_names_``, iteration and ``_value2member_map_`` are
+        untouched. Calls :meth:`_extend` directly rather than :meth:`register`, which
         would now refuse this call outright -- :meth:`register` and
         :meth:`register_alias` test ``value``'s membership for opposite
         outcomes, so neither can be the other's implementation any more.
+        ``AppType``'s override differs: it mints a real member through
+        :func:`~aenum.extend_enum`, so its iteration grows too.
 
         Args:
             value: Value of the existing member to alias.
