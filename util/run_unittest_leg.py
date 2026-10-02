@@ -65,20 +65,19 @@ table carries wall times only, no RSS -- but the largest of the three is still
 some 90x short of 29 GB, which is enough to place the OOM on running
 *everything* in one process rather than on any one directory.
 
-Every :data:`ROOT_MODULES` module runs in *every* invocation, ahead of the
-directory's own modules -- not interleaved, and not after. Issue #981's own
+Every module :func:`root_modules` returns runs in *every* invocation, after the
+directory's own modules -- not before, and not interleaved. Issue #981's own
 reproduction is a sibling module (``tests.protocols.application.test_http_unit``)
-*polluting* a root-level module
-(:mod:`tests.test_base_class_contract`) that runs after it in the same
-process; ``tests.test_base_class_contract`` first and the directory second
-would never reproduce that shape, because the pollution would land after the
-sensitive module had already made its assertions and finished. Running the
-directory first and the root modules second is what gives any purging module
-in that directory a chance to desync a root module that assumes its own
-import is current -- matching the reproduction exactly for ``protocols`` and
-``const``, and giving the same opportunity to every other directory this
-script is pointed at, most of which have never been tried in that
-configuration before.
+*polluting* a root-level module (:mod:`tests.test_base_class_contract`) that
+runs after it in the same process; ``tests.test_base_class_contract`` first and
+the directory second would never reproduce that shape, because the pollution
+would land after the sensitive module had already made its assertions and
+finished. Running the directory first and the root modules second is what gives
+any purging module in that directory a chance to desync a root module that
+assumes its own import is current -- matching the reproduction exactly for
+``protocols`` and ``const``, and giving the same opportunity to every other
+directory this script is pointed at, most of which have never been tried in
+that configuration before.
 
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
