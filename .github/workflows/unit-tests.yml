@@ -745,6 +745,101 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           python -m pytest -q -n auto --dist load $selection
 
+  # GitHub issue #981: three test modules each pass alone, and pytest -- the
+  # runner every job above uses -- reports the combined run green, while
+  # plain unittest over the same three modules in one process fails four
+  # subTest cases. pytest-subtests reports a parent test method ``passed``
+  # the instant only its subTests failed, so none of the jobs above can see
+  # this shape of defect at all; it is invisible by construction, not by
+  # oversight. This job exists solely to make that visible, by using a
+  # different test *runner* -- unittest.TextTestRunner, with no
+  # pytest-subtests sitting in front of it to hide a subTest failure behind
+  # a passing parent.
+  #
+  # util/run_unittest_leg.py (its own docstring has the full reasoning) runs
+  # one tests/ subdirectory per matrix cell, paired with every root-level
+  # tests/test_*.py module, directory first and root second -- the order
+  # #981's own reproduction needs, since the defect is an earlier module
+  # polluting a later one. Running the whole suite in one process is not an
+  # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
+  # of one leg per top-level directory is the affordable approximation, and
+  # every leg measured well under a gigabyte of peak RSS -- including
+  # tests/protocols, the largest -- so this matrix is sized for wall time,
+  # not memory. Measured wall times (this venv, serial): cli 18s, const
+  # 268s, dumpkit 39s, foundation 272s, interface 38s, project 70s, protocols
+  # 847s, toolkit 97s, utilities 42s -- all comfortably inside this job's own
+  # 20-minute timeout once run in parallel, one leg per matrix cell.
+  #
+  # Two directories are deliberately absent from ``leg``, for reasons that
+  # are not this job's to fix:
+  #
+  #   * tests/corekit -- already known and already accepted, not a new
+  #     finding. tests/_support.py's own purge_modules() docstring measures
+  #     and documents exactly this: "python -m unittest discover -s
+  #     tests/corekit fails 5 of that class's identity subtests, because
+  #     test_module sorts first and purges". pytest is "the supported
+  #     runner" for precisely this reason -- tests/conftest.py's autouse
+  #     restore_module_table fixture reconciles the module-identity drift
+  #     that plain unittest has no way to see coming. Running this leg
+  #     against tests/corekit would be permanently red for a characteristic
+  #     the suite's own documentation already treats as expected, not a
+  #     regression this job would be reporting.
+  #   * tests/vendor -- while sizing this job, running it this way surfaced a
+  #     previously-unknown instance of the *same* class of defect #981 is
+  #     about, in tests/vendor/test_vendor_snapshot_restore_unit.py: several
+  #     earlier-sorting files in that directory purge pcapkit the same
+  #     asymmetric way, and
+  #     test_a_failure_leaves_the_previous_file_byte_for_byte_intact's own
+  #     assertWarnsRegex(VendorRuntimeWarning, ...) ends up checking a stale
+  #     generation of that class against a warning raised under a fresher
+  #     one. Genuine, but a different file than this change touches and
+  #     outside what #981 asks this particular job to fix -- left out so
+  #     this new job lands green against a known and fixed cause, with the
+  #     finding reported for separate attention rather than silently hidden
+  #     or fixed in passing here.
+  #
+  # Not added to ``required-checks`` below: a brand-new job earns a place in
+  # the required set once its own track record justifies it, which is the
+  # maintainer's call to make separately from landing it.
+  unittest-ordering:
+    name: Plain unittest ordering (${{ matrix.leg }})
+    if: ${{ inputs.gate-only != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        leg:
+          - cli
+          - const
+          - dumpkit
+          - foundation
+          - interface
+          - project
+          - protocols
+          - toolkit
+          - utilities
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      # DPKT/crypto/NGAP join `test` for the same reason the `test` job above
+      # installs them: this leg's root-level modules and its own directory's
+      # modules both reach gates that would otherwise skip silently rather
+      # than run.
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+
+      - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
+        run: python util/run_unittest_leg.py ${{ matrix.leg }}
+
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
   # the moment an entry is edited without regenerating it. That is worth its own
