@@ -485,8 +485,8 @@
 <span class="sd">:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,</span>
 <span class="sd">:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and</span>
 <span class="sd">:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
-<span class="sd">on GitHub issue #911, verbatim -- *"Okay one module for all four it is."* --</span>
-<span class="sd">moves the four *definitions* here; each original module keeps a three-line</span>
+<span class="sd">on GitHub issue #911, choosing one shared module over one module per</span>
+<span class="sd">sentinel, moves the four *definitions* here; each original module keeps a three-line</span>
 <span class="sd">re-export so that no existing ``from &lt;module&gt; import &lt;name&gt;`` breaks,</span>
 <span class="sd">including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
 <span class="sd">:mod:`pcapkit.foundation.registry.foundation`,</span>
@@ -715,8 +715,8 @@
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
 <span class="sd">    A dedicated class rather than a bare :class:`object`, per a ruling given in</span>
-<span class="sd">    review of the work for #857: *"use dedicated class rather than bare object.</span>
-<span class="sd">    Follow the house convention."* A bare :class:`object` compares under</span>
+<span class="sd">    review of the work for #857, which asked for a dedicated class that</span>
+<span class="sd">    follows the house convention. A bare :class:`object` compares under</span>
 <span class="sd">    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its</span>
 <span class="sd">    own does -- identity comparison was never the problem an earlier</span>
 <span class="sd">    revision's docstring here overstated it to be. What a bare</span>
@@ -730,8 +730,9 @@
 <span class="sd">    use ``&lt;Name&gt;Type``. At the time, the *instance*'s own name was not</span>
 <span class="sd">    similarly settled -- a follow-up given in review of the work for #857</span>
 <span class="sd">    was explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``</span>
-<span class="sd">    (``CapWords``) disagreed, and "mainly depends on how we need it." The</span>
-<span class="sd">    need here was continuity:</span>
+<span class="sd">    (``CapWords``) disagreed, and that the choice should follow what each</span>
+<span class="sd">    sentinel is needed for rather than a settled rule. The need here was</span>
+<span class="sd">    continuity:</span>
 <span class="sd">    ``NO_DEFAULT`` was already the name on ``main`` -- referenced in</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature,</span>
 <span class="sd">    its docstring, and both comparison sites -- and that change was to *what</span>
@@ -935,9 +936,9 @@
 <span class="sd">    normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so</span>
 <span class="sd">    this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings</span>
 <span class="sd">    and privacy is no longer signalled by the name at all. The owner's ruling</span>
-<span class="sd">    on GitHub issue #719, verbatim: *"we can change* ``_ABSENT`` *to*</span>
-<span class="sd">    ``ABSENT`` *just document it as private type/class in the documentation</span>
-<span class="sd">    and not for public use is enough."* So this class and :data:`ABSENT` stay</span>
+<span class="sd">    on GitHub issue #719 accepted that rename, and held that documenting</span>
+<span class="sd">    ``ABSENT`` as a private type and class, not for public use, is enough</span>
+<span class="sd">    to replace the underscore. So this class and :data:`ABSENT` stay</span>
 <span class="sd">    exactly as private as they were: nothing outside</span>
 <span class="sd">    :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from</span>
 <span class="sd">    there, and neither this module's nor that module's :attr:`__all__` names</span>
@@ -966,8 +967,8 @@
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
 <span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
 <span class="c1">#: for exactly that one read. Private by convention and documentation only,</span>
-<span class="c1">#: not by a leading underscore -- see :class:`AbsentType`'s own docstring for</span>
-<span class="c1">#: why, per GitHub issue #937.</span>
+<span class="c1">#: not by a leading underscore, which GitHub issue #937 dropped -- see</span>
+<span class="c1">#: :class:`AbsentType`'s own docstring for why.</span>
 <span class="n">ABSENT</span> <span class="o">=</span> <span class="n">AbsentType</span><span class="p">()</span>
 </pre></div>
         </article>

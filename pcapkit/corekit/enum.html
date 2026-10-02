@@ -1165,8 +1165,8 @@ is.</p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
 <p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
-review of the work for #857: <em>“use dedicated class rather than bare object.
-Follow the house convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
+review of the work for #857, which asked for a dedicated class that
+follows the house convention. A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
 <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
 own does – identity comparison was never the problem an earlier
 revision’s docstring here overstated it to be. What a bare
@@ -1179,8 +1179,9 @@ convention is settled: both <code class="xref py py-class docutils literal notra
 use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
 similarly settled – a follow-up given in review of the work for #857
 was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code>
-(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and “mainly depends on how we need it.” The
-need here was continuity:
+(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and that the choice should follow what each
+sentinel is needed for rather than a settled rule. The need here was
+continuity:
 <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
 its docstring, and both comparison sites – and that change was to <em>what
@@ -1332,8 +1333,8 @@ be mistaken for.</p>
 <dd><p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
 <p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
-review of the work for #857: <em>“use dedicated class rather than bare object.
-Follow the house convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
+review of the work for #857, which asked for a dedicated class that
+follows the house convention. A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
 <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
 own does – identity comparison was never the problem an earlier
 revision’s docstring here overstated it to be. What a bare
@@ -1346,8 +1347,9 @@ convention is settled: both <code class="xref py py-class docutils literal notra
 use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
 similarly settled – a follow-up given in review of the work for #857
 was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code>
-(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and “mainly depends on how we need it.” The
-need here was continuity:
+(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and that the choice should follow what each
+sentinel is needed for rather than a settled rule. The need here was
+continuity:
 <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
 its docstring, and both comparison sites – and that change was to <em>what
