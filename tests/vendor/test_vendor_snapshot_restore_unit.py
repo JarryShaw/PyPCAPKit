@@ -207,10 +207,20 @@ class SnapshotRestoreTests(unittest.TestCase):
         discover`` is before any sibling has purged anything; the crawler under
         test, instantiated through ``self.vendor_main``/``self.Vendor`` below,
         raises whatever generation is current *when the test runs*. The two can
-        disagree, and :meth:`unittest.TestCase.assertWarnsRegex` matches by class
-        identity, not by name -- so a stale module-level binding fails with
+        disagree, and :meth:`unittest.TestCase.assertWarnsRegex` tests each
+        captured warning with ``isinstance(warning_instance, expected_class)``
+        against the class object it was handed -- not by name, and not by identity
+        either, so a genuine *subclass* of the expected class does match. That is
+        no rescue here, because the two generations are not related classes at
+        all: re-importing re-mints ``VendorRuntimeWarning`` *and* its
+        ``BaseWarning`` base, so ``issubclass`` is false in *both* directions and
+        the two MROs first converge on the builtin :exc:`UserWarning`.
+        ``isinstance`` against a stale binding therefore rejects an instance of
+        the fresh generation, and the assertion fails with
         "VendorRuntimeWarning not triggered" even though the warning was actually
-        raised, one line earlier, on stderr.
+        raised, one line earlier, on stderr -- both classes carry the same
+        ``__module__`` and ``__name__``, so the message names exactly the class
+        that *was* raised.
 
         ``vendor_main`` and ``Vendor`` were already immune to this, because they
         were resolved here in ``setUp`` rather than at module level.
