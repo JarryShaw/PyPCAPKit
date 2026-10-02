@@ -85,9 +85,11 @@ observed value as its own name rather than any manufactured label:
 initially left minting pending the owner's ruling (this measurement's own
 report flagged them as genuinely ambiguous under the criterion, since
 nothing about them is a manufactured placeholder). The owner's ruling on
-#860 settled it: only IANA-registered values are legitimate, and creating a
-new registry entry is :meth:`register`'s job alone -- nothing else has
-enough information to supply one. That reasoning reaches ``get()`` as well as
+#860 settled it: *"I think we should not mint on* ``get`` *still actually.
+For all three, only IANA registered ones are legit values and we need*
+``register`` *to properly create new entires [sic].* ``get`` *will not have
+sufficient information to create new ones."* That reasoning reaches
+``get()`` as well as
 ``_missing_`` -- :class:`Command` needs ``feat``/``desc``/``type``/``conf``
 and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
 wire string carries -- so both classes' own ``get()`` (a second, independent
@@ -1871,11 +1873,12 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     (``Unassigned_%d``, ``Unknown_%d``); each minted the literal, exact
     string it was asked to resolve, as its own name. That initially read as
     a case for keeping them minting (the label was never manufactured), but
-    the owner's ruling on #860 settled it the other way: only IANA-registered
-    values are legitimate, creating a new registry entry is
-    :meth:`register`'s job, and ``get()`` cannot supply what that would
-    take. Concretely: :class:`~pcapkit.const.ftp.command.Command`
-    needs ``feat``/``desc``/``type``/``conf`` and
+    the owner's ruling on #860 settled it the other way: *"I think we should
+    not mint on* ``get`` *still actually. For all three, only IANA
+    registered ones are legit values and we need* ``register`` *to properly
+    create new entires [sic].* ``get`` *will not have sufficient
+    information to create new ones."* Concretely:
+    :class:`~pcapkit.const.ftp.command.Command` needs ``feat``/``desc``/``type``/``conf`` and
     :class:`~pcapkit.const.http.method.Method` needs
     ``safe``/``idempotent``, neither of which a bare wire string carries, so
     minting used to register a permanently hollowed-out member for each.
@@ -2360,9 +2363,11 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     merely being imported, which does not exist here, since every one of
     these 766 spans mints only on an actual port lookup -- and the owner's
     ruling for the whole ``AppType`` family draws no distinction between a
-    real name and a placeholder: only IANA-registered values are
-    legitimate, creating a new registry entry is :meth:`register`'s job,
-    and ``get()`` lacks the information to do it. A lookup resolving
+    real name and a placeholder: *"I think we should not mint on* ``get``
+    *still actually. For all three, only IANA registered ones are legit
+    values and we need* ``register`` *to properly create new entires
+    [sic].* ``get`` *will not have sufficient information to create new
+    ones."* A lookup resolving
     ``TCP(6010)`` after this PR therefore returns an *unregistered* ``x11``
     member -- correct as a service name, but absent from
     ``__members__``/``_value2member_map_`` until someone calls

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #911: a sentinel exports its **object**, never its type.
 
-GitHub issue #719 is where the owner settled this: a module's :attr:`__all__`
-should list a sentinel's object (like ``NULL``), never its type (like
-``NullType``). Issue #911 carried that ruling out. That is one rule with two
-directions, and the tree on ``origin/main`` broke it in both:
+GitHub issue #719 is where the owner settled this: *"we should ONLY export
+the objects (like* ``NULL`` *) to* ``__all__`` *, and leave the types (like*
+``NullType`` *) out."* Issue #911 carried that ruling out -- and is also
+where he gave his own "to users" framing for the same rule: *"The general
+idea is that we only expose the final objects to users."* That is one rule
+with two directions, and the tree on ``origin/main`` broke it in both:
 
 * ``pcapkit.corekit.module.__all__`` was ``['NULL', 'NullType', 'ModuleDescriptor']``
   -- the type is exported;
