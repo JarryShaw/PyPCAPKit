@@ -1102,7 +1102,7 @@
 <span class="sd">    layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --</span>
 <span class="sd">    one parameter under two numbers, the difference being HIP's own C-bit</span>
 <span class="sd">    rather than an unrelated code -- and the field list below is that layout</span>
-<span class="sd">    exactly, since #696 widened :attr:`counter` to eight octets.</span>
+<span class="sd">    exactly, since #672 widened :attr:`counter` to eight octets.</span>
 <span class="sd">    :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries</span>
 <span class="sd">    two hand-written entries -- not a name-normalisation rule; ``R1_Counter``</span>
 <span class="sd">    and ``R1_COUNTER`` differ only in case, and each needed its own line --</span>
@@ -1217,9 +1217,10 @@
     <span class="c1">#: parameter's packet context while they pack, and their own ``len``</span>
     <span class="c1">#: overwrites it before ``padding`` is reached.</span>
     <span class="c1">#:</span>
-    <span class="c1">#: This is the site #651 deliberately left alone and #664 documented as an</span>
-    <span class="c1">#: exclusion, because two defects in this parameter cancelled at the shape</span>
-    <span class="c1">#: its tests sampled and correcting either alone made the wire output worse.</span>
+    <span class="c1">#: This is the site #651 deliberately left alone, and its fix</span>
+    <span class="c1">#: documented as an exclusion, because two defects in this parameter</span>
+    <span class="c1">#: cancelled at the shape its tests sampled and correcting either alone</span>
+    <span class="c1">#: made the wire output worse.</span>
     <span class="c1">#: The shadowed ``len`` is 4 for any IPv6 locator, so the old expression</span>
     <span class="c1">#: appended exactly four octets whatever the locator count; and the wrong</span>
     <span class="c1">#: ``Length`` unit above made the declared ``Length`` ``4n`` where the</span>

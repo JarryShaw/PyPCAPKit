@@ -558,12 +558,12 @@
 <span class="sd">        warning**. On an IPv6-typed field the same conversion happens to</span>
 <span class="sd">        raise instead, because the resulting</span>
 <span class="sd">        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that</span>
-<span class="sd">        asymmetry is exactly what let this slip past #481's otherwise</span>
+<span class="sd">        asymmetry is exactly what let this slip past #469's otherwise</span>
 <span class="sd">        equivalent guard for :meth:`MH._make_opt_mn_id</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (c.f. #491).</span>
 
 <span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
-<span class="sd">        for the same placement reason #481 gives: a correct check in the</span>
+<span class="sd">        for the same placement reason #469 gives: a correct check in the</span>
 <span class="sd">        wrong position does not fire, and that placement mistake has</span>
 <span class="sd">        already been made twice in this repository's history.</span>
 
@@ -617,7 +617,7 @@
 <span class="sd">        length is the only thing on the wire that carries the family -- must</span>
 <span class="sd">        convert the argument itself, and that conversion happens **before** the</span>
 <span class="sd">        schema, so it launders a :obj:`bool` into an</span>
-<span class="sd">        :class:`~ipaddress.IPv4Address` that #500's guard in</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address` that the guard added for #491 in</span>
 <span class="sd">        :meth:`_IPAddressField.pre_process` can then only see as a legitimate</span>
 <span class="sd">        address. Seven such call sites took ``True`` / ``False`` without</span>
 <span class="sd">        complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::`` where the</span>
@@ -629,7 +629,7 @@
 <span class="sd">        unrelated defect of its own.</span>
 
 <span class="sd">        Routing every one of them through here rather than giving each its own</span>
-<span class="sd">        :func:`isinstance` check is the whole point: #481 added exactly such a</span>
+<span class="sd">        :func:`isinstance` check is the whole point: #469 added exactly such a</span>
 <span class="sd">        check to :meth:`MH._make_opt_mn_id</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;`, and #491 was the</span>
 <span class="sd">        same defect surviving at every site that had not been thought of. A</span>
@@ -637,14 +637,14 @@
 <span class="sd">        forgotten at the next one.</span>
 
 <span class="sd">        The :obj:`bool` rejection is the **first** statement here, ahead of any</span>
-<span class="sd">        dispatch on the value's type, for the placement reason #481 gives and</span>
+<span class="sd">        dispatch on the value's type, for the placement reason #469 gives and</span>
 <span class="sd">        :func:`_reject_bool` repeats.</span>
 
 <span class="sd">        This raises :exc:`FieldValueError` and not</span>
 <span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate</span>
 <span class="sd">        even though two sibling guards for the same mistake --</span>
 <span class="sd">        :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` from #481 and</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` from #469 and</span>
 <span class="sd">        :class:`ESP's SecurityAssociation</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.esp.SecurityAssociation&gt;` from #491 -- raise</span>
 <span class="sd">        the latter. The layer decides: this is a field-level conversion, so it</span>

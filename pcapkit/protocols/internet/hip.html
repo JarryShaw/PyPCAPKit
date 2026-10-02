@@ -567,10 +567,10 @@ as below:</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.hip.</span></span><span class="sig-name descname"><span class="pre">HIP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/hip.html#HIP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.hip.HIP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.hip.HIP" title="pcapkit.protocols.data.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIP" title="pcapkit.protocols.schema.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>], <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.hip.HIP" title="pcapkit.protocols.data.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIP" title="pcapkit.protocols.schema.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>]</p>
 <p>This class implements Host Identity Protocol.</p>
-<p>Double-inherited, per the maintainer’s convention on GitHub pull request
-#924: a header that is <em>only</em> usable as an extension header inherits
-<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone, while one
-that is also usable as a standalone protocol names
+<p>Double-inherited, per the maintainer’s convention given in review of the
+work for #917: a header that is <em>only</em> usable as an extension header
+inherits <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone,
+while one that is also usable as a standalone protocol names
 <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> as well. HIP is
 both, on two independent grounds:</p>
 <ul class="simple">
@@ -4240,7 +4240,7 @@ parameter by itself.</p>
 layout to code 128 (<code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code>) and code 129 (<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code>) –
 one parameter under two numbers, the difference being HIP’s own C-bit
 rather than an unrelated code – and the field list below is that layout
-exactly, since #696 widened <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter" title="pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">counter</span></code></a> to eight octets.
+exactly, since #672 widened <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter" title="pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">counter</span></code></a> to eight octets.
 <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP.__parameter__" title="pcapkit.protocols.internet.hip.HIP.__parameter__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__parameter__</span></code></a> already carries
 two hand-written entries – not a name-normalisation rule; <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code>
 and <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> differ only in case, and each needed its own line –
@@ -4325,9 +4325,10 @@ read off a snapshot of this parameter’s <code class="docutils literal notransl
 read does not work here: the nested <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.Locator" title="pcapkit.protocols.schema.internet.hip.Locator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Locator</span></code></a> schemas share this
 parameter’s packet context while they pack, and their own <code class="docutils literal notranslate"><span class="pre">len</span></code>
 overwrites it before <code class="docutils literal notranslate"><span class="pre">padding</span></code> is reached.</p>
-<p>This is the site #651 deliberately left alone and #664 documented as an
-exclusion, because two defects in this parameter cancelled at the shape
-its tests sampled and correcting either alone made the wire output worse.
+<p>This is the site #651 deliberately left alone, and its fix
+documented as an exclusion, because two defects in this parameter
+cancelled at the shape its tests sampled and correcting either alone
+made the wire output worse.
 The shadowed <code class="docutils literal notranslate"><span class="pre">len</span></code> is 4 for any IPv6 locator, so the old expression
 appended exactly four octets whatever the locator count; and the wrong
 <code class="docutils literal notranslate"><span class="pre">Length</span></code> unit above made the declared <code class="docutils literal notranslate"><span class="pre">Length</span></code> <code class="docutils literal notranslate"><span class="pre">4n</span></code> where the

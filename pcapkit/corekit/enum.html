@@ -774,12 +774,13 @@ it. A rejection raised as
 catches an ordinary failed construction, and so falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code>
 on the same terms; the <code class="docutils literal notranslate"><span class="pre">str</span></code> path does not call the hook, for the reason
 given on <a class="reference internal" href="#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> itself.</p>
-<p>Both failure paths raise from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather
-than a builtin, per the owner’s ruling on GitHub issue #923: <em>“Either
-``ValueError`` or ``KeyError``, that’s depending on how stdlib’s
-``Enum`` would raise on these circumstances. And we should raise one
-from ``pcapkit.utilities.exceptions`` rather builtin exceptions.”</em> The
-<em>shape</em> is unchanged by that ruling and deliberately so – a name miss
+<p>Both failure paths raise from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>
+rather than a builtin, per a ruling recorded on GitHub issue #923,
+verbatim: <em>“Either ``ValueError`` or ``KeyError``, that’s depending on
+how stdlib’s ``Enum`` would raise on these circumstances. And we
+should raise one from ``pcapkit.utilities.exceptions`` rather builtin
+exceptions.”</em> The <em>shape</em> is unchanged by that ruling and
+deliberately so – a name miss
 stays <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived and a value miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived,
 matching <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> on a stdlib
 <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>, and matching the 119 of this tree’s 127 concrete
@@ -1163,21 +1164,23 @@ is.</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
-<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per the owner’s ruling
-on #859: <em>“use dedicated class rather than bare object. Follow the house
-convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as
-safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its own does – identity
-comparison was never the problem an earlier revision’s docstring here
-overstated it to be. What a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a
-readable representation: it prints as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a
-signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
+<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
+review of the work for #857: <em>“use dedicated class rather than bare object.
+Follow the house convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
+<code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
+own does – identity comparison was never the problem an earlier
+revision’s docstring here overstated it to be. What a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a readable representation: it prints
+as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in
+a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
 – via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
 <p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
 convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
 use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
-similarly settled – the owner’s follow-up on #859 was explicit that
-<code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and
-“mainly depends on how we need it.” The need here was continuity:
+similarly settled – a follow-up given in review of the work for #857
+was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code>
+(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and “mainly depends on how we need it.” The
+need here was continuity:
 <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
 its docstring, and both comparison sites – and that change was to <em>what
@@ -1277,7 +1280,7 @@ package: <code class="docutils literal notranslate"><span class="pre">-1</span><
 compares by value rather than identity, and reload staleness is a
 <em>tracked</em> defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
-docstring note citing GitHub issues #425, #428 and #560, and
+docstring note citing GitHub issues #425 and #555, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
 deliberately to pin the fix for exactly that class of bug elsewhere. A
@@ -1328,21 +1331,23 @@ be mistaken for.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.enum.</span></span><span class="sig-name descname"><span class="pre">NO_DEFAULT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NO_DEFAULT&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.enum.NO_DEFAULT" title="Link to this definition">¶</a></dt>
 <dd><p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
-<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per the owner’s ruling
-on #859: <em>“use dedicated class rather than bare object. Follow the house
-convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as
-safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its own does – identity
-comparison was never the problem an earlier revision’s docstring here
-overstated it to be. What a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a
-readable representation: it prints as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a
-signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
+<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
+review of the work for #857: <em>“use dedicated class rather than bare object.
+Follow the house convention.”</em> A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
+<code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
+own does – identity comparison was never the problem an earlier
+revision’s docstring here overstated it to be. What a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a readable representation: it prints
+as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in
+a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
 – via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
 <p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
 convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
 use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
-similarly settled – the owner’s follow-up on #859 was explicit that
-<code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and
-“mainly depends on how we need it.” The need here was continuity:
+similarly settled – a follow-up given in review of the work for #857
+was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code>
+(<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and “mainly depends on how we need it.” The
+need here was continuity:
 <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
 its docstring, and both comparison sites – and that change was to <em>what
@@ -1442,7 +1447,7 @@ package: <code class="docutils literal notranslate"><span class="pre">-1</span><
 compares by value rather than identity, and reload staleness is a
 <em>tracked</em> defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
-docstring note citing GitHub issues #425, #428 and #560, and
+docstring note citing GitHub issues #425 and #555, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
 deliberately to pin the fix for exactly that class of bug elsewhere. A

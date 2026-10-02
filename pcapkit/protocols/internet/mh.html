@@ -6128,7 +6128,7 @@ own minimal big-endian octets, at least one. <code class="docutils literal notra
 (RFC 4283’s <code class="docutils literal notranslate"><span class="pre">user&#64;realm</span></code> form) rather than a numeric
 identifier, so there is no non-arbitrary int-to-text mapping
 the way there is int-to-address or int-to-octets, and an
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> is rejected there (c.f. #467, #468).</p></li>
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> is rejected there (c.f. #467).</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -6154,7 +6154,7 @@ the way there is int-to-address or int-to-octets, and an
     type its subtype’s field cannot hold at all: anything but
     <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> for <code class="docutils literal notranslate"><span class="pre">NAI</span></code>, anything but <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>/
     <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> for the other six – an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>
-    is converted rather than rejected there, per #468 – or anything
+    is converted rather than rejected there, per #467 – or anything
     <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ipaddress.IPv6Address</span></code></a> itself does not accept for
     <code class="docutils literal notranslate"><span class="pre">IPv6_Address</span></code> (c.f. #469).</p>
 </dd>
@@ -8013,11 +8013,11 @@ untouched, since <code class="xref py py-class docutils literal notranslate"><sp
 <p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
 #930, and briefly again through GitHub issue #935’s first attempt,
 which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. The owner’s final ruling on #935 went the other way,
-verbatim – asked <em>“why must we have the two overrides tho? cant
-they directly fall back to the base class’s?”</em>, the answer was <em>“I
-prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the ruling’s
-own options. Measured before acting on it: the override’s own
+it outright. A ruling given in review of the work for #935 went the
+other way, verbatim – asked <em>“why must we have the two overrides
+tho? cant they directly fall back to the base class’s?”</em>, the answer
+was <em>“I prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the
+ruling’s own options. Measured before acting on it: the override’s own
 docstring called it a “Backport support for original codes”, but
 this class mints no alias – <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code>
 agree at 6 – so what the override actually did was resolve an
@@ -8149,11 +8149,11 @@ untouched, since <code class="xref py py-class docutils literal notranslate"><sp
 <p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
 #930, and briefly again through GitHub issue #935’s first attempt,
 which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. The owner’s final ruling on #935 went the other way,
-verbatim – asked <em>“why must we have the two overrides tho? cant
-they directly fall back to the base class’s?”</em>, the answer was <em>“I
-prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the ruling’s
-own options. Measured before acting on it: the override’s own
+it outright. A ruling given in review of the work for #935 went the
+other way, verbatim – asked <em>“why must we have the two overrides
+tho? cant they directly fall back to the base class’s?”</em>, the answer
+was <em>“I prefer (2) directly”</em>, <code class="docutils literal notranslate"><span class="pre">(2)</span></code> naming deletion among the
+ruling’s own options. Measured before acting on it: the override’s own
 docstring called it a “Backport support for original codes”, but
 this class mints no alias – <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code>
 agree at 4 – so what the override actually did was resolve an
@@ -8314,9 +8314,10 @@ issue #935, on <a class="reference internal" href="#pcapkit.protocols.internet.m
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> either: it had zero callers repo-wide
 – tests included – so GitHub issue #880 deleted it outright rather
 than rebuilding it on the immutable contract, the same conclusion
-#935 reached separately for the other two, on the owner’s ruling
-there, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code> being deletion
-of those two overrides rather than widening them to match the base.
+#935 reached separately for the other two, on a ruling given in
+review of that work, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code>
+being deletion of those two overrides rather than widening them to
+match the base.
 GitHub issue #930’s re-parenting above gives this class
 <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
 than a bespoke override – it still cannot mint, so an unassigned
@@ -8404,9 +8405,10 @@ issue #935, on <a class="reference internal" href="#pcapkit.protocols.internet.m
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> either: it had zero callers repo-wide
 – tests included – so GitHub issue #880 deleted it outright rather
 than rebuilding it on the immutable contract, the same conclusion
-#935 reached separately for the other two, on the owner’s ruling
-there, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code> being deletion
-of those two overrides rather than widening them to match the base.
+#935 reached separately for the other two, on a ruling given in
+review of that work, verbatim: <em>“I prefer (2) directly”</em> – <code class="docutils literal notranslate"><span class="pre">(2)</span></code>
+being deletion of those two overrides rather than widening them to
+match the base.
 GitHub issue #930’s re-parenting above gives this class
 <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
 than a bespoke override – it still cannot mint, so an unassigned

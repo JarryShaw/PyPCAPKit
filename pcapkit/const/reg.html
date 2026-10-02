@@ -6885,10 +6885,10 @@ issue #808 dropped <code class="docutils literal notranslate"><span class="pre">
 the same as any caller passing a literal port-transport bitmask
 – falls through to <code class="docutils literal notranslate"><span class="pre">int.__or__</span></code> and returns a bare
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> rather than a member. Never split back into the
-transports its bits would each name – owner ruling on this PR
-(#836) – so it is looked up as the one whole value it
-already is, exactly like any other bare int: refused when
-that whole value names no registry, resolved when it
+transports its bits would each name – a ruling given in review
+of the work for #808 – so it is looked up as the one whole
+value it already is, exactly like any other bare int: refused
+when that whole value names no registry, resolved when it
 happens to equal one instead. Since GitHub issue #860 moved
 this class off power-of-two spacing, a hand-built composite
 is no longer guaranteed to be the former – see

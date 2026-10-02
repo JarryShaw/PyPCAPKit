@@ -4843,7 +4843,7 @@ never inspected for structure, only counted out by the prefix that
 names them, and a blank line – found by <em>reading</em>, not by
 splitting – is what starts the next entry. The one-octet
 terminator that must follow a binary field’s value, and the warning
-when it is missing, are unchanged from <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/722">#722</a>; walking the
+when it is missing, are unchanged from <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/704">#704</a>; walking the
 buffer whole rather than pre-slicing it also retires that fix’s
 newline restoration, which existed only to undo what the slicing
 itself had taken away.</p>
@@ -5160,7 +5160,7 @@ reported as a <a class="reference internal" href="../../utilities/warnings.html#
 every other registry in the package does – the lookup that follows
 cannot tell a deliberate replacement from an accidental one, so an
 unreported overwrite is a parser silently swapped out for another. See
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/681">#681</a> for the
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/675">#675</a> for the
 guard <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> added first, which this one now matches.</p>
 <p>The guard is identity-based: it fires only when the incumbent differs
 from <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so re-registering the exact same class under the same

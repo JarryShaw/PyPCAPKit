@@ -4226,7 +4226,7 @@ later resolved the real length and rebuilt the template as <code class="docutils
 template and it raised <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span>
 <span class="pre">integer</span></code>. Measured on the 8-octet form, which the old lambda did reach:
 <code class="docutils literal notranslate"><span class="pre">_make_mptcp_dss(DSS,</span> <span class="pre">ack=1</span> <span class="pre">&lt;&lt;</span> <span class="pre">40)</span></code> raised exactly that.</p>
-<p>That half is now history: <strong>#598 fixed it</strong>, in
+<p>That half is now history: <strong>#591 fixed it</strong>, in
 <a class="reference internal" href="../../corekit/fields/numbers.html#module-pcapkit.corekit.fields.numbers" title="pcapkit.corekit.fields.numbers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code></a> where this note used to say the fix
 belonged, by recomputing <code class="docutils literal notranslate"><span class="pre">_need_process</span></code> from the width actually in
 force instead of once from the placeholder. A callable-length
@@ -4287,8 +4287,8 @@ instance – the field is absent from the wire.</p></li>
 identical defect: <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['m']</span>
 <span class="pre">else</span> <span class="pre">0,</span> <span class="pre">...)</span></code>. See that function’s note for why the <code class="docutils literal notranslate"><span class="pre">0</span></code> was wrong, why a
 corrected lambda would not have packed either <em>at the time</em>, and why the
-<code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept now that #598 has made a callable length work.
-C.f. #576, #598.</p>
+<code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept now that #591 has made a callable length work.
+C.f. #576, #591.</p>
 </div>
 </dd></dl>
 

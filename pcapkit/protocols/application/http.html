@@ -604,7 +604,7 @@ answer, which answers “did a parser accept this?” where the question is
 preface came back <code class="docutils literal notranslate"><span class="pre">version='2'</span></code> only because <code class="docutils literal notranslate"><span class="pre">httpv2.HTTP</span></code> read its
 leading <code class="docutils literal notranslate"><span class="pre">b'PRI'</span></code> as a 24-bit declared frame length of 5,265,993, and
 <code class="docutils literal notranslate"><span class="pre">b'foo</span> <span class="pre">bar</span> <span class="pre">baz\r\nX:</span> <span class="pre">y\r\n\r\n'</span></code> – not HTTP at all – came back
-<code class="docutils literal notranslate"><span class="pre">version='2'</span></code> the same way. #799/#802 closed the second of those by
+<code class="docutils literal notranslate"><span class="pre">version='2'</span></code> the same way. #799 closed the second of those by
 requiring a frame’s declared length to be backed by its buffer, but that
 left the preface <em>unidentifiable</em>: a real HTTP/2 connection opening is
 refused by both arms and reported as not-HTTP.</p>

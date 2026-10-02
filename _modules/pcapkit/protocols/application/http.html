@@ -710,7 +710,7 @@
 <span class="sd">        preface came back ``version='2'`` only because ``httpv2.HTTP`` read its</span>
 <span class="sd">        leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and</span>
 <span class="sd">        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back</span>
-<span class="sd">        ``version='2'`` the same way. #799/#802 closed the second of those by</span>
+<span class="sd">        ``version='2'`` the same way. #799 closed the second of those by</span>
 <span class="sd">        requiring a frame's declared length to be backed by its buffer, but that</span>
 <span class="sd">        left the preface *unidentifiable*: a real HTTP/2 connection opening is</span>
 <span class="sd">        refused by both arms and reported as not-HTTP.</span>
@@ -797,7 +797,7 @@
             <span class="c1"># version``, so a preface followed by a frame that used to trip the</span>
             <span class="c1"># #805 residual (an inner field shortfall, e.g. a 16-octet</span>
             <span class="c1"># ``GOAWAY``) had to reach the caller as something it could catch,</span>
-            <span class="c1"># not as a bare stdlib error. #811 has since closed that residual at</span>
+            <span class="c1"># not as a bare stdlib error. That residual has since been closed at</span>
             <span class="c1"># ``FieldBase.length``, so the same ``GOAWAY`` now raises</span>
             <span class="c1"># ``ProtocolError`` on its own and is caught by the ``except</span>
             <span class="c1"># ProtocolError: raise`` above, never reaching this clause -- but</span>
@@ -861,8 +861,8 @@
         <span class="c1"># closed that particular route -- the same call now raises</span>
         <span class="c1"># ``ProtocolError: unknown HTTP version``, the documented answer.</span>
         <span class="c1"># Suppressing :exc:`struct.error` on the last arm stays regardless --</span>
-        <span class="c1"># #811 kept it deliberately, as defence in depth, rather than retiring</span>
-        <span class="c1"># it now that the case it was added for is closed. Whether anything</span>
+        <span class="c1"># kept deliberately, as defence in depth, rather than retired now</span>
+        <span class="c1"># that the case it was added for is closed. Whether anything</span>
         <span class="c1"># can still reach it, and whether it should therefore go, is #825's</span>
         <span class="c1"># open question, not settled here.</span>
         <span class="c1">#</span>
@@ -880,7 +880,7 @@
         <span class="c1"># field further in, past this guard's reach. Measured: a 16-octet</span>
         <span class="c1"># ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)</span>
         <span class="c1"># used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``</span>
-        <span class="c1"># directly. #811 closed that class at its actual root --</span>
+        <span class="c1"># directly. That class was closed at its actual root --</span>
         <span class="c1"># :attr:`FieldBase.length</span>
         <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` now catches</span>
         <span class="c1"># :func:`struct.calcsize`'s failure on a negative-length template and</span>

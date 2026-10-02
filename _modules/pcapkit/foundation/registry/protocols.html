@@ -1399,11 +1399,11 @@
     <span class="c1"># up front, before any registry work, so every downstream use -- the</span>
     <span class="c1"># ``code.proto`` default and the registries lookup below -- sees members</span>
     <span class="c1"># only. Resolution is by the member's own ``name``, case-insensitively --</span>
-    <span class="c1"># maintainer ruling on #815 -- via ``__members__`` directly rather than</span>
-    <span class="c1"># ``TransportProtocol[name]``: this function's contract is</span>
-    <span class="c1"># :exc:`~pcapkit.utilities.exceptions.RegistryError` for anything</span>
-    <span class="c1"># unrecognised, composite-spelled or not, and ``__getitem__`` raises a</span>
-    <span class="c1"># bare :exc:`KeyError` on a miss instead of that -- both</span>
+    <span class="c1"># a ruling given in review of the work for #806 -- via ``__members__``</span>
+    <span class="c1"># directly rather than ``TransportProtocol[name]``: this function's</span>
+    <span class="c1"># contract is :exc:`~pcapkit.utilities.exceptions.RegistryError` for</span>
+    <span class="c1"># anything unrecognised, composite-spelled or not, and ``__getitem__``</span>
+    <span class="c1"># raises a bare :exc:`KeyError` on a miss instead of that -- both</span>
     <span class="c1"># ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,</span>
     <span class="c1"># now that GitHub issue #808 dropped the ``IntFlag`` base that used to</span>
     <span class="c1"># make the first of those two silently compose into the value ``3``</span>

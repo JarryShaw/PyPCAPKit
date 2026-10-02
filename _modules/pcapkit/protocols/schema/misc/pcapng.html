@@ -802,12 +802,12 @@
 <span class="sd">    with one option declaring 65,535 against none present, produced 131,070,000</span>
 <span class="sd">    octets of zero padding, an amplification of 1,637x linear in the block</span>
 <span class="sd">    count. See `#594 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/594&gt;`__,</span>
-<span class="sd">    and `#593 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/593&gt;`__ for the</span>
+<span class="sd">    and `#573 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/573&gt;`__ for the</span>
 <span class="sd">    32-bit band the field layer's own budget already covers.</span>
 
 <span class="sd">    The bound has to come from this layer because the field layer cannot see</span>
 <span class="sd">    it. What distinguishes the crafted case from the legitimate one is not the</span>
-<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why #571's</span>
+<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why #554's</span>
 <span class="sd">    ``len(buffer) &lt; length`` rejection was declined -- but whether the option</span>
 <span class="sd">    is inconsistent with the framing the block itself declares. Block Total</span>
 <span class="sd">    Length is authoritative and cross-checked against its own trailing copy, so</span>
@@ -1315,7 +1315,7 @@
 <span class="sd">        every other registry in the package does -- the lookup that follows</span>
 <span class="sd">        cannot tell a deliberate replacement from an accidental one, so an</span>
 <span class="sd">        unreported overwrite is a parser silently swapped out for another. See</span>
-<span class="sd">        `#681 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/681&gt;`__ for the</span>
+<span class="sd">        `#675 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/675&gt;`__ for the</span>
 <span class="sd">        guard ``register_protocol`` added first, which this one now matches.</span>
 
 <span class="sd">        The guard is identity-based: it fires only when the incumbent differs</span>
@@ -2556,8 +2556,8 @@
 <span class="sd">            names them, and a blank line -- found by *reading*, not by</span>
 <span class="sd">            splitting -- is what starts the next entry. The one-octet</span>
 <span class="sd">            terminator that must follow a binary field's value, and the warning</span>
-<span class="sd">            when it is missing, are unchanged from `#722</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/722&gt;`__; walking the</span>
+<span class="sd">            when it is missing, are unchanged from `#704</span>
+<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/704&gt;`__; walking the</span>
 <span class="sd">            buffer whole rather than pre-slicing it also retires that fix's</span>
 <span class="sd">            newline restoration, which existed only to undo what the slicing</span>
 <span class="sd">            itself had taken away.</span>
@@ -2707,10 +2707,10 @@
                         <span class="c1"># the reader's position is well defined either way --</span>
                         <span class="c1"># exactly length + 1 octets past where the field name</span>
                         <span class="c1"># started -- so a bad octet here ends only this</span>
-                        <span class="c1"># entry's field collection, matching #722: it does not</span>
+                        <span class="c1"># entry's field collection, matching #704: it does not</span>
                         <span class="c1"># abort the walk, which keeps looking for the next</span>
-                        <span class="c1"># entry's separator from here. See #728's review for</span>
-                        <span class="c1"># why an outer abort was considered and rejected as</span>
+                        <span class="c1"># entry's separator from here. See #723 for why an</span>
+                        <span class="c1"># outer abort was considered and rejected as</span>
                         <span class="c1"># the default.</span>
                         <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>

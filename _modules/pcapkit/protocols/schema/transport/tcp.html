@@ -797,7 +797,7 @@
 <span class="sd">        integer``. Measured on the 8-octet form, which the old lambda did reach:</span>
 <span class="sd">        ``_make_mptcp_dss(DSS, ack=1 &lt;&lt; 40)`` raised exactly that.</span>
 
-<span class="sd">        That half is now history: **#598 fixed it**, in</span>
+<span class="sd">        That half is now history: **#591 fixed it**, in</span>
 <span class="sd">        :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix</span>
 <span class="sd">        belonged, by recomputing ``_need_process`` from the width actually in</span>
 <span class="sd">        force instead of once from the placeholder. A callable-length</span>
@@ -858,8 +858,8 @@
 <span class="sd">        identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']</span>
 <span class="sd">        else 0, ...)``. See that function's note for why the ``0`` was wrong, why a</span>
 <span class="sd">        corrected lambda would not have packed either *at the time*, and why the</span>
-<span class="sd">        ``SwitchField`` form is kept now that #598 has made a callable length work.</span>
-<span class="sd">        C.f. #576, #598.</span>
+<span class="sd">        ``SwitchField`` form is kept now that #591 has made a callable length work.</span>
+<span class="sd">        C.f. #576, #591.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">]:</span>
@@ -934,12 +934,12 @@
 <span class="sd">            A port outside this field's own width is rejected *before* any of</span>
 <span class="sd">            that, rather than being let through to :meth:`_missing_` and</span>
 <span class="sd">            caught alongside a genuine miss. Both are a bare :exc:`ValueError`</span>
-<span class="sd">            with nothing to tell them apart by type, and GitHub issue #764</span>
+<span class="sd">            with nothing to tell them apart by type, and GitHub issue #758</span>
 <span class="sd">            gave the out-of-range case a deliberate, ``breaking``-tagged</span>
 <span class="sd">            rejection specifically so it would stop being minted over -- a</span>
 <span class="sd">            catch keyed on exception type alone cannot see the difference</span>
 <span class="sd">            between that and :mod:`aenum`'s own "no member has this value",</span>
-<span class="sd">            so it would absorb both and quietly revert #764 for these four</span>
+<span class="sd">            so it would absorb both and quietly revert #758 for these four</span>
 <span class="sd">            fields. Checking the width first needs no exception-based</span>
 <span class="sd">            distinction at all: it asks the same question :meth:`_missing_`</span>
 <span class="sd">            would eventually ask, and asks it in a way that never manufactures</span>
@@ -957,7 +957,7 @@
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">))):</span>
-            <span class="c1"># NOTE: lets AppType.get() -- unmodified -- raise #764's rejection</span>
+            <span class="c1"># NOTE: lets AppType.get() -- unmodified -- raise #758's rejection</span>
             <span class="c1"># for a port this field's own width cannot represent, rather than</span>
             <span class="c1"># risking it being absorbed below as a foreign miss.</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
@@ -969,7 +969,7 @@
                 <span class="c1"># NOTE: value is already known to be in-width here, so this</span>
                 <span class="c1"># ValueError is aenum's own "no member has this value" for an</span>
                 <span class="c1"># in-range but unassigned port -- a foreign miss, absorbed --</span>
-                <span class="c1"># never #764's out-of-range rejection, which never reaches</span>
+                <span class="c1"># never #758's out-of-range rejection, which never reaches</span>
                 <span class="c1"># this branch. A pcapkit.utilities.exceptions error is still a</span>
                 <span class="c1"># deliberate registry decision and propagates unchanged.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>

@@ -558,10 +558,10 @@
 <span class="sd">    :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed</span>
 <span class="sd">    route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.</span>
 <span class="sd">    ipv6_route.IPv6_Route.read` then subtracts from the outer packet length</span>
-<span class="sd">    to find the next layer's length. #489 unified the write side</span>
+<span class="sd">    to find the next layer's length. #487 unified the write side</span>
 <span class="sd">    (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)</span>
 <span class="sd">    into one helper; this is the matching read-side helper for the total</span>
-<span class="sd">    header length, finishing that half of #487/#489.</span>
+<span class="sd">    header length, finishing that half of #487.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.</span>

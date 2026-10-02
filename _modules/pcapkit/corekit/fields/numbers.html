@@ -524,7 +524,7 @@
 <span class="sd">        ProtocolError: If ``bit_length`` is given negative. Left alone,</span>
 <span class="sd">            ``(1 &lt;&lt; bit_length) - 1`` raises a bare, uncatchable</span>
 <span class="sd">            :exc:`ValueError` (``negative shift count``) here, before</span>
-<span class="sd">            :meth:`__call__`'s own negative-``length`` guard (#828/#829) or</span>
+<span class="sd">            :meth:`__call__`'s own negative-``length`` guard (#828) or</span>
 <span class="sd">            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s (#805)</span>
 <span class="sd">            ever see anything -- this one fires at construction time, on the</span>
 <span class="sd">            argument itself rather than on a resolved wire length. See</span>
@@ -625,7 +625,7 @@
 <span class="sd">                a bare, uncatchable :exc:`ValueError` (``negative shift</span>
 <span class="sd">                count``) when ``bit_length`` was not supplied, before</span>
 <span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see</span>
-<span class="sd">                its own :exc:`ProtocolError` guard, #805/#811/#827) or</span>
+<span class="sd">                its own :exc:`ProtocolError` guard, #805/#825) or</span>
 <span class="sd">                :meth:`build_template` ever sees the value: this method sets</span>
 <span class="sd">                ``self._bit_length`` from the resolved length eagerly, as a</span>
 <span class="sd">                cache, and shifts by it immediately, so the crash happens on</span>

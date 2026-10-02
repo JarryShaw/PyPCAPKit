@@ -746,7 +746,7 @@ because doing it with <a class="reference external" href="https://docs.python.or
 length is the only thing on the wire that carries the family – must
 convert the argument itself, and that conversion happens <strong>before</strong> the
 schema, so it launders a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> into an
-<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that #500’s guard in
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that the guard added for #491 in
 <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> can then only see as a legitimate
 address. Seven such call sites took <code class="docutils literal notranslate"><span class="pre">True</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> without
 complaint as <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code> / <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> – or <code class="docutils literal notranslate"><span class="pre">::1</span></code> / <code class="docutils literal notranslate"><span class="pre">::</span></code> where the
@@ -756,18 +756,18 @@ those octets. The seventh,
 equally corrupt schema and is only stopped from packing it by an
 unrelated defect of its own.</p>
 <p>Routing every one of them through here rather than giving each its own
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: #481 added exactly such a
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: #469 added exactly such a
 check to <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a>, and #491 was the
 same defect surviving at every site that had not been thought of. A
 guard that has to be remembered per call site is a guard that will be
 forgotten at the next one.</p>
 <p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rejection is the <strong>first</strong> statement here, ahead of any
-dispatch on the value’s type, for the placement reason #481 gives and
+dispatch on the value’s type, for the placement reason #469 gives and
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code> repeats.</p>
 <p>This raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code> and not
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, which is deliberate
 even though two sibling guards for the same mistake –
-<a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> from #481 and
+<a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> from #469 and
 <a class="reference internal" href="../../protocols/internet/esp.html#pcapkit.protocols.internet.esp.SecurityAssociation" title="pcapkit.protocols.internet.esp.SecurityAssociation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP's</span> <span class="pre">SecurityAssociation</span></code></a> from #491 – raise
 the latter. The layer decides: this is a field-level conversion, so it
 answers with what <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> answers with for

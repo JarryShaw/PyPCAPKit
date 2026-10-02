@@ -885,8 +885,8 @@
 <span class="sd">            of, so nothing downstream can question it. Measured before this</span>
 <span class="sd">            fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and</span>
 <span class="sd">            reported ``IPv4Address('0.0.0.1')`` with no exception and no</span>
-<span class="sd">            warning. This was the fifth site of that defect -- #481, #500,</span>
-<span class="sd">            #539 and #540 are the first four -- and the reason it is the fifth</span>
+<span class="sd">            warning. This was the fifth site of that defect -- #469, #491,</span>
+<span class="sd">            #508 and #540 are the first four -- and the reason it is the fifth</span>
 <span class="sd">            is that each of those fixed the sites it could see. See #552.</span>
 
 <span class="sd">        """</span>
@@ -951,7 +951,7 @@
             <span class="c1"># still raises a plain :exc:`ValueError` for a tail that is not a</span>
             <span class="c1"># whole number of 8-octet pairs, which no ``except BaseError`` can</span>
             <span class="c1"># catch, and because leaving one of this method's three conversions</span>
-            <span class="c1"># unguarded is exactly how #552 came to be the fifth site of #481.</span>
+            <span class="c1"># unguarded is exactly how #552 came to be the fifth site of #469.</span>
             <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
                 <span class="n">buf_ip</span> <span class="o">=</span> <span class="n">pad</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>

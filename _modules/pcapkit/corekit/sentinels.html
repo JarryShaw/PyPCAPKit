@@ -714,22 +714,24 @@
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
-<span class="sd">    A dedicated class rather than a bare :class:`object`, per the owner's ruling</span>
-<span class="sd">    on #859: *"use dedicated class rather than bare object. Follow the house</span>
-<span class="sd">    convention."* A bare :class:`object` compares under ``is`` exactly as</span>
-<span class="sd">    safely as a dedicated class with no ``__eq__`` of its own does -- identity</span>
-<span class="sd">    comparison was never the problem an earlier revision's docstring here</span>
-<span class="sd">    overstated it to be. What a bare :class:`object` actually lacks is a</span>
-<span class="sd">    readable representation: it prints as ``&lt;object object at 0x...&gt;`` in a</span>
-<span class="sd">    signature, in :func:`help`, and in a traceback, where ``NoDefaultType()``</span>
+<span class="sd">    A dedicated class rather than a bare :class:`object`, per a ruling given in</span>
+<span class="sd">    review of the work for #857: *"use dedicated class rather than bare object.</span>
+<span class="sd">    Follow the house convention."* A bare :class:`object` compares under</span>
+<span class="sd">    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its</span>
+<span class="sd">    own does -- identity comparison was never the problem an earlier</span>
+<span class="sd">    revision's docstring here overstated it to be. What a bare</span>
+<span class="sd">    :class:`object` actually lacks is a readable representation: it prints</span>
+<span class="sd">    as ``&lt;object object at 0x...&gt;`` in a signature, in :func:`help`, and in</span>
+<span class="sd">    a traceback, where ``NoDefaultType()``</span>
 <span class="sd">    -- via :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``.</span>
 
 <span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
 <span class="sd">    convention is settled: both :class:`NullType` and :class:`NoValueType`</span>
 <span class="sd">    use ``&lt;Name&gt;Type``. At the time, the *instance*'s own name was not</span>
-<span class="sd">    similarly settled -- the owner's follow-up on #859 was explicit that</span>
-<span class="sd">    ``NULL`` (``SCREAMING_CASE``) and ``NoValue`` (``CapWords``) disagreed, and</span>
-<span class="sd">    "mainly depends on how we need it." The need here was continuity:</span>
+<span class="sd">    similarly settled -- a follow-up given in review of the work for #857</span>
+<span class="sd">    was explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``</span>
+<span class="sd">    (``CapWords``) disagreed, and "mainly depends on how we need it." The</span>
+<span class="sd">    need here was continuity:</span>
 <span class="sd">    ``NO_DEFAULT`` was already the name on ``main`` -- referenced in</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature,</span>
 <span class="sd">    its docstring, and both comparison sites -- and that change was to *what</span>
@@ -834,7 +836,7 @@
 <span class="sd">    compares by value rather than identity, and reload staleness is a</span>
 <span class="sd">    *tracked* defect class here for other constructs -- see</span>
 <span class="sd">    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own</span>
-<span class="sd">    docstring note citing GitHub issues #425, #428 and #560, and</span>
+<span class="sd">    docstring note citing GitHub issues #425 and #555, and</span>
 <span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
 <span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
 <span class="sd">    deliberately to pin the fix for exactly that class of bug elsewhere. A</span>
@@ -933,13 +935,13 @@
 <span class="sd">    normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so</span>
 <span class="sd">    this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings</span>
 <span class="sd">    and privacy is no longer signalled by the name at all. The owner's ruling</span>
-<span class="sd">    on #937, verbatim: *"we can change* ``_ABSENT`` *to* ``ABSENT`` *just</span>
-<span class="sd">    document it as private type/class in the documentation and not for public</span>
-<span class="sd">    use is enough."* So this class and :data:`ABSENT` stay exactly as private</span>
-<span class="sd">    as they were: nothing outside :mod:`pcapkit.protocols.protocol` reads</span>
-<span class="sd">    :data:`ABSENT`, from here or from there, and neither this module's nor</span>
-<span class="sd">    that module's :attr:`__all__` names either one. This docstring, and the</span>
-<span class="sd">    "Naming a Sentinel" section of</span>
+<span class="sd">    on GitHub issue #719, verbatim: *"we can change* ``_ABSENT`` *to*</span>
+<span class="sd">    ``ABSENT`` *just document it as private type/class in the documentation</span>
+<span class="sd">    and not for public use is enough."* So this class and :data:`ABSENT` stay</span>
+<span class="sd">    exactly as private as they were: nothing outside</span>
+<span class="sd">    :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from</span>
+<span class="sd">    there, and neither this module's nor that module's :attr:`__all__` names</span>
+<span class="sd">    either one. This docstring, and the "Naming a Sentinel" section of</span>
 <span class="sd">    :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are</span>
 <span class="sd">    what now records that fact in place of the leading underscore.</span>
 

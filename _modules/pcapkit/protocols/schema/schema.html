@@ -1577,7 +1577,7 @@
 <span class="sd">    This is the schema-layer instance of the defect :meth:`ProtocolBase.\</span>
 <span class="sd">    _lookup_registry &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;`</span>
 <span class="sd">    fixed for the protocol-layer ``__proto__`` family in GitHub issues #421 and</span>
-<span class="sd">    #425/#428; see GitHub issue #555. The fallback itself is deliberate -- it</span>
+<span class="sd">    #425; see GitHub issue #555. The fallback itself is deliberate -- it</span>
 <span class="sd">    is how an unknown option, chunk or block falls back to its</span>
 <span class="sd">    ``Unknown*``/``Unassigned*`` schema -- so this subclass keeps returning it,</span>
 <span class="sd">    it just stops recording it.</span>
@@ -1831,7 +1831,7 @@
 <span class="sd">            have made the next legitimate registration for that code warn about</span>
 <span class="sd">            an entry no caller ever asked for -- the defect fixed for this layer</span>
 <span class="sd">            in #555, and for the parser-layer ``__proto__`` family in #421 and</span>
-<span class="sd">            #425/#428. That fix is what makes this guard safe to add.</span>
+<span class="sd">            #425. That fix is what makes this guard safe to add.</span>
 
 <span class="sd">            :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this</span>
 <span class="sd">            method with a namespaced registry of its own and does not delegate</span>

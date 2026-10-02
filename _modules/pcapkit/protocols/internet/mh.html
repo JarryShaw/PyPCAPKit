@@ -1057,11 +1057,11 @@
 <span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
 <span class="sd">        #930, and briefly again through GitHub issue #935's first attempt,</span>
 <span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. The owner's final ruling on #935 went the other way,</span>
-<span class="sd">        verbatim -- asked *"why must we have the two overrides tho? cant</span>
-<span class="sd">        they directly fall back to the base class's?"*, the answer was *"I</span>
-<span class="sd">        prefer (2) directly"*, ``(2)`` naming deletion among the ruling's</span>
-<span class="sd">        own options. Measured before acting on it: the override's own</span>
+<span class="sd">        it outright. A ruling given in review of the work for #935 went the</span>
+<span class="sd">        other way, verbatim -- asked *"why must we have the two overrides</span>
+<span class="sd">        tho? cant they directly fall back to the base class's?"*, the answer</span>
+<span class="sd">        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the</span>
+<span class="sd">        ruling's own options. Measured before acting on it: the override's own</span>
 <span class="sd">        docstring called it a "Backport support for original codes", but</span>
 <span class="sd">        this class mints no alias -- ``__members__`` and ``list(cls)``</span>
 <span class="sd">        agree at 6 -- so what the override actually did was resolve an</span>
@@ -1180,11 +1180,11 @@
 <span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
 <span class="sd">        #930, and briefly again through GitHub issue #935's first attempt,</span>
 <span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. The owner's final ruling on #935 went the other way,</span>
-<span class="sd">        verbatim -- asked *"why must we have the two overrides tho? cant</span>
-<span class="sd">        they directly fall back to the base class's?"*, the answer was *"I</span>
-<span class="sd">        prefer (2) directly"*, ``(2)`` naming deletion among the ruling's</span>
-<span class="sd">        own options. Measured before acting on it: the override's own</span>
+<span class="sd">        it outright. A ruling given in review of the work for #935 went the</span>
+<span class="sd">        other way, verbatim -- asked *"why must we have the two overrides</span>
+<span class="sd">        tho? cant they directly fall back to the base class's?"*, the answer</span>
+<span class="sd">        was *"I prefer (2) directly"*, ``(2)`` naming deletion among the</span>
+<span class="sd">        ruling's own options. Measured before acting on it: the override's own</span>
 <span class="sd">        docstring called it a "Backport support for original codes", but</span>
 <span class="sd">        this class mints no alias -- ``__members__`` and ``list(cls)``</span>
 <span class="sd">        agree at 4 -- so what the override actually did was resolve an</span>
@@ -1326,9 +1326,10 @@
 <span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
 <span class="sd">        -- tests included -- so GitHub issue #880 deleted it outright rather</span>
 <span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        #935 reached separately for the other two, on the owner's ruling</span>
-<span class="sd">        there, verbatim: *"I prefer (2) directly"* -- ``(2)`` being deletion</span>
-<span class="sd">        of those two overrides rather than widening them to match the base.</span>
+<span class="sd">        #935 reached separately for the other two, on a ruling given in</span>
+<span class="sd">        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``</span>
+<span class="sd">        being deletion of those two overrides rather than widening them to</span>
+<span class="sd">        match the base.</span>
 <span class="sd">        GitHub issue #930's re-parenting above gives this class</span>
 <span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
 <span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
@@ -1411,9 +1412,10 @@
 <span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
 <span class="sd">        -- tests included -- so GitHub issue #880 deleted it outright rather</span>
 <span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        #935 reached separately for the other two, on the owner's ruling</span>
-<span class="sd">        there, verbatim: *"I prefer (2) directly"* -- ``(2)`` being deletion</span>
-<span class="sd">        of those two overrides rather than widening them to match the base.</span>
+<span class="sd">        #935 reached separately for the other two, on a ruling given in</span>
+<span class="sd">        review of that work, verbatim: *"I prefer (2) directly"* -- ``(2)``</span>
+<span class="sd">        being deletion of those two overrides rather than widening them to</span>
+<span class="sd">        match the base.</span>
 <span class="sd">        GitHub issue #930's re-parenting above gives this class</span>
 <span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
 <span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
@@ -3502,13 +3504,13 @@
 <span class="sd">        Length fields"* -- so the whole option, which is what every</span>
 <span class="sd">        ``_read_opt_*`` below reports back as the parsed option's own</span>
 <span class="sd">        ``.length``, is two octets more. This is the exact ``+2``/``-2``</span>
-<span class="sd">        mismatch #398 fixed independently in six places (see the ``Note:``</span>
+<span class="sd">        mismatch independently fixed in six places (see the ``Note:``</span>
 <span class="sd">        on :meth:`_read_opt_pad` below, which explains why a ``Pad1``</span>
 <span class="sd">        option -- the one option with no ``Option Length`` field at all --</span>
 <span class="sd">        is this helper's sole exception); collecting the read-side half of</span>
 <span class="sd">        it into one helper is so a future fix to this arithmetic only has</span>
-<span class="sd">        to happen once. Do NOT drop the ``+ 2``: that is precisely the</span>
-<span class="sd">        mismatch #398 fixed.</span>
+<span class="sd">        to happen once. Do NOT drop the ``+ 2``: that is precisely this</span>
+<span class="sd">        mismatch.</span>
 
 <span class="sd">        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility</span>
 <span class="sd">        option, whose Option Type and Option Length are one octet each. It</span>
@@ -8918,7 +8920,7 @@
 <span class="sd">                (RFC 4283's ``user@realm`` form) rather than a numeric</span>
 <span class="sd">                identifier, so there is no non-arbitrary int-to-text mapping</span>
 <span class="sd">                the way there is int-to-address or int-to-octets, and an</span>
-<span class="sd">                :obj:`int` is rejected there (c.f. #467, #468).</span>
+<span class="sd">                :obj:`int` is rejected there (c.f. #467).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8940,7 +8942,7 @@
 <span class="sd">                type its subtype's field cannot hold at all: anything but</span>
 <span class="sd">                :obj:`str` for ``NAI``, anything but :obj:`bytes`/</span>
 <span class="sd">                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`</span>
-<span class="sd">                is converted rather than rejected there, per #468 -- or anything</span>
+<span class="sd">                is converted rather than rejected there, per #467 -- or anything</span>
 <span class="sd">                :class:`ipaddress.IPv6Address` itself does not accept for</span>
 <span class="sd">                ``IPv6_Address`` (c.f. #469).</span>
 
@@ -8961,14 +8963,14 @@
             <span class="c1"># exactly the class of leak this handler exists to stop, and which a</span>
             <span class="c1"># guard living inside the ``elif isinstance(identifier, int)`` branch</span>
             <span class="c1"># could not catch, since the ``IPv6_Address`` dispatch never reaches</span>
-            <span class="c1"># it (c.f. #467, #468).</span>
+            <span class="c1"># it (c.f. #467).</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back</span>
                 <span class="c1"># into a named member for the message below -- but its own</span>
                 <span class="c1"># ``_missing_`` only auto-extends 9-15 and 16-255, so 0,</span>
                 <span class="c1"># negatives and anything above 255 make the constructor itself</span>
                 <span class="c1"># raise a bare ``ValueError``, which would defeat the point of</span>
-                <span class="c1"># this guard (c.f. #468 review). Caught here and the raw value</span>
+                <span class="c1"># this guard (c.f. #467). Caught here and the raw value</span>
                 <span class="c1"># used instead rather than let it propagate.</span>
                 <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">Enum_MNIDSubtype</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -9009,7 +9011,7 @@
                 <span class="c1"># unguarded, :class:`ipaddress.IPv6Address` raises</span>
                 <span class="c1"># ``AddressValueError``, itself a bare :exc:`ValueError`, so this</span>
                 <span class="c1"># handler would otherwise ship with its lower bound guarded and its</span>
-                <span class="c1"># upper bound leaking (c.f. #467, #468). Checked explicitly rather</span>
+                <span class="c1"># upper bound leaking (c.f. #467). Checked explicitly rather</span>
                 <span class="c1"># than by wrapping the construction below, because that would also</span>
                 <span class="c1"># swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or</span>
                 <span class="c1"># ``None`` reaching here -- which is #469's subject, not this one's.</span>
@@ -9026,7 +9028,7 @@
                 <span class="c1"># bytes, int or str). The ``try`` wraps only this call, not</span>
                 <span class="c1"># the whole branch, so it cannot swallow the ProtocolError</span>
                 <span class="c1"># raised above for an out-of-range int, which is also a</span>
-                <span class="c1"># ValueError subclass (c.f. #467, #468, #469).</span>
+                <span class="c1"># ValueError subclass (c.f. #467, #469).</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -9060,9 +9062,9 @@
             <span class="c1"># width all along -- the pre-#467 defect was never the sizing, it</span>
             <span class="c1"># was that ``identifier`` itself stayed an ``int`` afterwards and</span>
             <span class="c1"># was handed to ``BytesField`` unconverted, which ``struct.pack()``</span>
-            <span class="c1"># cannot do anything with. #468 initially rejected outright instead</span>
+            <span class="c1"># cannot do anything with. #467 initially rejected outright instead</span>
             <span class="c1"># of noticing that; converting is what this revision does (c.f.</span>
-            <span class="c1"># #467, #468). ``bit_length()`` is 0 for 0 itself, which would</span>
+            <span class="c1"># #467). ``bit_length()`` is 0 for 0 itself, which would</span>
             <span class="c1"># otherwise declare a zero-octet identifier -- collapsing "the</span>
             <span class="c1"># identifier's value is 0" into "there is no identifier" -- so the</span>
             <span class="c1"># width is floored at one octet, matching what any reasonable</span>
