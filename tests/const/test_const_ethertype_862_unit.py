@@ -174,8 +174,8 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
         # tests/const/test_const_enum_no_mint.py's own docstring -- so this
         # now checks for the ``_unregistered_member`` form instead, keeping
         # the hex-suffixed name exactly as before; only the registration
-        # mechanism changed, per the owner's ruling that this is "not about
-        # renaming anything".
+        # mechanism changed, because PR #878 scoped the change as not
+        # registering rather than renaming.
         _enum, miss = self._process_fixture()
         text = '\n'.join(miss)
 
