@@ -1065,7 +1065,7 @@ class GetOverrideContractTests(unittest.TestCase):
         self.assertIn('deleting them outright', flat,
                       'the page no longer records that #940 ruled for deletion '
                       'rather than widening')
-        self.assertIn('he took the first', flat,
+        self.assertIn('the first was the ruling', flat,
                       'the page no longer records which of #935\'s three options '
                       'was taken')
         self.assertNotIn('**Two** of them define a ``get`` of their own', flat,

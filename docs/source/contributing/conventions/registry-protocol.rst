@@ -228,7 +228,7 @@ all, so neither meets the condition.
 `#933 <https://github.com/JarryShaw/PyPCAPKit/issues/933>`__ asked whether two
 overrides raising :exc:`~pcapkit.utilities.exceptions.EnumKeyError` **without**
 ``quiet=True`` should adopt the base's. The owner first declined, then reversed
-himself: they should follow the house convention and not be loud.
+course: they should follow the house convention and not be loud.
 
 Both answers are on the issue deliberately, and the reversal is the ruling. What it
 settles is not the one keyword -- it is the tie-breaker. A loud
@@ -254,7 +254,7 @@ mismatch from ``mypy`` and ``pylint``, and both docstrings disclosed it in prose
 instead. Put to the owner on
 `#935 <https://github.com/JarryShaw/PyPCAPKit/issues/935>`__ as one of three options
 -- widen and delegate, refuse ``default`` explicitly with an in-library error, or
-leave the disclosure as the settled answer -- he took the first. So
+leave the disclosure as the settled answer -- the first was the ruling. So
 **a suppression plus a docstring is not an answer to a contract the class advertises
 and breaks.** The check that the suppression was load-bearing is the one to repeat
 before believing any such pair: stripping these two yielded
@@ -271,10 +271,9 @@ every ``default`` combination -- differed from ``EnumLookup.get.__func__(cls, ..
 in **zero** of them, and neither class carried an alias (``__members__`` 6 and 4,
 ``list(cls)`` 6 and 4) for the *"Backport support for original codes"* in their
 docstrings to refer to. Offered the choice between merging the widened copies and
-deleting them in a follow-up, he ruled for deleting them outright. Both ``get``
-methods and
-both suppressions went with it, and :mod:`pcapkit.protocols.internet.mh` now defines
-no ``get`` at all.
+deleting them in a follow-up, the owner ruled for deleting them outright. Both
+``get`` methods and both suppressions went with it, and
+:mod:`pcapkit.protocols.internet.mh` now defines no ``get`` at all.
 
 The one input where the copies **did** differ is why this matters beyond line count,
 and it is the trap for whoever writes the next override: the base branches on
@@ -303,9 +302,9 @@ And the reason a registry's spelling is never quietly normalised, from the same 
 an enumeration honours and keeps the original writing the registrar used, and
 case-insensitivity applies only to the selected registries where it makes logical sense
 -- ``TransportProtocol`` being one -- or where the RFC documentation itself recognises
-the values as case-insensitive, FTP and HTTP commands being the candidates he named.
-Only FTP survived the audit below: :rfc:`9110#section-9.1` makes the HTTP method token
-case-sensitive outright.
+the values as case-insensitive, FTP and HTTP commands being the candidates the owner
+named. Only FTP survived the audit below: :rfc:`9110#section-9.1` makes the HTTP method
+token case-sensitive outright.
 
 So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
 default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
@@ -340,8 +339,8 @@ The ruling above leaves one question open, and
 specification have to state a **comparison rule** for a registry to be treated
 case-insensitively, or does it also count when the authorities merely **disagree
 about spelling**? The owner ruled for the lenient reading, with ``TransportProtocol``
-as his own example: upper and lower casings are used throughout the RFCs and IANA's own
-data, and that mixed usage is itself an indication of case-insensitivity.
+as the example given: upper and lower casings are used throughout the RFCs and IANA's
+own data, and that mixed usage is itself an indication of case-insensitivity.
 
 So the test a new registry has to pass has **two limbs**, and satisfying either one
 justifies case-insensitivity:
