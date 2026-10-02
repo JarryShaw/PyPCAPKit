@@ -652,14 +652,14 @@ class AppTypeSplitTests(unittest.TestCase):
         picking the lowest set bit (``tcp``, iterating **LSB-first**) dispatched
         every composite containing it into the TCP registry whatever else it
         named. The owner's ruling on this PR (#836) retires that decoding
-        instead of refining it: "since it's no longer a Flag, `|` joined values
-        are no longer parsed and accepted, we will treat it as a whole, instead
-        of splitting." A bare-int composite is therefore refused exactly like
-        any other value that names no registry -- a stray bit, ``undefined``, or
-        a number with nothing to do with any transport -- through the one plain
-        :exc:`ValueError` :meth:`AppType._dispatch` already gives those. There is
-        no longer a "too many transports" refusal distinct from a "no
-        transport" one.
+        instead of refining it: with ``TransportProtocol`` no longer a flag,
+        ``|``-joined values are no longer parsed and accepted, and the value is
+        treated as a whole rather than split. A bare-int composite is therefore
+        refused exactly like any other value that names no registry -- a stray
+        bit, ``undefined``, or a number with nothing to do with any transport
+        -- through the one plain :exc:`ValueError` :meth:`AppType._dispatch`
+        already gives those. There is no longer a "too many transports" refusal
+        distinct from a "no transport" one.
 
         GitHub issue #860 step 2 PR 2 moved ``TransportProtocol`` off its old
         power-of-two values onto sequential ones instead (``undefined=0,
@@ -1408,16 +1408,16 @@ class AppTypeSplitTests(unittest.TestCase):
         ``max_val + 1`` -- right after ``dccp``'s 8, so ``.get('bogus')``
         minted 9 -- rather than stock ``ad4805f5f``'s ``max_val * 2``
         doubling, which mints 16 for that same call; the difference between
-        the two schemes is explained below. The maintainer's ruling refuses
-        minting outright either way: "Do not allow extension of
-        TransportProtocol at all." There is no bound left to walk and
-        nothing left to mint, so the refusal is the one plain
-        :class:`ValueError` every unrecognised name gets, whether or not it
-        happens to spell a composite like ``'tcp|udp'``. A later round of
-        this PR briefly gave the composite case its own, more specific
-        message; the owner's ruling retired that split too -- "since it's
-        no longer a Flag, `|` joined values are no longer parsed and
-        accepted, we will treat it as a whole, instead of splitting" -- so
+        the two schemes is explained below. The maintainer's ruling, given in
+        an inline review comment on this PR, refuses minting outright either
+        way: ``TransportProtocol`` is not to be extended at all. There is no
+        bound left to walk and nothing left to mint, so the refusal is the one
+        plain :class:`ValueError` every unrecognised name gets, whether or not
+        it happens to spell a composite like ``'tcp|udp'``. A later round of
+        this PR briefly gave the composite case its own, more specific message;
+        the owner's ruling retired that split too -- with ``TransportProtocol``
+        no longer a flag, ``|``-joined values are no longer parsed and
+        accepted, and the value is treated as a whole rather than split -- so
         ``'|'`` is not treated specially any more, here or in
         :meth:`AppType._dispatch` (see
         ``test_a_bare_int_composite_is_refused_as_a_whole``).
@@ -1480,15 +1480,15 @@ class AppTypeSplitTests(unittest.TestCase):
         readily as a genuinely OR-ed value, the mirror image of the
         minted-member defect above -- and that branch is gone now too (see
         ``test_a_bare_int_composite_is_refused_as_a_whole``).
-        :func:`~pcapkit.foundation.registry.protocols.register_apptype`
-        refuses the identical string the same generic way it refuses any
-        other unrecognised one, and the owner's ruling on this PR -- "since
-        it's no longer a Flag, `|` joined values are no longer parsed and
-        accepted, we will treat it as a whole, instead of splitting" --
-        settles :meth:`TransportProtocol.get` onto that same answer: ``'|'``
-        is not special, it is simply not the name of a declared member. A
-        review round of this PR briefly carved the composite case out with
-        its own diagnostic message; the owner's ruling retired that too.
+        :func:`~pcapkit.foundation.registry.protocols.register_apptype` refuses
+        the identical string the same generic way it refuses any other
+        unrecognised one, and the owner's ruling on this PR -- with
+        ``TransportProtocol`` no longer a flag, ``|``-joined values are no
+        longer parsed and accepted, and the value is treated as a whole rather
+        than split -- settles :meth:`TransportProtocol.get` onto that same
+        answer: ``'|'`` is not special, it is simply not the name of a declared
+        member. A review round of this PR briefly carved the composite case out
+        with its own diagnostic message; the owner's ruling retired that too.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
 

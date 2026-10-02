@@ -3,9 +3,9 @@
 
 The `__all__` half of #911 landed as #916 and is pinned by
 :mod:`tests.corekit.test_sentinel_exports_unit`. The owner left the second
-question -- where the four sentinels should be *defined* -- open, and settled it
-with a one-line ruling once offered the choice: *"Okay one module for all four it
-is."*
+question -- where the four sentinels should be *defined* -- open, offering
+either one module per sentinel or one module for all of them, and settled it with
+a one-line ruling once offered the choice: one module for all four.
 
 So :mod:`pcapkit.corekit.sentinels` is now the single defining module for all
 four -- :class:`~pcapkit.corekit.sentinels.NullType`,
@@ -255,11 +255,11 @@ class NoImportCycleTests(unittest.TestCase):
 class SentinelsModuleExportRuleTests(unittest.TestCase):
     """The canonical module follows its own house rule: objects only, in ``__all__``.
 
-    Nothing forces :mod:`pcapkit.corekit.sentinels` to honour the *"only export the
-    objects"* ruling for itself -- the ruling was stated about the shim locations,
-    which #916 already fixed -- but shipping a brand new module that violates the
-    rule its own docstring cites would be a strange way to land it, so this pins
-    that it does not.
+    Nothing forces :mod:`pcapkit.corekit.sentinels` to honour the ruling that the
+    sentinel objects, and not their types, are what gets exported -- the ruling
+    was stated about the shim locations, which #916 already fixed -- but shipping
+    a brand new module that violates the rule its own docstring cites would be a
+    strange way to land it, so this pins that it does not.
 
     """
 

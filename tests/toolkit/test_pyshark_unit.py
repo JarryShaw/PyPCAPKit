@@ -335,8 +335,11 @@ class PySharkToolkitTests(unittest.TestCase):
     def test_filter_name_fallback_resolves_the_measured_names(self) -> None:
         """Per the maintainer's ruling on #842, the fallback table covers
         **every** filter name the sweep measured as unambiguous, not only the
-        two it started with -- "so that we don't have to come back in future
-        and update". None of the names below spells a LinkType member, so
+        two it started with. The owner's reason on #842 for covering every
+        filter name that differs from the one pcapkit uses was that nobody
+        should have to come back later to update the table; he also wanted the
+        values generated if possible, or at least a comment pointing at the
+        source of truth. None of the names below spells a LinkType member, so
         each one raised before the expansion.
 
         Each pair was measured the same way as the rest of the table: the

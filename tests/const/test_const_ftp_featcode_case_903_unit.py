@@ -41,10 +41,10 @@ all-upper-case code (10 distinct -- ``AUTH``, ``HOST``, ``MDTM``, ``MLST``,
 all-lower-case one (5 distinct -- ``base``, ``feat``, ``hist``, ``nat6``,
 ``secu``), 1 is blank, and **none** is mixed. So the two authorities
 disagree about the casing of the same field, which is exactly the shape the
-owner's ruling on this issue calls case-insensitive, verbatim: *"I say
-lenient. TransportProtocol for example should be case-insensitive. Upper or
-lower cases are being used everywhere in RFC and IANA themselves so that's an
-indication of case insensitivity."*
+owner's ruling on this issue treats as case-insensitive. He chose the lenient
+reading of the criterion, with ``TransportProtocol`` as his example: when the
+RFC and IANA themselves use upper and lower case for the same field, that mix
+is itself an indication of case insensitivity.
 
 **Pre-change behaviour, measured before the fix** (throwaway process, no
 probe that could mint; ``_member_map_`` and ``_value2member_map_`` both 15
@@ -59,20 +59,21 @@ entries before and after)::
     FEATCode.get('auth'  ) -> KeyError: 'auth'
     FEATCode.get('Auth'  ) -> KeyError: 'Auth'
 
-**What the fix deliberately does not do.** It does not fold the stored
-members, and it does not rename one. Every member keeps the registrar's own
-casing, per the ruling on the *House Conventions* page -- *"enum
-should honour and keep their original writings as in the registrars"* -- so
-``FEATCode.get('BASE').name`` is still ``'base'`` and still says
-*placeholder*. Nor does it fold the *value* a lookup resolves to, which is
-what would have made the fold lossy. Only the inbound key is folded, and only
-after an exact name-or-value match has already missed, so
+**What the fix deliberately does not do.** It does not fold the stored members,
+and it does not rename one. Every member keeps the registrar's own casing, per
+the ruling on #877 that the *House Conventions* page records -- enumerations
+keep the registrars' own writing, and case-insensitivity is kept for the
+selected registries where it makes logical sense and/or the RFC itself treats
+the values as case-insensitive -- so ``FEATCode.get('BASE').name`` is still
+``'base'`` and still says *placeholder*. Nor does it fold the *value* a lookup
+resolves to, which is what would have made the fold lossy. Only the inbound key
+is folded, and only after an exact name-or-value match has already missed, so
 :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s own precedence (name before
 value) and its non-minting ``str`` path both survive untouched. RFC 5797's
 uniqueness rule is what makes the fold unambiguous rather than merely
-convenient: a registered ``BASE`` cannot coexist with the placeholder
-``base``, so there is no second member for the fold to hide -- pinned below
-by :meth:`FEATCodeCaseFoldSafetyTests.test_no_two_members_collide_when_folded`.
+convenient: a registered ``BASE`` cannot coexist with the placeholder ``base``,
+so there is no second member for the fold to hide -- pinned below by
+:meth:`FEATCodeCaseFoldSafetyTests.test_no_two_members_collide_when_folded`.
 
 **Contrast, pinned so the default is not quietly widened.** The audit's other
 ``str``-valued registries stay case-sensitive and each has a reason:

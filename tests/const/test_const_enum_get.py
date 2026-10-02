@@ -218,16 +218,16 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         self.assertIs(Hardware.get(99999, 0), Hardware(0))
         self.assertIs(Hardware.get(99999, 1), Hardware.Ethernet)
 
-        # GitHub issue #864 changes what an *unresolvable* default does,
-        # though: #584 passed a ``str`` where the signature says ``int``,
-        # and ``'X'`` is not a registered value either way -- before #864
-        # that failed with ``cls('X')``'s own error, naming ``'X'``; #864's
-        # ruling ("get should not mint unless it falls through the
-        # _missing_'s minted ranges") replaces ``cls(default)`` with a plain
-        # ``_value2member_map_`` lookup for exactly this reason, so an
-        # unresolvable default no longer gets an attempt of its own to fail
-        # from -- it now falls through to the *original* key lookup's own
-        # error instead, same as if no default had been supplied at all.
+        # GitHub issue #864 changes what an *unresolvable* default does, though:
+        # #584 passed a ``str`` where the signature says ``int``, and ``'X'`` is
+        # not a registered value either way -- before #864 that failed with
+        # ``cls('X')``'s own error, naming ``'X'``; #864's ruling (only
+        # ``register`` can mint, and ``get`` may mint only where the lookup falls
+        # through to the ranges ``_missing_`` mints) replaces ``cls(default)``
+        # with a plain ``_value2member_map_`` lookup for exactly this reason, so
+        # an unresolvable default no longer gets an attempt of its own to fail
+        # from -- it now falls through to the *original* key lookup's own error
+        # instead, same as if no default had been supplied at all.
         with self.assertRaises(ValueError) as caught:
             Hardware.get(99999, 'X')
         self.assertIn('99999', str(caught.exception))
@@ -256,16 +256,16 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         Before GitHub issue #864, that distinction was *also* observable
         through ``get()`` itself: a supplied-but-unresolvable ``-1`` failed
-        with its own name (``cls(-1)`` raising directly), differently from
-        the omitted case's original-key error. #864's ruling ("get should
-        not mint unless it falls through the _missing_'s minted ranges")
-        removes that particular observation for an *unregistered* default
-        specifically: ``default`` no longer reaches ``cls(default)`` at
-        all, and ``-1`` is not a registered value on either registry here
-        (both domains start at ``0``), so supplying it now converges on
-        exactly the *same* original-key error as omitting it outright,
-        rather than a distinguishable one of its own. The test's own title
-        is, if anything, more true after #864 than before: *omitting* the
+        with its own name (``cls(-1)`` raising directly), differently from the
+        omitted case's original-key error. #864's ruling (only ``register`` can
+        mint, and ``get`` may mint only where the lookup falls through to the
+        ranges ``_missing_`` mints) removes that particular observation for an
+        *unregistered* default specifically: ``default`` no longer reaches
+        ``cls(default)`` at all, and ``-1`` is not a registered value on either
+        registry here (both domains start at ``0``), so supplying it now
+        converges on exactly the *same* original-key error as omitting it
+        outright, rather than a distinguishable one of its own. The test's own
+        title is, if anything, more true after #864 than before: *omitting* the
         default raises for the original key, and now so does supplying an
         unregistered one -- pinned below for both.
 

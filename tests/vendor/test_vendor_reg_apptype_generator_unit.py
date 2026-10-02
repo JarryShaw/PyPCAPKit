@@ -62,12 +62,12 @@ with no bare literal left anywhere, no member's wrapper was load-bearing
 against a mypy error any more, since an ``auto()``-valued member infers as
 ``Any``, which is assignable to ``TransportProtocol`` with no cast at all.
 The owner's final ruling, given on GitHub pull request #874, reinstated the
-original shape instead, verbatim: *"undefined direct uses 0. then other real
-transport use auto. so we don't have to define a _start_ and the undefined
-declaration is explicit."* So ``undefined`` is a direct, explicit ``0``
-again, and ``tcp``/``udp``/``sctp``/``dccp`` continue from it via plain
-``auto()`` with no ``_start_`` needed at all -- ``auto()`` picks up the
-next value after whatever came immediately before it, explicit literal or
+original shape instead: ``undefined`` takes ``0`` directly, and the other real
+transports use ``auto()``, so that no ``_start_`` has to be defined and the
+declaration of ``undefined`` is explicit. So ``undefined`` is a direct,
+explicit ``0`` again, and ``tcp``/``udp``/``sctp``/``dccp`` continue from it
+via plain ``auto()`` with no ``_start_`` needed at all -- ``auto()`` picks up
+the next value after whatever came immediately before it, explicit literal or
 not. #770's own account above is therefore accurate again as shipped, and
 ``undefined`` is once more the one member among the five whose wrapper is
 load-bearing against a mypy error, exactly as it always was -- see
@@ -226,12 +226,13 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         a mypy error any more (measured at the time: unwrapping ``undefined``
         alone stayed mypy-clean, identically to unwrapping ``tcp`` instead).
         The owner's final ruling, given on GitHub pull request #874,
-        reinstated the original shape, verbatim: *"undefined direct uses 0.
-        then other real transport use auto. so we don't have to define a
-        _start_ and the undefined declaration is explicit."* So ``undefined``
-        is a direct, explicit ``cast('TransportProtocol', 0)`` again, exactly
-        as #770 first shaped it, and this test's own check (and #770's
-        asymmetry) are both back to describing the tree as it actually ships.
+        reinstated the original shape: ``undefined`` takes ``0`` directly, and
+        the other real transports use ``auto()``, so that no ``_start_`` has to
+        be defined and the declaration of ``undefined`` is explicit. So
+        ``undefined`` is a direct, explicit ``cast('TransportProtocol', 0)``
+        again, exactly as #770 first shaped it, and this test's own check (and
+        #770's asymmetry) are both back to describing the tree as it actually
+        ships.
 
         Measured directly, to prove the load-bearing claim rather than
         assert it: with ``undefined`` unwrapped to a bare ``0`` (everything

@@ -2,9 +2,10 @@
 """Phase 2 of GitHub issue #877, the unblocked half: re-parenting 11 helper
 enumerations across 8 files onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 
-The owner's ruling, verbatim: *"I still prefer to reparent all enums until a
-in house base class so that they can share common contracts."* Phase 1
-(#906) split :class:`~pcapkit.corekit.enum.EnumLookup` out of
+The owner's last word on #877 was to re-parent every non-registry enumeration
+onto an in-house base class so that they all share the same contracts; it
+overrode the recommendation the thread had reached before it. Phase 1 (#906)
+split :class:`~pcapkit.corekit.enum.EnumLookup` out of
 :class:`~pcapkit.corekit.enum.EnumRegistry` for exactly this; this module
 pins that the split half of the tree that is not blocked by #913 or #904
 actually took the base -- :class:`TransportProtocol
