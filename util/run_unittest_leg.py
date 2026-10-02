@@ -200,31 +200,11 @@ def main(argv: 'list[str] | None' = None) -> 'int':
         return 0 if result.wasSuccessful() else 1
     finally:
         elapsed = time.monotonic() - start
-        # In a ``finally`` so the measured number survives a leg that *fails*
-        # and a leg that unwinds on an exception -- including the
-        # ``KeyboardInterrupt`` CPython's default SIGINT handler raises,
-        # which :class:`unittest.case._Outcome`'s ``testPartExecutor``
-        # re-raises rather than swallowing. A GitHub Actions
-        # ``timeout-minutes`` expiry (see the ``unittest-ordering`` job in
-        # .github/workflows/unit-tests.yml) normally *does* still reach this
-        # line: the runner sends SIGINT first, with a 7.5s grace period,
-        # before SIGTERM (2.5s) and only then SIGKILL --
-        # ``actions/runner``'s ``src/Runner.Sdk/ProcessInvoker.cs``
-        # (``CancelAndKillProcessTree``, ``_sigintTimeout``/
-        # ``_sigtermTimeout``). A job-level timeout uses that same ladder,
-        # not a separate one: the backend's cancellation reaches the worker
-        # as a ``CancelRequest`` (``Runner.Worker/Worker.cs``), which cancels
-        # the token ``JobRunner``/``StepsRunner`` thread into this step's
-        # own ``ExecutionContext.CancellationToken`` -- the token
-        # ``Handlers/ScriptHandler.cs`` hands ``ProcessInvoker.ExecuteAsync``
-        # with ``killProcessOnCancel: false``, which is what selects the
-        # SIGINT/SIGTERM ladder for a ``run:`` step like this one, rather
-        # than an immediate kill. The real gap is narrower: a test blocked
-        # inside a C extension defers signal delivery, so the handler may
-        # not run before SIGTERM/SIGKILL follow it -- SIGKILL in particular
-        # still runs no Python code at all. What this line buys is the
-        # number from a run that finished, or was interrupted by SIGINT,
-        # close to the cap -- not one genuinely stuck in C.
+        # In a ``finally`` so a leg that *fails*, and a leg that unwinds on an
+        # exception -- including the ``KeyboardInterrupt`` CPython's default
+        # SIGINT handler raises, which :class:`unittest.case._Outcome`'s
+        # ``testPartExecutor`` re-raises rather than swallowing -- still
+        # reports its elapsed time.
         tally = ('interrupted before a result was available' if result is None else
                  f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
                  f'{len(result.errors)} error(s)')
