@@ -33,19 +33,19 @@ all rather than fall back to the base class's, and once a comparison against the
 showed them redundant, ruled for the second of the two options laid out there: deleting
 both overrides outright rather than widening them.
 
-Measured before that final ruling: neither override ever minted an alias --
-``__members__`` and ``list(cls)`` agree at 6 and 4 -- so what each docstring called
-"Backport support for original codes" was the int-or-name dual resolution
+Measured before that final ruling: neither override ever minted an alias -- ``__members__``
+and ``list(cls)`` agree at 6 and 4 -- so what each docstring called "Backport support for
+original codes" was the int-or-name dual resolution
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for every other
-:class:`int`-valued registry in this tree. Checked when acting on it: none of the 20 call
+:class:`int`-valued registry in this tree. Checked before acting on it: none of the 20 call
 sites either override had (all in tests, none in :mod:`pcapkit`) passed a key the base
 would have resolved differently. There was nothing left to backport, so ``get``/``get_all``
-on both now come from the base alone, the same as the five classes below that were pure re-parents from the
-start. :class:`ReparentedBasesTests` used to pin, alongside each class's own base-tuple
-change, that the ``@staticmethod`` decorator survived re-parenting and then the signature
-widening; now that the method is deleted rather than converted, there is nothing left to
-decorate, and :class:`AllSevenInheritTheBareClassmethodTests` covers these two the same way
-it always covered the other five.
+on both now come from the base alone, the same as the five classes below that were pure
+re-parents from the start. :class:`ReparentedBasesTests` used to pin, alongside each
+class's own base-tuple change, that the ``@staticmethod`` decorator survived re-parenting
+and then the signature widening; now that the method is deleted rather than converted,
+there is nothing left to decorate, and :class:`AllSevenInheritTheBareClassmethodTests`
+covers these two the same way it always covered the other five.
 
 Deleting the overrides is a real behaviour change, deliberately so: each branched on
 ``isinstance(key, int)`` and routed every other type -- ``None``, a :class:`float`, ... --
