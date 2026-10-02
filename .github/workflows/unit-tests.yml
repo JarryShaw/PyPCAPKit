@@ -790,7 +790,14 @@ jobs:
   # 70s, protocols 847s, toolkit 97s, utilities 42s, one leg per matrix cell --
   # see `timeout-minutes` below for why the job-level budget is no longer 20.
   #
-  # Three directories are deliberately absent from ``leg``, for reasons that
+  # tests/vendor was first left out of ``leg`` because running it this way
+  # surfaced an instance of the very defect this job exists to catch (issue
+  # #985): a stale VendorRuntimeWarning generation made assertWarnsRegex fail
+  # in tests/vendor/test_vendor_snapshot_restore_unit.py. That was fixed by
+  # re-resolving the class fresh per generation, so the directory is now a
+  # leg (vendor 83s, 118 directory tests, measured on this venv).
+  #
+  # Two directories are deliberately absent from ``leg``, for reasons that
   # are not this job's to fix:
   #
   #   * tests/corekit -- already known and already accepted, not a new
@@ -804,22 +811,6 @@ jobs:
   #     against tests/corekit would be permanently red for a characteristic
   #     the suite's own documentation already treats as expected, not a
   #     regression this job would be reporting.
-  #   * tests/vendor -- while sizing this job, running it this way surfaced a
-  #     previously-unknown instance of the *same* class of defect #981 is
-  #     about, in tests/vendor/test_vendor_snapshot_restore_unit.py: several
-  #     earlier-sorting files in that directory purge pcapkit the same
-  #     asymmetric way, and
-  #     test_a_failure_leaves_the_previous_file_byte_for_byte_intact's own
-  #     assertWarnsRegex(VendorRuntimeWarning, ...) ends up checking a stale
-  #     generation of that class against a warning raised under a fresher
-  #     one. Genuine, but a different file than this change touches and
-  #     outside what #981 asks this particular job to fix -- left out so
-  #     this new job lands green against a known and fixed cause, with the
-  #     finding tracked as #985 rather than silently hidden or fixed in
-  #     passing here. Until #985 lands, excluding the directory also means
-  #     the other 13 tests/vendor modules get no unittest-ordering coverage
-  #     at all, not just the one file #985 is about -- that cost is accepted
-  #     for now, not unnoticed.
   #   * tests/integration -- needs generated captures this script does not
   #     build, and is already run whole, under pytest, by the `integration`
   #     job above. The exclusion lives here, in this matrix, and nowhere else:
@@ -862,6 +853,7 @@ jobs:
           - protocols
           - toolkit
           - utilities
+          - vendor
 
     steps:
       - uses: actions/checkout@v7
