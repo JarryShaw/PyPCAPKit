@@ -173,8 +173,6 @@ import tempfile
 import unittest
 from unittest import mock
 
-from pcapkit.utilities.warnings import VendorRuntimeWarning
-
 #: Same two-dependency gate the rest of :file:`tests/vendor/` uses. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for its
 #: ``vendor_module`` default-target-list fallback), which pulls in every
@@ -194,11 +192,50 @@ class SnapshotRestoreTests(unittest.TestCase):
     """``run()``'s snapshot-and-restore, isolated from fetch/render/discovery."""
 
     def setUp(self) -> None:
+        """Re-resolve ``vendor_main``, ``Vendor`` and ``VendorRuntimeWarning``, fresh.
+
+        GitHub issue #985, the same generation skew #981 pins in
+        :class:`tests.test_base_class_contract.RegistrationGateTests`: a sibling
+        module under :file:`tests/vendor/` (several call
+        :func:`tests._support.purge_modules` on ``pcapkit``, e.g.
+        :mod:`tests.vendor.test_vendor_dest_path_unit`) mints a fresh generation
+        of every :mod:`pcapkit` class, and :func:`tests.conftest.restore_module_table`
+        only reconciles that back under :program:`pytest` -- plain :mod:`unittest`
+        loads no ``conftest`` at all. A module-level ``from pcapkit.utilities.warnings
+        import VendorRuntimeWarning`` would bind whatever generation was live when
+        *this module* was first imported, which under ``python -m unittest
+        discover`` is before any sibling has purged anything; the crawler under
+        test, instantiated through ``self.vendor_main``/``self.Vendor`` below,
+        raises whatever generation is current *when the test runs*. The two can
+        disagree, and :meth:`unittest.TestCase.assertWarnsRegex` tests each
+        captured warning with ``isinstance(warning_instance, expected_class)``
+        against the class object it was handed -- not by name, and not by identity
+        either, so a genuine *subclass* of the expected class does match. That is
+        no rescue here, because the two generations are not related classes at
+        all: re-importing re-mints ``VendorRuntimeWarning`` *and* its
+        ``BaseWarning`` base, so ``issubclass`` is false in *both* directions and
+        the two MROs first converge on the builtin :exc:`UserWarning`.
+        ``isinstance`` against a stale binding therefore rejects an instance of
+        the fresh generation, and the assertion fails with
+        "VendorRuntimeWarning not triggered" even though the warning was actually
+        raised, one line earlier, on stderr -- both classes carry the same
+        ``__module__`` and ``__name__``, so the message names exactly the class
+        that *was* raised.
+
+        ``vendor_main`` and ``Vendor`` were already immune to this, because they
+        were resolved here in ``setUp`` rather than at module level.
+        ``VendorRuntimeWarning`` was not; it joins them, resolved through
+        :func:`importlib.import_module` so this always compares against the
+        same generation the crawler actually raises.
+
+        """
         import pcapkit.vendor.__main__ as vendor_main
         from pcapkit.vendor.default import Vendor
 
         self.vendor_main = vendor_main
         self.Vendor = Vendor
+        self.VendorRuntimeWarning = importlib.import_module(
+            'pcapkit.utilities.warnings').VendorRuntimeWarning
         self._tempdir = tempfile.TemporaryDirectory(prefix='pcapkit-vendor-snapshot-restore-test-')
         self.addCleanup(self._tempdir.cleanup)
 
@@ -283,7 +320,7 @@ class SnapshotRestoreTests(unittest.TestCase):
         # RuntimeError. A bare falsy check cannot tell "failed for the right
         # reason" from "failed for the wrong one"; this can.
         with mock.patch('builtins.print', side_effect=_raise_on_render):
-            with self.assertWarnsRegex(VendorRuntimeWarning, 'simulated failure'):
+            with self.assertWarnsRegex(self.VendorRuntimeWarning, 'simulated failure'):
                 result = self.vendor_main.run(stub_crawler)
         self.assertFalse(result)
 
