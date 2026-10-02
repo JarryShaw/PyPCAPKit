@@ -32,7 +32,9 @@ sweep filtered on capitalised names did not see it when it was still spelled
 ``_Absent``/``_AbsentType``, with a leading underscore. :class:`SentinelPopulationTests`
 pins the count and the doc together, so the next sentinel cannot be added to one
 without the other. ``ABSENT`` is private and stays out of :attr:`__all__` in both
-directions, consistent with the #719 ruling that only the object goes in.
+directions -- not under the export ruling, which argues the opposite for an
+object like this one, but under the privacy ruling quoted below, which treats a
+sentinel documented as private as having no place in :attr:`__all__` at all.
 
 A follow-up to this same issue moved all four *definitions* into
 :mod:`pcapkit.corekit.sentinels`, per the owner's later ruling -- *"Okay one module
