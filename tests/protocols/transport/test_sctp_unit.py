@@ -1329,7 +1329,10 @@ class SCTPUnitTests(unittest.TestCase):
         self.assertEqual(data.stream_id, scapy_data.stream_id)
         self.assertEqual(data.stream_seq, scapy_data.stream_seq)
         self.assertEqual(int(data.ppid), scapy_data.proto_id)
-        self.assertEqual(data.data, scapy_data.data)
+        # scapy 2.8 dissects the DATA user payload by PPID and hands back a
+        # ``Raw`` packet where 2.7 returned ``bytes``; ``bytes()`` of either is
+        # the payload as it sits on the wire, and is a no-op on ``bytes``.
+        self.assertEqual(data.data, bytes(scapy_data.data))
         self.assertEqual(data.flags.I, bool(scapy_data.delay_sack))
         self.assertEqual(data.flags.U, bool(scapy_data.unordered))
         self.assertEqual(data.flags.B, bool(scapy_data.beginning))
