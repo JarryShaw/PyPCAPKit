@@ -77,13 +77,16 @@ class FEATCode(EnumRegistry, StrEnum):
        effect of building :class:`Command`'s own rows. GitHub issue #860:
        that import-time mutation was the same defect shape #775 removed
        from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not
-       previously noticed here. ``_missing_`` still unmints for a keyword
-       that turns up on the wire but names none of these -- the
-       extendability the owner asked to keep, verbatim: *"If it is expected
-       to be handled as our current approach in industry convention, then
-       we keep it extendable as is."* No custom ``__new__`` here, so the
-       base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.
-       _unregistered_member` needs no override.
+       previously noticed here. ``_missing_`` still unmints for a keyword that
+       turns up on the wire but names none of these -- the extendability the
+       owner conditionally asked to keep on GitHub issue #860: unsure what a
+       FEAT value absent from the RFC's list means in the CSV table, the owner
+       said that if the expected handling is our current approach, as industry
+       convention has it, the registry stays extendable as is, and then approved
+       declaring the registry's keywords as real members with ``_missing_``
+       still covering the rest. No custom ``__new__`` here, so the base's
+       generic :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+       needs no override.
 
     """
 
@@ -135,12 +138,13 @@ class FEATCode(EnumRegistry, StrEnum):
         codes are listed in all uppercase, whereas placeholder keywords ... are
         listed in lowercase"* -- so folding might look like it discards that
         distinction. It does not. Only the inbound ``key`` is folded; every
-        member keeps the registrar's own casing, per the same ruling's *"enum
-        should honour and keep their original writings as in the registrars"*,
-        so ``get('BASE').name`` is still ``'base'`` and still says placeholder.
-        And the uniqueness rule quoted above is what makes that safe: a real
-        keyword ``BASE`` could not be registered alongside the placeholder
-        ``base``, so there is no second member for the fold to hide.
+        member keeps the registrar's own casing, and the fold itself is backed by
+        the RFC: the final ruling on GitHub issue #877 is that an enum treats its
+        values as case-insensitive where the RFC states they are, and as
+        case-sensitive otherwise. So ``get('BASE').name`` is still ``'base'`` and
+        still says placeholder. And the uniqueness rule quoted above is what makes
+        that safe: a real keyword ``BASE`` could not be registered alongside the
+        placeholder ``base``, so there is no second member for the fold to hide.
 
         Folds only as a *fallback*. An exact name or value hit is delegated to
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` untouched, so the base's
@@ -252,15 +256,14 @@ class {NAME}(EnumRegistry, StrEnum):
 
     .. note::
 
-       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's
-       ruling on GitHub issue #860: *"only IANA registered ones are legit
-       values and we need register to properly create new entries. get will
-       not have sufficient information to create new ones."* Concretely
-       true here -- a bare wire command word carries no
-       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one
-       used to register a permanent member with all four hollowed out to
-       their defaults; :meth:`register` is the path that can actually supply
-       them.
+       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
+       GitHub issue #860 that ``get`` should not mint: only IANA-registered
+       values are legitimate members, a new one is properly created through
+       :meth:`register`, and ``get`` is not given enough information to create
+       one. Concretely true here -- a bare wire command word carries no
+       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one used
+       to register a permanent member with all four hollowed out to their
+       defaults; :meth:`register` is the path that can actually supply them.
 
     """
 

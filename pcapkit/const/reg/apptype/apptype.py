@@ -38,39 +38,36 @@ class TransportProtocol(EnumLookup, IntEnum):
     # ever ships type stubs letting it infer TransportProtocol on its own,
     # these casts start erroring instead of lingering as dead scaffolding.
     #
-    # Values are sequential from 0 rather than the power-of-two spacing
-    # this class carried while it still mixed in ``IntFlag`` --
-    # ``undefined`` is declared explicitly as ``0`` and every other member
-    # is ``auto()``, which continues from the preceding explicit value
-    # rather than needing its own ``_start_ = 0`` to begin there; the
-    # a ruling given in review of the work for #860 is explicit that
-    # ``undefined`` stays a direct ``0`` for that reason: "undefined
-    # direct uses 0. then other real transport use auto. so we don't have
-    # to define a _start_ and the undefined declaration is explicit."
-    # GitHub issue #808 already dropped the ``IntFlag`` base once nothing
-    # built a composite, and a ruling given in review of that work later
-    # retired ``|``-composite decoding entirely: "since it's no longer a
-    # Flag, `|` joined values are no longer parsed and accepted, we will
-    # treat it as a whole, instead of splitting." With no decoding left to
-    # protect, the owner's own further ruling on GitHub issue #860 retired
-    # the power-of-two spacing itself too: "2-power on TransportProtocol is
-    # mainly for the consideration of previously `tcp | udp`-alike code.
-    # But we dont accept this kind of piping anymore in the new logic so I
-    # think `auto()` is the expected behaviour." :meth:`AppType._dispatch`
-    # never decodes an ``int`` -- composed by hand with ``|`` or passed
-    # bare -- into anything narrower than the whole value it already is, on
-    # either numbering; a plain ``dict.get`` lookup cannot tell a composed
-    # ``int`` from any other one that happens to equal it. Treating every
-    # int as a whole is exactly what that ruling above asks for, and it
-    # is also why this renumbering changes what specific ints mean, not
-    # only what composed ones do:
-    # ``tcp | udp`` (``3``) used to name no registry and now resolves as
+    # Values are sequential from 0 rather than the power-of-two spacing this
+    # class carried while it still mixed in ``IntFlag`` -- ``undefined`` is
+    # declared explicitly as ``0`` and every other member is ``auto()``, which
+    # continues from the preceding explicit value rather than needing its own
+    # ``_start_ = 0`` to begin there. A ruling given in review of the work for
+    # #860 is explicit that ``undefined`` stays a direct ``0`` for that reason:
+    # the other, real transports use ``auto()``, so no ``_start_`` has to be
+    # defined and the declaration of ``undefined`` stays explicit. GitHub issue
+    # #808 already dropped the ``IntFlag`` base once nothing built a composite,
+    # and a ruling given in review of that work later retired ``|``-composite
+    # decoding entirely: once it is no longer a Flag, a ``|``-joined value is no
+    # longer parsed and accepted as a composite, and is treated as a whole
+    # instead of being split. With no decoding left to protect, the owner's own
+    # further ruling on GitHub issue #860 retired the power-of-two spacing
+    # itself too: that spacing existed mainly for code that composed values like
+    # ``tcp | udp``, which the new logic no longer accepts, so sequential
+    # ``auto()`` values are the expected behaviour. :meth:`AppType._dispatch`
+    # never decodes an ``int`` -- composed by hand with ``|`` or passed bare --
+    # into anything narrower than the whole value it already is, on either
+    # numbering; a plain ``dict.get`` lookup cannot tell a composed ``int`` from
+    # any other one that happens to equal it. Treating every int as a whole is
+    # exactly what that ruling above asks for, and it is also why this
+    # renumbering changes what specific ints mean, not only what composed ones
+    # do: ``tcp | udp`` (``3``) used to name no registry and now resolves as
     # ``sctp``'s own value, and a bare, uncomposed ``4`` -- previously
     # ``sctp``'s value -- now resolves as ``dccp``'s, silently, with no
-    # exception, since a real member sits at ``4`` either way. A caller
-    # holding an integer under the old spacing (composed or not) can
-    # therefore land on a different real transport's registry after this
-    # change, not merely be refused where it previously resolved.
+    # exception, since a real member sits at ``4`` either way. A caller holding
+    # an integer under the old spacing (composed or not) can therefore land on a
+    # different real transport's registry after this change, not merely be
+    # refused where it previously resolved.
 
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
@@ -102,24 +99,26 @@ class TransportProtocol(EnumLookup, IntEnum):
 
         Case folding is now the *only* thing this override adds. It used to
         convert the base's name-miss exception as well -- this class raised
-        :exc:`ValueError` where the base raised :exc:`KeyError` -- and GitHub
-        issue #923's ruling retired that conversion: *"Either ``ValueError``
-        or ``KeyError``, that's depending on how stdlib's ``Enum`` would raise
-        on these circumstances."* A stdlib ``E['nosuch']`` raises
-        :exc:`KeyError`, and #923's census of the 127 concrete
-        :class:`~pcapkit.corekit.enum.EnumLookup` subclasses -- taken before
-        the phase-2 re-parenting moved this class, so it is not among them --
-        found 119 already answering a name miss that way against 5 answering
-        with :exc:`ValueError`. Those 5 are :class:`AppType` and its four
-        transport registries, and they land there only because their own
+        :exc:`ValueError` where the base raised :exc:`KeyError` -- and the
+        ruling given in review of the work for #877, implemented in GitHub issue
+        #923, retired that conversion: the exception is to follow what stdlib's
+        ``Enum`` would raise in the circumstances, :exc:`ValueError` or
+        :exc:`KeyError` as the case may be, and is to come from
+        :mod:`pcapkit.utilities.exceptions` rather than being a builtin. A
+        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and #923's census of the
+        127 concrete :class:`~pcapkit.corekit.enum.EnumLookup` subclasses --
+        taken before the phase-2 re-parenting moved this class, so it is not
+        among them -- found 119 already answering a name miss that way against 5
+        answering with :exc:`ValueError`. Those 5 are :class:`AppType` and its
+        four transport registries, and they land there only because their own
         ``get()`` takes an :class:`int` port and never accepts a name at all,
-        rather than from any name-miss policy. So there was no policy here
-        to preserve, and a name miss now reaches the caller as
-        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
-        Maintainer ruling given in review of the work for #808 -- "Do not
-        allow extension of TransportProtocol at all" -- is untouched by
-        that: the refusal is still a refusal and still mints nothing, only
-        its exception class moved.
+        rather than from any name-miss policy. So there was no policy here to
+        preserve, and a name miss now reaches the caller as
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The
+        maintainer's ruling given in review of the work for #808, that
+        :class:`TransportProtocol` is not to be extended at all, is untouched by
+        that: the refusal is still a refusal and still mints nothing, only its
+        exception class moved.
 
         The base is a :class:`classmethod`
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
@@ -164,24 +163,22 @@ class TransportProtocol(EnumLookup, IntEnum):
         """
         if isinstance(key, str):
             return super().get(key.lower(), default)
-        # NOTE: maintainer ruling given in review of the work for #808: "Do
-        # not allow extension of TransportProtocol at all." A name that is
-        # not a declared member used to mint a brand-new one here, at
-        # ``max_val + 1`` (before that, ``max_val * 2``) -- an unbounded,
-        # ever-growing set of transport protocols nothing ever asked for.
-        # There is nothing left to walk now: it is simply refused, exactly
-        # like any other unrecognised name -- including one spelling a
-        # composite, e.g. ``'tcp|udp'``.
-        # ``'|'`` used to be intercepted here on its own, so a composite in
-        # disguise never got minted into a member whose own name lied about
-        # being a single transport; a further ruling given in review of the
-        # work for #808 retired that special case along with the rest of the
-        # composite handling once TransportProtocol stopped being a Flag at
-        # all: "since it's no longer a Flag, `|` joined values are no longer
-        # parsed and accepted, we will treat it as a whole, instead of
-        # splitting." A ``'|'``-joined name is therefore not special any
-        # more -- it is simply not the name of a declared member, and gets
-        # the same message as any other one that is not.
+        # NOTE: the maintainer ruled in review of the work for #808 that
+        # TransportProtocol is not to be extended at all. A name that is not a
+        # declared member used to mint a brand-new one here, at ``max_val + 1``
+        # (before that, ``max_val * 2``) -- an unbounded, ever-growing set of
+        # transport protocols nothing ever asked for. There is nothing left to walk
+        # now: it is simply refused, exactly like any other unrecognised name --
+        # including one spelling a composite, e.g. ``'tcp|udp'``. ``'|'`` used to be
+        # intercepted here on its own, so a composite in disguise never got minted
+        # into a member whose own name lied about being a single transport; a
+        # further ruling given in review of the work for #808 retired that special
+        # case along with the rest of the composite handling once TransportProtocol
+        # stopped being a Flag at all: a ``|``-joined value is no longer parsed and
+        # accepted as a composite, and is treated as a whole instead of being split.
+        # A ``'|'``-joined name is therefore not special any more -- it is simply
+        # not the name of a declared member, and gets the same message as any other
+        # one that is not.
         #
         # NOTE: the delegation below is exception-compatible for the keys this
         # signature admits -- an unrecognised :class:`int` still reaches the
@@ -2571,39 +2568,37 @@ class AppType(EnumRegistry, StrEnum):
         if subclass is not None:
             return subclass
 
-        # NOTE: everything that reaches here has already failed to match a
-        # real member's value at the dict lookup above, and nothing below
-        # decodes ``proto``'s bits looking for a partial answer either -- on
-        # either numbering. A genuine member reaching this point is
-        # ``undefined`` -- the four real transports would already have
-        # resolved above, and :meth:`TransportProtocol.get` cannot mint
-        # anything else, per the maintainer ruling given in review of the
-        # work for #808, against extending TransportProtocol at all -- and
-        # a bare :class:`int` reaches here whenever it matches no real
-        # member's value, e.g. a stray bit like ``17``. A composite built by
-        # hand used to reach here just as reliably, since no combination of
-        # the old power-of-
-        # two bits ever equalled a single real member's value; that is no
-        # longer true under this class's current sequential numbering --
+        # NOTE: everything that reaches here has already failed to match a real
+        # member's value at the dict lookup above, and nothing below decodes
+        # ``proto``'s bits looking for a partial answer either -- on either
+        # numbering. A genuine member reaching this point is ``undefined`` --
+        # the four real transports would already have resolved above, and
+        # :meth:`TransportProtocol.get` cannot mint anything else, per the
+        # maintainer ruling given in review of the work for #808, against
+        # extending TransportProtocol at all -- and a bare :class:`int` reaches
+        # here whenever it matches no real member's value, e.g. a stray bit like
+        # ``17``. A composite built by hand used to reach here just as reliably,
+        # since no combination of the old power-of-two bits ever equalled a
+        # single real member's value; that is no longer true under this class's
+        # current sequential numbering --
         # ``TransportProtocol.tcp | TransportProtocol.udp`` (``3``) is
         # ``sctp``'s own value now, so it resolves at the dict lookup above
-        # instead of reaching this point at all. A composite used to get
-        # its own :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
-        # decoded through :func:`~pcapkit.utilities.compat.show_flag_values`
-        # and naming every transport whose bit was set -- the fix for
-        # GitHub issue #759, where resolving a composite by picking its
-        # lowest set bit dispatched every one containing ``tcp`` into the
-        # TCP registry regardless of what else it named. A further ruling
-        # given in review of the work for #808 retired that decoding along
-        # with the rest of the composite handling: "since it's no longer a
-        # Flag, `|` joined values are no longer parsed and accepted, we will
-        # treat it as a whole, instead of splitting." So a composite's bits
-        # are never decoded looking for a partial answer any more, on
-        # either numbering -- it is looked up as the one whole value it
-        # already is, exactly like any int a caller might have written
-        # directly, and whether that whole value resolves or reaches this
-        # point depends only on whether some real member happens to equal
-        # it, never on whether a caller built it with ``|`` by hand.
+        # instead of reaching this point at all. A composite used to get its own
+        # :exc:`~pcapkit.utilities.exceptions.ProtocolError`, decoded through
+        # :func:`~pcapkit.utilities.compat.show_flag_values` and naming every
+        # transport whose bit was set -- the fix for GitHub issue #759, where
+        # resolving a composite by picking its lowest set bit dispatched every
+        # one containing ``tcp`` into the TCP registry regardless of what else
+        # it named. A further ruling given in review of the work for #808
+        # retired that decoding along with the rest of the composite handling:
+        # once it is no longer a Flag, a ``|``-joined value is no longer parsed
+        # and accepted as a composite, and is treated as a whole instead of
+        # being split. So a composite's bits are never decoded looking for a
+        # partial answer any more, on either numbering -- it is looked up as the
+        # one whole value it already is, exactly like any int a caller might
+        # have written directly, and whether that whole value resolves or
+        # reaches this point depends only on whether some real member happens to
+        # equal it, never on whether a caller built it with ``|`` by hand.
         raise ValueError(f'{proto!r} names no transport protocol registry of '
                          f'{cls.__name__}')
 
@@ -2666,17 +2661,20 @@ class AppType(EnumRegistry, StrEnum):
             return matched[0]
 
         # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
-        # for -- GitHub issue #860 stopped that from minting, on the owner's
-        # ruling: *"we should not mint on get still actually... get will not
-        # have sufficient information to create new ones."* A port outside
+        # for -- GitHub issue #860 stopped that from minting, following the
+        # owner's ruling there that ``get`` should not mint because it lacks the
+        # information to create a new member: only IANA-registered values are
+        # legitimate, and ``register`` is the proper way to add one. That ruling
+        # was given for the FEATCode, Command and Method branches, and this
+        # family was brought in line with it under the same issue. A port outside
         # ``0..65535`` still *raises* rather than reaching here at all. Before
         # #860, catching the ``None`` answer minted ``PORT_{key}_{transport}``
         # here directly -- GitHub issue #758's defect (it also minted for
-        # ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
-        # attribute access could reach) -- and this was the second, independent
-        # mint site on this method, distinct from the one inside
-        # :meth:`_missing_` itself: neither is a value anyone asked to be named,
-        # so both build an unregistered member instead of registering one.
+        # ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no attribute
+        # access could reach) -- and this was the second, independent mint site
+        # on this method, distinct from the one inside :meth:`_missing_` itself:
+        # neither is a value anyone asked to be named, so both build an
+        # unregistered member instead of registering one.
         ret = owner._missing_(key)
         if ret is None:
             ret = owner._unregistered_member(key, 'unknown', owner.__transport__)
@@ -2757,11 +2755,10 @@ class AppType(EnumRegistry, StrEnum):
         ``port`` to already carry a member and adds a further name for it;
         this requires the opposite -- ``port`` unclaimed in this registry --
         and mints the first. :meth:`get` can no longer do this itself as of
-        GitHub issue #860 (the owner's ruling: *"only IANA registered ones
-        are legit values and we need register to properly create new
-        entries. get will not have sufficient information to create new
-        ones."*), so this is now the only way to add a service this registry
-        does not already carry.
+        GitHub issue #860 (the owner's ruling there: only IANA-registered values
+        are legitimate, a new entry is properly created through :meth:`register`,
+        and ``get`` lacks the information to create one), so this is now the only
+        way to add a service this registry does not already carry.
 
         Deliberately scoped like :meth:`register_alias` to **this**
         per-transport registry rather than dispatched through
@@ -2959,8 +2956,9 @@ class AppType(EnumRegistry, StrEnum):
         # falls through to :meth:`_unregistered_member`, which is what IANA
         # assigning it nothing means -- GitHub issue #860 stopped this from
         # growing either lookup table or :data:`__registry__`, on the owner's
-        # ruling for the whole family: *"only IANA registered ones are legit
-        # values and we need register to properly create new entries."*
+        # ruling there that only IANA-registered values are legitimate and a new
+        # entry is properly created through ``register``; that ruling was given for
+        # the FEATCode, Command and Method branches, and this family follows it.
         if 225 <= value <= 241:
             #: [N/A] Reserved [RFC 1060]
             return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)

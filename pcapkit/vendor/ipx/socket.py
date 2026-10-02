@@ -252,13 +252,15 @@ RANGES = [
 
 #: Range names from :data:`RANGES` above that name an allocation *policy* for
 #: the pool (who may claim a code, or that nobody has) rather than a specific
-#: assigned protocol. The owner's original ruling on #775/#841 held
-#: ``Registered by Xerox`` out of this set as a real ownership fact rather
-#: than a placeholder. #775's final round converts it too, so this set no
-#: longer decides *whether* a range registers -- only *how its name is
-#: spelled*: these four keep the bare label with no hex suffix, since the
-#: label itself already says nothing was assigned, while ``Registered by
-#: Xerox`` keeps the hex-suffixed name it always rendered.
+#: assigned protocol. The maintainer's test, set in review of the branch-order
+#: fix for #841, is whether a label is the final concrete assigned name or only
+#: a notation for readers; the ruling on #775 kept ``Registered by Xerox`` out
+#: of this set on that test, because a proprietary protocol may expose no name
+#: of its own, so the company name serves as its name. #775's final round
+#: converts it too, so this set no longer decides *whether* a range registers --
+#: only *how its name is spelled*: these four keep the bare label with no hex
+#: suffix, since the label itself already says nothing was assigned, while
+#: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.
 UNASSIGNED_RANGE_NAMES = frozenset({
     'Experimental',
     'Dynamically Assigned Socket Numbers',
