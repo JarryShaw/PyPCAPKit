@@ -456,13 +456,13 @@ class AbsentType:
     normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so
     this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings
     and privacy is no longer signalled by the name at all. The owner's ruling
-    on #937, verbatim: *"we can change* ``_ABSENT`` *to* ``ABSENT`` *just
-    document it as private type/class in the documentation and not for public
-    use is enough."* So this class and :data:`ABSENT` stay exactly as private
-    as they were: nothing outside :mod:`pcapkit.protocols.protocol` reads
-    :data:`ABSENT`, from here or from there, and neither this module's nor
-    that module's :attr:`__all__` names either one. This docstring, and the
-    "Naming a Sentinel" section of
+    on GitHub issue #719, verbatim: *"we can change* ``_ABSENT`` *to*
+    ``ABSENT`` *just document it as private type/class in the documentation
+    and not for public use is enough."* So this class and :data:`ABSENT` stay
+    exactly as private as they were: nothing outside
+    :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from
+    there, and neither this module's nor that module's :attr:`__all__` names
+    either one. This docstring, and the "Naming a Sentinel" section of
     :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are
     what now records that fact in place of the leading underscore.
 
