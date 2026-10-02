@@ -11,7 +11,7 @@ writing, an easier path is simply keep a copy before running the sub-vendor
 and revert if anything failed."*
 
 That supersedes the atomic write entirely rather than adjusting it.
-:meth:`~pcapkit.vendor.default.Vendor._write_atomic` no longer exists;
+``Vendor._write_atomic`` no longer exists;
 :meth:`Vendor.__init__`'s last line is once again a plain::
 
     with open(const_file, 'w') as file:
@@ -55,7 +55,7 @@ The three permission-matching methods rounds 6-8 added
 (``test_existing_permissions_survive_a_successful_write``,
 ``test_a_read_only_destination_is_regenerated_and_stays_read_only``,
 ``test_a_new_destination_gets_umask_masked_permissions``) are gone with the
-code they pinned: :meth:`_write_atomic`'s mode-matching had three genuinely
+code they pinned: ``_write_atomic``'s mode-matching had three genuinely
 different branches (existing mode preserved via :func:`os.stat`, the
 ``0o444``-succeeds-anyway case, and a fresh-file umask fallback), each
 worth its own test. Snapshot-and-restore has no equivalent branching to
