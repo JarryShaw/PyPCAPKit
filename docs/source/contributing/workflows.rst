@@ -203,14 +203,15 @@ repository target the same reusable workflow, with the same input:
 * ``.github/workflows/deploy-pages.yml:47`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 
-``gate-only: true`` selects **two** of ``unit-tests.yml``'s **seven** jobs,
+``gate-only: true`` selects **two** of ``unit-tests.yml``'s **eight** jobs,
 not one: ``gate`` (the full suite, one Python version) and ``changelog``
 (checks ``CHANGELOG.md`` against its source entry). It skips the other
-**five** -- the four matrix jobs, ``test`` (five Python legs),
-``integration`` (five), ``engine-tests`` (a Python x engine matrix) and
-``pypcap-parity`` (two), each of which has already run once for this commit
-from Unit Tests' own ``push``/``pull_request`` triggers, so running any of
-them again per caller would test the same commit several times over -- and
+**six** -- the five matrix jobs, ``test`` (five Python legs),
+``integration`` (five), ``engine-tests`` (a Python x engine matrix),
+``pypcap-parity`` (two) and ``unittest-ordering`` (ten ``tests/`` legs),
+each of which has already run once for this commit from Unit Tests' own
+``push``/``pull_request`` triggers, so running any of them again per caller
+would test the same commit several times over -- and
 ``required-checks`` (see `Required Status Checks`_ below), gated out by its
 own ``if:`` rather than by having already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
@@ -219,9 +220,10 @@ comment (``unit-tests.yml:695-701``): ``create-release.yml`` feeds
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
 schedule-triggered GitHub Pages run): both ``Changelog drift`` and ``Gate
-(full suite, Python 3.14)`` succeeded, with the four matrix jobs -- ``Python
-${{ matrix.python-version }}``, ``Integration Python …``, ``Engines Python
-…`` and ``PyPCAP/PyPCAPFile parity Python …`` -- all reporting ``skipped``.
+(full suite, Python 3.14)`` succeeded, with the four matrix jobs that
+existed then -- ``Python ${{ matrix.python-version }}``, ``Integration
+Python …``, ``Engines Python …`` and ``PyPCAP/PyPCAPFile parity Python
+…`` -- all reporting ``skipped``.
 
 The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 -------------------------------------------------------------------------------
