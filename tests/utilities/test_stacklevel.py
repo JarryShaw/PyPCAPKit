@@ -13,10 +13,12 @@ complaint.
 
 It also returned ``-1``, and not only in theory: :func:`traceback.extract_stack`
 honours :data:`sys.tracebacklimit`, which :class:`BaseError
-<pcapkit.utilities.exceptions.BaseError>` sets to ``0`` for every loud error
-outside development mode. After the first such error the extracted stack was
-*empty*, the ``for``/``else`` branch ran, and every subsequent warning in the
-process got ``-1``.
+<pcapkit.utilities.exceptions.BaseError>` *used to* set to ``0`` for every loud
+error outside development mode (GitHub issue #719 removed that -- it prints its
+terse line through an exception hook instead, and no longer touches the global
+at all). After the first such error the extracted stack was *empty*, the
+``for``/``else`` branch ran, and every subsequent warning in the process got
+``-1``.
 
 Three groups of tests here, because they fail for different reasons:
 
@@ -363,13 +365,17 @@ class StacklevelAttributionTests(unittest.TestCase):
     def test_a_truncated_traceback_limit_does_not_blind_the_walk(self) -> None:
         """``sys.tracebacklimit = 0`` must not change the answer.
 
-        :class:`~pcapkit.utilities.exceptions.BaseError` sets it for every loud
-        error outside development mode, and :func:`traceback.extract_stack` honours
-        it -- returning an *empty* list, on which the old implementation fell
-        through to its ``for``/``else`` and returned ``-1``. So in ordinary use the
-        first error silently broke the attribution of every warning after it, for
-        the life of the process. It is also why this only ever reproduced in a
-        full-suite run: alone, this module never raises a loud error first.
+        :class:`~pcapkit.utilities.exceptions.BaseError` *used to* set it for
+        every loud error outside development mode (GitHub issue #719 removed
+        that), and :func:`traceback.extract_stack` honours it -- returning an
+        *empty* list, on which the old implementation fell through to its
+        ``for``/``else`` and returned ``-1``. So in ordinary use the first error
+        silently broke the attribution of every warning after it, for the life
+        of the process. It is also why this only ever reproduced in a
+        full-suite run: alone, this module never raised a loud error first.
+        Nothing in :mod:`pcapkit` sets the global any more, but the frame walk
+        this guards is correct regardless of who does, which is exactly the
+        point of setting it by hand below rather than provoking it indirectly.
 
         """
         saved = getattr(sys, 'tracebacklimit', None)
@@ -428,9 +434,9 @@ class StacklevelAttributionTests(unittest.TestCase):
     def error_site(self) -> 'logging.LogRecord':
         """Provoke one :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`.
 
-        Development mode is forced on because that is the branch which logs; the
-        other one sets :data:`sys.tracebacklimit` and reports no attribution to
-        read back.
+        Development mode is forced on because that is the branch which logs with
+        a ``stacklevel`` to read back at all; the other one logs with none,
+        installs pcapkit's own exception hook, and reports no attribution.
 
         """
         recorder = Recorder()

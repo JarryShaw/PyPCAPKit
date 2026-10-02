@@ -52,6 +52,7 @@ class QuietExceptionTests(unittest.TestCase):
     def setUp(self) -> None:
         self._saved_devmode = os.environ.get('PCAPKIT_DEVMODE')
         self._saved_tracebacklimit = getattr(sys, 'tracebacklimit', None)
+        self._saved_excepthook = sys.excepthook
         # The defect, and the traceback truncation, only reproduce outside
         # development mode.
         modules = bootstrap(devmode=False)
@@ -66,6 +67,10 @@ class QuietExceptionTests(unittest.TestCase):
                 del sys.tracebacklimit
         else:
             sys.tracebacklimit = self._saved_tracebacklimit
+        # A loud error constructed by any test below now installs an exception
+        # hook (see tests/utilities/test_exceptions_excepthook.py) rather than
+        # setting sys.tracebacklimit -- so this has to be restored too.
+        sys.excepthook = self._saved_excepthook
         if self._saved_devmode is None:
             os.environ.pop('PCAPKIT_DEVMODE', None)
         else:
@@ -125,6 +130,7 @@ class QuietExceptionTests(unittest.TestCase):
     def test_quiet_error_leaves_tracebacklimit_alone(self) -> None:
         if hasattr(sys, 'tracebacklimit'):
             del sys.tracebacklimit
+        before_hook = sys.excepthook
         before = _unrelated_failure()
 
         with capture(self.logger):
@@ -132,6 +138,11 @@ class QuietExceptionTests(unittest.TestCase):
             self.exceptions.BaseError('boom', quiet=True)
 
         self.assertFalse(hasattr(sys, 'tracebacklimit'))
+        # Also no side effect on the replacement mechanism: a quiet error must
+        # not install the exception hook either (see
+        # tests/utilities/test_exceptions_excepthook.py).
+        self.assertIs(sys.excepthook, before_hook)
+        self.assertIsNone(self.exceptions._previous_excepthook)
         self.assertEqual(_unrelated_failure(), before)
         self.assertGreater(before, 1)
 
@@ -191,15 +202,26 @@ class QuietExceptionTests(unittest.TestCase):
 
         self.assertEqual(recorder.messages, [('CRITICAL', 'StreamEOFError: boom')])
 
-    def test_loud_error_still_limits_the_traceback(self) -> None:
-        """The feature a loud error provides is unchanged."""
+    def test_loud_error_leaves_tracebacklimit_unset_and_installs_a_hook(self) -> None:
+        """The feature a loud error provides is unchanged; the mechanism is not.
+
+        A loud error used to shorten its own printing by setting
+        ``sys.tracebacklimit = 0`` -- process-wide, for every exception, for the
+        rest of the process, which is the #719 defect. It now installs an
+        exception hook instead, which only shortens the printing of a
+        :class:`~pcapkit.utilities.exceptions.BaseError` itself; see
+        ``tests/utilities/test_exceptions_excepthook.py`` for what that hook
+        actually prints, end to end.
+
+        """
         if hasattr(sys, 'tracebacklimit'):
             del sys.tracebacklimit
 
         with capture(self.logger):
             self.exceptions.BaseError('boom')
 
-        self.assertEqual(sys.tracebacklimit, 0)
+        self.assertFalse(hasattr(sys, 'tracebacklimit'))
+        self.assertTrue(getattr(sys.excepthook, 'installed_by_pcapkit', False))
 
 
 if __name__ == '__main__':

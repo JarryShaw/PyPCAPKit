@@ -13,9 +13,12 @@ Loud and Quiet Errors
 Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
 **loud** act: the error is logged once at :data:`logging.CRITICAL` on the
 :data:`~pcapkit.utilities.logging.logger` logger, and outside development mode
-:data:`sys.tracebacklimit` is set to ``0``, which suppresses the traceback frames
-entirely so the user sees the exception line rather than a walk through
-:mod:`pcapkit`'s internals.
+an exception hook is installed on :data:`sys.excepthook` and
+:data:`threading.excepthook`, the first time a loud error needs it, so the user
+sees the exception line rather than a walk through :mod:`pcapkit`'s internals.
+That hook only shortens the printing of a
+:class:`~pcapkit.utilities.exceptions.BaseError` itself; every other exception
+is handed on to whichever hook was previously installed, unchanged.
 
 ``quiet=True`` marks an error that :mod:`pcapkit` raises as **internal control
 flow** and expects to catch itself -- the
@@ -42,8 +45,8 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
    :show-inheritance:
 
    :param quiet: If :data:`True`, the error is neither logged nor allowed to
-      alter :data:`sys.tracebacklimit`; it is raised silently, as internal
-      control flow.
+      install the exception hook; it is raised silently, as internal control
+      flow.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 

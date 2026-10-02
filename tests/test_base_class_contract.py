@@ -61,10 +61,41 @@ to provide, and it is stronger than a convention.
    The invariant is asserted over the *library's own* classes instead, which is
    what it is actually about and is immune to collection order.
 
+   It fires, though, and GitHub issue #981 is the reproduction:
+   ``tests.protocols.application.test_http_unit`` run before this module, one
+   process, plain :mod:`unittest`, desyncs
+   :class:`RegistrationGateTests.test_user_style_subclass_registers_when_it_opts_in`
+   on all four suites. That test's own ``setUp`` calls
+   :func:`tests._support.purge_modules` on ``pcapkit`` and re-imports it from
+   source, which mints a *second generation* of every ``pcapkit`` class --
+   deliberately asymmetric, see that function's own docstring, and ordinarily
+   reconciled straight back by :func:`tests.conftest.restore_module_table`'s
+   autouse fixture. Plain :mod:`unittest` never loads that fixture, so the
+   second generation stays live: this module's own top-level ``from
+   pcapkit... import Engine, EngineBase, ...`` is now bound to the *first*
+   generation, while ``Dumper.__init_subclass__`` and
+   ``Extractor.register_engine``/``register_reassembly``/``register_traceflow``
+   each re-import their collaborators locally and so see the *second*. A
+   dynamically-created ``UserOptIn_engines(Engine, engine=...)`` is then a
+   first-generation class handed to a second-generation
+   ``issubclass(..., EngineBase)`` check -- which is false, two same-named but
+   distinct classes -- and the ``dumpers`` suite's registration lands in the
+   second generation's ``Extractor.__output__`` while
+   :meth:`RegistrationGateTests.registry` keeps reading the first generation's,
+   so the key the test just added looks absent. :class:`RegistrationGateTests`
+   closes this by never trusting its own module-level import for anything it
+   compares a *live* class against: :meth:`~RegistrationGateTests.setUp`
+   re-resolves every base/public pair and the ``Extractor`` singleton through
+   :func:`importlib.import_module` -- a no-op lookup in :data:`sys.modules`
+   when nothing has reimported, and the current generation when something has
+   -- so the suite always compares like generation to like, regardless of what
+   ran before it in the same process.
+
 """
 from __future__ import annotations
 
 import ast
+import importlib
 import pkgutil
 import unittest
 from typing import TYPE_CHECKING
@@ -239,21 +270,68 @@ class BaseClassAliasTests(unittest.TestCase):
 class RegistrationGateTests(unittest.TestCase):
     """Only a subclass of the public class registers -- pinned, per suite."""
 
-    #: ``(label, base, public, keyword, registry accessor)`` per suite. The
-    #: protocols suite is absent on purpose: its name registry is
-    #: ``pcapkit.protocols.__proto__`` and its hook takes no registration
-    #: keyword of this shape, so it is covered by
-    #: :meth:`test_library_classes_are_not_descendants_of_the_public_class` and
-    #: by ``tests/protocols/`` instead.
-    SUITES = (
-        ('engines', EngineBase, Engine, 'engine', 'ENGINE'),
-        ('reassembly', ReassemblyBase, Reassembly, 'protocol', 'REASSEMBLY'),
-        ('traceflow', TraceFlowBase, TraceFlow, 'protocol', 'TRACEFLOW'),
-        ('dumpers', DumperBase, Dumper, 'fmt', 'OUTPUT'),
-    )
+    def setUp(self) -> None:
+        """Re-resolve every base/public pair and the ``Extractor`` singleton, fresh.
 
-    @staticmethod
-    def registry(which: 'str') -> 'dict[str, Any]':
+        GitHub issue #981: this module's own top-level ``from pcapkit... import
+        Engine, EngineBase, ...`` binds whatever generation of those classes was
+        live when *this module* was imported. A sibling test that purges
+        ``pcapkit`` from :data:`sys.modules` and re-imports it --
+        :func:`tests._support.purge_modules`, deliberately asymmetric; see its own
+        docstring -- mints a new generation that :meth:`make_subclass` and
+        :meth:`registry` would otherwise silently disagree about, because
+        ``Dumper.__init_subclass__`` and ``Extractor.register_engine`` /
+        ``register_reassembly`` / ``register_traceflow`` each re-import their own
+        collaborators locally and so always see the *current* generation, not the
+        one this module's import statement captured.
+
+        :func:`tests.conftest.restore_module_table`'s autouse fixture reconciles
+        the two generations back together after every test, but only under
+        :program:`pytest` -- plain :mod:`unittest` loads no ``conftest`` at all, so
+        the mismatch survives into this test. The fix is to never compare this
+        module's own stale import against something that might be live-generation:
+        :func:`importlib.import_module` here returns the module straight out of
+        :data:`sys.modules` when nothing has reimported it (a no-op lookup, no
+        reload) and the current generation when something has, so every
+        comparison below is generation-consistent regardless of what ran earlier
+        in this process.
+
+        """
+        engine_mod = importlib.import_module('pcapkit.foundation.engines.engine')
+        reassembly_mod = importlib.import_module('pcapkit.foundation.reassembly.reassembly')
+        traceflow_mod = importlib.import_module('pcapkit.foundation.traceflow.traceflow')
+        dumper_mod = importlib.import_module('pcapkit.dumpkit.common')
+        protocol_mod = importlib.import_module('pcapkit.protocols.protocol')
+        self._extractor = importlib.import_module('pcapkit.foundation.extraction').Extractor
+
+        #: ``(label, base, public, keyword, registry accessor)`` per suite,
+        #: resolved fresh in :meth:`setUp` rather than carried as a class
+        #: attribute -- see this method's own docstring. The protocols suite is
+        #: absent on purpose: its name registry is ``pcapkit.protocols.__proto__``
+        #: and its hook takes no registration keyword of this shape, so it is
+        #: covered by :meth:`test_library_classes_are_not_descendants_of_the_public_class`
+        #: and by ``tests/protocols/`` instead.
+        self.SUITES = (
+            ('engines', engine_mod.EngineBase, engine_mod.Engine, 'engine', 'ENGINE'),
+            ('reassembly', reassembly_mod.ReassemblyBase, reassembly_mod.Reassembly,
+             'protocol', 'REASSEMBLY'),
+            ('traceflow', traceflow_mod.TraceFlowBase, traceflow_mod.TraceFlow,
+             'protocol', 'TRACEFLOW'),
+            ('dumpers', dumper_mod.DumperBase, dumper_mod.Dumper, 'fmt', 'OUTPUT'),
+        )  # type: tuple[tuple[str, type, type, str, str], ...]
+
+        #: ``(label, base, public)`` per suite, including ``protocols`` --
+        #: :meth:`test_library_classes_are_not_descendants_of_the_public_class`'s
+        #: own set, resolved the same fresh way for the same reason.
+        self._descendant_pairs = (
+            ('protocols', protocol_mod.ProtocolBase, protocol_mod.Protocol),
+            ('engines', engine_mod.EngineBase, engine_mod.Engine),
+            ('reassembly', reassembly_mod.ReassemblyBase, reassembly_mod.Reassembly),
+            ('traceflow', traceflow_mod.TraceFlowBase, traceflow_mod.TraceFlow),
+            ('dumpers', dumper_mod.DumperBase, dumper_mod.Dumper),
+        )  # type: tuple[tuple[str, type, type], ...]
+
+    def registry(self, which: 'str') -> 'dict[str, Any]':
         """The name-keyed registry for a suite.
 
         Args:
@@ -264,10 +342,10 @@ class RegistrationGateTests(unittest.TestCase):
 
         """
         return {
-            'ENGINE': Extractor.__engine__,
-            'REASSEMBLY': Extractor.__reassembly__,
-            'TRACEFLOW': Extractor.__traceflow__,
-            'OUTPUT': Extractor.__output__,
+            'ENGINE': self._extractor.__engine__,
+            'REASSEMBLY': self._extractor.__reassembly__,
+            'TRACEFLOW': self._extractor.__traceflow__,
+            'OUTPUT': self._extractor.__output__,
         }[which]
 
     def make_subclass(self, name: 'str', base: 'type', **kwargs: 'Any') -> 'type':
@@ -347,11 +425,7 @@ class RegistrationGateTests(unittest.TestCase):
         the thing to assert.
 
         """
-        for label, base, public in (('protocols', ProtocolBase, Protocol),
-                                    ('engines', EngineBase, Engine),
-                                    ('reassembly', ReassemblyBase, Reassembly),
-                                    ('traceflow', TraceFlowBase, TraceFlow),
-                                    ('dumpers', DumperBase, Dumper)):
+        for label, base, public in self._descendant_pairs:
             with self.subTest(suite=label):
                 found, pending = set(), [base]
                 while pending:
