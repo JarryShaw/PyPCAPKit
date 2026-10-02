@@ -238,22 +238,24 @@ class NoDefaultType:
     """Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`.
 
-    A dedicated class rather than a bare :class:`object`, per the owner's ruling
-    on #859: *"use dedicated class rather than bare object. Follow the house
-    convention."* A bare :class:`object` compares under ``is`` exactly as
-    safely as a dedicated class with no ``__eq__`` of its own does -- identity
-    comparison was never the problem an earlier revision's docstring here
-    overstated it to be. What a bare :class:`object` actually lacks is a
-    readable representation: it prints as ``<object object at 0x...>`` in a
-    signature, in :func:`help`, and in a traceback, where ``NoDefaultType()``
+    A dedicated class rather than a bare :class:`object`, per a ruling given in
+    review of the work for #857: *"use dedicated class rather than bare object.
+    Follow the house convention."* A bare :class:`object` compares under
+    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its
+    own does -- identity comparison was never the problem an earlier
+    revision's docstring here overstated it to be. What a bare
+    :class:`object` actually lacks is a readable representation: it prints
+    as ``<object object at 0x...>`` in a signature, in :func:`help`, and in
+    a traceback, where ``NoDefaultType()``
     -- via :meth:`__repr__` below -- prints as ``<NO_DEFAULT>``.
 
     Named ``NoDefaultType`` for the *class* because that half of the house
     convention is settled: both :class:`NullType` and :class:`NoValueType`
     use ``<Name>Type``. At the time, the *instance*'s own name was not
-    similarly settled -- the owner's follow-up on #859 was explicit that
-    ``NULL`` (``SCREAMING_CASE``) and ``NoValue`` (``CapWords``) disagreed, and
-    "mainly depends on how we need it." The need here was continuity:
+    similarly settled -- a follow-up given in review of the work for #857
+    was explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``
+    (``CapWords``) disagreed, and "mainly depends on how we need it." The
+    need here was continuity:
     ``NO_DEFAULT`` was already the name on ``main`` -- referenced in
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s signature,
     its docstring, and both comparison sites -- and that change was to *what
@@ -358,7 +360,7 @@ class NoDefaultType:
     compares by value rather than identity, and reload staleness is a
     *tracked* defect class here for other constructs -- see
     :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own
-    docstring note citing GitHub issues #425, #428 and #560, and
+    docstring note citing GitHub issues #425 and #555, and
     :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
     ``test_no_stale_class_survives_a_module_reload``, which reloads a module
     deliberately to pin the fix for exactly that class of bug elsewhere. A
@@ -454,13 +456,13 @@ class AbsentType:
     normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so
     this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings
     and privacy is no longer signalled by the name at all. The owner's ruling
-    on #937, verbatim: *"we can change* ``_ABSENT`` *to* ``ABSENT`` *just
-    document it as private type/class in the documentation and not for public
-    use is enough."* So this class and :data:`ABSENT` stay exactly as private
-    as they were: nothing outside :mod:`pcapkit.protocols.protocol` reads
-    :data:`ABSENT`, from here or from there, and neither this module's nor
-    that module's :attr:`__all__` names either one. This docstring, and the
-    "Naming a Sentinel" section of
+    on GitHub issue #719, verbatim: *"we can change* ``_ABSENT`` *to*
+    ``ABSENT`` *just document it as private type/class in the documentation
+    and not for public use is enough."* So this class and :data:`ABSENT` stay
+    exactly as private as they were: nothing outside
+    :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from
+    there, and neither this module's nor that module's :attr:`__all__` names
+    either one. This docstring, and the "Naming a Sentinel" section of
     :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are
     what now records that fact in place of the leading underscore.
 

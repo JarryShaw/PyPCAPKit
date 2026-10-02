@@ -27,10 +27,10 @@ argument raised :exc:`TypeError` instead of resolving through the base's own fal
 ``mypy``'s ``[override]`` check plus ``pylint``'s ``arguments-differ`` both flagged the
 resulting shape mismatch, silenced with a suppression. GitHub issue #935 first answered
 that on the owner's ruling, verbatim: *"I lean on 1"* -- widen both signatures to accept
-``default`` and delete the suppression. Asked, on the same issue, *"why must we have the
-two overrides tho? cant they directly fall back to the base class's?"*, the owner's final
-ruling went further, verbatim: *"I prefer (2) directly"* -- deleting both overrides
-outright rather than widening them.
+``default`` and delete the suppression. Asked, on GitHub pull request #940 -- which was
+implementing that widening -- *"why must we have the two overrides tho? cant they directly
+fall back to the base class's?"*, the owner's final ruling went further, verbatim: *"I
+prefer (2) directly"* -- deleting both overrides outright rather than widening them.
 
 Measured before acting on that final ruling: neither override ever minted an alias --
 ``__members__`` and ``list(cls)`` agree at 6 and 4 -- so what each docstring called
@@ -198,9 +198,9 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertEqual(len(list(ESPStatus)), 6)
 
     def test_fast_binding_acknowledgment_status(self) -> None:
-        """GitHub issue #935 later deleted its kept ``get`` override outright
-        (the owner's ruling, verbatim: *"I prefer (2) directly"*), so the
-        decorator this once pinned no longer exists to pin --
+        """GitHub pull request #940 later deleted its kept ``get`` override
+        outright (the owner's ruling, verbatim: *"I prefer (2) directly"*), so
+        the decorator this once pinned no longer exists to pin --
         :class:`AllSevenInheritTheBareClassmethodTests` now covers this class
         alongside the other six."""
         from aenum import IntEnum
@@ -450,10 +450,10 @@ class InheritedQuietnessTests(unittest.TestCase):
     carried their own ``get``, first through #930's re-parenting and
     briefly again through GitHub issue #935's first attempt, which widened
     that override to accept ``default`` rather than delete it. The owner's
-    final ruling on #935 deleted both outright instead, verbatim: *"I
-    prefer (2) directly"*. What this class pins did not change with that
-    deletion -- the quiet raise -- only *how* it is produced: through
-    :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+    final ruling, given on GitHub pull request #940, deleted both outright
+    instead, verbatim: *"I prefer (2) directly"*. What this class pins did not
+    change with that deletion -- the quiet raise -- only *how* it is produced
+    through :meth:`~pcapkit.corekit.enum.EnumLookup.get`
     (:mod:`pcapkit.corekit.enum`) directly now, rather than through an
     override that reconciled itself onto the base's shape.
 
@@ -573,12 +573,12 @@ class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
     Five were always this way -- pure re-parents, having defined no
     ``get`` of their own to begin with. The other two,
     :class:`FastBindingAcknowledgmentStatus` and
-    :class:`IPv6AddressPrefixCode`, joined them only at GitHub issue #935's
+    :class:`IPv6AddressPrefixCode`, joined them only at GitHub pull request #940's
     final revision: their own kept ``get`` stayed a :class:`staticmethod`
-    through #930's re-parenting and briefly again through #935's first
-    attempt (which widened it to accept ``default`` rather than delete it),
-    and only the owner's final ruling there -- verbatim, *"I prefer (2)
-    directly"* -- deleted it outright, collapsing the seven-way split this
+    through #930's re-parenting and briefly again through #935's first attempt
+    (which widened it to accept ``default`` rather than delete it), and only
+    the owner's final ruling on #940 -- outright deletion over widening the
+    signature -- removed it, collapsing the seven-way split this
     class used to test as five-plus-two into one uniform case. This class
     was named for the five alone before that ruling, and
     :class:`ReparentedBasesTests` pinned the other two's surviving

@@ -96,7 +96,7 @@ jobs:
       # `python_version < '3.12'` marker lets it install), installing it turned
       # 7 of the 10 HAS_PYPCAPFILE-gated methods this comment used to count
       # into failures, against a real bug in pcapkit/toolkit/pypcapfile.py's
-      # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #747 and #748 fixed
+      # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #743 and #746 fixed
       # that bug, and #751 gave the now-safe extra a home: the dedicated
       # `engine-tests` and `pypcap-parity` jobs below install it (15
       # HAS_PYPCAPFILE-gated methods between them), deliberately apart from
@@ -169,7 +169,7 @@ jobs:
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
-      # make installing it here a regression, now fixed by #747/#748. #751's
+      # make installing it here a regression, now fixed by #743/#746. #751's
       # `pypcap-parity` job below covers those 6 methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
       - name: Install package, test and generator dependencies
@@ -251,7 +251,7 @@ jobs:
   # jobs is textually part of the one above it, and that guard's pytest_jobs()
   # requires exactly one such literal per job section -- a second one here,
   # even in a comment, makes it think this job has two install lines and
-  # cannot tell which extras the run would have. See #849's cross-review.),
+  # cannot tell which extras the run would have. See #845's cross-review.),
   # so "Engines Python 3.12/3.13/3.14" reported
   # green while never exercising PyPCAPFile at all on three of five legs --
   # yet all three were promoted to ruleset 23497679's required checks anyway
@@ -482,7 +482,7 @@ jobs:
       # comment here would make that guard think this section holds two
       # baseline install lines), and running them unchecked used to mean a
       # broken base install on a `not-installable` cell read as "expected"
-      # while the job had installed and run nothing at all (#849's
+      # while the job had installed and run nothing at all (#845's
       # cross-review). They now run under this step's own explicit `set -eu`
       # below -- not "the shell's default", since GitHub's default for a
       # Linux `run:` step is plain `bash -e {0}` with no `pipefail`, and
@@ -546,7 +546,7 @@ jobs:
             # bare "5xx or 429" number scan: pip prints a "(NNN kB)" download
             # size on essentially every sdist fetch, and a Cython-generated
             # .c file runs to thousands of lines, so an unanchored bare-number
-            # match (#849's cross-review) fires on ordinary download-size
+            # match (#845's cross-review) fires on ordinary download-size
             # lines and on compiler diagnostics quoting a line number in that
             # range -- e.g. "Downloading pypcap-1.3.0.tar.gz (500 kB)" and
             # "pcap.c:501:24: error: ..." both matched, while the actual
@@ -596,8 +596,9 @@ jobs:
       # those files themselves assert once they see this interpreter's
       # version, e.g. PyPCAPFile's own
       # test_unsupported_reason_tracks_the_running_interpreter and PyShark's
-      # test_the_reason_tracks_the_running_interpreter (added in #846) both
-      # branch on sys.version_info against the engine's own PYTHON_CEILING.
+      # test_the_reason_tracks_the_running_interpreter (added for PyShark's
+      # real-capture coverage) both branch on sys.version_info against the
+      # engine's own PYTHON_CEILING.
       # That is what proves the decline actually fired and named the
       # interpreter, rather than this job asserting it from the outside.
       # Skipped entirely for `not-installable` cells -- see the install step.
@@ -958,7 +959,7 @@ jobs:
       # above, which each cover only the subset their own selection reaches.
       # PyPCAPFile is deliberately NOT added here -- see the `test` job's
       # comment above for the bug that used to make installing it a
-      # regression, now fixed by #747/#748. This job runs on 3.14 only, where
+      # regression, now fixed by #743/#746. This job runs on 3.14 only, where
       # PyPCAPFile's marker resolves to nothing regardless, so adding it here
       # would be a no-op that misleadingly suggests the extra is exercised by
       # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for
@@ -1129,7 +1130,7 @@ jobs:
   # keeps that visibility, but means duplicating this job's system-package
   # install, per-engine install logic, and test invocation -- measured at
   # 182 raw lines across those three steps, and GitHub Actions has no YAML
-  # anchors to shrink that with -- into a second job immediately after #849
+  # anchors to shrink that with -- into a second job immediately after #845
   # rebuilt this one, to close a single unverified edge. Flagging the risk
   # here instead: if a `required-checks` run ever goes red with only a 3.15
   # `engine-tests` leg failing underneath it, that is this exact gap and not

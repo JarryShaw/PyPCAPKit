@@ -7,11 +7,11 @@ inherit. It could not reach the eleven crawlers that replace that template with
 their own, because each of those carries a hand-copied ``get()`` -- and none of
 them carries ``register``, ``register_alias`` or ``get_all`` at all.
 
-The maintainer's ruling on #842, verbatim: *"to finalise the abstraction idea,
-get/get_all/register/register_alias should always exist on the const enums - so
-they're to be moved to the base class. And AppType's sub-base class will do its
-necessary overrides and dispatching logic; AppType subclasses will have their
-necessary overrides again pertaining their different contracts."*
+The design ruling on #842 finalises the abstraction: ``get``, ``get_all``,
+``register`` and ``register_alias`` should always exist on the const enums, so they
+move to the base class and every registry answers the same four calls. The
+``AppType`` sub-base class keeps its own overrides and dispatching logic, and its
+subclasses override further where their contracts differ.
 
 :class:`~pcapkit.corekit.enum.EnumRegistry` is tier one of that hierarchy. This
 module pins both halves of the claim: that the generated registries in this batch
@@ -322,7 +322,10 @@ class TCPFlagsConversionTests(unittest.TestCase):
 
 
 class GetContractTests(unittest.TestCase):
-    """*"get is a shortcut for ``[]`` operation and returns the canonical enum."*"""
+    """``get`` is a shortcut for the ``[]`` operation and returns the canonical enum.
+
+    The contract set on #842.
+    """
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -397,7 +400,10 @@ class GetContractTests(unittest.TestCase):
 
 
 class GetAllContractTests(unittest.TestCase):
-    """*"get_all returns all matching enums."*"""
+    """``get_all`` returns every matching enum, not only the canonical one.
+
+    The contract set on #842.
+    """
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -434,7 +440,11 @@ class GetAllContractTests(unittest.TestCase):
 
 
 class RegisterContractTests(unittest.TestCase):
-    """*"register mints new enum to the class at runtime with specified names."*"""
+    """``register`` mints a new enum on the class at runtime under the names it is given.
+
+    The contract set on #842: the caller supplies the names, so nothing has to guess
+    one blindly.
+    """
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -568,10 +578,13 @@ class RegisterContractTests(unittest.TestCase):
 
 
 class RegisterAliasContractTests(unittest.TestCase):
-    """*"register_alias(es) adds additional alias(es) to a given enum's mapping."*
+    """``register_alias`` adds additional alias(es) to a given enum's mapping.
 
-    And, on whether an enum must be given: *"actually i think it should always be
-    for an existing member"*.
+    The contract set on #842, which also ruled that an alias is always for an
+    existing member, unless ``AppType`` (and the concrete enums) must call it on a
+    member that does not exist yet. One method name then carries one convention
+    across the registries, and for the plain registries an alias is a caller-opt-in
+    name that IANA does not record.
 
     """
 
@@ -1360,10 +1373,15 @@ class NoDefaultSentinelTests(unittest.TestCase):
         """GitHub issue #911 reversed half of what this used to assert.
 
         It read ``assertIn('NoDefaultType', enum_module.__all__)`` -- the type
-        *and* the object were exported. The owner's ruling: *"we should ONLY
-        export the objects (like* ``NULL`` *) to users"*, so the type is out of
-        :attr:`__all__` while staying importable by its dotted path, which is
-        what the last assertion here pins.
+        *and* the object were exported. GitHub issue #719 is where the owner
+        settled the rule behind this: a module's ``__all__`` lists a
+        sentinel's object (such as ``NO_DEFAULT``), and deliberately leaves
+        its type (such as ``NoDefaultType``) out, because the type is not
+        part of the public surface -- exposing only the final object is what
+        keeps the published API to what a caller actually uses. GitHub issue
+        #911 is the issue that ruling's implementing work belongs to. The
+        type is out of :attr:`__all__` while staying importable by its
+        dotted path, which is what the last assertion here pins.
         """
         import pcapkit.corekit.enum as enum_module
 
@@ -1494,13 +1512,16 @@ class GetDefaultNoMintTests(unittest.TestCase):
     and the value branch's -- reached ``_missing_`` for a ``default`` that
     fell inside a still-minting registry's own range, growing the registry
     as a side effect of resolving ``default`` rather than ``key``. The
-    owner's ruling, verbatim: *"Take (b). Only register can mint. get should
-    not mint unless it falls through the ``_missing_``'s minted ranges."*,
-    and on the implementation, choosing option 1 of three: *"I think 1 is
-    correct mechanism we'd like."* -- ``default`` now resolves through a
-    plain ``_value2member_map_`` lookup only, so it cannot mint by
-    construction, while ``key`` resolution -- and whatever it lets
-    ``_missing_`` do -- is deliberately unchanged.
+    owner ruled on #864 that only ``register`` may mint: ``get`` mints only
+    as the natural outcome of ``key`` falling through one of ``_missing_``'s
+    minted ranges, never because a fallback happened to resolve. Of the
+    three mechanisms offered, the owner chose the one that cannot mint by
+    construction -- ``default`` now resolves through a plain
+    ``_value2member_map_`` lookup only, with no snapshot-and-undo and no
+    per-class marker to keep in step with future crawlers -- at the price of a
+    ``default`` in a declared-but-unassigned range no longer resolving.
+    ``key`` resolution -- and whatever it lets ``_missing_`` do -- is
+    deliberately unchanged.
     """
 
     def setUp(self) -> None:
@@ -1546,10 +1567,10 @@ class GetDefaultNoMintTests(unittest.TestCase):
     def test_key_path_minting_is_preserved(self) -> None:
         """Originally a no-change guard: ``EtherType.get(0x0888)`` -- no
         ``default`` at all -- used to mint ``Xyplex_0x0888`` through its own
-        ``_missing_``, back when ruling one's mint/unmint criterion
-        (*"get should not mint unless it falls through the _missing_'s
-        minted ranges"*) still classed ``Xyplex`` as a kept-minting,
-        real-attributed-name range. GitHub issue #775's final round converts
+        ``_missing_``, back when #775's original mint/unmint criterion still
+        classed ``Xyplex`` as a kept-minting, real-attributed-name range --
+        the one kind of mint #864 ruled ``get`` may still produce, by falling
+        through ``_missing_``'s minted ranges. GitHub issue #775's final round converts
         that range (and every other one still minting on ``EtherType``/
         :class:`~pcapkit.const.ipx.socket.Socket`) to :meth:`~pcapkit.corekit.
         enum.EnumRegistry._unregistered_member`, preserving the hex-suffixed

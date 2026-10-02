@@ -572,7 +572,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --
     one parameter under two numbers, the difference being HIP's own C-bit
     rather than an unrelated code -- and the field list below is that layout
-    exactly, since #696 widened :attr:`counter` to eight octets.
+    exactly, since #672 widened :attr:`counter` to eight octets.
     :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries
     two hand-written entries -- not a name-normalisation rule; ``R1_Counter``
     and ``R1_COUNTER`` differ only in case, and each needed its own line --
@@ -681,9 +681,10 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: parameter's packet context while they pack, and their own ``len``
     #: overwrites it before ``padding`` is reached.
     #:
-    #: This is the site #651 deliberately left alone and #664 documented as an
-    #: exclusion, because two defects in this parameter cancelled at the shape
-    #: its tests sampled and correcting either alone made the wire output worse.
+    #: This is the site #651 deliberately left alone, and its fix
+    #: documented as an exclusion, because two defects in this parameter
+    #: cancelled at the shape its tests sampled and correcting either alone
+    #: made the wire output worse.
     #: The shadowed ``len`` is 4 for any IPv6 locator, so the old expression
     #: appended exactly four octets whatever the locator count; and the wrong
     #: ``Length`` unit above made the declared ``Length`` ``4n`` where the

@@ -336,7 +336,7 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
             straight from its own arguments), so the only caller is a unit
             test. It is routed through :func:`parse_ip_address` anyway, so
             that it does not resurface the defect the moment a caller
-            reaches it -- the same kind of omission is how #481's single-site
+            reaches it -- the same kind of omission is how #469's single-site
             fix survived to become #491 and then #508 (c.f. #540).
 
             The description below uses :attr:`self.__class__.__name__

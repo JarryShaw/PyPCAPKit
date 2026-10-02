@@ -51,7 +51,7 @@ name: "Lint"
 # have been deleted, not because the code changed. Already superseded the
 # same day it was measured, too: a cross-review measured `R0801
 # duplicate-code` alone moving 400 -> 573 on `merge(f31e5114f, 83b58ebda)` --
-# this branch merged onto the `main` it was rebased against before #769
+# this branch merged onto the `main` it was rebased against before #768
 # landed there -- taking R to 823 and the total to 6220 on that merge. Still
 # true of `main` itself today, since this PR touches no `pcapkit/` file, but
 # named for the tree it was actually measured on rather than asserted of
@@ -62,7 +62,7 @@ name: "Lint"
 # actually unchanged between them, despite what an earlier revision of this
 # comment claimed: four files moved (`pcapkit/const/reg/apptype/apptype.py`,
 # `pcapkit/foundation/extraction.py`, `pcapkit/protocols/schema/schema.py`,
-# `pcapkit/vendor/reg/apptype/apptype.py`; tree 7270ad50 -> 2b9ac808), #764's
+# `pcapkit/vendor/reg/apptype/apptype.py`; tree 7270ad50 -> 2b9ac808), #758's
 # port-validation logic among them. E, W and C read identically either side of
 # that diff -- 90/4765/542 both times -- but 1a852698b is the tree actually
 # re-measured for this line, so that is what it is pinned to now, rather than

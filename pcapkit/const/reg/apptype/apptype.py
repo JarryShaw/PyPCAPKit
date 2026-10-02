@@ -43,12 +43,12 @@ class TransportProtocol(EnumLookup, IntEnum):
     # ``undefined`` is declared explicitly as ``0`` and every other member
     # is ``auto()``, which continues from the preceding explicit value
     # rather than needing its own ``_start_ = 0`` to begin there; the
-    # owner's own ruling on this issue (#860) is explicit that
+    # a ruling given in review of the work for #860 is explicit that
     # ``undefined`` stays a direct ``0`` for that reason: "undefined
     # direct uses 0. then other real transport use auto. so we don't have
     # to define a _start_ and the undefined declaration is explicit."
-    # GitHub issue #808 already dropped the ``IntFlag`` base once
-    # nothing built a composite, and GitHub PR #836's ruling later
+    # GitHub issue #808 already dropped the ``IntFlag`` base once nothing
+    # built a composite, and a ruling given in review of that work later
     # retired ``|``-composite decoding entirely: "since it's no longer a
     # Flag, `|` joined values are no longer parsed and accepted, we will
     # treat it as a whole, instead of splitting." With no decoding left to
@@ -61,7 +61,7 @@ class TransportProtocol(EnumLookup, IntEnum):
     # bare -- into anything narrower than the whole value it already is, on
     # either numbering; a plain ``dict.get`` lookup cannot tell a composed
     # ``int`` from any other one that happens to equal it. Treating every
-    # int as a whole is exactly what #836's ruling above asks for, and it
+    # int as a whole is exactly what that ruling above asks for, and it
     # is also why this renumbering changes what specific ints mean, not
     # only what composed ones do:
     # ``tcp | udp`` (``3``) used to name no registry and now resolves as
@@ -108,22 +108,23 @@ class TransportProtocol(EnumLookup, IntEnum):
         on these circumstances."* A stdlib ``E['nosuch']`` raises
         :exc:`KeyError`, and #923's census of the 127 concrete
         :class:`~pcapkit.corekit.enum.EnumLookup` subclasses -- taken before
-        #921 re-parented this class, so this class is not among them -- found
-        119 already answering a name miss that way against 5 answering with
-        :exc:`ValueError`. Those 5 are :class:`AppType` and its four transport
-        registries, and they land there only because their own ``get()`` takes
-        an :class:`int` port and never accepts a name at all, rather than from
-        any name-miss policy. So there was no policy here to preserve, and a
-        name miss now reaches the caller as
+        the phase-2 re-parenting moved this class, so it is not among them --
+        found 119 already answering a name miss that way against 5 answering
+        with :exc:`ValueError`. Those 5 are :class:`AppType` and its four
+        transport registries, and they land there only because their own
+        ``get()`` takes an :class:`int` port and never accepts a name at all,
+        rather than from any name-miss policy. So there was no policy here
+        to preserve, and a name miss now reaches the caller as
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
-        Maintainer ruling on GitHub PR #836 -- "Do not allow extension of
-        TransportProtocol at all" -- is untouched by that: the refusal is still
-        a refusal and still mints nothing, only its exception class moved.
+        Maintainer ruling given in review of the work for #808 -- "Do not
+        allow extension of TransportProtocol at all" -- is untouched by
+        that: the refusal is still a refusal and still mints nothing, only
+        its exception class moved.
 
         The base is a :class:`classmethod`
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
         moves from :class:`staticmethod` to :class:`classmethod` to
-        delegate at all -- the same move GitHub issue #908 and #915 made for
+        delegate at all -- the same move GitHub issue #908 made for
         :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call
         site in this tree for GitHub issue #877: all call this method by
         name, none take it as a bare callable or introspect ``__func__``,
@@ -163,19 +164,20 @@ class TransportProtocol(EnumLookup, IntEnum):
         """
         if isinstance(key, str):
             return super().get(key.lower(), default)
-        # NOTE: maintainer ruling on this PR (#836): "Do not allow extension
-        # of TransportProtocol at all." A name that is not a declared member
-        # used to mint a brand-new one here, at ``max_val + 1`` (before that,
-        # ``max_val * 2``) -- an unbounded, ever-growing set of transport
-        # protocols nothing ever asked for. There is nothing left to walk
-        # now: it is simply refused, exactly like any other unrecognised
-        # name -- including one spelling a composite, e.g. ``'tcp|udp'``.
+        # NOTE: maintainer ruling given in review of the work for #808: "Do
+        # not allow extension of TransportProtocol at all." A name that is
+        # not a declared member used to mint a brand-new one here, at
+        # ``max_val + 1`` (before that, ``max_val * 2``) -- an unbounded,
+        # ever-growing set of transport protocols nothing ever asked for.
+        # There is nothing left to walk now: it is simply refused, exactly
+        # like any other unrecognised name -- including one spelling a
+        # composite, e.g. ``'tcp|udp'``.
         # ``'|'`` used to be intercepted here on its own, so a composite in
         # disguise never got minted into a member whose own name lied about
-        # being a single transport; the owner's further ruling on this PR
-        # retired that special case along with the rest of the composite
-        # handling once TransportProtocol stopped being a Flag at all:
-        # "since it's no longer a Flag, `|` joined values are no longer
+        # being a single transport; a further ruling given in review of the
+        # work for #808 retired that special case along with the rest of the
+        # composite handling once TransportProtocol stopped being a Flag at
+        # all: "since it's no longer a Flag, `|` joined values are no longer
         # parsed and accepted, we will treat it as a whole, instead of
         # splitting." A ``'|'``-joined name is therefore not special any
         # more -- it is simply not the name of a declared member, and gets
@@ -2524,10 +2526,10 @@ class AppType(EnumRegistry, StrEnum):
                 the same as any caller passing a literal port-transport bitmask
                 -- falls through to ``int.__or__`` and returns a bare
                 :class:`int` rather than a member. Never split back into the
-                transports its bits would each name -- owner ruling on this PR
-                (#836) -- so it is looked up as the one whole value it
-                already is, exactly like any other bare int: refused when
-                that whole value names no registry, resolved when it
+                transports its bits would each name -- a ruling given in review
+                of the work for #808 -- so it is looked up as the one whole
+                value it already is, exactly like any other bare int: refused
+                when that whole value names no registry, resolved when it
                 happens to equal one instead. Since GitHub issue #860 moved
                 this class off power-of-two spacing, a hand-built composite
                 is no longer guaranteed to be the former -- see
@@ -2575,11 +2577,12 @@ class AppType(EnumRegistry, StrEnum):
         # either numbering. A genuine member reaching this point is
         # ``undefined`` -- the four real transports would already have
         # resolved above, and :meth:`TransportProtocol.get` cannot mint
-        # anything else, per this PR's own maintainer ruling against
-        # extending TransportProtocol at all -- and a bare :class:`int`
-        # reaches here whenever it matches no real member's value, e.g. a
-        # stray bit like ``17``. A composite built by hand used to reach
-        # here just as reliably, since no combination of the old power-of-
+        # anything else, per the maintainer ruling given in review of the
+        # work for #808, against extending TransportProtocol at all -- and
+        # a bare :class:`int` reaches here whenever it matches no real
+        # member's value, e.g. a stray bit like ``17``. A composite built by
+        # hand used to reach here just as reliably, since no combination of
+        # the old power-of-
         # two bits ever equalled a single real member's value; that is no
         # longer true under this class's current sequential numbering --
         # ``TransportProtocol.tcp | TransportProtocol.udp`` (``3``) is
@@ -2590,10 +2593,10 @@ class AppType(EnumRegistry, StrEnum):
         # and naming every transport whose bit was set -- the fix for
         # GitHub issue #759, where resolving a composite by picking its
         # lowest set bit dispatched every one containing ``tcp`` into the
-        # TCP registry regardless of what else it named. The owner's
-        # further ruling on this PR (#836) retired that decoding along with
-        # the rest of the composite handling: "since it's no longer a Flag,
-        # `|` joined values are no longer parsed and accepted, we will
+        # TCP registry regardless of what else it named. A further ruling
+        # given in review of the work for #808 retired that decoding along
+        # with the rest of the composite handling: "since it's no longer a
+        # Flag, `|` joined values are no longer parsed and accepted, we will
         # treat it as a whole, instead of splitting." So a composite's bits
         # are never decoded looking for a partial answer any more, on
         # either numbering -- it is looked up as the one whole value it

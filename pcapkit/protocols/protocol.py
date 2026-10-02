@@ -1741,8 +1741,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :func:`importlib.import_module` -- see #574. Memoising the resolved
             class here instead, whether under ``proto``, in ``registry``'s
             default factory, or in a cache beside the registry, would retain a
-            class that :func:`importlib.reload` then makes stale; #425 and #428
-            at this layer and #560 at the schema layer are all that same defect.
+            class that :func:`importlib.reload` then makes stale; #425 at
+            this layer and #555 at the schema layer are all that same defect.
 
         """
         protocol = ProtocolBase._lookup_registry(registry, proto)

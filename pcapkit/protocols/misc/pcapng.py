@@ -293,14 +293,15 @@ class PacketReception(EnumLookup, enum.IntEnum):
 # :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated the same
 # way as its :mod:`pcapkit.const.pcapng` siblings -- imported above as
 # ``Enum_TLSKeyLabel``, matching the ``Enum_*`` alias every one of its seven
-# :mod:`pcapkit.const.pcapng` siblings already carries in this file (the
-# owner's review on #890: this import was the only one of the eight lacking
-# it, because the class used to be *defined* here rather than imported, so
-# nothing applied the convention until this move made it an import). The
-# assignment below re-exports the same object under the module's own,
-# unaliased name, so ``from pcapkit.protocols.misc.pcapng import
-# TLSKeyLabel`` keeps working and still resolves to the identical class --
-# not a copy -- that every internal ``Enum_TLSKeyLabel`` reference below uses.
+# :mod:`pcapkit.const.pcapng` siblings already carries in this file (a
+# review of the work for #886: this import was the only one of the
+# eight lacking it, because the class used to be *defined* here rather than
+# imported, so nothing applied the convention until this move made it an
+# import). The assignment below re-exports the same object under the
+# module's own, unaliased name, so ``from pcapkit.protocols.misc.pcapng
+# import TLSKeyLabel`` keeps working and still resolves to the identical
+# class -- not a copy -- that every internal ``Enum_TLSKeyLabel`` reference
+# below uses.
 # :class:`WireGuardKeyLabel` below stays hand-written -- it is verified closed
 # (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names) and not a
 # registry, so filing it under :mod:`pcapkit.const` would misrepresent it as

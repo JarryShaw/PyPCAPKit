@@ -121,10 +121,11 @@ EXPECTED_RANGES = (
 #: numeric suffix. ``Registered by Xerox`` was the one that stayed at the
 #: time, on the theory that it states a real ownership fact rather than a
 #: status placeholder -- #775's *final* round converts it too, keeping its
-#: hex-suffixed name unchanged (the owner's ruling: preserve the existing
-#: name argument exactly, this is about not registering, not about renaming),
-#: so all five ranges resolve through :meth:`~pcapkit.corekit.enum.
-#: EnumRegistry._unregistered_member` now and none of them mint.
+#: hex-suffixed name unchanged -- PR #878 scoped the change this way:
+#: preserve the existing name argument exactly, since this is about not
+#: registering rather than about renaming -- so all five ranges resolve
+#: through :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+#: now and none of them mint.
 EXPECTED_MISSING_NAMES = {
     0x0000: 'Unspecified',                    # a defined member
     0x0001: 'Routing_Information_Packet',     # a defined member

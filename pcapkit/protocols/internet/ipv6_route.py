@@ -611,7 +611,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         # ``header.length`` is ``Hdr Ext Len``, in the 8-octet units
         # :rfc:`6554#section-3` specifies, not octets -- and it additionally
         # assumed 16-octet addresses, which an SRH only carries when ``CmprI``
-        # and ``CmprE`` are both 0. #489 called it out but deliberately left
+        # and ``CmprE`` are both 0. #487 called it out but deliberately left
         # it alone, because ``RPL.post_process`` raised on every pack back
         # then so there was no round trip to validate a replacement against.
         # #556 removed that blocker and #564 the mis-sized fixed area behind

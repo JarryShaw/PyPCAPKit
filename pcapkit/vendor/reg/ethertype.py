@@ -36,7 +36,7 @@ class EtherType(Vendor):
     #: carrying no real assignment -- a company holding the block but naming
     #: nothing (``DEC Unassigned``), or a range the list says is dead/invalid
     #: outright -- rather than a proprietary protocol's real name. The owner's
-    #: original ruling on #775/#847 held these two out as the only rows to
+    #: original ruling on #775/#841 held these two out as the only rows to
     #: convert to :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_
     #: member`, on the theory that a proprietary protocol's company name IS
     #: the final concrete name for every other row. #775's final round

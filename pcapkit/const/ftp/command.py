@@ -35,7 +35,7 @@ class FEATCode(EnumRegistry, StrEnum):
        :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than
        minting the per-command ones at import time as an incidental side
        effect of building :class:`Command`'s own rows. GitHub issue #860:
-       that import-time mutation was the same defect shape #861 removed
+       that import-time mutation was the same defect shape #775 removed
        from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not
        previously noticed here. ``_missing_`` still unmints for a keyword
        that turns up on the wire but names none of these -- the

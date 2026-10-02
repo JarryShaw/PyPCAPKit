@@ -47,8 +47,9 @@ therefore had no users to serve among the classes being re-parented.
    the base above was deliberately behaviour-preserving on its own, so that it
    could land while other work was still in flight on the files the re-parent
    touches, and the phase itself landed in two pull requests for exactly that
-   reason -- #921 for the 17 enumerations that were free to move at once, and
-   `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ for the
+   reason -- the first for the 17 enumerations that were free to move at
+   once, and the second, `#930
+   <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__, for the
    remaining seven once the files holding them freed up.
 
 The registry tier's own shape is the earlier ruling on GitHub issue #842,
@@ -340,12 +341,13 @@ class EnumLookup:
         on the same terms; the ``str`` path does not call the hook, for the reason
         given on :meth:`_validate_value` itself.
 
-        Both failure paths raise from :mod:`pcapkit.utilities.exceptions` rather
-        than a builtin, per the owner's ruling on GitHub issue #923: *"Either
-        ``ValueError`` or ``KeyError``, that's depending on how stdlib's
-        ``Enum`` would raise on these circumstances. And we should raise one
-        from ``pcapkit.utilities.exceptions`` rather builtin exceptions."* The
-        *shape* is unchanged by that ruling and deliberately so -- a name miss
+        Both failure paths raise from :mod:`pcapkit.utilities.exceptions`
+        rather than a builtin, per a ruling recorded on GitHub issue #923,
+        verbatim: *"Either ``ValueError`` or ``KeyError``, that's depending on
+        how stdlib's ``Enum`` would raise on these circumstances. And we
+        should raise one from ``pcapkit.utilities.exceptions`` rather builtin
+        exceptions."* The *shape* is unchanged by that ruling and
+        deliberately so -- a name miss
         stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
         matching ``E['nosuch']`` and ``E(999)`` on a stdlib
         :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete

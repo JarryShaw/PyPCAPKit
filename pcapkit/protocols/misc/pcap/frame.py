@@ -278,7 +278,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # other way round, which is what this reader used to do (see #618).
             #
             # The two only differ for a frame the snapshot length cut short, so
-            # until ``big_endian.pcap`` arrived with #614 no fixture here could
+            # until ``big_endian.pcap`` arrived with #605 no fixture here could
             # tell the two assignments apart.
             #
             # Worth knowing *why* this reader moved rather than the other one,

@@ -69,7 +69,7 @@ class LinkType(Vendor):
         ]
 
         # Value-aware guard for the ``sink`` decision below (GitHub issue #852,
-        # a follow-up to #848/#844). A row's notes mentioning "legacy" is
+        # a follow-up to #844). A row's notes mentioning "legacy" is
         # tcpdump's only textual signal for *which* member of a duplicated
         # value is the deprecated one, but that word can appear in a row's
         # notes for an unrelated reason -- e.g. referencing some other,
