@@ -25,7 +25,7 @@ they generate) are out of scope and untouched.
 Tier 1 fixed the *mechanism* (a lookup should never mint); it did not decide,
 registry by registry, which of the remaining ``_missing_`` bodies mint
 something worth keeping. That is tier 2; the owner's mint/unmint criterion was
-settled while fixing #841 and confirmed on #775 as the core of the ruling: a name
+settled on PR #847 and confirmed on #775 as the core of the ruling: a name
 is minted when it is the final concrete name an assignment gave, and left
 unminted when it is only a notation for the readers. A dynamically or statically
 assigned range is as unspecified as any other -- it gets concrete names when
@@ -125,7 +125,7 @@ the generated data join two kinds with ``/`` and would break under a plain
 ``test_commandtype_is_untouched``.
 :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, by contrast,
 *did* change -- on a different ruling than CommandType's, not the same one.
-GitHub issue #808 is what first retired ``|``-composite decoding: once
+GitHub PR #836 is what first retired ``|``-composite decoding: once
 ``TransportProtocol`` is no longer a ``Flag``, a ``|``-joined value is not parsed
 and accepted but treated as a whole, instead of being split. GitHub issue #860
 later drew the further consequence once nothing decoded a composite any more:
@@ -2700,7 +2700,7 @@ class TransportProtocolAutoTests(unittest.TestCase):
 
     def test_stale_power_of_two_comment_is_gone(self) -> None:
         """Per GitHub issue #860: the in-code comment claiming
-        the values "must keep" power-of-two spacing contradicted the #808
+        the values "must keep" power-of-two spacing contradicted the PR #836
         ruling that nothing composes a ``TransportProtocol`` any
         more, and is deleted rather than merely superseded -- checked
         against the generated source itself, not the docstring here, so a

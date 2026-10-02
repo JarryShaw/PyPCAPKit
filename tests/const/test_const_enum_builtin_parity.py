@@ -851,7 +851,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         ``.get('quic')`` there returns ``16``, right after ``dccp``'s ``8``.
         This PR's own intermediate revision, not #808, is what switched an
         unrecognised name to ``max_val + 1`` instead, minting ``9``. The
-        review ruling behind #808 removes the registration from
+        review ruling on PR #836 removes the registration from
         ``TransportProtocol.get`` entirely, regardless of which scheme numbered
         it: ``TransportProtocol`` is not to be extended at all. Unlike
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
@@ -1001,7 +1001,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_no_percent_formatting_survives_in_the_issue_804_pair(self) -> None:
         """Neither const module nor either generator still formats with ``%``.
 
-        The house convention, set in review of the fix for GitHub issue #759:
+        The house convention, set in review on PR #783:
         f-strings across the whole library, with ``%`` substitution only where
         it is inevitable. A ``__repr__`` is not an inevitable case, and neither
         is a ``wrap_comment`` argument.
