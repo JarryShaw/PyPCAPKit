@@ -26,25 +26,26 @@ that revision, though: re-parenting made both **advertise** the base's two-argum
 argument raised :exc:`TypeError` instead of resolving through the base's own fallback, and
 ``mypy``'s ``[override]`` check plus ``pylint``'s ``arguments-differ`` both flagged the
 resulting shape mismatch, silenced with a suppression. GitHub issue #935 first answered
-that on the owner's ruling, verbatim: *"I lean on 1"* -- widen both signatures to accept
-``default`` and delete the suppression. Asked, on GitHub pull request #940 -- which was
-implementing that widening -- *"why must we have the two overrides tho? cant they directly
-fall back to the base class's?"*, the owner's final ruling went further, verbatim: *"I
-prefer (2) directly"* -- deleting both overrides outright rather than widening them.
+that on the owner's lean toward its first option -- widen both signatures to accept
+``default`` and delete the suppression. On GitHub pull request #940, which was
+implementing that widening, the owner then asked why the two overrides had to exist at
+all rather than fall back to the base class's, and once a comparison against the base
+showed them redundant, ruled for the second of the two options laid out there: deleting
+both overrides outright rather than widening them.
 
-Measured before acting on that final ruling: neither override ever minted an alias --
-``__members__`` and ``list(cls)`` agree at 6 and 4 -- so what each docstring called
-"Backport support for original codes" was the int-or-name dual resolution
+Measured before that final ruling: neither override ever minted an alias -- ``__members__``
+and ``list(cls)`` agree at 6 and 4 -- so what each docstring called "Backport support for
+original codes" was the int-or-name dual resolution
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for every other
-:class:`int`-valued registry in this tree, and none of the 20 call sites either override
-had (all in tests, none in :mod:`pcapkit`) passed a key the base would have resolved
-differently. There was nothing left to backport, so ``get``/``get_all`` on both now come
-from the base alone, the same as the five classes below that were pure re-parents from the
-start. :class:`ReparentedBasesTests` used to pin, alongside each class's own base-tuple
-change, that the ``@staticmethod`` decorator survived re-parenting and then the signature
-widening; now that the method is deleted rather than converted, there is nothing left to
-decorate, and :class:`AllSevenInheritTheBareClassmethodTests` covers these two the same way
-it always covered the other five.
+:class:`int`-valued registry in this tree. Checked before acting on it: none of the 20 call
+sites either override had (all in tests, none in :mod:`pcapkit`) passed a key the base
+would have resolved differently. There was nothing left to backport, so ``get``/``get_all``
+on both now come from the base alone, the same as the five classes below that were pure
+re-parents from the start. :class:`ReparentedBasesTests` used to pin, alongside each
+class's own base-tuple change, that the ``@staticmethod`` decorator survived re-parenting
+and then the signature widening; now that the method is deleted rather than converted,
+there is nothing left to decorate, and :class:`AllSevenInheritTheBareClassmethodTests`
+covers these two the same way it always covered the other five.
 
 Deleting the overrides is a real behaviour change, deliberately so: each branched on
 ``isinstance(key, int)`` and routed every other type -- ``None``, a :class:`float`, ... --
@@ -62,8 +63,9 @@ the first time, calls ``get`` internally. Before this issue, that mattered becau
 itself raised **loud**: both overrides used to log once at :data:`logging.CRITICAL` and set
 :data:`sys.tracebacklimit` to ``0`` process-wide on a name miss, unlike the base's own quiet
 raise. GitHub issue #930 converged both onto the base's quiet shape instead -- a real
-behaviour change, not merely a re-parent -- settled on GitHub issue #933's follow-up ruling,
-verbatim: *"Oh wait. I meant, they should follow house convention and not to be loud."*
+behaviour change, not merely a re-parent -- settled on GitHub issue #933, where the owner
+reversed an earlier answer: the two overrides should follow the library's house convention
+for a name miss, which is the base's quiet raise, rather than stay loud as a special case.
 :class:`InheritedQuietnessTests` (renamed from ``KeptOverrideQuietnessTests`` once GitHub
 issue #935 deleted the overrides that name described) pins that the quiet shape survived
 the deletion too -- purely inherited now, rather than reconciled by hand on each class.
@@ -199,10 +201,10 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_fast_binding_acknowledgment_status(self) -> None:
         """GitHub pull request #940 later deleted its kept ``get`` override
-        outright (the owner's ruling, verbatim: *"I prefer (2) directly"*), so
-        the decorator this once pinned no longer exists to pin --
-        :class:`AllSevenInheritTheBareClassmethodTests` now covers this class
-        alongside the other six."""
+        outright (the owner preferred deleting it to widening it to accept
+        ``default``), so the decorator this once pinned no longer exists to
+        pin -- :class:`AllSevenInheritTheBareClassmethodTests` now covers this
+        class alongside the other six."""
         from aenum import IntEnum
 
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
@@ -450,10 +452,12 @@ class InheritedQuietnessTests(unittest.TestCase):
     carried their own ``get``, first through #930's re-parenting and
     briefly again through GitHub issue #935's first attempt, which widened
     that override to accept ``default`` rather than delete it. The owner's
-    final ruling, given on GitHub pull request #940, deleted both outright
-    instead, verbatim: *"I prefer (2) directly"*. What this class pins did not
-    change with that deletion -- the quiet raise -- only *how* it is produced
-    through :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+    final ruling, given on GitHub pull request #940, went the other way: an
+    earlier lean on GitHub issue #935 had favoured widening, but on
+    reviewing that attempt the owner preferred deleting both overrides
+    outright. What this class pins did not change with that deletion -- the
+    quiet raise -- only *how* it is produced through
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get`
     (:mod:`pcapkit.corekit.enum`) directly now, rather than through an
     override that reconciled itself onto the base's shape.
 
@@ -462,12 +466,12 @@ class InheritedQuietnessTests(unittest.TestCase):
     :data:`sys.tracebacklimit` to ``0`` process-wide on a name miss, unlike
     the base's own quiet raise. GitHub issue #930 converged both onto that
     quiet shape instead, settled on GitHub issue #933's follow-up ruling,
-    verbatim: *"Oh wait. I meant, they should follow house convention and
-    not to be loud."* (An earlier message on the same issue said the
-    opposite -- plain *"No."* -- and an earlier revision of this file
-    briefly pinned loud as the settled answer on the strength of that
-    message; the follow-up four minutes later superseded it, and what
-    follows is the corrected version.)
+    in which the owner reversed an earlier answer: the two should follow
+    house convention and not be loud. (The owner's first answer on the
+    same issue was a bare refusal, which selected the issue's own numbered
+    option for keeping them loud, and an earlier revision of this file
+    pinned loud as the settled answer on that basis; the follow-up five
+    minutes later reversed it, and what follows is the corrected version.)
 
     The first two methods are pinned quiet, and for two different reasons
     against the tree reverted to before #930.

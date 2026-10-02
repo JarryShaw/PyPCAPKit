@@ -17,8 +17,8 @@ used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,
 :class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,
 :class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and
 :class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling
-on GitHub issue #911, verbatim -- *"Okay one module for all four it is."* --
-moves the four *definitions* here; each original module keeps a three-line
+on GitHub issue #911, choosing one shared module over one module per
+sentinel, moves the four *definitions* here; each original module keeps a three-line
 re-export so that no existing ``from <module> import <name>`` breaks,
 including the ``if TYPE_CHECKING:``-only imports of the *types* that
 :mod:`pcapkit.foundation.registry.foundation`,
@@ -239,8 +239,8 @@ class NoDefaultType:
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`.
 
     A dedicated class rather than a bare :class:`object`, per a ruling given in
-    review of the work for #857: *"use dedicated class rather than bare object.
-    Follow the house convention."* A bare :class:`object` compares under
+    review of the work for #857, which asked for a dedicated class that
+    follows the house convention. A bare :class:`object` compares under
     ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its
     own does -- identity comparison was never the problem an earlier
     revision's docstring here overstated it to be. What a bare
@@ -254,8 +254,9 @@ class NoDefaultType:
     use ``<Name>Type``. At the time, the *instance*'s own name was not
     similarly settled -- a follow-up given in review of the work for #857
     was explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``
-    (``CapWords``) disagreed, and "mainly depends on how we need it." The
-    need here was continuity:
+    (``CapWords``) disagreed, and that the choice should follow what each
+    sentinel is needed for rather than a settled rule. The need here was
+    continuity:
     ``NO_DEFAULT`` was already the name on ``main`` -- referenced in
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s signature,
     its docstring, and both comparison sites -- and that change was to *what
@@ -456,9 +457,9 @@ class AbsentType:
     normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so
     this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings
     and privacy is no longer signalled by the name at all. The owner's ruling
-    on GitHub issue #719, verbatim: *"we can change* ``_ABSENT`` *to*
-    ``ABSENT`` *just document it as private type/class in the documentation
-    and not for public use is enough."* So this class and :data:`ABSENT` stay
+    on GitHub issue #719 accepted that rename, and held that documenting
+    ``ABSENT`` as a private type and class, not for public use, is enough
+    to replace the underscore. So this class and :data:`ABSENT` stay
     exactly as private as they were: nothing outside
     :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from
     there, and neither this module's nor that module's :attr:`__all__` names
@@ -486,6 +487,6 @@ class AbsentType:
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
 #: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it
 #: for exactly that one read. Private by convention and documentation only,
-#: not by a leading underscore -- see :class:`AbsentType`'s own docstring for
-#: why, per GitHub issue #937.
+#: not by a leading underscore, which GitHub issue #937 dropped -- see
+#: :class:`AbsentType`'s own docstring for why.
 ABSENT = AbsentType()
