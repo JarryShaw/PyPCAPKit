@@ -507,13 +507,16 @@
 <span class="sd">       effect of building :class:`Command`'s own rows. GitHub issue #860:</span>
 <span class="sd">       that import-time mutation was the same defect shape #775 removed</span>
 <span class="sd">       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not</span>
-<span class="sd">       previously noticed here. ``_missing_`` still unmints for a keyword</span>
-<span class="sd">       that turns up on the wire but names none of these -- the</span>
-<span class="sd">       extendability the owner asked to keep, verbatim: *"If it is expected</span>
-<span class="sd">       to be handled as our current approach in industry convention, then</span>
-<span class="sd">       we keep it extendable as is."* No custom ``__new__`` here, so the</span>
-<span class="sd">       base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
-<span class="sd">       _unregistered_member` needs no override.</span>
+<span class="sd">       previously noticed here. ``_missing_`` still unmints for a keyword that</span>
+<span class="sd">       turns up on the wire but names none of these -- the extendability the</span>
+<span class="sd">       owner conditionally asked to keep on GitHub issue #860: unsure what a</span>
+<span class="sd">       FEAT value absent from the RFC's list means in the CSV table, the owner</span>
+<span class="sd">       said that if the expected handling is our current approach, as industry</span>
+<span class="sd">       convention has it, the registry stays extendable as is, and then approved</span>
+<span class="sd">       declaring the registry's keywords as real members with ``_missing_``</span>
+<span class="sd">       still covering the rest. No custom ``__new__`` here, so the base's</span>
+<span class="sd">       generic :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`</span>
+<span class="sd">       needs no override.</span>
 
 <span class="sd">    """</span>
 
@@ -595,12 +598,13 @@
 <span class="sd">        codes are listed in all uppercase, whereas placeholder keywords ... are</span>
 <span class="sd">        listed in lowercase"* -- so folding might look like it discards that</span>
 <span class="sd">        distinction. It does not. Only the inbound ``key`` is folded; every</span>
-<span class="sd">        member keeps the registrar's own casing, per the same ruling's *"enum</span>
-<span class="sd">        should honour and keep their original writings as in the registrars"*,</span>
-<span class="sd">        so ``get('BASE').name`` is still ``'base'`` and still says placeholder.</span>
-<span class="sd">        And the uniqueness rule quoted above is what makes that safe: a real</span>
-<span class="sd">        keyword ``BASE`` could not be registered alongside the placeholder</span>
-<span class="sd">        ``base``, so there is no second member for the fold to hide.</span>
+<span class="sd">        member keeps the registrar's own casing, and the fold itself is backed by</span>
+<span class="sd">        the RFC: the final ruling on GitHub issue #877 is that an enum treats its</span>
+<span class="sd">        values as case-insensitive where the RFC states they are, and as</span>
+<span class="sd">        case-sensitive otherwise. So ``get('BASE').name`` is still ``'base'`` and</span>
+<span class="sd">        still says placeholder. And the uniqueness rule quoted above is what makes</span>
+<span class="sd">        that safe: a real keyword ``BASE`` could not be registered alongside the</span>
+<span class="sd">        placeholder ``base``, so there is no second member for the fold to hide.</span>
 
 <span class="sd">        Folds only as a *fallback*. An exact name or value hit is delegated to</span>
 <span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` untouched, so the base's</span>
@@ -719,15 +723,14 @@
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's</span>
-<span class="sd">       ruling on GitHub issue #860: *"only IANA registered ones are legit</span>
-<span class="sd">       values and we need register to properly create new entries. get will</span>
-<span class="sd">       not have sufficient information to create new ones."* Concretely</span>
-<span class="sd">       true here -- a bare wire command word carries no</span>
-<span class="sd">       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one</span>
-<span class="sd">       used to register a permanent member with all four hollowed out to</span>
-<span class="sd">       their defaults; :meth:`register` is the path that can actually supply</span>
-<span class="sd">       them.</span>
+<span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on</span>
+<span class="sd">       GitHub issue #860 that ``get`` should not mint: only IANA-registered</span>
+<span class="sd">       values are legitimate members, a new one is properly created through</span>
+<span class="sd">       :meth:`register`, and ``get`` is not given enough information to create</span>
+<span class="sd">       one. Concretely true here -- a bare wire command word carries no</span>
+<span class="sd">       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one used</span>
+<span class="sd">       to register a permanent member with all four hollowed out to their</span>
+<span class="sd">       defaults; :meth:`register` is the path that can actually supply them.</span>
 
 <span class="sd">    """</span>
 

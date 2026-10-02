@@ -513,15 +513,14 @@ names, c.f., <span class="target" id="index-0"></span><a class="rfc reference ex
 <p>[Command] FTP Command</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more, per the owner’s
-ruling on GitHub issue #860: <em>“only IANA registered ones are legit
-values and we need register to properly create new entries. get will
-not have sufficient information to create new ones.”</em> Concretely
-true here – a bare wire command word carries no
-<a class="reference internal" href="#pcapkit.const.ftp.command.Command.feat" title="pcapkit.const.ftp.command.Command.feat"><code class="xref py py-attr docutils literal notranslate"><span class="pre">feat</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.type" title="pcapkit.const.ftp.command.Command.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.conf" title="pcapkit.const.ftp.command.Command.conf"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conf</span></code></a>, so minting one
-used to register a permanent member with all four hollowed out to
-their defaults; <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply
-them.</p>
+<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more. The owner ruled on
+GitHub issue #860 that <code class="docutils literal notranslate"><span class="pre">get</span></code> should not mint: only IANA-registered
+values are legitimate members, a new one is properly created through
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get</span></code> is not given enough information to create
+one. Concretely true here – a bare wire command word carries no
+<a class="reference internal" href="#pcapkit.const.ftp.command.Command.feat" title="pcapkit.const.ftp.command.Command.feat"><code class="xref py py-attr docutils literal notranslate"><span class="pre">feat</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.type" title="pcapkit.const.ftp.command.Command.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.conf" title="pcapkit.const.ftp.command.Command.conf"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conf</span></code></a>, so minting one used
+to register a permanent member with all four hollowed out to their
+defaults; <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply them.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.feat">
@@ -986,13 +985,16 @@ minting the per-command ones at import time as an incidental side
 effect of building <a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s own rows. GitHub issue #860:
 that import-time mutation was the same defect shape #775 removed
 from <a class="reference internal" href="pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterType</span></code></a>, just not
-previously noticed here. <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> still unmints for a keyword
-that turns up on the wire but names none of these – the
-extendability the owner asked to keep, verbatim: <em>“If it is expected
-to be handled as our current approach in industry convention, then
-we keep it extendable as is.”</em> No custom <code class="docutils literal notranslate"><span class="pre">__new__</span></code> here, so the
-base’s generic <code class="xref py py-meth docutils literal notranslate">
-<span class="pre">_unregistered_member()</span></code> needs no override.</p>
+previously noticed here. <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> still unmints for a keyword that
+turns up on the wire but names none of these – the extendability the
+owner conditionally asked to keep on GitHub issue #860: unsure what a
+FEAT value absent from the RFC’s list means in the CSV table, the owner
+said that if the expected handling is our current approach, as industry
+convention has it, the registry stays extendable as is, and then approved
+declaring the registry’s keywords as real members with <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+still covering the rest. No custom <code class="docutils literal notranslate"><span class="pre">__new__</span></code> here, so the base’s
+generic <a class="reference internal" href="../corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
+needs no override.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.FEATCode.base">
@@ -1114,12 +1116,13 @@ to tell a real keyword from a placeholder – <em>“defined FEAT keywords
 codes are listed in all uppercase, whereas placeholder keywords … are
 listed in lowercase”</em> – so folding might look like it discards that
 distinction. It does not. Only the inbound <code class="docutils literal notranslate"><span class="pre">key</span></code> is folded; every
-member keeps the registrar’s own casing, per the same ruling’s <em>“enum
-should honour and keep their original writings as in the registrars”</em>,
-so <code class="docutils literal notranslate"><span class="pre">get('BASE').name</span></code> is still <code class="docutils literal notranslate"><span class="pre">'base'</span></code> and still says placeholder.
-And the uniqueness rule quoted above is what makes that safe: a real
-keyword <code class="docutils literal notranslate"><span class="pre">BASE</span></code> could not be registered alongside the placeholder
-<code class="docutils literal notranslate"><span class="pre">base</span></code>, so there is no second member for the fold to hide.</p>
+member keeps the registrar’s own casing, and the fold itself is backed by
+the RFC: the final ruling on GitHub issue #877 is that an enum treats its
+values as case-insensitive where the RFC states they are, and as
+case-sensitive otherwise. So <code class="docutils literal notranslate"><span class="pre">get('BASE').name</span></code> is still <code class="docutils literal notranslate"><span class="pre">'base'</span></code> and
+still says placeholder. And the uniqueness rule quoted above is what makes
+that safe: a real keyword <code class="docutils literal notranslate"><span class="pre">BASE</span></code> could not be registered alongside the
+placeholder <code class="docutils literal notranslate"><span class="pre">base</span></code>, so there is no second member for the fold to hide.</p>
 <p>Folds only as a <em>fallback</em>. An exact name or value hit is delegated to
 <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> untouched, so the base’s
 own precedence – name before value – and its non-minting <code class="docutils literal notranslate"><span class="pre">str</span></code>

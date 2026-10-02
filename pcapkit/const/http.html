@@ -741,11 +741,11 @@ which is automatically generated from <a class="reference internal" href="../ven
 <p>[Method] HTTP Method</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more, per the owner’s
-ruling on GitHub issue #860: <em>“only IANA registered ones are legit
-values and we need register to properly create new entries. get will
-not have sufficient information to create new ones.”</em> Concretely true
-here – a bare wire method verb carries no
+<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more. The owner ruled on
+GitHub issue #860 that <code class="docutils literal notranslate"><span class="pre">get</span></code> should not mint: only IANA-registered
+values are legitimate members, a new one is properly created through
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get</span></code> is not given enough information to create
+one. Concretely true here – a bare wire method verb carries no
 <a class="reference internal" href="#pcapkit.const.http.method.Method.safe" title="pcapkit.const.http.method.Method.safe"><code class="xref py py-attr docutils literal notranslate"><span class="pre">safe</span></code></a>/<a class="reference internal" href="#pcapkit.const.http.method.Method.idempotent" title="pcapkit.const.http.method.Method.idempotent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idempotent</span></code></a>, so minting one used to register a
 permanent member with both hollowed out to their defaults;
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply them.</p>

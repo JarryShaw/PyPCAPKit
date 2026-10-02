@@ -720,13 +720,15 @@
 
 <span class="c1">#: Range names from :data:`RANGES` above that name an allocation *policy* for</span>
 <span class="c1">#: the pool (who may claim a code, or that nobody has) rather than a specific</span>
-<span class="c1">#: assigned protocol. The owner's original ruling on #775/#841 held</span>
-<span class="c1">#: ``Registered by Xerox`` out of this set as a real ownership fact rather</span>
-<span class="c1">#: than a placeholder. #775's final round converts it too, so this set no</span>
-<span class="c1">#: longer decides *whether* a range registers -- only *how its name is</span>
-<span class="c1">#: spelled*: these four keep the bare label with no hex suffix, since the</span>
-<span class="c1">#: label itself already says nothing was assigned, while ``Registered by</span>
-<span class="c1">#: Xerox`` keeps the hex-suffixed name it always rendered.</span>
+<span class="c1">#: assigned protocol. The maintainer's test, set in review of the branch-order</span>
+<span class="c1">#: fix for #841, is whether a label is the final concrete assigned name or only</span>
+<span class="c1">#: a notation for readers; the ruling on #775 kept ``Registered by Xerox`` out</span>
+<span class="c1">#: of this set on that test, because a proprietary protocol may expose no name</span>
+<span class="c1">#: of its own, so the company name serves as its name. #775's final round</span>
+<span class="c1">#: converts it too, so this set no longer decides *whether* a range registers --</span>
+<span class="c1">#: only *how its name is spelled*: these four keep the bare label with no hex</span>
+<span class="c1">#: suffix, since the label itself already says nothing was assigned, while</span>
+<span class="c1">#: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.</span>
 <span class="n">UNASSIGNED_RANGE_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
     <span class="s1">'Experimental'</span><span class="p">,</span>
     <span class="s1">'Dynamically Assigned Socket Numbers'</span><span class="p">,</span>

@@ -518,11 +518,11 @@
 
 <span class="s1">    .. note::</span>
 
-<span class="s1">       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's</span>
-<span class="s1">       ruling on GitHub issue #860: *"only IANA registered ones are legit</span>
-<span class="s1">       values and we need register to properly create new entries. get will</span>
-<span class="s1">       not have sufficient information to create new ones."* Concretely true</span>
-<span class="s1">       here -- a bare wire method verb carries no</span>
+<span class="s1">       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on</span>
+<span class="s1">       GitHub issue #860 that ``get`` should not mint: only IANA-registered</span>
+<span class="s1">       values are legitimate members, a new one is properly created through</span>
+<span class="s1">       :meth:`register`, and ``get`` is not given enough information to create</span>
+<span class="s1">       one. Concretely true here -- a bare wire method verb carries no</span>
 <span class="s1">       :attr:`safe`/:attr:`idempotent`, so minting one used to register a</span>
 <span class="s1">       permanent member with both hollowed out to their defaults;</span>
 <span class="s1">       :meth:`register` is the path that can actually supply them.</span>

@@ -524,11 +524,11 @@ nothing on this tier depends on <code class="xref py py-mod docutils literal not
 <dt class="sig sig-object py" id="pcapkit.corekit.enum.EnumLookup._validate_value">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumLookup._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.enum.EnumLookup._validate_value" title="Link to this definition">¶</a></dt>
 <dd><p>Hook: reject <code class="docutils literal notranslate"><span class="pre">value</span></code> if this enumeration’s contract does not allow it.</p>
-<p>GitHub issue #877 requires some range-validation logic for the inheriting
-classes to hook into. This is that hook, and it is what the bare tier carries
-<strong>instead</strong> of <code class="docutils literal notranslate"><span class="pre">register</span></code>: what values are <em>legal</em> is something every enumeration
-has an opinion on, whereas who may <em>add</em> one is only an open registry’s
-concern.</p>
+<p>GitHub issue #877 requires some range-validation logic for the
+inheriting classes to hook into. This is that hook, and it is what the
+bare tier carries <strong>instead</strong> of <code class="docutils literal notranslate"><span class="pre">register</span></code>: what values are <em>legal</em>
+is something every enumeration has an opinion on, whereas who may <em>add</em>
+one is only an open registry’s concern.</p>
 <p>The base implementation accepts everything, because a base cannot know
 any subclass’s range. Overriding it is how a subclass states one – the
 shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries
@@ -601,11 +601,11 @@ normally; a value it does not is reported by raising.</p>
 <dt class="sig sig-object py" id="id0">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumLookup._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
 <dd><p>Hook: reject <code class="docutils literal notranslate"><span class="pre">value</span></code> if this enumeration’s contract does not allow it.</p>
-<p>GitHub issue #877 requires some range-validation logic for the inheriting
-classes to hook into. This is that hook, and it is what the bare tier carries
-<strong>instead</strong> of <code class="docutils literal notranslate"><span class="pre">register</span></code>: what values are <em>legal</em> is something every enumeration
-has an opinion on, whereas who may <em>add</em> one is only an open registry’s
-concern.</p>
+<p>GitHub issue #877 requires some range-validation logic for the
+inheriting classes to hook into. This is that hook, and it is what the
+bare tier carries <strong>instead</strong> of <code class="docutils literal notranslate"><span class="pre">register</span></code>: what values are <em>legal</em>
+is something every enumeration has an opinion on, whereas who may <em>add</em>
+one is only an open registry’s concern.</p>
 <p>The base implementation accepts everything, because a base cannot know
 any subclass’s range. Overriding it is how a subclass states one – the
 shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries
@@ -693,14 +693,14 @@ job and nobody else’s, which is the ruling #775 exists to carry
 out: an unrecognised or unregistered value does not become a registered
 member unless a user or caller explicitly creates one. A value inside a
 registry’s declared-but-unassigned range still resolves, through that
-registry’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>, to a member
-that is deliberately absent from the lookup tables – true outside the one registry
-named above, where such a value instead lands in <em>both</em> tables,
-exactly as <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> would leave it – for a non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key;
-the <code class="docutils literal notranslate"><span class="pre">str</span></code> case is qualified below. Both describe <code class="docutils literal notranslate"><span class="pre">key</span></code> resolution
-only. <code class="docutils literal notranslate"><span class="pre">default</span></code> never reaches <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> on either branch: a
-declared-but-unassigned <code class="docutils literal notranslate"><span class="pre">default</span></code> does not resolve to an
-unregistered member the way such a <code class="docutils literal notranslate"><span class="pre">key</span></code> does – it simply does
+registry’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>, to a
+member that is deliberately absent from the lookup tables – true
+outside the one registry named above, where such a value instead lands
+in <em>both</em> tables, exactly as <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> would leave it – for a
+non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key; the <code class="docutils literal notranslate"><span class="pre">str</span></code> case is qualified below. Both describe
+<code class="docutils literal notranslate"><span class="pre">key</span></code> resolution only. <code class="docutils literal notranslate"><span class="pre">default</span></code> never reaches <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> on
+either branch: a declared-but-unassigned <code class="docutils literal notranslate"><span class="pre">default</span></code> does not resolve
+to an unregistered member the way such a <code class="docutils literal notranslate"><span class="pre">key</span></code> does – it simply does
 not resolve, and the lookup error <code class="docutils literal notranslate"><span class="pre">key</span></code> itself would have raised
 propagates instead.</p>
 <p>For a <code class="docutils literal notranslate"><span class="pre">str</span></code> key, a name match wins over a value match – the two are

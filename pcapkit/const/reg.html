@@ -6977,11 +6977,10 @@ appropriate to their own call.</p>
 <code class="docutils literal notranslate"><span class="pre">port</span></code> to already carry a member and adds a further name for it;
 this requires the opposite – <code class="docutils literal notranslate"><span class="pre">port</span></code> unclaimed in this registry –
 and mints the first. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> can no longer do this itself as of
-GitHub issue #860 (the owner’s ruling: <em>“only IANA registered ones
-are legit values and we need register to properly create new
-entries. get will not have sufficient information to create new
-ones.”</em>), so this is now the only way to add a service this registry
-does not already carry.</p>
+GitHub issue #860 (the owner’s ruling there: only IANA-registered values
+are legitimate, a new entry is properly created through <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>,
+and <code class="docutils literal notranslate"><span class="pre">get</span></code> lacks the information to create one), so this is now the only
+way to add a service this registry does not already carry.</p>
 <p>Deliberately scoped like <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> to <strong>this</strong>
 per-transport registry rather than dispatched through
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a>: minting on one transport must never leak onto a

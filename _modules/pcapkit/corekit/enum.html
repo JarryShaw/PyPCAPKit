@@ -532,21 +532,25 @@
 <span class="sd">That is a three-tier hierarchy, of which this module is **tier one**:</span>
 
 <span class="sd">1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry</span>
-<span class="sd">   mapping one key to one member. The registries under :mod:`pcapkit.const`</span>
-<span class="sd">   inherit them from here, apart from the overrides below and a few hand-written</span>
-<span class="sd">   ``get`` overrides.</span>
-<span class="sd">2. ``AppType``'s sub-base -- overrides all four to route through its</span>
-<span class="sd">   ``_dispatch``, because a port lookup needs a transport protocol to be</span>
-<span class="sd">   answerable at all. Landed as of GitHub issue #860: not in this module, but</span>
-<span class="sd">   in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which now</span>
-<span class="sd">   mixes in :class:`EnumRegistry` directly and overrides ``get``, ``get_all``,</span>
-<span class="sd">   ``register`` and ``register_alias`` with that dispatch, plus</span>
-<span class="sd">   ``_unregistered_member`` for its own three extra attributes (``svc``,</span>
+<span class="sd">   mapping one key to one member. Two are its own, ``register`` and</span>
+<span class="sd">   ``register_alias``; ``get`` and ``get_all`` are declared one level up on</span>
+<span class="sd">   :class:`EnumLookup` and reach it by inheritance. So a registry under</span>
+<span class="sd">   :mod:`pcapkit.const` gets all four from this module, apart from the</span>
+<span class="sd">   overrides below and a few hand-written ``get`` overrides.</span>
+<span class="sd">2. ``AppType``'s sub-base -- overrides all four, routing the two lookups</span>
+<span class="sd">   through its ``_dispatch``, because a port lookup needs a transport protocol</span>
+<span class="sd">   to be answerable at all. Landed as of GitHub issue #860: not in this module,</span>
+<span class="sd">   but in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which</span>
+<span class="sd">   mixes in :class:`EnumRegistry` directly. ``register`` and ``register_alias``</span>
+<span class="sd">   are overridden without that dispatch, staying on the registry they are</span>
+<span class="sd">   called on, so that a write never leaks onto a transport IANA never assigned</span>
+<span class="sd">   the service to -- a minted member for the first, an alias for the second.</span>
+<span class="sd">   Plus ``_unregistered_member``, for its own three extra attributes (``svc``,</span>
 <span class="sd">   ``port``, ``proto``) that the generic one below does not know to set.</span>
 <span class="sd">3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``</span>
 <span class="sd">   -- turned out to need no override of their own at all: ``_dispatch``</span>
 <span class="sd">   already returns ``cls`` unchanged the moment ``cls.__registry__`` is not</span>
-<span class="sd">   :obj:`None`, which is true for exactly these four, so tier 2's methods</span>
+<span class="sd">   :obj:`None`, which is true for exactly these four, so tier 2's lookups</span>
 <span class="sd">   already answer correctly on each of them without a further layer.</span>
 
 <span class="sd">Before this, the four methods lived as generated *text*: written out longhand in</span>
@@ -636,11 +640,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Hook: reject ``value`` if this enumeration's contract does not allow it.</span>
 
-<span class="sd">        GitHub issue #877 requires some range-validation logic for the inheriting</span>
-<span class="sd">        classes to hook into. This is that hook, and it is what the bare tier carries</span>
-<span class="sd">        **instead** of ``register``: what values are *legal* is something every enumeration</span>
-<span class="sd">        has an opinion on, whereas who may *add* one is only an open registry's</span>
-<span class="sd">        concern.</span>
+<span class="sd">        GitHub issue #877 requires some range-validation logic for the</span>
+<span class="sd">        inheriting classes to hook into. This is that hook, and it is what the</span>
+<span class="sd">        bare tier carries **instead** of ``register``: what values are *legal*</span>
+<span class="sd">        is something every enumeration has an opinion on, whereas who may *add*</span>
+<span class="sd">        one is only an open registry's concern.</span>
 
 <span class="sd">        The base implementation accepts everything, because a base cannot know</span>
 <span class="sd">        any subclass's range. Overriding it is how a subclass states one -- the</span>
@@ -735,14 +739,14 @@
 <span class="sd">        out: an unrecognised or unregistered value does not become a registered</span>
 <span class="sd">        member unless a user or caller explicitly creates one. A value inside a</span>
 <span class="sd">        registry's declared-but-unassigned range still resolves, through that</span>
-<span class="sd">        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a member</span>
-<span class="sd">        that is deliberately absent from the lookup tables -- true outside the one registry</span>
-<span class="sd">        named above, where such a value instead lands in *both* tables,</span>
-<span class="sd">        exactly as :meth:`register` would leave it -- for a non-``str`` key;</span>
-<span class="sd">        the ``str`` case is qualified below. Both describe ``key`` resolution</span>
-<span class="sd">        only. ``default`` never reaches ``_missing_`` on either branch: a</span>
-<span class="sd">        declared-but-unassigned ``default`` does not resolve to an</span>
-<span class="sd">        unregistered member the way such a ``key`` does -- it simply does</span>
+<span class="sd">        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a</span>
+<span class="sd">        member that is deliberately absent from the lookup tables -- true</span>
+<span class="sd">        outside the one registry named above, where such a value instead lands</span>
+<span class="sd">        in *both* tables, exactly as :meth:`register` would leave it -- for a</span>
+<span class="sd">        non-``str`` key; the ``str`` case is qualified below. Both describe</span>
+<span class="sd">        ``key`` resolution only. ``default`` never reaches ``_missing_`` on</span>
+<span class="sd">        either branch: a declared-but-unassigned ``default`` does not resolve</span>
+<span class="sd">        to an unregistered member the way such a ``key`` does -- it simply does</span>
 <span class="sd">        not resolve, and the lookup error ``key`` itself would have raised</span>
 <span class="sd">        propagates instead.</span>
 
