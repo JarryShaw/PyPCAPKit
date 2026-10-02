@@ -64,21 +64,25 @@ differ.
 That is a three-tier hierarchy, of which this module is **tier one**:
 
 1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry
-   mapping one key to one member. The registries under :mod:`pcapkit.const`
-   inherit them from here, apart from the overrides below and a few hand-written
-   ``get`` overrides.
-2. ``AppType``'s sub-base -- overrides all four to route through its
-   ``_dispatch``, because a port lookup needs a transport protocol to be
-   answerable at all. Landed as of GitHub issue #860: not in this module, but
-   in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which now
-   mixes in :class:`EnumRegistry` directly and overrides ``get``, ``get_all``,
-   ``register`` and ``register_alias`` with that dispatch, plus
-   ``_unregistered_member`` for its own three extra attributes (``svc``,
+   mapping one key to one member. Two are its own, ``register`` and
+   ``register_alias``; ``get`` and ``get_all`` are declared one level up on
+   :class:`EnumLookup` and reach it by inheritance. So a registry under
+   :mod:`pcapkit.const` gets all four from this module, apart from the
+   overrides below and a few hand-written ``get`` overrides.
+2. ``AppType``'s sub-base -- overrides all four, routing the two lookups
+   through its ``_dispatch``, because a port lookup needs a transport protocol
+   to be answerable at all. Landed as of GitHub issue #860: not in this module,
+   but in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which
+   mixes in :class:`EnumRegistry` directly. ``register`` and ``register_alias``
+   are overridden without that dispatch, staying on the registry they are
+   called on, so that a write never leaks onto a transport IANA never assigned
+   the service to -- a minted member for the first, an alias for the second.
+   Plus ``_unregistered_member``, for its own three extra attributes (``svc``,
    ``port``, ``proto``) that the generic one below does not know to set.
 3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
    -- turned out to need no override of their own at all: ``_dispatch``
    already returns ``cls`` unchanged the moment ``cls.__registry__`` is not
-   :obj:`None`, which is true for exactly these four, so tier 2's methods
+   :obj:`None`, which is true for exactly these four, so tier 2's lookups
    already answer correctly on each of them without a further layer.
 
 Before this, the four methods lived as generated *text*: written out longhand in
@@ -164,11 +168,11 @@ class EnumLookup:
     def _validate_value(cls, value: 'Any') -> 'None':
         """Hook: reject ``value`` if this enumeration's contract does not allow it.
 
-        GitHub issue #877 requires some range-validation logic for the inheriting
-        classes to hook into. This is that hook, and it is what the bare tier carries
-        **instead** of ``register``: what values are *legal* is something every enumeration
-        has an opinion on, whereas who may *add* one is only an open registry's
-        concern.
+        GitHub issue #877 requires some range-validation logic for the
+        inheriting classes to hook into. This is that hook, and it is what the
+        bare tier carries **instead** of ``register``: what values are *legal*
+        is something every enumeration has an opinion on, whereas who may *add*
+        one is only an open registry's concern.
 
         The base implementation accepts everything, because a base cannot know
         any subclass's range. Overriding it is how a subclass states one -- the
@@ -260,14 +264,14 @@ class EnumLookup:
         out: an unrecognised or unregistered value does not become a registered
         member unless a user or caller explicitly creates one. A value inside a
         registry's declared-but-unassigned range still resolves, through that
-        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a member
-        that is deliberately absent from the lookup tables -- true outside the one registry
-        named above, where such a value instead lands in *both* tables,
-        exactly as :meth:`register` would leave it -- for a non-``str`` key;
-        the ``str`` case is qualified below. Both describe ``key`` resolution
-        only. ``default`` never reaches ``_missing_`` on either branch: a
-        declared-but-unassigned ``default`` does not resolve to an
-        unregistered member the way such a ``key`` does -- it simply does
+        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a
+        member that is deliberately absent from the lookup tables -- true
+        outside the one registry named above, where such a value instead lands
+        in *both* tables, exactly as :meth:`register` would leave it -- for a
+        non-``str`` key; the ``str`` case is qualified below. Both describe
+        ``key`` resolution only. ``default`` never reaches ``_missing_`` on
+        either branch: a declared-but-unassigned ``default`` does not resolve
+        to an unregistered member the way such a ``key`` does -- it simply does
         not resolve, and the lookup error ``key`` itself would have raised
         propagates instead.
 

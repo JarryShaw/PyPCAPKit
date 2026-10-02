@@ -631,12 +631,12 @@ class NonCanonicalKeyConvergenceTests(unittest.TestCase):
     out to make true, and the two overrides are exactly what kept it from
     being true before this.
 
-    Verified before writing this test: no call site in this tree -- tests
-    included -- ever passed ``get`` a key that is neither an :class:`int`
-    nor a :class:`str`, so this divergence was live on the two overrides
-    but never actually reached; its removal changes no behaviour any
-    caller in this tree observed, only what a caller passing such a key
-    would see.
+    Scope of that change, stated as narrowly as the evidence supports:
+    what moved is the exception a key of some third type raises. Whether
+    any caller ever passed one was not established -- a key reaching
+    ``get`` through a variable cannot be read off a search of the tree --
+    so this test pins the converged behaviour directly rather than resting
+    on the divergence having been unreachable.
     """
 
     def test_none_and_float_keys_all_raise_enumvalueerror(self) -> None:
