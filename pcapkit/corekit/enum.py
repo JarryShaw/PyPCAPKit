@@ -15,7 +15,7 @@ library is meant to inherit from, split by whether the enumeration may *grow*:
 * :class:`EnumRegistry`, a subclass of the above -- adds the **mutating** half:
   :meth:`~EnumRegistry.register`, :meth:`~EnumRegistry.register_alias`,
   :meth:`~EnumRegistry.register_aliases`, :meth:`~EnumRegistry._extend` and
-  :meth:`~EnumRegistry._unregistered_member`. Every generated enumeration under
+  :meth:`~EnumRegistry._unregistered_member`. Every generated registry under
   :mod:`pcapkit.const` inherits from here.
 
 That split follows the rules laid down in GitHub issue #877: a helper enumeration is
@@ -64,7 +64,7 @@ differ.
 That is a three-tier hierarchy, of which this module is **tier one**:
 
 1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry
-   mapping one key to one member. Every generated enumeration under
+   mapping one key to one member. Every generated registry under
    :mod:`pcapkit.const` inherits them from here.
 2. ``AppType``'s sub-base -- overrides all four to route through its
    ``_dispatch``, because a port lookup needs a transport protocol to be
@@ -578,17 +578,16 @@ class EnumRegistry(EnumLookup):
         """Add ``name`` as a further name for the member already at ``value``.
 
         Per GitHub issue #842, an alias adds a further name to a given member's
-        mapping -- so it needs an existing member to attach to, and this refuses
-        a value no member carries rather than falling through to
-        :meth:`register`. That holds for every registry, ``AppType`` included
-        (the issue's ``AppType`` exception concerns where an alias is routed, not
-        whether the member being aliased must already exist), whose own override
-        is stricter still: the port must already carry a
-        member of that very registry. What an alias means also differs away
-        from ``AppType``: on every other registry it is a custom name the
-        caller opts into, not one recorded by the IANA registrars. Minting
-        under the name of an aliasing call would manufacture exactly the
-        unrecorded member #775 removes.
+        mapping -- so it needs an existing member to attach to, and this refuses a
+        value no member carries rather than falling through to :meth:`register`.
+        #842 settled on an alias always attaching to an existing member, leaving
+        open only whether ``AppType`` or a concrete enumeration might need to
+        alias a value no member carries. ``AppType``'s override does not: it
+        requires the port to already carry a member of that very registry. What an
+        alias means also differs away from ``AppType``: on every other registry it
+        is a custom name the caller opts into, not one recorded by the IANA
+        registrars. Minting under the name of an aliasing call would manufacture
+        exactly the unrecorded member #775 removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
