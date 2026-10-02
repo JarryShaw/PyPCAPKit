@@ -64,8 +64,9 @@ differ.
 That is a three-tier hierarchy, of which this module is **tier one**:
 
 1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry
-   mapping one key to one member. Every generated registry under
-   :mod:`pcapkit.const` inherits them from here.
+   mapping one key to one member. The registries under :mod:`pcapkit.const`
+   inherit them from here, apart from the overrides below and a few hand-written
+   ``get`` overrides.
 2. ``AppType``'s sub-base -- overrides all four to route through its
    ``_dispatch``, because a port lookup needs a transport protocol to be
    answerable at all. Landed as of GitHub issue #860: not in this module, but
@@ -581,13 +582,13 @@ class EnumRegistry(EnumLookup):
         mapping -- so it needs an existing member to attach to, and this refuses a
         value no member carries rather than falling through to :meth:`register`.
         #842 settled on an alias always attaching to an existing member, leaving
-        open only whether ``AppType`` or a concrete enumeration might need to
-        alias a value no member carries. ``AppType``'s override does not: it
-        requires the port to already carry a member of that very registry. What an
-        alias means also differs away from ``AppType``: on every other registry it
-        is a custom name the caller opts into, not one recorded by the IANA
-        registrars. Minting under the name of an aliasing call would manufacture
-        exactly the unrecorded member #775 removes.
+        open whether ``AppType`` or a concrete enumeration might need to alias a
+        value no member carries. ``AppType``'s override does not: it requires the
+        port to already carry a member of that very registry. What an alias means
+        also differs away from ``AppType``: on every other registry it is a custom
+        name the caller opts into, not one recorded by the IANA registrars.
+        Minting under the name of an aliasing call would manufacture exactly the
+        unrecorded member #775 removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
