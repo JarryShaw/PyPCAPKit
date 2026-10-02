@@ -716,10 +716,10 @@ class EnumKeyError(BaseError, KeyError):
     taste: ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises
     :exc:`ValueError`, so a lookup that misses by *name* is
     :exc:`KeyError`-derived and one that misses by *value* is
-    :exc:`ValueError`-derived. A ruling recorded on GitHub issue #923,
-    verbatim: *"Either ``ValueError`` or ``KeyError``, that's depending on how
-    stdlib's ``Enum`` would raise on these circumstances. And we should raise
-    one from ``pcapkit.utilities.exceptions`` rather builtin exceptions."*
+    :exc:`ValueError`-derived. That is a ruling given in review of #877's
+    phase-2 re-parenting, carried out by GitHub issue #923: raise
+    whichever of the two stdlib :class:`~enum.Enum` would raise in the same
+    circumstances, and raise it from this module rather than as a builtin.
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
     :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin
