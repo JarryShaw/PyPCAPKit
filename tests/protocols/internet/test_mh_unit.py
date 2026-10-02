@@ -1618,16 +1618,16 @@ class MHUnitTests(unittest.TestCase):
         ``TypeError: get() takes 1 positional argument but 2 were given``.
         GitHub issue #935's first ruling, verbatim *"I lean on 1"*, widened
         both signatures to accept ``default`` rather than delete them; asked
-        next *"why must we have the two overrides tho? cant they directly
-        fall back to the base class's?"*, the owner's final ruling went
-        further, verbatim: *"I prefer (2) directly"* -- deleting both
-        overrides outright. Both classes now inherit ``get`` from the base
-        exactly as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus`
-        -- the two pure re-parents already in this module -- always have, so
-        ``default`` now works the same way on all four, uniformly, because
-        there is only one implementation left to call. This test fails with
-        the ``TypeError`` above against the tree at 382375811, before either
-        of #935's rulings landed.
+        next, on GitHub pull request #940, *"why must we have the two
+        overrides tho? cant they directly fall back to the base class's?"*,
+        the owner's final ruling there went further, verbatim: *"I prefer (2)
+        directly"* -- deleting both overrides outright. Both classes now
+        inherit ``get`` from the base exactly as :class:`LMAAddressCode` and
+        :class:`LocalizedRoutingStatus` -- the two pure re-parents already in
+        this module -- always have, so ``default`` now works the same way on
+        all four, uniformly, because there is only one implementation left to
+        call. This test fails with the ``TypeError`` above against the tree at
+        382375811, before either ruling landed.
         """
         import sys
 

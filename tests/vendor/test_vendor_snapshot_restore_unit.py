@@ -4,11 +4,11 @@
 GitHub issue #872. Rounds 4-8 made
 :meth:`~pcapkit.vendor.default.Vendor.__init__`'s own write atomic -- a
 temp-file-then-:func:`os.replace` at the point of the write, with permission
-matching for the replacement. The owner's ruling on that, verbatim: *"I
-prefer we use contextlib over manually manage the temp file deletion based
-on pure best intent (try-finally) and for atomic writing, an easier path is
-simply keep a copy before running the sub-vendor and revert if anything
-failed."*
+matching for the replacement. The owner's ruling on GitHub pull request
+#873, verbatim: *"I prefer we use contextlib over manually manage the temp
+file deletion based on pure best intent (try-finally) and for atomic
+writing, an easier path is simply keep a copy before running the sub-vendor
+and revert if anything failed."*
 
 That supersedes the atomic write entirely rather than adjusting it.
 :meth:`~pcapkit.vendor.default.Vendor._write_atomic` no longer exists;

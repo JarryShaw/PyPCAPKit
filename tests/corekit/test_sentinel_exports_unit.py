@@ -46,9 +46,9 @@ GitHub issue #937 later renamed two of the four *objects* to SCREAMING_SNAKE --
 ``NoValue`` to ``NO_VALUE`` and ``_Absent`` to ``ABSENT``, the latter also dropping
 its leading underscore -- so every instance name agrees on one casing. Privacy for
 what is now ``ABSENT`` stopped being signalled by the name at all and became
-documentation-only, per the owner's ruling on #937: *"we can change* ``_ABSENT`` *to*
-``ABSENT`` *just document it as private type/class in the documentation and not for
-public use is enough."*
+documentation-only, per the owner's ruling on GitHub issue #719, verbatim:
+*"we can change* ``_ABSENT`` *to* ``ABSENT`` *just document it as private
+type/class in the documentation and not for public use is enough."*
 :meth:`SentinelExportTests.test_the_private_sentinel_is_exported_neither_way` is what
 now pins that privacy under the new name, since the mechanical underscore signal it
 used to double-check is gone.

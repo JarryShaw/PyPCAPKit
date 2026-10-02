@@ -24,10 +24,11 @@ they generate) are out of scope and untouched.
 
 Tier 1 fixed the *mechanism* (a lookup should never mint); it did not decide,
 registry by registry, which of the remaining ``_missing_`` bodies mint
-something worth keeping. That is tier 2, decided on #775 and carried out on
-#847: the owner's ruling, verbatim, is *"a final concrete assigned name ->
-mint; a notation for the readers -> unmint"*. Applied registry by registry to
-every ``_missing_`` that still called :func:`~aenum.extend_enum` -- measured
+something worth keeping. That is tier 2; the owner's mint/unmint criterion,
+settled on GitHub pull request #847 and confirmed on #775, is verbatim: *"a
+final concrete assigned name -> mint; a notation for the readers -> unmint"*.
+Applied registry by registry to every ``_missing_`` that still called
+:func:`~aenum.extend_enum` -- measured
 at exactly 89 modules by an AST walk over ``pcapkit/const/*.py`` (not the
 "~92" an earlier pass in this programme estimated) -- the ruling converted 82
 of them outright (172 branches, :data:`RULING_CONVERTED_REGISTRIES` below),
@@ -1204,15 +1205,15 @@ def _is_hex_suffixed_unregistered_name(name_arg: 'Optional[ast.expr]') -> bool:
 
 
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
-    """#775's Q1 follow-up, the maintainer's ruling verbatim: *"Q1 - bare it
-    is."* Asked whether the non-minting path should honour the registry's
-    own ``unassigned``/``reserved`` name directly or keep appending the
-    numeric value, he chose the bare name -- safe precisely because a
+    """GitHub pull request #838's Q1 follow-up, the maintainer's ruling verbatim:
+    *"Q1 - bare it is."* Asked whether the non-minting path should honour the
+    registry's own ``unassigned``/``reserved`` name directly or keep appending
+    the numeric value, he chose the bare name -- safe precisely because a
     pseudo-member built by :meth:`_unregistered_member` never enters
-    ``__members__``/``_member_map_``/``_value2member_map_``, so two
-    same-named pseudo-members (e.g. ``Chunk._unregistered_member(20,
-    'Unassigned')`` and ``(70, 'Unassigned')``) cannot collide the way two
-    *minted* ``extend_enum`` members with the same name would.
+    ``__members__``/``_member_map_``/``_value2member_map_``, so two same-named
+    pseudo-members (e.g. ``Chunk._unregistered_member(20, 'Unassigned')`` and
+    ``(70, 'Unassigned')``) cannot collide the way two *minted*
+    ``extend_enum`` members with the same name would.
 
     This walks every generated :mod:`pcapkit.const` module by AST -- rather
     than pinning one example -- and asserts that every
