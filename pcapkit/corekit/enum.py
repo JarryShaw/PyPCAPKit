@@ -18,7 +18,7 @@ library is meant to inherit from, split by whether the enumeration may *grow*:
   :meth:`~EnumRegistry._unregistered_member`. Every generated enumeration under
   :mod:`pcapkit.const` inherits from here.
 
-That split is the rule set on GitHub issue #877: a helper enumeration is
+That split follows the rules laid down in GitHub issue #877: a helper enumeration is
 immutable by default, unless RFC or IANA documents its value space as open.
 Such closed sets subclass a bare base enumeration in this module, and
 :class:`EnumRegistry` subclasses that base for the mutable ones.
@@ -53,7 +53,7 @@ therefore had no users to serve among the classes being re-parented.
    <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__, for the
    remaining seven once the files holding them freed up.
 
-The registry tier's own shape is the earlier rule set on GitHub issue #842:
+The registry tier's own shape is the earlier design settled in GitHub issue #842:
 ``get``, ``get_all``, ``register`` and ``register_alias`` exist on every const
 enumeration, so the abstraction is finished by moving them to the base class.
 ``AppType``'s sub-base class carries the overrides and dispatching logic it
@@ -163,8 +163,8 @@ class EnumLookup:
         """Hook: reject ``value`` if this enumeration's contract does not allow it.
 
         GitHub issue #877 requires some range-validation logic for the inheriting
-        classes to hook into. This is that hook, and it is what the bare tier carries **instead**
-        of ``register``: what values are *legal* is something every enumeration
+        classes to hook into. This is that hook, and it is what the bare tier carries
+        **instead** of ``register``: what values are *legal* is something every enumeration
         has an opinion on, whereas who may *add* one is only an open registry's
         concern.
 
@@ -256,10 +256,10 @@ class EnumLookup:
         either. Registering a member any other way is :meth:`register`'s
         job and nobody else's, which is the ruling #775 exists to carry
         out: an unrecognised or unregistered value does not become a registered
-        member unless a user or caller explicitly creates one. A value inside a registry's declared-but-unassigned
-        range still resolves, through that registry's own ``_missing_`` and
-        :meth:`_unregistered_member`, to a member that is deliberately
-        absent from the lookup tables -- true outside the one registry
+        member unless a user or caller explicitly creates one. A value inside a
+        registry's declared-but-unassigned range still resolves, through that
+        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a member
+        that is deliberately absent from the lookup tables -- true outside the one registry
         named above, where such a value instead lands in *both* tables,
         exactly as :meth:`register` would leave it -- for a non-``str`` key;
         the ``str`` case is qualified below. Both describe ``key`` resolution
@@ -345,8 +345,8 @@ class EnumLookup:
         rather than a builtin, per the ruling recorded on GitHub issue #923:
         in-library code raises from ``pcapkit.utilities.exceptions`` rather
         than a builtin, and whether ``ValueError`` or ``KeyError`` applies
-        follows what stdlib's ``Enum`` raises in the same circumstance. The *shape* is unchanged by that ruling and
-        deliberately so -- a name miss
+        follows what stdlib's ``Enum`` raises in the same circumstance. The *shape*
+        is unchanged by that ruling and deliberately so -- a name miss
         stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
         matching ``E['nosuch']`` and ``E(999)`` on a stdlib
         :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete
@@ -485,9 +485,9 @@ class EnumRegistry(EnumLookup):
         """Mint a new member on this registry at runtime, under ``name``.
 
         The caller-named path, and the only one that grows the registry:
-        it mints a new member on the class at runtime under names the caller
-        specifies, so nothing has to be guessed (GitHub issue #842). Contrast :meth:`get` and
-        ``_missing_``, which resolve without naming anything.
+        it mints a new member on the class at runtime under the ``name`` the
+        caller specifies, so nothing has to be guessed (GitHub issue #842).
+        Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.
 
         Refuses a ``value`` that already has a member. Without this guard,
         :func:`~aenum.extend_enum` does not mint anything for an already-taken
@@ -579,12 +579,13 @@ class EnumRegistry(EnumLookup):
         Per GitHub issue #842, an alias adds a further name to a given member's
         mapping -- so it needs an existing member to attach to, and this refuses
         a value no member carries rather than falling through to
-        :meth:`register`. That holds for every registry; the one exception is
-        ``AppType`` and the concrete enumerations, which must call it for
-        members that do not exist yet. What an alias means also differs away
+        :meth:`register`. That holds for every registry, ``AppType`` included,
+        whose own override is stricter still: the port must already carry a
+        member of that very registry. What an alias means also differs away
         from ``AppType``: on every other registry it is a custom name the
-        caller opts into, not one recorded by the IANA registrars. Minting under the name of an aliasing call would
-        manufacture exactly the unrecorded member #775 removes.
+        caller opts into, not one recorded by the IANA registrars. Minting
+        under the name of an aliasing call would manufacture exactly the
+        unrecorded member #775 removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
