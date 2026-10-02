@@ -591,23 +591,24 @@ ETHERTYPE_UNASSIGNED_PROBES = {
     0x8039: 'DEC_Unassigned',
     0x0101: ETHERTYPE_OLD_XEROX_LABEL,
 }
-#: The one probe the original ruling held out as "a real ownership fact, keep
-#: minting" -- Xyplex, 0x0888. #775's final round converts it too, preserving
+#: The one probe the original ruling kept minting -- Xyplex, 0x0888 -- because
+#: a proprietary protocol has no public name of its own, so the company name
+#: serves as one (#775, #847). #775's final round converts it too, preserving
 #: the hex-suffixed name exactly as the crawler always rendered it (PR #878
-#: scoped it that way: preserving each branch's existing name argument
-#: exactly as the current code produces it, since this is about not
-#: registering rather than about renaming anything), so this now pins the
-#: opposite of what its name suggests: that the formerly-kept probe no
-#: longer mints either. Kept as its own constant, distinct from
-#: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because :class:`EtherTypeMixedMintTests`
-#: below still wants it named individually in its own regression test.
+#: scoped it that way: preserving each branch's existing name argument exactly
+#: as the current code produces it, since this is about not registering rather
+#: than about renaming), so this now pins the opposite of what its name
+#: suggests: that the formerly-kept probe no longer mints either. Kept as its
+#: own constant, distinct from :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
+#: :class:`EtherTypeMixedMintTests` below still wants it named individually in
+#: its own regression test.
 ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
 #: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's original
-#: #775/#847 ruling: ``Experimental`` and the three "who may claim this pool"
-#: policy labels convert; ``Registered by Xerox`` -- a real ownership fact,
-#: not a status word -- used to keep minting, pinned by
-#: :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
+#: #775/#847 ruling: ``Experimental`` and the three dynamically/statically
+#: assigned labels convert, as notation for the reader rather than a final
+#: concrete assigned name; ``Registered by Xerox``, the company one, used to
+#: keep minting, pinned by :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
 IPX_SOCKET_UNASSIGNED_PROBES = {
     0x0025: 'Experimental',
     0x4001: 'Dynamically Assigned Socket Numbers',
@@ -1568,10 +1569,10 @@ class EtherTypeMixedMintTests(unittest.TestCase):
 
 class IPXSocketMixedMintTests(unittest.TestCase):
     """:class:`~pcapkit.const.ipx.socket.Socket` was the ruling's other mixed
-    case: ``Experimental`` and the three "who may claim this pool" allocation-
-    policy labels converted first, while ``Registered by Xerox`` -- a real
-    ownership fact -- kept minting. GitHub issue #775's final round converts
-    it too; see :meth:`test_registered_by_xerox_no_longer_mints` below."""
+    case: ``Experimental`` and the three dynamically/statically assigned
+    labels converted first, while ``Registered by Xerox``, the company one,
+    kept minting. GitHub issue #775's final round converts it too; see
+    :meth:`test_registered_by_xerox_no_longer_mints` below."""
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -1596,9 +1597,9 @@ class IPXSocketMixedMintTests(unittest.TestCase):
     def test_registered_by_xerox_no_longer_mints(self) -> None:
         """The regression guard this class used to carry the other way: this
         exact probe (``Registered by Xerox``, 0x0010) used to prove the
-        ruling *kept* minting a real ownership fact; GitHub issue #775's
-        final round converts it, preserving the hex-suffixed name exactly as
-        the crawler always rendered it -- same ruling, same reasoning as
+        ruling *kept* minting the company name; GitHub issue #775's final
+        round converts it, preserving the hex-suffixed name exactly as the
+        crawler always rendered it -- same ruling, same reasoning as
         :meth:`EtherTypeMixedMintTests.
         test_formerly_attributed_vendor_block_no_longer_mints`."""
         from pcapkit.const.ipx.socket import Socket
