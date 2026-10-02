@@ -199,10 +199,10 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_fast_binding_acknowledgment_status(self) -> None:
         """GitHub pull request #940 later deleted its kept ``get`` override
-        outright (the owner's ruling, verbatim: *"I prefer (2) directly"*), so
-        the decorator this once pinned no longer exists to pin --
-        :class:`AllSevenInheritTheBareClassmethodTests` now covers this class
-        alongside the other six."""
+        outright (the owner preferred deleting it to widening it to accept
+        ``default``), so the decorator this once pinned no longer exists to
+        pin -- :class:`AllSevenInheritTheBareClassmethodTests` now covers this
+        class alongside the other six."""
         from aenum import IntEnum
 
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
@@ -450,10 +450,12 @@ class InheritedQuietnessTests(unittest.TestCase):
     carried their own ``get``, first through #930's re-parenting and
     briefly again through GitHub issue #935's first attempt, which widened
     that override to accept ``default`` rather than delete it. The owner's
-    final ruling, given on GitHub pull request #940, deleted both outright
-    instead, verbatim: *"I prefer (2) directly"*. What this class pins did not
-    change with that deletion -- the quiet raise -- only *how* it is produced
-    through :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+    final ruling, given on GitHub pull request #940, went the other way: an
+    earlier lean on GitHub issue #935 had favoured widening, but on
+    reviewing that attempt the owner preferred deleting both overrides
+    outright. What this class pins did not change with that deletion -- the
+    quiet raise -- only *how* it is produced through
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get`
     (:mod:`pcapkit.corekit.enum`) directly now, rather than through an
     override that reconciled itself onto the base's shape.
 
