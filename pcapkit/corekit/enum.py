@@ -54,8 +54,9 @@ therefore had no users to serve among the classes being re-parented.
    remaining seven once the files holding them freed up.
 
 The registry tier's own shape is the earlier design settled in GitHub issue #842:
-``get``, ``get_all``, ``register`` and ``register_alias`` exist on every const
-enumeration, so the abstraction is finished by moving them to the base class.
+``get``, ``get_all``, ``register`` and ``register_alias`` are to exist on every
+const registry, so the abstraction is finished by moving them to the base class.
+The closed sets split off by #877 are outside that contract.
 ``AppType``'s sub-base class carries the overrides and dispatching logic it
 needs, and ``AppType``'s subclasses override again where their contracts
 differ.
@@ -88,7 +89,7 @@ editing every bespoke template by hand, which is the cost #775 asks to remove.
 The contracts are those set out on GitHub issue #842: ``get`` is a shortcut for
 the ``[]`` operation and returns the canonical enumeration member; ``get_all``
 returns every matching member; ``register`` mints a new member on the class at
-runtime under caller-specified names, so nothing has to be guessed;
+runtime under the name the caller specifies, so nothing has to be guessed;
 ``register_alias`` (and ``register_aliases``) adds further alias names to a
 given member's mapping.
 
@@ -434,9 +435,9 @@ class EnumLookup:
         registry inheriting this base unmodified -- that tuple holds exactly one
         entry, since an alias registered by :meth:`register_alias` is a second
         *name* for the canonical member rather than a second member. The method
-        still exists here, because all four methods must exist on every const
-        enumeration (GitHub issue #842), and it is where a registry with genuinely several
-        matches puts them: ``AppType`` overrides it to return every service IANA
+        still exists here, because all four methods are to exist on every const
+        registry (GitHub issue #842), and it is where a registry with genuinely
+        several matches puts them: ``AppType`` overrides it to return every service IANA
         assigns to a port.
 
         Args:
@@ -579,8 +580,10 @@ class EnumRegistry(EnumLookup):
         Per GitHub issue #842, an alias adds a further name to a given member's
         mapping -- so it needs an existing member to attach to, and this refuses
         a value no member carries rather than falling through to
-        :meth:`register`. That holds for every registry, ``AppType`` included,
-        whose own override is stricter still: the port must already carry a
+        :meth:`register`. That holds for every registry, ``AppType`` included
+        (the issue's ``AppType`` exception concerns where an alias is routed, not
+        whether the member being aliased must already exist), whose own override
+        is stricter still: the port must already carry a
         member of that very registry. What an alias means also differs away
         from ``AppType``: on every other registry it is a custom name the
         caller opts into, not one recorded by the IANA registrars. Minting
@@ -593,12 +596,14 @@ class EnumRegistry(EnumLookup):
         absent from that table, so a successful call proves nothing about
         whether a member exists.
 
-        An alias adds a *name*, not a member: ``__members__`` grows by one while
-        ``_member_names_``, iteration and ``_value2member_map_`` are untouched.
-        Calls :meth:`_extend` directly rather than :meth:`register`, which
+        On this base, an alias adds a *name*, not a member: ``__members__`` grows
+        by one while ``_member_names_``, iteration and ``_value2member_map_`` are
+        untouched. Calls :meth:`_extend` directly rather than :meth:`register`, which
         would now refuse this call outright -- :meth:`register` and
         :meth:`register_alias` test ``value``'s membership for opposite
         outcomes, so neither can be the other's implementation any more.
+        ``AppType``'s override differs: it mints a real member through
+        :func:`~aenum.extend_enum`, so its iteration grows too.
 
         Args:
             value: Value of the existing member to alias.
