@@ -95,8 +95,8 @@ UNRESOLVABLE = 1 << 70
 #: below rather than in this set.
 #:
 #: Both used to auto-*extend* their unassigned span across the full integer
-#: range, via :func:`~aenum.extend_enum`. GitHub issues #775/#847's
-#: mint-criterion ruling converted :class:`~pcapkit.const.ipv4.
+#: range, via :func:`~aenum.extend_enum`. The #775/#847 mint-criterion
+#: ruling converted :class:`~pcapkit.const.ipv4.
 #: protection_authority.ProtectionAuthority`'s bare ``Unassigned`` label, so it
 #: now resolves via :meth:`~pcapkit.corekit.enum.EnumRegistry.
 #: _unregistered_member` instead -- it still resolves anything (the property
@@ -129,7 +129,7 @@ EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset()  # type: frozenset[str]
 
 #: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
 #: members at all -- every one of its 256 codes reaches ``_missing_``. Before
-#: GitHub issues #775/#847's ruling that was masked by an accident: importing
+#: the #775/#847 ruling that was masked by an accident: importing
 #: :mod:`pcapkit.protocols.misc.pcapng` evaluates ``Enum_FilterType(0)`` as a
 #: default argument at class-definition time, which used to permanently mint
 #: ``'Unassigned_0'`` as a side effect of merely importing the library --
@@ -383,8 +383,8 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         Probing :class:`~pcapkit.const.mh.cga_type.CGAType` still *mutates*
         the registry: the call permanently registers a member on a
-        module-global class, because its mint is untouched by GitHub issues
-        #775/#847's ruling. That is done deliberately here, and
+        module-global class, because its mint is untouched by the
+        #775/#847 ruling. That is done deliberately here, and
         ``setUpClass`` registers a class cleanup that purges :mod:`pcapkit`
         afterwards so the pollution cannot reach another module.
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`

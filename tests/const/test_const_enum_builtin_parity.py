@@ -95,7 +95,7 @@ ISSUE_647_OUTLIERS = (
 #:
 #: Only :class:`~pcapkit.const.mh.cga_type.CGAType` still ends in
 #: :func:`~aenum.extend_enum` (its mint is not an IANA-style range at all, so
-#: GitHub issues #775/#847's ruling never touched it).
+#: the #775/#847 ruling never touched it).
 #: :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
 #: resolves the same way but no longer *registers* -- its bare ``Unassigned``
 #: converted, so it now goes through ``_unregistered_member`` and the
@@ -148,7 +148,7 @@ ISSUE_804_PAIR = (
 #: their ``_missing_`` guard (inherited from the *shared*
 #: :mod:`pcapkit.vendor.default` template) and which the issue's own last
 #: comment split back out, plus ``pcapkit.const.reg.apptype.apptype`` (already
-#: an f-string since #792, and off the table anyway while GitHub issue #815
+#: an f-string since #792, and off the table anyway while PR #815
 #: owns that tree). What is left with an actual ``%``-formatted ``__repr__``
 #: is exactly these three -- each its own bespoke vendor template, like
 #: :data:`ISSUE_804_PAIR`'s pair, so each gets a const half and a vendor half.
@@ -772,7 +772,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         """:class:`~pcapkit.const.mh.cga_type.CGAType` is the one true survivor
         here: its ``Tag_<hex>`` mint is not an IANA-style range at all (a CGA
         extension type tag is a collision-avoidance random 128-bit value), so
-        GitHub issues #775/#847's mint-criterion ruling never touched it.
+        the #775/#847 mint-criterion ruling never touched it.
 
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
         used to stand here beside it -- its own unbounded ``_missing_`` also
@@ -952,7 +952,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         All four bespoke const modules now carry no ``%``-formatted code, so
         all four drop their module-level ``consider-using-f-string``.
         ``pcapkit.const.tcp.flags`` and ``pcapkit.const.reg.apptype.apptype``
-        got there under GitHub issue #803, once their guards -- and, for the
+        got there under PR #803, once their guards -- and, for the
         latter, its three dunders and its span-handling tail -- were
         converted. ``pcapkit.const.ftp.command`` and
         ``pcapkit.const.http.method`` were *not* an oversight of #798, whose
@@ -1135,7 +1135,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
         The same proof shape as
         :meth:`test_the_tcp_flags_template_renders_the_committed_module`,
-        which GitHub issue #803 added for the other half of
+        which PR #677 added for the other half of
         :data:`BESPOKE_TEMPLATES`. This is what makes a half-applied
         conversion -- template edited but generated file not, or the reverse
         -- fail here rather than at the next crawl, which is the failure mode

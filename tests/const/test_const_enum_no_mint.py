@@ -1448,7 +1448,7 @@ class RulingConversionSourceTests(unittest.TestCase):
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
         # EtherType now belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
         # masked-branch exclusion (Old Xerox shadowed by the wider IEEE802.3
-        # range) was fixed by GitHub issue #862/#865, and its first converted
+        # range) was fixed under GitHub issue #862, and its first converted
         # branch by source order is directly probeable like any other
         # reachable-gap registry now. The `_MIXED_REGISTRIES` subtraction
         # below is a defensive no-op today -- neither mixed registry needs
