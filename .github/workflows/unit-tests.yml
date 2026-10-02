@@ -745,9 +745,11 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           python -m pytest -q -n auto --dist load $selection
 
-  # GitHub issue #981: three test modules each pass alone, and pytest -- the
+  # GitHub issue #981: two test modules
+  # (tests/protocols/application/test_http_unit.py and
+  # tests/test_base_class_contract.py) each pass alone, and pytest -- the
   # runner every job above uses -- reports the combined run green, while
-  # plain unittest over the same three modules in one process fails four
+  # plain unittest over the same two modules in one process fails four
   # subTest cases. pytest-subtests is not why -- it is not even installed in
   # this project (absent from the `test` extra in pyproject.toml), and plain
   # pytest already reports a failed subTest as its own top-level SUBFAILED
@@ -762,16 +764,15 @@ jobs:
   # unittest.TextTestRunner -- that never loads conftest.py and so never
   # gets the reconciliation that hides the defect from pytest.
   #
-  # A cheaper, narrower alternative: `pytest --noconftest` over just the two
-  # modules #981 reproduces with (tests/protocols/application/test_http_unit.py
-  # then tests/test_base_class_contract.py) disables that same autouse
-  # fixture directly and reproduced the identical four subTest failures in
-  # about 70s on the pre-fix tree, under the pytest this CI already
-  # installs. Whether that single invocation would have been sufficient
-  # instead of this dedicated job and its per-directory matrix was not
-  # evaluated when this job was written -- recorded here rather than
-  # justified after the fact; see util/run_unittest_leg.py's own docstring
-  # for the fuller version of both this and the paragraph above.
+  # A cheaper, narrower alternative: `pytest --noconftest` over just those two
+  # modules, in that order, disables that same autouse fixture directly and
+  # reproduced the identical four subTest failures in about 70s on the pre-fix
+  # tree, under the pytest this CI already installs. Whether that single
+  # invocation would have been sufficient instead of this dedicated job and its
+  # per-directory matrix was not evaluated when this job was written --
+  # recorded here rather than justified after the fact; see
+  # util/run_unittest_leg.py's own docstring for the fuller version of both
+  # this and the paragraph above.
   #
   # util/run_unittest_leg.py (its own docstring has the full reasoning) runs
   # one tests/ subdirectory per matrix cell, paired with every root-level
@@ -779,13 +780,15 @@ jobs:
   # #981's own reproduction needs, since the defect is an earlier module
   # polluting a later one. Running the whole suite in one process is not an
   # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
-  # of one leg per top-level directory is the affordable approximation, and
-  # every leg measured well under a gigabyte of peak RSS -- including
-  # tests/protocols, the largest -- so this matrix is sized for wall time,
-  # not memory. Measured wall times (this venv, serial): cli 18s, const
-  # 268s, dumpkit 39s, foundation 272s, interface 38s, project 70s, protocols
-  # 847s, toolkit 97s, utilities 42s, one leg per matrix cell -- see
-  # `timeout-minutes` below for why the job-level budget is no longer 20.
+  # of one leg per top-level directory is the affordable approximation, and it
+  # is sized for wall time rather than for memory. Peak RSS was measured for
+  # the three cheapest legs only -- cli 152 MiB, dumpkit 237 MiB, interface
+  # 305 MiB (resource.getrusage on RUSAGE_CHILDREN, this venv) -- leaving the
+  # largest of the three some 90x short of 29 GB; no figure was taken for
+  # tests/protocols, the largest leg. Measured wall times (this venv, serial):
+  # cli 18s, const 268s, dumpkit 39s, foundation 272s, interface 38s, project
+  # 70s, protocols 847s, toolkit 97s, utilities 42s, one leg per matrix cell --
+  # see `timeout-minutes` below for why the job-level budget is no longer 20.
   #
   # Three directories are deliberately absent from ``leg``, for reasons that
   # are not this job's to fix:
@@ -819,9 +822,13 @@ jobs:
   #     for now, not unnoticed.
   #   * tests/integration -- needs generated captures this script does not
   #     build, and is already run whole, under pytest, by the `integration`
-  #     job above; see util/run_unittest_leg.py's own docstring for the
-  #     fuller reasoning, since this exclusion is enforced in the script
-  #     itself rather than only here.
+  #     job above. The exclusion lives here, in this matrix, and nowhere else:
+  #     util/run_unittest_leg.py does not refuse the directory, it collects
+  #     nothing from it. tests._tiers.is_unit_tier() rejects all 12 of its
+  #     test_*.py files, so leg_modules('integration') returns an empty tuple
+  #     and the leg would run the root-level modules alone -- green, while
+  #     covering none of tests/integration. Adding it back here would buy that
+  #     nothing, not a failure.
   #
   # Not added to ``required-checks`` below: a brand-new job earns a place in
   # the required set once its own track record justifies it, which is the

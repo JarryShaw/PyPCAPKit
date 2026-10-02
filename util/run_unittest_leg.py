@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """Run one unit-tier directory under plain :mod:`unittest`, in a single process.
 
-GitHub issue #981: three test modules each pass alone and :program:`pytest`
+GitHub issue #981: two test modules --
+:mod:`tests.protocols.application.test_http_unit` and
+:mod:`tests.test_base_class_contract` -- each pass alone and :program:`pytest`
 reports the whole run green when they are collected together, but plain
-:mod:`unittest` over the same three modules in one process fails -- four
+:mod:`unittest` over the same two modules in one process fails -- four
 ``subTest`` cases. ``pytest-subtests`` is *not* why: that plugin is not
 installed in this project at all (absent from the ``test`` extra in
 ``pyproject.toml``), and plain :program:`pytest` (9.1.1 in this checkout)
@@ -30,16 +32,14 @@ and printed, with no autouse fixture smoothing the import table out from
 under it.
 
 A cheaper alternative exists, and is recorded here rather than left
-undocumented: running ``pytest --noconftest`` over just
-:mod:`tests.protocols.application.test_http_unit` and
-:mod:`tests.test_base_class_contract`, in that order, disables the very same
-autouse fixture directly and reproduces the identical four ``subTest``
-failures in about 70s on the pre-fix tree, under the exact :program:`pytest`
-version this CI already installs. Whether that single invocation would have
-been sufficient instead of this dedicated runner and its per-directory
-matrix was not evaluated when this script was written; this paragraph
-records that gap rather than inventing a reason for the choice after the
-fact.
+undocumented: running ``pytest --noconftest`` over just those same two
+modules, in that order, disables the very same autouse fixture directly and
+reproduces the identical four ``subTest`` failures in about 70s on the pre-fix
+tree, under the exact :program:`pytest` version this CI already installs.
+Whether that single invocation would have been sufficient instead of this
+dedicated runner and its per-directory matrix was not evaluated when this
+script was written; this paragraph records that gap rather than inventing a
+reason for the choice after the fact.
 
 Scope, and why it stops where it does
 --------------------------------------
@@ -50,13 +50,20 @@ subdirectory per invocation (its ``directory`` argument), which is what
 :file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
 once per entry of its own matrix -- the leg list lives in that workflow, not
 as a module-level constant here. :mod:`tests.protocols` is the largest leg,
-measured in that workflow's own comment at 847s serially; the smallest of the
-multi-file directories is :mod:`tests.dumpkit`, at two files and 199 tests,
-finishing in about 39s -- not :mod:`tests.const` (478 tests, ~268s), which is
-larger on both axes. Every leg measured well under a gigabyte of
-peak RSS (see that workflow comment for the full per-leg timings) -- nowhere
-near 29 GB -- so the OOM is a property of running *everything* together, not
-of any one directory.
+measured in that workflow's own comment at 847s serially. At the other end sit
+two legs of two unit-tier modules each, with no clean ordering between them --
+:mod:`tests.dumpkit` (199 tests, ~39s) and :mod:`tests.interface` (201 tests,
+~37s), dumpkit carrying two fewer tests but running two seconds slower.
+Neither small leg is :mod:`tests.const` (478 tests, ~268s), which is larger on
+both axes.
+
+Peak RSS was measured for the three cheapest legs only, via
+:func:`resource.getrusage` on ``RUSAGE_CHILDREN`` in this venv:
+:mod:`tests.cli` 152 MiB, :mod:`tests.dumpkit` 237 MiB, :mod:`tests.interface`
+305 MiB. No figure was taken for the larger legs, and that workflow comment's
+table carries wall times only, no RSS -- but the largest of the three is still
+some 90x short of 29 GB, which is enough to place the OOM on running
+*everything* in one process rather than on any one directory.
 
 Every :data:`ROOT_MODULES` module runs in *every* invocation, ahead of the
 directory's own modules -- not interleaved, and not after. Issue #981's own
@@ -188,16 +195,27 @@ def main(argv: 'list[str] | None' = None) -> 'int':
     start = time.monotonic()
     suite = build_suite(args.directory)
     runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1)
-    result = runner.run(suite)
-    elapsed = time.monotonic() - start
-    # Printed unconditionally -- including when the leg fails -- so a future
-    # timeout (see .github/workflows/unit-tests.yml's `unittest-ordering`
-    # job) leaves behind a measured number instead of forcing a re-run just
-    # to find out how close to the cap this leg actually was.
-    print(f'tests/{args.directory} + {len(root_modules())} root module(s): '
-          f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
-          f'{len(result.errors)} error(s), {elapsed:.1f}s elapsed')
-    return 0 if result.wasSuccessful() else 1
+    result: 'unittest.TestResult | None' = None
+    try:
+        result = runner.run(suite)
+        return 0 if result.wasSuccessful() else 1
+    finally:
+        elapsed = time.monotonic() - start
+        # In a ``finally`` so the measured number survives a leg that *fails*
+        # and a leg that unwinds on an exception -- including the
+        # ``KeyboardInterrupt`` CPython's default SIGINT handler raises. It
+        # deliberately claims no more than that: SIGKILL never runs Python
+        # code at all, and SIGTERM has no default handler, so neither unwinds
+        # this block. A GitHub Actions ``timeout-minutes`` expiry (see the
+        # ``unittest-ordering`` job in .github/workflows/unit-tests.yml) is
+        # therefore *not* covered -- a leg killed at the cap prints nothing.
+        # What this line buys is the number from a run that completed close
+        # to the cap, which is what spares the re-run.
+        tally = ('interrupted before a result was available' if result is None else
+                 f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
+                 f'{len(result.errors)} error(s)')
+        print(f'tests/{args.directory} + {len(root_modules())} root module(s): '
+              f'{tally}, {elapsed:.1f}s elapsed')
 
 
 if __name__ == '__main__':
