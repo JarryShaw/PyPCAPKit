@@ -748,13 +748,30 @@ jobs:
   # GitHub issue #981: three test modules each pass alone, and pytest -- the
   # runner every job above uses -- reports the combined run green, while
   # plain unittest over the same three modules in one process fails four
-  # subTest cases. pytest-subtests reports a parent test method ``passed``
-  # the instant only its subTests failed, so none of the jobs above can see
-  # this shape of defect at all; it is invisible by construction, not by
-  # oversight. This job exists solely to make that visible, by using a
-  # different test *runner* -- unittest.TextTestRunner, with no
-  # pytest-subtests sitting in front of it to hide a subTest failure behind
-  # a passing parent.
+  # subTest cases. pytest-subtests is not why -- it is not even installed in
+  # this project (absent from the `test` extra in pyproject.toml), and plain
+  # pytest already reports a failed subTest as its own top-level SUBFAILED
+  # entry rather than folding it into a passing parent. The real cause is
+  # tests/conftest.py's autouse restore_module_table fixture, which
+  # reconciles the cross-module pcapkit reimport pollution #981 is about --
+  # but only under pytest, since plain unittest never loads conftest.py at
+  # all. Every job above runs under pytest, so that reconciliation is why
+  # none of them can see this shape of defect -- invisible by construction
+  # once the fixture is doing its job, not by oversight. This job exists
+  # solely to make that visible, by using a different test *runner* --
+  # unittest.TextTestRunner -- that never loads conftest.py and so never
+  # gets the reconciliation that hides the defect from pytest.
+  #
+  # A cheaper, narrower alternative: `pytest --noconftest` over just the two
+  # modules #981 reproduces with (tests/protocols/application/test_http_unit.py
+  # then tests/test_base_class_contract.py) disables that same autouse
+  # fixture directly and reproduced the identical four subTest failures in
+  # about 70s on the pre-fix tree, under the pytest this CI already
+  # installs. Whether that single invocation would have been sufficient
+  # instead of this dedicated job and its per-directory matrix was not
+  # evaluated when this job was written -- recorded here rather than
+  # justified after the fact; see util/run_unittest_leg.py's own docstring
+  # for the fuller version of both this and the paragraph above.
   #
   # util/run_unittest_leg.py (its own docstring has the full reasoning) runs
   # one tests/ subdirectory per matrix cell, paired with every root-level
@@ -767,10 +784,10 @@ jobs:
   # tests/protocols, the largest -- so this matrix is sized for wall time,
   # not memory. Measured wall times (this venv, serial): cli 18s, const
   # 268s, dumpkit 39s, foundation 272s, interface 38s, project 70s, protocols
-  # 847s, toolkit 97s, utilities 42s -- all comfortably inside this job's own
-  # 20-minute timeout once run in parallel, one leg per matrix cell.
+  # 847s, toolkit 97s, utilities 42s, one leg per matrix cell -- see
+  # `timeout-minutes` below for why the job-level budget is no longer 20.
   #
-  # Two directories are deliberately absent from ``leg``, for reasons that
+  # Three directories are deliberately absent from ``leg``, for reasons that
   # are not this job's to fix:
   #
   #   * tests/corekit -- already known and already accepted, not a new
@@ -795,8 +812,16 @@ jobs:
   #     one. Genuine, but a different file than this change touches and
   #     outside what #981 asks this particular job to fix -- left out so
   #     this new job lands green against a known and fixed cause, with the
-  #     finding reported for separate attention rather than silently hidden
-  #     or fixed in passing here.
+  #     finding tracked as #985 rather than silently hidden or fixed in
+  #     passing here. Until #985 lands, excluding the directory also means
+  #     the other 13 tests/vendor modules get no unittest-ordering coverage
+  #     at all, not just the one file #985 is about -- that cost is accepted
+  #     for now, not unnoticed.
+  #   * tests/integration -- needs generated captures this script does not
+  #     build, and is already run whole, under pytest, by the `integration`
+  #     job above; see util/run_unittest_leg.py's own docstring for the
+  #     fuller reasoning, since this exclusion is enforced in the script
+  #     itself rather than only here.
   #
   # Not added to ``required-checks`` below: a brand-new job earns a place in
   # the required set once its own track record justifies it, which is the
@@ -805,7 +830,18 @@ jobs:
     name: Plain unittest ordering (${{ matrix.leg }})
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45, not 20: `timeout-minutes` is job-level, so it has to cover
+    # checkout/setup/install (~39s) as well as the leg itself, and this is
+    # the only test job in this file with no xdist underneath it, so its
+    # protocols leg (847s serial, measured above) carries the full cost
+    # alone. A review pass measured medium legs at 1.22-1.31x that figure on
+    # a contended machine, putting protocols at 17-18.5 minutes, and one
+    # contended run of it hit 1275s outright -- over the old 20-minute cap.
+    # 45 matches the `test`/`integration`/`pypcap-parity` jobs' own cap
+    # rather than inventing a new number (`engine-tests` is 30, but runs
+    # under xdist, which this job deliberately does not); splitting
+    # `protocols` into sub-legs is the alternative if 45 ever stops fitting.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -836,6 +872,11 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
 
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         run: python util/run_unittest_leg.py ${{ matrix.leg }}

@@ -4,20 +4,42 @@
 GitHub issue #981: three test modules each pass alone and :program:`pytest`
 reports the whole run green when they are collected together, but plain
 :mod:`unittest` over the same three modules in one process fails -- four
-``subTest`` cases, all swallowed by ``pytest-subtests`` reporting the parent
-node ``passed`` while only its ``subTest``\\ s failed. The root cause (fixed
-separately, in :mod:`tests.test_base_class_contract`) is cross-module
-``pcapkit`` reimport pollution that :mod:`tests.conftest`'s autouse
-``restore_module_table`` fixture reconciles after every test -- but only under
-:program:`pytest`. Plain :mod:`unittest` loads no ``conftest.py`` at all, so
-whatever a sibling module's :func:`tests._support.purge_modules` leaves behind
-survives into the next module run in the same process.
+``subTest`` cases. ``pytest-subtests`` is *not* why: that plugin is not
+installed in this project at all (absent from the ``test`` extra in
+``pyproject.toml``), and plain :program:`pytest` (9.1.1 in this checkout)
+already reports a failed ``subTest`` as its own top-level ``SUBFAILED`` entry
+rather than folding it into a passing parent -- confirmed here with a
+synthetic two-``subTest`` probe that pytest reported as two separate
+failures. The real cause (fixed separately, in
+:mod:`tests.test_base_class_contract`) is cross-module ``pcapkit`` reimport
+pollution that :mod:`tests.conftest`'s autouse ``restore_module_table``
+fixture reconciles after every test -- but only under :program:`pytest`,
+because that fixture lives in a ``conftest.py`` that plain :mod:`unittest`
+never loads. Without it, whatever a sibling module's
+:func:`tests._support.purge_modules` leaves behind survives into the next
+module run in the same process.
 
 That is this script's whole reason to exist: it is not a faster or stricter
-pytest, it is a *different* test runner, chosen because its blind spots are not
-``pytest-subtests``'s. A ``subTest`` failure under :class:`unittest.TextTestRunner`
-is a top-level ``FAIL``/``ERROR``, counted and printed, with no parent node to
-hide behind.
+pytest, it is a *different* test runner, chosen because plain
+:mod:`unittest` never loads ``tests/conftest.py`` and so gets none of the
+reconciliation :func:`tests.conftest.restore_module_table` performs -- the
+same reconciliation that, under ordinary pytest, is what let #981's defect
+through undetected. A ``subTest`` failure under
+:class:`unittest.TextTestRunner` is a top-level ``FAIL``/``ERROR``, counted
+and printed, with no autouse fixture smoothing the import table out from
+under it.
+
+A cheaper alternative exists, and is recorded here rather than left
+undocumented: running ``pytest --noconftest`` over just
+:mod:`tests.protocols.application.test_http_unit` and
+:mod:`tests.test_base_class_contract`, in that order, disables the very same
+autouse fixture directly and reproduces the identical four ``subTest``
+failures in about 70s on the pre-fix tree, under the exact :program:`pytest`
+version this CI already installs. Whether that single invocation would have
+been sufficient instead of this dedicated runner and its per-directory
+matrix was not evaluated when this script was written; this paragraph
+records that gap rather than inventing a reason for the choice after the
+fact.
 
 Scope, and why it stops where it does
 --------------------------------------
@@ -25,12 +47,16 @@ Scope, and why it stops where it does
 The whole suite in one process is not an option -- it OOMs at 29 GB on the
 machine this was diagnosed on. This script instead runs one :file:`tests/`
 subdirectory per invocation (its ``directory`` argument), which is what
-:file:`.github/workflows/unit-tests.yml`'s matrix calls once per entry of
-:data:`LEGS` below, each in its own job and so its own process and its own
-memory budget. :mod:`tests.protocols`, the largest, measured at 226s and a
-peak RSS of 344 MB for :mod:`tests.const` alone (the smallest of the
-multi-file directories) -- nowhere near 29 GB -- so the OOM is a property of
-running *everything* together, not of any one directory.
+:file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
+once per entry of its own matrix -- the leg list lives in that workflow, not
+as a module-level constant here. :mod:`tests.protocols` is the largest leg,
+measured in that workflow's own comment at 847s serially; the smallest of the
+multi-file directories is :mod:`tests.dumpkit`, at two files and 199 tests,
+finishing in about 39s -- not :mod:`tests.const` (478 tests, ~268s), which is
+larger on both axes. Every leg measured well under a gigabyte of
+peak RSS (see that workflow comment for the full per-leg timings) -- nowhere
+near 29 GB -- so the OOM is a property of running *everything* together, not
+of any one directory.
 
 Every :data:`ROOT_MODULES` module runs in *every* invocation, ahead of the
 directory's own modules -- not interleaved, and not after. Issue #981's own
@@ -52,9 +78,11 @@ root module polluting a directory module), interference between two
 directories neither of which is bundled with the other in the same leg, and
 anything that only manifests with the fixture-dependent tier
 (:data:`tests._tiers.FIXTURE_TIER_DIRS`) alongside it -- ``tests/integration/``
-is deliberately never one of :data:`LEGS` below, both because it needs
-generated captures this script does not build and because it is already run
-whole, under :program:`pytest`, by the ``integration`` job.
+is deliberately never one of the ``unittest-ordering`` job's matrix legs
+(defined in :file:`.github/workflows/unit-tests.yml`, not in this module),
+both because it needs generated captures this script does not build and
+because it is already run whole, under :program:`pytest`, by the
+``integration`` job.
 
 """
 from __future__ import annotations
@@ -62,6 +90,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
+import time
 import unittest
 
 #: Repository root -- resolved from this file's own location, not from the
@@ -156,12 +185,18 @@ def main(argv: 'list[str] | None' = None) -> 'int':
     )
     args = parser.parse_args(argv)
 
+    start = time.monotonic()
     suite = build_suite(args.directory)
     runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1)
     result = runner.run(suite)
+    elapsed = time.monotonic() - start
+    # Printed unconditionally -- including when the leg fails -- so a future
+    # timeout (see .github/workflows/unit-tests.yml's `unittest-ordering`
+    # job) leaves behind a measured number instead of forcing a re-run just
+    # to find out how close to the cap this leg actually was.
     print(f'tests/{args.directory} + {len(root_modules())} root module(s): '
           f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
-          f'{len(result.errors)} error(s)')
+          f'{len(result.errors)} error(s), {elapsed:.1f}s elapsed')
     return 0 if result.wasSuccessful() else 1
 
 
