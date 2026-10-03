@@ -406,7 +406,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             directly, because :obj:`bool` is an :class:`int` subclass that
             either constructor accepts without complaint. Before this,
             ``addr=True`` packed as ``00000001`` (IPv4) or ``::1`` (IPv6) with
-            no exception and no warning at all (c.f. #508, #540).
+            no exception and no warning at all (c.f. :issue:`508`, :issue:`540`).
 
             The description below uses :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias

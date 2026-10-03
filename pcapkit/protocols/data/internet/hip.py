@@ -209,7 +209,7 @@ class PuzzleParameter(Parameter):
     #: exact width of ``Random #I``. Declared rather than recomputed from
     #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it
     #: a parameter read with ``Length = 12`` re-serialised as ``Length = 5``.
-    #: See #653.
+    #: See :issue:`653`.
     rhash_len: 'int'
 
     if TYPE_CHECKING:
@@ -227,7 +227,7 @@ class SolutionParameter(Parameter):
     #: Carried verbatim rather than interpreted, so that re-serialising a parsed
     #: parameter reproduces the octet it arrived with. It used to be read as a
     #: ``PUZZLE`` ``Lifetime``, which only :rfc:`7401#section-5.2.4` defines, and
-    #: the conformant ``0x00`` then could not be re-serialised at all. See #654.
+    #: the conformant ``0x00`` then could not be re-serialised at all. See :issue:`654`.
     reserved: 'int'
     #: Solution data.
     opaque: 'bytes'
@@ -241,7 +241,7 @@ class SolutionParameter(Parameter):
     #: width of both fields. Declared rather than recomputed from
     #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it a
     #: parameter read with ``Length = 20`` re-serialised as ``Length = 6``.
-    #: See #653.
+    #: See :issue:`653`.
     rhash_len: 'int'
 
     if TYPE_CHECKING:

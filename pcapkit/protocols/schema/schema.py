@@ -273,7 +273,7 @@ class SchemaMeta(abc.ABCMeta):
     #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
     #: **kwargs)``), so a class keyword spelled the same as any of them binds
     #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
-    #: values for argument '...'``. That is GitHub issue #439's root cause --
+    #: values for argument '...'``. That is GitHub issue :issue:`439`'s root cause --
     #: ``namespace`` collided this way, which is why
     #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``Option`` subclasses
     #: spell it ``ns=`` instead.
@@ -401,7 +401,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         :func:`schema_final` finalises carries a generated ``__init__`` built
         from the :attr:`__fields__` that were declared at that moment, so a
         subclass adding a field afterwards inherits a constructor that cannot
-        set it -- which is #422's failure shape, reached by a different route.
+        set it -- which is :issue:`422`'s failure shape, reached by a different route.
         This turns that promise into a rule the interpreter keeps.
 
         Args:
@@ -1064,8 +1064,8 @@ class _EnumRegistry(collections.defaultdict):
 
     This is the schema-layer instance of the defect :meth:`ProtocolBase.\
     _lookup_registry <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`
-    fixed for the protocol-layer ``__proto__`` family in GitHub issues #421 and
-    #425; see GitHub issue #555. The fallback itself is deliberate -- it
+    fixed for the protocol-layer ``__proto__`` family in GitHub issues :issue:`421` and
+    :issue:`425`; see GitHub issue :issue:`555`. The fallback itself is deliberate -- it
     is how an unknown option, chunk or block falls back to its
     ``Unknown*``/``Unassigned*`` schema -- so this subclass keeps returning it,
     it just stops recording it.
@@ -1293,7 +1293,7 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             <pcapkit.foundation.registry.protocols.register_protocol>` applies,
             even though ``code`` here -- unlike ``register_protocol``'s key --
             is supplied by the caller and independent of ``schema``. GitHub
-            issue #718 corrected the previous presence-only guard: a repeat
+            issue :issue:`718` corrected the previous presence-only guard: a repeat
             call that names the exact same schema object is a caller replaying
             a registration, not a mistake, so it is now a silent no-op.
 
@@ -1304,8 +1304,8 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             looked up, so parsing a single packet carrying an unknown code would
             have made the next legitimate registration for that code warn about
             an entry no caller ever asked for -- the defect fixed for this layer
-            in #555, and for the parser-layer ``__proto__`` family in #421 and
-            #425. That fix is what makes this guard safe to add.
+            in :issue:`555`, and for the parser-layer ``__proto__`` family in :issue:`421` and
+            :issue:`425`. That fix is what makes this guard safe to add.
 
             :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this
             method with a namespaced registry of its own and does not delegate

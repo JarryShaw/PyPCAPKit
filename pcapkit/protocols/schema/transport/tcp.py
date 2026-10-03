@@ -256,11 +256,11 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector
         rather than a :class:`~pcapkit.corekit.fields.misc.ConditionalField`
         wrapping ``NumberField(length=lambda pkt: ...)``, which is what it was
-        until #576.
+        until :issue:`576`.
 
         The width lambda read ``8 if pkt['flags']['a'] else 0`` -- **0**, not 4 --
         so an unextended Data ACK packed no octets at all while the ``length``
-        octet still counted 4 for it. That is the defect #576 records: the option
+        octet still counted 4 for it. That is the defect :issue:`576` records: the option
         went onto the wire 4 (or 8, with ``dsn`` too) octets shorter than it
         declared, and the ``ack`` value the caller supplied was simply not
         present.
@@ -276,7 +276,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         integer``. Measured on the 8-octet form, which the old lambda did reach:
         ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that.
 
-        That half is now history: **#591 fixed it**, in
+        That half is now history: :issue:`591` **fixed it**, in
         :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix
         belonged, by recomputing ``_need_process`` from the width actually in
         force instead of once from the placeholder. A callable-length
@@ -302,7 +302,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         special case: its selector always hands back an already-concrete field,
         :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its
         ``length`` is safe wherever it is read. Swapping the two would be a
-        behaviour change, not a tidy-up, and #603 does not make it.
+        behaviour change, not a tidy-up, and :issue:`603` does not make it.
 
     """
     if not pkt['flags']['A']:
@@ -334,8 +334,8 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
         identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']
         else 0, ...)``. See that function's note for why the ``0`` was wrong, why a
         corrected lambda would not have packed either *at the time*, and why the
-        ``SwitchField`` form is kept now that #591 has made a callable length work.
-        C.f. #576, #591.
+        ``SwitchField`` form is kept now that :issue:`591` has made a callable length work.
+        C.f. :issue:`576`, :issue:`591`.
 
     """
     if not pkt['flags']['M']:
@@ -390,7 +390,7 @@ class PortEnumField(EnumField):
             Processed field value -- the registry member declared for the
             port, or an unregistered member of the same registry, carrying
             the port itself, when the registry declares none. See GitHub
-            issue #575.
+            issue :issue:`575`.
 
         Notes:
             :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
@@ -409,12 +409,12 @@ class PortEnumField(EnumField):
             A port outside this field's own width is rejected *before* any of
             that, rather than being let through to :meth:`_missing_` and
             caught alongside a genuine miss. Both are a bare :exc:`ValueError`
-            with nothing to tell them apart by type, and GitHub issue #758
+            with nothing to tell them apart by type, and GitHub issue :issue:`758`
             gave the out-of-range case a deliberate, ``breaking``-tagged
             rejection specifically so it would stop being minted over -- a
             catch keyed on exception type alone cannot see the difference
             between that and :mod:`aenum`'s own "no member has this value",
-            so it would absorb both and quietly revert #758 for these four
+            so it would absorb both and quietly revert :issue:`758` for these four
             fields. Checking the width first needs no exception-based
             distinction at all: it asks the same question :meth:`_missing_`
             would eventually ask, and asks it in a way that never manufactures
@@ -766,7 +766,7 @@ class _MPTCP(Schema):
     #: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,
     #: ``length`` in bits 8-15, and the subtype in bits 16-19 of this 3-octet
     #: window -- which is why ``subtype`` reads from bit 16 and ``length`` has
-    #: to read from bit 8. It read from bit 1 until #553, straddling the low
+    #: to read from bit 8. It read from bit 1 until :issue:`553`, straddling the low
     #: seven bits of ``kind`` and the high bit of ``length``, so a 12-octet
     #: MP_CAPABLE (``1e 0c 01``) decoded its length as 60.
     test: 'MPTCPSubtypeTest' = ForwardMatchField(BitField(length=3, namespace={
@@ -889,7 +889,7 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
     #:
     #: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key
     #: and 20 octets with it, so the field is present only for the latter --
-    #: not, as it read until #567, for every length *except* 32, which is not
+    #: not, as it read until :issue:`567`, for every length *except* 32, which is not
     #: an MP_CAPABLE length either RFC form uses.
     rkey: 'int' = ConditionalField(
         UInt64Field(),
@@ -982,7 +982,7 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     #: 4 octets when ``A`` is set, 8 when ``a`` is set as well, absent otherwise --
     #: :rfc:`8684` section 3.3 figure 9. Both the presence test and the width live
     #: in :func:`mptcp_dss_ack_selector`, whose note records what this field
-    #: declared until #576 and why the switch form is kept.
+    #: declared until :issue:`576` and why the switch form is kept.
     ack: 'int' = SwitchField(
         selector=mptcp_dss_ack_selector,
     )
@@ -1103,7 +1103,7 @@ class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
     #: :rfc:`8684` section 3.5 figure 14 spends a whole 32-bit row on
     #: ``Kind``/``Length``/``Subtype``/``(reserved)``, i.e. the subtype's 4 bits
     #: are followed by **12** reserved bits, not 4 -- so the subtype-and-reserved
-    #: part is 2 octets and the option is 12 octets in total. Until #576 this
+    #: part is 2 octets and the option is 12 octets in total. Until :issue:`576` this
     #: field did not exist and ``test`` was the only octet between ``length`` and
     #: ``key``, so the schema packed **11** octets against a ``length`` of 12.
     #: Declared the same way :class:`MPTCPJoinACK` declares its own reserved

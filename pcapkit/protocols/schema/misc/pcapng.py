@@ -231,8 +231,7 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell
     either from a bug in its own code, and neither is an :exc:`EOFError`, so
     neither is caught by the frame loop -- one malformed block therefore cost the
-    whole extraction. See `#678
-    <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+    whole extraction. See :issue:`678`.
 
     Two shapes reach here. A Block Total Length below the block's own fixed-field
     floor -- 28 octets for a Section Header Block, 20 for an Interface
@@ -249,8 +248,7 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     :func:`bounded_area` already made, for the reason their docstrings give: a
     block read has no catch point above :meth:`FieldBase.unpack
     <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
-    whole extraction rather than one block, which is what the `#431
-    <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation exists
+    whole extraction rather than one block, which is what the :issue:`431` accommodation exists
     to prevent. The end of the file is the one case that is *not* a clamp, since
     there no block is being read at all -- see :meth:`PCAPNG._check_block_floor
     <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>`, which reports it
@@ -315,13 +313,12 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each
     with one option declaring 65,535 against none present, produced 131,070,000
     octets of zero padding, an amplification of 1,637x linear in the block
-    count. See `#594 <https://github.com/JarryShaw/PyPCAPKit/issues/594>`__,
-    and `#573 <https://github.com/JarryShaw/PyPCAPKit/issues/573>`__ for the
+    count. See :issue:`594`, and :issue:`573` for the
     32-bit band the field layer's own budget already covers.
 
     The bound has to come from this layer because the field layer cannot see
     it. What distinguishes the crafted case from the legitimate one is not the
-    shortfall's size -- both are inside a 16-bit length, which is why #554's
+    shortfall's size -- both are inside a 16-bit length, which is why :issue:`554`'s
     ``len(buffer) < length`` rejection was declined -- but whether the option
     is inconsistent with the framing the block itself declares. Block Total
     Length is authoritative and cross-checked against its own trailing copy, so
@@ -331,8 +328,7 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     capture says so through ``captured_len`` instead, and leaves its options
     whole, so it never trips this.
 
-    Clamping rather than refusing is what keeps the `#431
-    <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation: a
+    Clamping rather than refusing is what keeps the :issue:`431` accommodation: a
     block read has no catch point above :meth:`FieldBase.unpack
     <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
     whole extraction rather than one block, and a truncated capture would stop
@@ -412,8 +408,7 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
         Secrets -- are deliberately left unclamped *against the block* here,
         since each computes its span with a different offset and the equality
         above has to be re-established per block rather than assumed. They do go
-        through :func:`nonnegative`, which is the part of `#678
-        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__ that stops a
+        through :func:`nonnegative`, which is the part of :issue:`678` that stops a
         declared length reaching a read at all; the per-block equality is still
         open.
 
@@ -469,8 +464,7 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
         zero-pads a short read rather than refusing it. A tail of one, two or
         three octets therefore arrived here negative and
-        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is `#678
-        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__. The floor is a
+        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is :issue:`678`. The floor is a
         backstop: :meth:`PCAPNG._check_block_floor
         <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>` reports that
         tail as end-of-stream before it gets here, and on the packing path
@@ -570,13 +564,13 @@ class OptionEnumField(EnumField):
             option code in this namespace (or in the shared ``opt``
             namespace), or an unregistered member of the same registry,
             carrying the code itself, when neither declares one. See GitHub
-            issue #575.
+            issue :issue:`575`.
 
         Notes:
-            Until GitHub issue #860,
+            Until GitHub issue :issue:`860`,
             :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` minted a
             fresh member -- via :func:`aenum.extend_enum` -- for any code
-            neither namespace's row covers, unconditionally on a miss. #860
+            neither namespace's row covers, unconditionally on a miss. :issue:`860`
             converted that miss path to
             :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
             instead, so calling it now would no longer grow the registry
@@ -744,7 +738,7 @@ class Option(EnumSchema[Enum_OptionType]):
                 own fourth parameter ``namespace``, and before Python 3.11 that
                 parameter is positional-or-keyword rather than positional-only --
                 so a class keyword literally called ``namespace`` bound it twice.
-                See GitHub issue #439.
+                See GitHub issue :issue:`439`.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
@@ -804,7 +798,7 @@ class Option(EnumSchema[Enum_OptionType]):
         every other registry in the package does -- the lookup that follows
         cannot tell a deliberate replacement from an accidental one, so an
         unreported overwrite is a parser silently swapped out for another. See
-        `#675 <https://github.com/JarryShaw/PyPCAPKit/issues/675>`__ for the
+        :issue:`675` for the
         guard ``register_protocol`` added first, which this one now matches.
 
         The guard is identity-based: it fires only when the incumbent differs
@@ -814,7 +808,7 @@ class Option(EnumSchema[Enum_OptionType]):
         :meth:`__init_subclass__` honest: it loops over a ``code`` list with no
         deduplication, so a repeated or aliased entry reaches this method twice
         with the same class, and the second call now finds itself already the
-        incumbent. GitHub issue #718 corrected the previous presence-only
+        incumbent. GitHub issue :issue:`718` corrected the previous presence-only
         guard, which read every such repeat as a caller mistake whether or not
         the value had actually changed -- the same fix the sibling
         :meth:`register` methods on
@@ -1813,8 +1807,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             raised, for the reason :func:`nonnegative` gives: a bare
             :exc:`struct.error` is neither one of
             :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it
-            aborted the whole extraction rather than this one entry. See `#678
-            <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+            aborted the whole extraction rather than this one entry. See :issue:`678`.
 
             A line of nothing but NUL octets is the block's own 32-bit padding
             and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,
@@ -1858,15 +1851,13 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             is worse, since ``struct.pack('<Q', 2570) ==
             b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside
             the length prefix itself*, so the split landed before a single
-            field was read. See `#723
-            <https://github.com/JarryShaw/PyPCAPKit/issues/723>`__. The entry is
+            field was read. See :issue:`723`. The entry is
             now walked once, end to end: a length-prefixed field's bytes are
             never inspected for structure, only counted out by the prefix that
             names them, and a blank line -- found by *reading*, not by
             splitting -- is what starts the next entry. The one-octet
             terminator that must follow a binary field's value, and the warning
-            when it is missing, are unchanged from `#704
-            <https://github.com/JarryShaw/PyPCAPKit/issues/704>`__; walking the
+            when it is missing, are unchanged from :issue:`704`; walking the
             buffer whole rather than pre-slicing it also retires that fix's
             newline restoration, which existed only to undo what the slicing
             itself had taken away.
@@ -1891,8 +1882,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             :meth:`bytes.strip` still will not take the NUL octets off since
             they are not ASCII whitespace. The padding then went out as part
             of the field's value with nothing to flag it, silently, however
-            small -- see `#794
-            <https://github.com/JarryShaw/PyPCAPKit/issues/794>`__.
+            small -- see :issue:`794`.
             :meth:`~io.BytesIO.readline` returns a line without its own
             trailing newline only at end of stream, so a terminator-less
             line is necessarily the buffer's last one; a binary field's

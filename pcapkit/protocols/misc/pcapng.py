@@ -250,7 +250,7 @@ class PacketDirection(EnumLookup, enum.IntEnum):
     """Packet direction for ``epb_flags`` options.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
@@ -268,7 +268,7 @@ class PacketReception(EnumLookup, enum.IntEnum):
     """Reception type for ``epb_flags`` options.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
@@ -314,7 +314,7 @@ class WireGuardKeyLabel(EnumLookup, StrEnum):
     """WireGuard key log label.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
@@ -721,7 +721,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             :attr:`ProtocolBase.length <pcapkit.protocols.protocol.ProtocolBase.length>`
             does not distinguish them, but a PCAP-NG block carries a trailer.
             :attr:`self.packet <packet>` is overridden accordingly; see there and
-            #646.
+            :issue:`646`.
 
         """
         return self._info.length
@@ -759,7 +759,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         packet block reported ``packet == b''`` while ``captured_len`` declared
         hundreds of octets, and dumping such a block through
         :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a record header promising
-        octets it then did not write. See #646.
+        octets it then did not write. See :issue:`646`.
 
         The payload is therefore the block schema's
         :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which
@@ -1308,11 +1308,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         of nothing ``__length__`` is negative -- which
         :func:`~pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector` hands
         to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where
-        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of `#678
-        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of :issue:`678`.
 
-        Reporting the end of the stream instead is what keeps the `#431
-        <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation:
+        Reporting the end of the stream instead is what keeps the :issue:`431` accommodation:
         :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an
         :exc:`EOFError`, which :meth:`Extractor.record_frames
         <pcapkit.foundation.extraction.Extractor.record_frames>` already catches
@@ -1387,7 +1385,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Not used when reconstructing a block timestamp, and must not be:
             a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the
             *reading* host's zone into it makes one file parse to different
-            instants on different machines (see #361).
+            instants on different machines (see :issue:`361`).
             :meth:`self._get_timezone <_get_timezone>` returns
             :attr:`datetime.timezone.utc` instead when the capture names no
             ``if_tzone``.
@@ -1607,7 +1605,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             used to promise a "timezone conversion" that the code never
             performed, which made it look as though the read side's timezone
             shift had a counterpart here (it did not, so a read followed by a
-            write drifted by the host's UTC offset -- see #361).
+            write drifted by the host's UTC offset -- see :issue:`361`).
 
         """
         with localcontext(prec=64):

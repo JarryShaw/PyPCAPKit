@@ -1667,7 +1667,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             subtype/flags (1) + ``Address ID`` (1) + the truncated HMAC (8) + the
             random number (4).
 
-            This guard required ``20`` until #576 -- a value that appears in
+            This guard required ``20`` until :issue:`576` -- a value that appears in
             neither the figure nor the schema, and that contradicted this method's
             own docstring. Together with ``_make_join_synack``'s ``length=12`` it
             made the SYN/ACK form unusable in both directions at once: the maker
@@ -1850,13 +1850,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             IDs is one further octet.
             :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id`
             sizes its list as ``pkt['length'] - 3`` from exactly this, which is why
-            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in #576) also
+            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in :issue:`576`) also
             mis-sized the parse rather than only the pack.
 
             The guard permits ``3``, i.e. ``n = 0``, which the figure does not
             describe -- it shows one Address ID plus "n-1 Address IDs, if
             required". Left as it stands: tightening it to reject an empty list is
-            a behaviour change beyond #576's scope, and a zero-ID REMOVE_ADDR now
+            a behaviour change beyond :issue:`576`'s scope, and a zero-ID REMOVE_ADDR now
             at least round-trips honestly instead of declaring an octet it never
             packed.
 
@@ -1907,7 +1907,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             4-octet :rfc:`6824` form is therefore legacy, and the guard stays
             permissive so that traffic carrying it still parses.
 
-            ``_make_mptcp_prio`` declared a constant ``length=4`` until #576,
+            ``_make_mptcp_prio`` declared a constant ``length=4`` until :issue:`576`,
             which meant the construction side could only ever emit the legacy
             form -- and emitted it with an all-zero phantom Address ID when the
             caller supplied none, because
@@ -1999,10 +1999,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             it draws is **12** octets: ``Kind`` (1) + ``Length`` (1) +
             subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
             option receiver's key (64 bits, 8). Note that section 3.5 is Fast
-            Close; section 3.7 is Fallback (MP_FAIL), which #576's own text cited
+            Close; section 3.7 is Fallback (MP_FAIL), which :issue:`576`'s own text cited
             here by mistake.
 
-            Three sites disagreed on this number before #576, all three now
+            Three sites disagreed on this number before :issue:`576`, all three now
             reading 12: this guard required ``16``, an octet count nothing in the
             RFC produces for MP_FASTCLOSE; ``_make_mptcp_fastclose`` declared the
             correct 12 but the schema packed only **11**, missing the reserved

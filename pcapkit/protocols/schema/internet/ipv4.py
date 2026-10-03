@@ -125,7 +125,7 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
     :class:`QSOption` is an :class:`~pcapkit.protocols.schema.schema.EnumSchema`,
     so a caller may register a further function code with a schema of its own
     width -- and a number written here has to be kept in step by hand with every
-    field the suboptions declare, which is precisely how #552 arose: the length
+    field the suboptions declare, which is precisely how :issue:`552` arose: the length
     was ``5``, the width of a Quick-Start Request's ``ttl`` and ``nonce`` alone,
     with the ``type``, ``length`` and ``flags`` octets in front of them
     unaccounted for.
@@ -210,7 +210,7 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         octets to be read as a further, fabricated option -- which made the
         enclosing datagram fail with ``ProtocolError: IPv4: invalid format``. That
         is silent corruption on the way to a misleading failure, and it was logged
-        in review twice before #552 filed it.
+        in review twice before :issue:`552` filed it.
 
     """
     func = Enum_QSFunction.get(pkt['flags']['func'])
@@ -368,9 +368,9 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             of, so nothing downstream can question it. Measured before this
             fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and
             reported ``IPv4Address('0.0.0.1')`` with no exception and no
-            warning. This was the fifth site of that defect -- #469, #491,
-            #508 and #540 are the first four -- and the reason it is the fifth
-            is that each of those fixed the sites it could see. See #552.
+            warning. This was the fifth site of that defect -- :issue:`469`, :issue:`491`,
+            :issue:`508` and :issue:`540` are the first four -- and the reason it is the fifth
+            is that each of those fixed the sites it could see. See :issue:`552`.
 
         """
         ts_flag = Enum_TSFlag.get(self.flags['flag'])
@@ -516,7 +516,7 @@ class SIDOption(Option, code=Enum_OptionNumber.SID):
     #: ``packet length < 0: -2`` the library warned about -- and re-emitted it two
     #: octets too wide on the way out, against the ``length=4`` that
     #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid` had always
-    #: written. See #534.
+    #: written. See :issue:`534`.
     sid: 'int' = UInt16Field()
 
     if TYPE_CHECKING:
@@ -678,7 +678,7 @@ class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_R
     #: ``packet length < 0: -1`` and then died with a bare ``struct.error: bad
     #: char in struct format``, the unconsumed octet having been read as another
     #: option. Declared as padding rather than as data because :rfc:`4782` gives
-    #: it no meaning and no caller should be setting it. See #552.
+    #: it no meaning and no caller should be setting it. See :issue:`552`.
     reserved: 'bytes' = PaddingField(length=1)
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={

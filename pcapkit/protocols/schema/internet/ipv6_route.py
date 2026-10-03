@@ -57,7 +57,7 @@ def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
     that arithmetic is done on the read side; see
     :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`
     for its inverse on the write side. Do NOT drop the ``4 +``: that turns
-    the field back into raw octets and is the exact defect #487 fixed.
+    the field back into raw octets and is the exact defect :issue:`487` fixed.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
@@ -81,10 +81,10 @@ def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
     :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed
     route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.
     ipv6_route.IPv6_Route.read` then subtracts from the outer packet length
-    to find the next layer's length. #487 unified the write side
+    to find the next layer's length. :issue:`487` unified the write side
     (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)
     into one helper; this is the matching read-side helper for the total
-    header length, finishing that half of #487.
+    header length, finishing that half of :issue:`487`.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
@@ -192,7 +192,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     #: NOTE: :rfc:`6554#section-3` gives ``CmprI`` and ``CmprE`` as *"4-bit
     #: unsigned integer"*, i.e. the high and low nibble of a single octet, so
     #: they cannot be two :class:`~pcapkit.corekit.fields.numbers.UInt8Field`
-    #: as they were before #564. Together with :attr:`pad` below -- ``Pad``
+    #: as they were before :issue:`564`. Together with :attr:`pad` below -- ``Pad``
     #: (4 bits) plus ``Reserved`` (20 bits) -- this is the one 32-bit word the
     #: diagram in :rfc:`6554#section-3` draws, and the same word
     #: :meth:`IPv6_Route._read_data_type_rpl

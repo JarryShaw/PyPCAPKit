@@ -201,7 +201,7 @@ class PDUKind(EnumLookup, StrEnum):
     |pycrate|_ resolves by value.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
@@ -223,11 +223,11 @@ class Criticality(EnumLookup, IntEnum):
     by |pycrate|_ through the standard member map. The values are the
     ``ENUMERATED`` indices, which is what goes on the wire.
 
-    Carries no ``get`` of its own. GitHub issue #877 re-parented this class onto
+    Carries no ``get`` of its own. GitHub issue :issue:`877` re-parented this class onto
     :class:`~pcapkit.corekit.enum.EnumLookup` and kept a delegating override for
     one reason only: it converted the base's name-miss :exc:`KeyError` into a
     :exc:`ValueError`, so that an unknown *name* and an unknown *value* reported
-    identically. GitHub issue #923's ruling retired that conversion -- a name
+    identically. GitHub issue :issue:`923`'s ruling retired that conversion -- a name
     miss is :exc:`KeyError`-shaped, exactly as ``E['nosuch']`` is on a stdlib
     :class:`~enum.Enum` -- which left the override a pure pass-through, so it
     went with it.

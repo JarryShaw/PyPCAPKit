@@ -223,7 +223,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             fixed ``stream`` and ``error`` fields alone consume eight); that
             residual is why :meth:`HTTP._guess_version
             <pcapkit.protocols.application.http.HTTP._guess_version>` still
-            suppresses :exc:`struct.error` on its last arm. See #799.
+            suppresses :exc:`struct.error` on its last arm. See :issue:`799`.
 
             ``length`` is resolved against :func:`len` only for *this*
             method's own check, and the *original* argument -- ``None``

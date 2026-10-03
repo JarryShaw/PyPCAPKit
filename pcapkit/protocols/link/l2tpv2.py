@@ -98,7 +98,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         references :rfc:`3931`, i.e. **L2TPv3**, whose session and control
         message headers are a different shape -- so the binding waits on an
         ``L2TPv3`` class rather than on this one. Binding *this* class there was
-        proposed in GitHub issue #548 and does not work: over IP the v3 session
+        proposed in GitHub issue :issue:`548` and does not work: over IP the v3 session
         header carries no version nibble at all, so this class cannot recognise
         that the datagram is not its own. See
         :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.
