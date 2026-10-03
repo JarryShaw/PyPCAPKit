@@ -108,10 +108,22 @@ extensions = [
 # ``:discussion:`` is needed because a handful of cited numbers are GitHub
 # Discussions rather than issues -- the issues API returns 404 for them, so
 # ``:issue:`` would link to a page that does not exist.
+#
+# ``:wikipedia:`` and ``:iana:`` are defined ahead of their first use, deliberately.
+# ``extlinks`` does not check the template at setup time, and the ``ExternalLinksChecker``
+# post-transform that does read every entry, cited or not, returns early while
+# ``extlinks_detect_hardcoded_links`` stays at its default ``False``. So in this
+# configuration an uncited role does not change the build; that is not a general law.
+# Their argument is a slug or a path rather than a number, hence the ``%s`` caption,
+# and the ``:iana:`` argument is the path after ``/assignments/``. Prose should give an
+# explicit title, ``:iana:`ARP parameters <arp-parameters/arp-parameters.xhtml>```,
+# since the bare caption renders the raw slug or path as the visible text.
 extlinks = {
     'issue': ('https://github.com/JarryShaw/PyPCAPKit/issues/%s', '#%s'),
     'pr': ('https://github.com/JarryShaw/PyPCAPKit/pull/%s', '#%s'),
     'discussion': ('https://github.com/JarryShaw/PyPCAPKit/discussions/%s', '#%s'),
+    'wikipedia': ('https://en.wikipedia.org/wiki/%s', '%s'),
+    'iana': ('https://www.iana.org/assignments/%s', '%s'),
 }
 
 intersphinx_mapping = {
