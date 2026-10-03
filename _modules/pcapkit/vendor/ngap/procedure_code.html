@@ -476,7 +476,7 @@
 <span class="sd">Codes**, which is automatically generating</span>
 <span class="sd">:class:`pcapkit.const.ngap.procedure_code.ProcedureCode`.</span>
 
-<span class="sd">GitHub issue #880's owner ruling: unlike every other crawler in this package,</span>
+<span class="sd">GitHub issue :issue:`880`'s owner ruling: unlike every other crawler in this package,</span>
 <span class="sd">the source of truth here is not a network registry :mod:`requests` can fetch</span>
 <span class="sd">-- 3GPP publishes TS 38.413 as a PDF, with no CSV or HTML IANA-style registry</span>
 <span class="sd">kept in step with it. |pycrate|_ already carries the up-to-date assignment as</span>
@@ -493,13 +493,13 @@
 
 <span class="sd">:class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` is a genuinely open</span>
 <span class="sd">registry -- 3GPP keeps assigning new elementary procedures to TS 38.413 -- so,</span>
-<span class="sd">unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue #877</span>
+<span class="sd">unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue :issue:`877`</span>
 <span class="sd">ruled on, an in-range value this crawler has not (yet) seen is not a bug to</span>
 <span class="sd">raise on: :meth:`~pcapkit.const.ngap.procedure_code.ProcedureCode._missing_`</span>
 <span class="sd">answers it with a throwaway, non-registering member instead (see</span>
 <span class="sd">:meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`), which is what</span>
 <span class="sd">stops two different unrecognised keys from aliasing onto the same member --</span>
-<span class="sd">the defect GitHub issue #880 exists to fix.</span>
+<span class="sd">the defect GitHub issue :issue:`880` exists to fix.</span>
 
 <span class="sd">.. |pycrate| replace:: ``pycrate``</span>
 <span class="sd">.. _pycrate: https://github.com/pycrate-org/pycrate</span>

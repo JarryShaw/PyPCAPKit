@@ -559,7 +559,7 @@
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub</span>
-<span class="sd">        issue #877's re-parenting, but keeps this override rather than dropping</span>
+<span class="sd">        issue :issue:`877`'s re-parenting, but keeps this override rather than dropping</span>
 <span class="sd">        it, for one behaviour the base does not reproduce on its own: **case</span>
 <span class="sd">        folding**. This class has always matched a name case-insensitively</span>
 <span class="sd">        (``key.lower()``); the base's own ``str`` branch is case-sensitive.</span>
@@ -570,12 +570,12 @@
 <span class="sd">        Case folding is now the *only* thing this override adds. It used to</span>
 <span class="sd">        convert the base's name-miss exception as well -- this class raised</span>
 <span class="sd">        :exc:`ValueError` where the base raised :exc:`KeyError` -- and the</span>
-<span class="sd">        ruling given in review of the work for #877, implemented in GitHub issue</span>
-<span class="sd">        #923, retired that conversion: the exception is to follow what stdlib's</span>
+<span class="sd">        ruling given in review of the work for :issue:`877`, implemented in GitHub issue</span>
+<span class="sd">        :issue:`923`, retired that conversion: the exception is to follow what stdlib's</span>
 <span class="sd">        ``Enum`` would raise in the circumstances, :exc:`ValueError` or</span>
 <span class="sd">        :exc:`KeyError` as the case may be, and is to come from</span>
 <span class="sd">        :mod:`pcapkit.utilities.exceptions` rather than being a builtin. A</span>
-<span class="sd">        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and #923's census of the</span>
+<span class="sd">        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census of the</span>
 <span class="sd">        127 concrete :class:`~pcapkit.corekit.enum.EnumLookup` subclasses --</span>
 <span class="sd">        taken before the phase-2 re-parenting moved this class, so it is not</span>
 <span class="sd">        among them -- found 119 already answering a name miss that way against 5</span>
@@ -585,7 +585,7 @@
 <span class="sd">        rather than from any name-miss policy. So there was no policy here to</span>
 <span class="sd">        preserve, and a name miss now reaches the caller as</span>
 <span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The</span>
-<span class="sd">        maintainer's ruling given in review of the work for #808, that</span>
+<span class="sd">        maintainer's ruling given in review of the work for :issue:`808`, that</span>
 <span class="sd">        :class:`TransportProtocol` is not to be extended at all, is untouched by</span>
 <span class="sd">        that: the refusal is still a refusal and still mints nothing, only its</span>
 <span class="sd">        exception class moved.</span>
@@ -593,9 +593,9 @@
 <span class="sd">        The base is a :class:`classmethod`</span>
 <span class="sd">        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override</span>
 <span class="sd">        moves from :class:`staticmethod` to :class:`classmethod` to</span>
-<span class="sd">        delegate at all -- the same move GitHub issue #908 made for</span>
+<span class="sd">        delegate at all -- the same move GitHub issue :issue:`908` made for</span>
 <span class="sd">        :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call</span>
-<span class="sd">        site in this tree for GitHub issue #877: all call this method by</span>
+<span class="sd">        site in this tree for GitHub issue :issue:`877`: all call this method by</span>
 <span class="sd">        name, none take it as a bare callable or introspect ``__func__``,</span>
 <span class="sd">        so the switch is not caller-visible.</span>
 
@@ -624,7 +624,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumKeyError: If ``key`` names no member and there is no usable</span>
 <span class="sd">                ``default``. A :exc:`KeyError`, from the base, since GitHub</span>
-<span class="sd">                issue #923 -- it used to be a plain :exc:`ValueError` raised</span>
+<span class="sd">                issue :issue:`923` -- it used to be a plain :exc:`ValueError` raised</span>
 <span class="sd">                here.</span>
 <span class="sd">            EnumValueError: If ``key`` is a value no member carries and there</span>
 <span class="sd">                is no usable ``default``. A :exc:`ValueError`, from the base.</span>
@@ -2903,7 +2903,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[AppType, ...]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Other services sharing :attr:`port` in this member's own registry.</span>
 
-<span class="sd">        GitHub issue #807. No storage of its own: IANA already keeps every</span>
+<span class="sd">        GitHub issue :issue:`807`. No storage of its own: IANA already keeps every</span>
 <span class="sd">        colliding service as its own member of :data:`__registry__`, keyed on</span>
 <span class="sd">        the shared port -- :meth:`get_all` already walks that same bucket to</span>
 <span class="sd">        answer with the aliases after the canonical member, so this is exactly</span>
@@ -2993,16 +2993,16 @@
 <span class="sd">                every entry point rejects a non-port identically.</span>
 <span class="sd">            proto: Transport protocol, as a member, its name, or a bare</span>
 <span class="sd">                :class:`int`. That last shape is not merely defensive: GitHub</span>
-<span class="sd">                issue #808 dropped ``TransportProtocol``'s ``IntFlag`` base, so</span>
+<span class="sd">                issue :issue:`808` dropped ``TransportProtocol``'s ``IntFlag`` base, so</span>
 <span class="sd">                ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,</span>
 <span class="sd">                the same as any caller passing a literal port-transport bitmask</span>
 <span class="sd">                -- falls through to ``int.__or__`` and returns a bare</span>
 <span class="sd">                :class:`int` rather than a member. Never split back into the</span>
 <span class="sd">                transports its bits would each name -- a ruling given in review</span>
-<span class="sd">                of the work for #808 -- so it is looked up as the one whole</span>
+<span class="sd">                of the work for :issue:`808` -- so it is looked up as the one whole</span>
 <span class="sd">                value it already is, exactly like any other bare int: refused</span>
 <span class="sd">                when that whole value names no registry, resolved when it</span>
-<span class="sd">                happens to equal one instead. Since GitHub issue #860 moved</span>
+<span class="sd">                happens to equal one instead. Since GitHub issue :issue:`860` moved</span>
 <span class="sd">                this class off power-of-two spacing, a hand-built composite</span>
 <span class="sd">                is no longer guaranteed to be the former -- see</span>
 <span class="sd">                :meth:`_dispatch`'s own body for a value that resolves.</span>
@@ -3239,7 +3239,7 @@
 <span class="sd">        ``port`` to already carry a member and adds a further name for it;</span>
 <span class="sd">        this requires the opposite -- ``port`` unclaimed in this registry --</span>
 <span class="sd">        and mints the first. :meth:`get` can no longer do this itself as of</span>
-<span class="sd">        GitHub issue #860 (the owner's ruling there: only IANA-registered values</span>
+<span class="sd">        GitHub issue :issue:`860` (the owner's ruling there: only IANA-registered values</span>
 <span class="sd">        are legitimate, a new entry is properly created through :meth:`register`,</span>
 <span class="sd">        and ``get`` lacks the information to create one), so this is now the only</span>
 <span class="sd">        way to add a service this registry does not already carry.</span>
@@ -3299,7 +3299,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">register_alias</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'AppType'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-renamed</span>
 <span class="w">        </span><span class="sd">"""Register ``name`` as a new alias on ``port``, in this registry alone.</span>
 
-<span class="sd">        GitHub issue #807's third ask, deliberately scoped to **this**</span>
+<span class="sd">        GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**</span>
 <span class="sd">        per-transport registry: ``TCP.register_alias(...)`` never touches</span>
 <span class="sd">        :class:`UDP`'s members, which is what keeps an alias registered on one</span>
 <span class="sd">        transport from leaking onto a transport IANA never assigned it -- e.g.</span>

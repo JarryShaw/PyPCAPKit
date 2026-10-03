@@ -935,7 +935,7 @@
 
 <span class="sd">        :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`</span>
 <span class="sd">        package -- today always exactly one level down, e.g.</span>
-<span class="sd">        :mod:`pcapkit.vendor.reg.apptype`, but #732 needs deeper nesting such as</span>
+<span class="sd">        :mod:`pcapkit.vendor.reg.apptype`, but :issue:`732` needs deeper nesting such as</span>
 <span class="sd">        :mod:`pcapkit.vendor.reg.apptype.tcp`. The output file mirrors that same</span>
 <span class="sd">        position, whatever its depth, under :mod:`pcapkit.const` instead.</span>
 
@@ -983,7 +983,7 @@
 <span class="sd">        *without* instantiating it, and so without triggering</span>
 <span class="sd">        :meth:`Vendor.__init__`'s network fetch, render and write --</span>
 <span class="sd">        :func:`pcapkit.vendor.__main__.run`'s pre-run snapshot (GitHub issue</span>
-<span class="sd">        #872) is exactly such a caller. Every crawler defined in this</span>
+<span class="sd">        :issue:`872`) is exactly such a caller. Every crawler defined in this</span>
 <span class="sd">        codebase inherits this implementation unchanged; none overrides</span>
 <span class="sd">        ``_dest_path``, so the classmethod is authoritative for all of them.</span>
 
@@ -1041,7 +1041,7 @@
 <span class="sd">        :func:`stdin_is_interactive` finds a terminal. A non-interactive run --</span>
 <span class="sd">        under a pipe, in a container, from a scheduled job -- is failed with the</span>
 <span class="sd">        fetch error instead, the same way :envvar:`PCAPKIT_CI_MODE` fails it,</span>
-<span class="sd">        rather than printing instructions nobody will read. See #522.</span>
+<span class="sd">        rather than printing instructions nobody will read. See :issue:`522`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            CSV data.</span>

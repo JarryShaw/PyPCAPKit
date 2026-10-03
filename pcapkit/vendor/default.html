@@ -672,7 +672,7 @@ when <span class="target" id="index-0"></span><code class="xref std std-envvar d
 <code class="xref py py-func docutils literal notranslate"><span class="pre">stdin_is_interactive()</span></code> finds a terminal. A non-interactive run –
 under a pipe, in a container, from a scheduled job – is failed with the
 fetch error instead, the same way <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code> fails it,
-rather than printing instructions nobody will read. See #522.</p>
+rather than printing instructions nobody will read. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/522">#522</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
@@ -702,7 +702,7 @@ rather than printing instructions nobody will read. See #522.</p>
 <dd><p>Resolve the <code class="docutils literal notranslate"><span class="pre">const/</span></code> file this crawler’s module mirrors.</p>
 <p><code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> sits somewhere under the <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>
 package – today always exactly one level down, e.g.
-<a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype" title="pcapkit.vendor.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype</span></code></a>, but #732 needs deeper nesting such as
+<a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype" title="pcapkit.vendor.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype</span></code></a>, but <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/732">#732</a> needs deeper nesting such as
 <a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype.tcp" title="pcapkit.vendor.reg.apptype.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype.tcp</span></code></a>. The output file mirrors that same
 position, whatever its depth, under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> instead.</p>
 <p>This used to split the module’s absolute path into exactly two levels
@@ -745,7 +745,7 @@ to obtain it. That lets a caller resolve a crawler’s destination
 <em>without</em> instantiating it, and so without triggering
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Vendor.__init__()</span></code>’s network fetch, render and write –
 <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.vendor.__main__.run()</span></code>’s pre-run snapshot (GitHub issue
-#872) is exactly such a caller. Every crawler defined in this
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/872">#872</a>) is exactly such a caller. Every crawler defined in this
 codebase inherits this implementation unchanged; none overrides
 <code class="docutils literal notranslate"><span class="pre">_dest_path</span></code>, so the classmethod is authoritative for all of them.</p>
 <dl class="field-list simple">

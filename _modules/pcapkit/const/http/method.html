@@ -497,7 +497,7 @@
 <span class="sd">    .. note::</span>
 
 <span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on</span>
-<span class="sd">       GitHub issue #860 that ``get`` should not mint: only IANA-registered</span>
+<span class="sd">       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered</span>
 <span class="sd">       values are legitimate members, a new one is properly created through</span>
 <span class="sd">       :meth:`register`, and ``get`` is not given enough information to create</span>
 <span class="sd">       one. Concretely true here -- a bare wire method verb carries no</span>
@@ -674,14 +674,14 @@
 <span class="sd">                identifier, not the value -- is canonicalised.</span>
 
 <span class="sd">                A *registered* member of this class used to carry something</span>
-<span class="sd">                different here: GitHub issue #870 found that</span>
+<span class="sd">                different here: GitHub issue :issue:`870` found that</span>
 <span class="sd">                :meth:`__new__` called ``str.__new__(cls)`` with no</span>
 <span class="sd">                argument at all, so every one of the 40 declared members'</span>
 <span class="sd">                own :class:`str` payload was permanently empty regardless</span>
 <span class="sd">                of ``value`` (``str(Method.GET) == ''``, and</span>
 <span class="sd">                ``Method.GET == 'GET'`` was :obj:`False`) -- true on</span>
 <span class="sd">                ``main`` at ``60b85e3a4`` as well as when this docstring</span>
-<span class="sd">                was first written. #870 fixed :meth:`__new__` to</span>
+<span class="sd">                was first written. :issue:`870` fixed :meth:`__new__` to</span>
 <span class="sd">                ``str.__new__(cls, value)``, mirroring</span>
 <span class="sd">                :class:`~pcapkit.const.ftp.command.Command`'s own</span>
 <span class="sd">                ``__new__``, so a registered member's payload now agrees</span>
@@ -691,7 +691,7 @@
 <span class="sd">            name: Bare label for the unregistered member -- here, the</span>
 <span class="sd">                canonical upper-case form of ``value``, matching the name</span>
 <span class="sd">                every *registered* member of this class is looked up by,</span>
-<span class="sd">                since #860's open-vocabulary registries have no manufactured</span>
+<span class="sd">                since :issue:`860`'s open-vocabulary registries have no manufactured</span>
 <span class="sd">                placeholder label to fall back to.</span>
 
 <span class="sd">        """</span>
@@ -706,7 +706,7 @@
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the</span>
-<span class="sd">        lookup itself, per GitHub issue #908: the previous override checked</span>
+<span class="sd">        lookup itself, per GitHub issue :issue:`908`: the previous override checked</span>
 <span class="sd">        only ``_member_map_`` (names), never ``_value2member_map_``</span>
 <span class="sd">        (values), so the two IANA methods whose member *name* differs from</span>
 <span class="sd">        their *value* -- ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and</span>
@@ -719,7 +719,7 @@
 <span class="sd">        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), and a zero-argument</span>
 <span class="sd">        ``super()`` needs a first argument to bind, so this override had to</span>
 <span class="sd">        move from :class:`staticmethod` to :class:`classmethod` to delegate</span>
-<span class="sd">        at all -- see GitHub issue #908's own correction of the fix it</span>
+<span class="sd">        at all -- see GitHub issue :issue:`908`'s own correction of the fix it</span>
 <span class="sd">        originally proposed. Callers are unaffected by the switch itself:</span>
 <span class="sd">        ``Method.get('X')`` binds identically either way.</span>
 
@@ -743,11 +743,11 @@
 <span class="sd">                and values, via the base's own precedence -- name before</span>
 <span class="sd">                value -- so a value-only match such as</span>
 <span class="sd">                ``'BASELINE-CONTROL'`` now resolves too, closing GitHub</span>
-<span class="sd">                issue #908.</span>
+<span class="sd">                issue :issue:`908`.</span>
 <span class="sd">            default: Value for the unregistered member built when ``key``</span>
 <span class="sd">                matches neither a name nor a value. ``None``, the</span>
 <span class="sd">                default, uses ``key`` itself -- unchanged from before</span>
-<span class="sd">                GitHub issue #908.</span>
+<span class="sd">                GitHub issue :issue:`908`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If ``key`` is not a :class:`str`. This reaches the</span>
@@ -755,7 +755,7 @@
 <span class="sd">                ``cls(key)`` and so ``_missing_``, and is **not** caught by</span>
 <span class="sd">                the ``except KeyError`` fallback below -- only a failed</span>
 <span class="sd">                *name* lookup is. The non-``str`` surface therefore moved</span>
-<span class="sd">                with GitHub issue #908: ``get(42)`` and ``get(None)`` used</span>
+<span class="sd">                with GitHub issue :issue:`908`: ``get(42)`` and ``get(None)`` used</span>
 <span class="sd">                to raise :exc:`AttributeError` from ``key.upper()``, and</span>
 <span class="sd">                ``get(b'GET')`` used to *return* a member whose name and</span>
 <span class="sd">                value were both the :class:`bytes` object. Raising is the</span>
@@ -792,7 +792,7 @@
 <span class="sd">                the canonical upper-case member names -- deliberately unlike</span>
 <span class="sd">                :meth:`get`, which is case-**sensitive** per</span>
 <span class="sd">                :rfc:`9110#section-9.1`. The split was ruled deliberate on</span>
-<span class="sd">                GitHub issue #896; GitHub issue #908 is the pointer between</span>
+<span class="sd">                GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between</span>
 <span class="sd">                the two, so a reader of this one file is not left with two</span>
 <span class="sd">                contradictory rationales and nothing tying them together.</span>
 

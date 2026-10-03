@@ -6849,7 +6849,7 @@ protocol of the registry this member lives in.</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.aliases">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">aliases</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><span class="pre">AppType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.aliases" title="Link to this definition">¶</a></dt>
 <dd><p>Other services sharing <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">port</span></code></a> in this member’s own registry.</p>
-<p>GitHub issue #807. No storage of its own: IANA already keeps every
+<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/807">#807</a>. No storage of its own: IANA already keeps every
 colliding service as its own member of <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code>, keyed on
 the shared port – <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.get_all" title="pcapkit.const.reg.apptype.apptype.AppType.get_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_all()</span></code></a> already walks that same bucket to
 answer with the aliases after the canonical member, so this is exactly
@@ -6880,16 +6880,16 @@ to guard the read.</p>
 every entry point rejects a non-port identically.</p></li>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Transport protocol, as a member, its name, or a bare
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>. That last shape is not merely defensive: GitHub
-issue #808 dropped <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code> base, so
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> dropped <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code> base, so
 <code class="docutils literal notranslate"><span class="pre">TransportProtocol.a</span> <span class="pre">|</span> <span class="pre">TransportProtocol.b</span></code> – built by hand,
 the same as any caller passing a literal port-transport bitmask
 – falls through to <code class="docutils literal notranslate"><span class="pre">int.__or__</span></code> and returns a bare
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> rather than a member. Never split back into the
 transports its bits would each name – a ruling given in review
-of the work for #808 – so it is looked up as the one whole
+of the work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> – so it is looked up as the one whole
 value it already is, exactly like any other bare int: refused
 when that whole value names no registry, resolved when it
-happens to equal one instead. Since GitHub issue #860 moved
+happens to equal one instead. Since GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> moved
 this class off power-of-two spacing, a hand-built composite
 is no longer guaranteed to be the former – see
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a>’s own body for a value that resolves.</p></li>
@@ -6977,7 +6977,7 @@ appropriate to their own call.</p>
 <code class="docutils literal notranslate"><span class="pre">port</span></code> to already carry a member and adds a further name for it;
 this requires the opposite – <code class="docutils literal notranslate"><span class="pre">port</span></code> unclaimed in this registry –
 and mints the first. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> can no longer do this itself as of
-GitHub issue #860 (the owner’s ruling there: only IANA-registered values
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> (the owner’s ruling there: only IANA-registered values
 are legitimate, a new entry is properly created through <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>,
 and <code class="docutils literal notranslate"><span class="pre">get</span></code> lacks the information to create one), so this is now the only
 way to add a service this registry does not already carry.</p>
@@ -7019,7 +7019,7 @@ member.</p></li>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.register_alias">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.register_alias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="Link to this definition">¶</a></dt>
 <dd><p>Register <code class="docutils literal notranslate"><span class="pre">name</span></code> as a new alias on <code class="docutils literal notranslate"><span class="pre">port</span></code>, in this registry alone.</p>
-<p>GitHub issue #807’s third ask, deliberately scoped to <strong>this</strong>
+<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/807">#807</a>’s third ask, deliberately scoped to <strong>this</strong>
 per-transport registry: <code class="docutils literal notranslate"><span class="pre">TCP.register_alias(...)</span></code> never touches
 <code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code>’s members, which is what keeps an alias registered on one
 transport from leaking onto a transport IANA never assigned it – e.g.

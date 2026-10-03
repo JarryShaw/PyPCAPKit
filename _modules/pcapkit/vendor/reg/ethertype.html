@@ -506,10 +506,10 @@
     <span class="c1">#: carrying no real assignment -- a company holding the block but naming</span>
     <span class="c1">#: nothing (``DEC Unassigned``), or a range the list says is dead/invalid</span>
     <span class="c1">#: outright -- rather than a proprietary protocol's real name. The owner's</span>
-    <span class="c1">#: original ruling on #775/#841 held these two out as the only rows to</span>
+    <span class="c1">#: original ruling on :issue:`775`/:issue:`841` held these two out as the only rows to</span>
     <span class="c1">#: convert to :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_</span>
     <span class="c1">#: member`, on the theory that a proprietary protocol's company name IS</span>
-    <span class="c1">#: the final concrete name for every other row. #775's final round</span>
+    <span class="c1">#: the final concrete name for every other row. :issue:`775`'s final round</span>
     <span class="c1">#: converts every row alike, so this set no longer decides *whether* a</span>
     <span class="c1">#: row registers -- only *how its name is spelled*: these two keep the</span>
     <span class="c1">#: bare label with no hex suffix, since the label itself already says</span>
@@ -560,7 +560,7 @@
 <span class="sd">        The generated :meth:`~EtherType._missing_` tests these ``if`` blocks in</span>
 <span class="sd">        list order and returns on the first match, so a range that is fully</span>
 <span class="sd">        contained within an earlier, wider one would never be reached -- see</span>
-<span class="sd">        GitHub issue #862, where the source table lists ``0x0101-0x01FF``</span>
+<span class="sd">        GitHub issue :issue:`862`, where the source table lists ``0x0101-0x01FF``</span>
 <span class="sd">        after the ``0x0000-0x05DC`` range that wholly contains it.</span>
 
 <span class="sd">        The IANA CSV is not otherwise sorted by range, so this only reorders</span>

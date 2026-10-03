@@ -504,12 +504,12 @@
 <span class="sd">       keywords generated after them (data-driven, not hand-picked; see</span>
 <span class="sd">       :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than</span>
 <span class="sd">       minting the per-command ones at import time as an incidental side</span>
-<span class="sd">       effect of building :class:`Command`'s own rows. GitHub issue #860:</span>
-<span class="sd">       that import-time mutation was the same defect shape #775 removed</span>
+<span class="sd">       effect of building :class:`Command`'s own rows. GitHub issue :issue:`860`:</span>
+<span class="sd">       that import-time mutation was the same defect shape :issue:`775` removed</span>
 <span class="sd">       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not</span>
 <span class="sd">       previously noticed here. ``_missing_`` still unmints for a keyword that</span>
 <span class="sd">       turns up on the wire but names none of these -- the extendability the</span>
-<span class="sd">       owner conditionally asked to keep on GitHub issue #860: unsure what a</span>
+<span class="sd">       owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a</span>
 <span class="sd">       FEAT value absent from the RFC's list means in the CSV table, the owner</span>
 <span class="sd">       said that if the expected handling is our current approach, as industry</span>
 <span class="sd">       convention has it, the registry stays extendable as is, and then approved</span>
@@ -571,7 +571,7 @@
 <span class="w">        </span><span class="sd">"""Resolve ``key`` case-insensitively, per :rfc:`5797#section-2`.</span>
 
 <span class="sd">        One of the few case-insensitive overrides the ruling on GitHub issue</span>
-<span class="sd">        #877 allows, and the registry's own defining document states the</span>
+<span class="sd">        :issue:`877` allows, and the registry's own defining document states the</span>
 <span class="sd">        comparison rule outright rather than leaving it to be inferred --</span>
 <span class="sd">        :rfc:`5797#section-2`, on the ``FEAT Code`` column this class is</span>
 <span class="sd">        generated from: *"IANA maintains uniqueness of feature names (FEAT</span>
@@ -591,7 +591,7 @@
 <span class="sd">        lower case -- measured on the IANA CSV: 10 distinct all-upper-case</span>
 <span class="sd">        keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,</span>
 <span class="sd">        with none mixed. Without this override ``get('BASE')`` raised</span>
-<span class="sd">        :exc:`KeyError`, which is the defect GitHub issue #903's audit found.</span>
+<span class="sd">        :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.</span>
 
 <span class="sd">        The obvious objection, answered: :rfc:`5797` uses case *presentationally*</span>
 <span class="sd">        to tell a real keyword from a placeholder -- *"defined FEAT keywords</span>
@@ -599,7 +599,7 @@
 <span class="sd">        listed in lowercase"* -- so folding might look like it discards that</span>
 <span class="sd">        distinction. It does not. Only the inbound ``key`` is folded; every</span>
 <span class="sd">        member keeps the registrar's own casing, and the fold itself is backed by</span>
-<span class="sd">        the RFC: the final ruling on GitHub issue #877 is that an enum treats its</span>
+<span class="sd">        the RFC: the final ruling on GitHub issue :issue:`877` is that an enum treats its</span>
 <span class="sd">        values as case-insensitive where the RFC states they are, and as</span>
 <span class="sd">        case-sensitive otherwise. So ``get('BASE').name`` is still ``'base'`` and</span>
 <span class="sd">        still says placeholder. And the uniqueness rule quoted above is what makes</span>
@@ -668,7 +668,7 @@
 <span class="w">    </span><span class="sd">"""Type of "kind" of command, based on :rfc:`959#section-4`.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #930, finishing #877's phase 2. Pure re-parenting as far as</span>
+<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as</span>
 <span class="sd">    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its</span>
 <span class="sd">    own to reconcile with the base -- and its own :meth:`_missing_` range</span>
 <span class="sd">    guard below is untouched, since :class:`EnumLookup` does not touch that</span>
@@ -702,7 +702,7 @@
 <span class="w">    </span><span class="sd">"""Expectation for support in modern FTP implementations.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #930, finishing #877's phase 2 -- pure re-parenting, since this</span>
+<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this</span>
 <span class="sd">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
 <span class="sd">    with the base.</span>
 
@@ -724,7 +724,7 @@
 <span class="sd">    .. note::</span>
 
 <span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on</span>
-<span class="sd">       GitHub issue #860 that ``get`` should not mint: only IANA-registered</span>
+<span class="sd">       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered</span>
 <span class="sd">       values are legitimate members, a new one is properly created through</span>
 <span class="sd">       :meth:`register`, and ``get`` is not given enough information to create</span>
 <span class="sd">       one. Concretely true here -- a bare wire command word carries no</span>
@@ -971,7 +971,7 @@
 <span class="sd">            name: Bare label for the unregistered member -- here, the</span>
 <span class="sd">                canonical upper-case form of ``value``, matching the name</span>
 <span class="sd">                every *registered* member of this class is looked up by,</span>
-<span class="sd">                since #860's open-vocabulary registries have no manufactured</span>
+<span class="sd">                since :issue:`860`'s open-vocabulary registries have no manufactured</span>
 <span class="sd">                placeholder label to fall back to.</span>
 
 <span class="sd">        """</span>

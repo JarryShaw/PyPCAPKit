@@ -742,7 +742,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more. The owner ruled on
-GitHub issue #860 that <code class="docutils literal notranslate"><span class="pre">get</span></code> should not mint: only IANA-registered
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> that <code class="docutils literal notranslate"><span class="pre">get</span></code> should not mint: only IANA-registered
 values are legitimate members, a new one is properly created through
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get</span></code> is not given enough information to create
 one. Concretely true here – a bare wire method verb carries no
@@ -1028,14 +1028,14 @@ exactly what was observed on the wire, matching how a
 declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
 identifier, not the value – is canonicalised.</p>
 <p>A <em>registered</em> member of this class used to carry something
-different here: GitHub issue #870 found that
+different here: GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/870">#870</a> found that
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> called <code class="docutils literal notranslate"><span class="pre">str.__new__(cls)</span></code> with no
 argument at all, so every one of the 40 declared members’
 own <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload was permanently empty regardless
 of <code class="docutils literal notranslate"><span class="pre">value</span></code> (<code class="docutils literal notranslate"><span class="pre">str(Method.GET)</span> <span class="pre">==</span> <span class="pre">''</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> was <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – true on
 <code class="docutils literal notranslate"><span class="pre">main</span></code> at <code class="docutils literal notranslate"><span class="pre">60b85e3a4</span></code> as well as when this docstring
-was first written. #870 fixed <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> to
+was first written. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/870">#870</a> fixed <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> to
 <code class="docutils literal notranslate"><span class="pre">str.__new__(cls,</span> <span class="pre">value)</span></code>, mirroring
 <a class="reference internal" href="ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s own
 <code class="docutils literal notranslate"><span class="pre">__new__</span></code>, so a registered member’s payload now agrees
@@ -1046,7 +1046,7 @@ both carry their own value as real <a class="reference external" href="https://d
 <li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
 canonical upper-case form of <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching the name
 every <em>registered</em> member of this class is looked up by,
-since #860’s open-vocabulary registries have no manufactured
+since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>’s open-vocabulary registries have no manufactured
 placeholder label to fall back to.</p></li>
 </ul>
 </dd>
@@ -1066,7 +1066,7 @@ placeholder label to fall back to.</p></li>
 the canonical upper-case member names – deliberately unlike
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>, which is case-<strong>sensitive</strong> per
 <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>. The split was ruled deliberate on
-GitHub issue #896; GitHub issue #908 is the pointer between
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>; GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> is the pointer between
 the two, so a reader of this one file is not left with two
 contradictory rationales and nothing tying them together.</p>
 </dd>
