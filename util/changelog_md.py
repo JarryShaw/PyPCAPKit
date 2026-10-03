@@ -46,7 +46,9 @@ conversion is six mechanical rules rather than a document converter:
      already implies, with no level skipped;
   2. ``:rfc:`NNNN``` -- and ``:rfc:`NNNN#section-3```, the anchored spelling
      Sphinx accepts too -- become Markdown links to the RFC on the IETF
-     datatracker;
+     datatracker, and every role in the ``extlinks`` table of
+     ``docs/source/conf.py`` (``:issue:``, ``:pr:``, ``:wikipedia:`` ...),
+     mirrored in ``EXTLINKS``, becomes a link to that role's URL;
   3. ``double backtick`` literals become single-backtick code spans;
   4. ``*`` bullets become ``-`` bullets;
   5. ``[n]_`` / ``.. [n]`` footnotes become GitHub's ``[^n]`` / ``[^n]:``;
@@ -138,6 +140,7 @@ reproduction gate over the generated ``pcapkit.const`` modules.
 from __future__ import annotations
 
 import argparse
+import ast
 import difflib
 import pathlib
 import re
@@ -179,6 +182,33 @@ _RFC_ROLE = re.compile(r':rfc:`(\d+)(?:#([\w.-]+))?`')
 #: Kept level with Sphinx so the Markdown link and the rendered documentation say
 #: the same thing about the same page, which is the whole point of rule 2.
 _RFC_ANCHORS = frozenset({'appendix', 'page', 'section'})
+
+#: The Sphinx configuration whose ``extlinks`` table :data:`EXTLINKS` mirrors.
+CONF = ROOT / 'docs' / 'source' / 'conf.py'
+
+#: The ``sphinx.ext.extlinks`` roles -- role name to ``(URL template, caption
+#: template)`` -- copied from ``extlinks`` in ``docs/source/conf.py``. A constant
+#: rather than a read of that file because a source distribution carries the
+#: changelog entries and this script but prunes ``docs/source/conf.py``, and
+#: a generator that needed the file would reject every role there.
+#: ``tests/project/test_changelog_md.py`` fails if the two tables drift apart.
+EXTLINKS = {
+    'issue': ('https://github.com/JarryShaw/PyPCAPKit/issues/%s', '#%s'),
+    'pr': ('https://github.com/JarryShaw/PyPCAPKit/pull/%s', '#%s'),
+    'discussion': ('https://github.com/JarryShaw/PyPCAPKit/discussions/%s', '#%s'),
+    'wikipedia': ('https://en.wikipedia.org/wiki/%s', '%s'),
+    'iana': ('https://www.iana.org/assignments/%s', '%s'),
+}  # type: dict[str, tuple[str, Optional[str]]]
+
+#: Every :data:`EXTLINKS` role, with its content. Longest name first so a role
+#: that is a prefix of another cannot shadow it.
+_EXTLINK_ROLE = re.compile(
+    ':(' + '|'.join(map(re.escape, sorted(EXTLINKS, key=len, reverse=True))) + r'):`([^`\n]+)`')
+
+#: Sphinx's split of role content into an explicit title and a target, verbatim
+#: from ``sphinx.util.nodes.explicit_title_re`` (Sphinx 9.1.0):
+#: ``:issue:`the parsing bug <591>``` is the text *the parsing bug* linking to 591.
+_EXPLICIT_TITLE = re.compile(r'^(.+?)\s*(?<!\x00)<([^<]*?)>$', re.DOTALL)
 
 #: Where the full rendered history lives. Must match ``[project.urls].changelog``
 #: in ``pyproject.toml`` -- ``MANIFEST.in`` prunes ``docs/``, so in a source
@@ -379,6 +409,64 @@ def rfc_link(number: str, anchor: str = '') -> str:
     return f'[{title}]({RFC_URL}{number}#{anchor})'
 
 
+def read_extlinks(conf: pathlib.Path = CONF) -> dict[str, tuple[str, Optional[str]]]:
+    """Read the ``extlinks`` table out of the Sphinx configuration.
+
+    Not on the conversion path: :data:`EXTLINKS` is what converts, so the generator
+    works where ``docs/source/conf.py`` is absent. This is the drift check's reader
+    -- ``tests/project/test_changelog_md.py`` asserts the two tables agree.
+
+    Parsed with :mod:`ast` rather than imported: ``conf.py`` sets environment
+    variables and imports ``pcapkit``. A non-literal table raises
+    :exc:`ValueError`.
+
+    Args:
+        conf: The configuration file.
+
+    Returns:
+        Role name to ``(URL template, caption template)``, or an empty dict if
+        *conf* defines no table.
+
+    """
+    for node in ast.parse(conf.read_text(encoding='utf-8')).body:
+        if isinstance(node, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == 'extlinks'
+                for target in node.targets):
+            return dict(ast.literal_eval(node.value))
+    return {}
+
+
+def extlink(name: str, text: str,
+            table: Optional[dict[str, tuple[str, Optional[str]]]] = None) -> str:
+    """Render one ``extlinks`` role as a Markdown link, as Sphinx's extlinks does.
+
+    An explicit ``title <target>`` supplies the text and the target; otherwise the
+    target is the whole content and the text is the caption template applied to it
+    (or the URL itself, if the table gives no caption).
+
+    Args:
+        name: The role name, a key of *table*.
+        text: The role content, between the backticks.
+        table: The role table; :data:`EXTLINKS` if omitted.
+
+    Returns:
+        A Markdown inline link.
+
+    """
+    base_url, caption = (EXTLINKS if table is None else table)[name]
+    match = _EXPLICIT_TITLE.match(text)
+    title, part = match.groups() if match else (text, text)
+    url = base_url % part
+    if not match:
+        title = url if caption is None else caption % part
+    # Markdown's own metacharacters, which a reST title and target never needed
+    # escaping for: a bracket would end the text early, a space or parenthesis
+    # would end the destination early.
+    title = title.replace('[', '\\[').replace(']', '\\]')
+    url = url.replace(' ', '%20').replace('(', '%28').replace(')', '%29')
+    return f'[{title}]({url})'
+
+
 def convert(rst: str) -> str:
     """Apply the six rules to one per-version entry.
 
@@ -440,8 +528,10 @@ def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
                 index += 2
                 continue
 
-        # 2. the one role these entries use, in both spellings Sphinx accepts.
+        # 2. the roles these entries use: ``:rfc:`` in both spellings Sphinx
+        #    accepts, and every role in :data:`EXTLINKS`.
         line = _RFC_ROLE.sub(lambda match: rfc_link(match[1], match[2] or ''), line)
+        line = _EXTLINK_ROLE.sub(lambda match: extlink(match[1], match[2]), line)
         # 3. literals.
         line = re.sub(r'``([^`]+)``', r'`\1`', line)
         # 4. bullets, at any indent.

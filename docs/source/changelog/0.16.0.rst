@@ -16,8 +16,8 @@ A project-wide revision, and the last release of the pre-1.0 design.
   data models; PCAP and the auxiliary protocols moved under ``pcapkit.misc``.
 * **Removed** -- the ``validators`` module, several decorators from
   ``pcapkit.utilities``, and multiprocessing support in ``Extractor``.
-* **Fixed** -- the DPKT toolkit (#101), IP reassembly, and missing ``id``
+* **Fixed** -- the DPKT toolkit (:issue:`101`), IP reassembly, and missing ``id``
   methods on subclassed protocols.
 
 The PyPCAPKit Enhancement Proposals discussion channel was opened with this
-release (#106).
+release (:discussion:`106`).

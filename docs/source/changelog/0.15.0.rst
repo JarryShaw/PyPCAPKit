@@ -6,6 +6,6 @@
   revised.
 * **Added** -- full API documentation, published at
   https://pypcapkit.jarryshaw.me.
-* **Fixed** -- the DictDumper dependency and the failures it caused (#37, #40).
+* **Fixed** -- the DictDumper dependency and the failures it caused (:issue:`37`, :issue:`40`).
 
 Preceded by ``0.15.0rc1`` (2020-06-06).
