@@ -20,7 +20,7 @@ Both are automatically generated from
 :mod:`pcapkit.vendor.ngap.procedure_code` and
 :mod:`pcapkit.vendor.ngap.protocol_ie`, which source the assignment from
 |pycrate|_'s compiled NGAP specification rather than a network registry --
-see that module's docstring for why, and GitHub issue #880 for the ruling.
+see that module's docstring for why, and GitHub issue :issue:`880` for the ruling.
 
 .. [*] 3GPP TS 38.413
 .. [*] 3GPP TS 38.413

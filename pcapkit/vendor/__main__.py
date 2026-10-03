@@ -51,7 +51,7 @@ def get_parser() -> 'ArgumentParser':
 def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     """Copy a target's const file aside before it runs; restore it if it raises.
 
-    A ruling given in review of the work for #872 settled how a failed target
+    A ruling given in review of the work for :issue:`872` settled how a failed target
     is undone: keep a copy of its const file before running the sub-vendor and
     revert if anything failed, rather than making the write itself atomic.
     This is that -- at the per-target boundary :func:`run` already owns, which
@@ -100,7 +100,7 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     not backed up stops the target before it starts. Both leave the
     previous file exactly as it was, for different reasons.
 
-    A symlinked destination has a related divergence from the pre-#872
+    A symlinked destination has a related divergence from the pre-:issue:`872`
     behaviour -- documented against the write path by rounds 4-8 (deleted
     along with ``_write_atomic``, though the underlying behaviour persists
     here instead): ``open(const_file, 'w')`` writes *through* a symlink,

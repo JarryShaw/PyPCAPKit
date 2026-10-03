@@ -8,7 +8,7 @@ This module contains the vendor crawler for **NGAP Elementary Procedure
 Codes**, which is automatically generating
 :class:`pcapkit.const.ngap.procedure_code.ProcedureCode`.
 
-GitHub issue #880's owner ruling: unlike every other crawler in this package,
+GitHub issue :issue:`880`'s owner ruling: unlike every other crawler in this package,
 the source of truth here is not a network registry :mod:`requests` can fetch
 -- 3GPP publishes TS 38.413 as a PDF, with no CSV or HTML IANA-style registry
 kept in step with it. |pycrate|_ already carries the up-to-date assignment as
@@ -25,13 +25,13 @@ No network access happens at generation time -- only, if at all, whenever
 
 :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` is a genuinely open
 registry -- 3GPP keeps assigning new elementary procedures to TS 38.413 -- so,
-unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue #877
+unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue :issue:`877`
 ruled on, an in-range value this crawler has not (yet) seen is not a bug to
 raise on: :meth:`~pcapkit.const.ngap.procedure_code.ProcedureCode._missing_`
 answers it with a throwaway, non-registering member instead (see
 :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`), which is what
 stops two different unrecognised keys from aliasing onto the same member --
-the defect GitHub issue #880 exists to fix.
+the defect GitHub issue :issue:`880` exists to fix.
 
 .. |pycrate| replace:: ``pycrate``
 .. _pycrate: https://github.com/pycrate-org/pycrate

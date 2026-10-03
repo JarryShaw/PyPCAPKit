@@ -36,10 +36,10 @@ class EtherType(Vendor):
     #: carrying no real assignment -- a company holding the block but naming
     #: nothing (``DEC Unassigned``), or a range the list says is dead/invalid
     #: outright -- rather than a proprietary protocol's real name. The owner's
-    #: original ruling on #775/#841 held these two out as the only rows to
+    #: original ruling on :issue:`775`/:issue:`841` held these two out as the only rows to
     #: convert to :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_
     #: member`, on the theory that a proprietary protocol's company name IS
-    #: the final concrete name for every other row. #775's final round
+    #: the final concrete name for every other row. :issue:`775`'s final round
     #: converts every row alike, so this set no longer decides *whether* a
     #: row registers -- only *how its name is spelled*: these two keep the
     #: bare label with no hex suffix, since the label itself already says
@@ -90,7 +90,7 @@ class EtherType(Vendor):
         The generated :meth:`~EtherType._missing_` tests these ``if`` blocks in
         list order and returns on the first match, so a range that is fully
         contained within an earlier, wider one would never be reached -- see
-        GitHub issue #862, where the source table lists ``0x0101-0x01FF``
+        GitHub issue :issue:`862`, where the source table lists ``0x0101-0x01FF``
         after the ``0x0000-0x05DC`` range that wholly contains it.
 
         The IANA CSV is not otherwise sorted by range, so this only reorders
