@@ -741,18 +741,20 @@ is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 Checksum and Integrity Verification
 -----------------------------------
 
-Eight protocols parse a checksum or CRC field —
+Ten protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.internet.hip.HIP`,
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
 :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
+:class:`~pcapkit.protocols.internet.ipx.IPX`,
+:class:`~pcapkit.protocols.internet.mh.MH`,
 :class:`~pcapkit.protocols.link.ospf.OSPF`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
 :class:`~pcapkit.protocols.transport.udp.UDP` — and exactly one of them checks
 whether the value is *right*:
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
-For the other seven the field is recorded and never questioned, so a corrupted
+For the other nine the field is recorded and never questioned, so a corrupted
 capture parses as cleanly as an intact one.
 
 **These are two different problems and they want separating**, because only one

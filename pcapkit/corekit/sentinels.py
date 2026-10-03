@@ -363,8 +363,8 @@ class NoDefaultType:
     compares by value rather than identity, and reload staleness is a
     *tracked* defect class here for other constructs -- see
     :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own
-    docstring note citing GitHub issues :issue:`425` and :issue:`555`, and
-    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
+    docstring note citing GitHub issues :issue:`421`, :issue:`425` and
+    :issue:`555`, and :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
     ``test_no_stale_class_survives_a_module_reload``, which reloads a module
     deliberately to pin the fix for exactly that class of bug elsewhere. A
     *future* comparison site written the vulnerable way -- a bare ``is
