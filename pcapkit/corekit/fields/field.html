@@ -609,7 +609,7 @@ and the actual value provided for packing.</p>
     <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size such a template and raises
     a bare <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, uncatchable as a pcapkit-specific
     error; this re-raises it as the negative-length message below.
-    See #805.</p></li>
+    See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a>.</p></li>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> is otherwise malformed –
     anything else <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size, such as a
     typo’d format character – rather than the negative-length
@@ -621,7 +621,7 @@ and the actual value provided for packing.</p>
     <code class="xref py py-data docutils literal notranslate"><span class="pre">_RE_NEGATIVE_LENGTH_TEMPLATE</span></code> against <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a>
     itself – which is known already, without needing anything
     <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a>’s own error says – rather than by the
-    error message. See #825.</p></li>
+    error message. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/825">#825</a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -673,7 +673,7 @@ per packet, all from this exact path. Calling <code class="docutils literal notr
 directly is exactly what <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> would have done once it
 found it, so this changes nothing about <em>when</em> a field is copied or
 what the copy contains – only the redundant dispatch is removed.
-See GitHub issue #730.</p>
+See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/730">#730</a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -794,7 +794,7 @@ mapping dictionary.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../../_modules/pcapkit/corekit/sentinels.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.NoValueType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.fields.field.NO_VALUE" title="pcapkit.corekit.fields.field.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
-<p>Housed here per GitHub issue #911 rather than in
+<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a> rather than in
 <a class="reference internal" href="#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where it used to be defined and where
 <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
 still documents it as the field-default sentinel.</p>
@@ -804,7 +804,7 @@ still documents it as the field-default sentinel.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.NO_VALUE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.NO_VALUE" title="Link to this definition">¶</a></dt>
 <dd><p>Type of <a class="reference internal" href="#pcapkit.corekit.fields.field.NO_VALUE" title="pcapkit.corekit.fields.field.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
-<p>Housed here per GitHub issue #911 rather than in
+<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a> rather than in
 <a class="reference internal" href="#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where it used to be defined and where
 <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
 still documents it as the field-default sentinel.</p>

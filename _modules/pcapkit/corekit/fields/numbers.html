@@ -524,20 +524,20 @@
 <span class="sd">        ProtocolError: If ``bit_length`` is given negative. Left alone,</span>
 <span class="sd">            ``(1 &lt;&lt; bit_length) - 1`` raises a bare, uncatchable</span>
 <span class="sd">            :exc:`ValueError` (``negative shift count``) here, before</span>
-<span class="sd">            :meth:`__call__`'s own negative-``length`` guard (#828) or</span>
-<span class="sd">            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s (#805)</span>
-<span class="sd">            ever see anything -- this one fires at construction time, on the</span>
-<span class="sd">            argument itself rather than on a resolved wire length. See</span>
-<span class="sd">            GitHub issue #831.</span>
+<span class="sd">            :meth:`__call__`'s own negative-``length`` guard (:issue:`828`) or</span>
+<span class="sd">            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s</span>
+<span class="sd">            (:issue:`805`) ever see anything -- this one fires at construction</span>
+<span class="sd">            time, on the argument itself rather than on a resolved wire length.</span>
+<span class="sd">            See GitHub issue :issue:`831`.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        A subclass such as :class:`UInt32Field` fixes the sign through</span>
 <span class="sd">        ``__signed__``, so ``signed`` there is at best redundant. It used to be</span>
 <span class="sd">        discarded outright, in both directions, which meant</span>
 <span class="sd">        ``UInt32Field(signed=True)`` handed back an unsigned field whose values</span>
-<span class="sd">        only looked wrong once the high bit was set -- see GitHub issue #545. A</span>
-<span class="sd">        contradicting value is now rejected instead; omitting it, or passing the</span>
-<span class="sd">        sign the class already fixes, stays legal.</span>
+<span class="sd">        only looked wrong once the high bit was set -- see GitHub issue</span>
+<span class="sd">        :issue:`545`. A contradicting value is now rejected instead; omitting</span>
+<span class="sd">        it, or passing the sign the class already fixes, stays legal.</span>
 
 <span class="sd">    """</span>
 
@@ -625,27 +625,27 @@
 <span class="sd">                a bare, uncatchable :exc:`ValueError` (``negative shift</span>
 <span class="sd">                count``) when ``bit_length`` was not supplied, before</span>
 <span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see</span>
-<span class="sd">                its own :exc:`ProtocolError` guard, #805/#825) or</span>
-<span class="sd">                :meth:`build_template` ever sees the value: this method sets</span>
+<span class="sd">                its own :exc:`ProtocolError` guard, :issue:`805`/:issue:`825`)</span>
+<span class="sd">                or :meth:`build_template` ever sees the value: this method sets</span>
 <span class="sd">                ``self._bit_length`` from the resolved length eagerly, as a</span>
 <span class="sd">                cache, and shifts by it immediately, so the crash happens on</span>
-<span class="sd">                *this* line rather than on the later, already-guarded ones.</span>
-<span class="sd">                See GitHub issue #828. This guard runs regardless of whether</span>
-<span class="sd">                ``bit_length`` was supplied, so a field constructed with a</span>
-<span class="sd">                fixed ``bit_length`` *and* a callable ``length`` that resolves</span>
-<span class="sd">                negative raises the identical message as one with no</span>
+<span class="sd">                *this* line rather than on the later, already-guarded ones. See</span>
+<span class="sd">                GitHub issue :issue:`828`. This guard runs regardless of</span>
+<span class="sd">                whether ``bit_length`` was supplied, so a field constructed</span>
+<span class="sd">                with a fixed ``bit_length`` *and* a callable ``length`` that</span>
+<span class="sd">                resolves negative raises the identical message as one with no</span>
 <span class="sd">                ``bit_length`` at all, rather than falling through to a</span>
 <span class="sd">                ``template='...-1s'`` :exc:`ProtocolError` from</span>
 <span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` later --</span>
-<span class="sd">                see GitHub issue #831. A resolved length of exactly ``0`` is a</span>
-<span class="sd">                legitimate empty field (e.g. ``len=4`` above resolving to</span>
-<span class="sd">                ``0``) and is left alone.</span>
+<span class="sd">                see GitHub issue :issue:`831`. A resolved length of exactly</span>
+<span class="sd">                ``0`` is a legitimate empty field (e.g. ``len=4`` above</span>
+<span class="sd">                resolving to ``0``) and is left alone.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            Rebuilding the template here is what applies a callable ``length``,</span>
 <span class="sd">            and :meth:`build_template` recomputes ``self._need_process`` as it</span>
 <span class="sd">            goes, so the flag and the template always describe the same width.</span>
-<span class="sd">            They did not always: see GitHub issue #591.</span>
+<span class="sd">            They did not always: see GitHub issue :issue:`591`.</span>
 
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
@@ -690,7 +690,7 @@
 <span class="sd">            resolved the real width. :meth:`pre_process` consequently handed</span>
 <span class="sd">            :obj:`bytes` to a template that had become ``&gt;Q`` -- or ``&gt;I``,</span>
 <span class="sd">            ``&gt;H``, ``&gt;B`` -- and :func:`struct.pack` refused it. See GitHub</span>
-<span class="sd">            issue #591.</span>
+<span class="sd">            issue :issue:`591`.</span>
 
 <span class="sd">            Assigning it is what tells a placeholder apart from a width that</span>
 <span class="sd">            genuinely needs byte packing, without having to remember that a</span>
@@ -743,7 +743,7 @@
 <span class="sd">            integer code for. The flag is therefore consulted **after** the</span>
 <span class="sd">            rebuild rather than before it, since deciding first and rebuilding</span>
 <span class="sd">            second is how the template and the value being returned came to</span>
-<span class="sd">            disagree in the first place. C.f. #591.</span>
+<span class="sd">            disagree in the first place. C.f. :issue:`591`.</span>
 
 <span class="sd">            That width is a **ceiling** of the bit length over eight, and it is</span>
 <span class="sd">            written as one. It used to read</span>
@@ -754,7 +754,7 @@
 <span class="sd">            eight was therefore sized one octet short -- ``256`` at one octet,</span>
 <span class="sd">            ``65536`` at two, and ``1`` itself at *zero* -- which</span>
 <span class="sd">            :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub</span>
-<span class="sd">            issue #599.</span>
+<span class="sd">            issue :issue:`599`.</span>
 
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
@@ -1087,14 +1087,14 @@
 <span class="sd">            would have selected it. PCAP-NG repeats a block's total length at</span>
 <span class="sd">            both ends precisely so that a reader can skip a block type it does</span>
 <span class="sd">            not recognise; that skip is what this fallback restores. See GitHub</span>
-<span class="sd">            issue #701.</span>
+<span class="sd">            issue :issue:`701`.</span>
 
 <span class="sd">            The fallback is the same nameless pseudo-member this method already</span>
 <span class="sd">            builds for a field carrying no registry at all, so it is a value</span>
 <span class="sd">            shape the package already produces and the dump layer already</span>
 <span class="sd">            renders -- as ``&lt;unknown&gt;::&lt;unassigned&gt; [28]``, through</span>
 <span class="sd">            :func:`~pcapkit.dumpkit.common.render_enum`, not through the</span>
-<span class="sd">            ``name is None`` branch #648 added, which a member named</span>
+<span class="sd">            ``name is None`` branch :issue:`648` added, which a member named</span>
 <span class="sd">            ``&lt;unassigned&gt;`` never takes -- and one an :class:`int`-keyed</span>
 <span class="sd">            dispatch registry looks up by value like any declared member. It is</span>
 <span class="sd">            built per value rather than grafted onto</span>
@@ -1119,14 +1119,14 @@
 <span class="sd">            from its guard today, and deliberately so: a generated guard raises a</span>
 <span class="sd">            bare, unlogged :exc:`ValueError` precisely because the generated</span>
 <span class="sd">            ``get()``'s ``except ValueError`` fallback has to keep catching it</span>
-<span class="sd">            (GitHub issues #584 and #647). The registries that *do* bound</span>
-<span class="sd">            themselves to a width and reject outside it are the bit-flag ones --</span>
-<span class="sd">            :class:`pcapkit.const.tcp.flags.Flags` among them -- and none of</span>
-<span class="sd">            those is named as the namespace of a plain :class:`EnumField`</span>
-<span class="sd">            anywhere in the package, so no in-library guard loses its force</span>
-<span class="sd">            through this method. The distinction is therefore for a registry</span>
-<span class="sd">            registered from outside :mod:`pcapkit.const`, which has no such</span>
-<span class="sd">            obligation to stay quiet.</span>
+<span class="sd">            (GitHub issues :issue:`584` and :issue:`647`). The registries that</span>
+<span class="sd">            *do* bound themselves to a width and reject outside it are the</span>
+<span class="sd">            bit-flag ones -- :class:`pcapkit.const.tcp.flags.Flags` among them --</span>
+<span class="sd">            and none of those is named as the namespace of a plain</span>
+<span class="sd">            :class:`EnumField` anywhere in the package, so no in-library guard</span>
+<span class="sd">            loses its force through this method. The distinction is therefore for</span>
+<span class="sd">            a registry registered from outside :mod:`pcapkit.const`, which has no</span>
+<span class="sd">            such obligation to stay quiet.</span>
 
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
@@ -1171,16 +1171,16 @@
 <span class="sd">        the registry's own ``get()`` -- resolved without anyone asking for a</span>
 <span class="sd">        name.</span>
 
-<span class="sd">        GitHub issue #575: the owner's ruling is that an unassigned wire value</span>
-<span class="sd">        should resolve to a real member of the registry the field names --</span>
-<span class="sd">        ``isinstance`` against it and every ancestor holds, and it renders and</span>
-<span class="sd">        dispatches exactly like a declared one -- provided building it never</span>
-<span class="sd">        grows the registry, which is the whole reason the field stopped</span>
-<span class="sd">        calling ``get()`` unconditionally in the first place. This is what</span>
-<span class="sd">        gets there: it calls ``namespace``'s own storage base's ``__new__``</span>
-<span class="sd">        directly -- :class:`str` or :class:`int`, whichever ``namespace``</span>
-<span class="sd">        derives from -- which skips ``namespace``'s *own* ``__new__``</span>
-<span class="sd">        entirely, and with it the ``cls.__registry__.add(...)`` /</span>
+<span class="sd">        GitHub issue :issue:`575`: the owner's ruling is that an unassigned</span>
+<span class="sd">        wire value should resolve to a real member of the registry the field</span>
+<span class="sd">        names -- ``isinstance`` against it and every ancestor holds, and it</span>
+<span class="sd">        renders and dispatches exactly like a declared one -- provided</span>
+<span class="sd">        building it never grows the registry, which is the whole reason the</span>
+<span class="sd">        field stopped calling ``get()`` unconditionally in the first place.</span>
+<span class="sd">        This is what gets there: it calls ``namespace``'s own storage base's</span>
+<span class="sd">        ``__new__`` directly -- :class:`str` or :class:`int`, whichever</span>
+<span class="sd">        ``namespace`` derives from -- which skips ``namespace``'s *own*</span>
+<span class="sd">        ``__new__`` entirely, and with it the ``cls.__registry__.add(...)`` /</span>
 <span class="sd">        ``cls.__members_ns__[...] = ...`` line every registry in this package</span>
 <span class="sd">        uses to record a member it mints. No entry is added to</span>
 <span class="sd">        ``_member_map_`` or ``_value2member_map_`` either, since those are</span>

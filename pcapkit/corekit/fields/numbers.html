@@ -758,13 +758,13 @@ because the lookup failed several frames before the dispatch that
 would have selected it. PCAP-NG repeats a block’s total length at
 both ends precisely so that a reader can skip a block type it does
 not recognise; that skip is what this fallback restores. See GitHub
-issue #701.</p>
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/701">#701</a>.</p>
 <p>The fallback is the same nameless pseudo-member this method already
 builds for a field carrying no registry at all, so it is a value
 shape the package already produces and the dump layer already
 renders – as <code class="docutils literal notranslate"><span class="pre">&lt;unknown&gt;::&lt;unassigned&gt;</span> <span class="pre">[28]</span></code>, through
 <a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.render_enum" title="pcapkit.dumpkit.common.render_enum"><code class="xref py py-func docutils literal notranslate"><span class="pre">render_enum()</span></code></a>, not through the
-<code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> branch #648 added, which a member named
+<code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> branch <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a> added, which a member named
 <code class="docutils literal notranslate"><span class="pre">&lt;unassigned&gt;</span></code> never takes – and one an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-keyed
 dispatch registry looks up by value like any declared member. It is
 built per value rather than grafted onto
@@ -786,14 +786,14 @@ unconditional <code class="docutils literal notranslate"><span class="pre">excep
 from its guard today, and deliberately so: a generated guard raises a
 bare, unlogged <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> precisely because the generated
 <code class="docutils literal notranslate"><span class="pre">get()</span></code>’s <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> fallback has to keep catching it
-(GitHub issues #584 and #647). The registries that <em>do</em> bound
-themselves to a width and reject outside it are the bit-flag ones –
-<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.flags.Flags</span></code></a> among them – and none of
-those is named as the namespace of a plain <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a>
-anywhere in the package, so no in-library guard loses its force
-through this method. The distinction is therefore for a registry
-registered from outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no such
-obligation to stay quiet.</p>
+(GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/584">#584</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/647">#647</a>). The registries that
+<em>do</em> bound themselves to a width and reject outside it are the
+bit-flag ones – <a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.flags.Flags</span></code></a> among them –
+and none of those is named as the namespace of a plain
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a> anywhere in the package, so no in-library guard
+loses its force through this method. The distinction is therefore for
+a registry registered from outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no
+such obligation to stay quiet.</p>
 </div>
 </dd></dl>
 
@@ -821,16 +821,16 @@ fresh per call rather than <code class="xref py py-func docutils literal notrans
 lookup tables, for a value a <em>parse</em> – rather than a direct call to
 the registry’s own <code class="docutils literal notranslate"><span class="pre">get()</span></code> – resolved without anyone asking for a
 name.</p>
-<p>GitHub issue #575: the owner’s ruling is that an unassigned wire value
-should resolve to a real member of the registry the field names –
-<code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against it and every ancestor holds, and it renders and
-dispatches exactly like a declared one – provided building it never
-grows the registry, which is the whole reason the field stopped
-calling <code class="docutils literal notranslate"><span class="pre">get()</span></code> unconditionally in the first place. This is what
-gets there: it calls <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s own storage base’s <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
-directly – <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, whichever <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
-derives from – which skips <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s <em>own</em> <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
-entirely, and with it the <code class="docutils literal notranslate"><span class="pre">cls.__registry__.add(...)</span></code> /
+<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/575">#575</a>: the owner’s ruling is that an unassigned
+wire value should resolve to a real member of the registry the field
+names – <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against it and every ancestor holds, and it
+renders and dispatches exactly like a declared one – provided
+building it never grows the registry, which is the whole reason the
+field stopped calling <code class="docutils literal notranslate"><span class="pre">get()</span></code> unconditionally in the first place.
+This is what gets there: it calls <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s own storage base’s
+<code class="docutils literal notranslate"><span class="pre">__new__</span></code> directly – <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, whichever
+<code class="docutils literal notranslate"><span class="pre">namespace</span></code> derives from – which skips <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s <em>own</em>
+<code class="docutils literal notranslate"><span class="pre">__new__</span></code> entirely, and with it the <code class="docutils literal notranslate"><span class="pre">cls.__registry__.add(...)</span></code> /
 <code class="docutils literal notranslate"><span class="pre">cls.__members_ns__[...]</span> <span class="pre">=</span> <span class="pre">...</span></code> line every registry in this package
 uses to record a member it mints. No entry is added to
 <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> or <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> either, since those are
@@ -973,11 +973,11 @@ means unsigned.</p></li>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> is given negative. Left alone,
     <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">&lt;&lt;</span> <span class="pre">bit_length)</span> <span class="pre">-</span> <span class="pre">1</span></code> raises a bare, uncatchable
     <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">shift</span> <span class="pre">count</span></code>) here, before
-    <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.__call__" title="pcapkit.corekit.fields.numbers.NumberField.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>’s own negative-<code class="docutils literal notranslate"><span class="pre">length</span></code> guard (#828) or
-    <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>’s (#805)
-    ever see anything – this one fires at construction time, on the
-    argument itself rather than on a resolved wire length. See
-    GitHub issue #831.</p></li>
+    <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.__call__" title="pcapkit.corekit.fields.numbers.NumberField.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>’s own negative-<code class="docutils literal notranslate"><span class="pre">length</span></code> guard (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/828">#828</a>) or
+    <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>’s
+    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a>) ever see anything – this one fires at construction
+    time, on the argument itself rather than on a resolved wire length.
+    See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/831">#831</a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -987,9 +987,9 @@ means unsigned.</p></li>
 <code class="docutils literal notranslate"><span class="pre">__signed__</span></code>, so <code class="docutils literal notranslate"><span class="pre">signed</span></code> there is at best redundant. It used to be
 discarded outright, in both directions, which meant
 <code class="docutils literal notranslate"><span class="pre">UInt32Field(signed=True)</span></code> handed back an unsigned field whose values
-only looked wrong once the high bit was set – see GitHub issue #545. A
-contradicting value is now rejected instead; omitting it, or passing the
-sign the class already fixes, stays legal.</p>
+only looked wrong once the high bit was set – see GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/545">#545</a>. A contradicting value is now rejected instead; omitting
+it, or passing the sign the class already fixes, stays legal.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.NumberField.bit_length">
@@ -1023,21 +1023,21 @@ updating the current instance.</p>
     a bare, uncatchable <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">shift</span>
 &#160;&#160;&#160; <span class="pre">count</span></code>) when <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> was not supplied, before
     <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> (see
-    its own <code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code> guard, #805/#825) or
-    <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template" title="pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_template()</span></code></a> ever sees the value: this method sets
+    its own <code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code> guard, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a>/<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/825">#825</a>)
+    or <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template" title="pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_template()</span></code></a> ever sees the value: this method sets
     <code class="docutils literal notranslate"><span class="pre">self._bit_length</span></code> from the resolved length eagerly, as a
     cache, and shifts by it immediately, so the crash happens on
-    <em>this</em> line rather than on the later, already-guarded ones.
-    See GitHub issue #828. This guard runs regardless of whether
-    <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> was supplied, so a field constructed with a
-    fixed <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> <em>and</em> a callable <code class="docutils literal notranslate"><span class="pre">length</span></code> that resolves
-    negative raises the identical message as one with no
+    <em>this</em> line rather than on the later, already-guarded ones. See
+    GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/828">#828</a>. This guard runs regardless of
+    whether <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> was supplied, so a field constructed
+    with a fixed <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> <em>and</em> a callable <code class="docutils literal notranslate"><span class="pre">length</span></code> that
+    resolves negative raises the identical message as one with no
     <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> at all, rather than falling through to a
     <code class="docutils literal notranslate"><span class="pre">template='...-1s'</span></code> <code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code> from
     <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> later –
-    see GitHub issue #831. A resolved length of exactly <code class="docutils literal notranslate"><span class="pre">0</span></code> is a
-    legitimate empty field (e.g. <code class="docutils literal notranslate"><span class="pre">len=4</span></code> above resolving to
-    <code class="docutils literal notranslate"><span class="pre">0</span></code>) and is left alone.</p>
+    see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/831">#831</a>. A resolved length of exactly
+    <code class="docutils literal notranslate"><span class="pre">0</span></code> is a legitimate empty field (e.g. <code class="docutils literal notranslate"><span class="pre">len=4</span></code> above
+    resolving to <code class="docutils literal notranslate"><span class="pre">0</span></code>) and is left alone.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
@@ -1045,7 +1045,7 @@ updating the current instance.</p>
 <p>Rebuilding the template here is what applies a callable <code class="docutils literal notranslate"><span class="pre">length</span></code>,
 and <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template" title="pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_template()</span></code></a> recomputes <code class="docutils literal notranslate"><span class="pre">self._need_process</span></code> as it
 goes, so the flag and the template always describe the same width.
-They did not always: see GitHub issue #591.</p>
+They did not always: see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a>.</p>
 </div>
 </dd></dl>
 
@@ -1079,7 +1079,7 @@ the flag then survived the rebuild in <a class="reference internal" href="#pcapk
 resolved the real width. <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> consequently handed
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to a template that had become <code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code> – or <code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>,
 <code class="docutils literal notranslate"><span class="pre">&gt;H</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;B</span></code> – and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> refused it. See GitHub
-issue #591.</p>
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a>.</p>
 <p>Assigning it is what tells a placeholder apart from a width that
 genuinely needs byte packing, without having to remember that a
 placeholder was ever in play: the answer for <code class="docutils literal notranslate"><span class="pre">-1</span></code> is
@@ -1124,7 +1124,7 @@ that rebuild can land on a width <code class="xref py py-func docutils literal n
 integer code for. The flag is therefore consulted <strong>after</strong> the
 rebuild rather than before it, since deciding first and rebuilding
 second is how the template and the value being returned came to
-disagree in the first place. C.f. #591.</p>
+disagree in the first place. C.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a>.</p>
 <p>That width is a <strong>ceiling</strong> of the bit length over eight, and it is
 written as one. It used to read
 <code class="docutils literal notranslate"><span class="pre">math.ceil(value.bit_length()</span> <span class="pre">//</span> <span class="pre">8)</span></code>, which is not a ceiling at
@@ -1134,7 +1134,7 @@ nothing. Every value whose bit length is not an exact multiple of
 eight was therefore sized one octet short – <code class="docutils literal notranslate"><span class="pre">256</span></code> at one octet,
 <code class="docutils literal notranslate"><span class="pre">65536</span></code> at two, and <code class="docutils literal notranslate"><span class="pre">1</span></code> itself at <em>zero</em> – which
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.to_bytes" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.to_bytes()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> both refuse. See GitHub
-issue #599.</p>
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/599">#599</a>.</p>
 </div>
 </dd></dl>
 

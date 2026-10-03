@@ -561,7 +561,7 @@ registry helpers in <a class="reference internal" href="../foundation/registry.h
 independently of each other – so that <code class="docutils literal notranslate"><span class="pre">is</span></code> comparisons against it mean
 what they say: no <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> a caller passes, including one that
 happens to spell <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> itself, can compare equal to this sentinel
-by identity. See GitHub issue #833.</p>
+by identity. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance
 that already exists, rather than building a new one, so no caller –
@@ -608,11 +608,11 @@ other. <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescrip
 of problem for the <em>class</em> it resolves, which is why it re-reads
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> on every call rather than memoising; nothing
 equivalent is possible here, because unlike a resolved class there is no
-live registry this sentinel could be re-read from. The pre-#833 <code class="docutils literal notranslate"><span class="pre">str</span></code>
-sentinel had the same fragility for the same reason – it is a property
-of sharing one module-level binding across a reload, not something this
-class’s singleton guarantees claim to solve – and nothing in this
-package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
+live registry this sentinel could be re-read from. The pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>
+<code class="docutils literal notranslate"><span class="pre">str</span></code> sentinel had the same fragility for the same reason – it is a
+property of sharing one module-level binding across a reload, not
+something this class’s singleton guarantees claim to solve – and nothing
+in this package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
 <p>A second caveat, specific to this class now living apart from its one
 caller-visible re-export: reloading <a class="reference internal" href="#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>
 itself – rather than this module – no longer has any effect on the
@@ -634,7 +634,7 @@ registry helpers in <a class="reference internal" href="../foundation/registry.h
 independently of each other – so that <code class="docutils literal notranslate"><span class="pre">is</span></code> comparisons against it mean
 what they say: no <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> a caller passes, including one that
 happens to spell <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> itself, can compare equal to this sentinel
-by identity. See GitHub issue #833.</p>
+by identity. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance
 that already exists, rather than building a new one, so no caller –
@@ -681,11 +681,11 @@ other. <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescrip
 of problem for the <em>class</em> it resolves, which is why it re-reads
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> on every call rather than memoising; nothing
 equivalent is possible here, because unlike a resolved class there is no
-live registry this sentinel could be re-read from. The pre-#833 <code class="docutils literal notranslate"><span class="pre">str</span></code>
-sentinel had the same fragility for the same reason – it is a property
-of sharing one module-level binding across a reload, not something this
-class’s singleton guarantees claim to solve – and nothing in this
-package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
+live registry this sentinel could be re-read from. The pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>
+<code class="docutils literal notranslate"><span class="pre">str</span></code> sentinel had the same fragility for the same reason – it is a
+property of sharing one module-level binding across a reload, not
+something this class’s singleton guarantees claim to solve – and nothing
+in this package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
 <p>A second caveat, specific to this class now living apart from its one
 caller-visible re-export: reloading <a class="reference internal" href="#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>
 itself – rather than this module – no longer has any effect on the

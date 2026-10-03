@@ -1123,7 +1123,7 @@
 <span class="sd">        :class:`dict` subclass adopted when the ``ChainMap`` was suspected of</span>
 <span class="sd">        corrupting the shared :class:`~abc.ABCMeta` cache every</span>
 <span class="sd">        :class:`Schema &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclass used</span>
-<span class="sd">        to share on CPython &lt;= 3.10 (issue #439), and then a</span>
+<span class="sd">        to share on CPython &lt;= 3.10 (issue :issue:`439`), and then a</span>
 <span class="sd">        :class:`~collections.ChainMap` again once that suspicion was doubted.</span>
 <span class="sd">        A plain :class:`dict` ends the question: it satisfies every</span>
 <span class="sd">        ``packet: 'dict[str, Any]'`` annotation on the rest of the field</span>
@@ -1131,25 +1131,25 @@
 <span class="sd">        site, and it cannot interact with :class:`~abc.ABCMeta` at all because</span>
 <span class="sd">        :class:`dict` is not an :class:`~abc.ABCMeta`-based class.</span>
 
-<span class="sd">        On the #439 suspicion itself, for the record, since it drove two</span>
-<span class="sd">        rewrites: it is *probably* wrong and no longer decidable. What is</span>
+<span class="sd">        On the :issue:`439` suspicion itself, for the record, since it drove</span>
+<span class="sd">        two rewrites: it is *probably* wrong and no longer decidable. What is</span>
 <span class="sd">        directly measured is that the cache keys on the **exact type</span>
 <span class="sd">        queried**, so asking about a :class:`~collections.ChainMap` instance</span>
 <span class="sd">        caches lookups for :class:`~collections.ChainMap` and not for</span>
-<span class="sd">        :class:`dict`, and that the poisoning observed in #439 came from</span>
-<span class="sd">        ordinary code asking :func:`isinstance` about a plain :class:`dict` --</span>
-<span class="sd">        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that.</span>
-<span class="sd">        Against that, swapping the ``ChainMap`` for a plain literal was, at</span>
-<span class="sd">        the time and on a real CPython 3.10 venv, enough to move</span>
-<span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
+<span class="sd">        :class:`dict`, and that the poisoning observed in :issue:`439` came</span>
+<span class="sd">        from ordinary code asking :func:`isinstance` about a plain</span>
+<span class="sd">        :class:`dict` -- :func:`~pcapkit.corekit.infoclass.Info.__update__`</span>
+<span class="sd">        does exactly that. Against that, swapping the ``ChainMap`` for a plain</span>
+<span class="sd">        literal was, at the time and on a real CPython 3.10 venv, enough to</span>
+<span class="sd">        move ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
 <span class="sd">        between passing and failing, toggled both ways. The likeliest</span>
 <span class="sd">        reconciliation -- that the ``ChainMap`` was never causal but changed</span>
 <span class="sd">        which concrete types flowed through unrelated :func:`isinstance` calls</span>
 <span class="sd">        in the same run, and so changed *when* the pre-existing corruption</span>
 <span class="sd">        fired -- is plausible rather than demonstrated, and cannot now be</span>
-<span class="sd">        tested: #439 has been fixed directly, every :class:`Schema` subclass</span>
-<span class="sd">        gets its own ``_abc_impl``, and the original conditions no longer</span>
-<span class="sd">        exist. It does not affect correctness either way.</span>
+<span class="sd">        tested: :issue:`439` has been fixed directly, every :class:`Schema`</span>
+<span class="sd">        subclass gets its own ``_abc_impl``, and the original conditions no</span>
+<span class="sd">        longer exist. It does not affect correctness either way.</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">}</span>

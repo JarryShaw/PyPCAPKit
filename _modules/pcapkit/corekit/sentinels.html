@@ -485,7 +485,7 @@
 <span class="sd">:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,</span>
 <span class="sd">:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and</span>
 <span class="sd">:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
-<span class="sd">on GitHub issue #911, choosing one shared module over one module per</span>
+<span class="sd">on GitHub issue :issue:`911`, choosing one shared module over one module per</span>
 <span class="sd">sentinel, moves the four *definitions* here; each original module keeps a three-line</span>
 <span class="sd">re-export so that no existing ``from &lt;module&gt; import &lt;name&gt;`` breaks,</span>
 <span class="sd">including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
@@ -505,10 +505,10 @@
 <span class="sd">its re-export exists only so that module's own code keeps reading</span>
 <span class="sd">``ABSENT`` rather than a fully-qualified name; see :class:`AbsentType`'s</span>
 <span class="sd">own docstring below for why it stays private after the move. GitHub issue</span>
-<span class="sd">#937 later dropped the leading underscore both used to carry (``_Absent``,</span>
-<span class="sd">``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like their two</span>
-<span class="sd">siblings; the privacy this paragraph describes did not move with the name --</span>
-<span class="sd">see :class:`AbsentType`'s docstring for what carries it now.</span>
+<span class="sd">:issue:`937` later dropped the leading underscore both used to carry</span>
+<span class="sd">(``_Absent``, ``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like</span>
+<span class="sd">their two siblings; the privacy this paragraph describes did not move with the</span>
+<span class="sd">name -- see :class:`AbsentType`'s docstring for what carries it now.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -535,7 +535,7 @@
 <span class="sd">    independently of each other -- so that ``is`` comparisons against it mean</span>
 <span class="sd">    what they say: no :class:`str` a caller passes, including one that</span>
 <span class="sd">    happens to spell ``'(null)'`` itself, can compare equal to this sentinel</span>
-<span class="sd">    by identity. See GitHub issue #833.</span>
+<span class="sd">    by identity. See GitHub issue :issue:`833`.</span>
 
 <span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
 <span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance</span>
@@ -586,11 +586,11 @@
 <span class="sd">    of problem for the *class* it resolves, which is why it re-reads</span>
 <span class="sd">    :data:`sys.modules` on every call rather than memoising; nothing</span>
 <span class="sd">    equivalent is possible here, because unlike a resolved class there is no</span>
-<span class="sd">    live registry this sentinel could be re-read from. The pre-#833 ``str``</span>
-<span class="sd">    sentinel had the same fragility for the same reason -- it is a property</span>
-<span class="sd">    of sharing one module-level binding across a reload, not something this</span>
-<span class="sd">    class's singleton guarantees claim to solve -- and nothing in this</span>
-<span class="sd">    package reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
+<span class="sd">    live registry this sentinel could be re-read from. The pre-:issue:`833`</span>
+<span class="sd">    ``str`` sentinel had the same fragility for the same reason -- it is a</span>
+<span class="sd">    property of sharing one module-level binding across a reload, not</span>
+<span class="sd">    something this class's singleton guarantees claim to solve -- and nothing</span>
+<span class="sd">    in this package reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
 
 <span class="sd">    A second caveat, specific to this class now living apart from its one</span>
 <span class="sd">    caller-visible re-export: reloading :mod:`pcapkit.corekit.module`</span>
@@ -661,10 +661,10 @@
 <span class="c1">#: helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
 <span class="c1">#: :mod:`pcapkit.foundation.registry.foundation`. Housed here, alongside the</span>
 <span class="c1">#: package's other sentinels, rather than in :mod:`pcapkit.corekit.module`</span>
-<span class="c1">#: where it used to live -- per the owner's ruling on GitHub issue #911, see</span>
-<span class="c1">#: the module docstring above. :mod:`pcapkit.corekit.module` keeps a</span>
-<span class="c1">#: re-export so every existing ``from pcapkit.corekit.module import NULL``</span>
-<span class="c1">#: keeps working.</span>
+<span class="c1">#: where it used to live -- per the owner's ruling on GitHub issue</span>
+<span class="c1">#: :issue:`911`, see the module docstring above. :mod:`pcapkit.corekit.module`</span>
+<span class="c1">#: keeps a re-export so every existing</span>
+<span class="c1">#: ``from pcapkit.corekit.module import NULL`` keeps working.</span>
 <span class="n">NULL</span> <span class="o">=</span> <span class="n">NullType</span><span class="p">()</span>
 
 
@@ -685,7 +685,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
-<span class="sd">    Housed here per GitHub issue #911 rather than in</span>
+<span class="sd">    Housed here per GitHub issue :issue:`911` rather than in</span>
 <span class="sd">    :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where</span>
 <span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
 <span class="sd">    still documents it as the field-default sentinel.</span>
@@ -702,8 +702,8 @@
 <span class="c1">#: :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`.</span>
 <span class="c1">#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that</span>
 <span class="c1">#: attribute's own documentation is a published contract naming this object.</span>
-<span class="c1">#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue #937, which</span>
-<span class="c1">#: normalised all four sentinel *objects* to SCREAMING_SNAKE.</span>
+<span class="c1">#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue :issue:`937`,</span>
+<span class="c1">#: which normalised all four sentinel *objects* to SCREAMING_SNAKE.</span>
 <span class="n">NO_VALUE</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
 
 
@@ -715,7 +715,7 @@
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
 <span class="sd">    A dedicated class rather than a bare :class:`object`, per a ruling given in</span>
-<span class="sd">    review of the work for #857, which asked for a dedicated class that</span>
+<span class="sd">    review of the work for :issue:`857`, which asked for a dedicated class that</span>
 <span class="sd">    follows the house convention. A bare :class:`object` compares under</span>
 <span class="sd">    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its</span>
 <span class="sd">    own does -- identity comparison was never the problem an earlier</span>
@@ -728,21 +728,21 @@
 <span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
 <span class="sd">    convention is settled: both :class:`NullType` and :class:`NoValueType`</span>
 <span class="sd">    use ``&lt;Name&gt;Type``. At the time, the *instance*'s own name was not</span>
-<span class="sd">    similarly settled -- a follow-up given in review of the work for #857</span>
-<span class="sd">    was explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``</span>
-<span class="sd">    (``CapWords``) disagreed, and that the choice should follow what each</span>
-<span class="sd">    sentinel is needed for rather than a settled rule. The need here was</span>
-<span class="sd">    continuity:</span>
-<span class="sd">    ``NO_DEFAULT`` was already the name on ``main`` -- referenced in</span>
+<span class="sd">    similarly settled -- a follow-up given in review of the work for</span>
+<span class="sd">    :issue:`857` was explicit that ``NULL`` (``SCREAMING_CASE``) and</span>
+<span class="sd">    ``NoValue`` (``CapWords``) disagreed, and that the choice should follow</span>
+<span class="sd">    what each sentinel is needed for rather than a settled rule. The need here</span>
+<span class="sd">    was continuity: ``NO_DEFAULT`` was already the name on ``main`` --</span>
+<span class="sd">    referenced in</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature,</span>
 <span class="sd">    its docstring, and both comparison sites -- and that change was to *what</span>
 <span class="sd">    the sentinel is*, not to *what it is called*, so it kept that name rather</span>
 <span class="sd">    than being renamed to match either precedent's instance casing for its own</span>
 <span class="sd">    sake. ``NULL``'s ``SCREAMING_CASE`` was the closer match regardless, since</span>
-<span class="sd">    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue #937</span>
-<span class="sd">    later settled the question this paragraph left open: ``NoValue`` became</span>
-<span class="sd">    :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`, so every instance</span>
-<span class="sd">    name now agrees on SCREAMING_SNAKE.</span>
+<span class="sd">    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue</span>
+<span class="sd">    :issue:`937` later settled the question this paragraph left open:</span>
+<span class="sd">    ``NoValue`` became :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`,</span>
+<span class="sd">    so every instance name now agrees on SCREAMING_SNAKE.</span>
 
 <span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
 <span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
@@ -806,18 +806,19 @@
 <span class="sd">    ``held_default is NO_DEFAULT`` comparison against the post-reload global</span>
 <span class="sd">    then reads :data:`False` where it once read :data:`True`.</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` looked</span>
-<span class="sd">    exactly like such a consumer before GitHub issue #864: an unrecognised,</span>
-<span class="sd">    non-``NO_DEFAULT`` value used to fall through to ``cls(default)``, so a</span>
-<span class="sd">    stale sentinel handed to that call could raise a :exc:`ValueError` a</span>
-<span class="sd">    caller had no reason to expect from an *omitted* argument. #864 closed a</span>
-<span class="sd">    different hole -- ``default`` could mint a new member -- by replacing</span>
-<span class="sd">    that call with a ``default not in cls._value2member_map_`` guard, and the</span>
-<span class="sd">    guard happens to close this one too: a :class:`NoDefaultType` instance,</span>
-<span class="sd">    stale or fresh, is never a registered enum value, so the guard's ``not</span>
-<span class="sd">    in`` half reads :data:`True` for it either way and ``get`` re-raises the</span>
-<span class="sd">    original lookup error correctly regardless of which :data:`NO_DEFAULT`</span>
-<span class="sd">    a caller's stale default is stale *against*. Measured on the current</span>
-<span class="sd">    tree, guard included::</span>
+<span class="sd">    exactly like such a consumer before GitHub issue :issue:`864`: an</span>
+<span class="sd">    unrecognised, non-``NO_DEFAULT`` value used to fall through to</span>
+<span class="sd">    ``cls(default)``, so a stale sentinel handed to that call could raise a</span>
+<span class="sd">    :exc:`ValueError` a caller had no reason to expect from an *omitted*</span>
+<span class="sd">    argument. :issue:`864` closed a different hole -- ``default`` could mint</span>
+<span class="sd">    a new member -- by replacing that call with a</span>
+<span class="sd">    ``default not in cls._value2member_map_`` guard, and the guard happens to</span>
+<span class="sd">    close this one too: a :class:`NoDefaultType` instance, stale or fresh, is</span>
+<span class="sd">    never a registered enum value, so the guard's ``not in`` half reads</span>
+<span class="sd">    :data:`True` for it either way and ``get`` re-raises the original lookup</span>
+<span class="sd">    error correctly regardless of which :data:`NO_DEFAULT` a caller's stale</span>
+<span class="sd">    default is stale *against*. Measured on the current tree, guard</span>
+<span class="sd">    included::</span>
 
 <span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')              # before reload</span>
 <span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
@@ -825,33 +826,34 @@
 <span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')               # after reload</span>
 <span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
 
-<span class="sd">    So the docstring this class carried before GitHub issue #911's move --</span>
-<span class="sd">    which claimed the second call above raises :exc:`ValueError` -- was</span>
-<span class="sd">    already wrong on ``main`` at ``d31c0aaf6``, independently of the move:</span>
-<span class="sd">    it described the pre-#864 ``cls(default)`` call, and nobody had</span>
-<span class="sd">    re-verified it against the guard #864 added afterwards. Fixed here as a</span>
-<span class="sd">    drive-by correction, not a consequence of the housing change itself.</span>
+<span class="sd">    So the docstring this class carried before GitHub issue :issue:`911`'s</span>
+<span class="sd">    move -- which claimed the second call above raises :exc:`ValueError` --</span>
+<span class="sd">    was already wrong on ``main`` at ``d31c0aaf6``, independently of the</span>
+<span class="sd">    move: it described the pre-:issue:`864` ``cls(default)`` call, and</span>
+<span class="sd">    nobody had re-verified it against the guard :issue:`864` added</span>
+<span class="sd">    afterwards. Fixed here as a drive-by correction, not a consequence of</span>
+<span class="sd">    the housing change itself.</span>
 
 <span class="sd">    None of that makes the underlying hazard theoretical elsewhere in this</span>
 <span class="sd">    package: ``-1`` never had this failure mode at all, since ``-1 == -1``</span>
 <span class="sd">    compares by value rather than identity, and reload staleness is a</span>
 <span class="sd">    *tracked* defect class here for other constructs -- see</span>
 <span class="sd">    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own</span>
-<span class="sd">    docstring note citing GitHub issues #425 and #555, and</span>
+<span class="sd">    docstring note citing GitHub issues :issue:`425` and :issue:`555`, and</span>
 <span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
 <span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
 <span class="sd">    deliberately to pin the fix for exactly that class of bug elsewhere. A</span>
 <span class="sd">    *future* comparison site written the vulnerable way -- a bare ``is</span>
-<span class="sd">    NO_DEFAULT`` with no independent guard behind it, the way #864's fix</span>
-<span class="sd">    itself was not -- would still reproduce it. "Nothing in this package</span>
+<span class="sd">    NO_DEFAULT`` with no independent guard behind it, the way :issue:`864`'s</span>
+<span class="sd">    fix itself was not -- would still reproduce it. "Nothing in this package</span>
 <span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import" remains true</span>
 <span class="sd">    today, but it is a caveat to keep honest rather than a guarantee this</span>
 <span class="sd">    class enforces.</span>
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">       GitHub issue #911 also changes *which* reload is the one that</span>
-<span class="sd">       matters, independently of the #864 finding above.</span>
+<span class="sd">       GitHub issue :issue:`911` also changes *which* reload is the one that</span>
+<span class="sd">       matters, independently of the :issue:`864` finding above.</span>
 <span class="sd">       :mod:`pcapkit.corekit.enum` no longer defines ``NoDefaultType``</span>
 <span class="sd">       itself; it only reads :data:`NO_DEFAULT` off this module once, at its</span>
 <span class="sd">       own import time, into its own module global. Reloading</span>
@@ -877,11 +879,11 @@
 <span class="sd">    ``if not default:`` instead of ``if default is NO_DEFAULT:`` would then</span>
 <span class="sd">    read :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy</span>
 <span class="sd">    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the exact</span>
-<span class="sd">    collision ``-1`` used to cause under ``==`` and the reason #857 exists.</span>
-<span class="sd">    Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy (the</span>
-<span class="sd">    default for any object defining neither ``__bool__`` nor ``__len__``),</span>
-<span class="sd">    which at least does not *look* like one of the falsy values it must never</span>
-<span class="sd">    be mistaken for.</span>
+<span class="sd">    collision ``-1`` used to cause under ``==`` and the reason :issue:`857`</span>
+<span class="sd">    exists. Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy</span>
+<span class="sd">    (the default for any object defining neither ``__bool__`` nor</span>
+<span class="sd">    ``__len__``), which at least does not *look* like one of the falsy values</span>
+<span class="sd">    it must never be mistaken for.</span>
 
 <span class="sd">    """</span>
 
@@ -931,18 +933,19 @@
 <span class="sd">    and means "no value was given", not "this key is not here".</span>
 
 <span class="sd">    Defined here, alongside the package's other sentinels, per the owner's</span>
-<span class="sd">    ruling on GitHub issue #911. Originally named ``_AbsentType``/``_Absent``,</span>
-<span class="sd">    with the leading underscore standing in for "private" -- GitHub issue #937</span>
-<span class="sd">    normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so</span>
-<span class="sd">    this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings</span>
-<span class="sd">    and privacy is no longer signalled by the name at all. The owner's ruling</span>
-<span class="sd">    on GitHub issue #719 accepted that rename, and held that documenting</span>
-<span class="sd">    ``ABSENT`` as a private type and class, not for public use, is enough</span>
-<span class="sd">    to replace the underscore. So this class and :data:`ABSENT` stay</span>
-<span class="sd">    exactly as private as they were: nothing outside</span>
-<span class="sd">    :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`, from here or from</span>
-<span class="sd">    there, and neither this module's nor that module's :attr:`__all__` names</span>
-<span class="sd">    either one. This docstring, and the "Naming a Sentinel" section of</span>
+<span class="sd">    ruling on GitHub issue :issue:`911`. Originally named</span>
+<span class="sd">    ``_AbsentType``/``_Absent``, with the leading underscore standing in for</span>
+<span class="sd">    "private" -- GitHub issue :issue:`937` normalised every sentinel *object*</span>
+<span class="sd">    to SCREAMING_SNAKE and dropped it, so this pair now reads as</span>
+<span class="sd">    CamelCase/SCREAMING_SNAKE like their two siblings and privacy is no longer</span>
+<span class="sd">    signalled by the name at all. The owner's ruling on GitHub issue</span>
+<span class="sd">    :issue:`719` accepted that rename, and held that documenting ``ABSENT`` as</span>
+<span class="sd">    a private type and class, not for public use, is enough to replace the</span>
+<span class="sd">    underscore. So this class and :data:`ABSENT` stay exactly as private as</span>
+<span class="sd">    they were: nothing outside :mod:`pcapkit.protocols.protocol` reads</span>
+<span class="sd">    :data:`ABSENT`, from here or from there, and neither this module's nor</span>
+<span class="sd">    that module's :attr:`__all__` names either one. This docstring, and the</span>
+<span class="sd">    "Naming a Sentinel" section of</span>
 <span class="sd">    :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are</span>
 <span class="sd">    what now records that fact in place of the leading underscore.</span>
 
@@ -967,8 +970,8 @@
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
 <span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
 <span class="c1">#: for exactly that one read. Private by convention and documentation only,</span>
-<span class="c1">#: not by a leading underscore, which GitHub issue #937 dropped -- see</span>
-<span class="c1">#: :class:`AbsentType`'s own docstring for why.</span>
+<span class="c1">#: not by a leading underscore, which GitHub issue :issue:`937` dropped --</span>
+<span class="c1">#: see :class:`AbsentType`'s own docstring for why.</span>
 <span class="n">ABSENT</span> <span class="o">=</span> <span class="n">AbsentType</span><span class="p">()</span>
 </pre></div>
         </article>
