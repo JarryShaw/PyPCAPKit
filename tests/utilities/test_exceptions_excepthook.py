@@ -437,7 +437,7 @@ class DoubleInstallTests(unittest.TestCase):
 class CrossInstanceReinstallTests(unittest.TestCase):
     """A fresh module instance must install *over* a stale instance's hook.
 
-    GitHub issue #983: CI caught this one. ``_install_excepthook``'s guard used
+    GitHub pull request #983: CI caught this one. ``_install_excepthook``'s guard used
     to skip installing whenever :data:`sys.excepthook` already carried the
     ``installed_by_pcapkit`` marker -- a plain ``True``, identical on *every*
     reloaded copy of :func:`~pcapkit.utilities.exceptions._excepthook`, so it

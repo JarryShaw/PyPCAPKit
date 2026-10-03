@@ -380,7 +380,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
         possible -- reaches the same key twice with ``cls`` on both sides,
         with no second call to ``__init_subclass__`` needed: this is a live
         path through normal syntax, not merely the direct-call case pinned
-        above. Not a contrived shape either: GitHub issue #721 shipped
+        above. Not a contrived shape either: GitHub pull request #721 shipped
         ``R1CounterParameter(Parameter, code=[R1_Counter, R1_COUNTER])``, and
         several :mod:`pcapkit.const` enums (e.g. ``reg.linktype.LinkType``,
         ``esp.cipher.Cipher``) declare real aliases that would make an

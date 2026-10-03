@@ -802,7 +802,7 @@ class AenumRoleExclusionTests(unittest.TestCase):
         """A later edit unqualifying one of these reintroduces #934 part B's miss.
 
         ``AbsentType``, ``NoValueType`` and ``ABSENT`` each resolve only against
-        the sentinels page's own module context (GitHub issue #936); written bare
+        the sentinels page's own module context (GitHub pull request #936); written bare
         anywhere on these pages, none of the three resolves at all. All four
         qualified references happen to live in
         :file:`sentinel-convention.rst`, but this scans every split page plus the

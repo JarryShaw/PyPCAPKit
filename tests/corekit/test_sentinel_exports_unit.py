@@ -234,7 +234,7 @@ class SentinelExportTests(unittest.TestCase):
     def test_enum_exports_the_object_and_not_the_type(self) -> 'None':
         """``EnumLookup`` and ``EnumRegistry`` are not sentinels and stay.
 
-        ``EnumLookup`` in particular: GitHub issue #906 split it out as a public
+        ``EnumLookup`` in particular: GitHub pull request #906 split it out as a public
         base and
         :file:`docs/source/contributing/conventions/registry-protocol.rst` cites
         its ``get``, so dropping it while removing the sentinel type next to it
