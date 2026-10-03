@@ -13,7 +13,7 @@ crawler's source is |pycrate|_'s already-installed, compiled NGAP
 specification rather than a network registry, and why an in-range value it has
 not seen answers through :meth:`~pcapkit.corekit.enum.EnumRegistry.
 _unregistered_member` rather than raising or minting a permanent, shared-value
-member -- the same GitHub issue #880 ruling, applied to the sibling registry.
+member -- the same GitHub issue :issue:`880` ruling, applied to the sibling registry.
 
 .. |pycrate| replace:: ``pycrate``
 .. _pycrate: https://github.com/pycrate-org/pycrate

@@ -51,7 +51,7 @@ class {NAME}(EnumRegistry, StrEnum):
     .. note::
 
        Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
-       GitHub issue #860 that ``get`` should not mint: only IANA-registered
+       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
        values are legitimate members, a new one is properly created through
        :meth:`register`, and ``get`` is not given enough information to create
        one. Concretely true here -- a bare wire method verb carries no
@@ -107,14 +107,14 @@ class {NAME}(EnumRegistry, StrEnum):
                 identifier, not the value -- is canonicalised.
 
                 A *registered* member of this class used to carry something
-                different here: GitHub issue #870 found that
+                different here: GitHub issue :issue:`870` found that
                 :meth:`__new__` called ``str.__new__(cls)`` with no
                 argument at all, so every one of the 40 declared members'
                 own :class:`str` payload was permanently empty regardless
                 of ``value`` (``str(Method.GET) == ''``, and
                 ``Method.GET == 'GET'`` was :obj:`False`) -- true on
                 ``main`` at ``60b85e3a4`` as well as when this docstring
-                was first written. #870 fixed :meth:`__new__` to
+                was first written. :issue:`870` fixed :meth:`__new__` to
                 ``str.__new__(cls, value)``, mirroring
                 :class:`~pcapkit.const.ftp.command.Command`'s own
                 ``__new__``, so a registered member's payload now agrees
@@ -124,7 +124,7 @@ class {NAME}(EnumRegistry, StrEnum):
             name: Bare label for the unregistered member -- here, the
                 canonical upper-case form of ``value``, matching the name
                 every *registered* member of this class is looked up by,
-                since #860's open-vocabulary registries have no manufactured
+                since :issue:`860`'s open-vocabulary registries have no manufactured
                 placeholder label to fall back to.
 
         """
@@ -138,7 +138,7 @@ class {NAME}(EnumRegistry, StrEnum):
         """Backport support for original codes.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the
-        lookup itself, per GitHub issue #908: the previous override checked
+        lookup itself, per GitHub issue :issue:`908`: the previous override checked
         only ``_member_map_`` (names), never ``_value2member_map_``
         (values), so the two IANA methods whose member *name* differs from
         their *value* -- ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and
@@ -151,7 +151,7 @@ class {NAME}(EnumRegistry, StrEnum):
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), and a zero-argument
         ``super()`` needs a first argument to bind, so this override had to
         move from :class:`staticmethod` to :class:`classmethod` to delegate
-        at all -- see GitHub issue #908's own correction of the fix it
+        at all -- see GitHub issue :issue:`908`'s own correction of the fix it
         originally proposed. Callers are unaffected by the switch itself:
         ``{NAME}.get('X')`` binds identically either way.
 
@@ -175,11 +175,11 @@ class {NAME}(EnumRegistry, StrEnum):
                 and values, via the base's own precedence -- name before
                 value -- so a value-only match such as
                 ``'BASELINE-CONTROL'`` now resolves too, closing GitHub
-                issue #908.
+                issue :issue:`908`.
             default: Value for the unregistered member built when ``key``
                 matches neither a name nor a value. ``None``, the
                 default, uses ``key`` itself -- unchanged from before
-                GitHub issue #908.
+                GitHub issue :issue:`908`.
 
         Raises:
             ValueError: If ``key`` is not a :class:`str`. This reaches the
@@ -187,7 +187,7 @@ class {NAME}(EnumRegistry, StrEnum):
                 ``cls(key)`` and so ``_missing_``, and is **not** caught by
                 the ``except KeyError`` fallback below -- only a failed
                 *name* lookup is. The non-``str`` surface therefore moved
-                with GitHub issue #908: ``get(42)`` and ``get(None)`` used
+                with GitHub issue :issue:`908`: ``get(42)`` and ``get(None)`` used
                 to raise :exc:`AttributeError` from ``key.upper()``, and
                 ``get(b'GET')`` used to *return* a member whose name and
                 value were both the :class:`bytes` object. Raising is the
@@ -222,7 +222,7 @@ class {NAME}(EnumRegistry, StrEnum):
                 the canonical upper-case member names -- deliberately unlike
                 :meth:`get`, which is case-**sensitive** per
                 :rfc:`9110#section-9.1`. The split was ruled deliberate on
-                GitHub issue #896; GitHub issue #908 is the pointer between
+                GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between
                 the two, so a reader of this one file is not left with two
                 contradictory rationales and nothing tying them together.
 

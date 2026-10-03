@@ -56,7 +56,7 @@ class ExtensionHeader(Vendor):
     #: Keyword-style names carried over from this crawler's *previous* data
     #: source, keyed by protocol number. The Protocol Numbers registry
     #: (``protocol-numbers-1.csv``, this crawler's :attr:`LINK` before GitHub
-    #: issue #925) paired each of these headers with a short ``Keyword``
+    #: issue :issue:`925`) paired each of these headers with a short ``Keyword``
     #: column value, e.g. ``IPv6-Route`` for header 43. The registry
     #: :attr:`LINK` now points at -- IANA's authoritative *IPv6 Extension
     #: Header Types* registry -- has no such column, only a verbose
@@ -81,7 +81,7 @@ class ExtensionHeader(Vendor):
     #:
     #: .. note::
     #:
-    #:    Until GitHub issue #925, this pointed at the *Protocol Numbers*
+    #:    Until GitHub issue :issue:`925`, this pointed at the *Protocol Numbers*
     #:    registry (``protocol-numbers/protocol-numbers-1.csv``), filtered on
     #:    its ``IPv6 Extension Header`` column -- a derived signal, not the
     #:    registry :rfc:`8200#section-4` names as authoritative for this

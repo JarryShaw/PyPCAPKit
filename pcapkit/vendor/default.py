@@ -436,7 +436,7 @@ class Vendor(metaclass=VendorMeta):
 
         :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`
         package -- today always exactly one level down, e.g.
-        :mod:`pcapkit.vendor.reg.apptype`, but #732 needs deeper nesting such as
+        :mod:`pcapkit.vendor.reg.apptype`, but :issue:`732` needs deeper nesting such as
         :mod:`pcapkit.vendor.reg.apptype.tcp`. The output file mirrors that same
         position, whatever its depth, under :mod:`pcapkit.const` instead.
 
@@ -484,7 +484,7 @@ class Vendor(metaclass=VendorMeta):
         *without* instantiating it, and so without triggering
         :meth:`Vendor.__init__`'s network fetch, render and write --
         :func:`pcapkit.vendor.__main__.run`'s pre-run snapshot (GitHub issue
-        #872) is exactly such a caller. Every crawler defined in this
+        :issue:`872`) is exactly such a caller. Every crawler defined in this
         codebase inherits this implementation unchanged; none overrides
         ``_dest_path``, so the classmethod is authoritative for all of them.
 
@@ -539,7 +539,7 @@ class Vendor(metaclass=VendorMeta):
         :func:`stdin_is_interactive` finds a terminal. A non-interactive run --
         under a pipe, in a container, from a scheduled job -- is failed with the
         fetch error instead, the same way :envvar:`PCAPKIT_CI_MODE` fails it,
-        rather than printing instructions nobody will read. See #522.
+        rather than printing instructions nobody will read. See :issue:`522`.
 
         Returns:
             CSV data.

@@ -182,7 +182,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         """Backport support for original codes.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
-        issue #877's re-parenting, but keeps this override rather than dropping
+        issue :issue:`877`'s re-parenting, but keeps this override rather than dropping
         it, for one behaviour the base does not reproduce on its own: **case
         folding**. This class has always matched a name case-insensitively
         (``key.lower()``); the base's own ``str`` branch is case-sensitive.
@@ -193,12 +193,12 @@ class TransportProtocol(EnumLookup, IntEnum):
         Case folding is now the *only* thing this override adds. It used to
         convert the base's name-miss exception as well -- this class raised
         :exc:`ValueError` where the base raised :exc:`KeyError` -- and the
-        ruling given in review of the work for #877, implemented in GitHub issue
-        #923, retired that conversion: the exception is to follow what stdlib's
+        ruling given in review of the work for :issue:`877`, implemented in GitHub issue
+        :issue:`923`, retired that conversion: the exception is to follow what stdlib's
         ``Enum`` would raise in the circumstances, :exc:`ValueError` or
         :exc:`KeyError` as the case may be, and is to come from
         :mod:`pcapkit.utilities.exceptions` rather than being a builtin. A
-        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and #923's census of the
+        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census of the
         127 concrete :class:`~pcapkit.corekit.enum.EnumLookup` subclasses --
         taken before the phase-2 re-parenting moved this class, so it is not
         among them -- found 119 already answering a name miss that way against 5
@@ -208,7 +208,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         rather than from any name-miss policy. So there was no policy here to
         preserve, and a name miss now reaches the caller as
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The
-        maintainer's ruling given in review of the work for #808, that
+        maintainer's ruling given in review of the work for :issue:`808`, that
         :class:`TransportProtocol` is not to be extended at all, is untouched by
         that: the refusal is still a refusal and still mints nothing, only its
         exception class moved.
@@ -216,9 +216,9 @@ class TransportProtocol(EnumLookup, IntEnum):
         The base is a :class:`classmethod`
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
         moves from :class:`staticmethod` to :class:`classmethod` to
-        delegate at all -- the same move GitHub issue #908 made for
+        delegate at all -- the same move GitHub issue :issue:`908` made for
         :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call
-        site in this tree for GitHub issue #877: all call this method by
+        site in this tree for GitHub issue :issue:`877`: all call this method by
         name, none take it as a bare callable or introspect ``__func__``,
         so the switch is not caller-visible.
 
@@ -247,7 +247,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         Raises:
             EnumKeyError: If ``key`` names no member and there is no usable
                 ``default``. A :exc:`KeyError`, from the base, since GitHub
-                issue #923 -- it used to be a plain :exc:`ValueError` raised
+                issue :issue:`923` -- it used to be a plain :exc:`ValueError` raised
                 here.
             EnumValueError: If ``key`` is a value no member carries and there
                 is no usable ``default``. A :exc:`ValueError`, from the base.
@@ -385,7 +385,7 @@ class {NAME}(EnumRegistry, StrEnum):
     def aliases(self) -> 'tuple[{NAME}, ...]':
         """Other services sharing :attr:`port` in this member's own registry.
 
-        GitHub issue #807. No storage of its own: IANA already keeps every
+        GitHub issue :issue:`807`. No storage of its own: IANA already keeps every
         colliding service as its own member of :data:`__registry__`, keyed on
         the shared port -- :meth:`get_all` already walks that same bucket to
         answer with the aliases after the canonical member, so this is exactly
@@ -473,16 +473,16 @@ class {NAME}(EnumRegistry, StrEnum):
                 every entry point rejects a non-port identically.
             proto: Transport protocol, as a member, its name, or a bare
                 :class:`int`. That last shape is not merely defensive: GitHub
-                issue #808 dropped ``TransportProtocol``'s ``IntFlag`` base, so
+                issue :issue:`808` dropped ``TransportProtocol``'s ``IntFlag`` base, so
                 ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,
                 the same as any caller passing a literal port-transport bitmask
                 -- falls through to ``int.__or__`` and returns a bare
                 :class:`int` rather than a member. Never split back into the
                 transports its bits would each name -- a ruling given in review
-                of the work for #808 -- so it is looked up as the one whole
+                of the work for :issue:`808` -- so it is looked up as the one whole
                 value it already is, exactly like any other bare int: refused
                 when that whole value names no registry, resolved when it
-                happens to equal one instead. Since GitHub issue #860 moved
+                happens to equal one instead. Since GitHub issue :issue:`860` moved
                 this class off power-of-two spacing, a hand-built composite
                 is no longer guaranteed to be the former -- see
                 :meth:`_dispatch`'s own body for a value that resolves.
@@ -710,7 +710,7 @@ class {NAME}(EnumRegistry, StrEnum):
         ``port`` to already carry a member and adds a further name for it;
         this requires the opposite -- ``port`` unclaimed in this registry --
         and mints the first. :meth:`get` can no longer do this itself as of
-        GitHub issue #860 (the owner's ruling there: only IANA-registered values
+        GitHub issue :issue:`860` (the owner's ruling there: only IANA-registered values
         are legitimate, a new entry is properly created through :meth:`register`,
         and ``get`` lacks the information to create one), so this is now the only
         way to add a service this registry does not already carry.
@@ -767,7 +767,7 @@ class {NAME}(EnumRegistry, StrEnum):
     def register_alias(cls, port: 'int', name: 'str') -> '{NAME}':  # pylint: disable=arguments-renamed
         """Register ``name`` as a new alias on ``port``, in this registry alone.
 
-        GitHub issue #807's third ask, deliberately scoped to **this**
+        GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**
         per-transport registry: ``TCP.register_alias(...)`` never touches
         :class:`UDP`'s members, which is what keeps an alias registered on one
         transport from leaking onto a transport IANA never assigned it -- e.g.

@@ -18,7 +18,7 @@ enumerations include:
 
 Both are sourced from |pycrate|_'s compiled NGAP specification rather than a
 network registry -- see :mod:`pcapkit.vendor.ngap.procedure_code`'s module
-docstring for why, and GitHub issue #880 for the ruling.
+docstring for why, and GitHub issue :issue:`880` for the ruling.
 
 .. [*] 3GPP TS 38.413
 .. [*] 3GPP TS 38.413

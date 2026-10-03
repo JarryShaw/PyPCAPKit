@@ -323,7 +323,7 @@ class VendorTemplateParityTests(unittest.TestCase):
         rendered = LINE('Method', 'HTTP Method', '<ENUM>', 'pcapkit.vendor.http.method')
         source = inspect.getsource(Method.get.__func__)  # type: ignore[attr-defined]
 
-        self.assertIn('GitHub issue #908', source)
+        self.assertRegex(source, r'GitHub issue (?:#|:issue:`)908')
         self.assertIn('return super().get(key)', source)
         self.assertIn(source.rstrip('\n'), rendered)
 
@@ -338,7 +338,7 @@ class VendorTemplateParityTests(unittest.TestCase):
         rendered = LINE('Method', 'HTTP Method', '<ENUM>', 'pcapkit.vendor.http.method')
         source = inspect.getsource(Method._missing_.__func__)  # type: ignore[attr-defined]
 
-        self.assertIn('GitHub issue #908', source)
+        self.assertRegex(source, r'GitHub issue (?:#|:issue:`)908')
         self.assertIn(source.rstrip('\n'), rendered)
 
 

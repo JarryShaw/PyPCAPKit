@@ -74,12 +74,12 @@ class FEATCode(EnumRegistry, StrEnum):
        keywords generated after them (data-driven, not hand-picked; see
        :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than
        minting the per-command ones at import time as an incidental side
-       effect of building :class:`Command`'s own rows. GitHub issue #860:
-       that import-time mutation was the same defect shape #775 removed
+       effect of building :class:`Command`'s own rows. GitHub issue :issue:`860`:
+       that import-time mutation was the same defect shape :issue:`775` removed
        from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not
        previously noticed here. ``_missing_`` still unmints for a keyword that
        turns up on the wire but names none of these -- the extendability the
-       owner conditionally asked to keep on GitHub issue #860: unsure what a
+       owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a
        FEAT value absent from the RFC's list means in the CSV table, the owner
        said that if the expected handling is our current approach, as industry
        convention has it, the registry stays extendable as is, and then approved
@@ -111,7 +111,7 @@ class FEATCode(EnumRegistry, StrEnum):
         """Resolve ``key`` case-insensitively, per :rfc:`5797#section-2`.
 
         One of the few case-insensitive overrides the ruling on GitHub issue
-        #877 allows, and the registry's own defining document states the
+        :issue:`877` allows, and the registry's own defining document states the
         comparison rule outright rather than leaving it to be inferred --
         :rfc:`5797#section-2`, on the ``FEAT Code`` column this class is
         generated from: *"IANA maintains uniqueness of feature names (FEAT
@@ -131,7 +131,7 @@ class FEATCode(EnumRegistry, StrEnum):
         lower case -- measured on the IANA CSV: 10 distinct all-upper-case
         keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,
         with none mixed. Without this override ``get('BASE')`` raised
-        :exc:`KeyError`, which is the defect GitHub issue #903's audit found.
+        :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.
 
         The obvious objection, answered: :rfc:`5797` uses case *presentationally*
         to tell a real keyword from a placeholder -- *"defined FEAT keywords
@@ -139,7 +139,7 @@ class FEATCode(EnumRegistry, StrEnum):
         listed in lowercase"* -- so folding might look like it discards that
         distinction. It does not. Only the inbound ``key`` is folded; every
         member keeps the registrar's own casing, and the fold itself is backed by
-        the RFC: the final ruling on GitHub issue #877 is that an enum treats its
+        the RFC: the final ruling on GitHub issue :issue:`877` is that an enum treats its
         values as case-insensitive where the RFC states they are, and as
         case-sensitive otherwise. So ``get('BASE').name`` is still ``'base'`` and
         still says placeholder. And the uniqueness rule quoted above is what makes
@@ -203,7 +203,7 @@ class CommandType(EnumLookup, IntFlag):
     """Type of "kind" of command, based on :rfc:`959#section-4`.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #930, finishing #877's phase 2. Pure re-parenting as far as
+    issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as
     ``get``/``get_all`` are concerned -- this class defines no ``get`` of its
     own to reconcile with the base -- and its own :meth:`_missing_` range
     guard below is untouched, since :class:`EnumLookup` does not touch that
@@ -237,7 +237,7 @@ class ConformanceRequirement(EnumLookup, IntEnum):
     """Expectation for support in modern FTP implementations.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #930, finishing #877's phase 2 -- pure re-parenting, since this
+    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this
     class defines neither ``get`` nor ``_missing_`` of its own to reconcile
     with the base.
 
@@ -257,7 +257,7 @@ class {NAME}(EnumRegistry, StrEnum):
     .. note::
 
        Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
-       GitHub issue #860 that ``get`` should not mint: only IANA-registered
+       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
        values are legitimate members, a new one is properly created through
        :meth:`register`, and ``get`` is not given enough information to create
        one. Concretely true here -- a bare wire command word carries no
@@ -324,7 +324,7 @@ class {NAME}(EnumRegistry, StrEnum):
             name: Bare label for the unregistered member -- here, the
                 canonical upper-case form of ``value``, matching the name
                 every *registered* member of this class is looked up by,
-                since #860's open-vocabulary registries have no manufactured
+                since :issue:`860`'s open-vocabulary registries have no manufactured
                 placeholder label to fall back to.
 
         """
@@ -397,7 +397,7 @@ class Command(Vendor):
             :class:`Command`'s enumeration fields, and every distinct
             per-command keyword the ``FEAT code`` column names --
             :class:`FEATCode` must declare these as real members (GitHub
-            issue #860), rather than the old approach of minting one as an
+            issue :issue:`860`), rather than the old approach of minting one as an
             incidental side effect the first time a :class:`Command` row
             referencing it was evaluated at import time.
 
