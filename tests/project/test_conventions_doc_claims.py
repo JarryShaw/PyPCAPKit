@@ -1615,23 +1615,33 @@ class ProcessConventionTests(unittest.TestCase):
 
         Scans every page rather than one, since a link can land on any of them.
 
+        The pages have since moved to the ``:issue:``/``:pr:`` roles configured in
+        ``docs/source/conf.py``, which is the move the floor below was written to
+        notice. A role carries no second number, so there is nothing to disagree with
+        itself -- the mismatch class this check exists for cannot arise there, and
+        Sphinx errors on a role name it does not know. So the floor now counts both
+        forms, and the pairwise comparison still runs over whatever explicit links
+        remain.
+
         """
         pattern = re.compile(
             r'`#(\d+)\s*<https://github\.com/JarryShaw/PyPCAPKit/'
             r'(?:issues|pull)/(\d+)>`__')
-        found = pattern.findall(_every_page())
+        text = _every_page()
+        found = pattern.findall(text)
+        roles = re.findall(r':(?:issue|pr|discussion):`(\d+)`', text)
 
         # A floor, because `assertEqual([], [])` is what an emptied page produces. This
-        # check disables itself silently on any link-style change -- a single-underscore
-        # named reference, or a move to an `:issue:` role, takes the regex to zero
-        # matches while the docstring goes on claiming it closes the largest class of
-        # unpinned claim. The module guards this shape five other times; this one had
-        # been left out.
+        # check disables itself silently on any citation-style change -- a
+        # single-underscore named reference, or a further move away from the roles,
+        # takes both patterns to zero while the docstring goes on claiming it closes
+        # the largest class of unpinned claim. The module guards this shape five other
+        # times; this one had been left out.
         self.assertGreater(
-            len(found), 40,
-            f'only {len(found)} issue links matched the pinned form, so this check is '
-            'no longer examining the pages -- the link style changed and the test went '
-            'quiet rather than red')
+            len(found) + len(roles), 40,
+            f'only {len(found)} explicit links and {len(roles)} role citations matched '
+            'the pinned forms, so this check is no longer examining the pages -- the '
+            'citation style changed and the test went quiet rather than red')
 
         mismatched = [(shown, target) for shown, target in found if shown != target]
 

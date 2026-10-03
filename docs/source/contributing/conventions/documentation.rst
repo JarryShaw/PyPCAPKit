@@ -10,7 +10,7 @@ reStructuredText under :file:`docs/source/` and the :mod:`pcapkit` docstrings th
 reference renders from, since the owner named both when settling the first of these.
 
 Nearly all of it was settled on
-`#719 <https://github.com/JarryShaw/PyPCAPKit/issues/719>`__, the prose sweep, whose
+:issue:`719`, the prose sweep, whose
 thread was the only place most of it lived. As on :ref:`process`, every ruling here is
 **paraphrased rather than quoted**, on the owner's standing instruction there; the
 issue named beside a rule is where the original wording is.
@@ -20,12 +20,12 @@ Heading Case and Shape
 
 **Title Case, and short.** Sentence case belongs only to a heading that genuinely is a
 sentence -- a how-to question is the example the owner gave -- and that was ruled rare:
-a sentence should generally not be used as a title at all. Settled on #719.
+a sentence should generally not be used as a title at all. Settled on :issue:`719`.
 
 Title Case here is the conventional kind rather than every-word capitalisation. The
 short function words ``a``, ``an``, ``the``, ``and``, ``or``, ``of``, ``in``, ``for``
 and ``to`` stay lowercase unless they lead, which was the reading put to the owner on
-#719 and left standing. It is also what the tree does: *The* ``all`` *Extra* and
+:issue:`719` and left standing. It is also what the tree does: *The* ``all`` *Extra* and
 *Issue and Pull Request Labels* on :ref:`process` are both in it.
 
 **The casing is the easy half.** A heading can be in Title Case already and still
@@ -80,7 +80,7 @@ the page for a string no longer on it.
 Nothing in CI catches a reference a rename left behind. :file:`docs/source/conf.py`
 sets no ``nitpicky`` and :file:`docs/Makefile` leaves ``SPHINXOPTS`` empty, so the
 build runs with neither ``-n`` nor ``-W``: a dead reference renders as the plain text
-it used to be, and the build still succeeds. ``#934`` found sixteen of them at once
+it used to be, and the build still succeeds. :issue:`934` found sixteen of them at once
 that way.
 
 One thing a rename breaks that no tool checks at all is the prose around it. Turning a
@@ -92,17 +92,17 @@ Mermaid for Flows
 
 Where the subject is a flow, prefer a Mermaid graph to the paragraph or the ASCII
 diagram that would otherwise carry it -- a graph is read faster than its own
-description. The owner ruled this on #719, asking for it where it is necessary and
+description. The owner ruled this on :issue:`719`, asking for it where it is necessary and
 helpful, which bounds it in three directions:
 
 *  **A short sequence does not earn a graph.** Two steps read perfectly well as a
    sentence, and a diagram of them costs a reader a context switch for nothing.
 *  **A rationale stays prose.** A diagram carries structure and sequence; it cannot
-   carry *why* a choice was made, and that reasoning is what #719 protects rather than
-   compresses.
+   carry *why* a choice was made, and that reasoning is what :issue:`719` protects rather
+   than compresses.
 *  **Do not redraw a graph another page already has.** The owner's condition when
-   approving the navigation work on #719 was that nothing duplicate information already
-   shown, and a second copy of a flow is exactly that.
+   approving the navigation work on :issue:`719` was that nothing duplicate information
+   already shown, and a second copy of a flow is exactly that.
 
 The style model is the set already in the tree, every one of which builds. The sweep
 excludes this page, which writes the directive name three times in its own prose and
@@ -163,7 +163,7 @@ count itself:
 
 Those root toctrees are ``:hidden:`` because, without it, each of the three captions
 rendered twice on the root page -- once inline in the body, once in the sidebar -- which
-is the duplication the owner ruled out on #719.
+is the duplication the owner ruled out on :issue:`719`.
 
 .. note::
 
@@ -182,8 +182,8 @@ Paraphrasing a Ruling
 ~~~~~~~~~~~~~~~~~~~~~
 
 Write a ruling down in your own words. **Do not quote the owner verbatim** -- a
-standing instruction on #719, and the one every page in this directory follows.
-``#949`` went back over the five pages that then existed and replaced their quoted
+standing instruction on :issue:`719`, and the one every page in this directory follows.
+:issue:`949` went back over the five pages that then existed and replaced their quoted
 rulings with paraphrase.
 
 What a quotation costs is not style. A quoted sentence is pinned to the moment it was
@@ -198,7 +198,7 @@ describes what was true on the day it merged, and the next change past it can ma
 citation wrong without touching it. The issue is the durable half -- where the ruling
 was asked for and given -- and it survives the work that implemented it. So cite the
 issue a rule was settled on, and describe a change by what it did rather than by its
-number. Ruled on #719.
+number. Ruled on :issue:`719`.
 
 **The changelog and** :file:`tests/` **are both exempt, for related reasons.** A
 changelog entry exists so a reader can find the change, and the pull-request number *is*
@@ -207,7 +207,7 @@ that pointer; converting it would delete the thing the entry is for --
 A substantial share of the pull requests cited under :file:`tests/` close no issue at
 all -- one credits a proposal to an external contributor and closes nothing -- and where
 an issue does exist beside a citation, it frequently lacks the fact being cited, which
-lives in the pull request's own body or review thread instead. Ruled on #719.
+lives in the pull request's own body or review thread instead. Ruled on :issue:`719`.
 
 The rule reaches the rest of this directory as well: a sibling page that cites a pull
 request is unconverted, not a third exemption. The changelog and :file:`tests/` are the
@@ -217,8 +217,8 @@ Accuracy
 ~~~~~~~~
 
 **Verify a claim against the code it describes, never against another document.** Where
-prose and code disagree the code wins and the prose is what gets fixed -- #719's own
-charter -- and a docstring outliving the thing it described is a demonstrated failure
+prose and code disagree the code wins and the prose is what gets fixed -- :issue:`719`'s
+own charter -- and a docstring outliving the thing it described is a demonstrated failure
 mode here rather than a hypothetical one.
 
 **Re-derive a count; do not copy one.** Better still, write down the command that
@@ -230,14 +230,14 @@ merge base, and re-measures the intersection. A tense-keyword grep misses a clai
 phrased as a fraction of a total.
 
 **Treat** ``every``, ``all``, ``each`` **and** ``none`` **as a claim about members, and
-check the members one at a time.** Several of #719's findings were of exactly that
+check the members one at a time.** Several of :issue:`719`'s findings were of exactly that
 shape:
 
 *  A sweep asserted that every ``.. module::`` target in the documentation resolved.
    One did not: :file:`docs/source/pcapkit/protocols/link/rarp.rst` declared
    ``pcapkit.protocols.data.link.rarp``, which has never existed, because RARP and
    DRARP reuse ARP's data class. Fixed in ``68fbccd90``.
-*  ``#911``'s ruling -- export the sentinel objects and leave their types out -- was
+*  :issue:`911`'s ruling -- export the sentinel objects and leave their types out -- was
    read as describing all three modules that then held a sentinel. One ran the other
    way: :mod:`pcapkit.corekit.fields.field` exported neither, so applying the rule
    there meant *adding* a name rather than removing one.
@@ -261,7 +261,7 @@ Resolvable Targets
 **A** ``.. module::`` **target must name a file on disk.** A dangling one is worse than
 no directive at all: it registers a module-index entry for a module that does not
 exist, and gives cross-references a target that resolves to nothing. The sweep that
-settled this on #719 found exactly one, and repeating it is cheap:
+settled this on :issue:`719` found exactly one, and repeating it is cheap:
 
 .. code-block:: shell
 
@@ -285,13 +285,13 @@ omits all of them.
 When something is removed, its documentation entry goes with it -- carrying a
 deprecation note where a user could have depended on the thing, and deleted outright
 where it never shipped. The ``rarp`` entry above needed no note for that second reason.
-Asked and ruled on #719.
+Asked and ruled on :issue:`719`.
 
 Format and Mechanics
 ~~~~~~~~~~~~~~~~~~~~
 
 *  **reStructuredText under** :file:`docs/source/`, **Markdown outside it.** The owner
-   ruled this on #719, correcting a blanket *always* ``.rst`` that had been in
+   ruled this on :issue:`719`, correcting a blanket *always* ``.rst`` that had been in
    circulation until then: the Sphinx documentation is reST, and the other documents --
    the READMEs included -- are Markdown where that applies. ``CONTRIBUTING.md``'s own
    *Documentation* section records the same split. One trap arrived with the ruling:
