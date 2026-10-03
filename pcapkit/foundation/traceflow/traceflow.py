@@ -213,8 +213,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
             a silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue #718 gave the code-keyed
-            registrars, extended here by GitHub issue #739. ``__output__``
+            the identity guard GitHub issue :issue:`718` gave the code-keyed
+            registrars, extended here by GitHub issue :issue:`739`. ``__output__``
             maps each format to a ``(dumper, ext)`` pair, so the identity
             check compares the incumbent *dumper* (index ``0``), not the
             pair -- a re-registration that only changes ``ext`` is still

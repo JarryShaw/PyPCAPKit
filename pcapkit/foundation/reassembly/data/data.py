@@ -22,7 +22,7 @@ class Completion(EnumLookup, StrEnum):
     """How completely a datagram was reassembled, and why it stopped.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
@@ -52,7 +52,7 @@ class Completion(EnumLookup, StrEnum):
     new state can be tested for without importing this class.
     :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` used to be a third
     precedent for the same :class:`~pcapkit.utilities.compat.StrEnum` base, but
-    GitHub issue #886 moved its canonical definition to
+    GitHub issue :issue:`886` moved its canonical definition to
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated like its
     :mod:`pcapkit.const.pcapng` siblings: it now derives from :class:`aenum`'s
     own ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`) rather than

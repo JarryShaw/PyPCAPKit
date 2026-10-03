@@ -203,7 +203,7 @@ class BaseError(Exception):
         * The two hooks still do not cover *every* path an exception can take.
           A traceback a caller formats itself with :mod:`traceback` -- rather
           than letting it reach the top level uncaught -- passes through
-          neither. See GitHub issue #719.
+          neither. See GitHub issue :issue:`719`.
         * The ``stacklevel`` of the log record is the relative level
           :func:`stacklevel` computes, so the record is attributed to the caller
           whose operation failed rather than to this module. It used to be
@@ -716,14 +716,14 @@ class EnumKeyError(BaseError, KeyError):
     taste: ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises
     :exc:`ValueError`, so a lookup that misses by *name* is
     :exc:`KeyError`-derived and one that misses by *value* is
-    :exc:`ValueError`-derived. That is a ruling given in review of #877's
-    phase-2 re-parenting, carried out by GitHub issue #923: raise
+    :exc:`ValueError`-derived. That is a ruling given in review of :issue:`877`'s
+    phase-2 re-parenting, carried out by GitHub issue :issue:`923`: raise
     whichever of the two stdlib :class:`~enum.Enum` would raise in the same
     circumstances, and raise it from this module rather than as a builtin.
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
     :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin
-    :exc:`KeyError` on a name miss until #923, and six in-library call sites
+    :exc:`KeyError` on a name miss until :issue:`923`, and six in-library call sites
     catch it -- :meth:`~pcapkit.const.http.method.Method.get` catches it in
     order to *mint*, so for that one a failed name lookup is part of a
     successful call. Every one of them keeps catching, unchanged.

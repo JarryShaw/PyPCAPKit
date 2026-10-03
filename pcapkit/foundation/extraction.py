@@ -142,7 +142,7 @@ class Extractor(Generic[_P]):
         #: stopping. It retries only while the input is still producing, though --
         #: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`
         #: for the rule and for what it narrows, without which an exhausted stream
-        #: spins forever (#620).
+        #: spins forever (:issue:`620`).
         _flag_n: 'bool'
         #: Input filename flag. It indicates if the input file is a file
         #: name or a binary IO object. For the latter, we should not close
@@ -192,7 +192,7 @@ class Extractor(Generic[_P]):
         #: :data:`None` before the first one. Comparing it against the position
         #: at the next end of stream is what tells a live capture that has paused
         #: -- retry, more may arrive -- from one that is finished, which is the
-        #: termination condition ``no_eof`` was missing (#620).
+        #: termination condition ``no_eof`` was missing (:issue:`620`).
         _eof_mark: 'Optional[int]'
 
         #: Magic number.
@@ -376,8 +376,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
             a silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue #718 gave the code-keyed
-            registrars, extended here by GitHub issue #739. ``__output__``
+            the identity guard GitHub issue :issue:`718` gave the code-keyed
+            registrars, extended here by GitHub issue :issue:`739`. ``__output__``
             maps each format to a ``(dumper, ext)`` pair, so the identity
             check compares the incumbent *dumper* (index ``0``), not the
             pair -- a re-registration that only changes ``ext`` is still
@@ -416,8 +416,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue #718 gave the code-keyed
-            registrars, extended here by GitHub issue #739.
+            the identity guard GitHub issue :issue:`718` gave the code-keyed
+            registrars, extended here by GitHub issue :issue:`739`.
 
         Arguments:
             name: engine name
@@ -451,8 +451,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue #718 gave the code-keyed
-            registrars, extended here by GitHub issue #739.
+            the identity guard GitHub issue :issue:`718` gave the code-keyed
+            registrars, extended here by GitHub issue :issue:`739`.
 
         Arguments:
             protocol: protocol name
@@ -482,8 +482,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue #718 gave the code-keyed
-            registrars, extended here by GitHub issue #739.
+            the identity guard GitHub issue :issue:`718` gave the code-keyed
+            registrars, extended here by GitHub issue :issue:`739`.
 
         Arguments:
             protocol: protocol name
@@ -1145,7 +1145,7 @@ class Extractor(Generic[_P]):
         stops before end of file never reaches :meth:`_cleanup` at all, so the
         ownership rule there never gets to run. The handle then survives until the
         interpreter collects it, and CPython announces that with the
-        ``ResourceWarning`` #606 was tripping over -- from an unrelated test, in an
+        ``ResourceWarning`` :issue:`606` was tripping over -- from an unrelated test, in an
         unrelated file, which is what made that flake so hard to place.
 
         This is a backstop and not the recommended route: collection is not
@@ -1183,7 +1183,7 @@ class Extractor(Generic[_P]):
     def _owns_input(self) -> 'bool':
         """Whether the input stream is this class's to close.
 
-        The one place the ownership rule of #610 is written down, so that
+        The one place the ownership rule of :issue:`610` is written down, so that
         :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.
 
         Returns:
@@ -1229,7 +1229,7 @@ class Extractor(Generic[_P]):
         ``fin='-'`` -- so the extraction retries rather than stopping. What it had
         no way to decide was when the stream is *genuinely* finished, and for an
         exhausted one every retry raises end of stream again immediately, which is
-        the spin #620 reported.
+        the spin :issue:`620` reported.
 
         The signal is the input's own position. End of stream is raised by
         :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in
@@ -1255,7 +1255,7 @@ class Extractor(Generic[_P]):
         following the writer. That is a deliberate narrowing of what ``no_eof``
         used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last
         record 0.6s in yielded all six frames, and here it yields five. The
-        previous behaviour was unbounded by construction -- it is the defect #620
+        previous behaviour was unbounded by construction -- it is the defect :issue:`620`
         reports -- so *some* stopping rule had to be chosen, and a timed grace
         period would only make the cut-off intermittent rather than absent.
         Following a growing file wants a deliberate policy of its own; see the
