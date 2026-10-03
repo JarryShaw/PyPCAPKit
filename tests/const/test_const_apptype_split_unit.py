@@ -1189,7 +1189,7 @@ class AppTypeSplitTests(unittest.TestCase):
         rather than spot-checked.
 
         Swept over all 12,391 real members (TCP 6147, UDP 6143, SCTP 91,
-        DCCP 10, matching the population GitHub issue #783 measured), each
+        DCCP 10, matching the population PR #783 measured), each
         compared against what the pre-#798 ``%``-style formula would have
         produced for that same member's own ``svc``/``port``/``proto``. This
         is an invariance check -- it is true either side of #798's fix by

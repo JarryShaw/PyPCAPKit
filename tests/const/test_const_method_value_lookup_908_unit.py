@@ -31,12 +31,12 @@ for the unregistered-member fallback -- but ``Method.get`` was a
 zero-argument ``super()`` inside a :class:`staticmethod` has no first
 argument to bind (``RuntimeError: super(): no arguments``). So the override
 had to move to :class:`classmethod` as well, following the shape
-GitHub issue #913's ``FEATCode.get`` sets for the same base method.
+PR #913's ``FEATCode.get`` sets for the same base method.
 
 **Two behaviours settled by earlier issues must survive unchanged**, each
 pinned by its own test below rather than only implied by the others:
 
-* Case-sensitivity, per :rfc:`9110#section-9.1` and GitHub issue #896/#907 --
+* Case-sensitivity, per :rfc:`9110#section-9.1` and GitHub issue #896 --
   ``Method.get('get')`` must *not* resolve to :attr:`Method.GET`.
 * An unregistered member's *value* is the caller's own casing, never the
   upper-cased form -- GitHub issue #860's ruling, already exercised by
@@ -126,7 +126,7 @@ class PreservedBehaviourTests(unittest.TestCase):
     """The two settled behaviours the fix must not disturb."""
 
     def test_case_sensitivity_from_896_still_holds(self) -> None:
-        """RFC 9110 Section 9.1, via GitHub issue #896/#907: a name match is
+        """RFC 9110 Section 9.1, via GitHub issue #896: a name match is
         case-**sensitive**, so ``get('get')`` must not resolve to
         :attr:`Method.GET`. Fails against a naive fix that resolves ``key``
         through ``cls(key)`` (which folds case via ``_missing_``) instead of
@@ -306,7 +306,7 @@ class NonStrKeyTests(unittest.TestCase):
 
 class VendorTemplateParityTests(unittest.TestCase):
     """The fix lives in the crawler template, so a regeneration cannot
-    silently discard it -- following GitHub issue #913's own precedent
+    silently discard it -- following PR #913's own precedent
     (``test_the_crawler_template_carries_the_same_get``)."""
 
     def test_the_crawler_template_carries_the_same_get(self) -> None:

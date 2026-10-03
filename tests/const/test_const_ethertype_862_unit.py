@@ -209,7 +209,7 @@ class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):
         "insert ahead of a containing range" -- not a general correctness
         proof for arbitrary nesting depth or arrival order. That exhaustive
         proof (every arrival order at 3 and 4 levels, plus randomised
-        fuzzing) was done separately during GitHub issue #862/#865's review
+        fuzzing) was done separately in the review of PR #865, #862's fix,
         and does not live in this repository as a test; this method only
         pins the two specific shortcuts that review considered and rejected.
 

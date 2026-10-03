@@ -966,7 +966,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
         """:class:`~pcapkit.const.reg.transtype.TransType` used to be the
         other shape: its own ``_missing_`` minted permanently via
         :func:`~aenum.extend_enum` for ``148..252`` rather than going through
-        ``_unregistered_member``. GitHub issues #775/#847's mint-criterion
+        ``_unregistered_member``. The #775/#847 mint-criterion
         ruling converted it: the label is a bare ``Unassigned``, which is a
         notation for the reader rather than a name IANA assigned, so it now
         matches :class:`~pcapkit.const.arp.hardware.Hardware`'s shape above
