@@ -2,4 +2,4 @@
 ====================
 
 **Fixed** -- a fallback encoder was added so that data DictDumper cannot encode
-no longer raises out of the dumper (#65).
+no longer raises out of the dumper (:issue:`65`).

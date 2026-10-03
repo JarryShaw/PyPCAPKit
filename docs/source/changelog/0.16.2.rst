@@ -2,4 +2,4 @@
 ====================
 
 **Fixed** -- ``Info`` ``__init__`` generation for classes without annotations
-(#113); the IP reassembly algorithm (#82).
+(:issue:`113`); the IP reassembly algorithm (:issue:`82`).

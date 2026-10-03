@@ -43,6 +43,7 @@ import shutil
 import tempfile
 import textwrap
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -327,6 +328,109 @@ class NewestEntryTests(ChangelogTreeMixin, unittest.TestCase):
 
         with self.assertRaises(FileNotFoundError):
             changelog_md.newest(index)
+
+
+class ExtlinksRoleTests(ChangelogTreeMixin, unittest.TestCase):
+    """Rule 2's ``extlinks`` half: the ``EXTLINKS`` table, pinned to ``docs/source/conf.py``."""
+
+    def body(self, line: str) -> str:
+        return self.convert(ENTRY + f'\n{line}\n')
+
+    def test_each_configured_role_becomes_a_link(self) -> None:
+        gh = 'https://github.com/JarryShaw/PyPCAPKit'
+        cases = {
+            ':issue:`29`': f'[#29]({gh}/issues/29)',
+            ':pr:`30`': f'[#30]({gh}/pull/30)',
+            ':discussion:`31`': f'[#31]({gh}/discussions/31)',
+            ':wikipedia:`Ethernet`': '[Ethernet](https://en.wikipedia.org/wiki/Ethernet)',
+            ':iana:`protocols`': '[protocols](https://www.iana.org/assignments/protocols)',
+        }
+        for role, expected in cases.items():
+            with self.subTest(role=role):
+                markdown = self.body(f'See {role} here.')
+                self.assertIn(f'See {expected} here.', markdown)
+                self.assertEqual(changelog_md.residual(markdown), [])
+
+    def test_an_explicit_title_is_the_text_and_the_bracket_the_target(self) -> None:
+        markdown = self.body('See :issue:`the parsing bug <591>` now.')
+
+        self.assertIn(
+            'See [the parsing bug](https://github.com/JarryShaw/PyPCAPKit/issues/591) now.',
+            markdown)
+
+    def test_a_slug_argument_is_carried_into_text_and_target(self) -> None:
+        markdown = self.body(
+            ':iana:`arp-parameters/arp-parameters.xhtml` and :wikipedia:`Ethernet_frame`')
+
+        self.assertIn('[arp-parameters/arp-parameters.xhtml]'
+                      '(https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml)',
+                      markdown)
+        self.assertIn('[Ethernet_frame](https://en.wikipedia.org/wiki/Ethernet_frame)', markdown)
+
+    def test_a_slug_with_an_explicit_title(self) -> None:
+        markdown = self.body(':iana:`ARP parameters <arp-parameters/arp-parameters.xhtml>`')
+
+        self.assertIn('[ARP parameters](https://www.iana.org/assignments/'
+                      'arp-parameters/arp-parameters.xhtml)', markdown)
+
+    def test_a_role_inside_a_wrapped_bullet_is_converted_in_place(self) -> None:
+        markdown = self.convert(ENTRY.replace('continuation line.', 'see :pr:`30`.'))
+
+        self.assertIn('see [#30](https://github.com/JarryShaw/PyPCAPKit/pull/30).', markdown)
+
+    def test_the_conf_py_reader_parses_without_executing(self) -> None:
+        conf = pathlib.Path(tempfile.mkdtemp()) / 'conf.py'
+        self.addCleanup(shutil.rmtree, conf.parent, True)
+        conf.write_text(
+            "raise SystemExit('executed')\n"
+            "extlinks = {'bug': ('https://example.org/b/%s', 'bug %s'),"
+            " 'raw': ('https://example.org/r/%s', None)}\n", encoding='utf-8')
+
+        table = changelog_md.read_extlinks(conf)
+
+        self.assertEqual(set(table), {'bug', 'raw'})
+        self.assertEqual(changelog_md.extlink('bug', '7', table), '[bug 7](https://example.org/b/7)')
+        # no caption template: Sphinx titles the link with its own URL.
+        self.assertEqual(changelog_md.extlink('raw', '7', table),
+                         '[https://example.org/r/7](https://example.org/r/7)')
+
+    def test_the_constant_has_not_drifted_from_conf_py(self) -> None:
+        if not changelog_md.CONF.is_file():
+            self.skipTest(f'{changelog_md.CONF} is absent (docs/ is pruned from a source tarball)')
+
+        self.assertEqual(changelog_md.EXTLINKS, changelog_md.read_extlinks())
+
+    def test_conversion_does_not_need_conf_py(self) -> None:
+        # A source distribution carries the entries and this script but not
+        # ``docs/source/conf.py``; conversion must not go looking for it.
+        missing = pathlib.Path('/nonexistent/conf.py')
+        with mock.patch.object(changelog_md, 'CONF', missing):
+            markdown = self.body('See :issue:`29`.')
+
+        self.assertIn('[#29](https://github.com/JarryShaw/PyPCAPKit/issues/29)', markdown)
+        self.assertEqual(changelog_md.residual(markdown), [])
+
+    def test_markdown_metacharacters_are_escaped_in_text_and_target(self) -> None:
+        # A deliberate deviation from Sphinx, which emits HTML and needs none of
+        # this: an unescaped ``]`` ends the link text early, and a space or ``)``
+        # ends the destination early, so the link would silently break.
+        markdown = self.body(':wikipedia:`a [b] <Foo_(bar) baz>`')
+
+        self.assertIn(r'[a \[b\]](https://en.wikipedia.org/wiki/Foo_%28bar%29%20baz)', markdown)
+
+    def test_an_unknown_role_is_still_fatal(self) -> None:
+        # Shows the guard was not loosened; it is not evidence of new behaviour. The
+        # ``:mod:`` half passed before the change too -- only the ``:issue:`` half
+        # failed without it, by being left unconverted.
+        index = self.make_tree(
+            entry=ENTRY + '\nSee :issue:`29` and :mod:`pcapkit.const` for more.\n')
+
+        with self.assertRaises(changelog_md.ResidualMarkupError) as error:
+            changelog_md.render(index)
+
+        self.assertIn('role', str(error.exception))
+        self.assertIn(':mod:', str(error.exception))
+        self.assertNotIn(':issue:', str(error.exception))
 
 
 class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
