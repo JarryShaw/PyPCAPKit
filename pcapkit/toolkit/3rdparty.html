@@ -970,7 +970,7 @@ it, so an entry can be re-checked, or corrected when upstream moves, by rerunnin
 rewrite. Names are listed even where they already spell their <code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code> member
 (<code class="docutils literal notranslate"><span class="pre">docsis</span></code>, <code class="docutils literal notranslate"><span class="pre">fddi</span></code>, <code class="docutils literal notranslate"><span class="pre">pflog</span></code>, …): there is deliberately <strong>no</strong> fallback onto a like-named
 member, because upper-casing the name is exactly what answered 101 for a <code class="docutils literal notranslate"><span class="pre">rawip6</span></code> capture and
-0 for a <code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> one – valid DLTs, wrong ones, and silent (#843).</p>
+0 for a <code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> one – valid DLTs, wrong ones, and silent (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/843">#843</a>).</p>
 <p>Three classes of name are absent, all three measured rather than assumed:</p>
 <ul class="simple">
 <li><p><strong>Ambiguous</strong> – one name, several DLTs, and the PDML node does not say which arrived. These

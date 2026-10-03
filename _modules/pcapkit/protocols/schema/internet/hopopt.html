@@ -684,7 +684,7 @@
 <span class="sd">        themselves. Sizing the field at ``Opt Data Len`` handed them an area two</span>
 <span class="sd">        octets short of the option they read, which</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted</span>
-<span class="sd">        against the option area -- c.f. #431.</span>
+<span class="sd">        against the option area -- c.f. :issue:`431`.</span>
 
 <span class="sd">    """</span>
     <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>

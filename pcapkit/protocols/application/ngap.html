@@ -736,7 +736,7 @@ should pay for it.</p>
 <p>The values are spelled as the ASN.1 identifiers, so that a name decoded by
 <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> resolves by value.</p>
 <p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue #877’s ruling that every non-registry enumeration shares that
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
 lookup contract – pure re-parenting, since this class defines neither
 <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
 <dl class="py attribute">
@@ -774,11 +774,11 @@ lookup contract – pure re-parenting, since this class defines neither
 that <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> resolves a name decoded
 by <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> through the standard member map. The values are the
 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> indices, which is what goes on the wire.</p>
-<p>Carries no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. GitHub issue #877 re-parented this class onto
+<p>Carries no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented this class onto
 <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and kept a delegating override for
 one reason only: it converted the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so that an unknown <em>name</em> and an unknown <em>value</em> reported
-identically. GitHub issue #923’s ruling retired that conversion – a name
+identically. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s ruling retired that conversion – a name
 miss is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-shaped, exactly as <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> is on a stdlib
 <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> – which left the override a pure pass-through, so it
 went with it.</p>

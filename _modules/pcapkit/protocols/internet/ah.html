@@ -521,7 +521,7 @@
          <span class="n">schema</span><span class="o">=</span><span class="n">Schema_AH</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_AH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Authentication Header.</span>
 
-<span class="sd">    Double-inherited (GitHub issue #917): ``AH`` is both a member of the</span>
+<span class="sd">    Double-inherited (GitHub issue :issue:`917`): ``AH`` is both a member of the</span>
 <span class="sd">    IPsec family and an IPv6 extension header -- IANA's *IPv6 Extension</span>
 <span class="sd">    Header Types* registry lists it at 51 (:rfc:`4302#section-3.1.1` has</span>
 <span class="sd">    it appear after the hop-by-hop, routing and fragmentation extension</span>
@@ -556,7 +556,7 @@
 <span class="sd">        class-name default, because</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits</span>
 <span class="sd">        between this class and that default in the MRO and carries a concrete</span>
-<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would</span>
+<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would</span>
 <span class="sd">        rename this header in every</span>
 <span class="sd">        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in</span>
 <span class="sd">        :meth:`IPv6._decode_next_layer</span>

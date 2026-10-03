@@ -663,7 +663,7 @@ header-field    :==:    field-name ":" OWS field-value OWS
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">_test_start_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv1.html#_test_start_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1._test_start_line" title="Link to this definition">¶</a></dt>
 <dd><p>Whether <code class="docutils literal notranslate"><span class="pre">data</span></code> opens with an HTTP/1.* start line.</p>
 <p>This is a <em>classification</em> predicate and parses nothing: it answers “is this
-HTTP/1?” for <a class="reference internal" href="http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code></a>, which until #800
+HTTP/1?” for <a class="reference internal" href="http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code></a>, which until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/800">#800</a>
 answered that question by trial-parsing every version in the family and
 keeping whichever one did not object – so a payload that is not HTTP at all
 was classified by which parser happened to fail less loudly.</p>
@@ -714,7 +714,7 @@ here either, matching the parser, which raises on fewer than three.</p>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>HTTP packet type.</p>
 <p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue #877’s ruling that every non-registry enumeration shares that
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
 lookup contract – pure re-parenting, since this class defines neither
 <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
 <dl class="py attribute">

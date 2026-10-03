@@ -582,8 +582,8 @@ should be as <code class="docutils literal notranslate"><span class="pre">{dumpe
 <p>The overwrite guard fires only when the incumbent dumper differs
 from the replacement, so re-registering the exact same object is
 a silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue #718 gave the code-keyed
-registrars, extended here by GitHub issue #739. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
+the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
+registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
 maps each format to a <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair, so the identity
 check compares the incumbent <em>dumper</em> (index <code class="docutils literal notranslate"><span class="pre">0</span></code>), not the
 pair – a re-registration that only changes <code class="docutils literal notranslate"><span class="pre">ext</span></code> is still

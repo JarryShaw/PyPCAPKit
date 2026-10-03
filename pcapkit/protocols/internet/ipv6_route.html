@@ -732,8 +732,8 @@ expression individually, is what let the two drift and is why there
 is one helper now rather than two call sites. Do NOT “simplify” the
 <code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">4</span></code> / <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">8</span></code> away: the units either side of it differ (octets
 vs. 8-octet units), and dropping the offset silently reinterprets
-the field, which is exactly the defect #487 fixed (compare the
-<code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">8</span></code> unit bug behind #483 in the scapy adapter).</p>
+the field, which is exactly the defect <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/487">#487</a> fixed (compare the
+<code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">8</span></code> unit bug behind <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/483">#483</a> in the scapy adapter).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – packed length, in octets, of the type-specific data
@@ -1182,7 +1182,7 @@ parse the routing type by itself.</p>
 <p>NOTE: <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> gives <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> as <em>“4-bit
 unsigned integer”</em>, i.e. the high and low nibble of a single octet, so
 they cannot be two <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field" title="pcapkit.corekit.fields.numbers.UInt8Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt8Field</span></code></a>
-as they were before #564. Together with <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.pad" title="pcapkit.protocols.schema.internet.ipv6_route.RPL.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pad</span></code></a> below – <code class="docutils literal notranslate"><span class="pre">Pad</span></code>
+as they were before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/564">#564</a>. Together with <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.pad" title="pcapkit.protocols.schema.internet.ipv6_route.RPL.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pad</span></code></a> below – <code class="docutils literal notranslate"><span class="pre">Pad</span></code>
 (4 bits) plus <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (20 bits) – this is the one 32-bit word the
 diagram in <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> draws, and the same word
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Route._read_data_type_rpl</span></code></a>’s
@@ -1286,7 +1286,7 @@ schema – is <code class="docutils literal notranslate"><span class="pre">4</sp
 that arithmetic is done on the read side; see
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hdr_ext_len()</span></code></a>
 for its inverse on the write side. Do NOT drop the <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span></code>: that turns
-the field back into raw octets and is the exact defect #487 fixed.</p>
+the field back into raw octets and is the exact defect <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/487">#487</a> fixed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>hdr_ext_len</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – raw <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> field value, as read off the wire.</p>

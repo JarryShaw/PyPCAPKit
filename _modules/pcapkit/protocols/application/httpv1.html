@@ -548,7 +548,7 @@
 
 <span class="sd">    This is a *classification* predicate and parses nothing: it answers "is this</span>
 <span class="sd">    HTTP/1?" for :meth:`HTTP._guess_version</span>
-<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`, which until #800</span>
+<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`, which until :issue:`800`</span>
 <span class="sd">    answered that question by trial-parsing every version in the family and</span>
 <span class="sd">    keeping whichever one did not object -- so a payload that is not HTTP at all</span>
 <span class="sd">    was classified by which parser happened to fail less loudly.</span>
@@ -615,7 +615,7 @@
 <span class="w">    </span><span class="sd">"""HTTP packet type.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
 <span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
 <span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
 

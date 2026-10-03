@@ -706,7 +706,7 @@
     <span class="c1">#: exact width of ``Random #I``. Declared rather than recomputed from</span>
     <span class="c1">#: :meth:`int.bit_length`, which cannot see a leading zero octet: without it</span>
     <span class="c1">#: a parameter read with ``Length = 12`` re-serialised as ``Length = 5``.</span>
-    <span class="c1">#: See #653.</span>
+    <span class="c1">#: See :issue:`653`.</span>
     <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -727,7 +727,7 @@
     <span class="c1">#: Carried verbatim rather than interpreted, so that re-serialising a parsed</span>
     <span class="c1">#: parameter reproduces the octet it arrived with. It used to be read as a</span>
     <span class="c1">#: ``PUZZLE`` ``Lifetime``, which only :rfc:`7401#section-5.2.4` defines, and</span>
-    <span class="c1">#: the conformant ``0x00`` then could not be re-serialised at all. See #654.</span>
+    <span class="c1">#: the conformant ``0x00`` then could not be re-serialised at all. See :issue:`654`.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Solution data.</span>
     <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -741,7 +741,7 @@
     <span class="c1">#: width of both fields. Declared rather than recomputed from</span>
     <span class="c1">#: :meth:`int.bit_length`, which cannot see a leading zero octet: without it a</span>
     <span class="c1">#: parameter read with ``Length = 20`` re-serialised as ``Length = 6``.</span>
-    <span class="c1">#: See #653.</span>
+    <span class="c1">#: See :issue:`653`.</span>
     <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

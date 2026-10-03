@@ -720,7 +720,7 @@
 <span class="w">    </span><span class="sd">"""Packet direction for ``epb_flags`` options.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
 <span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
 <span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
 
@@ -741,7 +741,7 @@
 <span class="w">    </span><span class="sd">"""Reception type for ``epb_flags`` options.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
 <span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
 <span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
 
@@ -790,7 +790,7 @@
 <span class="w">    </span><span class="sd">"""WireGuard key log label.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
 <span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
 <span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
 
@@ -1200,7 +1200,7 @@
 <span class="sd">            :attr:`ProtocolBase.length &lt;pcapkit.protocols.protocol.ProtocolBase.length&gt;`</span>
 <span class="sd">            does not distinguish them, but a PCAP-NG block carries a trailer.</span>
 <span class="sd">            :attr:`self.packet &lt;packet&gt;` is overridden accordingly; see there and</span>
-<span class="sd">            #646.</span>
+<span class="sd">            :issue:`646`.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
@@ -1238,7 +1238,7 @@
 <span class="sd">        packet block reported ``packet == b''`` while ``captured_len`` declared</span>
 <span class="sd">        hundreds of octets, and dumping such a block through</span>
 <span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a record header promising</span>
-<span class="sd">        octets it then did not write. See #646.</span>
+<span class="sd">        octets it then did not write. See :issue:`646`.</span>
 
 <span class="sd">        The payload is therefore the block schema's</span>
 <span class="sd">        :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which</span>
@@ -1823,11 +1823,9 @@
 <span class="sd">        of nothing ``__length__`` is negative -- which</span>
 <span class="sd">        :func:`~pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector` hands</span>
 <span class="sd">        to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where</span>
-<span class="sd">        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of `#678</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__.</span>
+<span class="sd">        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of :issue:`678`.</span>
 
-<span class="sd">        Reporting the end of the stream instead is what keeps the `#431</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation:</span>
+<span class="sd">        Reporting the end of the stream instead is what keeps the :issue:`431` accommodation:</span>
 <span class="sd">        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an</span>
 <span class="sd">        :exc:`EOFError`, which :meth:`Extractor.record_frames</span>
 <span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` already catches</span>
@@ -1905,7 +1903,7 @@
 <span class="sd">            Not used when reconstructing a block timestamp, and must not be:</span>
 <span class="sd">            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the</span>
 <span class="sd">            *reading* host's zone into it makes one file parse to different</span>
-<span class="sd">            instants on different machines (see #361).</span>
+<span class="sd">            instants on different machines (see :issue:`361`).</span>
 <span class="sd">            :meth:`self._get_timezone &lt;_get_timezone&gt;` returns</span>
 <span class="sd">            :attr:`datetime.timezone.utc` instead when the capture names no</span>
 <span class="sd">            ``if_tzone``.</span>
@@ -2128,7 +2126,7 @@
 <span class="sd">            used to promise a "timezone conversion" that the code never</span>
 <span class="sd">            performed, which made it look as though the read side's timezone</span>
 <span class="sd">            shift had a counterpart here (it did not, so a read followed by a</span>
-<span class="sd">            write drifted by the host's UTC offset -- see #361).</span>
+<span class="sd">            write drifted by the host's UTC offset -- see :issue:`361`).</span>
 
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>

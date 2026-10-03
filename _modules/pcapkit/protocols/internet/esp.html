@@ -944,7 +944,7 @@
 <span class="w">    </span><span class="sd">"""Outcome of ESP payload processing.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #930, finishing #877's phase 2 -- pure re-parenting, since this</span>
+<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this</span>
 <span class="sd">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
 <span class="sd">    with the base.</span>
 
@@ -1013,7 +1013,7 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If the algorithms or key lengths are inconsistent, or</span>
-<span class="sd">            ``destination`` is a :obj:`bool` (c.f. #491) -- :obj:`bool` is an</span>
+<span class="sd">            ``destination`` is a :obj:`bool` (c.f. :issue:`491`) -- :obj:`bool` is an</span>
 <span class="sd">            :class:`int` subclass, and :func:`ipaddress.ip_address` treats</span>
 <span class="sd">            any :class:`int` below ``2**32`` as IPv4, so without this check</span>
 <span class="sd">            ``destination=True`` would silently become</span>
@@ -1502,7 +1502,7 @@
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_ESP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_ESP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Encapsulating Security Payload.</span>
 
-<span class="sd">    Double-inherited (GitHub issue #917), mirroring</span>
+<span class="sd">    Double-inherited (GitHub issue :issue:`917`), mirroring</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension</span>
 <span class="sd">    Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`</span>
 <span class="sd">    has it appear after the hop-by-hop, routing and fragmentation</span>
@@ -1522,7 +1522,7 @@
 <span class="sd">    Note:</span>
 <span class="sd">        :rfc:`8200#section-4.5` says outright that ESP "is not considered an</span>
 <span class="sd">        extension header". The library follows IANA's registry rather than</span>
-<span class="sd">        that sentence, on the owner's ruling for GitHub issue #895.</span>
+<span class="sd">        that sentence, on the owner's ruling for GitHub issue :issue:`895`.</span>
 
 <span class="sd">    """</span>
 

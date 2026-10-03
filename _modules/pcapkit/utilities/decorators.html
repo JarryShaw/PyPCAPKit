@@ -684,8 +684,7 @@
 <span class="sd">        and nothing calls it with more; an earlier revision of this note</span>
 <span class="sd">        nonetheless promised implementors a trailing ``*args, **kwargs``, which</span>
 <span class="sd">        the wrapper below never populated. A caller relying on that promise</span>
-<span class="sd">        got extras silently discarded instead of forwarded -- see `#454</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/454&gt;`__ -- so the</span>
+<span class="sd">        got extras silently discarded instead of forwarded -- see :issue:`454` -- so the</span>
 <span class="sd">        wrapper now raises :exc:`TypeError` for a fifth positional argument or</span>
 <span class="sd">        an unconsumed keyword, the same as an ordinary call with too many</span>
 <span class="sd">        arguments would.</span>

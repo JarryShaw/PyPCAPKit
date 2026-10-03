@@ -701,7 +701,7 @@
 <span class="sd">        class-name default, because</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits</span>
 <span class="sd">        between this class and that default in the MRO and carries a concrete</span>
-<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would</span>
+<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would</span>
 <span class="sd">        rename this header in every</span>
 <span class="sd">        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in</span>
 <span class="sd">        :meth:`IPv6._decode_next_layer</span>
@@ -975,8 +975,8 @@
 
 <span class="sd">        Section 4.2 is the citation because it is what defines the TLV option</span>
 <span class="sd">        format, and it is where the sentence quoted above actually appears.</span>
-<span class="sd">        This cited :rfc:`8200#section-4.3` until #530, which is a subtler</span>
-<span class="sd">        error than the one #517 fixed in the IPv6-Opts sibling: Section 4.3</span>
+<span class="sd">        This cited :rfc:`8200#section-4.3` until :issue:`530`, which is a subtler</span>
+<span class="sd">        error than the one :issue:`517` fixed in the IPv6-Opts sibling: Section 4.3</span>
 <span class="sd">        is not the wrong *header* -- it is the Hop-by-Hop Options header,</span>
 <span class="sd">        which is exactly what this class implements -- but it is the wrong</span>
 <span class="sd">        place for this arithmetic. It defines no ``Opt Data Len`` at all,</span>

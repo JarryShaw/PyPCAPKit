@@ -474,7 +474,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_ext` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
-<span class="sd">only, which serves two roles at once (GitHub issue #917): it is the</span>
+<span class="sd">only, which serves two roles at once (GitHub issue :issue:`917`): it is the</span>
 <span class="sd">shared **base class** of every IPv6 extension header in this package,</span>
 <span class="sd">and it implements a **generic** extractor for IPv6 extension headers,</span>
 <span class="sd">standing in for one whenever the header's own dedicated parser is</span>
@@ -532,7 +532,7 @@
 <span class="sd">This table classifies by *wire format* alone, over the eleven codes</span>
 <span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates --</span>
 <span class="sd">matching IANA's own *IPv6 Extension Header Types* registry exactly, as of</span>
-<span class="sd">GitHub issue #925. Before that fix this package generated the enumeration</span>
+<span class="sd">GitHub issue :issue:`925`. Before that fix this package generated the enumeration</span>
 <span class="sd">out of the *Protocol Numbers* registry's extension-header column instead,</span>
 <span class="sd">which carried a twelfth code, ``BIT_EMU`` (147), that the authoritative</span>
 <span class="sd">registry does not; 147 was never reachable through this class either way</span>
@@ -578,14 +578,14 @@
 <span class="sd">   used to default it to plain :class:`~pcapkit.protocols.misc.raw.Raw` --</span>
 <span class="sd">   which has no ``next`` field, so the walk in</span>
 <span class="sd">   :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
-<span class="sd">   crashed on it (GitHub issue #891). This module registers itself for that</span>
+<span class="sd">   crashed on it (GitHub issue :issue:`891`). This module registers itself for that</span>
 <span class="sd">   code instead (see the bottom of the module), so dispatch reaches a</span>
 <span class="sd">   working generic parser directly. That registration is global -- shared</span>
 <span class="sd">   by every :class:`~pcapkit.protocols.internet.internet.Internet`</span>
 <span class="sd">   subclass -- so :meth:`__post_init__` gates on ``version == 6`` to keep</span>
 <span class="sd">   it from also activating for an IPv4 payload that happens to carry</span>
 <span class="sd">   protocol number 140; see its docstring for what that would otherwise do.</span>
-<span class="sd">2. **A recognised header whose own parser raises.** This is the actual #891</span>
+<span class="sd">2. **A recognised header whose own parser raises.** This is the actual :issue:`891`</span>
 <span class="sd">   defect: ``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``,</span>
 <span class="sd">   ``IPv6-Frag`` and ``AH`` all have dedicated classes, and when one of</span>
 <span class="sd">   *those* raises, :func:`~pcapkit.utilities.decorators.beholder`</span>
@@ -684,7 +684,7 @@
 <span class="sd">    The two roles</span>
 <span class="sd">    --------------</span>
 
-<span class="sd">    This one class plays both, on the owner's ruling for GitHub issue #917:</span>
+<span class="sd">    This one class plays both, on the owner's ruling for GitHub issue :issue:`917`:</span>
 
 <span class="sd">    1. **The concrete fallback parser** for an :rfc:`6564`-conforming header</span>
 <span class="sd">       this package has no dedicated class for, or whose dedicated class</span>
@@ -781,7 +781,7 @@
 <span class="sd">        module's own schema -- this is **not** the base</span>
 <span class="sd">        :attr:`Protocol.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`</span>
 <span class="sd">        meaning ("name of next layer protocol"); it is deliberately</span>
-<span class="sd">        repointed, on the owner's ruling for GitHub issue #891, at this</span>
+<span class="sd">        repointed, on the owner's ruling for GitHub issue :issue:`891`, at this</span>
 <span class="sd">        instance's *own* identity -- which header's format it parsed, e.g.</span>
 <span class="sd">        :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`</span>
 <span class="sd">        or :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.</span>
@@ -827,7 +827,7 @@
 <span class="sd">        Shared by every subclass rather than fallback-role-only -- see</span>
 <span class="sd">        :class:`_NextHeaderData` for why that is sound. Note this is an</span>
 <span class="sd">        *addition* for the eight implemented headers: none of them declared a</span>
-<span class="sd">        ``next`` property of its own before GitHub issue #917, so reading one</span>
+<span class="sd">        ``next`` property of its own before GitHub issue :issue:`917`, so reading one</span>
 <span class="sd">        raised :exc:`AttributeError`, and nothing could have depended on a</span>
 <span class="sd">        value it never returned.</span>
 

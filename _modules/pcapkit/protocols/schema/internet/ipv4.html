@@ -613,7 +613,7 @@
 <span class="sd">    :class:`QSOption` is an :class:`~pcapkit.protocols.schema.schema.EnumSchema`,</span>
 <span class="sd">    so a caller may register a further function code with a schema of its own</span>
 <span class="sd">    width -- and a number written here has to be kept in step by hand with every</span>
-<span class="sd">    field the suboptions declare, which is precisely how #552 arose: the length</span>
+<span class="sd">    field the suboptions declare, which is precisely how :issue:`552` arose: the length</span>
 <span class="sd">    was ``5``, the width of a Quick-Start Request's ``ttl`` and ``nonce`` alone,</span>
 <span class="sd">    with the ``type``, ``length`` and ``flags`` octets in front of them</span>
 <span class="sd">    unaccounted for.</span>
@@ -701,7 +701,7 @@
 <span class="sd">        octets to be read as a further, fabricated option -- which made the</span>
 <span class="sd">        enclosing datagram fail with ``ProtocolError: IPv4: invalid format``. That</span>
 <span class="sd">        is silent corruption on the way to a misleading failure, and it was logged</span>
-<span class="sd">        in review twice before #552 filed it.</span>
+<span class="sd">        in review twice before :issue:`552` filed it.</span>
 
 <span class="sd">    """</span>
     <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
@@ -885,9 +885,9 @@
 <span class="sd">            of, so nothing downstream can question it. Measured before this</span>
 <span class="sd">            fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and</span>
 <span class="sd">            reported ``IPv4Address('0.0.0.1')`` with no exception and no</span>
-<span class="sd">            warning. This was the fifth site of that defect -- #469, #491,</span>
-<span class="sd">            #508 and #540 are the first four -- and the reason it is the fifth</span>
-<span class="sd">            is that each of those fixed the sites it could see. See #552.</span>
+<span class="sd">            warning. This was the fifth site of that defect -- :issue:`469`, :issue:`491`,</span>
+<span class="sd">            :issue:`508` and :issue:`540` are the first four -- and the reason it is the fifth</span>
+<span class="sd">            is that each of those fixed the sites it could see. See :issue:`552`.</span>
 
 <span class="sd">        """</span>
         <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'flag'</span><span class="p">])</span>
@@ -1043,7 +1043,7 @@
     <span class="c1">#: ``packet length &lt; 0: -2`` the library warned about -- and re-emitted it two</span>
     <span class="c1">#: octets too wide on the way out, against the ``length=4`` that</span>
     <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid` had always</span>
-    <span class="c1">#: written. See #534.</span>
+    <span class="c1">#: written. See :issue:`534`.</span>
     <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1235,7 +1235,7 @@
     <span class="c1">#: ``packet length &lt; 0: -1`` and then died with a bare ``struct.error: bad</span>
     <span class="c1">#: char in struct format``, the unconsumed octet having been read as another</span>
     <span class="c1">#: option. Declared as padding rather than as data because :rfc:`4782` gives</span>
-    <span class="c1">#: it no meaning and no caller should be setting it. See #552.</span>
+    <span class="c1">#: it no meaning and no caller should be setting it. See :issue:`552`.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>

@@ -612,7 +612,7 @@
         <span class="c1">#: stopping. It retries only while the input is still producing, though --</span>
         <span class="c1">#: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`</span>
         <span class="c1">#: for the rule and for what it narrows, without which an exhausted stream</span>
-        <span class="c1">#: spins forever (#620).</span>
+        <span class="c1">#: spins forever (:issue:`620`).</span>
         <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Input filename flag. It indicates if the input file is a file</span>
         <span class="c1">#: name or a binary IO object. For the latter, we should not close</span>
@@ -662,7 +662,7 @@
         <span class="c1">#: :data:`None` before the first one. Comparing it against the position</span>
         <span class="c1">#: at the next end of stream is what tells a live capture that has paused</span>
         <span class="c1">#: -- retry, more may arrive -- from one that is finished, which is the</span>
-        <span class="c1">#: termination condition ``no_eof`` was missing (#620).</span>
+        <span class="c1">#: termination condition ``no_eof`` was missing (:issue:`620`).</span>
         <span class="n">_eof_mark</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
 
         <span class="c1">#: Magic number.</span>
@@ -848,8 +848,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent dumper differs</span>
 <span class="sd">            from the replacement, so re-registering the exact same object is</span>
 <span class="sd">            a silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue #739. ``__output__``</span>
+<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue :issue:`739`. ``__output__``</span>
 <span class="sd">            maps each format to a ``(dumper, ext)`` pair, so the identity</span>
 <span class="sd">            check compares the incumbent *dumper* (index ``0``), not the</span>
 <span class="sd">            pair -- a re-registration that only changes ``ext`` is still</span>
@@ -891,8 +891,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue #739.</span>
+<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            name: engine name</span>
@@ -929,8 +929,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue #739.</span>
+<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
@@ -963,8 +963,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue #739.</span>
+<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
@@ -1654,7 +1654,7 @@
 <span class="sd">        stops before end of file never reaches :meth:`_cleanup` at all, so the</span>
 <span class="sd">        ownership rule there never gets to run. The handle then survives until the</span>
 <span class="sd">        interpreter collects it, and CPython announces that with the</span>
-<span class="sd">        ``ResourceWarning`` #606 was tripping over -- from an unrelated test, in an</span>
+<span class="sd">        ``ResourceWarning`` :issue:`606` was tripping over -- from an unrelated test, in an</span>
 <span class="sd">        unrelated file, which is what made that flake so hard to place.</span>
 
 <span class="sd">        This is a backstop and not the recommended route: collection is not</span>
@@ -1692,7 +1692,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_owns_input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether the input stream is this class's to close.</span>
 
-<span class="sd">        The one place the ownership rule of #610 is written down, so that</span>
+<span class="sd">        The one place the ownership rule of :issue:`610` is written down, so that</span>
 <span class="sd">        :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.</span>
 
 <span class="sd">        Returns:</span>
@@ -1738,7 +1738,7 @@
 <span class="sd">        ``fin='-'`` -- so the extraction retries rather than stopping. What it had</span>
 <span class="sd">        no way to decide was when the stream is *genuinely* finished, and for an</span>
 <span class="sd">        exhausted one every retry raises end of stream again immediately, which is</span>
-<span class="sd">        the spin #620 reported.</span>
+<span class="sd">        the spin :issue:`620` reported.</span>
 
 <span class="sd">        The signal is the input's own position. End of stream is raised by</span>
 <span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in</span>
@@ -1764,7 +1764,7 @@
 <span class="sd">        following the writer. That is a deliberate narrowing of what ``no_eof``</span>
 <span class="sd">        used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last</span>
 <span class="sd">        record 0.6s in yielded all six frames, and here it yields five. The</span>
-<span class="sd">        previous behaviour was unbounded by construction -- it is the defect #620</span>
+<span class="sd">        previous behaviour was unbounded by construction -- it is the defect :issue:`620`</span>
 <span class="sd">        reports -- so *some* stopping rule had to be chosen, and a timed grace</span>
 <span class="sd">        period would only make the cut-off intermittent rather than absent.</span>
 <span class="sd">        Following a growing file wants a deliberate policy of its own; see the</span>

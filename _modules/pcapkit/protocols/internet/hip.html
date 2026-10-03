@@ -733,7 +733,7 @@
 <span class="w">    </span><span class="sd">"""This class implements Host Identity Protocol.</span>
 
 <span class="sd">    Double-inherited, per the maintainer's convention given in review of the</span>
-<span class="sd">    work for #917: a header that is *only* usable as an extension header</span>
+<span class="sd">    work for :issue:`917`: a header that is *only* usable as an extension header</span>
 <span class="sd">    inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone,</span>
 <span class="sd">    while one that is also usable as a standalone protocol names</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is</span>
@@ -3919,8 +3919,8 @@
 <span class="sd">        Only case 4 can lose a leading zero octet, and it is the only case where the</span>
 <span class="sd">        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing</span>
 <span class="sd">        declaring it. Reaching for it unconditionally is what re-serialised a</span>
-<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (#653) and what built, under</span>
-<span class="sd">        HIPv1, parameters this library's own reader then rejected (#655).</span>
+<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (:issue:`653`) and what built, under</span>
+<span class="sd">        HIPv1, parameters this library's own reader then rejected (:issue:`655`).</span>
 
 <span class="sd">        Two things this deliberately does *not* reject, both of which look like</span>
 <span class="sd">        oversights and are not:</span>

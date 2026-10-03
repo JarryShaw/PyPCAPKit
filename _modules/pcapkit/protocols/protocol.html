@@ -813,7 +813,7 @@
     <span class="c1">#: Declaring the parameter is preferable where it is possible, since that is</span>
     <span class="c1">#: also what documents the keyword to the caller and to :mod:`inspect`. This</span>
     <span class="c1">#: is for the cases where it is not -- a keyword handled uniformly for a whole</span>
-    <span class="c1">#: family of names, say -- and *not* a way to reopen the silence #617 closed:</span>
+    <span class="c1">#: family of names, say -- and *not* a way to reopen the silence :issue:`617` closed:</span>
     <span class="c1">#: it is opt-in per class, so it can only ever exempt a name whose author</span>
     <span class="c1">#: wrote it down.</span>
     <span class="c1">#:</span>
@@ -825,7 +825,7 @@
     <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.HTTP.make&gt;` or</span>
     <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTP.make&gt;`</span>
     <span class="c1">#: depending on that value, so no set of names is right for it. Use it only</span>
-    <span class="c1">#: for that shape; a protocol that forgoes the check gets the pre-#617</span>
+    <span class="c1">#: for that shape; a protocol that forgoes the check gets the pre-:issue:`617`</span>
     <span class="c1">#: behaviour back, and with it the silence. Unlike a set, the :obj:`None` is</span>
     <span class="c1">#: **not** inherited: a subclass of a dispatcher is checked normally unless it</span>
     <span class="c1">#: dispatches too and says so, because ``HTTPv1`` and ``HTTPv2`` declare their</span>
@@ -836,7 +836,7 @@
     <span class="c1">#: Whether this instance is being rebuilt by :meth:`from_data` from a parsed</span>
     <span class="c1">#: data model, as against constructed from keywords somebody wrote. It governs</span>
     <span class="c1">#: only whether the construction keyword check of :meth:`__init__` raises or</span>
-    <span class="c1">#: warns (#617), and is set for the duration of that call alone -- the class</span>
+    <span class="c1">#: warns (:issue:`617`), and is set for the duration of that call alone -- the class</span>
     <span class="c1">#: level :data:`False` is what every other code path sees, including an</span>
     <span class="c1">#: instance built without going through ``__init__`` at all.</span>
     <span class="n">__reconstructing__</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
@@ -930,7 +930,7 @@
 <span class="sd">            the option list and the trailing length field -- and</span>
 <span class="sd">            :meth:`ProtocolBase.__init__` injects this payload into every parsed</span>
 <span class="sd">            ``_info``, so the empty value reached the dumpers and corrupted the</span>
-<span class="sd">            files they wrote. See #646.</span>
+<span class="sd">            files they wrote. See :issue:`646`.</span>
 
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1008,7 +1008,7 @@
 <span class="sd">            parse as well as to the construction, so an implementation is not</span>
 <span class="sd">            expected to declare every keyword it is called with. It is *not* a</span>
 <span class="sd">            place for a caller to put a keyword no signature declares: since</span>
-<span class="sd">            #617, building a protocol *through its constructor* with such a</span>
+<span class="sd">            :issue:`617`, building a protocol *through its constructor* with such a</span>
 <span class="sd">            keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`</span>
 <span class="sd">            from :meth:`ProtocolBase.__init__</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` rather than</span>
@@ -1026,7 +1026,7 @@
 <span class="sd">            &lt;pcapkit.protocols.application.http.HTTP.make&gt;` to reach its versioned</span>
 <span class="sd">            implementation. Covering it would mean interposing on every ``make``</span>
 <span class="sd">            in the tree rather than on the one place their keywords converge, which</span>
-<span class="sd">            is a larger change than #617 and deliberately not made here. Construct</span>
+<span class="sd">            is a larger change than :issue:`617` and deliberately not made here. Construct</span>
 <span class="sd">            through the constructor to get the check.</span>
 
 <span class="sd">        """</span>
@@ -1225,7 +1225,7 @@
 <span class="sd">            fires only when the incumbent differs from the replacement, so</span>
 <span class="sd">            re-registering the exact same class object under the same ``code``</span>
 <span class="sd">            is a silent no-op rather than a warning about nothing displaced.</span>
-<span class="sd">            GitHub issue #718 corrected the previous presence-only guard here,</span>
+<span class="sd">            GitHub issue :issue:`718` corrected the previous presence-only guard here,</span>
 <span class="sd">            which read every repeat registration as a caller mistake even when</span>
 <span class="sd">            the value was unchanged. The identity check does not reintroduce</span>
 <span class="sd">            the concern that guard was written to avoid: it is a plain ``is``</span>
@@ -1353,7 +1353,7 @@
 <span class="sd">                keyword names no parameter of this protocol's :meth:`make`,</span>
 <span class="sd">                :meth:`read`, :meth:`pack`, :meth:`unpack`,</span>
 <span class="sd">                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO,</span>
-<span class="sd">                and is not listed in :attr:`__keywords__`. See #617; until then</span>
+<span class="sd">                and is not listed in :attr:`__keywords__`. See :issue:`617`; until then</span>
 <span class="sd">                such a keyword was silently discarded. Parsing (``file`` is</span>
 <span class="sd">                given) is unaffected.</span>
 
@@ -2211,11 +2211,11 @@
 <span class="sd">            what keeps that affordable is :attr:`ModuleDescriptor.klass</span>
 <span class="sd">            &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` reading</span>
 <span class="sd">            :data:`sys.modules` instead of re-entering</span>
-<span class="sd">            :func:`importlib.import_module` -- see #574. Memoising the resolved</span>
+<span class="sd">            :func:`importlib.import_module` -- see :issue:`574`. Memoising the resolved</span>
 <span class="sd">            class here instead, whether under ``proto``, in ``registry``'s</span>
 <span class="sd">            default factory, or in a cache beside the registry, would retain a</span>
-<span class="sd">            class that :func:`importlib.reload` then makes stale; #425 at</span>
-<span class="sd">            this layer and #555 at the schema layer are all that same defect.</span>
+<span class="sd">            class that :func:`importlib.reload` then makes stale; :issue:`425` at</span>
+<span class="sd">            this layer and :issue:`555` at the schema layer are all that same defect.</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>

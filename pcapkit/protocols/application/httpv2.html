@@ -1420,12 +1420,12 @@ frame by itself.</p>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code></a></p>
 <p>Flags enumeration for HTTP/2 frames.</p>
 <p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per
-GitHub issue #877’s ruling that every non-registry enumeration
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration
 shares that lookup contract. The six concrete per-frame subclasses
 below each declare <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Flags(FrameType.Flags):</span></code> with no base
 list of their own, so they inherit <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> transitively
 through this one re-parent rather than needing it repeated –
-verified at runtime for GitHub issue #877 (see the session report),
+verified at runtime for GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> (see the session report),
 not merely assumed from the MRO rules.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.application.httpv2.FrameType.Flags._generate_next_value_">

@@ -1456,7 +1456,7 @@ termination bit – 7, 15, 23 – which is what
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_sec()</span></code></a> encodes by looping over <code class="docutils literal notranslate"><span class="pre">range(7)</span></code> per
 octet, and the reason <code class="docutils literal notranslate"><span class="pre">Field_Termination_Indicator</span></code> is rejected
 here rather than written: the enumeration names it as structure, and
-a value written there would be dropped on the way back in. See #537.</p>
+a value written there would be dropped on the way back in. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/537">#537</a>.</p>
 </div>
 </dd></dl>
 
@@ -2004,9 +2004,9 @@ item type takes a <a class="reference external" href="https://docs.python.org/3/
 of, so nothing downstream can question it. Measured before this
 fix: <code class="docutils literal notranslate"><span class="pre">ts_data=[True,</span> <span class="pre">5]</span></code> packed as <code class="docutils literal notranslate"><span class="pre">0000000100000005</span></code> and
 reported <code class="docutils literal notranslate"><span class="pre">IPv4Address('0.0.0.1')</span></code> with no exception and no
-warning. This was the fifth site of that defect – #469, #491,
-#508 and #540 are the first four – and the reason it is the fifth
-is that each of those fixed the sites it could see. See #552.</p>
+warning. This was the fifth site of that defect – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/508">#508</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/540">#540</a> are the first four – and the reason it is the fifth
+is that each of those fixed the sites it could see. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a>.</p>
 </div>
 </dd></dl>
 
@@ -2071,7 +2071,7 @@ which over-read a well-formed option by two octets on the way in – the
 <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-2</span></code> the library warned about – and re-emitted it two
 octets too wide on the way out, against the <code class="docutils literal notranslate"><span class="pre">length=4</span></code> that
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid" title="pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_sid()</span></code></a> had always
-written. See #534.</p>
+written. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/534">#534</a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2264,7 +2264,7 @@ length fixed and this field still absent: <code class="docutils literal notransl
 <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-1</span></code> and then died with a bare <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">bad</span>
 <span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>, the unconsumed octet having been read as another
 option. Declared as padding rather than as data because <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> gives
-it no meaning and no caller should be setting it. See #552.</p>
+it no meaning and no caller should be setting it. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2417,7 +2417,7 @@ that literal, for two reasons. The registry is open –
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a> is an <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>,
 so a caller may register a further function code with a schema of its own
 width – and a number written here has to be kept in step by hand with every
-field the suboptions declare, which is precisely how #552 arose: the length
+field the suboptions declare, which is precisely how <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a> arose: the length
 was <code class="docutils literal notranslate"><span class="pre">5</span></code>, the width of a Quick-Start Request’s <code class="docutils literal notranslate"><span class="pre">ttl</span></code> and <code class="docutils literal notranslate"><span class="pre">nonce</span></code> alone,
 with the <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code> and <code class="docutils literal notranslate"><span class="pre">flags</span></code> octets in front of them
 unaccounted for.</p>
@@ -2478,7 +2478,7 @@ and decoded its <code class="docutils literal notranslate"><span class="pre">non
 octets to be read as a further, fabricated option – which made the
 enclosing datagram fail with <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">IPv4:</span> <span class="pre">invalid</span> <span class="pre">format</span></code>. That
 is silent corruption on the way to a misleading failure, and it was logged
-in review twice before #552 filed it.</p>
+in review twice before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a> filed it.</p>
 </div>
 </dd></dl>
 

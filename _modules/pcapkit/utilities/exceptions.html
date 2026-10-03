@@ -676,7 +676,7 @@
 <span class="sd">        * The two hooks still do not cover *every* path an exception can take.</span>
 <span class="sd">          A traceback a caller formats itself with :mod:`traceback` -- rather</span>
 <span class="sd">          than letting it reach the top level uncaught -- passes through</span>
-<span class="sd">          neither. See GitHub issue #719.</span>
+<span class="sd">          neither. See GitHub issue :issue:`719`.</span>
 <span class="sd">        * The ``stacklevel`` of the log record is the relative level</span>
 <span class="sd">          :func:`stacklevel` computes, so the record is attributed to the caller</span>
 <span class="sd">          whose operation failed rather than to this module. It used to be</span>
@@ -1330,14 +1330,14 @@
 <span class="sd">    taste: ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises</span>
 <span class="sd">    :exc:`ValueError`, so a lookup that misses by *name* is</span>
 <span class="sd">    :exc:`KeyError`-derived and one that misses by *value* is</span>
-<span class="sd">    :exc:`ValueError`-derived. That is a ruling given in review of #877's</span>
-<span class="sd">    phase-2 re-parenting, carried out by GitHub issue #923: raise</span>
+<span class="sd">    :exc:`ValueError`-derived. That is a ruling given in review of :issue:`877`'s</span>
+<span class="sd">    phase-2 re-parenting, carried out by GitHub issue :issue:`923`: raise</span>
 <span class="sd">    whichever of the two stdlib :class:`~enum.Enum` would raise in the same</span>
 <span class="sd">    circumstances, and raise it from this module rather than as a builtin.</span>
 
 <span class="sd">    Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:</span>
 <span class="sd">    :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin</span>
-<span class="sd">    :exc:`KeyError` on a name miss until #923, and six in-library call sites</span>
+<span class="sd">    :exc:`KeyError` on a name miss until :issue:`923`, and six in-library call sites</span>
 <span class="sd">    catch it -- :meth:`~pcapkit.const.http.method.Method.get` catches it in</span>
 <span class="sd">    order to *mint*, so for that one a failed name lookup is part of a</span>
 <span class="sd">    successful call. Every one of them keeps catching, unchanged.</span>

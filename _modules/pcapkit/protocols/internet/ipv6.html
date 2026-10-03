@@ -541,7 +541,7 @@
     <span class="c1">#: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain</span>
     <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field</span>
     <span class="c1">#: and used to crash the whole packet at :meth:`_decode_next_layer`'s</span>
-    <span class="c1">#: ``proto = info.next`` (GitHub issue #891).</span>
+    <span class="c1">#: ``proto = info.next`` (GitHub issue :issue:`891`).</span>
     <span class="c1">#:</span>
     <span class="c1">#: :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
     <span class="c1">#: is deliberately absent, even though its wire format also conforms:</span>
@@ -571,7 +571,7 @@
     <span class="c1">#: * ``253`` and ``254`` have no dedicated parser at all, so they resolve</span>
     <span class="c1">#:   to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no</span>
     <span class="c1">#:   ``next`` *attribute* -- this is what the structural check catches.</span>
-    <span class="c1">#:   (``BIT-EMU``/147 used to sit here too, until GitHub issue #925 found</span>
+    <span class="c1">#:   (``BIT-EMU``/147 used to sit here too, until GitHub issue :issue:`925` found</span>
     <span class="c1">#:   it was never in IANA's authoritative extension-header registry to</span>
     <span class="c1">#:   begin with; :class:`~pcapkit.const.ipv6.extension_header</span>
     <span class="c1">#:   .ExtensionHeader` no longer carries it, so a next-header byte of 147</span>
@@ -990,7 +990,7 @@
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no</span>
 <span class="sd">            ``next`` field, which is what used to crash the whole packet at</span>
 <span class="sd">            :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue</span>
-<span class="sd">            #891). Every other exception -- including one raised by</span>
+<span class="sd">            :issue:`891`). Every other exception -- including one raised by</span>
 <span class="sd">            ``IPv6_Ext`` itself, or by ``ESP``'s own dedicated</span>
 <span class="sd">            parser -- still reaches ``beholder`` unchanged, so *this</span>
 <span class="sd">            method's own* behaviour for anything outside that closed set is</span>

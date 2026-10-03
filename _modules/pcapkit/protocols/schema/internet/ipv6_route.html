@@ -533,7 +533,7 @@
 <span class="sd">    that arithmetic is done on the read side; see</span>
 <span class="sd">    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`</span>
 <span class="sd">    for its inverse on the write side. Do NOT drop the ``4 +``: that turns</span>
-<span class="sd">    the field back into raw octets and is the exact defect #487 fixed.</span>
+<span class="sd">    the field back into raw octets and is the exact defect :issue:`487` fixed.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.</span>
@@ -558,10 +558,10 @@
 <span class="sd">    :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed</span>
 <span class="sd">    route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.</span>
 <span class="sd">    ipv6_route.IPv6_Route.read` then subtracts from the outer packet length</span>
-<span class="sd">    to find the next layer's length. #487 unified the write side</span>
+<span class="sd">    to find the next layer's length. :issue:`487` unified the write side</span>
 <span class="sd">    (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)</span>
 <span class="sd">    into one helper; this is the matching read-side helper for the total</span>
-<span class="sd">    header length, finishing that half of #487.</span>
+<span class="sd">    header length, finishing that half of :issue:`487`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.</span>
@@ -689,7 +689,7 @@
     <span class="c1">#: NOTE: :rfc:`6554#section-3` gives ``CmprI`` and ``CmprE`` as *"4-bit</span>
     <span class="c1">#: unsigned integer"*, i.e. the high and low nibble of a single octet, so</span>
     <span class="c1">#: they cannot be two :class:`~pcapkit.corekit.fields.numbers.UInt8Field`</span>
-    <span class="c1">#: as they were before #564. Together with :attr:`pad` below -- ``Pad``</span>
+    <span class="c1">#: as they were before :issue:`564`. Together with :attr:`pad` below -- ``Pad``</span>
     <span class="c1">#: (4 bits) plus ``Reserved`` (20 bits) -- this is the one 32-bit word the</span>
     <span class="c1">#: diagram in :rfc:`6554#section-3` draws, and the same word</span>
     <span class="c1">#: :meth:`IPv6_Route._read_data_type_rpl</span>

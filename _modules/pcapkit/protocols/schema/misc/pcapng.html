@@ -717,8 +717,7 @@
 <span class="sd">    Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell</span>
 <span class="sd">    either from a bug in its own code, and neither is an :exc:`EOFError`, so</span>
 <span class="sd">    neither is caught by the frame loop -- one malformed block therefore cost the</span>
-<span class="sd">    whole extraction. See `#678</span>
-<span class="sd">    &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__.</span>
+<span class="sd">    whole extraction. See :issue:`678`.</span>
 
 <span class="sd">    Two shapes reach here. A Block Total Length below the block's own fixed-field</span>
 <span class="sd">    floor -- 28 octets for a Section Header Block, 20 for an Interface</span>
@@ -735,8 +734,7 @@
 <span class="sd">    :func:`bounded_area` already made, for the reason their docstrings give: a</span>
 <span class="sd">    block read has no catch point above :meth:`FieldBase.unpack</span>
 <span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`, so one refusal aborts the</span>
-<span class="sd">    whole extraction rather than one block, which is what the `#431</span>
-<span class="sd">    &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation exists</span>
+<span class="sd">    whole extraction rather than one block, which is what the :issue:`431` accommodation exists</span>
 <span class="sd">    to prevent. The end of the file is the one case that is *not* a clamp, since</span>
 <span class="sd">    there no block is being read at all -- see :meth:`PCAPNG._check_block_floor</span>
 <span class="sd">    &lt;pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor&gt;`, which reports it</span>
@@ -801,13 +799,12 @@
 <span class="sd">    padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each</span>
 <span class="sd">    with one option declaring 65,535 against none present, produced 131,070,000</span>
 <span class="sd">    octets of zero padding, an amplification of 1,637x linear in the block</span>
-<span class="sd">    count. See `#594 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/594&gt;`__,</span>
-<span class="sd">    and `#573 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/573&gt;`__ for the</span>
+<span class="sd">    count. See :issue:`594`, and :issue:`573` for the</span>
 <span class="sd">    32-bit band the field layer's own budget already covers.</span>
 
 <span class="sd">    The bound has to come from this layer because the field layer cannot see</span>
 <span class="sd">    it. What distinguishes the crafted case from the legitimate one is not the</span>
-<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why #554's</span>
+<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why :issue:`554`'s</span>
 <span class="sd">    ``len(buffer) &lt; length`` rejection was declined -- but whether the option</span>
 <span class="sd">    is inconsistent with the framing the block itself declares. Block Total</span>
 <span class="sd">    Length is authoritative and cross-checked against its own trailing copy, so</span>
@@ -817,8 +814,7 @@
 <span class="sd">    capture says so through ``captured_len`` instead, and leaves its options</span>
 <span class="sd">    whole, so it never trips this.</span>
 
-<span class="sd">    Clamping rather than refusing is what keeps the `#431</span>
-<span class="sd">    &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation: a</span>
+<span class="sd">    Clamping rather than refusing is what keeps the :issue:`431` accommodation: a</span>
 <span class="sd">    block read has no catch point above :meth:`FieldBase.unpack</span>
 <span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`, so one refusal aborts the</span>
 <span class="sd">    whole extraction rather than one block, and a truncated capture would stop</span>
@@ -898,8 +894,7 @@
 <span class="sd">        Secrets -- are deliberately left unclamped *against the block* here,</span>
 <span class="sd">        since each computes its span with a different offset and the equality</span>
 <span class="sd">        above has to be re-established per block rather than assumed. They do go</span>
-<span class="sd">        through :func:`nonnegative`, which is the part of `#678</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__ that stops a</span>
+<span class="sd">        through :func:`nonnegative`, which is the part of :issue:`678` that stops a</span>
 <span class="sd">        declared length reaching a read at all; the per-block equality is still</span>
 <span class="sd">        open.</span>
 
@@ -957,8 +952,7 @@
 <span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
 <span class="sd">        zero-pads a short read rather than refusing it. A tail of one, two or</span>
 <span class="sd">        three octets therefore arrived here negative and</span>
-<span class="sd">        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is `#678</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__. The floor is a</span>
+<span class="sd">        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is :issue:`678`. The floor is a</span>
 <span class="sd">        backstop: :meth:`PCAPNG._check_block_floor</span>
 <span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor&gt;` reports that</span>
 <span class="sd">        tail as end-of-stream before it gets here, and on the packing path</span>
@@ -1062,13 +1056,13 @@
 <span class="sd">            option code in this namespace (or in the shared ``opt``</span>
 <span class="sd">            namespace), or an unregistered member of the same registry,</span>
 <span class="sd">            carrying the code itself, when neither declares one. See GitHub</span>
-<span class="sd">            issue #575.</span>
+<span class="sd">            issue :issue:`575`.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            Until GitHub issue #860,</span>
+<span class="sd">            Until GitHub issue :issue:`860`,</span>
 <span class="sd">            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` minted a</span>
 <span class="sd">            fresh member -- via :func:`aenum.extend_enum` -- for any code</span>
-<span class="sd">            neither namespace's row covers, unconditionally on a miss. #860</span>
+<span class="sd">            neither namespace's row covers, unconditionally on a miss. :issue:`860`</span>
 <span class="sd">            converted that miss path to</span>
 <span class="sd">            :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`</span>
 <span class="sd">            instead, so calling it now would no longer grow the registry</span>
@@ -1252,7 +1246,7 @@
 <span class="sd">                own fourth parameter ``namespace``, and before Python 3.11 that</span>
 <span class="sd">                parameter is positional-or-keyword rather than positional-only --</span>
 <span class="sd">                so a class keyword literally called ``namespace`` bound it twice.</span>
-<span class="sd">                See GitHub issue #439.</span>
+<span class="sd">                See GitHub issue :issue:`439`.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1315,7 +1309,7 @@
 <span class="sd">        every other registry in the package does -- the lookup that follows</span>
 <span class="sd">        cannot tell a deliberate replacement from an accidental one, so an</span>
 <span class="sd">        unreported overwrite is a parser silently swapped out for another. See</span>
-<span class="sd">        `#675 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/675&gt;`__ for the</span>
+<span class="sd">        :issue:`675` for the</span>
 <span class="sd">        guard ``register_protocol`` added first, which this one now matches.</span>
 
 <span class="sd">        The guard is identity-based: it fires only when the incumbent differs</span>
@@ -1325,7 +1319,7 @@
 <span class="sd">        :meth:`__init_subclass__` honest: it loops over a ``code`` list with no</span>
 <span class="sd">        deduplication, so a repeated or aliased entry reaches this method twice</span>
 <span class="sd">        with the same class, and the second call now finds itself already the</span>
-<span class="sd">        incumbent. GitHub issue #718 corrected the previous presence-only</span>
+<span class="sd">        incumbent. GitHub issue :issue:`718` corrected the previous presence-only</span>
 <span class="sd">        guard, which read every such repeat as a caller mistake whether or not</span>
 <span class="sd">        the value had actually changed -- the same fix the sibling</span>
 <span class="sd">        :meth:`register` methods on</span>
@@ -2504,8 +2498,7 @@
 <span class="sd">            raised, for the reason :func:`nonnegative` gives: a bare</span>
 <span class="sd">            :exc:`struct.error` is neither one of</span>
 <span class="sd">            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it</span>
-<span class="sd">            aborted the whole extraction rather than this one entry. See `#678</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__.</span>
+<span class="sd">            aborted the whole extraction rather than this one entry. See :issue:`678`.</span>
 
 <span class="sd">            A line of nothing but NUL octets is the block's own 32-bit padding</span>
 <span class="sd">            and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,</span>
@@ -2549,15 +2542,13 @@
 <span class="sd">            is worse, since ``struct.pack('&lt;Q', 2570) ==</span>
 <span class="sd">            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside</span>
 <span class="sd">            the length prefix itself*, so the split landed before a single</span>
-<span class="sd">            field was read. See `#723</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/723&gt;`__. The entry is</span>
+<span class="sd">            field was read. See :issue:`723`. The entry is</span>
 <span class="sd">            now walked once, end to end: a length-prefixed field's bytes are</span>
 <span class="sd">            never inspected for structure, only counted out by the prefix that</span>
 <span class="sd">            names them, and a blank line -- found by *reading*, not by</span>
 <span class="sd">            splitting -- is what starts the next entry. The one-octet</span>
 <span class="sd">            terminator that must follow a binary field's value, and the warning</span>
-<span class="sd">            when it is missing, are unchanged from `#704</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/704&gt;`__; walking the</span>
+<span class="sd">            when it is missing, are unchanged from :issue:`704`; walking the</span>
 <span class="sd">            buffer whole rather than pre-slicing it also retires that fix's</span>
 <span class="sd">            newline restoration, which existed only to undo what the slicing</span>
 <span class="sd">            itself had taken away.</span>
@@ -2582,8 +2573,7 @@
 <span class="sd">            :meth:`bytes.strip` still will not take the NUL octets off since</span>
 <span class="sd">            they are not ASCII whitespace. The padding then went out as part</span>
 <span class="sd">            of the field's value with nothing to flag it, silently, however</span>
-<span class="sd">            small -- see `#794</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/794&gt;`__.</span>
+<span class="sd">            small -- see :issue:`794`.</span>
 <span class="sd">            :meth:`~io.BytesIO.readline` returns a line without its own</span>
 <span class="sd">            trailing newline only at end of stream, so a terminator-less</span>
 <span class="sd">            line is necessarily the buffer's last one; a binary field's</span>

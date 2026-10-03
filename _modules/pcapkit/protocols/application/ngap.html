@@ -674,7 +674,7 @@
 <span class="sd">    |pycrate|_ resolves by value.</span>
 
 <span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
 <span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
 <span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
 
@@ -699,11 +699,11 @@
 <span class="sd">    by |pycrate|_ through the standard member map. The values are the</span>
 <span class="sd">    ``ENUMERATED`` indices, which is what goes on the wire.</span>
 
-<span class="sd">    Carries no ``get`` of its own. GitHub issue #877 re-parented this class onto</span>
+<span class="sd">    Carries no ``get`` of its own. GitHub issue :issue:`877` re-parented this class onto</span>
 <span class="sd">    :class:`~pcapkit.corekit.enum.EnumLookup` and kept a delegating override for</span>
 <span class="sd">    one reason only: it converted the base's name-miss :exc:`KeyError` into a</span>
 <span class="sd">    :exc:`ValueError`, so that an unknown *name* and an unknown *value* reported</span>
-<span class="sd">    identically. GitHub issue #923's ruling retired that conversion -- a name</span>
+<span class="sd">    identically. GitHub issue :issue:`923`'s ruling retired that conversion -- a name</span>
 <span class="sd">    miss is :exc:`KeyError`-shaped, exactly as ``E['nosuch']`` is on a stdlib</span>
 <span class="sd">    :class:`~enum.Enum` -- which left the override a pure pass-through, so it</span>
 <span class="sd">    went with it.</span>

@@ -1051,13 +1051,13 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue #930, finishing #877's phase 2. :meth:`_missing_` below is</span>
+<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is</span>
 <span class="sd">        untouched, since :class:`EnumLookup` does not touch that hook.</span>
 
 <span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
-<span class="sd">        #930, and briefly again through GitHub issue #935's first attempt,</span>
+<span class="sd">        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,</span>
 <span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. An earlier lean on issue #935 had preferred that</span>
+<span class="sd">        it outright. An earlier lean on issue :issue:`935` had preferred that</span>
 <span class="sd">        widening; a later ruling in review of the attempt went the other</span>
 <span class="sd">        way: delete both ``get`` overrides in this module rather than widen</span>
 <span class="sd">        them, so :class:`FastBindingAcknowledgmentStatus` and</span>
@@ -1074,10 +1074,10 @@
 <span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for</span>
 <span class="sd">        every other :class:`int`-valued registry in this tree. There was</span>
 <span class="sd">        nothing left to backport. ``get``/``get_all`` now come from the base</span>
-<span class="sd">        alone, the same as the five other re-parents #930 finished alongside</span>
+<span class="sd">        alone, the same as the five other re-parents :issue:`930` finished alongside</span>
 <span class="sd">        this one -- including :class:`LocalizedRoutingStatus` and</span>
 <span class="sd">        :class:`LMAAddressCode` below, whose own hand-rolled ``get()``</span>
-<span class="sd">        GitHub issue #880 had already deleted outright, for the same reason:</span>
+<span class="sd">        GitHub issue :issue:`880` had already deleted outright, for the same reason:</span>
 <span class="sd">        zero callers depended on anything the base does not already do.</span>
 
 <span class="sd">        A behaviour change comes with the deletion, deliberately: the</span>
@@ -1107,7 +1107,7 @@
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
 <span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
 <span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        instead of extending the class. That is not a capture-level failure</span>
 <span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
@@ -1122,7 +1122,7 @@
 <span class="sd">        just this one MH message. The walk defect predates this change and</span>
 <span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue #880.</span>
+<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
 
 <span class="sd">    """</span>
 
@@ -1157,7 +1157,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value</span>
 <span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
 <span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
@@ -1177,13 +1177,13 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue #930, finishing #877's phase 2. :meth:`_missing_` below is</span>
+<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is</span>
 <span class="sd">        untouched, since :class:`EnumLookup` does not touch that hook.</span>
 
 <span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
-<span class="sd">        #930, and briefly again through GitHub issue #935's first attempt,</span>
+<span class="sd">        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,</span>
 <span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. An earlier lean on issue #935 had preferred that</span>
+<span class="sd">        it outright. An earlier lean on issue :issue:`935` had preferred that</span>
 <span class="sd">        widening; a later ruling in review of the attempt went the other</span>
 <span class="sd">        way: delete both ``get`` overrides in this module rather than widen</span>
 <span class="sd">        them, so :class:`FastBindingAcknowledgmentStatus` and</span>
@@ -1200,11 +1200,11 @@
 <span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for</span>
 <span class="sd">        every other :class:`int`-valued registry in this tree. There was</span>
 <span class="sd">        nothing left to backport. ``get``/``get_all`` now come from the base</span>
-<span class="sd">        alone, the same as the five other re-parents #930 finished alongside</span>
+<span class="sd">        alone, the same as the five other re-parents :issue:`930` finished alongside</span>
 <span class="sd">        this one -- including</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` and</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` below, whose</span>
-<span class="sd">        own hand-rolled ``get()`` GitHub issue #880 had already deleted</span>
+<span class="sd">        own hand-rolled ``get()`` GitHub issue :issue:`880` had already deleted</span>
 <span class="sd">        outright, for the same reason: zero callers depended on anything the</span>
 <span class="sd">        base does not already do.</span>
 
@@ -1232,7 +1232,7 @@
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
 <span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
 <span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        instead of extending the class. That is not a capture-level failure</span>
 <span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
@@ -1247,7 +1247,7 @@
 <span class="sd">        just this one MH message. The walk defect predates this change and</span>
 <span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue #880.</span>
+<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
 
 <span class="sd">    """</span>
 
@@ -1276,7 +1276,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value</span>
 <span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
 <span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
@@ -1296,7 +1296,7 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue #930, finishing #877's phase 2 -- pure re-parenting as far as</span>
+<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as</span>
 <span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
 <span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
 <span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
@@ -1311,7 +1311,7 @@
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`6705` leaves</span>
 <span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
 <span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        instead of extending the class. That is not a capture-level failure</span>
 <span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
@@ -1326,17 +1326,17 @@
 <span class="sd">        just this one MH message. The walk defect predates this change and</span>
 <span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue #880.</span>
+<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
 
 <span class="sd">        There is no hand-rolled ``get()`` backport here -- nor, since GitHub</span>
-<span class="sd">        issue #935, on :class:`FastBindingAcknowledgmentStatus` or</span>
+<span class="sd">        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or</span>
 <span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
-<span class="sd">        -- tests included -- so GitHub issue #880 deleted it outright rather</span>
+<span class="sd">        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather</span>
 <span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        #935 reached separately for the other two, on a ruling given in</span>
+<span class="sd">        :issue:`935` reached separately for the other two, on a ruling given in</span>
 <span class="sd">        review of that work: delete those two overrides rather than widen</span>
 <span class="sd">        them to match the base, which an earlier lean on the issue had</span>
-<span class="sd">        preferred. GitHub issue #930's re-parenting above gives this class</span>
+<span class="sd">        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class</span>
 <span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
 <span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
 <span class="sd">        value raises through ``get`` exactly as it does through the bare</span>
@@ -1365,7 +1365,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`6705#section-10.2` names this value</span>
 <span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
 <span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
@@ -1384,7 +1384,7 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue #930, finishing #877's phase 2 -- pure re-parenting as far as</span>
+<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as</span>
 <span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
 <span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
 <span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
@@ -1396,7 +1396,7 @@
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5949` leaves</span>
 <span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
 <span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        instead of extending the class. That is not a capture-level failure</span>
 <span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
@@ -1411,17 +1411,17 @@
 <span class="sd">        just this one MH message. The walk defect predates this change and</span>
 <span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue #880.</span>
+<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
 
 <span class="sd">        There is no hand-rolled ``get()`` backport here -- nor, since GitHub</span>
-<span class="sd">        issue #935, on :class:`FastBindingAcknowledgmentStatus` or</span>
+<span class="sd">        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or</span>
 <span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
-<span class="sd">        -- tests included -- so GitHub issue #880 deleted it outright rather</span>
+<span class="sd">        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather</span>
 <span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        #935 reached separately for the other two, on a ruling given in</span>
+<span class="sd">        :issue:`935` reached separately for the other two, on a ruling given in</span>
 <span class="sd">        review of that work: delete those two overrides rather than widen</span>
 <span class="sd">        them to match the base, which an earlier lean on the issue had</span>
-<span class="sd">        preferred. GitHub issue #930's re-parenting above gives this class</span>
+<span class="sd">        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class</span>
 <span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
 <span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
 <span class="sd">        value raises through ``get`` exactly as it does through the bare</span>
@@ -1450,7 +1450,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value</span>
 <span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
 <span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
@@ -1951,7 +1951,7 @@
 <span class="sd">        class-name default, because</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits</span>
 <span class="sd">        between this class and that default in the MRO and carries a concrete</span>
-<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would</span>
+<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would</span>
 <span class="sd">        rename this header in every</span>
 <span class="sd">        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in</span>
 <span class="sd">        :meth:`IPv6._decode_next_layer</span>
@@ -2068,7 +2068,7 @@
 <span class="sd">        ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`</span>
 <span class="sd">        then subtracts from the outer packet length to find the next</span>
 <span class="sd">        layer's length -- precisely the role ``Hdr Ext Len`` played in</span>
-<span class="sd">        #487, and the same read-side duplication :meth:`make`'s write-side</span>
+<span class="sd">        :issue:`487`, and the same read-side duplication :meth:`make`'s write-side</span>
 <span class="sd">        expression (``(len(data_val) + 6) // 8 - 1``, this formula's</span>
 <span class="sd">        inverse) had already been unified out of. Do NOT drop the ``+ 1``:</span>
 <span class="sd">        the units either side of it differ (octets vs. 8-octet units), and</span>
@@ -3523,7 +3523,7 @@
 <span class="sd">        a CGA extension's Extension Type and Extension Data Length are two</span>
 <span class="sd">        octets each [:rfc:`4581#section-2`], so those readers use</span>
 <span class="sd">        :meth:`_mh_extension_length` instead. Reusing this helper for them</span>
-<span class="sd">        reported every parsed CGA extension two octets short (#512).</span>
+<span class="sd">        reported every parsed CGA extension two octets short (:issue:`512`).</span>
 
 <span class="sd">        Note that only the *stored-length* read-side call sites are</span>
 <span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
@@ -7234,7 +7234,7 @@
 <span class="sd">        the Extension in octets, not including the first 4 octets"*.</span>
 
 <span class="sd">        Passing these lengths through :meth:`_mh_option_length` reported every</span>
-<span class="sd">        parsed CGA extension two octets short (#512): an 8-octet extension with</span>
+<span class="sd">        parsed CGA extension two octets short (:issue:`512`): an 8-octet extension with</span>
 <span class="sd">        an ``Extension Data Length`` of ``4`` came back as ``6``. Note</span>
 <span class="sd">        :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``</span>
 <span class="sd">        instead, so the write side was already right and only the read side</span>
@@ -8925,7 +8925,7 @@
 <span class="sd">                (RFC 4283's ``user@realm`` form) rather than a numeric</span>
 <span class="sd">                identifier, so there is no non-arbitrary int-to-text mapping</span>
 <span class="sd">                the way there is int-to-address or int-to-octets, and an</span>
-<span class="sd">                :obj:`int` is rejected there (c.f. #467).</span>
+<span class="sd">                :obj:`int` is rejected there (c.f. :issue:`467`).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8938,7 +8938,7 @@
 <span class="sd">                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for</span>
 <span class="sd">                the other six, neither of which a caller passing a flag can</span>
 <span class="sd">                plausibly have meant; pass ``int(...)`` to get the numeric</span>
-<span class="sd">                value (c.f. #469). If ``identifier`` is a negative :obj:`int`</span>
+<span class="sd">                value (c.f. :issue:`469`). If ``identifier`` is a negative :obj:`int`</span>
 <span class="sd">                (no subtype has a wire form for one), an :obj:`int` of any value</span>
 <span class="sd">                with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or</span>
 <span class="sd">                above with the ``IPv6_Address`` subtype (whose wire form is a</span>
@@ -8947,9 +8947,9 @@
 <span class="sd">                type its subtype's field cannot hold at all: anything but</span>
 <span class="sd">                :obj:`str` for ``NAI``, anything but :obj:`bytes`/</span>
 <span class="sd">                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`</span>
-<span class="sd">                is converted rather than rejected there, per #467 -- or anything</span>
+<span class="sd">                is converted rather than rejected there, per :issue:`467` -- or anything</span>
 <span class="sd">                :class:`ipaddress.IPv6Address` itself does not accept for</span>
-<span class="sd">                ``IPv6_Address`` (c.f. #469).</span>
+<span class="sd">                ``IPv6_Address`` (c.f. :issue:`469`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

@@ -620,7 +620,7 @@ no name at all – <a class="reference external" href="https://docs.python.org/3
 so interpolating it unguarded put the literal four characters <code class="docutils literal notranslate"><span class="pre">None</span></code>
 into the name half and rendered
 <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> <code class="docutils literal notranslate"><span class="pre">(0)</span></code> as <code class="docutils literal notranslate"><span class="pre">'Flags::None</span> <span class="pre">[0]'</span></code>
-(GitHub issue #648).</p>
+(GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a>).</p>
 <p>Two things make that worth a guard rather than a shrug. <code class="docutils literal notranslate"><span class="pre">'None'</span></code> is a
 plausible member name, so a consumer splitting the rendering on <code class="docutils literal notranslate"><span class="pre">::</span></code>
 cannot tell it from a member genuinely so named – and <code class="docutils literal notranslate"><span class="pre">NONE</span></code> <em>is</em> a

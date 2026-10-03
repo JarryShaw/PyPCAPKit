@@ -2238,7 +2238,7 @@
 <span class="sd">            subtype/flags (1) + ``Address ID`` (1) + the truncated HMAC (8) + the</span>
 <span class="sd">            random number (4).</span>
 
-<span class="sd">            This guard required ``20`` until #576 -- a value that appears in</span>
+<span class="sd">            This guard required ``20`` until :issue:`576` -- a value that appears in</span>
 <span class="sd">            neither the figure nor the schema, and that contradicted this method's</span>
 <span class="sd">            own docstring. Together with ``_make_join_synack``'s ``length=12`` it</span>
 <span class="sd">            made the SYN/ACK form unusable in both directions at once: the maker</span>
@@ -2433,13 +2433,13 @@
 <span class="sd">            IDs is one further octet.</span>
 <span class="sd">            :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id`</span>
 <span class="sd">            sizes its list as ``pkt['length'] - 3`` from exactly this, which is why</span>
-<span class="sd">            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in #576) also</span>
+<span class="sd">            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in :issue:`576`) also</span>
 <span class="sd">            mis-sized the parse rather than only the pack.</span>
 
 <span class="sd">            The guard permits ``3``, i.e. ``n = 0``, which the figure does not</span>
 <span class="sd">            describe -- it shows one Address ID plus "n-1 Address IDs, if</span>
 <span class="sd">            required". Left as it stands: tightening it to reject an empty list is</span>
-<span class="sd">            a behaviour change beyond #576's scope, and a zero-ID REMOVE_ADDR now</span>
+<span class="sd">            a behaviour change beyond :issue:`576`'s scope, and a zero-ID REMOVE_ADDR now</span>
 <span class="sd">            at least round-trips honestly instead of declaring an octet it never</span>
 <span class="sd">            packed.</span>
 
@@ -2493,7 +2493,7 @@
 <span class="sd">            4-octet :rfc:`6824` form is therefore legacy, and the guard stays</span>
 <span class="sd">            permissive so that traffic carrying it still parses.</span>
 
-<span class="sd">            ``_make_mptcp_prio`` declared a constant ``length=4`` until #576,</span>
+<span class="sd">            ``_make_mptcp_prio`` declared a constant ``length=4`` until :issue:`576`,</span>
 <span class="sd">            which meant the construction side could only ever emit the legacy</span>
 <span class="sd">            form -- and emitted it with an all-zero phantom Address ID when the</span>
 <span class="sd">            caller supplied none, because</span>
@@ -2591,10 +2591,10 @@
 <span class="sd">            it draws is **12** octets: ``Kind`` (1) + ``Length`` (1) +</span>
 <span class="sd">            subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the</span>
 <span class="sd">            option receiver's key (64 bits, 8). Note that section 3.5 is Fast</span>
-<span class="sd">            Close; section 3.7 is Fallback (MP_FAIL), which #576's own text cited</span>
+<span class="sd">            Close; section 3.7 is Fallback (MP_FAIL), which :issue:`576`'s own text cited</span>
 <span class="sd">            here by mistake.</span>
 
-<span class="sd">            Three sites disagreed on this number before #576, all three now</span>
+<span class="sd">            Three sites disagreed on this number before :issue:`576`, all three now</span>
 <span class="sd">            reading 12: this guard required ``16``, an octet count nothing in the</span>
 <span class="sd">            RFC produces for MP_FASTCLOSE; ``_make_mptcp_fastclose`` declared the</span>
 <span class="sd">            correct 12 but the schema packed only **11**, missing the reserved</span>

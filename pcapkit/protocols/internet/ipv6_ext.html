@@ -548,7 +548,7 @@ rules below, the two ways this class gets dispatched to, and the
 reasoning for stopping rather than clipping on an overrun.</p>
 <section id="the-two-roles">
 <h2>The two roles<a class="headerlink" href="#the-two-roles" title="Link to this heading">¶</a></h2>
-<p>This one class plays both, on the owner’s ruling for GitHub issue #917:</p>
+<p>This one class plays both, on the owner’s ruling for GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>:</p>
 <ol class="arabic simple">
 <li><p><strong>The concrete fallback parser</strong> for an <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html"><strong>RFC 6564</strong></a>-conforming header
 this package has no dedicated class for, or whose dedicated class
@@ -630,7 +630,7 @@ does not – must override it. All eight implemented headers do, and
 module’s own schema – this is <strong>not</strong> the base
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.protocol</span></code>
 meaning (“name of next layer protocol”); it is deliberately
-repointed, on the owner’s ruling for GitHub issue #891, at this
+repointed, on the owner’s ruling for GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>, at this
 instance’s <em>own</em> identity – which header’s format it parsed, e.g.
 <a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT" title="pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HOPOPT</span></code></a>
 or <a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6" title="pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Shim6</span></code></a>.
@@ -670,7 +670,7 @@ constructs exactly that instance).</p>
 <p>Shared by every subclass rather than fallback-role-only – see
 <code class="xref py py-class docutils literal notranslate"><span class="pre">_NextHeaderData</span></code> for why that is sound. Note this is an
 <em>addition</em> for the eight implemented headers: none of them declared a
-<code class="docutils literal notranslate"><span class="pre">next</span></code> property of its own before GitHub issue #917, so reading one
+<code class="docutils literal notranslate"><span class="pre">next</span></code> property of its own before GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>, so reading one
 raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>, and nothing could have depended on a
 value it never returned.</p>
 <p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the declared length would have overrun what

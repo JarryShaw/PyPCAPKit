@@ -632,7 +632,7 @@
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;`, which resolves a</span>
 <span class="sd">    bare protocol name through it.</span>
 
-<span class="sd">    Per #675 the overwrite is now reported rather than silent, matching</span>
+<span class="sd">    Per :issue:`675` the overwrite is now reported rather than silent, matching</span>
 <span class="sd">    :meth:`ProtocolBase.register</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` and the other</span>
 <span class="sd">    overwrite-warning registries.</span>
@@ -651,7 +651,7 @@
 <span class="sd">    that filter is what would then hide the ``HTTP`` collision this warning</span>
 <span class="sd">    exists to surface. The sibling ``register`` methods across the package --</span>
 <span class="sd">    each keyed on a caller-supplied ``code`` rather than a name derived from</span>
-<span class="sd">    the class -- apply the same identity criterion as of GitHub issue #718;</span>
+<span class="sd">    the class -- apply the same identity criterion as of GitHub issue :issue:`718`;</span>
 <span class="sd">    before that they warned on presence alone, and none of them does now.</span>
 
 <span class="sd">    Making the key itself unique would resolve the collision rather than</span>
@@ -665,7 +665,7 @@
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
 <span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the</span>
-<span class="sd">    registry redesign in #514, and reporting the collision here is the step that</span>
+<span class="sd">    registry redesign in :issue:`514`, and reporting the collision here is the step that</span>
 <span class="sd">    redesign is sequenced behind.</span>
 
 <span class="sd">    Args:</span>
@@ -712,7 +712,7 @@
 <span class="c1">#: Enum type -&gt; the class(es) owning the :attr:`ProtocolBase.__proto__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__proto__&gt;` dispatch registry</span>
 <span class="c1">#: keyed by that enum type -- the "registry-of-registries" that lets</span>
-<span class="c1">#: ``code=`` infer a destination from a key's own type, per #514. This is</span>
+<span class="c1">#: ``code=`` infer a destination from a key's own type, per :issue:`514`. This is</span>
 <span class="c1">#: not an invention: it is exactly the targeting</span>
 <span class="c1">#: :func:`register_ethertype`, :func:`register_transtype`,</span>
 <span class="c1">#: :func:`register_linktype` and :func:`register_sctp` already hard-code by</span>
@@ -821,7 +821,7 @@
 <span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.L2TPv2&gt;` answers on</span>
 <span class="sd">        port 1701 only, and registering *it* at ``TransType.L2TP`` would point</span>
 <span class="sd">        the :rfc:`2661` parser at a v3-over-IP header -- see</span>
-<span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue #548 for</span>
+<span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue :issue:`548` for</span>
 <span class="sd">        what that produced when measured.</span>
 
 <span class="sd">    Args:</span>
@@ -1361,8 +1361,8 @@
 <span class="sd">            when ``module`` is a :class:`str` and either ``class_`` names no</span>
 <span class="sd">            attribute of it, or ``class_`` was never given at all -- the</span>
 <span class="sd">            latter distinguished from the former rather than reported as a</span>
-<span class="sd">            missing attribute named ``'(null)'``. See GitHub issues #832 and</span>
-<span class="sd">            #833.</span>
+<span class="sd">            missing attribute named ``'(null)'``. See GitHub issues :issue:`832` and</span>
+<span class="sd">            :issue:`833`.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**</span>

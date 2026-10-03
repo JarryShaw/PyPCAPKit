@@ -738,7 +738,7 @@ leaves the interpreter free to subclass it anyway. Every schema
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
 from the <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__fields__" title="pcapkit.protocols.schema.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
 subclass adding a field afterwards inherits a constructor that cannot
-set it – which is #422’s failure shape, reached by a different route.
+set it – which is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/422">#422</a>’s failure shape, reached by a different route.
 This turns that promise into a rule the interpreter keeps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1093,7 +1093,7 @@ here closes that asymmetry.</p>
 same guard <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a> applies,
 even though <code class="docutils literal notranslate"><span class="pre">code</span></code> here – unlike <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>’s key –
 is supplied by the caller and independent of <code class="docutils literal notranslate"><span class="pre">schema</span></code>. GitHub
-issue #718 corrected the previous presence-only guard: a repeat
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> corrected the previous presence-only guard: a repeat
 call that names the exact same schema object is a caller replaying
 a registration, not a mistake, so it is now a silent no-op.</p>
 <p>Presence is a faithful “was this really registered” test only because
@@ -1103,8 +1103,8 @@ a registration, not a mistake, so it is now a silent no-op.</p>
 looked up, so parsing a single packet carrying an unknown code would
 have made the next legitimate registration for that code warn about
 an entry no caller ever asked for – the defect fixed for this layer
-in #555, and for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in #421 and
-#425. That fix is what makes this guard safe to add.</p>
+in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, and for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a> and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>. That fix is what makes this guard safe to add.</p>
 <p><a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option" title="pcapkit.protocols.schema.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.Option</span></code></a> overrides this
 method with a namespaced registry of its own and does not delegate
 here, so it is guarded separately.</p>
@@ -1297,8 +1297,8 @@ code is therefore enough to grow the registry for the remainder of the
 process, and to make a later, entirely legitimate
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call report an overwrite that never happened.</p>
 <p>This is the schema-layer instance of the defect <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
-fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issues #421 and
-#425; see GitHub issue #555. The fallback itself is deliberate – it
+fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a> and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>; see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>. The fallback itself is deliberate – it
 is how an unknown option, chunk or block falls back to its
 <code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this subclass keeps returning it,
 it just stops recording it.</p>

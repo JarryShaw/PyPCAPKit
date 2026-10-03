@@ -505,7 +505,7 @@
 <span class="c1">#: message can begin with it and a prefix compare cannot false-positive on one.</span>
 <span class="c1">#: That is what makes it a positive identification rather than a heuristic, and</span>
 <span class="c1">#: it is why :meth:`HTTP._guess_version` tests it before attempting any parse</span>
-<span class="c1">#: (#800).</span>
+<span class="c1">#: (:issue:`800`).</span>
 <span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
 
 
@@ -530,7 +530,7 @@
     <span class="c1">#: :attr:`length`; without that, ``ProtocolBase.__init__``'s</span>
     <span class="c1">#: ``self._info.__update__(packet=self.packet.payload)`` slices the payload</span>
     <span class="c1">#: from octet 9 of a buffer whose frame starts at octet 24 and reports the</span>
-    <span class="c1">#: tail of the preface as packet payload. See #800.</span>
+    <span class="c1">#: tail of the preface as packet payload. See :issue:`800`.</span>
     <span class="n">_preface_length</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1">#: This class is a version dispatcher rather than a protocol with a header of</span>
@@ -541,7 +541,7 @@
     <span class="c1">#: according to that value -- so the set of names that is correct here depends</span>
     <span class="c1">#: on an argument. :obj:`None` therefore opts out of the construction keyword</span>
     <span class="c1">#: check that :meth:`ProtocolBase.__init__</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs (#617); the</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs (:issue:`617`); the</span>
     <span class="c1">#: two versioned classes are checked normally when constructed directly.</span>
     <span class="n">__keywords__</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -703,14 +703,14 @@
 <span class="w">        </span><span class="sd">"""Identify the HTTP version of the payload, and parse it with that version.</span>
 
 <span class="sd">        The payload is *identified* first and trial-parsed only as a last resort.</span>
-<span class="sd">        Until #800 there was no identification step at all: both versions were</span>
+<span class="sd">        Until :issue:`800` there was no identification step at all: both versions were</span>
 <span class="sd">        tried in turn and whichever parser did not object was taken as the</span>
 <span class="sd">        answer, which answers "did a parser accept this?" where the question is</span>
 <span class="sd">        "what is this?" -- and got both directions wrong. The HTTP/2 connection</span>
 <span class="sd">        preface came back ``version='2'`` only because ``httpv2.HTTP`` read its</span>
 <span class="sd">        leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and</span>
 <span class="sd">        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back</span>
-<span class="sd">        ``version='2'`` the same way. #799 closed the second of those by</span>
+<span class="sd">        ``version='2'`` the same way. :issue:`799` closed the second of those by</span>
 <span class="sd">        requiring a frame's declared length to be backed by its buffer, but that</span>
 <span class="sd">        left the preface *unidentifiable*: a real HTTP/2 connection opening is</span>
 <span class="sd">        refused by both arms and reported as not-HTTP.</span>

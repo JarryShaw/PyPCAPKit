@@ -687,8 +687,8 @@ should be as <code class="docutils literal notranslate"><span class="pre">{dumpe
 <p>The overwrite guard fires only when the incumbent dumper differs
 from the replacement, so re-registering the exact same object is
 a silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue #718 gave the code-keyed
-registrars, extended here by GitHub issue #739. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
+the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
+registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
 maps each format to a <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair, so the identity
 check compares the incumbent <em>dumper</em> (index <code class="docutils literal notranslate"><span class="pre">0</span></code>), not the
 pair – a re-registration that only changes <code class="docutils literal notranslate"><span class="pre">ext</span></code> is still
@@ -722,8 +722,8 @@ should be as <code class="docutils literal notranslate"><span class="pre">{engin
 <p>The overwrite guard fires only when the incumbent differs from
 the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue #718 gave the code-keyed
-registrars, extended here by GitHub issue #739.</p>
+the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
+registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -747,8 +747,8 @@ should be as <code class="docutils literal notranslate"><span class="pre">{reass
 <p>The overwrite guard fires only when the incumbent differs from
 the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue #718 gave the code-keyed
-registrars, extended here by GitHub issue #739.</p>
+the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
+registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -772,8 +772,8 @@ should be as <code class="docutils literal notranslate"><span class="pre">{trace
 <p>The overwrite guard fires only when the incumbent differs from
 the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue #718 gave the code-keyed
-registrars, extended here by GitHub issue #739.</p>
+the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
+registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1049,7 +1049,7 @@ does not mean the capture is over: the extraction retries instead of
 stopping. It retries only while the input is still producing, though –
 see <code class="xref py py-meth docutils literal notranslate"><span class="pre">_note_eof_progress()</span></code>
 for the rule and for what it narrows, without which an exhausted stream
-spins forever (#620).</p>
+spins forever (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/620">#620</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1158,7 +1158,7 @@ is enabled.</p>
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> before the first one. Comparing it against the position
 at the next end of stream is what tells a live capture that has paused
 – retry, more may arrive – from one that is finished, which is the
-termination condition <code class="docutils literal notranslate"><span class="pre">no_eof</span></code> was missing (#620).</p>
+termination condition <code class="docutils literal notranslate"><span class="pre">no_eof</span></code> was missing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/620">#620</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">

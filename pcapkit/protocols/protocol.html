@@ -567,7 +567,7 @@ the wire’s Block Total Length and the captured octets sit ahead of
 the option list and the trailing length field – and
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__()</span></code> injects this payload into every parsed
 <code class="docutils literal notranslate"><span class="pre">_info</span></code>, so the empty value reached the dumpers and corrupted the
-files they wrote. See #646.</p>
+files they wrote. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/646">#646</a>.</p>
 </div>
 </dd></dl>
 
@@ -630,7 +630,7 @@ only that something was.</p>
 fires only when the incumbent differs from the replacement, so
 re-registering the exact same class object under the same <code class="docutils literal notranslate"><span class="pre">code</span></code>
 is a silent no-op rather than a warning about nothing displaced.
-GitHub issue #718 corrected the previous presence-only guard here,
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> corrected the previous presence-only guard here,
 which read every repeat registration as a caller mistake even when
 the value was unchanged. The identity check does not reintroduce
 the concern that guard was written to avoid: it is a plain <code class="docutils literal notranslate"><span class="pre">is</span></code>
@@ -740,7 +740,7 @@ instance.</p>
 parse as well as to the construction, so an implementation is not
 expected to declare every keyword it is called with. It is <em>not</em> a
 place for a caller to put a keyword no signature declares: since
-#617, building a protocol <em>through its constructor</em> with such a
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>, building a protocol <em>through its constructor</em> with such a
 keyword raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>
 from <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code> rather than
 discarding it.</p>
@@ -756,7 +756,7 @@ undeclared keyword in silence. The check lives in
 package’s own tests and by <a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its versioned
 implementation. Covering it would mean interposing on every <code class="docutils literal notranslate"><span class="pre">make</span></code>
 in the tree rather than on the one place their keywords converge, which
-is a larger change than #617 and deliberately not made here. Construct
+is a larger change than <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a> and deliberately not made here. Construct
 through the constructor to get the check.</p>
 </div>
 </dd></dl>
@@ -1131,11 +1131,11 @@ to avoid.</p>
 <p>So a miss resolves its fallback descriptor again on every frame, and
 what keeps that affordable is <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> instead of re-entering
-<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> – see #574. Memoising the resolved
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> – see <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/574">#574</a>. Memoising the resolved
 class here instead, whether under <code class="docutils literal notranslate"><span class="pre">proto</span></code>, in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s
 default factory, or in a cache beside the registry, would retain a
-class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale; #425 at
-this layer and #555 at the schema layer are all that same defect.</p>
+class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a> at
+this layer and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a> at the schema layer are all that same defect.</p>
 </div>
 </dd></dl>
 
@@ -1316,7 +1316,7 @@ propagated to nested layers by
     keyword names no parameter of this protocol’s <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>,
     <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>,
     <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> or <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a>, anywhere in the MRO,
-    and is not listed in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code>. See #617; until then
+    and is not listed in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code>. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>; until then
     such a keyword was silently discarded. Parsing (<code class="docutils literal notranslate"><span class="pre">file</span></code> is
     given) is unaffected.</p>
 </dd>

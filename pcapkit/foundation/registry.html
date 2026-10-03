@@ -779,7 +779,7 @@ for the single key <code class="docutils literal notranslate"><span class="pre">
 was there, and the replacement is observable through every reader of the
 registry, e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.expand_comp</span></code>, which resolves a
 bare protocol name through it.</p>
-<p>Per #675 the overwrite is now reported rather than silent, matching
+<p>Per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/675">#675</a> the overwrite is now reported rather than silent, matching
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> and the other
 overwrite-warning registries.</p>
 <p>The guard here reads “key present <strong>and</strong> incumbent is a different
@@ -796,7 +796,7 @@ filter <a class="reference internal" href="../utilities/warnings.html#pcapkit.ut
 that filter is what would then hide the <code class="docutils literal notranslate"><span class="pre">HTTP</span></code> collision this warning
 exists to surface. The sibling <code class="docutils literal notranslate"><span class="pre">register</span></code> methods across the package –
 each keyed on a caller-supplied <code class="docutils literal notranslate"><span class="pre">code</span></code> rather than a name derived from
-the class – apply the same identity criterion as of GitHub issue #718;
+the class – apply the same identity criterion as of GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>;
 before that they warned on presence alone, and none of them does now.</p>
 <p>Making the key itself unique would resolve the collision rather than
 merely reporting it, but it is a registry-format change that the bare-name
@@ -808,7 +808,7 @@ name as a plain string, and the <code class="docutils literal notranslate"><span
 <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a> and
 <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a> fall back to
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. Re-keying is therefore part of the
-registry redesign in #514, and reporting the collision here is the step that
+registry redesign in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/514">#514</a>, and reporting the collision here is the step that
 redesign is sequenced behind.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1226,8 +1226,8 @@ is used, which names exactly the registry the member lives in. A bare
     when <code class="docutils literal notranslate"><span class="pre">module</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> and either <code class="docutils literal notranslate"><span class="pre">class_</span></code> names no
     attribute of it, or <code class="docutils literal notranslate"><span class="pre">class_</span></code> was never given at all – the
     latter distinguished from the former rather than reported as a
-    missing attribute named <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code>. See GitHub issues #832 and
-    #833.</p></li>
+    missing attribute named <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code>. See GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/832">#832</a> and
+    <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>.</p></li>
 </ul>
 </dd>
 </dl>
