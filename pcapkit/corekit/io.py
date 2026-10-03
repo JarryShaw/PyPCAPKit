@@ -414,7 +414,7 @@ class SeekableReader(io.BufferedReader):
             for. It is also what CPython's own read-only buffered readers do: both the
             accelerated :class:`io.BufferedReader` and the pure-Python
             ``_pyio.BufferedReader`` raise :exc:`io.UnsupportedOperation`, the latter from
-            ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (#645).
+            ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (:issue:`645`).
 
             The resizing this used to perform is still reachable internally, as
             :meth:`_truncate_buffer`. It never touched the underlying stream in the first place
@@ -432,12 +432,12 @@ class SeekableReader(io.BufferedReader):
 
         Note:
             This is the internal half of what :meth:`truncate` used to do, which is all of it:
-            nothing here writes to the underlying stream -- :meth:`write` raises -- so what this
-            resizes is the buffer, not the stream behind it. That is why :meth:`truncate` refuses
-            (#645) while this remains: the operation is a private-window one, not an
-            :class:`io.IOBase` write. The buffer is a sliding window over a stream that cannot be
-            seeked: its octet 0 sits at absolute offset ``_buffer_set``, its content occupies
-            ``[0:_buffer_cur]``, and everything past that is padding never read.
+            nothing here writes to the underlying stream -- :meth:`write` raises -- so what
+            this resizes is the buffer, not the stream behind it. That is why :meth:`truncate`
+            refuses (:issue:`645`) while this remains: the operation is a private-window one,
+            not an :class:`io.IOBase` write. The buffer is a sliding window over a stream that
+            cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its content
+            occupies ``[0:_buffer_cur]``, and everything past that is padding never read.
 
             Two consequences for which octets survive. An extension appends its zero octets at
             the **tail**, the new area being by definition the region past the old end. A
@@ -494,10 +494,10 @@ class SeekableReader(io.BufferedReader):
         :meth:`truncate` will raise :exc:`OSError`.
 
         Note:
-            This was spelled ``writeable`` until #645, which is not how the :mod:`io` protocol
-            spells it, so it overrode nothing and :mod:`io` never consulted it -- the inherited
-            :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`, so there
-            was no observable divergence to notice; the coincidence is what hid it.
+            This was spelled ``writeable`` until :issue:`645`, which is not how the :mod:`io`
+            protocol spells it, so it overrode nothing and :mod:`io` never consulted it -- the
+            inherited :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`,
+            so there was no observable divergence to notice; the coincidence is what hid it.
 
         """
         return False

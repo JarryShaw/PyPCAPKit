@@ -35,8 +35,8 @@ ST = TypeVar('ST', bound='Type[Info]')
 class FinalisedState(EnumLookup, enum.IntEnum):
     """Finalised state.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
+    :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 

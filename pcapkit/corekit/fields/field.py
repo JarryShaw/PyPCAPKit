@@ -41,13 +41,13 @@ _T = TypeVar('_T')
 #: empty, tail past a truncated area and having it decode as zero -- that is
 #: how an over-long ``ihl``, or a capture cut short by the snapshot length,
 #: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see
-#: #431). Every such read is of a fixed-width, few-octet field, always far
-#: under this ceiling, so it is untouched; only a length past it -- which no
-#: fixed-width field ever legitimately is -- gets refused.
+#: :issue:`431`). Every such read is of a fixed-width, few-octet field, always
+#: far under this ceiling, so it is untouched; only a length past it -- which
+#: no fixed-width field ever legitimately is -- gets refused.
 #:
 #: A ceiling on one field says nothing about how many fields a parse may pad,
 #: which is what :data:`_MAX_ZERO_PAD_SHORTFALL` and
-#: :data:`_ZERO_PAD_BUDGET_RATIO` below are for. See #573.
+#: :data:`_ZERO_PAD_BUDGET_RATIO` below are for. See :issue:`573`.
 _MAX_ZERO_PAD_LENGTH = 0x40_000
 
 #: int: Shortfall :meth:`FieldBase.unpack` will always zero-pad for, whatever
@@ -60,17 +60,17 @@ _MAX_ZERO_PAD_LENGTH = 0x40_000
 #: declaring ``secrets_length`` of 262,142 against two supplied octets through
 #: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --
 #: retained 50.0 MiB, an amplification of 10,922x per block. Every individual
-#: field was under the ceiling, so nothing refused any of them (#573).
+#: field was under the ceiling, so nothing refused any of them (:issue:`573`).
 #:
 #: The sum therefore wants a budget, and this is the figure that makes one
 #: *safe*. A budget on its own is not: a capture cut short by its snapshot length
-#: pads legitimately and must keep parsing (#431, and the reasoning that declined
-#: #554), and it pads far more than it reads, so any running budget tight enough
-#: to matter starts refusing real captures. Worse, it refuses them *sometimes* --
-#: measured on this tree with a running budget alone, the same legitimate
-#: 54-octet frame parsed to one result on 37 of 40 calls and to another on calls
-#: 26, 33 and 39, because whether it fit depended on what had been parsed before
-#: it. A guard whose answer moves with history is not a guard.
+#: pads legitimately and must keep parsing (:issue:`431`, and the reasoning that
+#: declined :issue:`554`), and it pads far more than it reads, so any running
+#: budget tight enough to matter starts refusing real captures. Worse, it refuses
+#: them *sometimes* -- measured on this tree with a running budget alone, the
+#: same legitimate 54-octet frame parsed to one result on 37 of 40 calls and to
+#: another on calls 26, 33 and 39, because whether it fit depended on what had
+#: been parsed before it. A guard whose answer moves with history is not a guard.
 #:
 #: 65,536 is what removes that. It is the whole span of a 16-bit wire length
 #: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and
@@ -84,10 +84,11 @@ _MAX_ZERO_PAD_LENGTH = 0x40_000
 #: else a 16-bit field can ask for.
 #:
 #: What is left above it is the band a *32-bit* wire length reaches --
-#: PCAP-NG's own block and secrets lengths, which is where #573's amplification
-#: lives -- and legitimately that is a once-per-file event, since only the last
-#: block of a truncated capture is cut short. So the band gets the running budget
-#: below, whose one-off term already covers any single such event outright.
+#: PCAP-NG's own block and secrets lengths, which is where :issue:`573`'s
+#: amplification lives -- and legitimately that is a once-per-file event, since
+#: only the last block of a truncated capture is cut short. So the band gets the
+#: running budget below, whose one-off term already covers any single such event
+#: outright.
 _MAX_ZERO_PAD_SHORTFALL = 0x10_000
 
 #: int: Zero padding *past* :data:`_MAX_ZERO_PAD_SHORTFALL` that
@@ -105,10 +106,10 @@ _MAX_ZERO_PAD_SHORTFALL = 0x10_000
 #:
 #: *Repeating* one is not legitimate, and that is what 16 is chosen to catch.
 #: Truncation cuts the end of a file, so a capture has one short block, not two
-#: hundred; #573's shape has two hundred because they are declared rather than
-#: cut. 16 octets of further allowance per octet genuinely read leaves any real
-#: file an allowance orders of magnitude past the one event it can want, while
-#: bounding the sum for a file whose blocks all lie.
+#: hundred; :issue:`573`'s shape has two hundred because they are declared
+#: rather than cut. 16 octets of further allowance per octet genuinely read
+#: leaves any real file an allowance orders of magnitude past the one event it
+#: can want, while bounding the sum for a file whose blocks all lie.
 _ZERO_PAD_BUDGET_RATIO = 0x10
 
 #: ContextVar[Optional[list[int]]]: Running ``[octets supplied, octets
@@ -207,7 +208,7 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
 #: sign after it (``'>Xs'``), or any other malformed template -- which is what
 #: makes checking for it a reliable way to tell those cases apart from each
 #: other *before* :func:`struct.calcsize` is asked to size either one. See
-#: #825.
+#: :issue:`825`.
 _RE_NEGATIVE_LENGTH_TEMPLATE = re.compile(r'^[@=<>!]?-\d+')
 
 
@@ -292,7 +293,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 :func:`struct.calcsize` cannot size such a template and raises
                 a bare :exc:`struct.error`, uncatchable as a pcapkit-specific
                 error; this re-raises it as the negative-length message below.
-                See #805.
+                See :issue:`805`.
             ProtocolError: If :attr:`template` is otherwise malformed --
                 anything else :func:`struct.calcsize` cannot size, such as a
                 typo'd format character -- rather than the negative-length
@@ -304,7 +305,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 :data:`_RE_NEGATIVE_LENGTH_TEMPLATE` against :attr:`template`
                 itself -- which is known already, without needing anything
                 :func:`struct.calcsize`'s own error says -- rather than by the
-                error message. See #825.
+                error message. See :issue:`825`.
 
         """
         try:
@@ -372,7 +373,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             directly is exactly what :func:`copy.copy` would have done once it
             found it, so this changes nothing about *when* a field is copied or
             what the copy contains -- only the redundant dispatch is removed.
-            See GitHub issue #730.
+            See GitHub issue :issue:`730`.
 
         Returns:
             A new field instance sharing this one's attribute values.

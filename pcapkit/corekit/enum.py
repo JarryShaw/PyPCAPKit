@@ -18,9 +18,9 @@ library is meant to inherit from, split by whether the enumeration may *grow*:
   :meth:`~EnumRegistry._unregistered_member`. Every generated registry under
   :mod:`pcapkit.const` inherits from here.
 
-That split follows the rules laid down in GitHub issue #877: a helper enumeration is
-immutable by default, unless RFC or IANA documents its value space as open.
-Such closed sets subclass a bare base enumeration in this module, and
+That split follows the rules laid down in GitHub issue :issue:`877`: a helper
+enumeration is immutable by default, unless RFC or IANA documents its value space as
+open. Such closed sets subclass a bare base enumeration in this module, and
 :class:`EnumRegistry` subclasses that base for the mutable ones.
 
 Which methods land on which tier was settled in the same thread. The deciding
@@ -44,21 +44,20 @@ therefore had no users to serve among the classes being re-parented.
 .. note::
 
    Re-parenting every non-registry enumeration onto :class:`EnumLookup` was
-   **phase 2** of GitHub issue #877, and it is now **complete**: introducing
-   the base above was deliberately behaviour-preserving on its own, so that it
-   could land while other work was still in flight on the files the re-parent
-   touches, and the phase itself landed in two pull requests for exactly that
-   reason -- the first for the 17 enumerations that were free to move at
-   once, and the second, `#930
-   <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__, for the
-   remaining seven once the files holding them freed up.
+   **phase 2** of GitHub issue :issue:`877`, and it is now **complete**:
+   introducing the base above was deliberately behaviour-preserving on its
+   own, so that it could land while other work was still in flight on the
+   files the re-parent touches, and the phase itself landed in two pull
+   requests for exactly that reason -- the first for the 17 enumerations that
+   were free to move at once, and the second, :issue:`930`, for the remaining
+   seven once the files holding them freed up.
 
-The registry tier's own shape is the earlier design settled in GitHub issue #842:
-``get``, ``get_all``, ``register`` and ``register_alias`` are to exist on every
-const registry, so the abstraction is finished by moving them to the base class.
-The closed sets split off by #877 are outside that contract.
-``AppType``'s sub-base class carries the overrides and dispatching logic it
-needs, and ``AppType``'s subclasses override again where their contracts
+The registry tier's own shape is the earlier design settled in GitHub issue
+:issue:`842`: ``get``, ``get_all``, ``register`` and ``register_alias`` are to
+exist on every const registry, so the abstraction is finished by moving them to
+the base class. The closed sets split off by :issue:`877` are outside that
+contract. ``AppType``'s sub-base class carries the overrides and dispatching
+logic it needs, and ``AppType``'s subclasses override again where their contracts
 differ.
 
 That is a three-tier hierarchy, of which this module is **tier one**:
@@ -71,14 +70,15 @@ That is a three-tier hierarchy, of which this module is **tier one**:
    overrides below and a few hand-written ``get`` overrides.
 2. ``AppType``'s sub-base -- overrides all four, routing the two lookups
    through its ``_dispatch``, because a port lookup needs a transport protocol
-   to be answerable at all. Landed as of GitHub issue #860: not in this module,
-   but in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which
-   mixes in :class:`EnumRegistry` directly. ``register`` and ``register_alias``
-   are overridden without that dispatch, staying on the registry they are
-   called on, so that a write never leaks onto a transport IANA never assigned
-   the service to -- a minted member for the first, an alias for the second.
-   Plus ``_unregistered_member``, for its own three extra attributes (``svc``,
-   ``port``, ``proto``) that the generic one below does not know to set.
+   to be answerable at all. Landed as of GitHub issue :issue:`860`: not in this
+   module, but in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself,
+   which mixes in :class:`EnumRegistry` directly. ``register`` and
+   ``register_alias`` are overridden without that dispatch, staying on the
+   registry they are called on, so that a write never leaks onto a transport
+   IANA never assigned the service to -- a minted member for the first, an
+   alias for the second. Plus ``_unregistered_member``, for its own three extra
+   attributes (``svc``, ``port``, ``proto``) that the generic one below does
+   not know to set.
 3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
    -- turned out to need no override of their own at all: ``_dispatch``
    already returns ``cls`` unchanged the moment ``cls.__registry__`` is not
@@ -89,14 +89,15 @@ Before this, the four methods lived as generated *text*: written out longhand in
 :data:`pcapkit.vendor.default.LINE` and copied verbatim into each of the eleven
 crawlers that replace that template wholesale, none of which carried
 ``register``, ``register_alias`` or ``get_all`` at all. Adding one method meant
-editing every bespoke template by hand, which is the cost #775 asks to remove.
+editing every bespoke template by hand, which is the cost :issue:`775` asks to
+remove.
 
-The contracts are those set out on GitHub issue #842: ``get`` is a shortcut for
-the ``[]`` operation and returns the canonical enumeration member; ``get_all``
-returns every matching member; ``register`` mints a new member on the class at
-runtime under the name the caller specifies, so nothing has to be guessed;
-``register_alias`` (and ``register_aliases``) adds further alias names to a
-given member's mapping.
+The contracts are those set out on GitHub issue :issue:`842`: ``get`` is a
+shortcut for the ``[]`` operation and returns the canonical enumeration member;
+``get_all`` returns every matching member; ``register`` mints a new member on
+the class at runtime under the name the caller specifies, so nothing has to be
+guessed; ``register_alias`` (and ``register_aliases``) adds further alias names
+to a given member's mapping.
 
 """
 from typing import TYPE_CHECKING
@@ -168,7 +169,7 @@ class EnumLookup:
     def _validate_value(cls, value: 'Any') -> 'None':
         """Hook: reject ``value`` if this enumeration's contract does not allow it.
 
-        GitHub issue #877 requires some range-validation logic for the
+        GitHub issue :issue:`877` requires some range-validation logic for the
         inheriting classes to hook into. This is that hook, and it is what the
         bare tier carries **instead** of ``register``: what values are *legal*
         is something every enumeration has an opinion on, whereas who may *add*
@@ -188,10 +189,10 @@ class EnumLookup:
         type is :obj:`None` deliberately rather than the validated value, so that
         this hook cannot become a converter: a subclass that returned a changed
         value here would silently alter what a lookup resolves to, which is
-        exactly the case-folding the ruling on GitHub issue #877 rules out:
-        an enumeration keeps the original spellings its registrars use.
-        Case handling belongs in a deliberate ``get`` override with
-        an RFC behind it, not in a validation hook.
+        exactly the case-folding the ruling on GitHub issue :issue:`877` rules
+        out: an enumeration keeps the original spellings its registrars use. Case
+        handling belongs in a deliberate ``get`` override with an RFC behind it,
+        not in a validation hook.
 
         Raise from :mod:`pcapkit.utilities.exceptions`, per the same issue's
         ruling that in-library code raises in-library exceptions --
@@ -248,19 +249,20 @@ class EnumLookup:
     def get(cls, key: 'Any', default: 'Any' = NO_DEFAULT) -> 'Self':
         """Resolve ``key`` to the canonical member.
 
-        A shortcut for the ``[]`` operation, per the ruling on #842: given a
-        name it is ``cls[key]``, and given a value it is ``cls(key)``. Either
-        way the answer is the *canonical* member -- subscripting an alias
-        returns the member the alias points at, not a separate object -- so
-        two names for one assignment resolve to one enum.
+        A shortcut for the ``[]`` operation, per the ruling on :issue:`842`:
+        given a name it is ``cls[key]``, and given a value it is
+        ``cls(key)``. Either way the answer is the *canonical* member --
+        subscripting an alias returns the member the alias points at, not a
+        separate object -- so two names for one assignment resolve to one
+        enum.
 
         It never mints while resolving ``default``; ``key`` may still mint
-        through a ``_missing_`` that GitHub issue #775's ruling deliberately
-        kept minting, on one registry (``CGAType``) -- the ruling's final
-        round converted the other two it originally held out,
+        through a ``_missing_`` that GitHub issue :issue:`775`'s ruling
+        deliberately kept minting, on one registry (``CGAType``) -- the
+        ruling's final round converted the other two it originally held out,
         ``EtherType`` and ``Socket``, so they no longer mint on any path
-        either. Registering a member any other way is :meth:`register`'s
-        job and nobody else's, which is the ruling #775 exists to carry
+        either. Registering a member any other way is :meth:`register`'s job
+        and nobody else's, which is the ruling :issue:`775` exists to carry
         out: an unrecognised or unregistered value does not become a registered
         member unless a user or caller explicitly creates one. A value inside a
         registry's declared-but-unassigned range still resolves, through that
@@ -284,10 +286,10 @@ class EnumLookup:
         unrecognised value, routing a failed *name* lookup through the
         constructor would let a mere ``get()`` call mint a permanent member
         where it previously just raised. Defensive rather than observed: of
-        the 127 classes that reach this method -- 125 until GitHub issue #880's
-        own PR added ``pcapkit/const/ngap/procedure_code.py`` and
-        ``pcapkit/const/ngap/protocol_ie.py``, remeasured while auditing
-        GitHub issue #903 -- the ``str``-valued ones
+        the 127 classes that reach this method -- 125 until GitHub issue
+        :issue:`880`'s own PR added ``pcapkit/const/ngap/procedure_code.py``
+        and ``pcapkit/const/ngap/protocol_ie.py``, remeasured while auditing
+        GitHub issue :issue:`903` -- the ``str``-valued ones
         (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
         ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
         :class:`~pcapkit.const.pcapng.option_type.OptionType`,
@@ -296,32 +298,30 @@ class EnumLookup:
         :class:`~pcapkit.const.reg.apptype.udp.UDP`,
         :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
         :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- completing that set as
-        of GitHub issue #860's own PR 2 -- and, newest of them,
+        of GitHub issue :issue:`860`'s own PR 2 -- and, newest of them,
         :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, which GitHub
-        issue #877's own thread reclassified from a hand-written helper to a
-        generated registry once RFC 9850 §4.2 turned its member list into a
-        live IANA registry) no longer mint
-        on any path, so no live witness exists in this tree today. The one
-        registry that still mints directly via :func:`~aenum.extend_enum`,
-        :class:`~pcapkit.const.mh.cga_type.CGAType`, is
-        :class:`int`-valued, so a ``str`` name could not reach its mint
-        branch even if this restriction did not exist; it is not an
-        exception to it, just not reachable by it. GitHub issue #775's final
-        round converted the other two that used to share this footnote,
-        :class:`~pcapkit.const.ipx.socket.Socket` and
-        :class:`~pcapkit.const.reg.ethertype.EtherType`, so ``CGAType`` is
-        now the only one left. This is about a future
-        ``str``-valued registry (or a present one whose ``_missing_``
-        someday changes) reaching this base with a minting ``_missing_`` of
-        its own, which the restriction below is written to stay correct
-        for regardless. Restricting
-        the value side of ``key`` to an already-registered value keeps *that
-        side* non-minting on every ``str``-valued registry, not only the ones
-        without a minting ``_missing_``. Since #864, that is no longer merely
-        a claim about the value side alone: ``default`` resolves through the
-        same kind of ``_value2member_map_`` lookup rather than
-        ``cls(default)``, so for a ``str`` key every path through this
-        method -- name, value and ``default`` alike -- is non-minting.
+        issue :issue:`877`'s own thread reclassified from a hand-written helper
+        to a generated registry once RFC 9850 §4.2 turned its member list into
+        a live IANA registry) no longer mint on any path, so no live witness
+        exists in this tree today. The one registry that still mints directly
+        via :func:`~aenum.extend_enum`,
+        :class:`~pcapkit.const.mh.cga_type.CGAType`, is :class:`int`-valued, so
+        a ``str`` name could not reach its mint branch even if this restriction
+        did not exist; it is not an exception to it, just not reachable by it.
+        GitHub issue :issue:`775`'s final round converted the other two that
+        used to share this footnote, :class:`~pcapkit.const.ipx.socket.Socket`
+        and :class:`~pcapkit.const.reg.ethertype.EtherType`, so ``CGAType`` is
+        now the only one left. This is about a future ``str``-valued registry
+        (or a present one whose ``_missing_`` someday changes) reaching this
+        base with a minting ``_missing_`` of its own, which the restriction
+        below is written to stay correct for regardless. Restricting the value
+        side of ``key`` to an already-registered value keeps *that side*
+        non-minting on every ``str``-valued registry, not only the ones without
+        a minting ``_missing_``. Since :issue:`864`, that is no longer merely a
+        claim about the value side alone: ``default`` resolves through the same
+        kind of ``_value2member_map_`` lookup rather than ``cls(default)``, so
+        for a ``str`` key every path through this method -- name, value and
+        ``default`` alike -- is non-minting.
 
         That restriction has a cost the paragraph above glosses over: a
         *declared-but-unassigned* value -- the case resolved there through
@@ -348,17 +348,17 @@ class EnumLookup:
         given on :meth:`_validate_value` itself.
 
         Both failure paths raise from :mod:`pcapkit.utilities.exceptions`
-        rather than a builtin, per the ruling recorded on GitHub issue #923:
-        in-library code raises from ``pcapkit.utilities.exceptions`` rather
-        than a builtin, and whether ``ValueError`` or ``KeyError`` applies
+        rather than a builtin, per the ruling recorded on GitHub issue
+        :issue:`923`: in-library code raises from ``pcapkit.utilities.exceptions``
+        rather than a builtin, and whether ``ValueError`` or ``KeyError`` applies
         follows what stdlib's ``Enum`` raises in the same circumstance. The *shape*
-        is unchanged by that ruling and deliberately so -- a name miss
-        stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
-        matching ``E['nosuch']`` and ``E(999)`` on a stdlib
-        :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete
-        subclasses that already answered a name miss that way. Only the
-        provenance changed, so every ``except KeyError`` and ``except
-        ValueError`` around a call to this method keeps catching.
+        is unchanged by that ruling and deliberately so -- a name miss stays
+        :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
+        matching ``E['nosuch']`` and ``E(999)`` on a stdlib :class:`~enum.Enum`,
+        and matching the 119 of this tree's 127 concrete subclasses that already
+        answered a name miss that way. Only the provenance changed, so every
+        ``except KeyError`` and ``except ValueError`` around a call to this method
+        keeps catching.
 
         Two details of that conversion are worth stating, since neither is
         visible from the exception type alone:
@@ -372,7 +372,7 @@ class EnumLookup:
           *successful* call -- that override catches it in order to mint. A loud
           error there would put a :data:`logging.CRITICAL` record on every such
           call and set :data:`sys.tracebacklimit` to ``0`` process-wide, which
-          is exactly the GitHub issue #362 defect
+          is exactly the GitHub issue :issue:`362` defect
           :class:`~pcapkit.utilities.exceptions.BaseError` documents ``quiet``
           for. The value miss takes no such fallback anywhere in this tree, so
           it stays loud.
@@ -392,7 +392,7 @@ class EnumLookup:
             default: An already-registered value to fall back to when
                 ``key`` does not resolve. Resolved through a plain
                 ``_value2member_map_`` lookup, never through
-                ``cls(default)``, so it cannot mint -- see #864.
+                ``cls(default)``, so it cannot mint -- see :issue:`864`.
                 :data:`NO_DEFAULT` stands for *no default*; that and a
                 ``default`` naming no registered member both fall through to
                 the same lookup error ``key`` itself would have raised.
@@ -441,7 +441,7 @@ class EnumLookup:
         entry, since an alias registered by :meth:`register_alias` is a second
         *name* for the canonical member rather than a second member. The method
         still exists here, because all four methods are to exist on every const
-        registry (GitHub issue #842), and it is where a registry with genuinely
+        registry (GitHub issue :issue:`842`), and it is where a registry with genuinely
         several matches puts them: ``AppType`` overrides it to return every service IANA
         assigns to a port.
 
@@ -476,8 +476,8 @@ class EnumRegistry(EnumLookup):
 
     An enumeration inherits from *here* when it may grow at runtime, and from
     :class:`EnumLookup` directly when it may not. The owner's ruling on GitHub
-    issue #877 is what draws that line: an enumeration is immutable unless
-    RFC or IANA says otherwise.
+    issue :issue:`877` is what draws that line: an enumeration is immutable
+    unless RFC or IANA says otherwise.
 
     Mixed in ahead of the enum base exactly as before -- ``class
     Foo(EnumRegistry, IntFlag)`` -- and gaining :class:`EnumLookup` as a parent
@@ -492,7 +492,7 @@ class EnumRegistry(EnumLookup):
 
         The caller-named path, and the only one that grows the registry:
         it mints a new member on the class at runtime under the ``name`` the
-        caller specifies, so nothing has to be guessed (GitHub issue #842).
+        caller specifies, so nothing has to be guessed (GitHub issue :issue:`842`).
         Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.
 
         Refuses a ``value`` that already has a member. Without this guard,
@@ -582,17 +582,17 @@ class EnumRegistry(EnumLookup):
     def register_alias(cls, value: 'Any', name: 'str') -> 'Self':
         """Add ``name`` as a further name for the member already at ``value``.
 
-        Per GitHub issue #842, an alias adds a further name to a given member's
-        mapping -- so it needs an existing member to attach to, and this refuses a
-        value no member carries rather than falling through to :meth:`register`.
-        #842 settled on an alias always attaching to an existing member, leaving
-        open whether ``AppType`` or a concrete enumeration might need to alias a
-        value no member carries. ``AppType``'s override does not: it requires the
-        port to already carry a member of that very registry. What an alias means
-        also differs away from ``AppType``: on every other registry it is a custom
-        name the caller opts into, not one recorded by the IANA registrars.
-        Minting under the name of an aliasing call would manufacture exactly the
-        unrecorded member #775 removes.
+        Per GitHub issue :issue:`842`, an alias adds a further name to a given
+        member's mapping -- so it needs an existing member to attach to, and this
+        refuses a value no member carries rather than falling through to
+        :meth:`register`. :issue:`842` settled on an alias always attaching to an
+        existing member, leaving open whether ``AppType`` or a concrete
+        enumeration might need to alias a value no member carries. ``AppType``'s
+        override does not: it requires the port to already carry a member of that
+        very registry. What an alias means also differs away from ``AppType``: on
+        every other registry it is a custom name the caller opts into, not one
+        recorded by the IANA registrars. Minting under the name of an aliasing
+        call would manufacture exactly the unrecorded member :issue:`775` removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
