@@ -42,7 +42,7 @@ leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a
 different framing decision. It also means v3 is the first member of this family
 to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
 
-GitHub issue #548 proposed closing that gap by binding
+GitHub issue :issue:`548` proposed closing that gap by binding
 :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead, which does not
 work and is worth recording so it is not proposed again. Over IP the v3 session
 header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions imposed

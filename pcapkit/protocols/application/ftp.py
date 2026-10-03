@@ -42,7 +42,7 @@ class Type(EnumLookup, StrEnum):
     """FTP packet type.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 

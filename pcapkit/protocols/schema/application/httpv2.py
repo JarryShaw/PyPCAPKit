@@ -128,12 +128,12 @@ class FrameType(EnumSchema[Enum_Frame]):
         """Flags enumeration for HTTP/2 frames.
 
         Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per
-        GitHub issue #877's ruling that every non-registry enumeration
+        GitHub issue :issue:`877`'s ruling that every non-registry enumeration
         shares that lookup contract. The six concrete per-frame subclasses
         below each declare ``class Flags(FrameType.Flags):`` with no base
         list of their own, so they inherit :class:`EnumLookup` transitively
         through this one re-parent rather than needing it repeated --
-        verified at runtime for GitHub issue #877 (see the session report),
+        verified at runtime for GitHub issue :issue:`877` (see the session report),
         not merely assumed from the MRO rules.
 
         """

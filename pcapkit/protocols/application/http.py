@@ -37,7 +37,7 @@ __all__ = ['HTTP']
 #: message can begin with it and a prefix compare cannot false-positive on one.
 #: That is what makes it a positive identification rather than a heuristic, and
 #: it is why :meth:`HTTP._guess_version` tests it before attempting any parse
-#: (#800).
+#: (:issue:`800`).
 _HTTP2_PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 
 
@@ -60,7 +60,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: :attr:`length`; without that, ``ProtocolBase.__init__``'s
     #: ``self._info.__update__(packet=self.packet.payload)`` slices the payload
     #: from octet 9 of a buffer whose frame starts at octet 24 and reports the
-    #: tail of the preface as packet payload. See #800.
+    #: tail of the preface as packet payload. See :issue:`800`.
     _preface_length = 0
 
     #: This class is a version dispatcher rather than a protocol with a header of
@@ -71,7 +71,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: according to that value -- so the set of names that is correct here depends
     #: on an argument. :obj:`None` therefore opts out of the construction keyword
     #: check that :meth:`ProtocolBase.__init__
-    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs (#617); the
+    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs (:issue:`617`); the
     #: two versioned classes are checked normally when constructed directly.
     __keywords__ = None
 
@@ -219,14 +219,14 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         """Identify the HTTP version of the payload, and parse it with that version.
 
         The payload is *identified* first and trial-parsed only as a last resort.
-        Until #800 there was no identification step at all: both versions were
+        Until :issue:`800` there was no identification step at all: both versions were
         tried in turn and whichever parser did not object was taken as the
         answer, which answers "did a parser accept this?" where the question is
         "what is this?" -- and got both directions wrong. The HTTP/2 connection
         preface came back ``version='2'`` only because ``httpv2.HTTP`` read its
         leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and
         ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back
-        ``version='2'`` the same way. #799 closed the second of those by
+        ``version='2'`` the same way. :issue:`799` closed the second of those by
         requiring a frame's declared length to be backed by its buffer, but that
         left the preface *unidentifiable*: a real HTTP/2 connection opening is
         refused by both arms and reported as not-HTTP.

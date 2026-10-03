@@ -332,7 +332,7 @@ def encrypted_data_len(pkt: 'dict[str, Any]') -> 'int':
     ciphertext by four. That was recorded as the second half of
     ``hip-parameter/ENCRYPTED`` in the round-trip suite's expected-failure
     table, and left alone -- because while the padding rule was also four
-    octets out (#651), the two errors cancelled at some residues of ``Length``
+    octets out (:issue:`651`), the two errors cancelled at some residues of ``Length``
     and not others. Measured by packing through the public maker at every
     residue, the old record total agreed with :rfc:`7401` Section 5.2.1 at
     ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over at
@@ -388,7 +388,7 @@ def parameter_total_len(length: 'int') -> 'int':
     Padding", and it is the **total** -- contents plus the four octets of
     ``Type`` and ``Length`` plus padding -- that must land on a multiple of
     eight. Aligning the contents alone instead, as every padding site in this
-    module and in :mod:`pcapkit.protocols.internet.hip` did before #651, puts
+    module and in :mod:`pcapkit.protocols.internet.hip` did before :issue:`651`, puts
     every parameter at ``4 (mod 8)`` for every possible ``Length``: never a
     multiple of eight and never the length the RFC gives. It is not even a
     consistent offset, because the two formulas disagree in both directions --
@@ -464,7 +464,7 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
 #: its own. So by the time ``padding`` is evaluated -- after the list, since
 #: fields are packed in declaration order -- ``pkt['len']`` is the *last
 #: locator's* ``len``, not the parameter's. That is 4 for any IPv6 locator
-#: whatever the locator count, which is how the pre-#679 padding expression came
+#: whatever the locator count, which is how the pre-:issue:`679` padding expression came
 #: to append exactly four octets to every ``LOCATOR_SET`` regardless of size.
 #:
 #: The shadowing is specific to the packing path. :meth:`Schema.unpack
@@ -572,7 +572,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --
     one parameter under two numbers, the difference being HIP's own C-bit
     rather than an unrelated code -- and the field list below is that layout
-    exactly, since #672 widened :attr:`counter` to eight octets.
+    exactly, since :issue:`672` widened :attr:`counter` to eight octets.
     :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries
     two hand-written entries -- not a name-normalisation rule; ``R1_Counter``
     and ``R1_COUNTER`` differ only in case, and each needed its own line --
@@ -582,7 +582,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     parse path by :class:`~pcapkit.corekit.fields.collections.OptionField`
     -- that fell back to :class:`UnassignedParameter` for 128, since a
     single-code ``code=`` registered 129 alone and left 128 unclaimed.
-    See #690.
+    See :issue:`690`.
 
     """
 
@@ -598,7 +598,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     #: version under which four octets is right, and both codes that reach this
     #: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- are
     #: affected. It was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
-    #: until #672: the parameter declared the correct ``len=12`` and packed 12
+    #: until :issue:`672`: the parameter declared the correct ``len=12`` and packed 12
     #: octets in total where :rfc:`7401` Section 5.2.1's arithmetic makes the
     #: record 16, leaving it four short at ``4 (mod 8)``. Measured before the
     #: fix, at ``counter=1``: ``00 80 00 0c 00 00 00 00 00 00 00 01`` for code
@@ -649,7 +649,7 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: correct on the unpacking path for the reason :data:`LOCATOR_SET_LEN`
     #: gives -- nothing has shadowed ``len`` yet when this field is resolved,
     #: since ``type`` and ``len`` are the only fields ahead of it. What was
-    #: wrong until #679 is the *quantity* it was being handed:
+    #: wrong until :issue:`679` is the *quantity* it was being handed:
     #: :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set` wrote
     #: ``Length`` as ``sum(Locator.len)``, in the 4-octet units
     #: :rfc:`8046#section-4` gives ``Locator Length``, where :rfc:`7401`
@@ -681,7 +681,7 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: parameter's packet context while they pack, and their own ``len``
     #: overwrites it before ``padding`` is reached.
     #:
-    #: This is the site #651 deliberately left alone, and its fix
+    #: This is the site :issue:`651` deliberately left alone, and its fix
     #: documented as an exclusion, because two defects in this parameter
     #: cancelled at the shape its tests sampled and correcting either alone
     #: made the wire output worse.
@@ -751,7 +751,7 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
     #: This octet is *not* a lifetime: only ``PUZZLE`` carries one, at the same
     #: offset, and only :rfc:`7401#section-5.2.4` defines the ``2^(value - 32)``
-    #: seconds encoding that goes in it. See #654.
+    #: seconds encoding that goes in it. See :issue:`654`.
     reserved: 'int' = UInt8Field()
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=2)
@@ -925,7 +925,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
             ``packet.update(self.__dict__)`` carries it in here -- that value
             is trusted over the ``HIP_CIPHER`` sibling lookup below, which a
             parameter packed on its own has no ``options`` list for. See
-            #556.
+            :issue:`556`.
 
         """
         if 'cipher' in packet:
@@ -984,7 +984,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         #: :meth:`HIP._make_param_encrypted
         #: <pcapkit.protocols.internet.hip.HIP._make_param_encrypted>` before
         #: packing -- so it is documented here rather than accepted by
-        #: ``__init__``. See #556.
+        #: ``__init__``. See :issue:`556`.
         cipher: 'Enum_Cipher'
 
         def __init__(self, type: 'Enum_Parameter', len: 'int',

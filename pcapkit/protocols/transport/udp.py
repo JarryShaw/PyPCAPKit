@@ -70,7 +70,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         version from the payload and delegates.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
         bound :class:`pcapkit.protocols.application.httpv1.HTTP` directly for the
-        same ports until #682, which repointed it here and so removed an
+        same ports until :issue:`682`, which repointed it here and so removed an
         asymmetry that had predated the 8080 entries -- port 80 was already split
         that way. Both tables now agree.
 

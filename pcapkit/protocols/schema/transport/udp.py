@@ -67,7 +67,7 @@ class PortEnumField(EnumField):
             Processed field value -- the registry member declared for the
             port, or an unregistered member of the same registry, carrying
             the port itself, when the registry declares none. See GitHub
-            issue #575.
+            issue :issue:`575`.
 
         Notes:
             See :meth:`pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`,

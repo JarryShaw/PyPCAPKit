@@ -184,7 +184,7 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         themselves. Sizing the field at ``Opt Data Len`` handed them an area two
         octets short of the option they read, which
         :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted
-        against the option area -- c.f. #431.
+        against the option area -- c.f. :issue:`431`.
 
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])

@@ -78,7 +78,7 @@ def _test_start_line(data: 'bytes') -> 'bool':
 
     This is a *classification* predicate and parses nothing: it answers "is this
     HTTP/1?" for :meth:`HTTP._guess_version
-    <pcapkit.protocols.application.http.HTTP._guess_version>`, which until #800
+    <pcapkit.protocols.application.http.HTTP._guess_version>`, which until :issue:`800`
     answered that question by trial-parsing every version in the family and
     keeping whichever one did not object -- so a payload that is not HTTP at all
     was classified by which parser happened to fail less loudly.
@@ -142,7 +142,7 @@ class Type(EnumLookup, StrEnum):
     """HTTP packet type.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #877's ruling that every non-registry enumeration shares that
+    issue :issue:`877`'s ruling that every non-registry enumeration shares that
     lookup contract -- pure re-parenting, since this class defines neither
     ``get`` nor ``_missing_`` of its own to reconcile with the base.
 

@@ -33,7 +33,7 @@ def byteorder_callback(field: 'Field', packet: 'dict[str, Any]') -> 'None':
         :data:`sys.byteorder` is for a schema packed or unpacked on its own, with
         no global header to ask -- which also means a *misspelled* key looks
         exactly like an absent one and reports nothing. That is what hid GitHub
-        issue #605: ``unpack`` wrote ``bytesorder``, so every field here was read
+        issue :issue:`605`: ``unpack`` wrote ``bytesorder``, so every field here was read
         in the host's order rather than the file's, which is right by coincidence
         on a little-endian capture and byte-swapped on a big-endian one. See
         :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` for the
