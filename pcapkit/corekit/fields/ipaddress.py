@@ -90,20 +90,21 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         warning**. On an IPv6-typed field the same conversion happens to
         raise instead, because the resulting
         :class:`~ipaddress.IPv4Address`'s version mismatches -- and that
-        asymmetry is exactly what let this slip past #469's otherwise
+        asymmetry is exactly what let this slip past :issue:`469`'s otherwise
         equivalent guard for :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (c.f. #491).
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (c.f.
+        :issue:`491`).
 
         Every caller checks this *before* dispatching on the value's type,
-        for the same placement reason #469 gives: a correct check in the
-        wrong position does not fire, and that placement mistake has
-        already been made twice in this repository's history.
+        for the same placement reason :issue:`469` gives: a correct check
+        in the wrong position does not fire, and that placement mistake
+        has already been made twice in this repository's history.
 
         Guarding the field classes is necessary but not sufficient, because a
         ``_make_*`` that must know the address family before it can build the
         schema converts the argument itself and so never hands this module a
         :obj:`bool` at all. :func:`parse_ip_address` is where those callers
-        reach this guard (c.f. #508).
+        reach this guard (c.f. :issue:`508`).
 
     """
     if isinstance(value, bool):
@@ -142,46 +143,45 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         This is the sanctioned way for a ``_make_*`` method to turn a
         caller-supplied address into an :mod:`ipaddress` object, and it exists
         because doing it with :func:`ipaddress.ip_address` directly is what
-        #508 turned out to be: a ``_make_*`` that has to know the address
-        *family* before it can build the schema -- to size an option whose
-        length is the only thing on the wire that carries the family -- must
-        convert the argument itself, and that conversion happens **before** the
-        schema, so it launders a :obj:`bool` into an
-        :class:`~ipaddress.IPv4Address` that the guard added for #491 in
-        :meth:`_IPAddressField.pre_process` can then only see as a legitimate
-        address. Seven such call sites took ``True`` / ``False`` without
-        complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::`` where the
-        wire format fixes the family as IPv6 -- and six of them went on to pack
-        those octets. The seventh,
-        :meth:`TCP._make_mptcp_addaddr
+        :issue:`508` turned out to be: a ``_make_*`` that has to know the
+        address *family* before it can build the schema -- to size an option
+        whose length is the only thing on the wire that carries the family --
+        must convert the argument itself, and that conversion happens
+        **before** the schema, so it launders a :obj:`bool` into an
+        :class:`~ipaddress.IPv4Address` that the guard added for :issue:`491`
+        in :meth:`_IPAddressField.pre_process` can then only see as a
+        legitimate address. Seven such call sites took ``True`` / ``False``
+        without complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::``
+        where the wire format fixes the family as IPv6 -- and six of them went
+        on to pack those octets. The seventh, :meth:`TCP._make_mptcp_addaddr
         <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>`, built an
         equally corrupt schema and is only stopped from packing it by an
         unrelated defect of its own.
 
         Routing every one of them through here rather than giving each its own
-        :func:`isinstance` check is the whole point: #469 added exactly such a
-        check to :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`, and #491 was the
-        same defect surviving at every site that had not been thought of. A
-        guard that has to be remembered per call site is a guard that will be
-        forgotten at the next one.
+        :func:`isinstance` check is the whole point: :issue:`469` added
+        exactly such a check to :meth:`MH._make_opt_mn_id
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`, and :issue:`491`
+        was the same defect surviving at every site that had not been thought
+        of. A guard that has to be remembered per call site is a guard that
+        will be forgotten at the next one.
 
         The :obj:`bool` rejection is the **first** statement here, ahead of any
-        dispatch on the value's type, for the placement reason #469 gives and
-        :func:`_reject_bool` repeats.
+        dispatch on the value's type, for the placement reason :issue:`469`
+        gives and :func:`_reject_bool` repeats.
 
         This raises :exc:`FieldValueError` and not
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
         even though two sibling guards for the same mistake --
         :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from #469 and
-        :class:`ESP's SecurityAssociation
-        <pcapkit.protocols.internet.esp.SecurityAssociation>` from #491 -- raise
-        the latter. The layer decides: this is a field-level conversion, so it
-        answers with what :meth:`_IPAddressField.pre_process` answers with for
-        the identical value, and a caller sees one exception whether the
-        :obj:`bool` reached the field through the schema or through a
-        ``_make_*``. The two protocol-level guards answer for the *option*,
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from :issue:`469`
+        and :class:`ESP's SecurityAssociation
+        <pcapkit.protocols.internet.esp.SecurityAssociation>` from :issue:`491`
+        -- raise the latter. The layer decides: this is a field-level
+        conversion, so it answers with what :meth:`_IPAddressField.pre_process`
+        answers with for the identical value, and a caller sees one exception
+        whether the :obj:`bool` reached the field through the schema or through
+        a ``_make_*``. The two protocol-level guards answer for the *option*,
         alongside siblings that are not about addresses at all --
         ``_make_opt_mn_id`` refuses a :obj:`bool` for all eight MN-ID subtypes,
         only one of which is address-typed -- so neither can route through here

@@ -54,20 +54,20 @@ class NumberField(Field[int], Generic[_T]):
         ProtocolError: If ``bit_length`` is given negative. Left alone,
             ``(1 << bit_length) - 1`` raises a bare, uncatchable
             :exc:`ValueError` (``negative shift count``) here, before
-            :meth:`__call__`'s own negative-``length`` guard (#828) or
-            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s (#805)
-            ever see anything -- this one fires at construction time, on the
-            argument itself rather than on a resolved wire length. See
-            GitHub issue #831.
+            :meth:`__call__`'s own negative-``length`` guard (:issue:`828`) or
+            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s
+            (:issue:`805`) ever see anything -- this one fires at construction
+            time, on the argument itself rather than on a resolved wire length.
+            See GitHub issue :issue:`831`.
 
     Notes:
         A subclass such as :class:`UInt32Field` fixes the sign through
         ``__signed__``, so ``signed`` there is at best redundant. It used to be
         discarded outright, in both directions, which meant
         ``UInt32Field(signed=True)`` handed back an unsigned field whose values
-        only looked wrong once the high bit was set -- see GitHub issue #545. A
-        contradicting value is now rejected instead; omitting it, or passing the
-        sign the class already fixes, stays legal.
+        only looked wrong once the high bit was set -- see GitHub issue
+        :issue:`545`. A contradicting value is now rejected instead; omitting
+        it, or passing the sign the class already fixes, stays legal.
 
     """
 
@@ -153,27 +153,27 @@ class NumberField(Field[int], Generic[_T]):
                 a bare, uncatchable :exc:`ValueError` (``negative shift
                 count``) when ``bit_length`` was not supplied, before
                 :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see
-                its own :exc:`ProtocolError` guard, #805/#825) or
-                :meth:`build_template` ever sees the value: this method sets
+                its own :exc:`ProtocolError` guard, :issue:`805`/:issue:`825`)
+                or :meth:`build_template` ever sees the value: this method sets
                 ``self._bit_length`` from the resolved length eagerly, as a
                 cache, and shifts by it immediately, so the crash happens on
-                *this* line rather than on the later, already-guarded ones.
-                See GitHub issue #828. This guard runs regardless of whether
-                ``bit_length`` was supplied, so a field constructed with a
-                fixed ``bit_length`` *and* a callable ``length`` that resolves
-                negative raises the identical message as one with no
+                *this* line rather than on the later, already-guarded ones. See
+                GitHub issue :issue:`828`. This guard runs regardless of
+                whether ``bit_length`` was supplied, so a field constructed
+                with a fixed ``bit_length`` *and* a callable ``length`` that
+                resolves negative raises the identical message as one with no
                 ``bit_length`` at all, rather than falling through to a
                 ``template='...-1s'`` :exc:`ProtocolError` from
                 :attr:`~pcapkit.corekit.fields.field.FieldBase.length` later --
-                see GitHub issue #831. A resolved length of exactly ``0`` is a
-                legitimate empty field (e.g. ``len=4`` above resolving to
-                ``0``) and is left alone.
+                see GitHub issue :issue:`831`. A resolved length of exactly
+                ``0`` is a legitimate empty field (e.g. ``len=4`` above
+                resolving to ``0``) and is left alone.
 
         Notes:
             Rebuilding the template here is what applies a callable ``length``,
             and :meth:`build_template` recomputes ``self._need_process`` as it
             goes, so the flag and the template always describe the same width.
-            They did not always: see GitHub issue #591.
+            They did not always: see GitHub issue :issue:`591`.
 
         """
         new_self = super().__call__(packet)
@@ -215,7 +215,7 @@ class NumberField(Field[int], Generic[_T]):
             resolved the real width. :meth:`pre_process` consequently handed
             :obj:`bytes` to a template that had become ``>Q`` -- or ``>I``,
             ``>H``, ``>B`` -- and :func:`struct.pack` refused it. See GitHub
-            issue #591.
+            issue :issue:`591`.
 
             Assigning it is what tells a placeholder apart from a width that
             genuinely needs byte packing, without having to remember that a
@@ -265,7 +265,7 @@ class NumberField(Field[int], Generic[_T]):
             integer code for. The flag is therefore consulted **after** the
             rebuild rather than before it, since deciding first and rebuilding
             second is how the template and the value being returned came to
-            disagree in the first place. C.f. #591.
+            disagree in the first place. C.f. :issue:`591`.
 
             That width is a **ceiling** of the bit length over eight, and it is
             written as one. It used to read
@@ -276,7 +276,7 @@ class NumberField(Field[int], Generic[_T]):
             eight was therefore sized one octet short -- ``256`` at one octet,
             ``65536`` at two, and ``1`` itself at *zero* -- which
             :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub
-            issue #599.
+            issue :issue:`599`.
 
         """
         value = value & self._bit_mask
@@ -576,14 +576,14 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             would have selected it. PCAP-NG repeats a block's total length at
             both ends precisely so that a reader can skip a block type it does
             not recognise; that skip is what this fallback restores. See GitHub
-            issue #701.
+            issue :issue:`701`.
 
             The fallback is the same nameless pseudo-member this method already
             builds for a field carrying no registry at all, so it is a value
             shape the package already produces and the dump layer already
             renders -- as ``<unknown>::<unassigned> [28]``, through
             :func:`~pcapkit.dumpkit.common.render_enum`, not through the
-            ``name is None`` branch #648 added, which a member named
+            ``name is None`` branch :issue:`648` added, which a member named
             ``<unassigned>`` never takes -- and one an :class:`int`-keyed
             dispatch registry looks up by value like any declared member. It is
             built per value rather than grafted onto
@@ -608,14 +608,14 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             from its guard today, and deliberately so: a generated guard raises a
             bare, unlogged :exc:`ValueError` precisely because the generated
             ``get()``'s ``except ValueError`` fallback has to keep catching it
-            (GitHub issues #584 and #647). The registries that *do* bound
-            themselves to a width and reject outside it are the bit-flag ones --
-            :class:`pcapkit.const.tcp.flags.Flags` among them -- and none of
-            those is named as the namespace of a plain :class:`EnumField`
-            anywhere in the package, so no in-library guard loses its force
-            through this method. The distinction is therefore for a registry
-            registered from outside :mod:`pcapkit.const`, which has no such
-            obligation to stay quiet.
+            (GitHub issues :issue:`584` and :issue:`647`). The registries that
+            *do* bound themselves to a width and reject outside it are the
+            bit-flag ones -- :class:`pcapkit.const.tcp.flags.Flags` among them --
+            and none of those is named as the namespace of a plain
+            :class:`EnumField` anywhere in the package, so no in-library guard
+            loses its force through this method. The distinction is therefore for
+            a registry registered from outside :mod:`pcapkit.const`, which has no
+            such obligation to stay quiet.
 
         """
         value = super().post_process(value, packet)
@@ -654,16 +654,16 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         the registry's own ``get()`` -- resolved without anyone asking for a
         name.
 
-        GitHub issue #575: the owner's ruling is that an unassigned wire value
-        should resolve to a real member of the registry the field names --
-        ``isinstance`` against it and every ancestor holds, and it renders and
-        dispatches exactly like a declared one -- provided building it never
-        grows the registry, which is the whole reason the field stopped
-        calling ``get()`` unconditionally in the first place. This is what
-        gets there: it calls ``namespace``'s own storage base's ``__new__``
-        directly -- :class:`str` or :class:`int`, whichever ``namespace``
-        derives from -- which skips ``namespace``'s *own* ``__new__``
-        entirely, and with it the ``cls.__registry__.add(...)`` /
+        GitHub issue :issue:`575`: the owner's ruling is that an unassigned
+        wire value should resolve to a real member of the registry the field
+        names -- ``isinstance`` against it and every ancestor holds, and it
+        renders and dispatches exactly like a declared one -- provided
+        building it never grows the registry, which is the whole reason the
+        field stopped calling ``get()`` unconditionally in the first place.
+        This is what gets there: it calls ``namespace``'s own storage base's
+        ``__new__`` directly -- :class:`str` or :class:`int`, whichever
+        ``namespace`` derives from -- which skips ``namespace``'s *own*
+        ``__new__`` entirely, and with it the ``cls.__registry__.add(...)`` /
         ``cls.__members_ns__[...] = ...`` line every registry in this package
         uses to record a member it mints. No entry is added to
         ``_member_map_`` or ``_value2member_map_`` either, since those are
