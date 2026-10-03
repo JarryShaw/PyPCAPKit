@@ -4919,7 +4919,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
         per-namespace ones are plain :class:`collections.defaultdict`\\ s, so
         reading ``Option.registry[ns][code]`` to see whether a code is there
         *inserts* ``UnknownOption`` for it -- the schema-layer form of the
-        #421/#425/#428 defect.
+        protocol-layer #421/#425 defect, which #555 fixed for ``EnumSchema``.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
