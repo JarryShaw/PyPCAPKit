@@ -482,7 +482,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         IPv6-Opts itself is the Destination Options header of
         :rfc:`8200#section-4.6`, which carries those TLVs but says nothing
         about their internal length arithmetic. This cited
-        :rfc:`8200#section-4.3` until #517 -- that is the Hop-by-Hop Options
+        :rfc:`8200#section-4.3` until :issue:`517` -- that is the Hop-by-Hop Options
         header, which is a different header and not the one this class
         implements.
 

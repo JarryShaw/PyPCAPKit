@@ -231,7 +231,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         class-name default, because
         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
         between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
         rename this header in every
         :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
         :meth:`IPv6._decode_next_layer
@@ -487,8 +487,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Section 4.2 is the citation because it is what defines the TLV option
         format, and it is where the sentence quoted above actually appears.
-        This cited :rfc:`8200#section-4.3` until #530, which is a subtler
-        error than the one #517 fixed in the IPv6-Opts sibling: Section 4.3
+        This cited :rfc:`8200#section-4.3` until :issue:`530`, which is a subtler
+        error than the one :issue:`517` fixed in the IPv6-Opts sibling: Section 4.3
         is not the wrong *header* -- it is the Hop-by-Hop Options header,
         which is exactly what this class implements -- but it is the wrong
         place for this arithmetic. It defines no ``Opt Data Len`` at all,

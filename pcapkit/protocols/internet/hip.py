@@ -260,7 +260,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     """This class implements Host Identity Protocol.
 
     Double-inherited, per the maintainer's convention given in review of the
-    work for #917: a header that is *only* usable as an extension header
+    work for :issue:`917`: a header that is *only* usable as an extension header
     inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone,
     while one that is also usable as a standalone protocol names
     :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is
@@ -3263,8 +3263,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Only case 4 can lose a leading zero octet, and it is the only case where the
         width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
         declaring it. Reaching for it unconditionally is what re-serialised a
-        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (#653) and what built, under
-        HIPv1, parameters this library's own reader then rejected (#655).
+        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (:issue:`653`) and what built, under
+        HIPv1, parameters this library's own reader then rejected (:issue:`655`).
 
         Two things this deliberately does *not* reject, both of which look like
         oversights and are not:

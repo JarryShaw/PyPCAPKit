@@ -340,7 +340,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: Declaring the parameter is preferable where it is possible, since that is
     #: also what documents the keyword to the caller and to :mod:`inspect`. This
     #: is for the cases where it is not -- a keyword handled uniformly for a whole
-    #: family of names, say -- and *not* a way to reopen the silence #617 closed:
+    #: family of names, say -- and *not* a way to reopen the silence :issue:`617` closed:
     #: it is opt-in per class, so it can only ever exempt a name whose author
     #: wrote it down.
     #:
@@ -352,7 +352,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTP.make>` or
     #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
     #: depending on that value, so no set of names is right for it. Use it only
-    #: for that shape; a protocol that forgoes the check gets the pre-#617
+    #: for that shape; a protocol that forgoes the check gets the pre-:issue:`617`
     #: behaviour back, and with it the silence. Unlike a set, the :obj:`None` is
     #: **not** inherited: a subclass of a dispatcher is checked normally unless it
     #: dispatches too and says so, because ``HTTPv1`` and ``HTTPv2`` declare their
@@ -363,7 +363,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: Whether this instance is being rebuilt by :meth:`from_data` from a parsed
     #: data model, as against constructed from keywords somebody wrote. It governs
     #: only whether the construction keyword check of :meth:`__init__` raises or
-    #: warns (#617), and is set for the duration of that call alone -- the class
+    #: warns (:issue:`617`), and is set for the duration of that call alone -- the class
     #: level :data:`False` is what every other code path sees, including an
     #: instance built without going through ``__init__`` at all.
     __reconstructing__: 'bool' = False
@@ -457,7 +457,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             the option list and the trailing length field -- and
             :meth:`ProtocolBase.__init__` injects this payload into every parsed
             ``_info``, so the empty value reached the dumpers and corrupted the
-            files they wrote. See #646.
+            files they wrote. See :issue:`646`.
 
         """
         try:
@@ -535,7 +535,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             parse as well as to the construction, so an implementation is not
             expected to declare every keyword it is called with. It is *not* a
             place for a caller to put a keyword no signature declares: since
-            #617, building a protocol *through its constructor* with such a
+            :issue:`617`, building a protocol *through its constructor* with such a
             keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`
             from :meth:`ProtocolBase.__init__
             <pcapkit.protocols.protocol.ProtocolBase.__init__>` rather than
@@ -553,7 +553,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             <pcapkit.protocols.application.http.HTTP.make>` to reach its versioned
             implementation. Covering it would mean interposing on every ``make``
             in the tree rather than on the one place their keywords converge, which
-            is a larger change than #617 and deliberately not made here. Construct
+            is a larger change than :issue:`617` and deliberately not made here. Construct
             through the constructor to get the check.
 
         """
@@ -752,7 +752,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             fires only when the incumbent differs from the replacement, so
             re-registering the exact same class object under the same ``code``
             is a silent no-op rather than a warning about nothing displaced.
-            GitHub issue #718 corrected the previous presence-only guard here,
+            GitHub issue :issue:`718` corrected the previous presence-only guard here,
             which read every repeat registration as a caller mistake even when
             the value was unchanged. The identity check does not reintroduce
             the concern that guard was written to avoid: it is a plain ``is``
@@ -880,7 +880,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 keyword names no parameter of this protocol's :meth:`make`,
                 :meth:`read`, :meth:`pack`, :meth:`unpack`,
                 :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO,
-                and is not listed in :attr:`__keywords__`. See #617; until then
+                and is not listed in :attr:`__keywords__`. See :issue:`617`; until then
                 such a keyword was silently discarded. Parsing (``file`` is
                 given) is unaffected.
 
@@ -1738,11 +1738,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             what keeps that affordable is :attr:`ModuleDescriptor.klass
             <pcapkit.corekit.module.ModuleDescriptor.klass>` reading
             :data:`sys.modules` instead of re-entering
-            :func:`importlib.import_module` -- see #574. Memoising the resolved
+            :func:`importlib.import_module` -- see :issue:`574`. Memoising the resolved
             class here instead, whether under ``proto``, in ``registry``'s
             default factory, or in a cache beside the registry, would retain a
-            class that :func:`importlib.reload` then makes stale; #425 at
-            this layer and #555 at the schema layer are all that same defect.
+            class that :func:`importlib.reload` then makes stale; :issue:`425` at
+            this layer and :issue:`555` at the schema layer are all that same defect.
 
         """
         protocol = ProtocolBase._lookup_registry(registry, proto)
