@@ -162,7 +162,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`, which resolves a
     bare protocol name through it.
 
-    Per #675 the overwrite is now reported rather than silent, matching
+    Per :issue:`675` the overwrite is now reported rather than silent, matching
     :meth:`ProtocolBase.register
     <pcapkit.protocols.protocol.ProtocolBase.register>` and the other
     overwrite-warning registries.
@@ -181,7 +181,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     that filter is what would then hide the ``HTTP`` collision this warning
     exists to surface. The sibling ``register`` methods across the package --
     each keyed on a caller-supplied ``code`` rather than a name derived from
-    the class -- apply the same identity criterion as of GitHub issue #718;
+    the class -- apply the same identity criterion as of GitHub issue :issue:`718`;
     before that they warned on presence alone, and none of them does now.
 
     Making the key itself unique would resolve the collision rather than
@@ -195,7 +195,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
     :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the
-    registry redesign in #514, and reporting the collision here is the step that
+    registry redesign in :issue:`514`, and reporting the collision here is the step that
     redesign is sequenced behind.
 
     Args:
@@ -241,7 +241,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
 #: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
 #: <pcapkit.protocols.protocol.ProtocolBase.__proto__>` dispatch registry
 #: keyed by that enum type -- the "registry-of-registries" that lets
-#: ``code=`` infer a destination from a key's own type, per #514. This is
+#: ``code=`` infer a destination from a key's own type, per :issue:`514`. This is
 #: not an invention: it is exactly the targeting
 #: :func:`register_ethertype`, :func:`register_transtype`,
 #: :func:`register_linktype` and :func:`register_sctp` already hard-code by
@@ -350,7 +350,7 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
         1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.L2TPv2>` answers on
         port 1701 only, and registering *it* at ``TransType.L2TP`` would point
         the :rfc:`2661` parser at a v3-over-IP header -- see
-        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue #548 for
+        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue :issue:`548` for
         what that produced when measured.
 
     Args:
@@ -849,8 +849,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             when ``module`` is a :class:`str` and either ``class_`` names no
             attribute of it, or ``class_`` was never given at all -- the
             latter distinguished from the former rather than reported as a
-            missing attribute named ``'(null)'``. See GitHub issues #832 and
-            #833.
+            missing attribute named ``'(null)'``. See GitHub issues :issue:`832` and
+            :issue:`833`.
 
     Important:
         :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**

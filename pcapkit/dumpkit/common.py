@@ -189,7 +189,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         so interpolating it unguarded put the literal four characters ``None``
         into the name half and rendered
         :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as ``'Flags::None [0]'``
-        (GitHub issue #648).
+        (GitHub issue :issue:`648`).
 
         Two things make that worth a guard rather than a shrug. ``'None'`` is a
         plausible member name, so a consumer splitting the rendering on ``::``

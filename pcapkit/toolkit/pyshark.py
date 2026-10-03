@@ -237,7 +237,7 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #: rewrite. Names are listed even where they already spell their :class:`LinkType` member
 #: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named
 #: member, because upper-casing the name is exactly what answered 101 for a ``rawip6`` capture and
-#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (#843).
+#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).
 #:
 #: Three classes of name are absent, all three measured rather than assumed:
 #:

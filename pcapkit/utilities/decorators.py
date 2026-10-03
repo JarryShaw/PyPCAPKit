@@ -208,8 +208,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         and nothing calls it with more; an earlier revision of this note
         nonetheless promised implementors a trailing ``*args, **kwargs``, which
         the wrapper below never populated. A caller relying on that promise
-        got extras silently discarded instead of forwarded -- see `#454
-        <https://github.com/JarryShaw/PyPCAPKit/issues/454>`__ -- so the
+        got extras silently discarded instead of forwarded -- see :issue:`454` -- so the
         wrapper now raises :exc:`TypeError` for a fifth positional argument or
         an unconsumed keyword, the same as an ordinary call with too many
         arguments would.

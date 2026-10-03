@@ -25,7 +25,7 @@ its caller.
    a side effect, because by the time any of these functions runs the engine has
    already called ``sniff`` and every frame has already been dissected -- or not.
 
-   That distinction is what made #406 hard to see. Reaching
+   That distinction is what made :issue:`406` hard to see. Reaching
    :func:`ipv6_reassembly` repaired ``conf.l2types`` mid-run, one call too late to
    affect the frames being reassembled, so whether a process dissected correctly
    depended on what had imported `Scapy`_ earlier. Populating the registries before
