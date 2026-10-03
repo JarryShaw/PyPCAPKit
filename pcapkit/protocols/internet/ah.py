@@ -51,7 +51,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
          schema=Schema_AH, data=Data_AH):
     """This class implements Authentication Header.
 
-    Double-inherited (GitHub issue #917): ``AH`` is both a member of the
+    Double-inherited (GitHub issue :issue:`917`): ``AH`` is both a member of the
     IPsec family and an IPv6 extension header -- IANA's *IPv6 Extension
     Header Types* registry lists it at 51 (:rfc:`4302#section-3.1.1` has
     it appear after the hop-by-hop, routing and fragmentation extension
@@ -86,7 +86,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         class-name default, because
         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
         between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
         rename this header in every
         :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
         :meth:`IPv6._decode_next_layer

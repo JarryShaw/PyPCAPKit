@@ -1406,7 +1406,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             :meth:`_read_opt_sec` encodes by looping over ``range(7)`` per
             octet, and the reason ``Field_Termination_Indicator`` is rejected
             here rather than written: the enumeration names it as structure, and
-            a value written there would be dropped on the way back in. See #537.
+            a value written there would be dropped on the way back in. See :issue:`537`.
 
         """
         if option is not None:

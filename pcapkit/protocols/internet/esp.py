@@ -459,7 +459,7 @@ class ESPStatus(EnumLookup, enum.IntEnum):
     """Outcome of ESP payload processing.
 
     Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue #930, finishing #877's phase 2 -- pure re-parenting, since this
+    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this
     class defines neither ``get`` nor ``_missing_`` of its own to reconcile
     with the base.
 
@@ -525,7 +525,7 @@ class SecurityAssociation:
 
     Raises:
         ProtocolError: If the algorithms or key lengths are inconsistent, or
-            ``destination`` is a :obj:`bool` (c.f. #491) -- :obj:`bool` is an
+            ``destination`` is a :obj:`bool` (c.f. :issue:`491`) -- :obj:`bool` is an
             :class:`int` subclass, and :func:`ipaddress.ip_address` treats
             any :class:`int` below ``2**32`` as IPv4, so without this check
             ``destination=True`` would silently become
@@ -975,7 +975,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
           schema=Schema_ESP, data=Data_ESP):
     """This class implements Encapsulating Security Payload.
 
-    Double-inherited (GitHub issue #917), mirroring
+    Double-inherited (GitHub issue :issue:`917`), mirroring
     :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension
     Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`
     has it appear after the hop-by-hop, routing and fragmentation
@@ -995,7 +995,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
     Note:
         :rfc:`8200#section-4.5` says outright that ESP "is not considered an
         extension header". The library follows IANA's registry rather than
-        that sentence, on the owner's ruling for GitHub issue #895.
+        that sentence, on the owner's ruling for GitHub issue :issue:`895`.
 
     """
 

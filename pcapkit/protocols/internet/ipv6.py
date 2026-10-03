@@ -71,7 +71,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
     #: and used to crash the whole packet at :meth:`_decode_next_layer`'s
-    #: ``proto = info.next`` (GitHub issue #891).
+    #: ``proto = info.next`` (GitHub issue :issue:`891`).
     #:
     #: :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
     #: is deliberately absent, even though its wire format also conforms:
@@ -101,7 +101,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: * ``253`` and ``254`` have no dedicated parser at all, so they resolve
     #:   to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no
     #:   ``next`` *attribute* -- this is what the structural check catches.
-    #:   (``BIT-EMU``/147 used to sit here too, until GitHub issue #925 found
+    #:   (``BIT-EMU``/147 used to sit here too, until GitHub issue :issue:`925` found
     #:   it was never in IANA's authoritative extension-header registry to
     #:   begin with; :class:`~pcapkit.const.ipv6.extension_header
     #:   .ExtensionHeader` no longer carries it, so a next-header byte of 147
@@ -502,7 +502,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no
             ``next`` field, which is what used to crash the whole packet at
             :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue
-            #891). Every other exception -- including one raised by
+            :issue:`891`). Every other exception -- including one raised by
             ``IPv6_Ext`` itself, or by ``ESP``'s own dedicated
             parser -- still reaches ``beholder`` unchanged, so *this
             method's own* behaviour for anything outside that closed set is

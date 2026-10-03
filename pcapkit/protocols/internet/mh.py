@@ -575,13 +575,13 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
 
     Note:
         Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue #930, finishing #877's phase 2. :meth:`_missing_` below is
+        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is
         untouched, since :class:`EnumLookup` does not touch that hook.
 
         This class carried its own hand-rolled ``get()`` override through
-        #930, and briefly again through GitHub issue #935's first attempt,
+        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. An earlier lean on issue #935 had preferred that
+        it outright. An earlier lean on issue :issue:`935` had preferred that
         widening; a later ruling in review of the attempt went the other
         way: delete both ``get`` overrides in this module rather than widen
         them, so :class:`FastBindingAcknowledgmentStatus` and
@@ -598,10 +598,10 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
         every other :class:`int`-valued registry in this tree. There was
         nothing left to backport. ``get``/``get_all`` now come from the base
-        alone, the same as the five other re-parents #930 finished alongside
+        alone, the same as the five other re-parents :issue:`930` finished alongside
         this one -- including :class:`LocalizedRoutingStatus` and
         :class:`LMAAddressCode` below, whose own hand-rolled ``get()``
-        GitHub issue #880 had already deleted outright, for the same reason:
+        GitHub issue :issue:`880` had already deleted outright, for the same reason:
         zero callers depended on anything the base does not already do.
 
         A behaviour change comes with the deletion, deliberately: the
@@ -631,7 +631,7 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
 
         The enumeration is **closed**: an in-range value :rfc:`5568` leaves
         unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
         :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         instead of extending the class. That is not a capture-level failure
         -- sibling frames are unaffected -- but the cost is bigger than one
@@ -646,7 +646,7 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         just this one MH message. The walk defect predates this change and
         already fires on a malformed extension header; a well-formed packet
         naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue #880.
+        reach it. See GitHub issue :issue:`880`.
 
     """
 
@@ -679,7 +679,7 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         Raises:
             EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value
                 set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue #877 is that it stays immutable rather
+                ruling on GitHub issue :issue:`877` is that it stays immutable rather
                 than minting an ``Unassigned_N`` placeholder member.
 
         """
@@ -695,13 +695,13 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
 
     Note:
         Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue #930, finishing #877's phase 2. :meth:`_missing_` below is
+        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is
         untouched, since :class:`EnumLookup` does not touch that hook.
 
         This class carried its own hand-rolled ``get()`` override through
-        #930, and briefly again through GitHub issue #935's first attempt,
+        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,
         which widened the override to accept ``default`` rather than delete
-        it outright. An earlier lean on issue #935 had preferred that
+        it outright. An earlier lean on issue :issue:`935` had preferred that
         widening; a later ruling in review of the attempt went the other
         way: delete both ``get`` overrides in this module rather than widen
         them, so :class:`FastBindingAcknowledgmentStatus` and
@@ -718,11 +718,11 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
         every other :class:`int`-valued registry in this tree. There was
         nothing left to backport. ``get``/``get_all`` now come from the base
-        alone, the same as the five other re-parents #930 finished alongside
+        alone, the same as the five other re-parents :issue:`930` finished alongside
         this one -- including
         :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` and
         :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` below, whose
-        own hand-rolled ``get()`` GitHub issue #880 had already deleted
+        own hand-rolled ``get()`` GitHub issue :issue:`880` had already deleted
         outright, for the same reason: zero callers depended on anything the
         base does not already do.
 
@@ -750,7 +750,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
 
         The enumeration is **closed**: an in-range value :rfc:`5568` leaves
         unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
         :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         instead of extending the class. That is not a capture-level failure
         -- sibling frames are unaffected -- but the cost is bigger than one
@@ -765,7 +765,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         just this one MH message. The walk defect predates this change and
         already fires on a malformed extension header; a well-formed packet
         naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue #880.
+        reach it. See GitHub issue :issue:`880`.
 
     """
 
@@ -792,7 +792,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         Raises:
             EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value
                 set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue #877 is that it stays immutable rather
+                ruling on GitHub issue :issue:`877` is that it stays immutable rather
                 than minting an ``Unassigned_N`` placeholder member.
 
         """
@@ -808,7 +808,7 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
 
     Note:
         Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue #930, finishing #877's phase 2 -- pure re-parenting as far as
+        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as
         ``get``/``get_all`` are concerned, since this class defines no
         ``get`` of its own to reconcile with the base; its own
         :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
@@ -823,7 +823,7 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
 
         The enumeration is **closed**: an in-range value :rfc:`6705` leaves
         unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
         :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         instead of extending the class. That is not a capture-level failure
         -- sibling frames are unaffected -- but the cost is bigger than one
@@ -838,17 +838,17 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         just this one MH message. The walk defect predates this change and
         already fires on a malformed extension header; a well-formed packet
         naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue #880.
+        reach it. See GitHub issue :issue:`880`.
 
         There is no hand-rolled ``get()`` backport here -- nor, since GitHub
-        issue #935, on :class:`FastBindingAcknowledgmentStatus` or
+        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or
         :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
-        -- tests included -- so GitHub issue #880 deleted it outright rather
+        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
-        #935 reached separately for the other two, on a ruling given in
+        :issue:`935` reached separately for the other two, on a ruling given in
         review of that work: delete those two overrides rather than widen
         them to match the base, which an earlier lean on the issue had
-        preferred. GitHub issue #930's re-parenting above gives this class
+        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
         value raises through ``get`` exactly as it does through the bare
@@ -875,7 +875,7 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         Raises:
             EnumValueError: Always. :rfc:`6705#section-10.2` names this value
                 set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue #877 is that it stays immutable rather
+                ruling on GitHub issue :issue:`877` is that it stays immutable rather
                 than minting an ``Unassigned_N`` placeholder member.
 
         """
@@ -890,7 +890,7 @@ class LMAAddressCode(EnumLookup, IntEnum):
 
     Note:
         Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue #930, finishing #877's phase 2 -- pure re-parenting as far as
+        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as
         ``get``/``get_all`` are concerned, since this class defines no
         ``get`` of its own to reconcile with the base; its own
         :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
@@ -902,7 +902,7 @@ class LMAAddressCode(EnumLookup, IntEnum):
 
         The enumeration is **closed**: an in-range value :rfc:`5949` leaves
         unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
         :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         instead of extending the class. That is not a capture-level failure
         -- sibling frames are unaffected -- but the cost is bigger than one
@@ -917,17 +917,17 @@ class LMAAddressCode(EnumLookup, IntEnum):
         just this one MH message. The walk defect predates this change and
         already fires on a malformed extension header; a well-formed packet
         naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue #880.
+        reach it. See GitHub issue :issue:`880`.
 
         There is no hand-rolled ``get()`` backport here -- nor, since GitHub
-        issue #935, on :class:`FastBindingAcknowledgmentStatus` or
+        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or
         :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
-        -- tests included -- so GitHub issue #880 deleted it outright rather
+        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather
         than rebuilding it on the immutable contract, the same conclusion
-        #935 reached separately for the other two, on a ruling given in
+        :issue:`935` reached separately for the other two, on a ruling given in
         review of that work: delete those two overrides rather than widen
         them to match the base, which an earlier lean on the issue had
-        preferred. GitHub issue #930's re-parenting above gives this class
+        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class
         ``get``/``get_all`` again, but as the base's own bare lookup rather
         than a bespoke override -- it still cannot mint, so an unassigned
         value raises through ``get`` exactly as it does through the bare
@@ -954,7 +954,7 @@ class LMAAddressCode(EnumLookup, IntEnum):
         Raises:
             EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value
                 set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue #877 is that it stays immutable rather
+                ruling on GitHub issue :issue:`877` is that it stays immutable rather
                 than minting an ``Unassigned_N`` placeholder member.
 
         """
@@ -1451,7 +1451,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         class-name default, because
         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
         between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
         rename this header in every
         :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
         :meth:`IPv6._decode_next_layer
@@ -1565,7 +1565,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`
         then subtracts from the outer packet length to find the next
         layer's length -- precisely the role ``Hdr Ext Len`` played in
-        #487, and the same read-side duplication :meth:`make`'s write-side
+        :issue:`487`, and the same read-side duplication :meth:`make`'s write-side
         expression (``(len(data_val) + 6) // 8 - 1``, this formula's
         inverse) had already been unified out of. Do NOT drop the ``+ 1``:
         the units either side of it differ (octets vs. 8-octet units), and
@@ -2924,7 +2924,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         a CGA extension's Extension Type and Extension Data Length are two
         octets each [:rfc:`4581#section-2`], so those readers use
         :meth:`_mh_extension_length` instead. Reusing this helper for them
-        reported every parsed CGA extension two octets short (#512).
+        reported every parsed CGA extension two octets short (:issue:`512`).
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
@@ -6404,7 +6404,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         the Extension in octets, not including the first 4 octets"*.
 
         Passing these lengths through :meth:`_mh_option_length` reported every
-        parsed CGA extension two octets short (#512): an 8-octet extension with
+        parsed CGA extension two octets short (:issue:`512`): an 8-octet extension with
         an ``Extension Data Length`` of ``4`` came back as ``6``. Note
         :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``
         instead, so the write side was already right and only the read side
@@ -7979,7 +7979,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 (RFC 4283's ``user@realm`` form) rather than a numeric
                 identifier, so there is no non-arbitrary int-to-text mapping
                 the way there is int-to-address or int-to-octets, and an
-                :obj:`int` is rejected there (c.f. #467).
+                :obj:`int` is rejected there (c.f. :issue:`467`).
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7992,7 +7992,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 ``::1`` for ``IPv6_Address`` and to a one-octet identifier for
                 the other six, neither of which a caller passing a flag can
                 plausibly have meant; pass ``int(...)`` to get the numeric
-                value (c.f. #469). If ``identifier`` is a negative :obj:`int`
+                value (c.f. :issue:`469`). If ``identifier`` is a negative :obj:`int`
                 (no subtype has a wire form for one), an :obj:`int` of any value
                 with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or
                 above with the ``IPv6_Address`` subtype (whose wire form is a
@@ -8001,9 +8001,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 type its subtype's field cannot hold at all: anything but
                 :obj:`str` for ``NAI``, anything but :obj:`bytes`/
                 :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
-                is converted rather than rejected there, per #467 -- or anything
+                is converted rather than rejected there, per :issue:`467` -- or anything
                 :class:`ipaddress.IPv6Address` itself does not accept for
-                ``IPv6_Address`` (c.f. #469).
+                ``IPv6_Address`` (c.f. :issue:`469`).
 
         """
         if option is not None:

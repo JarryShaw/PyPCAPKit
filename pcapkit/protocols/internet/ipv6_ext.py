@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ipv6_ext` contains
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-only, which serves two roles at once (GitHub issue #917): it is the
+only, which serves two roles at once (GitHub issue :issue:`917`): it is the
 shared **base class** of every IPv6 extension header in this package,
 and it implements a **generic** extractor for IPv6 extension headers,
 standing in for one whenever the header's own dedicated parser is
@@ -64,7 +64,7 @@ Header(s)                                                Length rule
 This table classifies by *wire format* alone, over the eleven codes
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates --
 matching IANA's own *IPv6 Extension Header Types* registry exactly, as of
-GitHub issue #925. Before that fix this package generated the enumeration
+GitHub issue :issue:`925`. Before that fix this package generated the enumeration
 out of the *Protocol Numbers* registry's extension-header column instead,
 which carried a twelfth code, ``BIT_EMU`` (147), that the authoritative
 registry does not; 147 was never reachable through this class either way
@@ -110,14 +110,14 @@ This class is reached two different ways:
    used to default it to plain :class:`~pcapkit.protocols.misc.raw.Raw` --
    which has no ``next`` field, so the walk in
    :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
-   crashed on it (GitHub issue #891). This module registers itself for that
+   crashed on it (GitHub issue :issue:`891`). This module registers itself for that
    code instead (see the bottom of the module), so dispatch reaches a
    working generic parser directly. That registration is global -- shared
    by every :class:`~pcapkit.protocols.internet.internet.Internet`
    subclass -- so :meth:`__post_init__` gates on ``version == 6`` to keep
    it from also activating for an IPv4 payload that happens to carry
    protocol number 140; see its docstring for what that would otherwise do.
-2. **A recognised header whose own parser raises.** This is the actual #891
+2. **A recognised header whose own parser raises.** This is the actual :issue:`891`
    defect: ``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``,
    ``IPv6-Frag`` and ``AH`` all have dedicated classes, and when one of
    *those* raises, :func:`~pcapkit.utilities.decorators.beholder`
@@ -214,7 +214,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     The two roles
     --------------
 
-    This one class plays both, on the owner's ruling for GitHub issue #917:
+    This one class plays both, on the owner's ruling for GitHub issue :issue:`917`:
 
     1. **The concrete fallback parser** for an :rfc:`6564`-conforming header
        this package has no dedicated class for, or whose dedicated class
@@ -311,7 +311,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         module's own schema -- this is **not** the base
         :attr:`Protocol.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`
         meaning ("name of next layer protocol"); it is deliberately
-        repointed, on the owner's ruling for GitHub issue #891, at this
+        repointed, on the owner's ruling for GitHub issue :issue:`891`, at this
         instance's *own* identity -- which header's format it parsed, e.g.
         :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`
         or :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.
@@ -357,7 +357,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Shared by every subclass rather than fallback-role-only -- see
         :class:`_NextHeaderData` for why that is sound. Note this is an
         *addition* for the eight implemented headers: none of them declared a
-        ``next`` property of its own before GitHub issue #917, so reading one
+        ``next`` property of its own before GitHub issue :issue:`917`, so reading one
         raised :exc:`AttributeError`, and nothing could have depended on a
         value it never returned.
 

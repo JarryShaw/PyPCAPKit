@@ -237,8 +237,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         is one helper now rather than two call sites. Do NOT "simplify" the
         ``- 4`` / ``/ 8`` away: the units either side of it differ (octets
         vs. 8-octet units), and dropping the offset silently reinterprets
-        the field, which is exactly the defect #487 fixed (compare the
-        ``* 8`` unit bug behind #483 in the scapy adapter).
+        the field, which is exactly the defect :issue:`487` fixed (compare the
+        ``* 8`` unit bug behind :issue:`483` in the scapy adapter).
 
         Args:
             data_length: packed length, in octets, of the type-specific data
