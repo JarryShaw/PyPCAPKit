@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Every ``Args:`` name, ``Raises:`` clause, and quoted RFC sentence, checked.
 
-GitHub issue #501 fixed one wrong exception name and forty stale ``Args:``
+GitHub pull request #501 fixed one wrong exception name and forty stale ``Args:``
 labels by hand. Issue #519 then showed the class was not exhausted -- more
 phantom ``Raises:`` clauses and more ``Args:`` entries naming parameters that do
 not exist -- because nothing in the suite *derives* the answer from the code.

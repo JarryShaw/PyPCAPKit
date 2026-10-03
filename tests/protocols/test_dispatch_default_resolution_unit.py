@@ -5,7 +5,7 @@ A next layer code nobody registered resolves to the fallback
 produces -- normally :class:`~pcapkit.protocols.misc.raw.Raw`. That resolution is
 deliberately **not** written back into the registry, because the registry is a
 class-level :class:`collections.defaultdict` and recording a miss in it is the
-defect GitHub issues #425/#428 fixed at this layer and #560 fixed at the schema
+defect GitHub issue #425 reported and pull request #428 fixed at this layer, and #560 fixed at the schema
 layer. The cost of not writing it back is that every unrecognised frame resolves
 the same descriptor again: 48 of the 52 resolutions an extraction of
 :file:`many_interfaces.pcapng` performs.

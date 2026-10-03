@@ -2,7 +2,7 @@
 """GitHub issue #930, the blocked half of #877's phase 2: re-parenting the last
 seven non-registry enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 
-GitHub issue #921 re-parented 17 of the 24 non-registry enumerations and deliberately
+GitHub pull request #921 re-parented 17 of the 24 non-registry enumerations and deliberately
 left seven alone, because the files holding them were still open under other pull
 requests at the time: :mod:`pcapkit.const.ftp.command` (``CommandType``,
 ``ConformanceRequirement``) under #913, and :mod:`pcapkit.protocols.internet.esp`

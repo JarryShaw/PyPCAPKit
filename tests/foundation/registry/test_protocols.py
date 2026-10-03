@@ -532,7 +532,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                                       TransportProtocol.tcp | TransportProtocol.udp)
 
         # NOTE: a ``str`` transport is coerced to the member with that name --
-        # GitHub issue #815 ruling -- so a single string reaches the same
+        # GitHub pull request #815 ruling -- so a single string reaches the same
         # registry the equivalent member would.
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:

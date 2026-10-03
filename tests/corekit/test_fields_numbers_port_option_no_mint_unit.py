@@ -232,7 +232,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
                 self.assertEqual(resolved.port, 230)
 
     def test_an_out_of_width_port_still_raises_764s_rejection(self) -> None:
-        """The bounded fallback must not revert GitHub issue #764.
+        """The bounded fallback must not revert GitHub pull request #764.
 
         ``post_process`` is reachable directly -- not only through ``unpack``,
         which cannot even construct an out-of-range value from a 2-octet
