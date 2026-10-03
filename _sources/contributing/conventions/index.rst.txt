@@ -22,7 +22,7 @@ House Conventions
    the page that covers it in the same change that implements it, rather than
    left in the issue for the next contributor to find. That is the owner's
    standing ask on
-   `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__.
+   :issue:`918`.
 
 .. toctree::
    :maxdepth: 1

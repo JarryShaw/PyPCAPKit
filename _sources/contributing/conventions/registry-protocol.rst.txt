@@ -8,7 +8,7 @@ The Registry Protocol
 :meth:`~pcapkit.corekit.enum.EnumRegistry.register` and
 :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias` are expected to exist on
 **every** registry, per the ruling on
-`#842 <https://github.com/JarryShaw/PyPCAPKit/issues/842>`__. They come from
+:issue:`842`. They come from
 :class:`~pcapkit.corekit.enum.EnumRegistry`, mixed in ahead of the enum base so that
 ``_member_type_`` still resolves to :class:`int` or :class:`str`:
 
@@ -24,14 +24,14 @@ share the generated template: :class:`~pcapkit.const.ftp.command.Command`,
 :class:`~pcapkit.const.http.status_code.StatusCode`,
 :class:`~pcapkit.const.pcapng.option_type.OptionType` and
 :class:`~pcapkit.const.reg.apptype.apptype.AppType`. They are on the base regardless --
-`#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__ finished that -- so a
+:issue:`860` finished that -- so a
 bespoke ``__new__`` exempts a registry from the template, not from the protocol.
 
 The Two-Tier Hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base any more. Since
-phase 1 of `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ it has a
+phase 1 of :issue:`877` it has a
 parent, and the line between them is whether the enumeration may *grow*:
 
 =================================================== ==============================================================
@@ -40,7 +40,7 @@ parent, and the line between them is whether the enumeration may *grow*:
                                                     ``_extend``, ``_unregistered_member``
 =================================================== ==============================================================
 
-The owner ruled on #877 that a registry may subclass a bare base enum out of
+The owner ruled on :issue:`877` that a registry may subclass a bare base enum out of
 :mod:`pcapkit.corekit.enum`, with :class:`~pcapkit.corekit.enum.EnumRegistry`
 subclassing that base in turn for use by the mutable ones. So a **closed** set
 inherits :class:`~pcapkit.corekit.enum.EnumLookup`
@@ -104,7 +104,7 @@ Three things about it are easy to get wrong:
 
    Re-parenting every non-registry enumeration onto
    :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
-   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, and it is now
+   :issue:`877`, and it is now
    **complete**: the phase landed for 24 of the 24 non-registry enumerations.
    **Zero enumerations remain outside the hierarchy**, measured by the same runtime
    walk over both the :mod:`enum` and ``aenum`` flavours that once found seven.
@@ -114,7 +114,7 @@ Failed-Lookup Exceptions
 
 Two rules govern which exception a failed lookup raises, and they pull in opposite
 directions on purpose. The owner ruled on
-`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ that the choice between
+:issue:`923` that the choice between
 :exc:`ValueError` and :exc:`KeyError` follows whichever stdlib's :class:`~enum.Enum`
 would raise in the same circumstance, and that whichever it is comes from
 :mod:`pcapkit.utilities.exceptions` rather than from builtins.
@@ -152,8 +152,8 @@ Which branch a key takes, and what each miss ends in:
        VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>loud, derives ValueError"]
 
 Do not "improve" on the shape by making both misses report identically. Converting
-one into the other is exactly what #923 retired, and it was retired in three places
-at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
+one into the other is exactly what :issue:`923` retired, and it was retired in three
+places at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
 base's :exc:`KeyError` into a :exc:`ValueError`, and
 ``FastBindingAcknowledgmentStatus.get`` raised
 :exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two
@@ -168,7 +168,7 @@ loud. A name miss is in-library control flow at several call sites, and at
 that override catches it in order to mint. A loud error there would put a
 :data:`logging.CRITICAL` record on every such call and set
 :data:`sys.tracebacklimit` to ``0`` process-wide, which is the
-`#362 <https://github.com/JarryShaw/PyPCAPKit/issues/362>`__ defect ``quiet``
+:issue:`362` defect ``quiet``
 exists for. So a ``get`` override that catches a name miss as control flow is
 following the convention; one that catches a *value* miss that way is silencing a
 logged error, and needs a reason.
@@ -211,10 +211,10 @@ guaranteed either: pass a first argument that *is* an instance of the class and 
 delegation **silently succeeds**, so a ``@staticmethod`` override cannot even be
 relied on to fail loudly. Measured, all three cases, rather than reasoned about.
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` is itself a ``@classmethod``. The
-precedent is `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__, which made
+precedent is :issue:`903`, which made
 ``FEATCode.get`` a ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
 ``return super().get(key, default)``;
-`#908 <https://github.com/JarryShaw/PyPCAPKit/issues/908>`__ followed it, which is
+:issue:`908` followed it, which is
 what turned ``Method.get`` into a classmethod.
 
 Callers cannot see the switch -- ``Method.get('X')`` binds identically either way --
@@ -225,7 +225,7 @@ so there is no compatibility argument for keeping the ``@staticmethod``. Two
 all, so neither meets the condition.
 
 **Raise the way the base raises, which means** ``quiet=True``.
-`#933 <https://github.com/JarryShaw/PyPCAPKit/issues/933>`__ asked whether two
+:issue:`933` asked whether two
 overrides raising :exc:`~pcapkit.utilities.exceptions.EnumKeyError` **without**
 ``quiet=True`` should adopt the base's. The owner first declined, then reversed
 course: they should follow the house convention and not be loud.
@@ -234,7 +234,7 @@ Both answers are on the issue deliberately, and the reversal is the ruling. What
 settles is not the one keyword -- it is the tie-breaker. A loud
 :class:`~pcapkit.utilities.exceptions.BaseError` sets :data:`sys.tracebacklimit` to
 ``0`` **process-wide**, the
-`#362 <https://github.com/JarryShaw/PyPCAPKit/issues/362>`__ hazard, so loudness is
+:issue:`362` hazard, so loudness is
 paid for by the whole library rather than by the override's own callers. The argument
 against changing them was that ``quiet=True`` exists on the base for a name miss
 inside a *successful* call at ``Method.get`` and these two had no such caller;
@@ -252,7 +252,7 @@ refused::
 A ``# type: ignore[override] # pylint: disable=arguments-differ`` pair hid the
 mismatch from ``mypy`` and ``pylint``, and both docstrings disclosed it in prose
 instead. Put to the owner on
-`#935 <https://github.com/JarryShaw/PyPCAPKit/issues/935>`__ as one of three options
+:issue:`935` as one of three options
 -- widen and delegate, refuse ``default`` explicitly with an in-library error, or
 leave the disclosure as the settled answer -- the first was the ruling. So
 **a suppression plus a docstring is not an answer to a contract the class advertises
@@ -286,7 +286,7 @@ locally-defined helpers in those two modules, and no prose
 anywhere said so. Re-implementing the dispatch is how an override acquires a
 divergence nobody wrote down; delegating to it is how it does not.
 
-Taken with the ``Criticality.get`` deletion below -- an override emptied by #923
+Taken with the ``Criticality.get`` deletion below -- an override emptied by :issue:`923`
 rather than by redundancy -- the rule generalises: **an override justifies itself by
 what it adds to the base, and goes when the answer is nothing.**
 
@@ -294,7 +294,7 @@ RFC-Directed Case Sensitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The rule, as the owner ruled it on
-`#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__: where the RFC states the
+:issue:`877`: where the RFC states the
 values are case-insensitive, the enumeration treats them that way too; otherwise it
 treats them as case-sensitive.
 
@@ -317,11 +317,11 @@ resolvable.
 
 And a folding override carries **only** the fold. ``TransportProtocol.get`` is the
 worked example: since
-`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ it lowers ``key``,
+:issue:`923` it lowers ``key``,
 forwards ``default`` verbatim and delegates to ``super().get()``, and that is all it
 does. It used to convert the base's name-miss :exc:`KeyError` into a
-:exc:`ValueError` as well, and #923's ruling retired that; the
-`#808 <https://github.com/JarryShaw/PyPCAPKit/issues/808>`__ refusal to extend the
+:exc:`ValueError` as well, and :issue:`923`'s ruling retired that; the
+:issue:`808` refusal to extend the
 class at all is untouched by the retirement, since only the exception class moved.
 ``Criticality.get`` went further and no longer exists: conversion was the *only*
 thing it added over the base, so once that went there was nothing left for an
@@ -335,7 +335,7 @@ The Lenient Criterion, in Two Limbs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ruling above leaves one question open, and
-`#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__ settled it: does a
+:issue:`903` settled it: does a
 specification have to state a **comparison rule** for a registry to be treated
 case-insensitively, or does it also count when the authorities merely **disagree
 about spelling**? The owner ruled for the lenient reading, with ``TransportProtocol``
@@ -363,7 +363,7 @@ Where neither limb holds, the lookup is case-sensitive and inherits
 The Audit, per Class
 ~~~~~~~~~~~~~~~~~~~~
 
-`#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__'s sweep, so that a
+:issue:`903`'s sweep, so that a
 registry added later has something to check itself against. The owner set its scope:
 audit every registry first, and decide case-sensitivity per registry from that.
 
@@ -423,7 +423,7 @@ That leaves the classes with something to decide:
      - :rfc:`9110#section-9.1`
      - *"The method token is case-sensitive."* Explicitly the opposite of limb 1.
      - **case-sensitive** -- was a defect, fixed by
-       `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__
+       :issue:`896`
    * - :class:`~pcapkit.const.pcapng.option_type.OptionType`
      - ``draft-tuexen-opsawg-pcapng``
      - Nothing states a rule; the draft never discusses option-name case.
@@ -444,7 +444,7 @@ That leaves the classes with something to decide:
        all 14,536 rows (``tcp`` 6608, ``udp`` 6357, blank 1467, ``sctp`` 93,
        ``dccp`` 11, zero upper-case).
      - **case-insensitive** -- ``get`` folds, and this is the owner's own example.
-       Folding is now the *only* thing that override adds (#923)
+       Folding is now the *only* thing that override adds (:issue:`923`)
    * - :class:`~pcapkit.const.reg.apptype.apptype.AppType`
      - --
      - Moot: its ``get`` takes a port number and refuses a non-:class:`int` outright,
@@ -487,8 +487,8 @@ That leaves the classes with something to decide:
        ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
        string lookup to fold. ``Criticality`` had one when this audit was taken and no
        longer does:
-       `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ re-parented it onto
-       :class:`~pcapkit.corekit.enum.EnumLookup` and #923 retired the exception
+       :issue:`877` re-parented it onto
+       :class:`~pcapkit.corekit.enum.EnumLookup` and :issue:`923` retired the exception
        conversion that was the override's only remaining job, so it now inherits
        ``get`` unchanged.
      - **case-sensitive** -- conforms
@@ -523,7 +523,7 @@ wider than a case fix:
   crawler translates the CSV's lower-case letters to the upper-case member names at
   generation time. Both classes inherit
   :class:`~pcapkit.corekit.enum.EnumLookup`, since
-  `#930 <https://github.com/JarryShaw/PyPCAPKit/issues/930>`__ completed phase 2's
+  :issue:`930` completed phase 2's
   re-parenting, so a ``get`` exists on each, case-sensitive like the
   base's own. Whether to fold case to match ``TransportProtocol``'s own override is a
   design question for whoever writes the first string-keyed caller, not one this
@@ -557,7 +557,7 @@ rather than changing it.
 
    The example above is :class:`~pcapkit.const.ftp.command.FEATCode`'s shape, and it
    still resolves exactly as shown -- but since
-   `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__ that class overrides
+   :issue:`903` that class overrides
    ``get`` too, so the output is only the base's because its override delegates an
    exact name-or-value hit straight through. Measure the base on a registry that does
    **not** override ``get`` at all. **Five** do --
@@ -574,7 +574,7 @@ rather than changing it.
    before matching, which makes it look as though the base were case-insensitive --
    deliberately, since :rfc:`959#section-5` treats FTP command codes identically
    regardless of case. ``Method.get`` used to fold case the same way, but
-   `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__ made it
+   :issue:`896` made it
    case-sensitive instead: :rfc:`9110#section-9.1` says the HTTP method token is
    case-sensitive, so ``Method.get('get')`` no longer resolves to
    ``Method.GET`` -- it builds its own unregistered member, preserving the

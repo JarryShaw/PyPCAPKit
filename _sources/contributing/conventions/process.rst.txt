@@ -7,7 +7,7 @@ The four pages before this one are about writing library code. The rulings here 
 about running the repository -- what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
 module, and none fits a code-convention page, so the owner ruled on
-`#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ that they get a page of
+:issue:`918` that they get a page of
 their own rather than being left in their threads. Each ruling below is **paraphrased
 rather than quoted**, also on the owner's standing instruction there; the issue named
 beside it is where the original wording is.
@@ -17,7 +17,7 @@ The ``all`` Extra
 
 ``all`` means **core addons only** -- the things that let the library itself run at
 full functionality -- rather than everything a user might conceivably want. The owner
-settled that on `#910 <https://github.com/JarryShaw/PyPCAPKit/issues/910>`__ and named
+settled that on :issue:`910` and named
 the three that qualify to date: the CLI addon, the crypto addon, and ``pycrate``.
 
 On the tree, in :file:`pyproject.toml`:
@@ -68,7 +68,7 @@ Changelog Entry Granularity
 
 An entry is **not one line per commit**. Group the changes by topic, and give concise
 detail of what actually changed in that version bump. Ruled on
-`#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__.
+:issue:`918`.
 
 Two different things get confused here, so they are named apart:
 
@@ -98,7 +98,7 @@ commands down instead of a figure that will be stale by the next merge:
        --search 'shared 1.5.0 changelog in:title' \
        --json commits -q '.[].commits|length'
 
-The grouping scheme was settled on #918: **a section per top-level module, with**
+The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
 per-file and not per-subpackage. The file carries **9** module-level sections holding
 155 entries, and no entry carries an inline kind label::
@@ -121,11 +121,11 @@ belongs to none. Nor is the map one-to-one with the package list below --
    One case the rule does not settle by itself: an entry whose change spans modules --
    the reassembly and extraction ones touch :mod:`pcapkit.foundation` and
    :mod:`pcapkit.protocols` together. Ruled on
-   `#952 <https://github.com/JarryShaw/PyPCAPKit/issues/952>`__: file it under the
+   :issue:`952`: file it under the
    module the change is *about*, name the others in the entry's own text, and do
    **not** duplicate the entry into each section. A reader scanning one module's
    section wants that module's changes; the same prose appearing twice reads as two
-   separate changes. Raised originally on #918.
+   separate changes. Raised originally on :issue:`918`.
 
    The restructure itself belongs to the shared changelog's own pull request, which
    owns the file and merges last; doing it earlier would conflict with every open
@@ -134,7 +134,7 @@ belongs to none. Nor is the map one-to-one with the package list below --
 Issue and Pull Request Labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The owner asked on `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__ for
+The owner asked on :issue:`918` for
 this to be written down alongside ``breaking``, since ``breaking``'s meaning only
 makes sense against the scheme it sits in.
 
@@ -174,12 +174,10 @@ this page does not go stale every time one is added::
 
 One of those defaults carries a local ruling worth knowing: an issue closed as
 unnecessary takes ``invalid`` (or the nearest applicable) rather than ``bug``, since
-the issue was not a defect. `#275
-<https://github.com/JarryShaw/PyPCAPKit/issues/275>`__ is where it was applied --
-``bug`` removed and ``invalid`` added in the same second -- and `#707
-<https://github.com/JarryShaw/PyPCAPKit/issues/707>`__ is the worked example, closed
-as invalid because it was filed against ``main`` rather than against the pull
-request's diff.
+the issue was not a defect. :issue:`275` is where it was applied --
+``bug`` removed and ``invalid`` added in the same second -- and :issue:`707` is the worked
+example, closed as invalid because it was filed against ``main`` rather than against the
+pull request's diff.
 
 **Type -- what kind of change it is.** Each corresponds to the subject prefix of the
 commit, so the label and the message agree by construction:
@@ -228,7 +226,7 @@ these, so that its status is readable without opening it:
 
 Two things the board shows rather than the rule: ``wip`` and ``needs: decision``
 legitimately **co-occur**, when the bulk of an issue is being worked and one
-sub-question is held for the owner -- #918 itself was labelled that way while this
+sub-question is held for the owner -- :issue:`918` itself was labelled that way while this
 page was being written. And an open issue with no state label at all is a gap rather
 than a category, which is worth checking for rather than assuming away:
 
@@ -261,18 +259,18 @@ observe the difference without changing their code"**. On the tree, the changes
 carrying it are that kind:
 
 *  an exception type a caller catches --
-   `#805 <https://github.com/JarryShaw/PyPCAPKit/issues/805>`__ raising
+   :issue:`805` raising
    :exc:`~pcapkit.utilities.exceptions.ProtocolError` where a bare
    :exc:`struct.error` used to escape, and
-   `#759 <https://github.com/JarryShaw/PyPCAPKit/issues/759>`__ raising one where a
+   :issue:`759` raising one where a
    single-bit lookup used to return a member;
 *  a public attribute's meaning --
-   `#618 <https://github.com/JarryShaw/PyPCAPKit/issues/618>`__ swapping ``Frame.len``
+   :issue:`618` swapping ``Frame.len``
    and ``Frame.cap_len`` between the PCAP and PCAP-NG readers;
 *  a signature or a name a caller writes --
-   `#806 <https://github.com/JarryShaw/PyPCAPKit/issues/806>`__ retyping
+   :issue:`806` retyping
    ``AppType.proto`` and giving ``register_apptype`` varargs,
-   `#778 <https://github.com/JarryShaw/PyPCAPKit/issues/778>`__ enforcing ``@final``
+   :issue:`778` enforcing ``@final``
    at runtime;
 *  a path a caller or a script depends on -- the change that named the examples
    directories apart.
@@ -280,10 +278,10 @@ carrying it are that kind:
 .. warning::
 
    **A pull request's prose and its label can disagree, and the label is not
-   automatically right.** Both directions have happened here. The ``#759`` and
-   ``#805`` changes carry the label while their changelog bullets never said so, which
+   automatically right.** Both directions have happened here. The :issue:`759` and
+   :issue:`805` changes carry the label while their changelog bullets never said so, which
    a review round on the shared changelog caught and corrected. The
-   `#844 <https://github.com/JarryShaw/PyPCAPKit/issues/844>`__ change carries it too,
+   :issue:`844` change carries it too,
    and its own pull request argues at length that the change is *not* breaking -- a
    review round checked that argument and found it right on the facts, so there the
    label is the half that overstates. So when the two conflict, settle it on what a
@@ -299,7 +297,7 @@ carrying it are that kind:
    of the numbering, with nothing labelled at all between them and that change. Three
    of those seven are distribution rollups, each also carrying ``release``; the other
    four are early ``refactor``/``feat`` work from before the project stabilised. On
-   issues it is sparser still, appearing only from ``#775`` up. So ``breaking``'s
+   issues it is sparser still, appearing only from :issue:`775` up. So ``breaking``'s
    absence on an old pull request is weak evidence at best. The current figures, rather
    than these:
 

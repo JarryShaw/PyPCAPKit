@@ -488,7 +488,7 @@
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>. Some name a <strong>second</strong> base
 as well, and which ones do is a ruling rather than an accident. The owner ruled, in
 review of the rename that made <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> the shared base
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>), that a header usable
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>), that a header usable
 <em>only</em> as an extension header inherits <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and nothing else – <code class="docutils literal notranslate"><span class="pre">IPv6_Frag</span></code>
 being the example – while one that is usable as a standalone protocol in its own
 right inherits both <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and <code class="docutils literal notranslate"><span class="pre">Internet</span></code> (or <code class="docutils literal notranslate"><span class="pre">IPsec</span></code>), as <code class="docutils literal notranslate"><span class="pre">ESP</span></code> does.</p>
@@ -589,7 +589,7 @@ class for it, so nothing implements the classification, but a future one inherit
 <p>Own-protocolhood on its own is <strong>not</strong> sufficient, and MH is the case that
 settles it: the alternative reading – that a protocol in its own right qualifies
 whether or not it can appear under IPv4 – was put to the owner explicitly in
-review of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> and not
+review of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> and not
 taken, so MH and <code class="docutils literal notranslate"><span class="pre">Shim6</span></code> stay extension-only. A header that is a protocol in its
 own right but structurally cannot be an IPv4 payload names <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> alone.</p>
 </div>
@@ -613,8 +613,8 @@ held to the convention whether or not anyone remembers this page.</p>
 <section id="the-retired-ipv6-genericext-name">
 <h2>The Retired <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> Name<a class="headerlink" href="#the-retired-ipv6-genericext-name" title="Link to this heading">¶</a></h2>
 <p>The class arrived as <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code>, a fallback parser for an unrecognised
-extension header (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>), and
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> merged that role with
+extension header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>), and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> merged that role with
 the shared-base role into one class under the shorter name. No compatibility alias
 was left behind, and that was deliberate. The owner ruled that the
 <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> name goes for good: it was an intermediate state, and it was never
@@ -637,7 +637,7 @@ Payload (ESP) is not considered an extension header”</em> – but that sentenc
 <em>“For this purpose,”</em>, scoping it to the fragmentation discussion it sits in, and the
 sentence after it lists ESP among <em>“examples of upper-layer headers”</em>. The library
 follows the registry, on the owner’s ruling for
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/895">#895</a>, which is why ESP
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/895">#895</a>, which is why ESP
 carries the same extension-mode contract as its siblings.</p>
 <p><strong>And it terminates the chain walk.</strong> <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> places ESP’s Next Header byte
 inside the <em>encrypted</em> trailer, so with no key material there is nothing to continue

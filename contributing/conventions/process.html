@@ -488,7 +488,7 @@
 about running the repository – what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
 module, and none fits a code-convention page, so the owner ruled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> that they get a page of
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> that they get a page of
 their own rather than being left in their threads. Each ruling below is <strong>paraphrased
 rather than quoted</strong>, also on the owner’s standing instruction there; the issue named
 beside it is where the original wording is.</p>
@@ -496,7 +496,7 @@ beside it is where the original wording is.</p>
 <h2>The <code class="docutils literal notranslate"><span class="pre">all</span></code> Extra<a class="headerlink" href="#the-all-extra" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">all</span></code> means <strong>core addons only</strong> – the things that let the library itself run at
 full functionality – rather than everything a user might conceivably want. The owner
-settled that on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/910">#910</a> and named
+settled that on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/910">#910</a> and named
 the three that qualify to date: the CLI addon, the crypto addon, and <code class="docutils literal notranslate"><span class="pre">pycrate</span></code>.</p>
 <p>On the tree, in <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">cli</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"emoji"</span><span class="w"> </span><span class="p">]</span>
@@ -542,7 +542,7 @@ carries a tracked <code class="docutils literal notranslate"><span class="pre">i
 <h2>Changelog Entry Granularity<a class="headerlink" href="#changelog-entry-granularity" title="Link to this heading">¶</a></h2>
 <p>An entry is <strong>not one line per commit</strong>. Group the changes by topic, and give concise
 detail of what actually changed in that version bump. Ruled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
 <p>Two different things get confused here, so they are named apart:</p>
 <ul class="simple">
 <li><p><strong>A pull request’s commits.</strong> The shared changelog for the 1.5.0 cycle is a
@@ -569,7 +569,7 @@ gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>
 <span class="w">    </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.[].commits|length'</span>
 </pre></div>
 </div>
-<p>The grouping scheme was settled on #918: <strong>a section per top-level module, with</strong>
+<p>The grouping scheme was settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level module, with</strong>
 <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
 per-file and not per-subpackage. The file carries <strong>9</strong> module-level sections holding
 155 entries, and no entry carries an inline kind label:</p>
@@ -590,11 +590,11 @@ belongs to none. Nor is the map one-to-one with the package list below –
 <p>One case the rule does not settle by itself: an entry whose change spans modules –
 the reassembly and extraction ones touch <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> together. Ruled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/952">#952</a>: file it under the
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/952">#952</a>: file it under the
 module the change is <em>about</em>, name the others in the entry’s own text, and do
 <strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
 section wants that module’s changes; the same prose appearing twice reads as two
-separate changes. Raised originally on #918.</p>
+separate changes. Raised originally on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
 <p>The restructure itself belongs to the shared changelog’s own pull request, which
 owns the file and merges last; doing it earlier would conflict with every open
 change that touches an entry.</p>
@@ -602,7 +602,7 @@ change that touches an entry.</p>
 </section>
 <section id="issue-and-pull-request-labels">
 <h2>Issue and Pull Request Labels<a class="headerlink" href="#issue-and-pull-request-labels" title="Link to this heading">¶</a></h2>
-<p>The owner asked on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> for
+<p>The owner asked on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> for
 this to be written down alongside <code class="docutils literal notranslate"><span class="pre">breaking</span></code>, since <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s meaning only
 makes sense against the scheme it sits in.</p>
 <p><strong>Almost every label is applied by hand, by the owner</strong> – so a label is generally a
@@ -639,10 +639,10 @@ this page does not go stale every time one is added:</p>
 </div>
 <p>One of those defaults carries a local ruling worth knowing: an issue closed as
 unnecessary takes <code class="docutils literal notranslate"><span class="pre">invalid</span></code> (or the nearest applicable) rather than <code class="docutils literal notranslate"><span class="pre">bug</span></code>, since
-the issue was not a defect. <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/275">#275</a> is where it was applied –
-<code class="docutils literal notranslate"><span class="pre">bug</span></code> removed and <code class="docutils literal notranslate"><span class="pre">invalid</span></code> added in the same second – and <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/707">#707</a> is the worked example, closed
-as invalid because it was filed against <code class="docutils literal notranslate"><span class="pre">main</span></code> rather than against the pull
-request’s diff.</p>
+the issue was not a defect. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/275">#275</a> is where it was applied –
+<code class="docutils literal notranslate"><span class="pre">bug</span></code> removed and <code class="docutils literal notranslate"><span class="pre">invalid</span></code> added in the same second – and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/707">#707</a> is the worked
+example, closed as invalid because it was filed against <code class="docutils literal notranslate"><span class="pre">main</span></code> rather than against the
+pull request’s diff.</p>
 <p><strong>Type – what kind of change it is.</strong> Each corresponds to the subject prefix of the
 commit, so the label and the message agree by construction:</p>
 <div class="table-wrapper colwidths-given docutils container">
@@ -706,7 +706,7 @@ remembered – a command someone else can run and get an answer from.</p></li>
 </ul>
 <p>Two things the board shows rather than the rule: <code class="docutils literal notranslate"><span class="pre">wip</span></code> and <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">decision</span></code>
 legitimately <strong>co-occur</strong>, when the bulk of an issue is being worked and one
-sub-question is held for the owner – #918 itself was labelled that way while this
+sub-question is held for the owner – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> itself was labelled that way while this
 page was being written. And an open issue with no state label at all is a gap rather
 than a category, which is worth checking for rather than assuming away:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>open<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
@@ -734,18 +734,18 @@ observe the difference without changing their code”</strong>. On the tree, the
 carrying it are that kind:</p>
 <ul class="simple">
 <li><p>an exception type a caller catches –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a> raising
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a> raising
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> where a bare
 <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> used to escape, and
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/759">#759</a> raising one where a
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/759">#759</a> raising one where a
 single-bit lookup used to return a member;</p></li>
 <li><p>a public attribute’s meaning –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/618">#618</a> swapping <code class="docutils literal notranslate"><span class="pre">Frame.len</span></code>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/618">#618</a> swapping <code class="docutils literal notranslate"><span class="pre">Frame.len</span></code>
 and <code class="docutils literal notranslate"><span class="pre">Frame.cap_len</span></code> between the PCAP and PCAP-NG readers;</p></li>
 <li><p>a signature or a name a caller writes –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/806">#806</a> retyping
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/806">#806</a> retyping
 <code class="docutils literal notranslate"><span class="pre">AppType.proto</span></code> and giving <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> varargs,
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>
 at runtime;</p></li>
 <li><p>a path a caller or a script depends on – the change that named the examples
 directories apart.</p></li>
@@ -753,10 +753,10 @@ directories apart.</p></li>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>A pull request’s prose and its label can disagree, and the label is not
-automatically right.</strong> Both directions have happened here. The <code class="docutils literal notranslate"><span class="pre">#759</span></code> and
-<code class="docutils literal notranslate"><span class="pre">#805</span></code> changes carry the label while their changelog bullets never said so, which
+automatically right.</strong> Both directions have happened here. The <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/759">#759</a> and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/805">#805</a> changes carry the label while their changelog bullets never said so, which
 a review round on the shared changelog caught and corrected. The
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/844">#844</a> change carries it too,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/844">#844</a> change carries it too,
 and its own pull request argues at length that the change is <em>not</em> breaking – a
 review round checked that argument and found it right on the facts, so there the
 label is the half that overstates. So when the two conflict, settle it on what a
@@ -772,7 +772,7 @@ earlier carriers are seven pre-<code class="docutils literal notranslate"><span 
 of the numbering, with nothing labelled at all between them and that change. Three
 of those seven are distribution rollups, each also carrying <code class="docutils literal notranslate"><span class="pre">release</span></code>; the other
 four are early <code class="docutils literal notranslate"><span class="pre">refactor</span></code>/<code class="docutils literal notranslate"><span class="pre">feat</span></code> work from before the project stabilised. On
-issues it is sparser still, appearing only from <code class="docutils literal notranslate"><span class="pre">#775</span></code> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s
+issues it is sparser still, appearing only from <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> up. So <code class="docutils literal notranslate"><span class="pre">breaking</span></code>’s
 absence on an old pull request is weak evidence at best. The current figures, rather
 than these:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>all<span class="w"> </span>--label<span class="w"> </span>breaking<span class="w"> </span>--limit<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="se">\</span>

@@ -489,7 +489,7 @@
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> are expected to exist on
 <strong>every</strong> registry, per the ruling on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>. They come from
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>. They come from
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, mixed in ahead of the enum base so that
 <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still resolves to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LinkType</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
@@ -503,12 +503,12 @@ share the generated template: <a class="reference internal" href="../../pcapkit/
 <a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>. They are on the base regardless –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> finished that – so a
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> finished that – so a
 bespoke <code class="docutils literal notranslate"><span class="pre">__new__</span></code> exempts a registry from the template, not from the protocol.</p>
 <section id="the-two-tier-hierarchy">
 <h2>The Two-Tier Hierarchy<a class="headerlink" href="#the-two-tier-hierarchy" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base any more. Since
-phase 1 of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
+phase 1 of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
 parent, and the line between them is whether the enumeration may <em>grow</em>:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -523,7 +523,7 @@ parent, and the line between them is whether the enumeration may <em>grow</em>:<
 </tbody>
 </table>
 </div>
-<p>The owner ruled on #877 that a registry may subclass a bare base enum out of
+<p>The owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> that a registry may subclass a bare base enum out of
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a>, with <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>
 subclassing that base in turn for use by the mutable ones. So a <strong>closed</strong> set
 inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
@@ -582,7 +582,7 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 <p class="admonition-title">Note</p>
 <p>Re-parenting every non-registry enumeration onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> was <strong>phase 2</strong> of
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
 <strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
 <strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
 walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
@@ -592,7 +592,7 @@ walk over both the <a class="reference external" href="https://docs.python.org/3
 <h2>Failed-Lookup Exceptions<a class="headerlink" href="#failed-lookup-exceptions" title="Link to this heading">¶</a></h2>
 <p>Two rules govern which exception a failed lookup raises, and they pull in opposite
 directions on purpose. The owner ruled on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> that the choice between
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> that the choice between
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> and <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> follows whichever stdlib’s <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>
 would raise in the same circumstance, and that whichever it is comes from
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather than from builtins.</p>
@@ -626,8 +626,8 @@ caller’s.</p></li>
     VALUE --&gt;|&quot;ValueError, default is a registered value&quot;| OK
     VALUE --&gt;|&quot;ValueError, no usable default&quot;| VALERR[&quot;EnumValueError&lt;br/&gt;loud, derives ValueError&quot;]
     </pre><p>Do not “improve” on the shape by making both misses report identically. Converting
-one into the other is exactly what #923 retired, and it was retired in three places
-at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
+one into the other is exactly what <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> retired, and it was retired in three
+places at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
 base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
 <code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus.get</span></code> raised
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss, so that the two
@@ -641,7 +641,7 @@ loud. A name miss is in-library control flow at several call sites, and at
 that override catches it in order to mint. A loud error there would put a
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> record on every such call and set
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code> process-wide, which is the
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> defect <code class="docutils literal notranslate"><span class="pre">quiet</span></code>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> defect <code class="docutils literal notranslate"><span class="pre">quiet</span></code>
 exists for. So a <code class="docutils literal notranslate"><span class="pre">get</span></code> override that catches a name miss as control flow is
 following the convention; one that catches a <em>value</em> miss that way is silencing a
 logged error, and needs a reason.</p>
@@ -681,10 +681,10 @@ guaranteed either: pass a first argument that <em>is</em> an instance of the cla
 delegation <strong>silently succeeds</strong>, so a <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> override cannot even be
 relied on to fail loudly. Measured, all three cases, rather than reasoned about.
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is itself a <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span></code>. The
-precedent is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>, which made
+precedent is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>, which made
 <code class="docutils literal notranslate"><span class="pre">FEATCode.get</span></code> a <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span> <span class="pre">def</span> <span class="pre">get(cls,</span> <span class="pre">key,</span> <span class="pre">default=NO_DEFAULT)</span></code> ending in
 <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super().get(key,</span> <span class="pre">default)</span></code>;
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> followed it, which is
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> followed it, which is
 what turned <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> into a classmethod.</p>
 <p>Callers cannot see the switch – <code class="docutils literal notranslate"><span class="pre">Method.get('X')</span></code> binds identically either way –
 so there is no compatibility argument for keeping the <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code>. Two
@@ -693,7 +693,7 @@ so there is no compatibility argument for keeping the <code class="docutils lite
 <a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>’s never call <code class="docutils literal notranslate"><span class="pre">super()</span></code> at
 all, so neither meets the condition.</p>
 <p><strong>Raise the way the base raises, which means</strong> <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>.
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/933">#933</a> asked whether two
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/933">#933</a> asked whether two
 overrides raising <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> <strong>without</strong>
 <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> should adopt the base’s. The owner first declined, then reversed
 course: they should follow the house convention and not be loud.</p>
@@ -701,7 +701,7 @@ course: they should follow the house convention and not be loud.</p>
 settles is not the one keyword – it is the tie-breaker. A loud
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> sets <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to
 <code class="docutils literal notranslate"><span class="pre">0</span></code> <strong>process-wide</strong>, the
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> hazard, so loudness is
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> hazard, so loudness is
 paid for by the whole library rather than by the override’s own callers. The argument
 against changing them was that <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> exists on the base for a name miss
 inside a <em>successful</em> call at <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> and these two had no such caller;
@@ -718,7 +718,7 @@ refused:</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span> <span class="pre">#</span> <span class="pre">pylint:</span> <span class="pre">disable=arguments-differ</span></code> pair hid the
 mismatch from <code class="docutils literal notranslate"><span class="pre">mypy</span></code> and <code class="docutils literal notranslate"><span class="pre">pylint</span></code>, and both docstrings disclosed it in prose
 instead. Put to the owner on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> as one of three options
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> as one of three options
 – widen and delegate, refuse <code class="docutils literal notranslate"><span class="pre">default</span></code> explicitly with an in-library error, or
 leave the disclosure as the settled answer – the first was the ruling. So
 <strong>a suppression plus a docstring is not an answer to a contract the class advertises
@@ -748,14 +748,14 @@ else. <code class="docutils literal notranslate"><span class="pre">get(None)</sp
 locally-defined helpers in those two modules, and no prose
 anywhere said so. Re-implementing the dispatch is how an override acquires a
 divergence nobody wrote down; delegating to it is how it does not.</p>
-<p>Taken with the <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> deletion below – an override emptied by #923
+<p>Taken with the <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> deletion below – an override emptied by <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>
 rather than by redundancy – the rule generalises: <strong>an override justifies itself by
 what it adds to the base, and goes when the answer is nothing.</strong></p>
 </section>
 <section id="rfc-directed-case-sensitivity">
 <h2>RFC-Directed Case Sensitivity<a class="headerlink" href="#rfc-directed-case-sensitivity" title="Link to this heading">¶</a></h2>
 <p>The rule, as the owner ruled it on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>: where the RFC states the
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>: where the RFC states the
 values are case-insensitive, the enumeration treats them that way too; otherwise it
 treats them as case-sensitive.</p>
 <p>And the reason a registry’s spelling is never quietly normalised, from the same thread:
@@ -775,11 +775,11 @@ to make a lookup work – which is what keeps
 resolvable.</p>
 <p>And a folding override carries <strong>only</strong> the fold. <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> is the
 worked example: since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>,
 forwards <code class="docutils literal notranslate"><span class="pre">default</span></code> verbatim and delegates to <code class="docutils literal notranslate"><span class="pre">super().get()</span></code>, and that is all it
 does. It used to convert the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> as well, and #923’s ruling retired that; the
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> refusal to extend the
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> as well, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s ruling retired that; the
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> refusal to extend the
 class at all is untouched by the retirement, since only the exception class moved.
 <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> went further and no longer exists: conversion was the <em>only</em>
 thing it added over the base, so once that went there was nothing left for an
@@ -792,7 +792,7 @@ to diff it against the base to find out that it is not.</p>
 <section id="the-lenient-criterion-in-two-limbs">
 <h2>The Lenient Criterion, in Two Limbs<a class="headerlink" href="#the-lenient-criterion-in-two-limbs" title="Link to this heading">¶</a></h2>
 <p>The ruling above leaves one question open, and
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> settled it: does a
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> settled it: does a
 specification have to state a <strong>comparison rule</strong> for a registry to be treated
 case-insensitively, or does it also count when the authorities merely <strong>disagree
 about spelling</strong>? The owner ruled for the lenient reading, with <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>
@@ -817,7 +817,7 @@ IANA spells a column is not evidence.</p>
 </section>
 <section id="the-audit-per-class">
 <h2>The Audit, per Class<a class="headerlink" href="#the-audit-per-class" title="Link to this heading">¶</a></h2>
-<p><a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
+<p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
 registry added later has something to check itself against. The owner set its scope:
 audit every registry first, and decide case-sensitivity per registry from that.</p>
 <p>The population it covers, with the counting convention spelled out because the
@@ -883,7 +883,7 @@ line-oriented grep for the phrase finds nothing.</p></td>
 <td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
 <td><p><em>“The method token is case-sensitive.”</em> Explicitly the opposite of limb 1.</p></td>
 <td><p><strong>case-sensitive</strong> – was a defect, fixed by
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>
@@ -907,7 +907,7 @@ its §10.2 templates write the field upper case, the live CSV is lower case in
 all 14,536 rows (<code class="docutils literal notranslate"><span class="pre">tcp</span></code> 6608, <code class="docutils literal notranslate"><span class="pre">udp</span></code> 6357, blank 1467, <code class="docutils literal notranslate"><span class="pre">sctp</span></code> 93,
 <code class="docutils literal notranslate"><span class="pre">dccp</span></code> 11, zero upper-case).</p></td>
 <td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code> folds, and this is the owner’s own example.
-Folding is now the <em>only</em> thing that override adds (#923)</p></td>
+Folding is now the <em>only</em> thing that override adds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>)</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p></td>
 <td><p>–</p></td>
@@ -954,8 +954,8 @@ itself; each now inherits <code class="docutils literal notranslate"><span class
 <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> never carried a <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they had no
 string lookup to fold. <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> had one when this audit was taken and no
 longer does:
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented it onto
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and #923 retired the exception
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented it onto
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> retired the exception
 conversion that was the override’s only remaining job, so it now inherits
 <code class="docutils literal notranslate"><span class="pre">get</span></code> unchanged.</p></td>
 <td><p><strong>case-sensitive</strong> – conforms</p></td>
@@ -995,7 +995,7 @@ these two case-insensitive. Nothing looks them up by string today, though: the
 crawler translates the CSV’s lower-case letters to the upper-case member names at
 generation time. Both classes inherit
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> completed phase 2’s
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> completed phase 2’s
 re-parenting, so a <code class="docutils literal notranslate"><span class="pre">get</span></code> exists on each, case-sensitive like the
 base’s own. Whether to fold case to match <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s own override is a
 design question for whoever writes the first string-keyed caller, not one this
@@ -1026,7 +1026,7 @@ when the name lookup misses, so such a value resolves:</p>
 </div>
 <p>The example above is <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>’s shape, and it
 still resolves exactly as shown – but since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> that class overrides
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> that class overrides
 <code class="docutils literal notranslate"><span class="pre">get</span></code> too, so the output is only the base’s because its override delegates an
 exact name-or-value hit straight through. Measure the base on a registry that does
 <strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code> at all. <strong>Five</strong> do –
@@ -1043,7 +1043,7 @@ fall-through can be measured on a class that defines no <code class="docutils li
 before matching, which makes it look as though the base were case-insensitive –
 deliberately, since <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> treats FTP command codes identically
 regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
 case-sensitive instead: <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
 case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
 <code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the

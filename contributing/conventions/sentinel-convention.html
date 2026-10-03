@@ -490,9 +490,9 @@ caller might legitimately pass. The house rule, from the maintainer, covers the 
 the sentinel object’s type class is named <code class="docutils literal notranslate"><span class="pre">&lt;SENTINEL&gt;Type</span></code>.</p>
 <p>That is, the class takes the instance’s name in CamelCase with <code class="docutils literal notranslate"><span class="pre">Type</span></code> appended. It
 says nothing about the <strong>object</strong>’s own name, which is what let three casings diverge
-with no rule naming any of them wrong. GitHub issue #937 closed that gap: the owner
-ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with no
-backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
+with no rule naming any of them wrong. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> closed that gap: the
+owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
+no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
 derives from it mechanically – title-case each underscore-separated word and append
 <code class="docutils literal notranslate"><span class="pre">Type</span></code>, no per-sentinel exception needed. The four in the tree follow it:</p>
 <div class="table-wrapper colwidths-given docutils container">
@@ -528,8 +528,8 @@ derives from it mechanically – title-case each underscore-separated word and a
 </tbody>
 </table>
 </div>
-<p>GitHub issue #911’s housing ruling – one module for all four – is why the table names
-a single defining module. Each of the four modules that <em>uses</em> a sentinel keeps a
+<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s housing ruling – one module for all four – is why the table
+names a single defining module. Each of the four modules that <em>uses</em> a sentinel keeps a
 re-export of it, so <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span> <span class="pre">&lt;name&gt;</span></code> keeps working for
 <a class="reference internal" href="../../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="../../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>,
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> and <a class="reference internal" href="../../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> alike, including a
@@ -538,14 +538,14 @@ caller’s <code class="docutils literal notranslate"><span class="pre">if</span
 renaming a published sentinel again costs every caller for no further gain.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> carries no leading underscore even though it is private – it is read in
 <code class="docutils literal notranslate"><span class="pre">_declared_keywords</span></code> and discarded there, never leaving
-<a class="reference internal" href="../../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>. The owner ruled on #937 that dropping the underscore
-is fine so long as the documentation states that the type and the object are private and
-not for public use, which is what this page and
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>. The owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> that dropping the
+underscore is fine so long as the documentation states that the type and the object are
+private and not for public use, which is what this page and
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>’s own docstring do in its place. So
 <strong>privacy here is documentation-only</strong>, and nothing in the name marks it out: when
 adding a sentinel, add it to the table above whether or not it is public.</p>
-<p>What reaches users is the <strong>object only</strong>. The owner ruled on GitHub issue #911 that
-the objects alone – <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and its siblings – are exported to users, so a public
+<p>What reaches users is the <strong>object only</strong>. The owner ruled on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>
+that the objects alone – <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and its siblings – are exported to users, so a public
 sentinel names its instance in its module’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> and leaves the type out of it.
 The type stays importable by its dotted path, for an annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it
 is <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that no longer offers it. A private sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in

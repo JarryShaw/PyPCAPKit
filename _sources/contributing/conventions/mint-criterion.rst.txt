@@ -50,8 +50,8 @@ the label as the final, concrete assigned name, or only as a notation for a huma
 reading the table?
 
 Settled in review of the ``Socket._missing_`` branch-order fix
-(`#841 <https://github.com/JarryShaw/PyPCAPKit/issues/841>`__) and reaffirmed
-on `#775 <https://github.com/JarryShaw/PyPCAPKit/issues/775>`__ as a core concept of
+(:issue:`841`) and reaffirmed
+on :issue:`775` as a core concept of
 the ruling.
 
 So the question to ask of a range is **what the upstream registry actually did**, not
@@ -98,9 +98,9 @@ Suffixed Company Names
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The ethertype case looks like an exception to the rule and is not. The maintainer's
-reasoning, settled on `#775 <https://github.com/JarryShaw/PyPCAPKit/issues/775>`__ after
+reasoning, settled on :issue:`775` after
 being raised in review of the same ``Socket._missing_`` fix
-(`#841 <https://github.com/JarryShaw/PyPCAPKit/issues/841>`__): a proprietary protocol
+(:issue:`841`): a proprietary protocol
 will never have a public name, so the company name is what serves that purpose in its
 place.
 
