@@ -29,41 +29,38 @@ and ``to`` stay lowercase unless they lead, which was the reading put to the own
 *Issue and Pull Request Labels* on :ref:`process` are both in it.
 
 **The casing is the easy half.** A heading can be in Title Case already and still
-break the rule by being a clause rather than a title. The sweep of
-:file:`docs/source/contributing/` under this ruling found, of 62 headings, 24 already
-right, 16 needing only re-casing, and **22 to be rewritten**. *What a Failed Lookup
-Raises* was correctly cased and is now *Failed-Lookup Exceptions*.
+break the rule by being a clause rather than a title: *What a Failed Lookup Raises* was
+correctly cased and is now *Failed-Lookup Exceptions*. Of the 62 headings under
+:file:`docs/source/contributing/` when this was ruled, 22 needed rewriting and 16 only
+re-casing.
 
-The line that sweep drew, and the one to keep drawing: a **finite verb** makes a heading
-a sentence and earns a rewrite, while a gerund or infinitive phrase is a noun phrase and
-needs only re-casing -- so *Running the tests* became *Running the Tests* rather than
-being reworded.
+The line to draw: a **finite verb** makes a heading a sentence and earns a rewrite,
+while a gerund or infinitive phrase is a noun phrase and needs only re-casing -- so
+*Running the tests* becomes *Running the Tests* rather than being reworded.
 
 .. note::
 
    A heading also has to describe the section beneath it, and a rewrite is the moment
-   to check that. Two of that sweep's own new titles were renamed again in review for
-   failing it. *One Approval, Whole Release* became *The Release Pipeline* because the
-   section opens on a Mermaid flowchart while the approval prose it had been named for
-   sat well below, leaving the page's most navigable artefact unfindable from the table
-   of contents.
+   to check that. *One Approval, Whole Release* was renamed *The Release Pipeline*
+   because the section opens on a Mermaid flowchart while the approval prose it had
+   been named for sat well below, leaving the page's most navigable artefact
+   unfindable from the table of contents.
 
 Renaming a Heading
 ~~~~~~~~~~~~~~~~~~
 
-Two mechanical traps, both of which bit on that sweep rather than being hypothetical.
+Two mechanical traps, both of which have bitten rather than being hypothetical.
 
 **Re-measure the underline against the new text.** A case flip usually keeps the
 length; a rewrite almost never does, and docutils reports an underline shorter than
-its heading in a build that does not fail on warnings. The sweep re-checked all 62 and
-found none short, which is the standard to hold.
+its heading in a build that does not fail on warnings. Re-check every heading; none
+of the 62 was short.
 
 **A heading is a link target, so a rename is a repository-wide sweep** rather than a
 :file:`docs/source/` one. In scope: ``.rst`` prose, ``:ref:`` and ``:doc:`` link text,
 toctree entries, implicit ``` `Text`_ ``` references, **and** :mod:`pcapkit` docstrings
-and the files under :file:`tests/`. Applying that scope to the heading rename took two
-passes: the first reported one surviving stale reference; review found **five**, spread
-across :file:`pcapkit/corekit/sentinels.py`,
+and the files under :file:`tests/`. A heading rename once left **five** stale
+references, spread across :file:`pcapkit/corekit/sentinels.py`,
 :file:`tests/corekit/test_sentinel_exports_unit.py` and
 :file:`tests/project/test_conventions_doc_claims.py`. The first of those is a shipped
 module docstring that renders into the API reference, so a reader following it searches
@@ -73,9 +70,8 @@ the page for a string no longer on it.
 
    **Derive the list of old headings from the pre-change file, not from the diff.** A
    diff-derived list silently drops any heading whose underline is not adjacent in the
-   hunk, which is why the second pass undercounted as well as the first. What
-   worked was a whitespace-flattened search for every pre-change heading string across
-   every tracked file.
+   hunk. A whitespace-flattened search for every pre-change heading string across
+   every tracked file is what works.
 
 Nothing in CI catches a reference a rename left behind. :file:`docs/source/conf.py`
 sets no ``nitpicky`` and :file:`docs/Makefile` leaves ``SPHINXOPTS`` empty, so the
@@ -121,7 +117,7 @@ type hierarchy. **Quote a node label whose text Mermaid would otherwise try to p
 and leave a bare identifier bare. That is what the exemplars do with *node* labels, and
 it falls close to the ``TD``/``LR`` line without following it: every node label in the
 six ``TD`` graphs is quoted, since every one of them is prose; the ``LR`` graphs quote
-only where the text forces it, which today is ``h1["HTTP/1.*"]`` and ``h2["HTTP/2"]`` in
+only where the text forces it, which is ``h1["HTTP/1.*"]`` and ``h2["HTTP/2"]`` in
 :file:`docs/source/pcapkit/protocols/index.rst` and nowhere else. Everything else there
 uses the bare ``A{{Meta}}``, ``B(Base)``, ``D([user customisation ...])`` and
 ``subgraph name [Title]`` forms, and spends its quotes on ``click`` targets instead.
@@ -170,7 +166,7 @@ is the duplication the owner ruled out on :issue:`719`.
    For the same reason, do not add an inline ``.. contents::`` to a page. The ``furo``
    theme already renders a sticky page-local table of contents on every page, so an
    inline directive is a second copy of it; the one in :file:`docs/source/index.rst`
-   has been commented out since 2023 and should stay that way.
+   is commented out and should stay that way.
 
    One setting there was decided by measurement rather than by preference:
    ``toc_object_entries`` carries, in a comment beside it, the figures that settled it,
@@ -292,7 +288,7 @@ Format and Mechanics
 
 *  **reStructuredText under** :file:`docs/source/`, **Markdown outside it.** The owner
    ruled this on :issue:`719`, correcting a blanket *always* ``.rst`` that had been in
-   circulation until then: the Sphinx documentation is reST, and the other documents --
+   circulation: the Sphinx documentation is reST, and the other documents --
    the READMEs included -- are Markdown where that applies. ``CONTRIBUTING.md``'s own
    *Documentation* section records the same split. One trap arrived with the ruling:
    :file:`MANIFEST.in` reaches the two READMEs under :file:`examples/` through
