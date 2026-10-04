@@ -64,9 +64,8 @@ if TYPE_CHECKING:
     #: Every key registered in :attr:`Extractor.__output__` and in
     #: :attr:`TraceFlowBase.__output__
     #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
-    #: registries expose the same eight keys. This used to name only four of them,
-    #: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a
-    #: type checker even though every one of them is accepted at runtime.
+    #: registries expose the same eight keys, so ``'cap'`` and the ``'txt'``/``'xml'``
+    #: aliases are spellable for a type checker as they are accepted at runtime.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
     # copies need updating when a new engine lands. The duplication predates the
@@ -394,6 +393,13 @@ class Extractor(Generic[_P]):
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
 
+        Raises:
+            RegistryError: If ``dumper`` is not a class, or not a ``Dumper`` subclass.
+
+        Warns:
+            RegistryWarning: If a different dumper is already registered for
+                ``format``; it is overwritten.
+
         """
         if isinstance(dumper, ModuleDescriptor):
             dumper = dumper.klass
@@ -422,7 +428,18 @@ class Extractor(Generic[_P]):
         Arguments:
             name: engine name
             engine: module descriptor or an
-                :class:`~pcapkit.foundation.engines.engine.Engine` subclass
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
+                (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass
+                is one too, but no built-in engine is: they all derive from the
+                base directly); the ``Type[Engine]`` hint in the signature is
+                narrower than this check
+
+        Raises:
+            RegistryError: If ``engine`` is not a class, or not an ``EngineBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``name``; it is overwritten.
 
         """
         if isinstance(engine, ModuleDescriptor):
@@ -457,7 +474,17 @@ class Extractor(Generic[_P]):
         Arguments:
             protocol: protocol name
             reassembly: module descriptor or a
-                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass
+                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
+                subclass (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+                subclass is one too, but no built-in reassembly class is: they all
+                derive from the base directly)
+
+        Raises:
+            RegistryError: If ``reassembly`` is not a class, or not a ``ReassemblyBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
 
         """
         if isinstance(reassembly, ModuleDescriptor):
@@ -488,7 +515,17 @@ class Extractor(Generic[_P]):
         Arguments:
             protocol: protocol name
             traceflow: module descriptor or a
-                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
+                subclass (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+                subclass is one too, but no built-in flow tracing class is: they all
+                derive from the base directly)
+
+        Raises:
+            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlowBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
 
         """
         if isinstance(traceflow, ModuleDescriptor):
@@ -982,7 +1019,7 @@ class Extractor(Generic[_P]):
             # hides this defect rather than avoiding it: register the link types --
             # as importing :mod:`scapy.all` does -- and the same ``AttributeError``
             # appears. So the guard is written from what the adapters produce, not
-            # from which engines happen to crash today.
+            # from which engines happen to crash.
             if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcapfile')
                     and trace_format in ('pcap', 'cap', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
@@ -1200,7 +1237,7 @@ class Extractor(Generic[_P]):
             folded together because they *can* in principle coincide -- a path
             naming something non-seekable would be opened here and then wrapped --
             and the answer has to be :data:`True` for both halves of it. That
-            cannot arise today, since :meth:`make_name` admits a path only through
+            cannot arise, since :meth:`make_name` admits a path only through
             :func:`os.path.isfile`, which is :data:`False` for a FIFO or a device,
             and a regular file is always seekable. The second test is therefore
             defensive rather than dead, and is the reason
@@ -1313,11 +1350,11 @@ class Extractor(Generic[_P]):
             self._trace.tcp.finish()
 
         # NOTE: *Ownership* decides who closes the input, not seekability --
-        # see :meth:`_owns_input`. Before #610 this read ``not self._flag_s``,
-        # which got both halves wrong at once: the handle this class opened
-        # itself was never closed, leaking a descriptor and emitting the
-        # ``ResourceWarning`` #606 tripped over, while a stream the caller
-        # supplied and still needed *was* closed.
+        # see :meth:`_owns_input` and #610. Keying on seekability
+        # (``not self._flag_s``) gets both halves wrong at once: the handle this
+        # class opened itself is never closed, leaking a descriptor and emitting
+        # the ``ResourceWarning`` #606 tripped over, while a stream the caller
+        # supplied and still needs *is* closed.
         if self._owns_input():
             self._ifile.close()
         self._exeng.close()

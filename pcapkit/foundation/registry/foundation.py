@@ -60,7 +60,7 @@ def register_extractor_engine(name: 'str', module: 'str', class_: 'str') -> 'Non
 # NOTE: pcapkit.foundation.extraction.Extractor.__engine__
 def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine] | str',
                               class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new engine class.
+    r"""Register a new engine class.
 
     Notes:
         The full qualified class name of the new engine class
@@ -72,7 +72,10 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
     Arguments:
         name: engine name
         module: module name or module descriptor or an
-            :class:`~pcapkit.foundation.engines.engine.Engine` subclass
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
+            (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass
+            is one too, but no built-in engine is: they all derive from the
+            base directly)
         class\_: class name
 
     """
@@ -96,7 +99,7 @@ def register_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') 
 
 def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
                     class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new dumper class.
+    r"""Register a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -135,7 +138,7 @@ def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', *, ex
 # NOTE: pcapkit.foundation.extraction.Extractor.__output__
 def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
                               class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new dumper class.
+    r"""Register a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -168,7 +171,7 @@ def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', *, ex
 # NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__
 def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
                               class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new dumper class.
+    r"""Register a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -199,10 +202,10 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
 
 # NOTE: pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__
 def register_reassembly_ipv4_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Registered a new callback function.
+    """Register a new callback function.
 
     The function will register the given callback function to the
-    :attr:`IPv4.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    :attr:`IPv4.__callback_fn__ <pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__>`
     registry.
 
     Arguments:
@@ -215,10 +218,10 @@ def register_reassembly_ipv4_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
 # NOTE: pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__
 def register_reassembly_ipv6_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Registered a new callback function.
+    """Register a new callback function.
 
     The function will register the given callback function to the
-    :attr:`IPv6.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    :attr:`IPv6.__callback_fn__ <pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__>`
     registry.
 
     Arguments:
@@ -231,10 +234,10 @@ def register_reassembly_ipv6_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
 # NOTE: pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__
 def register_reassembly_tcp_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Registered a new callback function.
+    """Register a new callback function.
 
     The function will register the given callback function to the
-    :attr:`TCP.__callback_fn__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__>`
+    :attr:`TCP.__callback_fn__ <pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__>`
     registry.
 
     Arguments:
@@ -247,10 +250,10 @@ def register_reassembly_tcp_callback(callback: 'Reasm_CallbackFn') -> 'None':
 
 # NOTE: pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__
 def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
-    """Registered a new callback function.
+    """Register a new callback function.
 
     The function will register the given callback function to the
-    :attr:`TCP.__callback_fn__ <pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__>`
+    :attr:`TCP.__callback_fn__ <pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__>`
     registry.
 
     Arguments:
@@ -275,7 +278,7 @@ def register_extractor_reassembly(protocol: 'str', module: 'str', class_: 'str')
 # NOTE: pcapkit.foundation.extraction.Extractor.__reassembly__
 def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescriptor[Reassembly] | Type[Reassembly]',
                                   class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new reassembly class.
+    r"""Register a new reassembly class.
 
     Notes:
         The full qualified class name of the new reassembly class
@@ -287,7 +290,10 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
     Arguments:
         protocol: protocol name
         module: module name or module descriptor or a
-            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass
+            :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
+            (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+            subclass is one too, but no built-in reassembly class is: they all
+            derive from the base directly)
         class\_: class name
 
     """
@@ -307,7 +313,7 @@ def register_extractor_traceflow(protocol: 'str', module: 'str', class_: 'str') 
 # NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__
 def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]',
                                  class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
-    r"""Registered a new flow tracing class.
+    r"""Register a new flow tracing class.
 
     Notes:
         The full qualified class name of the new flow tracing class
@@ -319,7 +325,10 @@ def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescripto
     Arguments:
         protocol: protocol name
         module: module name or module descriptor or a
-            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass
+            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
+            (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+            subclass is one too, but no built-in flow tracing class is: they all
+            derive from the base directly)
         class\_: class name
 
     """

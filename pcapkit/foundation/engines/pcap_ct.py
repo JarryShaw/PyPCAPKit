@@ -95,7 +95,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     .. important::
 
        Both distributions are published as pre-releases only -- ``pcap-ct``
-       1.3.0b3 and ``libpcap`` 1.11.0b29 at the time of writing -- and
+       1.3.0b3 and ``libpcap`` 1.11.0b29 when measured -- and
        ``pcap-ct`` documents itself as tracking the `PyPCAP`_ **1.2.3** API
        rather than 1.3.0. Every attribute this engine touches is present and
        behaves identically on both (measured on ``pcap-ct`` 1.3.0b3 against
@@ -318,7 +318,7 @@ class PCAP_CT(EngineBase['RawFrame']):
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                  is provided as the pcap-ct engine currently does not
+                  is provided as the pcap-ct engine does not
                   support such operations.
                 * if reassembly and/or flow tracing is enabled, as the pcap-ct
                   engine performs no protocol dissection and so cannot support

@@ -112,7 +112,7 @@ def identify(module: 'ModuleType') -> 'str':
     is a structural difference rather than a cosmetic one, which is why it is
     preferred here over the alternatives:
 
-    * ``pcap.__version__`` is ``1.3.0b3`` against ``1.3.0`` today, but that is a
+    * ``pcap.__version__`` is ``1.3.0b3`` against ``1.3.0`` upstream, but that is a
       coincidence of release timing and would stop separating them the moment
       ``pcap-ct`` cuts a 1.3.0 final.
     * ``pcap.ex_name`` looked like a ``pcap-ct`` marker and is **not** -- measured

@@ -144,10 +144,10 @@ logger = get_logger(__name__)
 
 # NOTE: pcapkit.protocols.__proto__
 def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
-    """Registered protocol class.
+    """Register a protocol class.
 
     The protocol class must be a subclass of
-    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to
+    :class:`~pcapkit.protocols.protocol.ProtocolBase`, and will be registered to
     the :data:`pcapkit.protocols.__proto__` registry.
 
     The registry is keyed on ``protocol.__name__.upper()``, which is **not**
@@ -160,29 +160,26 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     was there, and the replacement is observable through every reader of the
     registry, e.g. :meth:`ProtocolBase.expand_comp
     <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`, which resolves a
-    bare protocol name through it.
-
-    Per :issue:`675` the overwrite is now reported rather than silent, matching
-    :meth:`ProtocolBase.register
+    bare protocol name through it. Per :issue:`675` the overwrite is reported,
+    matching :meth:`ProtocolBase.register
     <pcapkit.protocols.protocol.ProtocolBase.register>` and the other
     overwrite-warning registries.
 
-    The guard here reads "key present **and** incumbent is a different
-    class" -- presence alone is not enough. This registry's key is *derived*
-    from the class rather than supplied by a caller, and this function is the
-    funnel every wrapper registrar calls -- :func:`register_tcp`,
-    :func:`register_udp`, :func:`register_apptype`, :func:`register_linktype`
-    and the rest all end in ``register_protocol(module)``. So registering one
-    class under two codes, a supported and documented thing to do, reaches
-    this function twice with the same class and nothing at stake; a
-    presence-only guard would warn about an overwrite that overwrote nothing.
-    Warning on the harmless case is not free: it is what teaches a caller to
-    filter :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and
-    that filter is what would then hide the ``HTTP`` collision this warning
-    exists to surface. The sibling ``register`` methods across the package --
-    each keyed on a caller-supplied ``code`` rather than a name derived from
-    the class -- apply the same identity criterion as of GitHub issue :issue:`718`;
-    before that they warned on presence alone, and none of them does now.
+    The guard reads "key present **and** incumbent is a different class" --
+    presence alone is not enough. This registry's key is *derived* from the
+    class rather than supplied by a caller, and this function is the funnel
+    every wrapper registrar calls -- :func:`register_tcp`, :func:`register_udp`,
+    :func:`register_apptype`, :func:`register_linktype` and the rest all end in
+    ``register_protocol(module)``. So registering one class under two codes, a
+    supported and documented thing to do, reaches this function twice with the
+    same class and nothing at stake; a presence-only guard would warn about an
+    overwrite that overwrote nothing. Warning on the harmless case is not free:
+    it teaches a caller to filter
+    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that
+    filter would then hide the ``HTTP`` collision this warning exists to
+    surface. The sibling ``register`` methods across the package, each keyed on a
+    caller-supplied ``code``, apply the same identity criterion as of GitHub
+    issue :issue:`718`.
 
     Making the key itself unique would resolve the collision rather than
     merely reporting it, but it is a registry-format change that the bare-name
@@ -195,8 +192,8 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
     :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the
-    registry redesign in :issue:`514`, and reporting the collision here is the step that
-    redesign is sequenced behind.
+    registry redesign in :issue:`514`, and reporting the collision here is the
+    step that redesign is sequenced behind.
 
     Args:
         protocol: Protocol class.
@@ -343,8 +340,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
     error.
 
     Note:
-        That example names ``L2TPv3``, which this package does not implement
-        yet, rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is
+        That example names ``L2TPv3``, which this package does not implement,
+        rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is
         v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it
         directly over IP on protocol 115 and §4.1.2 puts it over UDP on port
         1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.L2TPv2>` answers on
@@ -398,7 +395,7 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     See Also:
@@ -440,7 +437,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -477,7 +474,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -519,7 +516,7 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -561,7 +558,7 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -808,7 +805,7 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     Arguments:
         code: port number
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name, meaningful only when ``module`` is a :class:`str`.
             Positional, at the same position as the sibling ``register_*``
             functions -- but unlike them, a third positional argument here is
@@ -868,10 +865,11 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         * :func:`pcapkit.foundation.registry.register_sctp`
 
     """
-    # NOTE: ``class_`` is back at the sibling position -- positional, ahead of
-    # ``*transport`` -- per maintainer ruling, and the swallow that made it
-    # keyword-only in the first place is disambiguated here by ``type(module)``
-    # alone, never by what ``class_`` itself looks like. A ``str`` module means
+    # NOTE: ``class_`` sits at the sibling position -- positional, ahead of
+    # ``*transport`` -- per maintainer ruling, so a third positional that is
+    # really a transport would be swallowed as a class name. That is
+    # disambiguated here by ``type(module)`` alone, never by what ``class_``
+    # itself looks like. A ``str`` module means
     # ``class_`` really is a class name, so it is left untouched -- including
     # when it happens to be a string like ``'tcp'``, which is not sniffed for
     # looking like a transport. Any other module type means the third
@@ -893,9 +891,9 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     # anything unrecognised, composite-spelled or not, and ``__getitem__``
     # raises a bare :exc:`KeyError` on a miss instead of that -- both
     # ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,
-    # now that GitHub issue #808 dropped the ``IntFlag`` base that used to
-    # make the first of those two silently compose into the value ``3``
-    # rather than miss at all. ``__members__.get(...)`` lets this function
+    # since GitHub issue #808 dropped the ``IntFlag`` base, which made the
+    # first of those two silently compose into the value ``3`` rather than
+    # miss at all. ``__members__.get(...)`` lets this function
     # raise its own exception on a miss instead of letting ``__getitem__``'s
     # propagate, and lowercasing does not turn ``'tcp|udp'`` into a member
     # name either way. Anything that is neither a ``str`` nor a
@@ -926,10 +924,10 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
 
     # NOTE: the member's own ``proto`` is the single transport protocol of the
     # registry it lives in -- GitHub issue #806 -- so it names one destination
-    # rather than fanning out across every transport IANA gave the service. The
-    # fan-out this replaced made ``register_apptype(TCP.http, Dummy)`` displace
-    # the UDP handler for port 80 as well, which no caller naming the TCP member
-    # asked for.
+    # rather than fanning out across every transport IANA gave the service. A
+    # fan-out would make ``register_apptype(TCP.http, Dummy)`` displace the UDP
+    # handler for port 80 as well, which no caller naming the TCP member asked
+    # for.
     if not transport:
         if not isinstance(code, Enum_AppType):
             raise RegistryError(f'no transport protocol given for port {code}; name each '
@@ -982,7 +980,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     Arguments:
         code: port number
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -1071,7 +1069,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     Arguments:
         code: port number
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     """
@@ -1111,7 +1109,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
         code: payload protocol identifier (PPID), as in
             :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
         module: module name or module descriptor or a
-            :class:`~pcapkit.protocols.protocol.Protocol` subclass
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
     Important:

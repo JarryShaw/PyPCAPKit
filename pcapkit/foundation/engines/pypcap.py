@@ -259,7 +259,7 @@ class PyPCAP(EngineBase['RawFrame']):
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                  is provided as the PyPCAP engine currently does not
+                  is provided as the PyPCAP engine does not
                   support such operations.
                 * if reassembly and/or flow tracing is enabled, as the PyPCAP
                   engine performs no protocol dissection and so cannot support

@@ -21,46 +21,40 @@ if TYPE_CHECKING:
 class Completion(EnumLookup, StrEnum):
     """How completely a datagram was reassembled, and why it stopped.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`877`'s ruling that every non-registry enumeration shares that
-    lookup contract -- pure re-parenting, since this class defines neither
-    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+    Derives from :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
+    :issue:`877`'s ruling that every non-registry enumeration shares that lookup
+    contract; the class defines neither ``get`` nor ``_missing_`` of its own.
 
     This is the value of
-    :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`.
-    That field used to be a plain :obj:`bool`, and this enumeration is a widening
-    of it rather than a second channel beside it: reassembly now has *three*
-    outcomes to report, not two, since a buffer abandoned under the :rfc:`791` /
-    :rfc:`8200` reassembly timeout is a different event from one that simply had
-    not finished when the capture did. Telling them apart is the whole point of
-    having a timeout at all -- an expired datagram says "these fragments are
-    gone", a partial one says "these fragments had not arrived yet".
+    :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`,
+    which widens a plain :obj:`bool` rather than adding a second channel beside
+    it: reassembly has *three* outcomes to report, not two, since a buffer
+    abandoned under the :rfc:`791` / :rfc:`8200` reassembly timeout is a different
+    event from one that simply had not finished when the capture did. An expired
+    datagram says "these fragments are gone", a partial one says "these fragments
+    had not arrived yet".
 
-    Truthiness is preserved, so ``if datagram.completed:`` reads exactly as it
-    did while ``completed`` was a :obj:`bool`: :attr:`COMPLETE` is the only
-    truthy member. Equality against :obj:`True` and :obj:`False` is *not*
-    preserved -- ``datagram.completed == True`` is now :data:`False` even for a
-    complete datagram -- so a caller comparing against a boolean has to compare
-    against a member instead.
+    Truthiness is that of a :obj:`bool`: :attr:`COMPLETE` is the only truthy
+    member, so ``if datagram.completed:`` reads as it would for a boolean.
+    Equality against :obj:`True` and :obj:`False` is *not* preserved --
+    ``datagram.completed == True`` is :data:`False` even for a complete datagram --
+    so a caller comparing against a boolean has to compare against a member
+    instead.
 
     It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as
     :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys two
     things a plain :class:`enum.Enum` does not: the value survives
     :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
     :meth:`Datagram.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` hands this
-    field straight out -- and ``datagram.completed == 'timeout'`` works, so the
-    new state can be tested for without importing this class.
-    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` used to be a third
-    precedent for the same :class:`~pcapkit.utilities.compat.StrEnum` base, but
-    GitHub issue :issue:`886` moved its canonical definition to
-    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated like its
-    :mod:`pcapkit.const.pcapng` siblings: it now derives from :class:`aenum`'s
-    own ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`) rather than
-    from :mod:`pcapkit.utilities.compat`'s version-branched one. Both
-    properties above still hold for it either way -- ``aenum.StrEnum`` is a
-    :class:`str` subclass same as the stdlib one -- but ``isinstance``/
-    ``issubclass`` against :class:`pcapkit.utilities.compat.StrEnum` no longer
-    does, which is why it is called out here rather than left silently stale.
+    field straight out -- and ``datagram.completed == 'timeout'`` works, so a
+    state can be tested for without importing this class.
+    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
+    string enumeration, but GitHub issue :issue:`886` made it generated like its
+    :mod:`pcapkit.const.pcapng` siblings, so it derives from :class:`aenum`'s own
+    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). Both
+    properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
+    subclass, but ``isinstance``/``issubclass`` against
+    :class:`pcapkit.utilities.compat.StrEnum` does not.
 
     Warning:
         Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
@@ -124,11 +118,10 @@ class Deferred:
     IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP
     reassembly over it.
 
-    TCP reassembly builds its ``packet`` eagerly too
-    (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>`). It is a
-    far smaller cost there, being FIN/RST-driven rather than per-frame -- 222
-    submits per :file:`http.pcap` pass against 1117 -- so it is left for its own
-    change, but it can use this unmodified when someone gets to it.
+    TCP reassembly defers its ``packet`` as well
+    (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>`), at a far
+    smaller saving, being FIN/RST-driven rather than per-frame -- 222 submits per
+    :file:`http.pcap` pass against 1117.
 
     Holding the call here defers it to the first read of
     :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets

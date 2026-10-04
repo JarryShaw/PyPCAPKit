@@ -21,6 +21,8 @@ TCP flows from a series of packets and connections.
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__
+   .. autoattribute:: __callback_fn__
+      :no-value:
 
 Terminology
 -----------

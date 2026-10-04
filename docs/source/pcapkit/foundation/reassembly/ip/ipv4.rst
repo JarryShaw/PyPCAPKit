@@ -14,6 +14,8 @@ origin. Please refer to :doc:`ip` for more information.
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__
+   .. autoattribute:: __callback_fn__
+      :no-value:
 
 Terminology
 -----------

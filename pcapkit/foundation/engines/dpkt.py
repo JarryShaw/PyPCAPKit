@@ -87,7 +87,7 @@ class DPKT(EngineBase['DPKTPacket']):
         Warns:
             AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                 and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                is provided as the DPKT engine currently does not support such operations;
+                is provided as the DPKT engine does not support such operations;
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations.

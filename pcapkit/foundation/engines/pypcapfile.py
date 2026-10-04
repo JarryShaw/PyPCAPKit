@@ -200,7 +200,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
-                  is provided as the PyPCAPFile engine currently does not
+                  is provided as the PyPCAPFile engine does not
                   support such operations.
                 * if IPv6 reassembly is enabled, as :mod:`pcapfile` has no IPv6
                   decoder.
