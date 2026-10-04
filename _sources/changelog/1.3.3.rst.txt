@@ -2,9 +2,9 @@
 ===================
 
 * **Fixed** -- errors reading PCAP files from both the CLI and the library
-  (#240): missing optional CLI dependencies are handled gracefully and console
+  (:issue:`240`): missing optional CLI dependencies are handled gracefully and console
   output is far less verbose; installation from source, which ``setup.py`` had
-  broken (#221); PCAP output during flow tracing (#180).
+  broken (:issue:`221`); PCAP output during flow tracing (:issue:`180`).
 * **Changed** -- the base protocol data class carries ``packet``; ``Info``
   iteration skips excluded fields.
 

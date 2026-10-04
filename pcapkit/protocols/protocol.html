@@ -1134,8 +1134,10 @@ what keeps that affordable is <a class="reference internal" href="../corekit/mod
 <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> – see <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/574">#574</a>. Memoising the resolved
 class here instead, whether under <code class="docutils literal notranslate"><span class="pre">proto</span></code>, in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s
 default factory, or in a cache beside the registry, would retain a
-class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a> at
-this layer and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a> at the schema layer are all that same defect.</p>
+class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a> at
+this layer, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a> for the option, chunk and block registries
+beside it, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a> at the schema layer are the same retention
+defect, of a lookup miss rather than of a resolved class.</p>
 </div>
 </dd></dl>
 

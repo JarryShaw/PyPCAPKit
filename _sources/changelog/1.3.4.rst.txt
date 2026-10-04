@@ -2,7 +2,7 @@
 ===================
 
 * **Fixed** -- IPv6 Routing header length handling, and extraction of the IPv6
-  extension header chain (#218).
+  extension header chain (:issue:`218`).
 * **Changed** -- the build matrix moved to Python 3.13 and stopped testing 3.8.
 
 This release also introduced the transport-layer parsing regression fixed in

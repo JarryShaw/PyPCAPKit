@@ -1103,7 +1103,8 @@ a registration, not a mistake, so it is now a silent no-op.</p>
 looked up, so parsing a single packet carrying an unknown code would
 have made the next legitimate registration for that code warn about
 an entry no caller ever asked for – the defect fixed for this layer
-in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, and for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a> and
+in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, and for the option, chunk and block registries in
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>. That fix is what makes this guard safe to add.</p>
 <p><a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option" title="pcapkit.protocols.schema.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.Option</span></code></a> overrides this
 method with a namespaced registry of its own and does not delegate
@@ -1297,9 +1298,10 @@ code is therefore enough to grow the registry for the remainder of the
 process, and to make a later, entirely legitimate
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call report an overwrite that never happened.</p>
 <p>This is the schema-layer instance of the defect <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
-fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a> and
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>; see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>. The fallback itself is deliberate – it
-is how an unknown option, chunk or block falls back to its
+fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, and for the option, chunk and block registries in
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>; see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>. The fallback itself is
+deliberate – it is how an unknown option, chunk or block falls back to its
 <code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this subclass keeps returning it,
 it just stops recording it.</p>
 <dl class="py method">

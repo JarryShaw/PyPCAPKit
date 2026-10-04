@@ -1282,7 +1282,7 @@ package: <code class="docutils literal notranslate"><span class="pre">-1</span><
 compares by value rather than identity, and reload staleness is a
 <em>tracked</em> defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
-docstring note citing GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, and
+docstring note on why it declines to memoise a resolved class, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
 deliberately to pin the fix for exactly that class of bug elsewhere. A
@@ -1452,7 +1452,7 @@ package: <code class="docutils literal notranslate"><span class="pre">-1</span><
 compares by value rather than identity, and reload staleness is a
 <em>tracked</em> defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
-docstring note citing GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, and
+docstring note on why it declines to memoise a resolved class, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
 deliberately to pin the fix for exactly that class of bug elsewhere. A

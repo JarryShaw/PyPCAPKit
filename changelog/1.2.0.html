@@ -487,8 +487,8 @@
 <ul class="simple">
 <li><p><strong>Added</strong> – streaming input. <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.io.SeekableReader</span></code> buffers a
 non-seekable stream so a capture can be read from <code class="docutils literal notranslate"><span class="pre">stdin</span></code> or a pipe, which
-is what live <code class="docutils literal notranslate"><span class="pre">tcpdump</span></code> output needs (#156).</p></li>
-<li><p><strong>Fixed</strong> – reassembly, broken since 0.16.3 (#155). <code class="docutils literal notranslate"><span class="pre">Extractor</span></code> now raises
+is what live <code class="docutils literal notranslate"><span class="pre">tcpdump</span></code> output needs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/156">#156</a>).</p></li>
+<li><p><strong>Fixed</strong> – reassembly, broken since 0.16.3 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/155">#155</a>). <code class="docutils literal notranslate"><span class="pre">Extractor</span></code> now raises
 an explicit unsupported-call error, and logs a notice, when reassembly or flow
 tracing is requested where it cannot be provided.</p></li>
 </ul>
