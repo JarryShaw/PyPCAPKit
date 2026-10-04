@@ -104,19 +104,15 @@ def stacklevel() -> 'int':
       the :mod:`sys` module.
 
     The walk goes through :func:`inspect.currentframe` and ``f_back`` rather than
-    :func:`traceback.extract_stack`, which *used to* be unusable here for a sharper
-    reason than cost: :meth:`traceback.StackSummary.extract` honours
-    :data:`sys.tracebacklimit`, and :class:`BaseError` used to set that to ``0`` for
-    every loud error outside development mode. One such error therefore made
-    ``extract_stack()`` return an *empty* list for the rest of the process, which is
-    where the old ``-1`` came from -- so in ordinary use the first error silently
-    broke the attribution of every warning after it. :class:`BaseError` no longer
-    touches :data:`sys.tracebacklimit` at all (it prints its terse line through an
-    exception hook instead), which removes that failure mode -- but the frame walk
-    remains the right approach regardless of it: it skips building the
+    :func:`traceback.extract_stack`: it skips building the
     :class:`~traceback.FrameSummary` objects and the :mod:`linecache` lookups
     :func:`traceback.extract_stack` does for every frame, which is worth avoiding on
-    a function called once per warning.
+    a function called once per warning. It is also immune to
+    :data:`sys.tracebacklimit`, which :meth:`traceback.StackSummary.extract`
+    honours: a limit of ``0`` would make ``extract_stack()`` return an *empty* list
+    and silently break the attribution of every warning. :class:`BaseError` does not
+    set that limit (it prints its terse line through an exception hook instead), but
+    user code may.
 
     Important:
         The level is relative to the *caller* of :func:`stacklevel`. A function
@@ -185,14 +181,10 @@ class BaseError(Exception):
 
     Important:
 
-        * This terseness used to come from setting :data:`sys.tracebacklimit` to
-          ``0``, which is process-global: one loud error truncated the tracebacks
-          of every *other*, unrelated exception for the rest of the process,
-          including ones that had nothing to do with :mod:`pcapkit`. It also,
-          incidentally, was what kept a loud error raised on a worker thread
-          terse, since the interpreter's default :data:`threading.excepthook`
-          itself consults :data:`sys.tracebacklimit`. The two hooks here replace
-          that mechanism precisely because neither has that reach -- each
+        * The terseness is deliberately not done by setting
+          :data:`sys.tracebacklimit` to ``0``: that is process-global, so one loud
+          error would truncate the tracebacks of every *other*, unrelated
+          exception for the rest of the process. Each of the two hooks here
           shortens the printing of a :class:`BaseError` only, and hands every
           other exception, unchanged, to whatever hook :mod:`pcapkit` found
           installed before it first needed its own.
@@ -206,10 +198,9 @@ class BaseError(Exception):
           neither. See GitHub issue :issue:`719`.
         * The ``stacklevel`` of the log record is the relative level
           :func:`stacklevel` computes, so the record is attributed to the caller
-          whose operation failed rather than to this module. It used to be
-          *negated*, which :meth:`logging.Logger.findCaller` reads as "do not walk
-          out at all" and which therefore blamed :mod:`logging` itself for every
-          error pcapkit raised.
+          whose operation failed rather than to this module. It must not be
+          negated: :meth:`logging.Logger.findCaller` reads that as "do not walk
+          out at all" and would blame :mod:`logging` itself for every error.
 
     See Also:
         :func:`pcapkit.utilities.exceptions.stacklevel`
@@ -276,10 +267,9 @@ def _excepthook(etype: 'Type[BaseException]', value: 'BaseException',
     only ever hands it the top exception's own traceback -- the chain's inner
     links keep their *real* ``__cause__``/``__context__`` traceback attributes
     regardless, untouched by this call, and get printed in full. ``limit=0``
-    against the real ``tb`` is what reaches every link, matching exactly what
-    :data:`sys.tracebacklimit` set to ``0`` used to produce for the same
-    exception -- the one-line answer for a plain :class:`BaseError` and the
-    *same* chain-without-frames answer this used to get wrong.
+    against the real ``tb`` is what reaches every link, giving the one-line
+    answer for a plain :class:`BaseError` and a chain without frames for a
+    chained one.
 
     Anything else is handed to ``_previous_excepthook`` exactly as received, so
     a program with its own hook installed before :mod:`pcapkit` needed one --
@@ -356,15 +346,10 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     was previously installed -- unchanged, header included, since that path
     does not touch the default hook's own printing at all.
 
-    Replacing this hook is the other half of why :data:`sys.tracebacklimit`
-    cannot simply be dropped without a replacement: the interpreter's *default*
-    :data:`threading.excepthook` itself consults :data:`sys.tracebacklimit` when
-    printing an uncaught exception from a worker thread, which is what made a
-    loud :class:`BaseError` there terse before this hook existed, incidentally
-    rather than by any thread-aware design on this module's part. Without this,
-    removing the global would have *regressed* that path from one line to a
-    full default traceback, even though the defect it was fixing is itself
-    thread-independent.
+    This hook is needed because the interpreter's *default*
+    :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which
+    :class:`BaseError` does not set; without it a loud :class:`BaseError` raised
+    on a worker thread would print a full default traceback.
 
     """
     if getattr(_threading_hook_state, 'running', False):
