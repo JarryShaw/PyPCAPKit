@@ -4,8 +4,9 @@
 :class:`collections.defaultdict`-backed mapping of enumeration codes to schema
 classes. Reading it with a bare ``registry[code]`` for a code nobody registered
 used to *insert* that code -- with whatever the default factory produced -- the
-same defect fixed at the protocol layer's ``__proto__`` family by GitHub issues
-#421 and #425/#428. These tests cover both the auto-created
+same defect fixed at the protocol layer's ``__proto__`` family by GitHub issue
+#421 and its option, chunk and block registries by #425. These tests cover
+both the auto-created
 :attr:`EnumSchema.__enum__` (the shape used by
 e.g. :class:`pcapkit.protocols.schema.transport.tcp.Option`) and a manually
 seeded one declared directly in a subclass's own class body (the shape used by

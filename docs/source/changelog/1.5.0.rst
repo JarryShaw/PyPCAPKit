@@ -537,8 +537,9 @@ Changed
   matters because next layer dispatch resolves a descriptor there on a per-frame
   path. A registry *hit* holding a ``ModuleDescriptor`` is resolved once and
   written back, but a *miss* deliberately is not -- recording a miss in a
-  class-level ``collections.defaultdict`` is the defect :issue:`425`/:pr:`428` fixed at this
-  layer and :pr:`560` fixed at the schema layer -- so every unrecognised frame resolved
+  class-level ``collections.defaultdict`` is the defect :issue:`421`/:pr:`426` fixed at this
+  layer, :issue:`425`/:pr:`428` fixed for the option, chunk and block registries, and
+  :issue:`555`/:pr:`560` fixed at the schema layer -- so every unrecognised frame resolved
   the same fallback descriptor again: 48 of the 52 ``ModuleDescriptor.klass``
   resolutions an extraction of ``many_interfaces.pcapng`` performs, and 4 of the 7
   on ``ipv4.pcap``. ``import_module`` keeps real per-call work for a module

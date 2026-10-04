@@ -1064,9 +1064,10 @@ class _EnumRegistry(collections.defaultdict):
 
     This is the schema-layer instance of the defect :meth:`ProtocolBase.\
     _lookup_registry <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`
-    fixed for the protocol-layer ``__proto__`` family in GitHub issues :issue:`421` and
-    :issue:`425`; see GitHub issue :issue:`555`. The fallback itself is deliberate -- it
-    is how an unknown option, chunk or block falls back to its
+    fixed for the protocol-layer ``__proto__`` family in GitHub issue
+    :issue:`421`, and for the option, chunk and block registries in
+    :issue:`425`; see GitHub issue :issue:`555`. The fallback itself is
+    deliberate -- it is how an unknown option, chunk or block falls back to its
     ``Unknown*``/``Unassigned*`` schema -- so this subclass keeps returning it,
     it just stops recording it.
 
@@ -1304,7 +1305,8 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             looked up, so parsing a single packet carrying an unknown code would
             have made the next legitimate registration for that code warn about
             an entry no caller ever asked for -- the defect fixed for this layer
-            in :issue:`555`, and for the parser-layer ``__proto__`` family in :issue:`421` and
+            in :issue:`555`, for the parser-layer ``__proto__`` family in
+            :issue:`421`, and for the option, chunk and block registries in
             :issue:`425`. That fix is what makes this guard safe to add.
 
             :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this

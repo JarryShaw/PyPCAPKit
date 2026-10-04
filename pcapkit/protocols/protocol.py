@@ -1743,8 +1743,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             default factory, or in a cache beside the registry, would retain a
             class that :func:`importlib.reload` then makes stale; :issue:`421` at
             this layer, :issue:`425` for the option, chunk and block registries
-            beside it, and :issue:`555` at the schema layer are all that same
-            defect.
+            beside it, and :issue:`555` at the schema layer are the same retention
+            defect, of a lookup miss rather than of a resolved class.
 
         """
         protocol = ProtocolBase._lookup_registry(registry, proto)
