@@ -36,9 +36,8 @@ All notable changes to PyPCAPKit are recorded here.
    collapsed into a single line per release below. Where a post-release did
    carry something real, it is called out.
 
-Each release below has a short summary and a link to its own page, newest
-first. The repository root's :file:`CHANGELOG.md` carries only the version
-currently being released; this is the whole history.
+Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
+carries only the version being released; this page is the whole history.
 
 * **1.5.0** (unreleased) -- The largest release since 1.0, and the first
   recorded here as it happened rather than reconstructed: three more
