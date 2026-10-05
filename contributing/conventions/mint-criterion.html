@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/mint-criterion.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
-<meta name="description" content="121 of the 127 registries under pcapkit.const define_missing_, which decides what happens when a value has no member. The six without one – ExtensionHeader, TLSKeyLabel and AppType ’s four transpor..." />
+<meta property="og:description" content="125 of the 127 registries under pcapkit.const resolve an unrecognised value through a_missing_ override, which decides what happens when a value has no member. Only ExtensionHeader and TLSKeyLabel ..." />
+<meta name="description" content="125 of the 127 registries under pcapkit.const resolve an unrecognised value through a_missing_ override, which decides what happens when a value has no member. Only ExtensionHeader and TLSKeyLabel ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Naming a Sentinel" href="sentinel-convention.html"><link rel="prev" title="House Conventions" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -484,13 +484,16 @@
         <article role="main" id="furo-main-content">
           <section id="minting-an-unrecognised-value">
 <span id="mint-criterion"></span><h1>Minting an Unrecognised Value<a class="headerlink" href="#minting-an-unrecognised-value" title="Link to this heading">¶</a></h1>
-<p>121 of the 127 registries under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> define <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which decides
-what happens when a value has no member. The six without one –
-<a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a>,
-<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>’s four transport subclasses – carry
-no declared-but-unassigned range for one to resolve. There are two possible behaviours,
-and which one a given range gets is a <strong>design decision, not a style preference</strong>:</p>
+<p>125 of the 127 registries under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> resolve an unrecognised value through
+a <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override, which decides what happens when a value has no member. Only
+<a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> have none anywhere in their
+MRO, so they carry no declared-but-unassigned range to resolve. 121 define one
+themselves; the other four are the transport subclasses of
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, which inherit
+<code class="docutils literal notranslate"><span class="pre">AppType._missing_</span></code> (<code class="file docutils literal notranslate"><span class="pre">pcapkit/const/reg/apptype/apptype.py:2936</span></code>). Three
+behaviours follow from it, and which one a given range gets is a <strong>design decision, not
+a style preference</strong>:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">extend_enum(cls,</span> <span class="pre">name,</span> <span class="pre">value)</span></code> – <em>mint</em></dt><dd><p>Creates a real, permanent member on the class. It is installed in
 <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, so it is visible to iteration,
@@ -500,23 +503,60 @@ lookup and <code class="docutils literal notranslate"><span class="pre">__member
 does not grow, and a second lookup of the same value builds an equal but distinct
 object rather than handing back the first.</p>
 </dd>
+<dt><code class="docutils literal notranslate"><span class="pre">super()._missing_(value)</span></code> – <em>hand back to</em> <code class="docutils literal notranslate"><span class="pre">aenum</span></code></dt><dd><p>Neither of the above. For an <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flag base this composes a pseudo-member and
+caches it in <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> only, so <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and iteration are
+unchanged but a second lookup returns the same object. For a plain enum it
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and the lookup raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>; the measured case is
+an in-range hole in an unmint registry, <code class="docutils literal notranslate"><span class="pre">BlockType(11)</span></code>.</p>
+</dd>
 </dl>
-<p><strong>Exactly one</strong> <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> in the tree mints:
-<a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>’s, whose values are 128-bit CGA extension
-tags rather than an IANA-style range of codes. 114 unmint, and the remaining six – the
-five flag registries and <a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> – only
-range-check and hand back to <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code>, declaring no unassigned range at
-all. So outside <code class="docutils literal notranslate"><span class="pre">CGAType</span></code> the criterion below decides the <em>name</em> an unregistered member
-carries rather than whether it registers: the registrar’s own label suffixed with the
-individual code, or the bare block label on its own. The two crawlers that generate the
-ranges record that narrowing in their own comments:
-<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/reg/ethertype.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_ROW_NAMES</span></code> and
-<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/ipx/socket.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_RANGE_NAMES</span></code>.</p>
+<p>Measured against the tree, by class:</p>
+<ul>
+<li><p><strong>1 mints</strong>: <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, whose values are 128-bit
+CGA extension tags rather than an IANA-style range of codes.</p></li>
+<li><p><strong>117 unmint.</strong> The four transport subclasses (<code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, <code class="docutils literal notranslate"><span class="pre">DCCP</span></code>)
+inherit the method; of the remaining 114 that call <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code>
+themselves, 113 can reach it, the 114th being <code class="docutils literal notranslate"><span class="pre">AppType</span></code>, which holds no members and
+raises for every value through its <code class="docutils literal notranslate"><span class="pre">cls.__registry__</span> <span class="pre">is</span> <span class="pre">None</span></code> guard.</p>
+<p>Of those 113, <strong>at least 12 can never reach it</strong>, because every range they declare is
+already covered by their own members – <code class="docutils literal notranslate"><span class="pre">ToSDelay</span></code> declares <code class="docutils literal notranslate"><span class="pre">0..1</span></code> and has members
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>, so its <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> call is dead code. The twelve are
+<code class="docutils literal notranslate"><span class="pre">ipv4.option_class</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4.tos_del</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4.tos_ecn</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4.tos_pre</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ipv4.tos_rel</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4.tos_thr</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6.option_action</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6.seed_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ipv6.smf_dpd_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">l2tp.type</span></code>, <code class="docutils literal notranslate"><span class="pre">mh.dhcp_support_mode</span></code> and
+<code class="docutils literal notranslate"><span class="pre">vlan.priority_level</span></code>. A further three are <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued and were not probed
+(<code class="docutils literal notranslate"><span class="pre">ftp.command.Command</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp.command.FEATCode</span></code>, <code class="docutils literal notranslate"><span class="pre">http.method.Method</span></code>), so 12 is
+a floor and the true figure is at most 15.</p>
+</li>
+<li><p><strong>5 cache in the value table only</strong>: <a class="reference internal" href="../../pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> and the
+four Mobility Header flag registries, such as
+<a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.binding_ack_flag.BindingACKFlag" title="pcapkit.const.mh.binding_ack_flag.BindingACKFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingACKFlag</span></code></a>. They range-check and hand
+back to <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code>, which for an <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> reaches
+<code class="docutils literal notranslate"><span class="pre">_create_pseudo_member_</span></code> and ends in
+<code class="docutils literal notranslate"><span class="pre">cls._value2member_map_.setdefault(value,</span> <span class="pre">pseudo_member)</span></code>.</p></li>
+<li><p><strong>4 raise for any unknown value</strong>: <code class="docutils literal notranslate"><span class="pre">AppType</span></code>, <code class="docutils literal notranslate"><span class="pre">ExtensionHeader</span></code>, <code class="docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code>
+and <a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>. <code class="docutils literal notranslate"><span class="pre">Transport</span></code> raises
+from its own range check: its declared range <code class="docutils literal notranslate"><span class="pre">0..3</span></code> is exactly its member set, so
+no unassigned value is left for <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code> (the line after the check is
+unreachable).</p></li>
+</ul>
+<p>Note that these are <code class="docutils literal notranslate"><span class="pre">aenum</span></code> classes: <code class="docutils literal notranslate"><span class="pre">issubclass(Flags,</span> <span class="pre">enum.IntFlag)</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>
+against the standard library and <code class="docutils literal notranslate"><span class="pre">True</span></code> against <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code>, so a probe against
+<code class="docutils literal notranslate"><span class="pre">enum</span></code> answers about the wrong hierarchy.</p>
+<p>The mint criterion below therefore applies only to the 117 that unmint, where it
+decides the <em>name</em> an unregistered member carries – the registrar’s own label suffixed
+with the individual code, or the bare block label on its own – not whether it
+registers. In the other 10 it never runs: <code class="docutils literal notranslate"><span class="pre">CGAType</span></code> names its tag from the value,
+the five flag registries compose a name from their members’ bits, and the four that
+raise name nothing. The two crawlers that generate the ranges record that narrowing in
+their own comments: <code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/reg/ethertype.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_ROW_NAMES</span></code>
+and <code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/ipx/socket.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_RANGE_NAMES</span></code>.</p>
 <pre  class="mermaid">
         flowchart TD
     LOOKUP[&quot;cls(value) finds no member&quot;] --&gt; MISSING[&quot;_missing_&quot;]
     MISSING --&gt;|&quot;out of range, or no block covers it&quot;| RAISE[&quot;ValueError&quot;]
     MISSING --&gt;|&quot;CGAType only&quot;| MINT[&quot;extend_enum&lt;br/&gt;permanent member, registry grows&quot;]
+    MISSING --&gt;|&quot;flag registries&quot;| FLAG[&quot;super()._missing_&lt;br/&gt;pseudo-member cached in the value table only&quot;]
     MISSING --&gt;|&quot;block label names a party&quot;| SUFFIXED[&quot;_unregistered_member&lt;br/&gt;label + _0x&amp;lt;code&amp;gt;&quot;]
     MISSING --&gt;|&quot;block label names a procedure&quot;| BARE[&quot;_unregistered_member&lt;br/&gt;bare block label&quot;]
     </pre><section id="the-criterion">
@@ -605,14 +645,26 @@ only <code class="docutils literal notranslate"><span class="pre">ast.Name</span
                 <span class="nb">print</span><span class="p">(</span><span class="s1">'UNMINT'</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The walk reads each file’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, so it reports <code class="docutils literal notranslate"><span class="pre">AppType</span></code> as an
+unmint although it raises, prints nothing for the five flag registries and
+<code class="docutils literal notranslate"><span class="pre">Transport</span></code> (they call neither function) nor for <code class="docutils literal notranslate"><span class="pre">ExtensionHeader</span></code> and
+<code class="docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code> (they define no <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>), and does not see the four
+transport subclasses, which inherit theirs. Reconcile it against a runtime probe
+for the split in the list above.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Calling <code class="docutils literal notranslate"><span class="pre">Cls(value)</span></code> on a registry whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> mints <strong>mutates the
-class</strong>. A probe is not a read: it installs a member that every later lookup then
-finds. <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a> is the one registry this applies
-to, but snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code> before any lookup
-regardless, and use a throwaway process per registry when comparing behaviour across
-revisions.</p>
+<p>Calling <code class="docutils literal notranslate"><span class="pre">Cls(value)</span></code> on a registry that mints or hands back to a flag base
+<strong>mutates the class</strong>. A probe is not a read: it installs something that every later
+lookup then finds. Six registries do this. <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>
+grows <code class="docutils literal notranslate"><span class="pre">__members__</span></code>, <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>;
+<a class="reference internal" href="../../pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> and the four Mobility Header flag registries
+grow <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> only. Snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code>
+before any lookup regardless – that snapshot cannot see the flag registries’ cache,
+so compare <code class="docutils literal notranslate"><span class="pre">len(Cls._value2member_map_)</span></code> too – and use a throwaway process per
+registry when comparing behaviour across revisions.</p>
 </div>
 </section>
 </section>
