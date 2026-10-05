@@ -804,9 +804,7 @@
             <span class="c1"># 80 -- so the port cannot decide the version and the payload has to.</span>
             <span class="c1"># That dispatch is a positive identification (the RFC 9113 §3.4</span>
             <span class="c1"># connection preface, then an HTTP/1 start line) rather than a trial</span>
-            <span class="c1"># parse; see #682 for the repoint and #800 for the identification it</span>
-            <span class="c1"># waited on. UDP's table already bound the proxy for the same ports,</span>
-            <span class="c1"># so this is also what removes the asymmetry between the two.</span>
+            <span class="c1"># parse. UDP's table binds the proxy for the same ports.</span>
             <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
             <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP'</span><span class="p">),</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
@@ -964,16 +962,14 @@
         <span class="c1"># connection control flags</span>
         <span class="c1">#</span>
         <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a</span>
-        <span class="c1"># runtime no-op -- it returns its second argument unchanged -- so the accumulator</span>
-        <span class="c1"># used to stay the plain :class:`int` ``0`` for a segment whose flags octet is all</span>
-        <span class="c1"># zero. Nothing then promoted it, because the ``|=`` below is the only promotion and</span>
-        <span class="c1"># it never runs; ``Enum_Flags.SYN in self._flags`` raised ``TypeError: argument of</span>
-        <span class="c1"># type 'int' is not a container or iterable`` instead of answering. A segment with</span>
-        <span class="c1"># any flag set masked the defect entirely. :class:`Enum_Flags` is an</span>
-        <span class="c1"># :class:`aenum.IntFlag` and declares no ``_missing_`` of its own, so</span>
-        <span class="c1"># ``Enum_Flags(0)`` is a valid flagless member that still compares equal to ``0``</span>
-        <span class="c1"># and still ORs as before; only the type, and hence the ``repr``, differs. That is</span>
-        <span class="c1"># what :attr:`connection` already advertises it returns. C.f. #616.</span>
+        <span class="c1"># runtime no-op, so the accumulator would stay the plain :class:`int` ``0`` for a</span>
+        <span class="c1"># segment whose flags octet is all zero: the ``|=`` below is the only promotion and</span>
+        <span class="c1"># never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:</span>
+        <span class="c1"># argument of type 'int' is not a container or iterable``. A segment with any flag</span>
+        <span class="c1"># set would mask that. :class:`Enum_Flags` is an :class:`aenum.IntFlag` with no</span>
+        <span class="c1"># ``_missing_`` of its own, so ``Enum_Flags(0)`` is a valid flagless member that</span>
+        <span class="c1"># compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`</span>
+        <span class="c1"># advertises.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1046,18 +1042,14 @@
         <span class="c1"># built, because option makers reached from ``_make_tcp_options`` read</span>
         <span class="c1"># :attr:`self._flags` -- ``_make_mptcp_join`` branches on it to pick between</span>
         <span class="c1"># the three MP_JOIN layouts of :rfc:`8684` section 3.2 (figure 5 for SYN,</span>
-        <span class="c1"># figure 6 for SYN/ACK, figure 7 for ACK). This block used to sit *after* the</span>
-        <span class="c1"># ``_make_tcp_options`` call below, so on a fresh instance MP_JOIN construction</span>
-        <span class="c1"># died with ``AttributeError: 'TCP' object has no attribute '_flags'``, and on</span>
-        <span class="c1"># an instance that had already parsed a segment it silently built the option</span>
-        <span class="c1"># for *that* segment's flags instead: measured pre-fix, a parsed MP_JOIN-SYN</span>
-        <span class="c1"># instance asked to ``pack`` an MP_JOIN-ACK segment emitted an ACK header</span>
-        <span class="c1"># carrying the 12-octet SYN option, dropping the caller's 20-octet HMAC. That</span>
-        <span class="c1"># second outcome is why initialising ``_flags`` to zero is not the fix -- it</span>
-        <span class="c1"># would leave the stale read intact and turn the fresh case into a spurious</span>
-        <span class="c1"># ``invalid flags combination``. Nothing between here and the old assignment</span>
-        <span class="c1"># site reads ``self._flags`` or depends on the option build, so hoisting the</span>
-        <span class="c1"># whole block is behaviour-preserving for every other option. C.f. #587.</span>
+        <span class="c1"># figure 6 for SYN/ACK, figure 7 for ACK). Resolving them afterwards would</span>
+        <span class="c1"># raise ``AttributeError: 'TCP' object has no attribute '_flags'`` on a fresh</span>
+        <span class="c1"># instance, and on an instance that had already parsed a segment would build</span>
+        <span class="c1"># the option from *that* segment's flags: packing an MP_JOIN-ACK segment from</span>
+        <span class="c1"># a parsed MP_JOIN-SYN instance would emit the 12-octet SYN option and drop</span>
+        <span class="c1"># the caller's 20-octet HMAC. Initialising ``_flags`` to zero would not fix</span>
+        <span class="c1"># that: it leaves the stale read and turns the fresh case into a spurious</span>
+        <span class="c1"># ``invalid flags combination``.</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">'cwr'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">cwr</span><span class="p">),</span>
             <span class="s1">'ece'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ece</span><span class="p">),</span>
@@ -1070,21 +1062,16 @@
         <span class="p">}</span>  <span class="c1"># type: Schema_Flags</span>
 
         <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``.</span>
-        <span class="c1"># :func:`typing.cast` is a runtime no-op, so the accumulator used to stay the</span>
-        <span class="c1"># plain :class:`int` ``0`` whenever no flag was set, and ``Enum_Flags.SYN in</span>
-        <span class="c1"># self._flags`` then raised ``TypeError: argument of type 'int' is not a</span>
+        <span class="c1"># :func:`typing.cast` is a runtime no-op, so the accumulator would stay the</span>
+        <span class="c1"># plain :class:`int` ``0`` whenever no flag is set, and ``Enum_Flags.SYN in</span>
+        <span class="c1"># self._flags`` would raise ``TypeError: argument of type 'int' is not a</span>
         <span class="c1"># container or iterable`` instead of reaching ``_make_mptcp_join``'s own</span>
-        <span class="c1"># ``ProtocolError: ... invalid flags combination``. That branch was unreachable</span>
-        <span class="c1"># before the hoist above -- construction died on the missing attribute first --</span>
-        <span class="c1"># so this keeps the newly reachable no-SYN-no-ACK case raising the library's</span>
-        <span class="c1"># documented error rather than a bare Python one. :class:`Enum_Flags` is an</span>
+        <span class="c1"># ``ProtocolError: ... invalid flags combination``. :class:`Enum_Flags` is an</span>
         <span class="c1"># :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that</span>
-        <span class="c1"># still compares equal to ``0`` and still ORs as before. :meth:`read` seeds itself</span>
-        <span class="c1"># the same way; it kept the ``cast`` until #616, on the grounds that</span>
-        <span class="c1"># ``mptcp_data_selector`` rejects a flagless MP_JOIN before ``_read_mptcp_join``</span>
-        <span class="c1"># runs, so no caller could reach the ``TypeError``. That made the read path latent</span>
-        <span class="c1"># rather than sound -- latent by virtue of a guard in another file -- which is a</span>
-        <span class="c1"># fragile reason for a ``TypeError`` not to happen. C.f. #587, #616.</span>
+        <span class="c1"># compares equal to ``0`` and ORs as usual. :meth:`read` seeds itself the same</span>
+        <span class="c1"># way, rather than relying on ``mptcp_data_selector`` rejecting a flagless</span>
+        <span class="c1"># MP_JOIN before ``_read_mptcp_join`` runs, which would leave the ``TypeError``</span>
+        <span class="c1"># avoided only by a guard in another file.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1308,7 +1295,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_mode_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_NoOperation'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NoOperation'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read TCP No Operation option.</span>
 
-<span class="sd">        Structure of TCP maximum segment size option [:rfc:`793`]:</span>
+<span class="sd">        Structure of TCP no-operation option [:rfc:`793`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -2106,10 +2093,8 @@
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without</span>
-        <span class="c1"># the receiver's key and 20 octets with it -- this guard, and the</span>
-        <span class="c1"># ``rkey=`` below, read ``(20, 32)``/``32`` until #567, which is what</span>
-        <span class="c1"># made a spec-correct 12-octet MP_CAPABLE unparseable and read a</span>
-        <span class="c1"># spec-correct 20-octet one (with the key) as having none.</span>
+        <span class="c1"># the receiver's key and 20 octets with it, hence this guard and the</span>
+        <span class="c1"># ``rkey=`` test below.</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -2232,19 +2217,11 @@
 <span class="sd">            ProtocolError: If length is **NOT** ``16``.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The accepted length is ``16``, which is what the figure above -- and</span>
-<span class="sd">            :rfc:`8684` section 3.2 figure 6, which it reproduces -- states, and</span>
-<span class="sd">            what :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK`</span>
-<span class="sd">            actually packs and unpacks: ``Kind`` (1) + ``Length`` (1) +</span>
-<span class="sd">            subtype/flags (1) + ``Address ID`` (1) + the truncated HMAC (8) + the</span>
-<span class="sd">            random number (4).</span>
-
-<span class="sd">            This guard required ``20`` until :issue:`576` -- a value that appears in</span>
-<span class="sd">            neither the figure nor the schema, and that contradicted this method's</span>
-<span class="sd">            own docstring. Together with ``_make_join_synack``'s ``length=12`` it</span>
-<span class="sd">            made the SYN/ACK form unusable in both directions at once: the maker</span>
-<span class="sd">            could not produce a length this guard accepted, and a spec-correct</span>
-<span class="sd">            16-octet option off the wire was rejected as an invalid format.</span>
+<span class="sd">            The accepted length is ``16``, as in the figure above (:rfc:`8684`</span>
+<span class="sd">            section 3.2 figure 6) and in what</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK`</span>
+<span class="sd">            packs and unpacks: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1)</span>
+<span class="sd">            + ``Address ID`` (1) + the truncated HMAC (8) + the random number (4).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
@@ -2433,16 +2410,13 @@
 <span class="sd">            ``Length`` (1) + subtype-and-reserved (1), and each of the *n* Address</span>
 <span class="sd">            IDs is one further octet.</span>
 <span class="sd">            :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id`</span>
-<span class="sd">            sizes its list as ``pkt['length'] - 3`` from exactly this, which is why</span>
-<span class="sd">            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in :issue:`576`) also</span>
-<span class="sd">            mis-sized the parse rather than only the pack.</span>
+<span class="sd">            sizes its list as ``pkt['length'] - 3`` from exactly this, so the</span>
+<span class="sd">            declared length governs the parse as well as the pack.</span>
 
 <span class="sd">            The guard permits ``3``, i.e. ``n = 0``, which the figure does not</span>
 <span class="sd">            describe -- it shows one Address ID plus "n-1 Address IDs, if</span>
-<span class="sd">            required". Left as it stands: tightening it to reject an empty list is</span>
-<span class="sd">            a behaviour change beyond :issue:`576`'s scope, and a zero-ID REMOVE_ADDR now</span>
-<span class="sd">            at least round-trips honestly instead of declaring an octet it never</span>
-<span class="sd">            packed.</span>
+<span class="sd">            required". It is left permissive: a zero-ID REMOVE_ADDR round-trips</span>
+<span class="sd">            honestly, and rejecting an empty list would be a behaviour change.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
@@ -2494,12 +2468,10 @@
 <span class="sd">            4-octet :rfc:`6824` form is therefore legacy, and the guard stays</span>
 <span class="sd">            permissive so that traffic carrying it still parses.</span>
 
-<span class="sd">            ``_make_mptcp_prio`` declared a constant ``length=4`` until :issue:`576`,</span>
-<span class="sd">            which meant the construction side could only ever emit the legacy</span>
-<span class="sd">            form -- and emitted it with an all-zero phantom Address ID when the</span>
-<span class="sd">            caller supplied none, because</span>
+<span class="sd">            On the construction side,</span>
 <span class="sd">            :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPPriority`'s</span>
-<span class="sd">            ``addr_id`` is conditional on that very length being 4.</span>
+<span class="sd">            ``addr_id`` is conditional on ``length`` being 4, so ``length`` has</span>
+<span class="sd">            to follow whether the caller supplied an Address ID.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
@@ -2591,18 +2563,9 @@
 <span class="sd">            The figure above is :rfc:`8684` section 3.5 figure 14, and the option</span>
 <span class="sd">            it draws is **12** octets: ``Kind`` (1) + ``Length`` (1) +</span>
 <span class="sd">            subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the</span>
-<span class="sd">            option receiver's key (64 bits, 8). Note that section 3.5 is Fast</span>
-<span class="sd">            Close; section 3.7 is Fallback (MP_FAIL), which :issue:`576`'s own text cited</span>
-<span class="sd">            here by mistake.</span>
-
-<span class="sd">            Three sites disagreed on this number before :issue:`576`, all three now</span>
-<span class="sd">            reading 12: this guard required ``16``, an octet count nothing in the</span>
-<span class="sd">            RFC produces for MP_FASTCLOSE; ``_make_mptcp_fastclose`` declared the</span>
-<span class="sd">            correct 12 but the schema packed only **11**, missing the reserved</span>
-<span class="sd">            octet entirely. The net effect was that constructing an MP_FASTCLOSE</span>
-<span class="sd">            through :class:`TCP` raised ``ProtocolError`` from this very guard --</span>
-<span class="sd">            the maker's *correct* length failing the parser's wrong check -- which</span>
-<span class="sd">            is why ``tcp-mptcp/MP_FASTCLOSE`` sat in ``EXPECTED_FAILURES``.</span>
+<span class="sd">            option receiver's key (64 bits, 8). The guard,</span>
+<span class="sd">            ``_make_mptcp_fastclose`` and the schema must all agree on 12, the</span>
+<span class="sd">            schema accounting for the reserved octet with a padding field.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
@@ -3394,13 +3357,13 @@
 
         <span class="n">schema</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># NOTE: ``Schema_MPTCP.subtype`` is not a packable field (see the</span>
-        <span class="c1"># comment on :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`),</span>
-        <span class="c1"># so nothing above set it -- ``subtype`` only ever went into ``test``,</span>
-        <span class="c1"># the bitfield each concrete maker actually packs. Real unpacking gets</span>
-        <span class="c1"># it from :meth:`~pcapkit.protocols.schema.transport.tcp._MPTCP.post_process`;</span>
-        <span class="c1"># this is that same assignment for the construction path, so a schema</span>
+        <span class="c1"># comment on :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`), so</span>
+        <span class="c1"># the makers above only put ``subtype`` into ``test``, the bitfield they</span>
+        <span class="c1"># actually pack. Unpacking sets it from</span>
+        <span class="c1"># :meth:`~pcapkit.protocols.schema.transport.tcp._MPTCP.post_process`;</span>
+        <span class="c1"># this is the same assignment for the construction path, so a schema</span>
         <span class="c1"># built via ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])`` has</span>
-        <span class="c1"># ``.subtype`` set exactly as one built by parsing bytes does. C.f. #566.</span>
+        <span class="c1"># ``.subtype`` set just like one built by parsing bytes.</span>
         <span class="n">schema</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">subtype_val</span>
         <span class="k">return</span> <span class="n">schema</span></div>
 
@@ -3474,10 +3437,7 @@
         <span class="k">return</span> <span class="n">Schema_MPTCPCapable</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="c1"># NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets</span>
-            <span class="c1"># without the receiver's key and 20 octets with it. This read</span>
-            <span class="c1"># ``20 if rkey is None else 32`` until #567 -- both branches</span>
-            <span class="c1"># wrong, and the no-key branch writing the value that RFC 8684</span>
-            <span class="c1"># assigns to the *other* case.</span>
+            <span class="c1"># without the receiver's key and 20 octets with it.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span> <span class="k">if</span> <span class="n">rkey</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">20</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3584,12 +3544,9 @@
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
-            <span class="c1"># NOTE: ``hmac`` used to be missing from this branch entirely, while</span>
-            <span class="c1"># ``nonce = opt.nonce`` appeared on two consecutive lines -- so</span>
-            <span class="c1"># reconstructing a parsed MP_JOIN-SYN/ACK silently substituted the</span>
-            <span class="c1"># ``bytes(8)`` default for the truncated HMAC that was actually on</span>
-            <span class="c1"># the wire, and the HMAC is the whole point of this form of the</span>
-            <span class="c1"># option. C.f. #576.</span>
+            <span class="c1"># NOTE: ``hmac`` must be carried over here, or reconstructing a</span>
+            <span class="c1"># parsed MP_JOIN-SYN/ACK would substitute the ``bytes(8)`` default</span>
+            <span class="c1"># for the truncated HMAC that was on the wire.</span>
             <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
@@ -3598,10 +3555,8 @@
             <span class="c1"># NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the</span>
             <span class="c1"># SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +</span>
             <span class="c1"># ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random</span>
-            <span class="c1"># number (32 bits, 4). This read ``12`` -- ``_make_join_syn``'s own</span>
-            <span class="c1"># correct length for the *SYN* form of figure 5, which carries a</span>
-            <span class="c1"># 4-octet token where this one carries an 8-octet HMAC -- copied</span>
-            <span class="c1"># across without recomputing. C.f. #576.</span>
+            <span class="c1"># number (32 bits, 4). The SYN form of figure 5 is 12, since it</span>
+            <span class="c1"># carries a 4-octet token where this one carries an 8-octet HMAC.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3638,9 +3593,7 @@
             <span class="c1"># NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the</span>
             <span class="c1"># ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,</span>
             <span class="c1"># being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,</span>
-            <span class="c1"># 20). This read ``8``, a third of the truth -- and</span>
-            <span class="c1"># ``_read_join_ack``'s guard already required 24, so nothing this</span>
-            <span class="c1"># maker produced could be parsed back. C.f. #576.</span>
+            <span class="c1"># 20). ``_read_join_ack``'s guard requires the same 24.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3697,29 +3650,19 @@
 
         <span class="k">return</span> <span class="n">Schema_MPTCPDSS</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: this arithmetic is correct against :rfc:`8684` section 3.3</span>
-            <span class="c1"># figure 9 and is deliberately left as it stands -- #576 filed it as</span>
-            <span class="c1"># one of six wrong lengths, and re-deriving it from the figure found</span>
-            <span class="c1"># it right. Read it as a base plus a widening increment rather than</span>
+            <span class="c1"># NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9.</span>
+            <span class="c1"># Read it as a base plus a widening increment rather than</span>
             <span class="c1"># as one term per field: 4 for ``Kind``/``Length``/subtype/flags, then</span>
             <span class="c1"># ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 to make</span>
             <span class="c1"># it 8; ``M`` contributes 12 (a 4-octet DSN, the 4-octet Subflow</span>
             <span class="c1"># Sequence Number, the 2-octet Data-Level Length and the 2-octet</span>
             <span class="c1"># Checksum) and ``m`` a further 4 to widen the DSN to 8. All flags set</span>
             <span class="c1"># gives 4 + 4 + 4 + 12 + 4 = 28, which is the maximum the section</span>
-            <span class="c1"># states in prose. What was wrong was the *schema* it describes:</span>
-            <span class="c1"># ``MPTCPDSS.ack`` and ``.dsn`` packed 0 octets rather than 4 in the</span>
-            <span class="c1"># unextended case, so the option came out 4 or 8 octets short of this</span>
-            <span class="c1"># length and produced ``packet length &lt; 0`` on the way back in.</span>
+            <span class="c1"># states in prose.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_a</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">12</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_m</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="c1"># NOTE: ``'A': flag_A`` used to appear twice in this literal, once at</span>
-            <span class="c1"># the top and once at the bottom. Harmless -- the same value under the</span>
-            <span class="c1"># same key, so the second simply won -- but it made the set of flags</span>
-            <span class="c1"># being written hard to read against figure 9's ``F|m|M|a|A``. C.f.</span>
-            <span class="c1"># #576.</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'F'</span><span class="p">:</span> <span class="n">data_fin</span><span class="p">,</span>
                 <span class="s1">'A'</span><span class="p">:</span> <span class="n">flag_A</span><span class="p">,</span>
@@ -3765,18 +3708,8 @@
             <span class="c1"># and the option length below are both derived from the family here,</span>
             <span class="c1"># ahead of the schema, so a bare ``ipaddress.ip_address`` would launder</span>
             <span class="c1"># a ``bool`` into an ``IPv4Address`` that the schema's own guard can no</span>
-            <span class="c1"># longer tell from a real address -- ``addr=True`` reached</span>
-            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``</span>
-            <span class="c1"># (c.f. #508). Until #541, this option could not be constructed end to</span>
-            <span class="c1"># end at all for an unrelated reason -- ``KeyError: 'length'`` from the</span>
-            <span class="c1"># ``port`` field's condition at</span>
-            <span class="c1"># pcapkit/protocols/schema/transport/tcp.py:819, since</span>
-            <span class="c1"># ``Schema_MPTCPAddAddress`` (like every ``MPTCP`` subtype schema)</span>
-            <span class="c1"># declared no ``kind``/``length`` fields of its own for ``kind=``/</span>
-            <span class="c1"># ``length=`` below to land in -- which is why the corruption here was</span>
-            <span class="c1"># only ever visible on the schema the maker returns. #541 gave</span>
-            <span class="c1"># ``MPTCP`` real ``kind``/``length`` fields, so both now land and this</span>
-            <span class="c1"># constructs and packs correctly.</span>
+            <span class="c1"># longer tell from a real address: ``addr=True`` would reach</span>
+            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``.</span>
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>
@@ -3820,15 +3753,10 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="c1"># NOTE: :rfc:`8684` section 3.4.2 figure 13 gives ``Length = 3 + n``,</span>
             <span class="c1"># where the 3 is ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved</span>
-            <span class="c1"># (1) and each of the *n* Address IDs is one further octet. This read</span>
-            <span class="c1"># a constant ``4``, which is right for exactly one list length -- and</span>
-            <span class="c1"># ``examples.generators.options``' own fixture passes ``addr_id=[1]``,</span>
-            <span class="c1"># so the round-trip suite exercised only that one. Measured before the</span>
-            <span class="c1"># fix: ``addr_id=[1, 2]`` packed 5 octets declaring 4, and</span>
-            <span class="c1"># ``addr_id=[]`` packed 3 declaring 4. This is the field</span>
+            <span class="c1"># (1) and each of the *n* Address IDs is one further octet. A constant</span>
+            <span class="c1"># length would be right for only one list length. This is the field</span>
             <span class="c1"># ``MPTCPRemoveAddress.addr_id`` sizes itself from, as</span>
-            <span class="c1"># ``pkt['length'] - 3``, so the constant also mis-sized the parse.</span>
-            <span class="c1"># C.f. #576.</span>
+            <span class="c1"># ``pkt['length'] - 3``, so it governs the parse as well as the pack.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr_id_list</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -3857,11 +3785,9 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``backup`` used to be missing from this branch, so</span>
-            <span class="c1"># reconstructing a parsed MP_PRIO always wrote ``B=0`` regardless of</span>
-            <span class="c1"># what was on the wire -- and the ``B`` flag is the entire payload of</span>
-            <span class="c1"># this option. The same shape as ``_make_join_synack``'s dropped</span>
-            <span class="c1"># ``hmac`` above. C.f. #576.</span>
+            <span class="c1"># NOTE: ``backup`` must be carried over, or reconstructing a parsed</span>
+            <span class="c1"># MP_PRIO would always write ``B=0``; the ``B`` flag is the entire</span>
+            <span class="c1"># payload of this option.</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
 
@@ -3874,11 +3800,10 @@
             <span class="c1"># option". The 4-octet form is :rfc:`6824`'s, which this schema and</span>
             <span class="c1"># ``_read_mptcp_prio`` both still accept, so the length has to follow</span>
             <span class="c1"># whether an Address ID was actually given rather than being a</span>
-            <span class="c1"># constant. It read a constant ``4``, and because</span>
-            <span class="c1"># ``MPTCPPriority.addr_id`` is conditional on ``pkt['length'] == 4``,</span>
-            <span class="c1"># that constant *satisfied its own predicate*: with ``addr_id=None``</span>
-            <span class="c1"># the option packed ``1e045000``, a phantom all-zero Address ID octet</span>
-            <span class="c1"># that no caller asked for. C.f. #576.</span>
+            <span class="c1"># constant. ``MPTCPPriority.addr_id`` is conditional on</span>
+            <span class="c1"># ``pkt['length'] == 4``, so a constant ``4`` would satisfy its own</span>
+            <span class="c1"># predicate and pack a phantom all-zero Address ID octet when</span>
+            <span class="c1"># ``addr_id=None``.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="k">if</span> <span class="n">addr_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>

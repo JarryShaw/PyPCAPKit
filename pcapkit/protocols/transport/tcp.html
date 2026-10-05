@@ -1004,7 +1004,7 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mode_nop">
 <span class="sig-name descname"><span class="pre">_read_mode_nop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mode_nop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mode_nop" title="Link to this definition">¶</a></dt>
 <dd><p>Read TCP No Operation option.</p>
-<p>Structure of TCP maximum segment size option [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>]:</p>
+<p>Structure of TCP no-operation option [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+--------+
 |00000001|
 +--------+
@@ -1843,15 +1843,12 @@ enumeration:</p>
 <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype-and-reserved (1), and each of the <em>n</em> Address
 IDs is one further octet.
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id" title="pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">addr_id</span></code></a>
-sizes its list as <code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">-</span> <span class="pre">3</span></code> from exactly this, which is why
-<code class="docutils literal notranslate"><span class="pre">_make_mptcp_remove</span></code>’s constant <code class="docutils literal notranslate"><span class="pre">length=4</span></code> (fixed in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>) also
-mis-sized the parse rather than only the pack.</p>
+sizes its list as <code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">-</span> <span class="pre">3</span></code> from exactly this, so the
+declared length governs the parse as well as the pack.</p>
 <p>The guard permits <code class="docutils literal notranslate"><span class="pre">3</span></code>, i.e. <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">0</span></code>, which the figure does not
 describe – it shows one Address ID plus “n-1 Address IDs, if
-required”. Left as it stands: tightening it to reject an empty list is
-a behaviour change beyond <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>’s scope, and a zero-ID REMOVE_ADDR now
-at least round-trips honestly instead of declaring an octet it never
-packed.</p>
+required”. It is left permissive: a zero-ID REMOVE_ADDR round-trips
+honestly, and rejecting an empty list would be a behaviour change.</p>
 </div>
 </dd></dl>
 
@@ -1895,12 +1892,10 @@ AddrID field [RFC6824] in the MP_PRIO option”, closing a theoretical
 attack in which a subflow could be forced into backup mode. The
 4-octet <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> form is therefore legacy, and the guard stays
 permissive so that traffic carrying it still parses.</p>
-<p><code class="docutils literal notranslate"><span class="pre">_make_mptcp_prio</span></code> declared a constant <code class="docutils literal notranslate"><span class="pre">length=4</span></code> until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>,
-which meant the construction side could only ever emit the legacy
-form – and emitted it with an all-zero phantom Address ID when the
-caller supplied none, because
+<p>On the construction side,
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPPriority" title="pcapkit.protocols.schema.transport.tcp.MPTCPPriority"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPPriority</span></code></a>’s
-<code class="docutils literal notranslate"><span class="pre">addr_id</span></code> is conditional on that very length being 4.</p>
+<code class="docutils literal notranslate"><span class="pre">addr_id</span></code> is conditional on <code class="docutils literal notranslate"><span class="pre">length</span></code> being 4, so <code class="docutils literal notranslate"><span class="pre">length</span></code> has
+to follow whether the caller supplied an Address ID.</p>
 </div>
 </dd></dl>
 
@@ -1977,17 +1972,9 @@ caller supplied none, because
 <p>The figure above is <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14, and the option
 it draws is <strong>12</strong> octets: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) +
 subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
-option receiver’s key (64 bits, 8). Note that section 3.5 is Fast
-Close; section 3.7 is Fallback (MP_FAIL), which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>’s own text cited
-here by mistake.</p>
-<p>Three sites disagreed on this number before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>, all three now
-reading 12: this guard required <code class="docutils literal notranslate"><span class="pre">16</span></code>, an octet count nothing in the
-RFC produces for MP_FASTCLOSE; <code class="docutils literal notranslate"><span class="pre">_make_mptcp_fastclose</span></code> declared the
-correct 12 but the schema packed only <strong>11</strong>, missing the reserved
-octet entirely. The net effect was that constructing an MP_FASTCLOSE
-through <a class="reference internal" href="#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> raised <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> from this very guard –
-the maker’s <em>correct</em> length failing the parser’s wrong check – which
-is why <code class="docutils literal notranslate"><span class="pre">tcp-mptcp/MP_FASTCLOSE</span></code> sat in <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>.</p>
+option receiver’s key (64 bits, 8). The guard,
+<code class="docutils literal notranslate"><span class="pre">_make_mptcp_fastclose</span></code> and the schema must all agree on 12, the
+schema accounting for the reserved octet with a padding field.</p>
 </div>
 </dd></dl>
 
@@ -2063,18 +2050,11 @@ is why <code class="docutils literal notranslate"><span class="pre">tcp-mptcp/MP
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The accepted length is <code class="docutils literal notranslate"><span class="pre">16</span></code>, which is what the figure above – and
-<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2 figure 6, which it reproduces – states, and
-what <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYNACK</span></code></a>
-actually packs and unpacks: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) +
-subtype/flags (1) + <code class="docutils literal notranslate"><span class="pre">Address</span> <span class="pre">ID</span></code> (1) + the truncated HMAC (8) + the
-random number (4).</p>
-<p>This guard required <code class="docutils literal notranslate"><span class="pre">20</span></code> until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a> – a value that appears in
-neither the figure nor the schema, and that contradicted this method’s
-own docstring. Together with <code class="docutils literal notranslate"><span class="pre">_make_join_synack</span></code>’s <code class="docutils literal notranslate"><span class="pre">length=12</span></code> it
-made the SYN/ACK form unusable in both directions at once: the maker
-could not produce a length this guard accepted, and a spec-correct
-16-octet option off the wire was rejected as an invalid format.</p>
+<p>The accepted length is <code class="docutils literal notranslate"><span class="pre">16</span></code>, as in the figure above (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>
+section 3.2 figure 6) and in what
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYNACK</span></code></a>
+packs and unpacks: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype/flags (1)
++ <code class="docutils literal notranslate"><span class="pre">Address</span> <span class="pre">ID</span></code> (1) + the truncated HMAC (8) + the random number (4).</p>
 </div>
 </dd></dl>
 
@@ -3525,9 +3505,7 @@ then be a method that can parse the option by itself.</p>
 <span class="sig-name descname"><span class="pre">rkey</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">rkey&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey" title="Link to this definition">¶</a></dt>
 <dd><p>Option receiver’s key.</p>
 <p><span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives MP_CAPABLE as 12 octets without this key
-and 20 octets with it, so the field is present only for the latter –
-not, as it read until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/567">#567</a>, for every length <em>except</em> 32, which is not
-an MP_CAPABLE length either RFC form uses.</p>
+and 20 octets with it, so the field is present only for the latter.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3649,8 +3627,8 @@ an MP_CAPABLE length either RFC form uses.</p>
 <dd><p>Data ACK.</p>
 <p>4 octets when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">a</span></code> is set as well, absent otherwise –
 <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. Both the presence test and the width live
-in <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, whose note records what this field
-declared until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a> and why the switch form is kept.</p>
+in <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, whose note explains why the switch form
+is used.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3787,12 +3765,10 @@ declared until <a class="extlink-issue reference external" href="https://github.
 <p><span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14 spends a whole 32-bit row on
 <code class="docutils literal notranslate"><span class="pre">Kind</span></code>/<code class="docutils literal notranslate"><span class="pre">Length</span></code>/<code class="docutils literal notranslate"><span class="pre">Subtype</span></code>/<code class="docutils literal notranslate"><span class="pre">(reserved)</span></code>, i.e. the subtype’s 4 bits
 are followed by <strong>12</strong> reserved bits, not 4 – so the subtype-and-reserved
-part is 2 octets and the option is 12 octets in total. Until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a> this
-field did not exist and <code class="docutils literal notranslate"><span class="pre">test</span></code> was the only octet between <code class="docutils literal notranslate"><span class="pre">length</span></code> and
-<code class="docutils literal notranslate"><span class="pre">key</span></code>, so the schema packed <strong>11</strong> octets against a <code class="docutils literal notranslate"><span class="pre">length</span></code> of 12.
-Declared the same way <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinACK</span></code></a> declares its own reserved
-octet, for the same reason: a wider <code class="docutils literal notranslate"><span class="pre">test</span></code> would make the reserved bits
-look like part of the subtype namespace.</p>
+part is 2 octets and the option is 12 octets in total. Declared the same
+way <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinACK</span></code></a> declares its own reserved octet, for the same
+reason: a wider <code class="docutils literal notranslate"><span class="pre">test</span></code> would make the reserved bits look like part of
+the subtype namespace.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4209,37 +4185,16 @@ instance – the field is absent from the wire.</p></li>
 <p class="admonition-title">Note</p>
 <p>This is a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField" title="pcapkit.corekit.fields.misc.SwitchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SwitchField</span></code></a> selector
 rather than a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>
-wrapping <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">...)</span></code>, which is what it was
-until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>.</p>
-<p>The width lambda read <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['a']</span> <span class="pre">else</span> <span class="pre">0</span></code> – <strong>0</strong>, not 4 –
-so an unextended Data ACK packed no octets at all while the <code class="docutils literal notranslate"><span class="pre">length</span></code>
-octet still counted 4 for it. That is the defect <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a> records: the option
-went onto the wire 4 (or 8, with <code class="docutils literal notranslate"><span class="pre">dsn</span></code> too) octets shorter than it
-declared, and the <code class="docutils literal notranslate"><span class="pre">ack</span></code> value the caller supplied was simply not
-present.</p>
-<p>Correcting the lambda to <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">else</span> <span class="pre">4</span></code> would not have worked <em>at the
-time</em>, because <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> could
-not pack a callable length at all: it called <code class="docutils literal notranslate"><span class="pre">build_template</span></code> once at
-<code class="docutils literal notranslate"><span class="pre">__init__</span></code> with the placeholder length <code class="docutils literal notranslate"><span class="pre">-1</span></code>, which latched
-<code class="docutils literal notranslate"><span class="pre">_need_process</span> <span class="pre">=</span> <span class="pre">True</span></code>, and nothing cleared that flag when <code class="docutils literal notranslate"><span class="pre">__call__</span></code>
-later resolved the real length and rebuilt the template as <code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>/<code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code>.
-<code class="docutils literal notranslate"><span class="pre">pre_process</span></code> then handed <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> bytes for an integer
-template and it raised <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span>
-<span class="pre">integer</span></code>. Measured on the 8-octet form, which the old lambda did reach:
-<code class="docutils literal notranslate"><span class="pre">_make_mptcp_dss(DSS,</span> <span class="pre">ack=1</span> <span class="pre">&lt;&lt;</span> <span class="pre">40)</span></code> raised exactly that.</p>
-<p>That half is now history: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a> <strong>fixed it</strong>, in
-<a class="reference internal" href="../../corekit/fields/numbers.html#module-pcapkit.corekit.fields.numbers" title="pcapkit.corekit.fields.numbers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code></a> where this note used to say the fix
-belonged, by recomputing <code class="docutils literal notranslate"><span class="pre">_need_process</span></code> from the width actually in
-force instead of once from the placeholder. A callable-length
-<code class="docutils literal notranslate"><span class="pre">NumberField</span></code> packs and unpacks both the 4- and the 8-octet form today,
-so <code class="docutils literal notranslate"><span class="pre">ConditionalField(NumberField(length=...),</span> <span class="pre">lambda</span> <span class="pre">pkt:</span>
-<span class="pre">pkt['flags']['A'])</span></code> would express this field correctly. Nor was wire
-<em>absence</em> ever the obstacle: <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ssn</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dl_len</span></code></a>
-and <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.checksum</span></code></a> are each a <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> on the
-sibling <code class="docutils literal notranslate"><span class="pre">M</span></code> flag, so this very class already leans on that wrapper to
-keep a field off the wire.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept anyway, for a narrower reason about
-composition rather than about absence. A
+wrapping <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">...)</span></code>. An unextended Data ACK
+is 4 octets, so a width lambda returning <code class="docutils literal notranslate"><span class="pre">0</span></code> for it would leave the
+<code class="docutils literal notranslate"><span class="pre">length</span></code> octet counting 4 octets that were never packed.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> form could express this field correctly, since a
+callable-length <code class="docutils literal notranslate"><span class="pre">NumberField</span></code> packs and unpacks both the 4- and the
+8-octet form, and wire <em>absence</em> is no obstacle:
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ssn</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dl_len</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.checksum</span></code></a> are each a <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> on the sibling
+<code class="docutils literal notranslate"><span class="pre">M</span></code> flag. The <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept for a narrower reason about
+composition. A
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">length</span></code>
 forwards to the wrapped field unconditionally, never consulting the
 condition, so reading it while the condition is false – the wrapped field
@@ -4251,7 +4206,7 @@ outright before any <code class="docutils literal notranslate"><span class="pre"
 special case: its selector always hands back an already-concrete field,
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a> included, so its
 <code class="docutils literal notranslate"><span class="pre">length</span></code> is safe wherever it is read. Swapping the two would be a
-behaviour change, not a tidy-up, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/603">#603</a> does not make it.</p>
+behaviour change, not a tidy-up.</p>
 </div>
 </dd></dl>
 
@@ -4284,12 +4239,9 @@ instance – the field is absent from the wire.</p></li>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Identical in shape to <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, and it replaces the
-identical defect: <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['m']</span>
-<span class="pre">else</span> <span class="pre">0,</span> <span class="pre">...)</span></code>. See that function’s note for why the <code class="docutils literal notranslate"><span class="pre">0</span></code> was wrong, why a
-corrected lambda would not have packed either <em>at the time</em>, and why the
-<code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept now that <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a> has made a callable length work.
-C.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/576">#576</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/591">#591</a>.</p>
+<p>Identical in shape to <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>; see that function’s
+note for why a <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> is used in place of a
+<code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> around a callable-length <code class="docutils literal notranslate"><span class="pre">NumberField</span></code>.</p>
 </div>
 </dd></dl>
 

@@ -491,8 +491,7 @@
 <span class="sd">  ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)</span>
 <span class="sd">======= ========= ===================== ==============================================</span>
 
-<span class="sd">Unlike every other protocol in :mod:`pcapkit`, ESP is **not** self</span>
-<span class="sd">describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``</span>
+<span class="sd">ESP is **not** self describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``</span>
 <span class="sd">fields *inside* the ciphertext, and leaves the length of the ``Integrity</span>
 <span class="sd">Check Value`` to be determined by the Security Association (SA), which is</span>
 <span class="sd">negotiated out of band. Therefore:</span>
@@ -525,7 +524,7 @@
 <span class="sd">   )</span>
 <span class="sd">   extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))</span>
 
-<span class="sd">Registered algorithms, and supported ones</span>
+<span class="sd">Registered Algorithms, and Supported Ones</span>
 <span class="sd">-----------------------------------------</span>
 
 <span class="sd">ESP has no algorithm registry of its own -- an SA's algorithms are negotiated</span>
@@ -608,7 +607,7 @@
 <span class="sd">:attr:`Cipher.ENCR_AES_CBC &lt;pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC&gt;`</span>
 <span class="sd">are the same member.</span>
 
-<span class="sd">Known limitations</span>
+<span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
 
 <span class="sd">* **Extended Sequence Numbers (ESN,** :rfc:`4303` **§2.2.1) are not</span>
@@ -944,10 +943,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ESPStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Outcome of ESP payload processing.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this</span>
-<span class="sd">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
-<span class="sd">    with the base.</span>
+<span class="sd">    ``get`` / ``get_all`` come from :class:`~pcapkit.corekit.enum.EnumLookup`;</span>
+<span class="sd">    the class defines no ``_missing_``, so an unknown value raises</span>
+<span class="sd">    :exc:`ValueError`.</span>
 
 <span class="sd">    """</span>
 
@@ -1014,7 +1012,7 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If the algorithms or key lengths are inconsistent, or</span>
-<span class="sd">            ``destination`` is a :obj:`bool` (c.f. :issue:`491`) -- :obj:`bool` is an</span>
+<span class="sd">            ``destination`` is a :obj:`bool` -- :obj:`bool` is an</span>
 <span class="sd">            :class:`int` subclass, and :func:`ipaddress.ip_address` treats</span>
 <span class="sd">            any :class:`int` below ``2**32`` as IPv4, so without this check</span>
 <span class="sd">            ``destination=True`` would silently become</span>
@@ -1052,7 +1050,7 @@
             <span class="c1"># subclass, and ``ipaddress.ip_address()`` treats any ``int`` below</span>
             <span class="c1"># ``2**32`` as IPv4 -- so without this check, ``destination=True``</span>
             <span class="c1"># would silently become ``IPv4Address('0.0.0.1')``, with no</span>
-            <span class="c1"># exception and no warning (c.f. #491).</span>
+            <span class="c1"># exception and no warning.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'invalid destination: must not be a bool, not </span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1"> -- '</span>
                 <span class="sa">f</span><span class="s1">'pass int(</span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
@@ -1503,18 +1501,16 @@
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_ESP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_ESP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Encapsulating Security Payload.</span>
 
-<span class="sd">    Double-inherited (GitHub issue :issue:`917`), mirroring</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension</span>
-<span class="sd">    Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`</span>
-<span class="sd">    has it appear after the hop-by-hop, routing and fragmentation</span>
-<span class="sd">    extension headers in the IPv6 header chain), and this package's own</span>
+<span class="sd">    Double-inherited, mirroring :class:`~pcapkit.protocols.internet.ah.AH`:</span>
+<span class="sd">    IANA's *IPv6 Extension Header Types* registry lists ``ESP`` at 50</span>
+<span class="sd">    (:rfc:`4303#section-3.1.1` has it follow the hop-by-hop, routing and</span>
+<span class="sd">    fragmentation extension headers in the IPv6 header chain), and this</span>
+<span class="sd">    package's own</span>
 <span class="sd">    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry</span>
-<span class="sd">    agrees (``ESP = 50``), so it must honour the same extension-mode</span>
-<span class="sd">    contract as its siblings. The same section separately states that,</span>
-<span class="sd">    in the context of IPv4, ESP is placed after the IP header and</span>
-<span class="sd">    before the next-layer protocol -- the primary-source evidence that</span>
-<span class="sd">    it also travels directly as an IPv4 payload, which is what</span>
-<span class="sd">    qualifies it for a base besides</span>
+<span class="sd">    agrees, so it must honour the same extension-mode contract as its</span>
+<span class="sd">    siblings. The same section places ESP after the IP header and before the</span>
+<span class="sd">    next-layer protocol in IPv4, so it also travels directly as an IPv4</span>
+<span class="sd">    payload, which is what qualifies it for a base besides</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.</span>
 <span class="sd">    :attr:`payload` and :attr:`protochain` come from</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`</span>
@@ -1523,7 +1519,7 @@
 <span class="sd">    Note:</span>
 <span class="sd">        :rfc:`8200#section-4.5` says outright that ESP "is not considered an</span>
 <span class="sd">        extension header". The library follows IANA's registry rather than</span>
-<span class="sd">        that sentence, on the owner's ruling for GitHub issue :issue:`895`.</span>
+<span class="sd">        that sentence (decided on :issue:`895`).</span>
 
 <span class="sd">    """</span>
 
@@ -1543,13 +1539,13 @@
 <span class="sd">        Spelled out rather than left to</span>
 <span class="sd">        :attr:`ProtocolBase.alias &lt;pcapkit.protocols.protocol.ProtocolBase.alias&gt;`'s</span>
 <span class="sd">        class-name default, because</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits</span>
 <span class="sd">        between this class and that default in the MRO and carries a concrete</span>
 <span class="sd">        ``'IPv6-Ext'`` of its own. Inheriting it would rename this header in</span>
 <span class="sd">        every :class:`~pcapkit.corekit.protochain.ProtoChain` string and in</span>
 <span class="sd">        :meth:`IPv6._decode_next_layer</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`'s packet</span>
-<span class="sd">        dict key. The value is exactly what the default produced before.</span>
+<span class="sd">        dict key. The value equals the class-name default.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="s1">'ESP'</span>

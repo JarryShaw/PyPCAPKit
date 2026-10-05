@@ -502,17 +502,17 @@ as below:</p>
 <tbody>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">opt.next</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">opts.next</span></code></p></td>
 <td><p>Next Header</p></td>
 </tr>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">opt.length</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">opts.length</span></code></p></td>
 <td><p>Header Extensive Length</p></td>
 </tr>
 <tr class="row-even"><td><p>2</p></td>
 <td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">opt.options</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">opts.options</span></code></p></td>
 <td><p>Options</p></td>
 </tr>
 </tbody>
@@ -523,8 +523,8 @@ as below:</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">IPv6_Opts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts" title="pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.IPv6_Opts" title="pcapkit.protocols.schema.internet.ipv6_opts.IPv6_Opts"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code></a>]</p>
 <p>This class implements Destination Options for IPv6.</p>
-<p>This class currently supports parsing of the following IPv6 destination
-options, which are registered in the
+<p>This class parses the following IPv6 destination options, which are
+registered in the
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__option__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
@@ -1340,7 +1340,7 @@ padding rather than empty.</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1363,16 +1363,16 @@ padding octets <em>after</em> the two octets of the option header</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.PadOption" title="pcapkit.protocols.schema.internet.ipv6_opts.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.Option.length" title="pcapkit.protocols.data.internet.ipv6_opts.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code></a> counts
 the <em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.len</span></code> is the
-<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field – two octets fewer, and absent altogether for
-a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. <code class="docutils literal notranslate"><span class="pre">opt</span></code> used to be ignored here, so re-making a parsed
-padding option silently collapsed it to a single <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field: two octets fewer, and absent altogether for a
+<code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. <code class="docutils literal notranslate"><span class="pre">opt</span></code> is honoured so that re-making a parsed padding
+option keeps its size instead of collapsing to a single <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.</p>
 </div>
 </dd></dl>
 
@@ -1393,7 +1393,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.TunnelEncapsulationLimitOption" title="pcapkit.protocols.schema.internet.ipv6_opts.TunnelEncapsulationLimitOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunnelEncapsulationLimitOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1418,7 +1418,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.RouterAlertOption" title="pcapkit.protocols.schema.internet.ipv6_opts.RouterAlertOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">RouterAlertOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1443,7 +1443,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption" title="pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CALIPSOOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1471,7 +1471,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFDPDOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1496,7 +1496,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.PDMOption" title="pcapkit.protocols.schema.internet.ipv6_opts.PDMOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDMOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1524,7 +1524,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1550,7 +1550,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.RPLOption" title="pcapkit.protocols.schema.internet.ipv6_opts.RPLOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">RPLOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1575,7 +1575,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.MPLOption" title="pcapkit.protocols.schema.internet.ipv6_opts.MPLOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPLOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1597,7 +1597,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption" title="pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">ILNPOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1619,7 +1619,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.LineIdentificationOption" title="pcapkit.protocols.schema.internet.ipv6_opts.LineIdentificationOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineIdentificationOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1641,7 +1641,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.JumboPayloadOption" title="pcapkit.protocols.schema.internet.ipv6_opts.JumboPayloadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">JumboPayloadOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1663,7 +1663,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption" title="pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">HomeAddressOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1688,7 +1688,7 @@ padding option silently collapsed it to a single <code class="docutils literal n
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.IPDFFOption" title="pcapkit.protocols.schema.internet.ipv6_opts.IPDFFOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPDFFOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2580,8 +2580,7 @@ presence of the key: <code class="docutils literal notranslate"><span class="pre
 <a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoValueType</span></code></a> straight to
 <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, where it becomes
 an unusable <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template and surfaces much later as an opaque
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> – which is exactly how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option used to
-fail to parse.</p>
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, which is how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option would fail to parse.</p>
 </div>
 </dd></dl>
 
@@ -2659,10 +2658,10 @@ instance.</p></li>
 <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> counts only what follows the option header
 [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>], while both schemas this may return inherit
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.type" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.type</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> and so parse those two octets
-themselves. Sizing the field at <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> handed them an area two
+themselves. Sizing the field at <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> would hand them an area two
 octets short of the option they read, which
-<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> then mis-counted
-against the option area – c.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/431">#431</a>.</p>
+<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> would then
+mis-count against the option area.</p>
 </div>
 </dd></dl>
 

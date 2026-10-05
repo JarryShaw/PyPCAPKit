@@ -733,23 +733,23 @@
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HIP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HIP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Host Identity Protocol.</span>
 
-<span class="sd">    Double-inherited, per the maintainer's convention given in review of the</span>
-<span class="sd">    work for :issue:`917`: a header that is *only* usable as an extension header</span>
-<span class="sd">    inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone,</span>
-<span class="sd">    while one that is also usable as a standalone protocol names</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is</span>
-<span class="sd">    both, on two independent grounds:</span>
+<span class="sd">    Double-inherited, per the convention set on :issue:`917`: a header usable</span>
+<span class="sd">    *only* as an extension header inherits</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one also</span>
+<span class="sd">    usable as a standalone protocol names</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is both,</span>
+<span class="sd">    on two independent grounds:</span>
 
 <span class="sd">    * :rfc:`7401#section-5.1` states that "the HIP header is logically an</span>
 <span class="sd">      IPv6 extension header", and IANA lists protocol 139 in its *IPv6</span>
-<span class="sd">      Extension Header Types* registry -- 11 entries, HIP among them.</span>
-<span class="sd">    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a</span>
-<span class="sd">      checksum for an **IPv4** header carrying ``Next Header: 139`` with</span>
+<span class="sd">      Extension Header Types* registry (11 entries).</span>
+<span class="sd">    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a checksum</span>
+<span class="sd">      for an **IPv4** header carrying ``Next Header: 139`` with</span>
 <span class="sd">      ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4</span>
-<span class="sd">      payload, exactly as :class:`~pcapkit.protocols.internet.ah.AH` and</span>
-<span class="sd">      :class:`~pcapkit.protocols.internet.esp.ESP` do.</span>
+<span class="sd">      payload, as do :class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">      :class:`~pcapkit.protocols.internet.esp.ESP`.</span>
 
-<span class="sd">    The second ground is what separates HIP from</span>
+<span class="sd">    The second ground separates HIP from</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.mh.MH` and Shim6, which are protocols</span>
 <span class="sd">    in their own right but cannot appear under IPv4:</span>
 <span class="sd">    :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a</span>
@@ -758,11 +758,11 @@
 <span class="sd">    than as protocol 135.</span>
 
 <span class="sd">    ``Internet`` is already reached transitively through ``IPv6_Ext``; naming</span>
-<span class="sd">    it is what records the classification, so a future reader can tell a</span>
-<span class="sd">    deliberate standalone protocol from a header that merely inherits one.</span>
+<span class="sd">    it records the classification, so a reader can tell a deliberate standalone</span>
+<span class="sd">    protocol from a header that merely inherits one.</span>
 
-<span class="sd">    This class currently supports parsing of the following HIP parameters,</span>
-<span class="sd">    which are registered in the :attr:`self.__parameter__ &lt;pcapkit.protocols.internet.hip.HIP.__parameter__&gt;`</span>
+<span class="sd">    This class parses the following HIP parameters, which are registered in the</span>
+<span class="sd">    :attr:`self.__parameter__ &lt;pcapkit.protocols.internet.hip.HIP.__parameter__&gt;`</span>
 <span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
@@ -1524,11 +1524,6 @@
         <span class="n">locator_set</span> <span class="o">=</span> <span class="n">Data_LocatorSetParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="c1"># NOTE: This was the one reported record length in this module left</span>
-            <span class="c1"># on the pre-#651 expression, held back to match the one padding</span>
-            <span class="c1"># site left on it. #679 moves both, together with the ``Length``</span>
-            <span class="c1"># unit they both read -- see ``LocatorSetParameter.padding`` in</span>
-            <span class="c1"># :mod:`pcapkit.protocols.schema.internet.hip`.</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">locator_set</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_locs</span><span class="p">),</span>
         <span class="p">)</span>
@@ -1588,7 +1583,7 @@
             <span class="c1"># Keep the field's on-wire width, which ``_rand`` alone cannot carry:</span>
             <span class="c1"># ``int.bit_length()`` sees the value, not the octets it was padded</span>
             <span class="c1"># into. ``schema.len`` is ``4 + RHASH_len / 8``, so the width in bits</span>
-            <span class="c1"># is ``(schema.len - 4) * 8``. See #653.</span>
+            <span class="c1"># is ``(schema.len - 4) * 8``.</span>
             <span class="n">rhash_len</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">puzzle</span></div>
@@ -1639,16 +1634,16 @@
         <span class="c1"># :rfc:`7401#section-5.2.5` names this octet ``Reserved``, "zero when sent,</span>
         <span class="c1"># ignored when received", and only ``PUZZLE`` (:rfc:`7401#section-5.2.4`)</span>
         <span class="c1"># has a ``Lifetime`` at this offset. Record it verbatim rather than reading</span>
-        <span class="c1"># it as a ``2^(value - 32)`` duration: interpreting it wrote ``0x20`` into a</span>
-        <span class="c1"># field the RFC requires to be zero, and made the conformant ``0x00``</span>
-        <span class="c1"># impossible to re-serialise. See #654.</span>
+        <span class="c1"># it as a ``2^(value - 32)`` duration: that would write ``0x20`` into a</span>
+        <span class="c1"># field the RFC requires to be zero, and make the conformant ``0x00``</span>
+        <span class="c1"># impossible to re-serialise.</span>
         <span class="n">_resv</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">reserved</span>
         <span class="n">_opak</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">opaque</span>
         <span class="n">_rand</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">random</span>
         <span class="c1"># ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which</span>
-        <span class="c1"># is the same quantity as ``4 + 2 * (RHASH_len / 8)`` -- two equal-width fields</span>
-        <span class="c1"># of ``RHASH_len / 8`` octets -- only because ``RHASH_len`` is a whole number of</span>
-        <span class="c1"># octets. Do not reuse the ``/ 4`` shorthand on a width that is not; see #608.</span>
+        <span class="c1"># is the same quantity as ``4 + 2 * (RHASH_len / 8)`` (two equal-width fields</span>
+        <span class="c1"># of ``RHASH_len / 8`` octets) only because ``RHASH_len`` is a whole number of</span>
+        <span class="c1"># octets. Do not reuse the ``/ 4`` shorthand on a width that is not.</span>
         <span class="n">_solt</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">solution</span>
 
         <span class="n">solution</span> <span class="o">=</span> <span class="n">Data_SolutionParameter</span><span class="p">(</span>
@@ -1663,8 +1658,8 @@
             <span class="c1"># Keep the two fields' shared on-wire width, which the values alone</span>
             <span class="c1"># cannot carry. Each is ``RHASH_len / 8`` octets and ``schema.len`` is</span>
             <span class="c1"># ``4 + RHASH_len / 4``, so the width in bits is</span>
-            <span class="c1"># ``((schema.len - 4) // 2) * 8`` -- the same halving the schema's own</span>
-            <span class="c1"># field lengths do. See #653.</span>
+            <span class="c1"># ``((schema.len - 4) // 2) * 8``, the same halving the schema's own</span>
+            <span class="c1"># field lengths do.</span>
             <span class="n">rhash_len</span><span class="o">=</span><span class="p">((</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">solution</span></div>
@@ -3784,12 +3779,11 @@
                 <span class="c1"># to octets *here*, ahead of the schema, so a bare</span>
                 <span class="c1"># ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``</span>
                 <span class="c1"># and hand the schema's ``SwitchField`` plain bytes that its guard</span>
-                <span class="c1"># cannot question. Before this, ``ip=True`` packed a locator of</span>
-                <span class="c1"># ``::1`` with no error at all. The ``version=6`` argument is the</span>
-                <span class="c1"># *IP* version rather than the HIP one the message names, and it is</span>
-                <span class="c1"># what keeps the ``int`` widening this signature documents --</span>
-                <span class="c1"># ``0x102`` is ``::102``, not the ``0.0.1.2`` that</span>
-                <span class="c1"># ``ipaddress.ip_address`` would give (c.f. #508).</span>
+                <span class="c1"># cannot question. The ``version=6`` argument is the *IP* version</span>
+                <span class="c1"># rather than the HIP one the message names, and it keeps the</span>
+                <span class="c1"># ``int`` widening this signature documents: ``0x102`` is</span>
+                <span class="c1"># ``::102``, not the ``0.0.1.2`` that ``ipaddress.ip_address``</span>
+                <span class="c1"># would give.</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                     <span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid locator'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 
@@ -3828,16 +3822,15 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="c1"># NOTE: ``Locator.len`` is ``Locator Length``, which</span>
             <span class="c1"># :rfc:`8046#section-4` gives "in 4-octet units" and which counts</span>
-            <span class="c1"># only the ``Locator`` field -- so a locator record is the eight</span>
+            <span class="c1"># only the ``Locator`` field, so a locator record is the eight</span>
             <span class="c1"># fixed octets (traffic type, locator type, locator length,</span>
             <span class="c1"># reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This</span>
             <span class="c1"># parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,</span>
             <span class="c1"># "length of the Contents, in bytes", so it is the sum of those</span>
-            <span class="c1"># record sizes. It was ``sum(locator['len'])`` until #679: ``4n``</span>
+            <span class="c1"># record sizes. Summing ``locator['len']`` instead gives ``4n``</span>
             <span class="c1"># where the contents are ``24n`` octets for plain IPv6 locators,</span>
-            <span class="c1"># which both mis-declared the record on the wire and starved the</span>
-            <span class="c1"># reader's ``ListField`` of the octets it needed -- see</span>
-            <span class="c1"># ``LocatorSetParameter.locators`` in</span>
+            <span class="c1"># mis-declaring the record and starving the reader's ``ListField``</span>
+            <span class="c1"># -- see ``LocatorSetParameter.locators`` in</span>
             <span class="c1"># :mod:`pcapkit.protocols.schema.internet.hip`.</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="n">locator</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">for</span> <span class="n">locator</span> <span class="ow">in</span> <span class="n">locators</span><span class="p">),</span>
             <span class="n">locators</span><span class="o">=</span><span class="n">locators</span><span class="p">,</span>
@@ -3868,28 +3861,27 @@
 <span class="sd">                to a value the one-octet field cannot hold.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: the old</span>
-        <span class="c1"># ``lifetime if isinstance(lifetime, int) else lifetime.total_seconds()``</span>
-        <span class="c1"># sent a plain ``float`` down the timedelta branch and escaped an</span>
-        <span class="c1"># :exc:`AttributeError` instead.</span>
+        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing</span>
+        <span class="c1"># for ``int`` would send a plain ``float`` down the timedelta branch and</span>
+        <span class="c1"># escape an :exc:`AttributeError`.</span>
         <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
 
         <span class="c1"># ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is</span>
-        <span class="c1"># not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it escapes the</span>
-        <span class="c1"># library's own error handling with a message naming neither HIP nor the</span>
-        <span class="c1"># field. It is reachable from conformant input rather than only from a</span>
-        <span class="c1"># crafted one: a ``Lifetime`` octet of ``0x00`` means ``2^-32`` seconds,</span>
-        <span class="c1"># below :class:`~datetime.timedelta`'s microsecond resolution, so parsing</span>
-        <span class="c1"># one yields ``timedelta(0)`` and re-serialising it lands here. See #654.</span>
+        <span class="c1"># not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it would</span>
+        <span class="c1"># escape the library's error handling with a message naming neither HIP</span>
+        <span class="c1"># nor the field. Conformant input reaches it: a ``Lifetime`` octet of</span>
+        <span class="c1"># ``0x00`` means ``2^-32`` seconds, below</span>
+        <span class="c1"># :class:`~datetime.timedelta`'s microsecond resolution, so parsing one</span>
+        <span class="c1"># yields ``timedelta(0)`` and re-serialising it lands here.</span>
         <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> is not a positive number of seconds'</span><span class="p">)</span>
 
         <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
 
-        <span class="c1"># ``UInt8Field`` wraps rather than raising -- measured, ``300`` packs as</span>
-        <span class="c1"># ``0x2c`` -- so an out-of-range lifetime would otherwise be written as some</span>
-        <span class="c1"># other perfectly valid-looking duration.</span>
+        <span class="c1"># ``UInt8Field`` wraps rather than raising (``300`` packs as ``0x2c``), so</span>
+        <span class="c1"># an out-of-range lifetime would otherwise be written as some other</span>
+        <span class="c1"># valid-looking duration.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
@@ -3919,20 +3911,19 @@
 
 <span class="sd">        Only case 4 can lose a leading zero octet, and it is the only case where the</span>
 <span class="sd">        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing</span>
-<span class="sd">        declaring it. Reaching for it unconditionally is what re-serialised a</span>
-<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (:issue:`653`) and what built, under</span>
-<span class="sd">        HIPv1, parameters this library's own reader then rejected (:issue:`655`).</span>
+<span class="sd">        declaring it. Using it unconditionally would re-serialise a</span>
+<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,</span>
+<span class="sd">        parameters this library's own reader rejects.</span>
 
 <span class="sd">        Two things this deliberately does *not* reject, both of which look like</span>
 <span class="sd">        oversights and are not:</span>
 
 <span class="sd">        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a</span>
 <span class="sd">          zero-length output, so no conformant packet carries one -- but it is what</span>
-<span class="sd">          case 4 yields for the default ``random=0``, it is what a ``Length = 4``</span>
-<span class="sd">          parameter parses back to, and it is what this builder produced before this</span>
-<span class="sd">          change. Rejecting it would turn a degenerate-but-self-consistent case into</span>
-<span class="sd">          a new failure for callers that pass no value at all, which is beyond the</span>
-<span class="sd">          three defects this addresses.</span>
+<span class="sd">          case 4 yields for the default ``random=0``, and it is what a</span>
+<span class="sd">          ``Length = 4`` parameter parses back to. Rejecting it would turn a</span>
+<span class="sd">          degenerate-but-self-consistent case into a failure for callers that pass</span>
+<span class="sd">          no value at all.</span>
 <span class="sd">        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is</span>
 <span class="sd">          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and</span>
 <span class="sd">          :meth:`_read_param_solution`, whose guards are likewise written as</span>
@@ -4015,7 +4006,7 @@
         <span class="k">return</span> <span class="n">Schema_PuzzleParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="c1"># One field of ``RHASH_len / 8`` octets after the 4-octet</span>
-            <span class="c1"># ``#K``/``Lifetime``/``Opaque`` prefix -- :rfc:`7401#section-5.2.4`</span>
+            <span class="c1"># ``#K``/``Lifetime``/``Opaque`` prefix; :rfc:`7401#section-5.2.4`</span>
             <span class="c1"># spells the same quantity ``4 + RHASH_len / 8``.</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">,</span> <span class="n">random</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
@@ -4071,8 +4062,8 @@
             <span class="c1"># Both of these are `None`-sentinelled rather than overwritten</span>
             <span class="c1"># outright, unlike the data fields above. `Data_SolutionParameter` is</span>
             <span class="c1"># immutable, so a caller with a parsed parameter in hand has no other</span>
-            <span class="c1"># way to sanitise a peer's non-conformant `Reserved` -- or to re-frame</span>
-            <span class="c1"># the parameter for an association with a different `RHASH_len`.</span>
+            <span class="c1"># way to sanitise a peer's non-conformant `Reserved` or to re-frame</span>
+            <span class="c1"># the parameter for a different `RHASH_len`.</span>
             <span class="k">if</span> <span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">reserved</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">reserved</span>
             <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -4084,13 +4075,13 @@
         <span class="k">return</span> <span class="n">Schema_SolutionParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="c1"># Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of</span>
-            <span class="c1"># ``RHASH_len / 8`` octets each -- so the contents length is necessarily</span>
+            <span class="c1"># ``RHASH_len / 8`` octets each, so the contents length is necessarily</span>
             <span class="c1"># even after the 4-octet ``#K``/``Reserved``/``Opaque`` prefix.</span>
             <span class="c1"># :rfc:`7401#section-5.2.5` spells the same quantity</span>
-            <span class="c1"># ``4 + RHASH_len / 4``, which is an identity only because a real</span>
+            <span class="c1"># ``4 + RHASH_len / 4``, an identity only because a real</span>
             <span class="c1"># ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an</span>
             <span class="c1"># arbitrary :meth:`int.bit_length` is not that quantity and yields an odd</span>
-            <span class="c1"># width that :meth:`_read_param_solution` rejects. See #608.</span>
+            <span class="c1"># width that :meth:`_read_param_solution` rejects.</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">,</span>
                                                       <span class="n">random</span><span class="p">,</span> <span class="n">solution</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
@@ -4455,18 +4446,16 @@
             <span class="n">iv</span><span class="o">=</span><span class="n">iv</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: ``cipher`` is not a schema field -- ``ENCRYPTED``'s own wire</span>
-        <span class="c1"># format carries no cipher ID of its own, only the preceding</span>
-        <span class="c1"># ``HIP_CIPHER`` parameter does -- so passing it as a constructor</span>
-        <span class="c1"># keyword (as this used to) drew an ``UnknownFieldWarning`` and was</span>
-        <span class="c1"># dropped, leaving ``pre_unpack`` to fall back to its own sibling</span>
-        <span class="c1"># lookup, which a standalone ``make`` call gives no ``options`` to</span>
-        <span class="c1"># search and which then always treated the parameter as cipher-less</span>
-        <span class="c1"># and silently packed the ``ENCRYPTED`` parameter without its IV.</span>
-        <span class="c1"># Setting the already-resolved ``cipher_id`` as a plain attribute</span>
-        <span class="c1"># instead reaches ``pack()``'s packet context via</span>
-        <span class="c1"># ``packet.update(self.__dict__)``, where ``pre_unpack`` now honours</span>
-        <span class="c1"># it ahead of that lookup. See #556.</span>
+        <span class="c1"># NOTE: ``cipher`` is not a schema field: ``ENCRYPTED``'s own wire</span>
+        <span class="c1"># format carries no cipher ID, only the preceding ``HIP_CIPHER``</span>
+        <span class="c1"># parameter does. Passed as a constructor keyword it draws an</span>
+        <span class="c1"># ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall</span>
+        <span class="c1"># back to its sibling lookup, which a standalone ``make`` call gives no</span>
+        <span class="c1"># ``options`` to search; the parameter would then be treated as</span>
+        <span class="c1"># cipher-less and silently packed without its IV. Setting the</span>
+        <span class="c1"># already-resolved ``cipher_id`` as a plain attribute instead reaches</span>
+        <span class="c1"># ``pack()``'s packet context via ``packet.update(self.__dict__)``,</span>
+        <span class="c1"># where ``pre_unpack`` honours it ahead of that lookup.</span>
         <span class="n">schema</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">cipher_id</span>
         <span class="k">return</span> <span class="n">schema</span></div>
 

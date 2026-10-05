@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/link/c_tag.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.link.c_tag contains C_Tag only, which implements extractor for the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag)*, EtherType 0x8100. Its structure, and all of its pars..." />
-<meta name="description" content="pcapkit.protocols.link.c_tag contains C_Tag only, which implements extractor for the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag)*, EtherType 0x8100. Its structure, and all of its pars..." />
+<meta property="og:description" content="pcapkit.protocols.link.c_tag contains C_Tag only, which implements extractor for the 802.1Q Customer VLAN Tag Type (C-Tag)*, EtherType 0x8100. Its structure, and all of its parsing and construction..." />
+<meta name="description" content="pcapkit.protocols.link.c_tag contains C_Tag only, which implements extractor for the 802.1Q Customer VLAN Tag Type (C-Tag)*, EtherType 0x8100. Its structure, and all of its parsing and construction..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="S_Tag - 802.1ad Service VLAN Tag Type" href="s_tag.html"><link rel="prev" title="VLAN - 802.1Q/802.1ad VLAN Tag Types" href="vlan.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -487,20 +487,17 @@
 <span id="c-tag-802-1q-customer-vlan-tag-type"></span><h1>C_Tag - 802.1Q Customer VLAN Tag Type<a class="headerlink" href="#module-pcapkit.protocols.link.c_tag" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.link.c_tag" title="pcapkit.protocols.link.c_tag"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.c_tag</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a> only, which implements extractor for
-the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, EtherType
+the 802.1Q Customer VLAN Tag Type (C-Tag) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, EtherType
 <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>.</p>
 <p>Its structure, and all of its parsing and construction, come from
 <a class="reference internal" href="vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>; this class adds only the tag’s own
 identity – <a class="reference internal" href="#pcapkit.protocols.link.c_tag.C_Tag.name" title="pcapkit.protocols.link.c_tag.C_Tag.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.link.c_tag.C_Tag.alias" title="pcapkit.protocols.link.c_tag.C_Tag.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.link.c_tag.C_Tag.info_name" title="pcapkit.protocols.link.c_tag.C_Tag.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a> – and its registry index.</p>
-<p>It lives in a module of its own rather than beside
-<a class="reference internal" href="s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a> because the two are reached through
-<em>different</em> registry indices, <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> against <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code>, which is the
-project’s rule for when protocols share a module. Contrast
-<a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.InARP" title="pcapkit.protocols.link.arp.InARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">InARP</span></code></a>, which shares
-<a class="reference internal" href="arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">arp</span></code></a> with <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a>
-precisely because it inherits its index.</p>
+<p>It has a module of its own, apart from
+<a class="reference internal" href="s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a>, because the two are reached through
+<em>different</em> registry indices, <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> against <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code>; see
+<a class="reference internal" href="vlan.html#module-pcapkit.protocols.link.vlan" title="pcapkit.protocols.link.vlan"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan</span></code></a> for the rule.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.c_tag.C_Tag">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.c_tag.</span></span><span class="sig-name descname"><span class="pre">C_Tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/c_tag.html#C_Tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.c_tag.C_Tag" title="Link to this definition">¶</a></dt>

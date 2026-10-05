@@ -517,44 +517,43 @@ modules of their own:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>1</p></td>
+<tr class="row-even"><td><p>0</p></td>
 <td><p>0</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">vlan.tci</span></code></p></td>
 <td><p>Tag Control Information</p></td>
 </tr>
-<tr class="row-odd"><td><p>1</p></td>
+<tr class="row-odd"><td><p>0</p></td>
 <td><p>0</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">vlan.tci.pcp</span></code></p></td>
 <td><p>Priority Code Point</p></td>
 </tr>
-<tr class="row-even"><td><p>1</p></td>
+<tr class="row-even"><td><p>0</p></td>
 <td><p>3</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">vlan.tci.dei</span></code></p></td>
 <td><p>Drop Eligible Indicator</p></td>
 </tr>
-<tr class="row-odd"><td><p>1</p></td>
+<tr class="row-odd"><td><p>0</p></td>
 <td><p>4</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">vlan.tci.vid</span></code></p></td>
 <td><p>VLAN Identifier</p></td>
 </tr>
-<tr class="row-even"><td><p>3</p></td>
-<td><p>24</p></td>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">vlan.type</span></code></p></td>
 <td><p>Protocol (Internet Layer)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The two tags carry an identical tag control information layout and are told apart
-solely by the tag protocol identifier (TPID) that selected them – <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> for
-the customer tag against <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> for the service tag. That TPID is not part of
-either tag: it is the EtherType field of whatever encapsulates the tag, so both
-classes read the same four octets and share every byte of parsing and
-construction code, which is what this base holds.</p>
-<p>They are nonetheless distinct classes rather than one class bound at two
-EtherTypes, because 802.1ad <em>stacks</em> them. In a Q-in-Q frame the service tag’s
-own next-EtherType is <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, which selects a customer tag in turn, so both
-tags appear in one frame:</p>
+<p>The two tags carry an identical tag control information layout and differ only
+in the tag protocol identifier (TPID) that selected them – <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> for the
+customer tag, <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> for the service tag. The TPID is not part of either tag:
+it is the EtherType field of whatever encapsulates the tag. Both classes read the
+same four octets and share all parsing and construction code, which this base
+holds.</p>
+<p>They are still distinct classes rather than one class bound at two EtherTypes,
+because 802.1ad <em>stacks</em> them. In a Q-in-Q frame the service tag’s own
+next-EtherType is <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, which selects a customer tag in turn:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ethernet.type                = 0x88A8
 ethernet.s_tag.tci.vid       = 100     &lt;- service tag,  802.1ad
 ethernet.s_tag.type          = 0x8100
@@ -564,17 +563,16 @@ ethernet.s_tag.c_tag.type    = 0x0800
 </div>
 <p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info_name" title="pcapkit.protocols.protocol.Protocol.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a> – <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> against
 <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> – is what keeps the two apart in the parsed
-<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>. A single class bound at both EtherTypes
-would nest one <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside another, leaving nothing in the output to say
-which of the two was the service tag.</p>
-<p>Two distinct EtherTypes also means two distinct
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> values, which is the
-project’s rule for when protocols get separate modules: siblings that <em>share</em> an
+<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>. One class bound at both EtherTypes
+would nest a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code>, leaving nothing to say which was the
+service tag.</p>
+<p>Two EtherTypes also mean two <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a>
+values, which is the project’s rule for separate modules: siblings that <em>share</em> an
 index may share a module, as <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.InARP" title="pcapkit.protocols.link.arp.InARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">InARP</span></code></a> shares
 <a class="reference internal" href="arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">arp</span></code></a> and
 <a class="reference internal" href="../application/rarp.html#pcapkit.protocols.application.rarp.DRARP" title="pcapkit.protocols.application.rarp.DRARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DRARP</span></code></a> shares
-<a class="reference internal" href="../application/rarp.html#module-pcapkit.protocols.application.rarp" title="pcapkit.protocols.application.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rarp</span></code></a>. This base declares no index of its own –
-it is abstract and nothing dispatches to it – so its <code class="docutils literal notranslate"><span class="pre">__index__</span></code> raises.</p>
+<a class="reference internal" href="../application/rarp.html#module-pcapkit.protocols.application.rarp" title="pcapkit.protocols.application.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rarp</span></code></a>. This base is abstract, nothing
+dispatches to it, and it declares no index, so its <code class="docutils literal notranslate"><span class="pre">__index__</span></code> raises.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN" title="Link to this definition">¶</a></dt>

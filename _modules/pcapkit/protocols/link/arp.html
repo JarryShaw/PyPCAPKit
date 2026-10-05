@@ -846,11 +846,10 @@
 <span class="sd">            ptype: Protocol type.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,</span>
-<span class="sd">            returns an :class:`~ipaddress.IPv4Address` object; if ``ptype`` is</span>
-<span class="sd">            ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`</span>
-<span class="sd">            object; otherwise, returns a raw :data:`str` representing the</span>
-<span class="sd">            protocol address.</span>
+<span class="sd">            Protocol address. If ``ptype`` is ``0x0800`` (IPv4), an</span>
+<span class="sd">            :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6), an</span>
+<span class="sd">            :class:`~ipaddress.IPv6Address`; otherwise, the address as a hex</span>
+<span class="sd">            :data:`str`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>  <span class="c1"># IPv4</span>
@@ -866,8 +865,13 @@
 <span class="sd">            addr: Hardware address.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Hardware address. If ``htype`` is ``1``, i.e. MAC address,</span>
-<span class="sd">            returns ``:`` separated *hex* encoded MAC address.</span>
+<span class="sd">            Hardware address as :obj:`bytes`. If ``htype`` is ``1``, i.e. MAC</span>
+<span class="sd">            address, the ``:``- or ``-``-separated hex string is validated and</span>
+<span class="sd">            returned with the separators removed (still hex encoded).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a</span>
+<span class="sd">                well-formed MAC address.</span>
 
 <span class="sd">        """</span>
         <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span>
@@ -885,11 +889,11 @@
 <span class="sd">            addr: Protocol address.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,</span>
-<span class="sd">            returns an :class:`~ipaddress.IPv4Address` object; if ``ptype`` is</span>
-<span class="sd">            ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`</span>
-<span class="sd">            object; otherwise, returns a raw :data:`str` representing the</span>
-<span class="sd">            protocol address.</span>
+<span class="sd">            Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or</span>
+<span class="sd">            ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16</span>
+<span class="sd">            octets; otherwise, a :data:`str` is encoded, an</span>
+<span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is</span>
+<span class="sd">            packed, and anything else is returned as given.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.</span>
@@ -899,9 +903,9 @@
 <span class="sd">            Through :func:`parse_ip_address` rather than</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`</span>
 <span class="sd">            directly, because :obj:`bool` is an :class:`int` subclass that</span>
-<span class="sd">            either constructor accepts without complaint. Before this,</span>
-<span class="sd">            ``addr=True`` packed as ``00000001`` (IPv4) or ``::1`` (IPv6) with</span>
-<span class="sd">            no exception and no warning at all (c.f. :issue:`508`, :issue:`540`).</span>
+<span class="sd">            either constructor accepts without complaint: ``addr=True`` would</span>
+<span class="sd">            pack as ``00000001`` (IPv4) or ``::1`` (IPv6) with no exception and</span>
+<span class="sd">            no warning.</span>
 
 <span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
 <span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>

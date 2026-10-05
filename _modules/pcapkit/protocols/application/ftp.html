@@ -512,10 +512,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""FTP packet type.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract</span>
+<span class="sd">    shared by every non-registry enumeration (:issue:`877`). The class defines</span>
+<span class="sd">    neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 

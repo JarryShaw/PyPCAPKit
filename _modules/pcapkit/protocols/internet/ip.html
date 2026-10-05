@@ -477,9 +477,8 @@
 <span class="sd">:class:`~pcapkit.protocols.internet.ip.IP` only,</span>
 <span class="sd">which is a base class for Internet Protocol (IP)</span>
 <span class="sd">protocol family [*]_, eg.</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipv4.IPv4`,</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6`, and</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipsec.IPsec`.</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipv4.IPv4` and</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6`.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Internet_Protocol</span>
 
@@ -498,12 +497,14 @@
 <div class="viewcode-block" id="IP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IP</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">"""This class implements all protocols in IP family.</span>
+<span class="w">    </span><span class="sd">"""Base class for the IP protocol family.</span>
 
 <span class="sd">    - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]</span>
 <span class="sd">    - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`2460`]</span>
-<span class="sd">    - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]</span>
-<span class="sd">    - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]</span>
+
+<span class="sd">    The IPsec protocols (:class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.esp.ESP`) derive from</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipsec.IPsec` instead.</span>
 
 <span class="sd">    """</span>
 

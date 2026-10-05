@@ -538,41 +538,39 @@
 <span class="c1">#: Keywords that configure the construction rather than naming a field, and are</span>
 <span class="c1">#: therefore consumed by :meth:`ProtocolBase.__init__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` or by the schema layer</span>
-<span class="c1">#: instead of by a :meth:`make &lt;pcapkit.protocols.protocol.Protocol.make&gt;`. They</span>
-<span class="c1">#: are declared by no signature, so :func:`_declared_keywords` cannot find them</span>
-<span class="c1">#: and they are listed here instead.</span>
+<span class="c1">#: instead of by a :meth:`make &lt;pcapkit.protocols.protocol.Protocol.make&gt;`. No</span>
+<span class="c1">#: signature declares them, so :func:`_declared_keywords` cannot find them and</span>
+<span class="c1">#: they are listed here.</span>
 <span class="c1">#:</span>
-<span class="c1">#: ``packet`` is here because the library puts it there itself, rather than</span>
-<span class="c1">#: because a caller might: :meth:`ProtocolBase.__init__</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` injects</span>
-<span class="c1">#: ``packet=self.packet.payload`` into every parsed ``_info``, so the default</span>
-<span class="c1">#: :meth:`ProtocolBase._make_data</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._make_data&gt;` -- which is</span>
-<span class="c1">#: ``data.to_dict()`` -- carries it into the keywords that</span>
-<span class="c1">#: :meth:`ProtocolBase.from_data &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;`</span>
-<span class="c1">#: reconstructs from. Refusing it would make ``from_data`` fail on any protocol</span>
-<span class="c1">#: whose ``make`` does not happen to declare a ``packet``, starting with</span>
-<span class="c1">#: :class:`~pcapkit.protocols.misc.null.NoPayload`, which is reached for the</span>
-<span class="c1">#: innermost layer of every packet. It is a field name for some protocols all the</span>
-<span class="c1">#: same -- :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;` takes the</span>
-<span class="c1">#: HIP packet *type* under that name -- and listing it here does not change how it</span>
-<span class="c1">#: binds, only that it is never refused.</span>
+<span class="c1">#: ``packet`` is here because the library puts it there itself:</span>
+<span class="c1">#: :meth:`ProtocolBase.__init__ &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;`</span>
+<span class="c1">#: injects ``packet=self.packet.payload`` into every parsed ``_info``, so the</span>
+<span class="c1">#: default :meth:`ProtocolBase._make_data</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._make_data&gt;` (``data.to_dict()``)</span>
+<span class="c1">#: carries it into the keywords that :meth:`ProtocolBase.from_data</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;` reconstructs from.</span>
+<span class="c1">#: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does</span>
+<span class="c1">#: not declare a ``packet``, starting with</span>
+<span class="c1">#: :class:`~pcapkit.protocols.misc.null.NoPayload`, the innermost layer of every</span>
+<span class="c1">#: packet. It is also a real field name for some protocols --</span>
+<span class="c1">#: :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;` takes the HIP</span>
+<span class="c1">#: packet *type* under it -- and listing it here does not change how it binds,</span>
+<span class="c1">#: only that it is never refused.</span>
 <span class="n">OUT_OF_BAND_KEYWORDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'_layer'</span><span class="p">,</span> <span class="s1">'_protocol'</span><span class="p">,</span> <span class="s1">'__context__'</span><span class="p">,</span>
                                   <span class="s1">'__packet__'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">})</span>
 
 
-<span class="c1">#: Cache for :func:`_declared_keywords`, keyed by protocol class. A protocol's</span>
-<span class="c1">#: signatures do not change after the class is created, and the walk below is</span>
-<span class="c1">#: :math:`O(\\text{MRO} \\times \\text{methods})`, so it is done once per class</span>
+<span class="c1">#: Cache for :func:`_declared_keywords`, keyed by protocol class. Signatures do</span>
+<span class="c1">#: not change after the class is created and the walk below is</span>
+<span class="c1">#: :math:`O(\\text{MRO} \\times \\text{methods})`, so it runs once per class</span>
 <span class="c1">#: rather than once per constructed packet.</span>
 <span class="n">_DECLARED_KEYWORDS</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[type, Optional[frozenset[str]]]</span>
 
-<span class="c1">#: Methods that a construction keyword may legitimately be destined for. The</span>
-<span class="c1">#: keywords handed to :class:`Protocol` are forwarded to all of them -- see</span>
-<span class="c1">#: :meth:`ProtocolBase.__post_init__</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;`, which passes the</span>
-<span class="c1">#: same ``**kwargs`` to :meth:`pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;`</span>
-<span class="c1">#: (and through it to ``make``) *and* to :meth:`unpack</span>
+<span class="c1">#: Methods a construction keyword may be destined for. The keywords handed to</span>
+<span class="c1">#: :class:`Protocol` reach all of them: :meth:`ProtocolBase.__post_init__</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` passes the same</span>
+<span class="c1">#: ``**kwargs`` to :meth:`pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;` (and</span>
+<span class="c1">#: through it to ``make``) *and* to :meth:`unpack</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;` (and through it to ``read``).</span>
 <span class="n">_KEYWORD_CONSUMERS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'make'</span><span class="p">,</span> <span class="s1">'read'</span><span class="p">,</span> <span class="s1">'pack'</span><span class="p">,</span> <span class="s1">'unpack'</span><span class="p">,</span> <span class="s1">'__post_init__'</span><span class="p">,</span> <span class="s1">'__init__'</span><span class="p">)</span>
 
@@ -593,23 +591,21 @@
 <span class="sd">        and are not to be checked -- inherited :obj:`None` does not count, for the</span>
 <span class="sd">        reason given at the read below.</span>
 
-<span class="sd">    The union is deliberately wider than the signature of ``cls.make`` alone,</span>
-<span class="sd">    because a keyword reaching ``make`` is not necessarily *for* ``make``:</span>
+<span class="sd">    The union is deliberately wider than the signature of ``cls.make``, because</span>
+<span class="sd">    a keyword reaching ``make`` is not necessarily *for* ``make``:</span>
 <span class="sd">    :meth:`ProtocolBase.__post_init__</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` hands one</span>
 <span class="sd">    ``**kwargs`` to both the construction and the parse of the packet it has just</span>
-<span class="sd">    constructed, so a keyword declared by ``read`` travels through ``make`` as</span>
-<span class="sd">    well. :class:`~pcapkit.protocols.internet.hip.HIP` is the live example --</span>
+<span class="sd">    constructed, so a keyword declared by ``read`` travels through ``make`` too.</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.hip.HIP` is the live example:</span>
 <span class="sd">    :meth:`HIP.read &lt;pcapkit.protocols.internet.hip.HIP.read&gt;` declares</span>
-<span class="sd">    ``extension`` and :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;`</span>
-<span class="sd">    does not, yet :meth:`HIP.__post_init__</span>
+<span class="sd">    ``extension``, :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;`</span>
+<span class="sd">    does not, and :meth:`HIP.__post_init__</span>
 <span class="sd">    &lt;pcapkit.protocols.internet.hip.HIP.__post_init__&gt;` forwards it to both.</span>
-<span class="sd">    Rejecting on ``make`` alone would reject that, which is correct code.</span>
 
 <span class="sd">    The walk covers the whole MRO rather than the most derived override of each</span>
-<span class="sd">    method, for the same reason: a subclass that declares its own keyword and</span>
-<span class="sd">    forwards the rest to its parent must not make the parent's keywords</span>
-<span class="sd">    unreachable.</span>
+<span class="sd">    method, so that a subclass declaring its own keyword and forwarding the rest</span>
+<span class="sd">    to its parent does not make the parent's keywords unreachable.</span>
 
 <span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
@@ -620,22 +616,22 @@
     <span class="n">unchecked</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">OUT_OF_BAND_KEYWORDS</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
-        <span class="c1"># NOTE: A keyword read out of ``**kwargs`` by name rather than declared</span>
-        <span class="c1"># as a parameter is invisible to :func:`inspect.signature`, so the class</span>
-        <span class="c1"># says so itself. Read per class in the MRO, for the same reason the</span>
-        <span class="c1"># methods are: a subclass should not have to repeat its parents'.</span>
+        <span class="c1"># NOTE: A keyword read out of ``**kwargs`` by name is invisible to</span>
+        <span class="c1"># :func:`inspect.signature`, so the class lists it in ``__keywords__``.</span>
+        <span class="c1"># Read per class in the MRO, like the methods, so a subclass need not</span>
+        <span class="c1"># repeat its parents' entries.</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__keywords__'</span><span class="p">,</span> <span class="n">ABSENT</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,</span>
             <span class="c1"># which is unioned down the MRO. It describes how the class that</span>
-            <span class="c1"># declares it dispatches, which is not a property its subclasses</span>
-            <span class="c1"># share: :class:`~pcapkit.protocols.application.http.HTTP` cannot</span>
-            <span class="c1"># enumerate its keywords because it forwards them to whichever of</span>
+            <span class="c1"># declares it dispatches, not a property its subclasses share:</span>
+            <span class="c1"># :class:`~pcapkit.protocols.application.http.HTTP` cannot enumerate</span>
+            <span class="c1"># its keywords because it forwards them to whichever of</span>
             <span class="c1"># :class:`HTTPv1 &lt;pcapkit.protocols.application.httpv1.HTTP&gt;` and</span>
             <span class="c1"># :class:`HTTPv2 &lt;pcapkit.protocols.application.httpv2.HTTP&gt;` the</span>
-            <span class="c1"># ``version`` names -- but those two declare theirs in full, and</span>
-            <span class="c1"># inheriting the opt-out would silently exempt the very classes that</span>
-            <span class="c1"># can be checked. A subclass that dispatches in turn says so itself.</span>
+            <span class="c1"># ``version`` names, but those two declare theirs in full, and</span>
+            <span class="c1"># inheriting the opt-out would exempt the very classes that can be</span>
+            <span class="c1"># checked. A subclass that dispatches in turn says so itself.</span>
             <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">cls</span><span class="p">:</span>
                 <span class="n">unchecked</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ABSENT</span><span class="p">:</span>
@@ -644,9 +640,9 @@
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">_KEYWORD_CONSUMERS</span><span class="p">:</span>
             <span class="c1"># NOTE: Read from ``__dict__`` rather than with :func:`getattr`, so</span>
             <span class="c1"># that each class in the MRO contributes its *own* definition instead</span>
-            <span class="c1"># of the most derived one over and over. An ``@overload``-decorated</span>
-            <span class="c1"># stub is overwritten by the implementation that follows it, which is</span>
-            <span class="c1"># what lands here.</span>
+            <span class="c1"># of the most derived one every time. An ``@overload`` stub is</span>
+            <span class="c1"># overwritten by the implementation that follows it, which is what</span>
+            <span class="c1"># lands here.</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -654,9 +650,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-                <span class="c1"># NOTE: A C-implemented or otherwise unintrospectable callable is</span>
-                <span class="c1"># skipped rather than fatal: failing to widen the accepted set is</span>
-                <span class="c1"># a false rejection, so the safe move is to keep walking.</span>
+                <span class="c1"># NOTE: An unintrospectable callable is skipped rather than fatal:</span>
+                <span class="c1"># failing to widen the accepted set is a false rejection, so keep</span>
+                <span class="c1"># walking.</span>
                 <span class="k">continue</span>
 
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -703,10 +699,10 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">unexpected</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="c1"># NOTE: The whole point of the check is a misspelling, so name the neighbour</span>
-    <span class="c1"># that was probably meant: ``seq`` for ``seq_no`` and ``ack_flag`` for</span>
-    <span class="c1"># ``ack`` are both a :func:`difflib.get_close_matches` hit, and the message</span>
-    <span class="c1"># is the only place the caller looks before reading the signature.</span>
+    <span class="c1"># NOTE: The check exists to catch misspellings, so name the neighbour that</span>
+    <span class="c1"># was probably meant (``seq`` for ``seq_no``, ``ack_flag`` for ``ack``, both</span>
+    <span class="c1"># a :func:`difflib.get_close_matches` hit); the message is the only place the</span>
+    <span class="c1"># caller looks before reading the signature.</span>
     <span class="n">report</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">unexpected</span><span class="p">:</span>
         <span class="n">suggestions</span> <span class="o">=</span> <span class="n">difflib</span><span class="o">.</span><span class="n">get_close_matches</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">declared</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -719,19 +715,17 @@
     <span class="c1"># NOTE: A warning rather than an error, because nobody typed these: they are</span>
     <span class="c1"># whatever ``_make_data`` returned, so the defect is a key of that mapping</span>
     <span class="c1"># disagreeing with the signature it is spread into, and the person who meets</span>
-    <span class="c1"># it is not the person who can fix it. Raising would also turn three latent</span>
-    <span class="c1"># defects of exactly that shape into a broken ``from_data`` -- ``Frame``</span>
-    <span class="c1"># returns ``ts_src`` for ``ts_sec``, ``Header`` an undeclared</span>
-    <span class="c1"># ``magic_number``, ``L2TPv2`` ``prio`` for ``priority`` -- each of which has</span>
-    <span class="c1"># been losing that field in silence and each of which belongs to its own</span>
-    <span class="c1"># change. This is what makes them audible meanwhile.</span>
+    <span class="c1"># it cannot fix it. Raising would turn every such mismatch -- e.g. ``Frame``</span>
+    <span class="c1"># returns ``ts_src`` for ``ts_sec`` and ``L2TPv2`` ``prio`` for ``priority``</span>
+    <span class="c1"># -- into a broken ``from_data``, where the field is merely dropped; the</span>
+    <span class="c1"># warning makes that audible instead.</span>
     <span class="c1">#</span>
     <span class="c1"># No explicit ``stacklevel``: the default blames the innermost frame outside</span>
     <span class="c1"># :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be</span>
-    <span class="c1"># pointed at, and it stays right if the frames between here and there ever</span>
-    <span class="c1"># change, where a hardcoded count would not. It is also what</span>
-    <span class="c1"># :meth:`Schema.__update__ &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;`</span>
-    <span class="c1"># passes for the warning this one is the counterpart of.</span>
+    <span class="c1"># pointed at, and it stays right if the frames between change, where a</span>
+    <span class="c1"># hardcoded count would not. It is also what :meth:`Schema.__update__</span>
+    <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` passes for the</span>
+    <span class="c1"># warning this one is the counterpart of.</span>
     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">._make_data returned keyword(s) that no signature of '</span>
          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> declares, so they are discarded: </span><span class="si">{</span><span class="n">listed</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
          <span class="n">UnknownFieldWarning</span><span class="p">)</span>
@@ -805,20 +799,20 @@
     <span class="c1">#: Construction keywords this protocol consumes out of ``**kwargs`` instead</span>
     <span class="c1">#: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in</span>
     <span class="c1">#: :meth:`read` -- as :meth:`ESP.read &lt;pcapkit.protocols.internet.esp.ESP.read&gt;`</span>
-    <span class="c1">#: does with ``packet``. :func:`~pcapkit.protocols.protocol._declared_keywords`</span>
-    <span class="c1">#: finds a protocol's keywords by reading its signatures, which cannot see</span>
-    <span class="c1">#: such a name, so a protocol that consumes one names it here and the</span>
-    <span class="c1">#: construction check of :meth:`__init__` accepts it. The union over the MRO</span>
-    <span class="c1">#: is used, so a subclass need not repeat its parents' entries.</span>
+    <span class="c1">#: does with ``packet``.</span>
+    <span class="c1">#: :func:`~pcapkit.protocols.protocol._declared_keywords` finds keywords by</span>
+    <span class="c1">#: reading signatures, which cannot see such a name, so a protocol that</span>
+    <span class="c1">#: consumes one names it here and the construction check of :meth:`__init__`</span>
+    <span class="c1">#: accepts it. The union over the MRO is used, so a subclass need not repeat</span>
+    <span class="c1">#: its parents' entries.</span>
     <span class="c1">#:</span>
-    <span class="c1">#: Declaring the parameter is preferable where it is possible, since that is</span>
-    <span class="c1">#: also what documents the keyword to the caller and to :mod:`inspect`. This</span>
-    <span class="c1">#: is for the cases where it is not -- a keyword handled uniformly for a whole</span>
-    <span class="c1">#: family of names, say -- and *not* a way to reopen the silence :issue:`617` closed:</span>
-    <span class="c1">#: it is opt-in per class, so it can only ever exempt a name whose author</span>
-    <span class="c1">#: wrote it down.</span>
+    <span class="c1">#: Declaring the parameter is preferable where possible, since that also</span>
+    <span class="c1">#: documents the keyword to the caller and to :mod:`inspect`. This is for the</span>
+    <span class="c1">#: cases where it is not -- a keyword handled uniformly for a whole family of</span>
+    <span class="c1">#: names, say. It is opt-in per class, so it can only exempt a name whose</span>
+    <span class="c1">#: author wrote it down (:issue:`617`).</span>
     <span class="c1">#:</span>
-    <span class="c1">#: :obj:`None` means the keywords cannot be enumerated at all and the check is</span>
+    <span class="c1">#: :obj:`None` means the keywords cannot be enumerated and the check is</span>
     <span class="c1">#: skipped for this protocol. That is for a *dispatcher*, whose real signature</span>
     <span class="c1">#: belongs to a class chosen at call time:</span>
     <span class="c1">#: :meth:`HTTP.make &lt;pcapkit.protocols.application.http.HTTP.make&gt;` declares</span>
@@ -826,28 +820,27 @@
     <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.HTTP.make&gt;` or</span>
     <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTP.make&gt;`</span>
     <span class="c1">#: depending on that value, so no set of names is right for it. Use it only</span>
-    <span class="c1">#: for that shape; a protocol that forgoes the check gets the pre-:issue:`617`</span>
-    <span class="c1">#: behaviour back, and with it the silence. Unlike a set, the :obj:`None` is</span>
-    <span class="c1">#: **not** inherited: a subclass of a dispatcher is checked normally unless it</span>
-    <span class="c1">#: dispatches too and says so, because ``HTTPv1`` and ``HTTPv2`` declare their</span>
-    <span class="c1">#: keywords in full and exempting them along with their base would forgo the</span>
-    <span class="c1">#: check on the only two classes here that can have it.</span>
+    <span class="c1">#: for that shape, since a protocol that skips the check silently discards an</span>
+    <span class="c1">#: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a</span>
+    <span class="c1">#: subclass of a dispatcher is checked normally unless it dispatches too and</span>
+    <span class="c1">#: says so, because ``HTTPv1`` and ``HTTPv2`` declare their keywords in full</span>
+    <span class="c1">#: and exempting them along with their base would forgo the check on the only</span>
+    <span class="c1">#: two classes here that can have it.</span>
     <span class="n">__keywords__</span><span class="p">:</span> <span class="s1">'Optional[frozenset[str]]'</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span>
 
     <span class="c1">#: Whether this instance is being rebuilt by :meth:`from_data` from a parsed</span>
     <span class="c1">#: data model, as against constructed from keywords somebody wrote. It governs</span>
     <span class="c1">#: only whether the construction keyword check of :meth:`__init__` raises or</span>
-    <span class="c1">#: warns (:issue:`617`), and is set for the duration of that call alone -- the class</span>
-    <span class="c1">#: level :data:`False` is what every other code path sees, including an</span>
-    <span class="c1">#: instance built without going through ``__init__`` at all.</span>
+    <span class="c1">#: warns, and is set for the duration of that call alone; the class-level</span>
+    <span class="c1">#: :data:`False` is what every other code path sees, including an instance</span>
+    <span class="c1">#: built without ``__init__``.</span>
     <span class="n">__reconstructing__</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">#: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.</span>
     <span class="c1">#: :meth:`self.__init__ &lt;Protocol.__init__&gt;` replaces this with a real</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.context.ContextRegistry`; the class level</span>
-    <span class="c1">#: :data:`None` is what an instance built without going through</span>
-    <span class="c1">#: ``__init__`` -- e.g. ``object.__new__(SomeProtocol)`` -- sees, so that</span>
-    <span class="c1">#: reading it is always safe.</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level</span>
+    <span class="c1">#: :data:`None` is what an instance built without ``__init__`` (e.g.</span>
+    <span class="c1">#: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.</span>
     <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
@@ -921,17 +914,15 @@
 <span class="sd">            there to the end of the buffer. Both hold for a protocol laid out as</span>
 <span class="sd">            a header followed by its payload, which is nearly all of them.</span>
 
-<span class="sd">            A protocol that is not laid out that way has to override this: one</span>
-<span class="sd">            whose :attr:`~length` counts something else, or one carrying a</span>
-<span class="sd">            *trailer* after the payload, gets a header that eats the payload and</span>
-<span class="sd">            a payload of ``b''``. That is what</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` did to every packet</span>
-<span class="sd">            block -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length` is</span>
-<span class="sd">            the wire's Block Total Length and the captured octets sit ahead of</span>
-<span class="sd">            the option list and the trailing length field -- and</span>
-<span class="sd">            :meth:`ProtocolBase.__init__` injects this payload into every parsed</span>
-<span class="sd">            ``_info``, so the empty value reached the dumpers and corrupted the</span>
-<span class="sd">            files they wrote. See :issue:`646`.</span>
+<span class="sd">            A protocol laid out otherwise has to override this: one whose</span>
+<span class="sd">            :attr:`~length` counts something else, or one carrying a *trailer*</span>
+<span class="sd">            after the payload, gets a header that eats the payload and a payload</span>
+<span class="sd">            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` is the</span>
+<span class="sd">            example -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length`</span>
+<span class="sd">            is the wire's Block Total Length and the captured octets sit ahead of</span>
+<span class="sd">            the option list and the trailing length field. The payload matters</span>
+<span class="sd">            because :meth:`ProtocolBase.__init__` injects it into every parsed</span>
+<span class="sd">            ``_info``, which the dumpers write out.</span>
 
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1008,12 +999,11 @@
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` hands to the</span>
 <span class="sd">            parse as well as to the construction, so an implementation is not</span>
 <span class="sd">            expected to declare every keyword it is called with. It is *not* a</span>
-<span class="sd">            place for a caller to put a keyword no signature declares: since</span>
-<span class="sd">            :issue:`617`, building a protocol *through its constructor* with such a</span>
-<span class="sd">            keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`</span>
-<span class="sd">            from :meth:`ProtocolBase.__init__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` rather than</span>
-<span class="sd">            discarding it.</span>
+<span class="sd">            place for a caller to put a keyword no signature declares: building a</span>
+<span class="sd">            protocol *through its constructor* with such a keyword raises</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` from</span>
+<span class="sd">            :meth:`ProtocolBase.__init__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` (:issue:`617`).</span>
 
 <span class="sd">        Warning:</span>
 <span class="sd">            **Calling this method directly is not checked**, and still discards an</span>
@@ -1026,9 +1016,9 @@
 <span class="sd">            package's own tests and by :meth:`HTTP.make</span>
 <span class="sd">            &lt;pcapkit.protocols.application.http.HTTP.make&gt;` to reach its versioned</span>
 <span class="sd">            implementation. Covering it would mean interposing on every ``make``</span>
-<span class="sd">            in the tree rather than on the one place their keywords converge, which</span>
-<span class="sd">            is a larger change than :issue:`617` and deliberately not made here. Construct</span>
-<span class="sd">            through the constructor to get the check.</span>
+<span class="sd">            in the tree rather than on the one place their keywords converge, so</span>
+<span class="sd">            it is deliberately not done. Construct through the constructor to get</span>
+<span class="sd">            the check.</span>
 
 <span class="sd">        """</span>
 
@@ -1216,25 +1206,24 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already</span>
-<span class="sd">                registered. The warning names the displaced entry and its</span>
-<span class="sd">                replacement, so a caller can tell *what* was lost rather than</span>
-<span class="sd">                only that something was.</span>
+<span class="sd">                registered, naming the displaced entry and its replacement so a</span>
+<span class="sd">                caller can tell *what* was lost rather than only that something</span>
+<span class="sd">                was. Fires only when the incumbent differs from the</span>
+<span class="sd">                replacement; an unresolved</span>
+<span class="sd">                :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent</span>
+<span class="sd">                counts as different from the class it names.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The guard now matches :func:`register_protocol</span>
+<span class="sd">            The guard matches :func:`register_protocol</span>
 <span class="sd">            &lt;pcapkit.foundation.registry.protocols.register_protocol&gt;`'s: it</span>
 <span class="sd">            fires only when the incumbent differs from the replacement, so</span>
 <span class="sd">            re-registering the exact same class object under the same ``code``</span>
 <span class="sd">            is a silent no-op rather than a warning about nothing displaced.</span>
-<span class="sd">            GitHub issue :issue:`718` corrected the previous presence-only guard here,</span>
-<span class="sd">            which read every repeat registration as a caller mistake even when</span>
-<span class="sd">            the value was unchanged. The identity check does not reintroduce</span>
-<span class="sd">            the concern that guard was written to avoid: it is a plain ``is``</span>
-<span class="sd">            comparison, so an incumbent left as an unresolved</span>
-<span class="sd">            :class:`~pcapkit.corekit.module.ModuleDescriptor` is never equal to</span>
-<span class="sd">            the resolved replacement without the descriptor being resolved --</span>
-<span class="sd">            the comparison itself resolves nothing, so the deferred import</span>
-<span class="sd">            stays deferred and such an incumbent still reports as different.</span>
+<span class="sd">            The comparison is a plain ``is`` that resolves nothing, so an</span>
+<span class="sd">            incumbent left as an unresolved</span>
+<span class="sd">            :class:`~pcapkit.corekit.module.ModuleDescriptor` still reports as</span>
+<span class="sd">            different from the class it names, and the deferred import stays</span>
+<span class="sd">            deferred.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -1289,12 +1278,12 @@
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># NOTE: These keywords came out of ``_make_data``, not out of a caller, so</span>
-        <span class="c1"># the construction keyword check of ``__init__`` (#617) warns here instead</span>
-        <span class="c1"># of raising: a key of that mapping which disagrees with the signature it</span>
-        <span class="c1"># is spread into is a defect in this protocol, and the caller of</span>
+        <span class="c1"># the construction keyword check of ``__init__`` warns here instead of</span>
+        <span class="c1"># raising: a key of that mapping which disagrees with the signature it is</span>
+        <span class="c1"># spread into is a defect in this protocol, and the caller of</span>
         <span class="c1"># ``from_data`` can do nothing about it. Set for the duration of the call</span>
-        <span class="c1"># and removed afterwards, so an instance built this way is afterwards</span>
-        <span class="c1"># indistinguishable from one built directly.</span>
+        <span class="c1"># and removed afterwards, so the instance is indistinguishable from one</span>
+        <span class="c1"># built directly.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># initialize protocol instance</span>
@@ -1356,31 +1345,28 @@
 <span class="sd">                keyword names no parameter of this protocol's :meth:`make`,</span>
 <span class="sd">                :meth:`read`, :meth:`pack`, :meth:`unpack`,</span>
 <span class="sd">                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO,</span>
-<span class="sd">                and is not listed in :attr:`__keywords__`. See :issue:`617`; until then</span>
-<span class="sd">                such a keyword was silently discarded. Parsing (``file`` is</span>
+<span class="sd">                and is not listed in :attr:`__keywords__`. Parsing (``file`` is</span>
 <span class="sd">                given) is unaffected.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Three of the keywords above are *out-of-band*: they configure the</span>
 <span class="sd">            parse rather than describing the packet, and every one of them is</span>
 <span class="sd">            consumed here, at the one point each of a protocol's producers passes</span>
-<span class="sd">            through. That is deliberate, and it is what the normalisation below</span>
-<span class="sd">            relies on -- fixing a spelling here fixes it for the engines, for all</span>
-<span class="sd">            four :meth:`_import_next_layer &lt;ProtocolBase._import_next_layer&gt;`</span>
+<span class="sd">            through. That is deliberate, and the normalisation below relies on it: fixing</span>
+<span class="sd">            a spelling here fixes it for the engines, for all four</span>
+<span class="sd">            :meth:`_import_next_layer &lt;ProtocolBase._import_next_layer&gt;`</span>
 <span class="sd">            implementations, and for any third party protocol that copied their</span>
 <span class="sd">            shape, rather than one call site at a time.</span>
 
 <span class="sd">        """</span>
         <span class="c1">#logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)</span>
 
-        <span class="c1"># Whether this instantiation parses an existing packet, as opposed to</span>
-        <span class="c1"># constructing a new one. ``file`` is the discriminator the rest of this</span>
-        <span class="c1"># method already turns on: ``__post_init__`` reads the stream when there</span>
-        <span class="c1"># is one and calls ``self.pack(**kwargs)`` when there is not. It matters</span>
-        <span class="c1"># below because ``layer``, ``protocol`` and ``packet`` are out-of-band</span>
-        <span class="c1"># only while parsing -- on the construction path they are ordinary</span>
-        <span class="c1"># ``make()`` arguments, and consuming them there would silently drop the</span>
-        <span class="c1"># value being constructed.</span>
+        <span class="c1"># Whether this instantiation parses an existing packet rather than</span>
+        <span class="c1"># constructing a new one; ``__post_init__`` turns on the same ``file``.</span>
+        <span class="c1"># ``layer``, ``protocol`` and ``packet`` are out-of-band only while</span>
+        <span class="c1"># parsing -- on the construction path they are ordinary ``make()``</span>
+        <span class="c1"># arguments, and consuming them there would silently drop the value</span>
+        <span class="c1"># being constructed.</span>
         <span class="n">parsing</span> <span class="o">=</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="c1">#: int: File pointer.</span>
@@ -1390,19 +1376,17 @@
         <span class="c1">#: str: Parse packet until such protocol.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_protocol'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[str | ProtocolBase | Type[ProtocolBase]]</span>
 
-        <span class="c1"># NOTE: The parse limits are documented here as ``_layer`` and</span>
-        <span class="c1"># ``_protocol``, but no producer in the tree spells them that way. The</span>
-        <span class="c1"># engines build the outermost protocol with ``layer=``/``protocol=``</span>
+        <span class="c1"># NOTE: The parse limits are documented as ``_layer`` and ``_protocol``,</span>
+        <span class="c1"># but no producer in the tree spells them that way. The engines build the</span>
+        <span class="c1"># outermost protocol with ``layer=``/``protocol=``</span>
         <span class="c1"># (``pcapkit.foundation.engines.pcap.PCAP.read_frame`` and</span>
         <span class="c1"># ``pcapkit.foundation.engines.pcapng.PCAPNG.read_frame``), every</span>
         <span class="c1"># ``_import_next_layer`` recurses into the next one the same way, and the</span>
-        <span class="c1"># un-prefixed pair is also the public spelling that</span>
-        <span class="c1"># ``pcapkit.extract(layer=..., protocol=...)`` and the CLI's ``-L``/``-P``</span>
-        <span class="c1"># use. Both were therefore dropped into ``**kwargs`` and ignored, so</span>
-        <span class="c1"># neither option did anything at all; see GH-356. Accepting both</span>
-        <span class="c1"># spellings is what makes them work, and the prefixed one still wins so</span>
-        <span class="c1"># that a caller which reads this docstring is not overridden by a limit</span>
-        <span class="c1"># its parent happened to be forwarding.</span>
+        <span class="c1"># un-prefixed pair is the public spelling of</span>
+        <span class="c1"># ``pcapkit.extract(layer=..., protocol=...)`` and the CLI's ``-L``/``-P``.</span>
+        <span class="c1"># Left in ``**kwargs`` they would be ignored, so both spellings are</span>
+        <span class="c1"># accepted (GH-356); the prefixed one wins, so a caller following this</span>
+        <span class="c1"># docstring is not overridden by a limit its parent happened to forward.</span>
         <span class="k">if</span> <span class="n">parsing</span><span class="p">:</span>
             <span class="n">layer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'layer'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'protocol'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -1437,13 +1421,12 @@
         <span class="c1"># NOTE: The enclosing layer's packet context arrives as ``packet=`` -- the</span>
         <span class="c1"># spelling ``_import_next_layer`` uses -- but the schema layer reads it</span>
         <span class="c1"># from ``__packet__`` (``self.unpack`` below, and the ``pack``/``unpack``</span>
-        <span class="c1"># overrides of ``Frame`` and ``PCAPNG``). Nothing bridged the two, so a</span>
-        <span class="c1"># schema's ``unpack``/``post_process`` always saw an empty dict however</span>
-        <span class="c1"># much the outer layer had put in it: an ``IPv6`` source address never</span>
-        <span class="c1"># reached the HOPOPT MPL option that RFC 7731 elides from the wire, and a</span>
-        <span class="c1"># destination address never reached the RPL source route header that</span>
-        <span class="c1"># RFC 6554 needs it to decompress. Republish it here, for the same reason</span>
-        <span class="c1"># the limits above are normalised here. See GH-382.</span>
+        <span class="c1"># overrides of ``Frame`` and ``PCAPNG``). Republishing it here, for the</span>
+        <span class="c1"># same reason the limits above are normalised here, is what lets a</span>
+        <span class="c1"># schema's ``unpack``/``post_process`` see what the outer layer put in it:</span>
+        <span class="c1"># the ``IPv6`` source address that the HOPOPT MPL option elides from the</span>
+        <span class="c1"># wire (RFC 7731), and the destination address that the RPL source route</span>
+        <span class="c1"># header needs to decompress (RFC 6554). See GH-382.</span>
         <span class="c1">#</span>
         <span class="c1"># A copy rather than the dict itself: ``Schema.unpack`` writes every field</span>
         <span class="c1"># it reads into the context it is given, plus its own ``__length__`` and</span>
@@ -1451,20 +1434,18 @@
         <span class="c1"># hands one dict to each header in turn. Sharing it would leave one</span>
         <span class="c1"># header's fields visible to the next, where a ``ConditionalField`` test</span>
         <span class="c1"># or a length callback could read a sibling's stale value instead of</span>
-        <span class="c1"># failing. ``Schema.unpack`` already isolates its own per-field contexts</span>
-        <span class="c1"># the same way.</span>
+        <span class="c1"># failing. ``Schema.unpack`` isolates its own per-field contexts the same</span>
+        <span class="c1"># way.</span>
         <span class="k">if</span> <span class="n">parsing</span> <span class="ow">and</span> <span class="s1">'__packet__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">'__packet__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">'packet'</span><span class="p">])</span>
 
         <span class="c1"># NOTE: Construction only. A keyword that names no parameter of this</span>
-        <span class="c1"># protocol is a mistake rather than a value, and until #617 it was</span>
-        <span class="c1"># silently discarded: every ``make`` in the tree ends its signature with</span>
-        <span class="c1"># ``**kwargs`` and never reads it, so the keyword reached the schema as</span>
-        <span class="c1"># nothing at all and the field kept its default. The cost was measured on</span>
-        <span class="c1"># #602, where ``TCP_BASE`` asked for ``seq=1`` -- which ``TCP.make``</span>
-        <span class="c1"># spells ``seq_no`` -- and 25 generated fixture frames carried ``seq = 0``</span>
-        <span class="c1"># with an empty ``warnings`` list to show for it. The schema layer has</span>
-        <span class="c1"># never been that permissive: :meth:`Schema.__update__</span>
+        <span class="c1"># protocol is a mistake rather than a value. Every ``make`` in the tree</span>
+        <span class="c1"># ends its signature with ``**kwargs`` and never reads it, so an unknown</span>
+        <span class="c1"># keyword would reach the schema as nothing at all and the field would</span>
+        <span class="c1"># keep its default -- ``TCP_BASE`` asking for ``seq=1``, which</span>
+        <span class="c1"># ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning</span>
+        <span class="c1"># (:issue:`617`). The schema layer is not that permissive: :meth:`Schema.__update__</span>
         <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` warns</span>
         <span class="c1"># :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it</span>
         <span class="c1"># does not know, and this closes the asymmetry from the other end.</span>
@@ -1473,9 +1454,9 @@
         <span class="c1"># whatever the engines and the four ``_import_next_layer``</span>
         <span class="c1"># implementations forward -- ``alias``, ``packet``, and the limits</span>
         <span class="c1"># normalised above -- and a protocol has no way to know which of its</span>
-        <span class="c1"># ancestors' keywords its parent chose to pass on. Nothing was ever lost</span>
-        <span class="c1"># that way either: a dropped parse keyword changes how a packet is read,</span>
-        <span class="c1"># not what the octets say.</span>
+        <span class="c1"># ancestors' keywords its parent chose to pass on. Nothing is lost that</span>
+        <span class="c1"># way either: a dropped parse keyword changes how a packet is read, not</span>
+        <span class="c1"># what the octets say.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parsing</span><span class="p">:</span>
             <span class="n">_check_construction_keywords</span><span class="p">(</span>
                 <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span><span class="p">)</span>
@@ -1549,19 +1530,18 @@
 <span class="sd">            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and</span>
 <span class="sd">            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.</span>
 
-<span class="sd">        Dispatch registration is **opt-in**, exactly like the ``name=``/``protocol=``/</span>
+<span class="sd">        Dispatch registration is **opt-in**, like the ``name=``/``protocol=``/</span>
 <span class="sd">        ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,</span>
 <span class="sd">        :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,</span>
 <span class="sd">        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and</span>
 <span class="sd">        :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a</span>
-<span class="sd">        deliberate, documented way for a subclass to decline registration, not</span>
-<span class="sd">        an oversight -- it is exactly what every built-in protocol class does</span>
-<span class="sd">        today, since the built-in dispatch tables (e.g. ``Link.__proto__``)</span>
-<span class="sd">        are populated by literal assignment in each layer module, not by this</span>
-<span class="sd">        hook, so leaving ``code`` unset here changes nothing about them. A</span>
-<span class="sd">        subclass that declines can still be registered later, on demand, via</span>
-<span class="sd">        the owning class's :meth:`register` classmethod or the matching</span>
-<span class="sd">        ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.</span>
+<span class="sd">        deliberate way to decline registration, and what every built-in</span>
+<span class="sd">        protocol class does: the built-in dispatch tables (e.g.</span>
+<span class="sd">        ``Link.__proto__``) are populated by literal assignment in each layer</span>
+<span class="sd">        module, not by this hook. A subclass that declines can still be</span>
+<span class="sd">        registered later via the owning class's :meth:`register` classmethod or</span>
+<span class="sd">        the matching ``register_*`` helper in</span>
+<span class="sd">        :mod:`pcapkit.foundation.registry.protocols`.</span>
 
 <span class="sd">        ``code`` accepts:</span>
 
@@ -1588,8 +1568,8 @@
 
 <span class="sd">        Inference refuses rather than guesses: an enum member whose type</span>
 <span class="sd">        names no known destination raises</span>
-<span class="sd">        :exc:`~pcapkit.utilities.exceptions.RegistryError` instead of</span>
-<span class="sd">        silently doing nothing or picking an arbitrary registry.</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.RegistryError` rather than doing</span>
+<span class="sd">        nothing or picking an arbitrary registry.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            :func:`pcapkit.foundation.registry.protocols.register_protocol_code`</span>
@@ -2085,11 +2065,10 @@
                             <span class="n">namespace</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[int, str]'</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
                         <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">namespace</span><span class="o">.</span><span class="n">items</span><span class="p">()}[</span><span class="n">name</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># Caught by the handler immediately below and converted, so</span>
-                    <span class="c1"># this never escapes -- it is a jump to the shared "name is</span>
-                    <span class="c1"># not in namespace" path, not a stdlib exception leaking out</span>
-                    <span class="c1"># of the library. A pcapkit exception here would log at</span>
-                    <span class="c1"># CRITICAL for something that is handled two lines later.</span>
+                    <span class="c1"># Caught by the handler below, so this never escapes: it jumps</span>
+                    <span class="c1"># to the shared "name is not in namespace" path. A pcapkit</span>
+                    <span class="c1"># exception here would log at CRITICAL for something handled</span>
+                    <span class="c1"># two lines later.</span>
                     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2164,15 +2143,14 @@
 <span class="sd">            Every one of these registries is a :class:`collections.defaultdict`</span>
 <span class="sd">            held on a *class* attribute, shared by every instance of the class in</span>
 <span class="sd">            the process. So ``registry[code]`` inserts each code it misses, and</span>
-<span class="sd">            parsing one packet carrying an unrecognised code is enough to grow</span>
-<span class="sd">            the registry permanently.</span>
+<span class="sd">            parsing one packet carrying an unrecognised code grows the registry</span>
+<span class="sd">            permanently.</span>
 
-<span class="sd">            The inserted value is whatever the default factory would have</span>
-<span class="sd">            produced anyway, so the entry buys nothing. It costs a spurious</span>
-<span class="sd">            "already registered" warning from the next genuine ``register`` call</span>
-<span class="sd">            for that code, and it makes "is this code registered?"</span>
-<span class="sd">            unanswerable by inspection, since the answer depends on what has</span>
-<span class="sd">            been parsed. The fallback is therefore read from the default factory</span>
+<span class="sd">            The inserted value is what the default factory would have produced</span>
+<span class="sd">            anyway, so the entry buys nothing. It costs a spurious "already</span>
+<span class="sd">            registered" warning from the next genuine ``register`` call for that</span>
+<span class="sd">            code, and makes "is this code registered?" depend on what has been</span>
+<span class="sd">            parsed. The fallback is therefore read from the default factory</span>
 <span class="sd">            directly rather than through a lookup that records it.</span>
 
 <span class="sd">        """</span>
@@ -2214,13 +2192,11 @@
 <span class="sd">            what keeps that affordable is :attr:`ModuleDescriptor.klass</span>
 <span class="sd">            &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` reading</span>
 <span class="sd">            :data:`sys.modules` instead of re-entering</span>
-<span class="sd">            :func:`importlib.import_module` -- see :issue:`574`. Memoising the resolved</span>
-<span class="sd">            class here instead, whether under ``proto``, in ``registry``'s</span>
+<span class="sd">            :func:`importlib.import_module` (:issue:`574`). Memoising the</span>
+<span class="sd">            resolved class instead, whether under ``proto``, in ``registry``'s</span>
 <span class="sd">            default factory, or in a cache beside the registry, would retain a</span>
-<span class="sd">            class that :func:`importlib.reload` then makes stale; :issue:`421` at</span>
-<span class="sd">            this layer, :issue:`425` for the option, chunk and block registries</span>
-<span class="sd">            beside it, and :issue:`555` at the schema layer are the same retention</span>
-<span class="sd">            defect, of a lookup miss rather than of a resolved class.</span>
+<span class="sd">            class that :func:`importlib.reload` then makes stale (:issue:`421`,</span>
+<span class="sd">            :issue:`425`, :issue:`555`).</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>

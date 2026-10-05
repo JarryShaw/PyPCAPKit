@@ -720,10 +720,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PacketDirection</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Packet direction for ``epb_flags`` options.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that</span>
+<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`); it</span>
+<span class="sd">    defines neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 
@@ -741,10 +740,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PacketReception</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Reception type for ``epb_flags`` options.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that</span>
+<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`); it</span>
+<span class="sd">    defines neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 
@@ -761,27 +759,19 @@
 
 
 
-<span class="c1"># NOTE: TLSKeyLabel used to be hand-written here. GitHub issue #886: RFC 9850</span>
-<span class="c1"># :rfc:`9850#section-4.2` makes its values an IANA registry ("TLS</span>
-<span class="c1"># SSLKEYLOGFILE Labels", Specification Required) rather than a closed,</span>
-<span class="c1"># hand-picked helper enum, so it moved to</span>
-<span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated the same</span>
-<span class="c1"># way as its :mod:`pcapkit.const.pcapng` siblings -- imported above as</span>
-<span class="c1"># ``Enum_TLSKeyLabel``, matching the ``Enum_*`` alias every one of its seven</span>
-<span class="c1"># :mod:`pcapkit.const.pcapng` siblings already carries in this file (a</span>
-<span class="c1"># review of the work for #886: this import was the only one of the</span>
-<span class="c1"># eight lacking it, because the class used to be *defined* here rather than</span>
-<span class="c1"># imported, so nothing applied the convention until this move made it an</span>
-<span class="c1"># import). The assignment below re-exports the same object under the</span>
-<span class="c1"># module's own, unaliased name, so ``from pcapkit.protocols.misc.pcapng</span>
-<span class="c1"># import TLSKeyLabel`` keeps working and still resolves to the identical</span>
-<span class="c1"># class -- not a copy -- that every internal ``Enum_TLSKeyLabel`` reference</span>
-<span class="c1"># below uses.</span>
-<span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written -- it is verified closed</span>
-<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names) and not a</span>
+<span class="c1"># NOTE: RFC 9850 :rfc:`9850#section-4.2` makes the TLS key labels an IANA</span>
+<span class="c1"># registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a</span>
+<span class="c1"># closed, hand-picked set, so :class:`TLSKeyLabel` is the generated</span>
+<span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as</span>
+<span class="c1"># ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. The</span>
+<span class="c1"># assignment below re-exports the same object (not a copy) under the unaliased</span>
+<span class="c1"># name, so ``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` resolves to</span>
+<span class="c1"># the class every internal ``Enum_TLSKeyLabel`` reference uses.</span>
+<span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set</span>
+<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a</span>
 <span class="c1"># registry, so filing it under :mod:`pcapkit.const` would misrepresent it as</span>
-<span class="c1"># one; the ``Enum_*`` alias convention is about imports of const enums, and</span>
-<span class="c1"># this is a local definition, so it does not apply here.</span>
+<span class="c1"># one. The ``Enum_*`` alias convention covers imports of const enums, so it does</span>
+<span class="c1"># not apply to a local definition.</span>
 <span class="n">TLSKeyLabel</span> <span class="o">=</span> <span class="n">Enum_TLSKeyLabel</span>
 
 
@@ -790,10 +780,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">WireGuardKeyLabel</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""WireGuard key log label.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that</span>
+<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`); it</span>
+<span class="sd">    defines neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 
@@ -886,6 +875,12 @@
 <span class="sd">       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_comment`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_comment`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_comment`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_custom_2988`,</span>
+<span class="sd">           :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_custom_2989`,</span>
+<span class="sd">           :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_custom_19372`,</span>
+<span class="sd">           :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_custom_19373`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_custom`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_custom`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_name`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_name`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_name`</span>
@@ -989,7 +984,7 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`</span>
 
-<span class="sd">    The class currently supports parsing of the following :manpage:`systemd(1)` journal export</span>
+<span class="sd">    The class currently supports parsing of the following name resolution</span>
 <span class="sd">    record types, which are registered in the :attr:`self.__record__ &lt;pcapkit.protocols.misc.pcapng.PCAPNG.__record__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -1149,11 +1144,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Union[Enum_OptionType, Tuple[str, int]], str | tuple[OptionParser, OptionConstructor]]</span>
 
-    <span class="c1">#: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]: :manpage:`systemd(1)`</span>
-    <span class="c1">#: Journal Export record type to method mapping. Method names are expected</span>
+    <span class="c1">#: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]: Name</span>
+    <span class="c1">#: Resolution Block record type to method mapping. Method names are expected</span>
     <span class="c1">#: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,</span>
     <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the name record by itself.</span>
+    <span class="c1">#: parse the record by itself.</span>
     <span class="n">__record__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1200,29 +1195,26 @@
 <span class="sd">            buffer, which is why</span>
 <span class="sd">            :attr:`ProtocolBase.length &lt;pcapkit.protocols.protocol.ProtocolBase.length&gt;`</span>
 <span class="sd">            does not distinguish them, but a PCAP-NG block carries a trailer.</span>
-<span class="sd">            :attr:`self.packet &lt;packet&gt;` is overridden accordingly; see there and</span>
-<span class="sd">            :issue:`646`.</span>
+<span class="sd">            :attr:`self.packet &lt;packet&gt;` is overridden accordingly.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
     <span class="c1"># NOTE: A plain property, where the inherited one is a</span>
-    <span class="c1"># :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate and it</span>
-    <span class="c1"># is not an oversight of the base class's caching: the inherited one caches</span>
-    <span class="c1"># because it *reads the stream*, and a second read would consume octets that</span>
-    <span class="c1"># are no longer there, whereas this one only walks buffers the schema layer has</span>
-    <span class="c1"># already filled and so costs a handful of dict lookups.</span>
+    <span class="c1"># :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate: the</span>
+    <span class="c1"># inherited one caches because it *reads the stream*, and a second read would</span>
+    <span class="c1"># consume octets that are no longer there, whereas this one only walks buffers</span>
+    <span class="c1"># the schema layer has already filled, at the cost of a handful of dict</span>
+    <span class="c1"># lookups.</span>
     <span class="c1">#</span>
-    <span class="c1"># Caching it would reintroduce, by a different route, the staleness this change</span>
-    <span class="c1"># exists to remove. :meth:`self.unpack &lt;unpack&gt;` now reports the payload</span>
-    <span class="c1"># through this property, so a cache would make a second ``unpack`` on the same</span>
-    <span class="c1"># instance return the *first* call's octets -- ``get_payload`` never even</span>
-    <span class="c1"># reached -- where the code before #646 recomputed from the schema every time.</span>
-    <span class="c1"># Nothing in the tree calls ``unpack`` twice on one instance today</span>
-    <span class="c1"># (``__post_init__`` is its only caller), so this is an invariant being kept</span>
-    <span class="c1"># rather than a bug being fixed; it was held before and there is no reason for</span>
-    <span class="c1"># it to stop holding. A data descriptor also wins over ``__dict__``, so a stale</span>
-    <span class="c1"># entry left by the inherited ``cached_property`` cannot shadow this either.</span>
+    <span class="c1"># Caching it would make a second ``unpack`` on the same instance return the</span>
+    <span class="c1"># *first* call's octets, because :meth:`self.unpack &lt;unpack&gt;` reports the</span>
+    <span class="c1"># payload through this property and ``get_payload`` would never be reached.</span>
+    <span class="c1"># Nothing in the tree calls ``unpack`` twice on one instance</span>
+    <span class="c1"># (``__post_init__`` is its only caller), so this keeps an invariant rather</span>
+    <span class="c1"># than fixing a bug. A data descriptor also wins over ``__dict__``, so a</span>
+    <span class="c1"># stale entry left by the inherited ``cached_property`` cannot shadow this</span>
+    <span class="c1"># one either.</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Packet'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Header and payload octets of the current block.</span>
@@ -1234,12 +1226,9 @@
 <span class="sd">        :attr:`ProtocolBase.packet &lt;pcapkit.protocols.protocol.ProtocolBase.packet&gt;`</span>
 <span class="sd">        -- which reads :attr:`self.length &lt;length&gt;` octets of header and takes</span>
 <span class="sd">        everything after as payload -- cannot produce it. Since</span>
-<span class="sd">        :attr:`self.length &lt;length&gt;` is the Block Total Length, that split</span>
-<span class="sd">        consumed the entire block as header and left the payload empty: every</span>
-<span class="sd">        packet block reported ``packet == b''`` while ``captured_len`` declared</span>
-<span class="sd">        hundreds of octets, and dumping such a block through</span>
-<span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a record header promising</span>
-<span class="sd">        octets it then did not write. See :issue:`646`.</span>
+<span class="sd">        :attr:`self.length &lt;length&gt;` is the Block Total Length, that split would</span>
+<span class="sd">        put the entire block in the header and leave the payload empty, so</span>
+<span class="sd">        ``packet`` would be ``b''`` while ``captured_len`` declared the octets.</span>
 
 <span class="sd">        The payload is therefore the block schema's</span>
 <span class="sd">        :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which</span>
@@ -1250,7 +1239,7 @@
 <span class="sd">        each place the payload at a different offset, so the offset is summed</span>
 <span class="sd">        from the octets the schema actually unpacked rather than hard-coded per</span>
 <span class="sd">        block type. A block declaring no payload field is all header and no</span>
-<span class="sd">        payload, as before.</span>
+<span class="sd">        payload.</span>
 
 <span class="sd">        """</span>
         <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span>
@@ -1263,8 +1252,8 @@
         <span class="c1"># Type -- and then the block's own fields up to the payload. The block is</span>
         <span class="c1"># found by identity rather than by name so that renaming the field</span>
         <span class="c1"># cannot silently fold the whole block body into the header; if it is not</span>
-        <span class="c1"># found at all, the header loses the Block Type and nothing else, leaving</span>
-        <span class="c1"># the payload -- the part #646 is about -- exact either way.</span>
+        <span class="c1"># found at all, the header loses the Block Type and nothing else, and the</span>
+        <span class="c1"># payload stays exact either way.</span>
         <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
         <span class="n">stop</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
                      <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">block</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
@@ -1348,7 +1337,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If current block is not a valid packet block, i.e.,</span>
-<span class="sd">                EPB, ISB or obsolete Packet Block.</span>
+<span class="sd">                EPB, SPB or obsolete Packet Block.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PACKET_TYPES</span><span class="p">:</span>
@@ -1389,9 +1378,9 @@
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this link type is</span>
 <span class="sd">                already registered against PCAP-NG blocks, naming the displaced</span>
 <span class="sd">                entry and its replacement so a caller can tell *what* was lost.</span>
-<span class="sd">                Fires only when the incumbent differs from the replacement, so</span>
-<span class="sd">                re-registering the same class is a silent no-op. Note this</span>
-<span class="sd">                registry is separate from the PCAP one, so</span>
+<span class="sd">                Fires only when the incumbent differs from the replacement, and</span>
+<span class="sd">                an unresolved module descriptor counts as different from the</span>
+<span class="sd">                class it names. This registry is separate from the PCAP one, so</span>
 <span class="sd">                :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
 <span class="sd">                writing to both cannot make either warn about the other.</span>
 
@@ -1446,15 +1435,15 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.register_record">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">register_record</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[RecordParser, RecordConstructor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register a :manpage:`systemd(1)` journal export record parser.</span>
+<span class="w">        </span><span class="sd">"""Register a name resolution record parser.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            code: PCAP-NG :manpage:`systemd(1)` journal export record type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the :manpage:`systemd(1)` journal export record.</span>
+<span class="sd">            code: PCAP-NG name resolution record type code.</span>
+<span class="sd">            meth: Method name or callable to parse and/or construct the name resolution record.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__record__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] :manpage:`systemd(1)` journal export record already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] name resolution record already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__record__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 
@@ -1539,11 +1528,10 @@
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema_PCAPNG]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
 
-            <span class="c1"># NOTE: reached on the parsing path only, and not by a flag: the</span>
+            <span class="c1"># NOTE: Reached on the parsing path only, with no flag needed: the</span>
             <span class="c1"># construction path sets ``__header__`` from ``make`` while packing</span>
-            <span class="c1"># its own buffer, so the branch above is already false by the time it</span>
-            <span class="c1"># gets here. An explicit ``_read`` guard would have been a branch</span>
-            <span class="c1"># that could never be taken.</span>
+            <span class="c1"># its own buffer, so the branch above is already false there. A</span>
+            <span class="c1"># ``_read`` guard would be a branch that can never be taken.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_block_floor</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1553,12 +1541,10 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: One source of truth for the captured octets. This used to extract</span>
-        <span class="c1"># the payload here as well, and ``ProtocolBase.__init__`` then overwrote</span>
-        <span class="c1"># the result with ``self.packet.payload`` -- which was empty, because the</span>
-        <span class="c1"># inherited ``packet`` split the block at its Block Total Length. Reading</span>
-        <span class="c1"># it through the property instead means the value injected there is the</span>
-        <span class="c1"># value computed here, rather than a second attempt at it. See #646.</span>
+        <span class="c1"># NOTE: One source of truth for the captured octets. Reading them through</span>
+        <span class="c1"># the :attr:`packet` property means the value ``ProtocolBase.__init__``</span>
+        <span class="c1"># injects from ``self.packet.payload`` is the value computed here, rather</span>
+        <span class="c1"># than a second attempt at it.</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1632,18 +1618,18 @@
             <span class="c1"># NOTE: Block Total Length is cross-checked against its own trailing</span>
             <span class="c1"># copy and never against the file, so on a capture cut short it runs</span>
             <span class="c1"># past the real end -- and seeking past the end is legal and silent.</span>
-            <span class="c1"># The *next* block read then measures a negative remainder, since</span>
-            <span class="c1"># ``pcapkit.utilities.decorators.prepare`` derives it as the end of</span>
-            <span class="c1"># the stream less the current position, and a negative ``__length__``</span>
-            <span class="c1"># is what ``pcapng_block_selector`` hands to</span>
-            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField` for the bare</span>
-            <span class="c1"># ``ValueError: read length must be non-negative or -1`` of `#678</span>
-            <span class="c1"># &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__. That cost</span>
-            <span class="c1"># the whole extraction rather than the one truncated block, which is</span>
-            <span class="c1"># the `#431 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__</span>
-            <span class="c1"># accommodation exactly inverted. ``_read_fileng`` already stopped at</span>
-            <span class="c1"># the end of the file, so the octets it returned are the authority on</span>
-            <span class="c1"># where the block really finishes.</span>
+            <span class="c1"># The *next* block read would then measure a negative remainder,</span>
+            <span class="c1"># since ``pcapkit.utilities.decorators.prepare`` derives it as the</span>
+            <span class="c1"># end of the stream less the current position, and a negative</span>
+            <span class="c1"># ``__length__`` is what ``pcapng_block_selector`` hands to</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with</span>
+            <span class="c1"># a bare ``ValueError: read length must be non-negative or -1``. That</span>
+            <span class="c1"># would cost the whole extraction rather than the one truncated</span>
+            <span class="c1"># block, the opposite of the `#431</span>
+            <span class="c1"># &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation</span>
+            <span class="c1"># for damaged input. ``_read_fileng`` stops at the end of the file, so</span>
+            <span class="c1"># the octets it returned are the authority on where the block really</span>
+            <span class="c1"># finishes.</span>
             <span class="n">read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">read</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length '</span>
@@ -1789,7 +1775,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            If the object is initiated, i.e. ``self._fnum`` exists, and is of a</span>
-<span class="sd">            packet block (EPB, ISB or Packet), returns the block index number of</span>
+<span class="sd">            packet block (EPB, SPB or Packet), returns the block index number of</span>
 <span class="sd">            itself; else raises :exc:`UnsupportedCall`.</span>
 
 <span class="sd">        Raises:</span>
@@ -1906,7 +1892,7 @@
 <span class="sd">            Not used when reconstructing a block timestamp, and must not be:</span>
 <span class="sd">            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the</span>
 <span class="sd">            *reading* host's zone into it makes one file parse to different</span>
-<span class="sd">            instants on different machines (see :issue:`361`).</span>
+<span class="sd">            instants on different machines.</span>
 <span class="sd">            :meth:`self._get_timezone &lt;_get_timezone&gt;` returns</span>
 <span class="sd">            :attr:`datetime.timezone.utc` instead when the capture names no</span>
 <span class="sd">            ``if_tzone``.</span>
@@ -2008,11 +1994,11 @@
         <span class="c1"># NOTE: UTC, not the host's timezone, is the default in both branches</span>
         <span class="c1"># below. A capture carries no timezone of its own unless it says so, and</span>
         <span class="c1"># draft-ietf-opsawg-pcapng-02 §4.3 defines the block timestamp as an</span>
-        <span class="c1"># offset from 1970-01-01 00:00:00 UTC with no timezone term at all --</span>
-        <span class="c1"># so substituting whatever zone the *reading* machine happens to sit in</span>
-        <span class="c1"># made the same file parse to different instants on different hosts</span>
-        <span class="c1"># (see #361). ``_get_resolution`` and ``_get_offset`` fall back to the</span>
-        <span class="c1"># format's own defaults in this situation; this is the matching one.</span>
+        <span class="c1"># offset from 1970-01-01 00:00:00 UTC with no timezone term at all, so</span>
+        <span class="c1"># substituting the *reading* machine's zone would make the same file</span>
+        <span class="c1"># parse to different instants on different hosts. ``_get_resolution``</span>
+        <span class="c1"># and ``_get_offset`` fall back to the format's own defaults in this</span>
+        <span class="c1"># situation; this is the matching one.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_timezone'"</span><span class="p">,</span>
@@ -2027,7 +2013,7 @@
         <span class="k">return</span> <span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_linktype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Data link layer protocol ty</span>
+<span class="w">        </span><span class="sd">"""Data link layer protocol type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            interface_id: Interface ID that the current block associates with.</span>
@@ -2037,7 +2023,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If current block is not a valid packet block, i.e.,</span>
-<span class="sd">                EPB, ISB or obsolete Packet Block.</span>
+<span class="sd">                EPB, SPB or obsolete Packet Block.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PACKET_TYPES</span><span class="p">:</span>
@@ -2063,17 +2049,16 @@
 
         <span class="n">timestamp_raw</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp_high</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">timestamp_low</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
-            <span class="c1"># NOTE: This *is* the UTC epoch the docstring above promises, and it</span>
-            <span class="c1"># is returned as such. It used to have ``tzone.utcoffset(None)``</span>
-            <span class="c1"># added to it, which is wrong twice over: the block timestamp is an</span>
-            <span class="c1"># offset from the UNIX epoch, so it is timezone-independent by</span>
-            <span class="c1"># definition (draft-ietf-opsawg-pcapng-02 §4.3 spells out the</span>
-            <span class="c1"># arithmetic and has no timezone term), and the same draft §4.2 says</span>
-            <span class="c1"># of ``if_tzone`` that it "SHOULD NOT be used" and of ``if_tsoffset``</span>
-            <span class="c1"># that it is "not intended to be used as an offset between local time</span>
-            <span class="c1"># and UTC". Adding the offset also made the two return values</span>
-            <span class="c1"># contradict each other, since ``ts_datetime`` below was always built</span>
-            <span class="c1"># from the unshifted value (see #361).</span>
+            <span class="c1"># NOTE: This is the UTC epoch the docstring above promises, with no</span>
+            <span class="c1"># ``tzone.utcoffset(None)`` added, for two reasons. The block</span>
+            <span class="c1"># timestamp is an offset from the UNIX epoch, so it is</span>
+            <span class="c1"># timezone-independent by definition (draft-ietf-opsawg-pcapng-02</span>
+            <span class="c1"># §4.3 spells out the arithmetic and has no timezone term), and the</span>
+            <span class="c1"># same draft §4.2 says of ``if_tzone`` that it "SHOULD NOT be used"</span>
+            <span class="c1"># and of ``if_tsoffset`` that it is "not intended to be used as an</span>
+            <span class="c1"># offset between local time and UTC". A shifted epoch would also</span>
+            <span class="c1"># contradict ``ts_datetime`` below, which is built from the</span>
+            <span class="c1"># unshifted value.</span>
             <span class="n">timestamp_epoch</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp_raw</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_resolution</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span> <span class="o">+</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_offset</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span>
 
@@ -2125,11 +2110,8 @@
 
 <span class="sd">        Notes:</span>
 <span class="sd">            No timezone conversion happens here, and none should: the field this</span>
-<span class="sd">            builds is defined as an offset from the UNIX epoch. The docstring</span>
-<span class="sd">            used to promise a "timezone conversion" that the code never</span>
-<span class="sd">            performed, which made it look as though the read side's timezone</span>
-<span class="sd">            shift had a counterpart here (it did not, so a read followed by a</span>
-<span class="sd">            write drifted by the host's UTC offset -- see :issue:`361`).</span>
+<span class="sd">            builds is defined as an offset from the UNIX epoch, and the read</span>
+<span class="sd">            side applies no timezone shift for it to mirror.</span>
 
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
@@ -3615,7 +3597,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_queue] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_packetid] invalid length (expected 4, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_queue] invalid length (expected 4, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
 
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_EPB_QueueOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -3669,7 +3651,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be only one, '</span>
@@ -3698,7 +3680,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP4addr] option must be only one, '</span>
@@ -3729,7 +3711,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP6addr] option must be only one, '</span>
@@ -4041,13 +4023,13 @@
 <div class="viewcode-block" id="PCAPNG._read_nrb_records">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_nrb_records">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_nrb_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records_schema</span><span class="p">:</span> <span class="s1">'list[Schema_NameResolutionRecord]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Record'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read PCAP-NG :manpage:`systemd(1)` journal export records.</span>
+<span class="w">        </span><span class="sd">"""Read PCAP-NG name resolution records.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            records_schema: Parsed :manpage:`systemd(1)` journal export records.</span>
+<span class="sd">            records_schema: Parsed name resolution records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed PCAP-NG :manpage:`systemd(1)` journal export records data.</span>
+<span class="sd">            Parsed PCAP-NG name resolution records data.</span>
 
 <span class="sd">        """</span>
         <span class="n">records</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Record</span>
@@ -4078,14 +4060,14 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_unknown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_record_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownRecord'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">records</span><span class="p">:</span> <span class="s1">'Record'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownRecord'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read PCAP-MG unknown :manpage:`systemd(1)` journal export records.</span>
+<span class="w">        </span><span class="sd">"""Read PCAP-NG unknown name resolution records.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: Parsed :manpage:`systemd(1)` journal export record schema.</span>
+<span class="sd">            schema: Parsed name resolution record schema.</span>
 <span class="sd">            records: Parsed PCAP-NG records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed :manpage:`systemd(1)` journal export record data.</span>
+<span class="sd">            Constructed name resolution record data.</span>
 
 <span class="sd">        """</span>
         <span class="n">record</span> <span class="o">=</span> <span class="n">Data_UnknownRecord</span><span class="p">(</span>
@@ -4100,14 +4082,14 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_record_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EndRecord'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">records</span><span class="p">:</span> <span class="s1">'Record'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EndRecord'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read PCAP-MG ``nrb_record_end`` :manpage:`systemd(1)` journal export records.</span>
+<span class="w">        </span><span class="sd">"""Read PCAP-NG ``nrb_record_end`` name resolution records.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: Parsed :manpage:`systemd(1)` journal export record schema.</span>
+<span class="sd">            schema: Parsed name resolution record schema.</span>
 <span class="sd">            records: Parsed PCAP-NG records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed :manpage:`systemd(1)` journal export record data.</span>
+<span class="sd">            Constructed name resolution record data.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -4124,14 +4106,14 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv4">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_record_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv4Record'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">records</span><span class="p">:</span> <span class="s1">'Record'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv4Record'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read PCAP-MG ``nrb_record_ipv4`` :manpage:`systemd(1)` journal export records.</span>
+<span class="w">        </span><span class="sd">"""Read PCAP-NG ``nrb_record_ipv4`` name resolution records.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: Parsed :manpage:`systemd(1)` journal export record schema.</span>
+<span class="sd">            schema: Parsed name resolution record schema.</span>
 <span class="sd">            records: Parsed PCAP-NG records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed :manpage:`systemd(1)` journal export record data.</span>
+<span class="sd">            Constructed name resolution record data.</span>
 
 <span class="sd">        """</span>
         <span class="n">record</span> <span class="o">=</span> <span class="n">Data_IPv4Record</span><span class="p">(</span>
@@ -4147,14 +4129,14 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_record_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv6Record'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">records</span><span class="p">:</span> <span class="s1">'Record'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6Record'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read PCAP-MG ``nrb_record_ipv6`` :manpage:`systemd(1)` journal export records.</span>
+<span class="w">        </span><span class="sd">"""Read PCAP-NG ``nrb_record_ipv6`` name resolution records.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: Parsed :manpage:`systemd(1)` journal export record schema.</span>
+<span class="sd">            schema: Parsed name resolution record schema.</span>
 <span class="sd">            records: Parsed PCAP-NG records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed :manpage:`systemd(1)` journal export record data.</span>
+<span class="sd">            Constructed name resolution record data.</span>
 
 <span class="sd">        """</span>
         <span class="n">record</span> <span class="o">=</span> <span class="n">Data_IPv6Record</span><span class="p">(</span>
@@ -5638,10 +5620,10 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_rxspeed] option must be in Interface Description Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_txspeed] option must be only one, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_rxspeed] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -5958,7 +5940,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsname] option must be only one, '</span>
@@ -5979,7 +5961,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_option_ns_dnsipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_NS_DNSIP4AddrOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">ip</span><span class="p">:</span> <span class="s1">'str | bytes | IPv4Address | int'</span> <span class="o">=</span> <span class="s1">'8.8.8.8'</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NS_DNSIP4AddrOption'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG ``ns_dnsip4addr`` option.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG ``ns_dnsIP4addr`` option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
@@ -5992,10 +5974,10 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsip4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsip4addr] option must be only one, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP4addr] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -6013,7 +5995,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_option_ns_dnsipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_NS_DNSIP6AddrOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">ip</span><span class="p">:</span> <span class="s1">'str | bytes | IPv6Address | int'</span> <span class="o">=</span> <span class="s1">'8.8.8.8'</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NS_DNSIP6AddrOption'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG ``ns_dnsip6addr`` option.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG ``ns_dnsIP6addr`` option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
@@ -6026,10 +6008,10 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsip6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '</span>
                                 <span class="sa">f</span><span class="s1">'but found in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1"> block.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsip6addr] option must be only one, '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [ns_dnsIP6addr] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -6424,13 +6406,13 @@
 <div class="viewcode-block" id="PCAPNG._make_nrb_records">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_nrb_records">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_nrb_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="s1">'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_NameResolutionRecord | bytes], int]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make :manpage:`systemd(1)` journal export records for PCAP-NG.</span>
+<span class="w">        </span><span class="sd">"""Make name resolution records for PCAP-NG.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            records: PCAP-NG :manpage:`systemd(1)` journal export records.</span>
+<span class="sd">            records: PCAP-NG name resolution records.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple of :manpage:`systemd(1)` journal export records and total length of the records.</span>
+<span class="sd">            Tuple of name resolution records and total length of the records.</span>
 
 <span class="sd">        """</span>
         <span class="n">has_record_end</span> <span class="o">=</span> <span class="kc">False</span>
@@ -6512,7 +6494,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownRecord]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownRecord'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG unknown :manpage:`systemd(1)` journal export record.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG unknown name resolution record.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Record type.</span>
@@ -6538,7 +6520,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_EndRecord]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_EndRecord'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_end`` :manpage:`systemd(1)` journal export record.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_end`` name resolution record.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Record type.</span>
@@ -6561,7 +6543,7 @@
                           <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
                           <span class="n">names</span><span class="p">:</span> <span class="s1">'Optional[list[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4Record'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_ipv4`` :manpage:`systemd(1)` journal export record.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_ipv4`` name resolution record.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Record type.</span>
@@ -6596,7 +6578,7 @@
                           <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
                           <span class="n">names</span><span class="p">:</span> <span class="s1">'Optional[list[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6Record'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_ipv6`` :manpage:`systemd(1)` journal export record.</span>
+<span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_ipv6`` name resolution record.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Record type.</span>

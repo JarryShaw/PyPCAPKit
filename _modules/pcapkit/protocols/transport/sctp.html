@@ -696,13 +696,11 @@
 <span class="sd">    (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every</span>
 <span class="sd">    other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
 
-<span class="sd">    Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU</span>
-<span class="sd">    wrapped in a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so</span>
-<span class="sd">    those bytes are not aligned PER and the parse degrades to</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` -- every time, not only when</span>
-<span class="sd">    ``pycrate`` is absent. It is registered so that the PPID is *named* in the</span>
-<span class="sd">    protochain rather than reported as an unassigned number, which is strictly</span>
-<span class="sd">    more than leaving it out would give.</span>
+<span class="sd">    Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in</span>
+<span class="sd">    a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so the bytes</span>
+<span class="sd">    are not aligned PER and the parse always degrades to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the PPID</span>
+<span class="sd">    is *named* in the protochain rather than reported as an unassigned number.</span>
 
 <span class="sd">    This class currently supports parsing of the following SCTP chunks, which</span>
 <span class="sd">    are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`</span>
@@ -827,10 +825,9 @@
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
             <span class="c1"># PPID 66 is NGAP wrapped in a DTLS record rather than a bare</span>
-            <span class="c1"># NGAP-PDU, and pcapkit implements no DTLS. It is registered anyway</span>
-            <span class="c1"># so that the PPID is *named*: the payload then fails in NGAP's own</span>
-            <span class="c1"># decoder and `beholder` degrades it to Raw, which is where an</span>
-            <span class="c1"># unregistered PPID would have left it regardless.</span>
+            <span class="c1"># NGAP-PDU, and pcapkit implements no DTLS. It is registered so</span>
+            <span class="c1"># that the PPID is *named*: the payload fails in NGAP's own decoder</span>
+            <span class="c1"># and `beholder` degrades it to Raw, as an unregistered PPID would.</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP over DTLS</span>
         <span class="p">},</span>
@@ -1094,12 +1091,13 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this PPID is already</span>
-<span class="sd">                registered, naming the displaced entry and its replacement so a</span>
-<span class="sd">                caller can tell *what* was lost. Fires only when the incumbent</span>
-<span class="sd">                differs from the replacement, as the port-keyed</span>
+<span class="sd">                registered and the incumbent differs from the replacement; the</span>
+<span class="sd">                message names both. As with the port-keyed</span>
 <span class="sd">                :meth:`Transport.register</span>
 <span class="sd">                &lt;pcapkit.protocols.transport.transport.Transport.register&gt;` it</span>
-<span class="sd">                overrides does.</span>
+<span class="sd">                overrides, an unresolved</span>
+<span class="sd">                :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent</span>
+<span class="sd">                counts as different from the class it names.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
@@ -1333,15 +1331,14 @@
 
 <span class="sd">            The PPID is passed through **unchanged**, registered or not, so that</span>
 <span class="sd">            an unregistered payload is still labelled with the identifier it</span>
-<span class="sd">            arrived with -- as :meth:`Internet._import_next_layer</span>
+<span class="sd">            arrived with, as :meth:`Internet._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`</span>
 <span class="sd">            does for an unregistered transport type. Resolving it to</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` is</span>
 <span class="sd">            :meth:`ProtocolBase._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`'s job,</span>
-<span class="sd">            which looks the PPID up through</span>
-<span class="sd">            :meth:`ProtocolBase._lookup_next_layer</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._lookup_next_layer&gt;` and so</span>
+<span class="sd">            through :meth:`ProtocolBase._lookup_next_layer</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._lookup_next_layer&gt;`, which</span>
 <span class="sd">            leaves :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` untouched.</span>
 
 <span class="sd">        """</span>

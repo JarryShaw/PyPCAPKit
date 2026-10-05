@@ -548,13 +548,11 @@ therefore keyed by PPID rather than by port number, and is populated through
 <a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>: 60
 (<code class="docutils literal notranslate"><span class="pre">NG_Application_Protocol</span></code>) and 66 (<code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code>). Every
 other PPID resolves to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
-<p>Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU
-wrapped in a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has no DTLS implementation, so
-those bytes are not aligned PER and the parse degrades to
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – every time, not only when
-<code class="docutils literal notranslate"><span class="pre">pycrate</span></code> is absent. It is registered so that the PPID is <em>named</em> in the
-protochain rather than reported as an unassigned number, which is strictly
-more than leaving it out would give.</p>
+<p>Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
+a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has no DTLS implementation, so the bytes
+are not aligned PER and the parse always degrades to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. It is registered so that the PPID
+is <em>named</em> in the protochain rather than reported as an unassigned number.</p>
 <p>This class currently supports parsing of the following SCTP chunks, which
 are directly mapped to the <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.chunk.Chunk</span></code></a>
 enumeration:</p>
@@ -827,11 +825,12 @@ PPID rather than by port number.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this PPID is already
-registered, naming the displaced entry and its replacement so a
-caller can tell <em>what</em> was lost. Fires only when the incumbent
-differs from the replacement, as the port-keyed
+registered and the incumbent differs from the replacement; the
+message names both. As with the port-keyed
 <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport.register" title="pcapkit.protocols.transport.transport.Transport.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.register</span></code></a> it
-overrides does.</p>
+overrides, an unresolved
+<a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> incumbent
+counts as different from the class it names.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1014,12 +1013,11 @@ which keys the lookup on port numbers, since SCTP keys it on the
 DATA chunk’s payload protocol identifier instead.</p>
 <p>The PPID is passed through <strong>unchanged</strong>, registered or not, so that
 an unregistered payload is still labelled with the identifier it
-arrived with – as <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>
+arrived with, as <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>
 does for an unregistered transport type. Resolving it to
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code></a>’s job,
-which looks the PPID up through
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code></a> and so
+through <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code></a>, which
 leaves <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> untouched.</p>
 </div>
 </dd></dl>

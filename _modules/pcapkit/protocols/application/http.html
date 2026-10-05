@@ -504,9 +504,8 @@
 <span class="c1">#: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose</span>
 <span class="c1">#: method ``PRI`` is reserved and permanently unregistered, so no valid HTTP/1</span>
 <span class="c1">#: message can begin with it and a prefix compare cannot false-positive on one.</span>
-<span class="c1">#: That is what makes it a positive identification rather than a heuristic, and</span>
-<span class="c1">#: it is why :meth:`HTTP._guess_version` tests it before attempting any parse</span>
-<span class="c1">#: (:issue:`800`).</span>
+<span class="c1">#: That makes it a positive identification rather than a heuristic, which is why</span>
+<span class="c1">#: :meth:`HTTP._guess_version` tests it before attempting any parse.</span>
 <span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
 
 
@@ -528,10 +527,10 @@
     <span class="c1">#: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`</span>
     <span class="c1">#: identified one and parsed the frame that follows it. They belong to this</span>
     <span class="c1">#: packet's header rather than to its payload, so :meth:`read` adds them to</span>
-    <span class="c1">#: :attr:`length`; without that, ``ProtocolBase.__init__``'s</span>
-    <span class="c1">#: ``self._info.__update__(packet=self.packet.payload)`` slices the payload</span>
-    <span class="c1">#: from octet 9 of a buffer whose frame starts at octet 24 and reports the</span>
-    <span class="c1">#: tail of the preface as packet payload. See :issue:`800`.</span>
+    <span class="c1">#: :attr:`length`; otherwise ``ProtocolBase.__init__``'s</span>
+    <span class="c1">#: ``self._info.__update__(packet=self.packet.payload)`` would slice the</span>
+    <span class="c1">#: payload from octet 9 of a buffer whose frame starts at octet 24 and report</span>
+    <span class="c1">#: the tail of the preface as packet payload.</span>
     <span class="n">_preface_length</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1">#: This class is a version dispatcher rather than a protocol with a header of</span>
@@ -539,11 +538,11 @@
     <span class="c1">#: declares only ``version`` and forwards everything else to</span>
     <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.HTTP.make&gt;` or</span>
     <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTP.make&gt;`</span>
-    <span class="c1">#: according to that value -- so the set of names that is correct here depends</span>
-    <span class="c1">#: on an argument. :obj:`None` therefore opts out of the construction keyword</span>
-    <span class="c1">#: check that :meth:`ProtocolBase.__init__</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs (:issue:`617`); the</span>
-    <span class="c1">#: two versioned classes are checked normally when constructed directly.</span>
+    <span class="c1">#: according to that value, so the correct set of names depends on an</span>
+    <span class="c1">#: argument. :obj:`None` therefore opts out of the construction keyword check</span>
+    <span class="c1">#: that :meth:`ProtocolBase.__init__</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs; the two</span>
+    <span class="c1">#: versioned classes are checked normally when constructed directly.</span>
     <span class="n">__keywords__</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
@@ -616,12 +615,9 @@
                 <span class="k">raise</span>
             <span class="c1"># NOTE: :exc:`struct.error` alongside :exc:`ValueError` because the</span>
             <span class="c1"># two are disjoint -- it derives straight from :exc:`Exception` --</span>
-            <span class="c1"># and a payload too short for a versioned parser's fixed header</span>
-            <span class="c1"># raises the former from deep inside the schema machinery</span>
-            <span class="c1"># (``FieldBase.length`` calls :func:`struct.calcsize` on a template</span>
-            <span class="c1"># built from a negative length). A caller of this method cannot</span>
-            <span class="c1"># catch that as a protocol error, which is the whole point of the</span>
-            <span class="c1"># conversion the next line performs, so it is converted too.</span>
+            <span class="c1"># and a payload too short for a versioned parser's fixed header can</span>
+            <span class="c1"># raise the former from inside the schema machinery. A caller cannot</span>
+            <span class="c1"># catch that as a protocol error, so it is converted too.</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -656,18 +652,15 @@
         <span class="c1"># NOTE: ``protocol.make`` is an ordinary instance method (the abstract</span>
         <span class="c1"># declaration at ``ProtocolBase.make`` takes ``self``, and the</span>
         <span class="c1"># versioned overrides use instance-bound helpers such as</span>
-        <span class="c1"># ``self._make_index``/``self.__frame__``), so calling it on the</span>
-        <span class="c1"># class itself -- as this used to -- left ``self`` unfilled and raised</span>
-        <span class="c1"># ``TypeError`` for every real call; see GH-452. There is no ``file``</span>
-        <span class="c1"># or ``length`` to construct with here, since building a packet from</span>
-        <span class="c1"># keyword arguments is the inverse of parsing one, so a bare instance</span>
-        <span class="c1"># via ``protocol.__new__`` -- bypassing ``__init__``'s parse/pack</span>
-        <span class="c1"># machinery entirely -- is what the versioned ``make`` needs to be</span>
-        <span class="c1"># called on. This is safe only as long as the versioned ``make`` never</span>
-        <span class="c1"># reads state that ``__init__``/``__post_init__`` would otherwise have</span>
-        <span class="c1"># established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does today);</span>
-        <span class="c1"># a future ``make`` override that reaches for such state would need a</span>
-        <span class="c1"># different dispatch here.</span>
+        <span class="c1"># ``self._make_index``/``self.__frame__``), so it cannot be called on the</span>
+        <span class="c1"># class itself. There is no ``file`` or ``length`` to construct with here,</span>
+        <span class="c1"># since building a packet from keyword arguments is the inverse of</span>
+        <span class="c1"># parsing one, so a bare instance via ``protocol.__new__`` -- bypassing</span>
+        <span class="c1"># ``__init__``'s parse/pack machinery entirely -- is what the versioned</span>
+        <span class="c1"># ``make`` is called on. This is safe only while the versioned ``make``</span>
+        <span class="c1"># reads no state that ``__init__``/``__post_init__`` would otherwise have</span>
+        <span class="c1"># established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does); a</span>
+        <span class="c1"># ``make`` override that did would need a different dispatch here.</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -704,17 +697,11 @@
 <span class="w">        </span><span class="sd">"""Identify the HTTP version of the payload, and parse it with that version.</span>
 
 <span class="sd">        The payload is *identified* first and trial-parsed only as a last resort.</span>
-<span class="sd">        Until :issue:`800` there was no identification step at all: both versions were</span>
-<span class="sd">        tried in turn and whichever parser did not object was taken as the</span>
-<span class="sd">        answer, which answers "did a parser accept this?" where the question is</span>
-<span class="sd">        "what is this?" -- and got both directions wrong. The HTTP/2 connection</span>
-<span class="sd">        preface came back ``version='2'`` only because ``httpv2.HTTP`` read its</span>
-<span class="sd">        leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and</span>
-<span class="sd">        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back</span>
-<span class="sd">        ``version='2'`` the same way. :issue:`799` closed the second of those by</span>
-<span class="sd">        requiring a frame's declared length to be backed by its buffer, but that</span>
-<span class="sd">        left the preface *unidentifiable*: a real HTTP/2 connection opening is</span>
-<span class="sd">        refused by both arms and reported as not-HTTP.</span>
+<span class="sd">        Trying each version in turn and taking whichever parser does not object</span>
+<span class="sd">        answers "did a parser accept this?" where the question is "what is</span>
+<span class="sd">        this?": the HTTP/2 preface reads as a frame whose declared length is</span>
+<span class="sd">        5,265,993 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at</span>
+<span class="sd">        all can be accepted the same way.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -767,9 +754,8 @@
         <span class="c1"># false-positive on HTTP/1, and it needs no parse to reach.</span>
         <span class="c1">#</span>
         <span class="c1"># ``length`` bounds the compare as well as ``self._data``, because a</span>
-        <span class="c1"># caller may hand this method fewer octets than the buffer holds, and</span>
-        <span class="c1"># claiming a preface out of octets that were not part of this payload</span>
-        <span class="c1"># would be the same kind of accident this change removes.</span>
+        <span class="c1"># caller may hand this method fewer octets than the buffer holds, and a</span>
+        <span class="c1"># preface must not be claimed out of octets outside this payload.</span>
         <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="n">preface_len</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">preface_len</span><span class="p">]</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
@@ -777,15 +763,15 @@
             <span class="c1"># The preface is not a frame -- the frames begin after it</span>
             <span class="c1"># (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately</span>
             <span class="c1"># following), so it is skipped rather than fed to ``httpv2.HTTP``,</span>
-            <span class="c1"># which is how it used to be misread as framing.</span>
+            <span class="c1"># which would misread it as framing.</span>
             <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="n">preface_len</span><span class="p">:</span>
                 <span class="c1"># A preface with nothing after it *is* HTTP/2, but this library's</span>
                 <span class="c1"># HTTP/2 data model is one frame per packet and has no</span>
                 <span class="c1"># representation for a frameless segment, so there is nothing to</span>
-                <span class="c1"># return. Refused with a message that says which of the two it</span>
-                <span class="c1"># was -- an HTTP/2 connection opening truncated at the preface,</span>
-                <span class="c1"># not an unrecognised payload -- because that distinction is the</span>
-                <span class="c1"># whole point of identifying before parsing.</span>
+                <span class="c1"># return. Refused with a message that says so -- an HTTP/2</span>
+                <span class="c1"># connection opening truncated at the preface, not an</span>
+                <span class="c1"># unrecognised payload -- because that distinction is the point</span>
+                <span class="c1"># of identifying before parsing.</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: connection preface with no frame'</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -793,19 +779,15 @@
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
             <span class="c1"># NOTE: Converted, unlike the HTTP/1 commit below, because this route</span>
-            <span class="c1"># is new and has no escaping-error contract to keep: the old arm 2</span>
-            <span class="c1"># suppressed :exc:`struct.error` and fell through to ``unknown HTTP</span>
-            <span class="c1"># version``, so a preface followed by a frame that used to trip the</span>
-            <span class="c1"># #805 residual (an inner field shortfall, e.g. a 16-octet</span>
-            <span class="c1"># ``GOAWAY``) had to reach the caller as something it could catch,</span>
-            <span class="c1"># not as a bare stdlib error. That residual has since been closed at</span>
-            <span class="c1"># ``FieldBase.length``, so the same ``GOAWAY`` now raises</span>
-            <span class="c1"># ``ProtocolError`` on its own and is caught by the ``except</span>
-            <span class="c1"># ProtocolError: raise`` above, never reaching this clause -- but</span>
-            <span class="c1"># the conversion stays for whichever :exc:`ValueError` or</span>
-            <span class="c1"># :exc:`struct.error` the schema machinery has not been shown never</span>
-            <span class="c1"># to raise here again. Same normalisation, and the same reasoning,</span>
-            <span class="c1"># as ``read``'s explicit ``version=`` path above.</span>
+            <span class="c1"># has no escaping-error contract to keep: a preface followed by a</span>
+            <span class="c1"># malformed frame must reach the caller as something it can catch,</span>
+            <span class="c1"># not as a bare stdlib error. The schema machinery raises</span>
+            <span class="c1"># ``ProtocolError`` itself for a short inner field (e.g. a 16-octet</span>
+            <span class="c1"># ``GOAWAY``, via ``FieldBase.length``), which the ``except</span>
+            <span class="c1"># ProtocolError: raise`` above passes through, so this clause is a</span>
+            <span class="c1"># backstop for any :exc:`ValueError` or :exc:`struct.error` it has</span>
+            <span class="c1"># not been shown never to raise. Same normalisation as ``read``'s</span>
+            <span class="c1"># explicit ``version=`` path above.</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -824,13 +806,10 @@
         <span class="c1"># disagree about what HTTP/1 looks like.</span>
         <span class="c1">#</span>
         <span class="c1"># Identified means *committed*: a malformed HTTP/1 message is reported as</span>
-        <span class="c1"># the malformed HTTP/1 message it is, instead of being handed to the</span>
-        <span class="c1"># HTTP/2 arm, which accepts any self-consistent nine-octet-or-longer</span>
-        <span class="c1"># buffer. Re-trying an identified HTTP/1 payload as HTTP/2 is exactly how</span>
-        <span class="c1"># HTTP/1 traffic acquires a confident HTTP/2 mislabel -- the failure #787</span>
-        <span class="c1"># exists to stop -- and #682 now routes 231 real HTTP/1 frames from the</span>
-        <span class="c1"># fixture corpus through here, TCP:80/8080 having been repointed at this</span>
-        <span class="c1"># class.</span>
+        <span class="c1"># such instead of being handed to the HTTP/2 arm, which accepts any</span>
+        <span class="c1"># self-consistent buffer of nine octets or more. Retrying an identified</span>
+        <span class="c1"># HTTP/1 payload as HTTP/2 is how HTTP/1 traffic acquires a confident</span>
+        <span class="c1"># HTTP/2 mislabel.</span>
         <span class="c1">#</span>
         <span class="c1"># Nothing is suppressed on this arm, deliberately: it is not a candidate</span>
         <span class="c1"># to be declined, so there is nothing to decline *to*, and</span>
@@ -844,74 +823,32 @@
         <span class="c1"># NOTE: Neither identification matched, so this is the fall-through: a</span>
         <span class="c1"># trial parse, kept because a *mid-stream* payload carries no start line</span>
         <span class="c1"># and no preface, and a self-consistent HTTP/2 frame is still the best</span>
-        <span class="c1"># answer available for one. It is the last resort rather than the whole</span>
-        <span class="c1"># method, which is the #800 change.</span>
+        <span class="c1"># answer available for one. It is the last resort, not the whole method.</span>
         <span class="c1">#</span>
-        <span class="c1"># The two arms suppress different sets, and the asymmetry is</span>
-        <span class="c1"># deliberate. Only the *last* arm additionally suppresses</span>
-        <span class="c1"># :exc:`struct.error`, because a payload too short to hold HTTP/2's</span>
-        <span class="c1"># nine-octet frame header, or one whose frame-specific fields exceed</span>
-        <span class="c1"># what a slightly-longer buffer holds, used to fail inside the schema</span>
-        <span class="c1"># machinery with that stdlib exception rather than with a protocol</span>
-        <span class="c1"># error -- ``FieldBase.length`` called :func:`struct.calcsize` on a</span>
-        <span class="c1"># template built from a negative length -- and it was neither a</span>
-        <span class="c1"># ``ProtocolError`` nor a :exc:`ValueError`, so it used to leave this</span>
-        <span class="c1"># method uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8),</span>
-        <span class="c1"># 8)`` used to raise a bare :exc:`struct.error` instead of reaching</span>
-        <span class="c1"># the closing ``raise`` below. #799's nine-octet guard has since</span>
-        <span class="c1"># closed that particular route -- the same call now raises</span>
-        <span class="c1"># ``ProtocolError: unknown HTTP version``, the documented answer.</span>
-        <span class="c1"># Suppressing :exc:`struct.error` on the last arm stays regardless --</span>
-        <span class="c1"># kept deliberately, as defence in depth, rather than retired now</span>
-        <span class="c1"># that the case it was added for is closed. Whether anything</span>
-        <span class="c1"># can still reach it, and whether it should therefore go, is #825's</span>
-        <span class="c1"># open question, not settled here.</span>
+        <span class="c1"># The two arms suppress different sets, deliberately. Only the *last*</span>
+        <span class="c1"># arm also suppresses :exc:`struct.error`, as defence in depth: a payload</span>
+        <span class="c1"># too short for HTTP/2's nine-octet frame header, or whose frame-specific</span>
+        <span class="c1"># fields exceed what the buffer holds, must not escape as a stdlib</span>
+        <span class="c1"># exception that no caller of this method can catch. Such payloads raise</span>
+        <span class="c1"># ``ProtocolError`` at the source -- ``httpv2.HTTP.unpack`` rejects a</span>
+        <span class="c1"># buffer under nine octets, and :attr:`FieldBase.length</span>
+        <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` re-raises a</span>
+        <span class="c1"># negative-length template as</span>
+        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.ProtocolError` -- so the</span>
+        <span class="c1"># suppression only guards whatever path is not yet known to do likewise.</span>
         <span class="c1">#</span>
-        <span class="c1"># #799 closed the *outer*-header slice of this: ``httpv2.HTTP.unpack``</span>
-        <span class="c1"># now rejects a buffer under nine octets before the schema layer runs</span>
-        <span class="c1"># at all, and ``read`` requires the declared length, the available</span>
-        <span class="c1"># buffer, and their consistency (``schema.length &lt;= length``) all to</span>
-        <span class="c1"># hold. That did *not* retire this suppression, only shrink what it</span>
-        <span class="c1"># has to catch: a buffer that clears nine octets can still carry a</span>
-        <span class="c1"># frame type whose own fixed-width fields exceed what is left after</span>
-        <span class="c1"># the header -- a ``GOAWAY`` at 9-16 octets (``stream`` and ``error``</span>
-        <span class="c1"># alone are eight), a ``PUSH_PROMISE`` at 9-12, or any ``PADDED``</span>
-        <span class="c1"># ``DATA``/``HEADERS``/``PUSH_PROMISE`` whose ``pad_len`` exceeds the</span>
-        <span class="c1"># remainder -- and those still drive ``pkt['__length__']`` negative one</span>
-        <span class="c1"># field further in, past this guard's reach. Measured: a 16-octet</span>
-        <span class="c1"># ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)</span>
-        <span class="c1"># used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``</span>
-        <span class="c1"># directly. That class was closed at its actual root --</span>
-        <span class="c1"># :attr:`FieldBase.length</span>
-        <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` now catches</span>
-        <span class="c1"># :func:`struct.calcsize`'s failure on a negative-length template and</span>
-        <span class="c1"># re-raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,</span>
-        <span class="c1"># generic across every schema in the tree rather than special-cased</span>
-        <span class="c1"># here. :meth:`Schema.unpack</span>
-        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`'s own</span>
-        <span class="c1"># running-counter warning was left alone on purpose: converting it too</span>
-        <span class="c1"># would reject a ``SETTINGS`` frame with a short trailing entry that</span>
-        <span class="c1"># parses successfully today while only warning, so that</span>
-        <span class="c1"># :class:`~pcapkit.utilities.warnings.SchemaWarning` still fires. The</span>
-        <span class="c1"># same ``GOAWAY`` now raises ``ProtocolError: Field debug resolved to</span>
-        <span class="c1"># a negative length; template='-1s'``.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Widening the *first* arm the same way was measured and reverted, as it</span>
-        <span class="c1"># buys nothing and costs a great deal. Nothing reaches a</span>
-        <span class="c1"># :exc:`struct.error` through ``httpv1.HTTP``: nine byte patterns over</span>
-        <span class="c1"># lengths 0-24, on this route and on ``read(version=1)``, answered</span>
-        <span class="c1"># ``ProtocolError`` 450 times out of 450. And</span>
+        <span class="c1"># Suppressing it on the *first* arm is wrong: nine byte patterns over</span>
+        <span class="c1"># lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTP``, so</span>
+        <span class="c1"># it buys nothing, and</span>
         <span class="c1"># :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*</span>
         <span class="c1"># :exc:`struct.error`, so suppressing it on a non-final arm swallows</span>
-        <span class="c1"># pcapkit's own signal and hands the payload to the arm below -- which</span>
+        <span class="c1"># pcapkit's own signal and hands the payload to the arm below, which</span>
         <span class="c1"># accepts anything of at least nine octets. With a fault injected at arm</span>
         <span class="c1"># 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP</span>
         <span class="c1"># port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2</span>
-        <span class="c1"># mislabel of HTTP/1 traffic is the exact failure #787 exists to stop, and</span>
-        <span class="c1"># it is worse than letting the error escape to ``beholder``, which turns</span>
-        <span class="c1"># it into ``Raw``; it would also erase ``StructError.eof``, which</span>
-        <span class="c1"># ``NoPayload`` handling reads. ``unknown HTTP version`` is only the best</span>
-        <span class="c1"># case, needing arm 2 to decline as well.</span>
+        <span class="c1"># mislabel of HTTP/1 traffic is worse than letting the error escape to</span>
+        <span class="c1"># ``beholder``, which turns it into ``Raw``; it would also erase</span>
+        <span class="c1"># ``StructError.eof``, which ``NoPayload`` handling reads.</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

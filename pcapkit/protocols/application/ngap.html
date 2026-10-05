@@ -504,20 +504,22 @@ and none of its structure is visible until an ASN.1 decoder has run over it.</p>
 (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[NGAP]</span></code>). <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> imports and works without
 it; an NGAP payload simply degrades to the opaque payload path, exactly as an
 unregistered PPID would, because
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP._import_next_layer</span></code>
-is wrapped in <a class="reference internal" href="../../utilities/functools.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and falls back to
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>, which
+<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> inherits, is wrapped in
+<a class="reference internal" href="../../utilities/functools.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and falls back to
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
-<section id="why-pycrate-rather-than-a-per-codec-of-our-own">
-<h2>Why <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> rather than a PER codec of our own<a class="headerlink" href="#why-pycrate-rather-than-a-per-codec-of-our-own" title="Link to this heading">¶</a></h2>
-<p>Two things make it the cheaper answer. <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> <strong>ships NGAP already
-compiled</strong>, at <code class="docutils literal notranslate"><span class="pre">pycrate_asn1dir/NGAP.py</span></code>, so the 3GPP ASN.1 source does not
-have to be vendored here and tracked across releases; and it is <strong>pure
-Python</strong>, with no compiled extension to build on any platform. Decoding costs
-0.15 ms per PDU, the same order as <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own per-packet cost, so
-the generic strategy below is not paying for the convenience.</p>
+<section id="decoder-dependency">
+<h2>Decoder Dependency<a class="headerlink" href="#decoder-dependency" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> is used rather than a PER codec of our own, for two reasons. It
+<strong>ships NGAP already compiled</strong>, at <code class="docutils literal notranslate"><span class="pre">pycrate_asn1dir/NGAP.py</span></code>, so the 3GPP
+ASN.1 source does not have to be vendored here and tracked across releases; and
+it is <strong>pure Python</strong>, with no compiled extension to build on any platform.
+Decoding costs 0.15 ms per PDU, the same order as <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
+per-packet cost, so the generic strategy below is not paying for the
+convenience.</p>
 </section>
-<section id="generic-conversion-not-81-hand-written-procedures">
-<h2>Generic conversion, not 81 hand-written procedures<a class="headerlink" href="#generic-conversion-not-81-hand-written-procedures" title="Link to this heading">¶</a></h2>
+<section id="generic-conversion">
+<h2>Generic Conversion<a class="headerlink" href="#generic-conversion" title="Link to this heading">¶</a></h2>
 <p>The decoded value tree is mapped into <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>
 objects <strong>structurally</strong>, by ASN.1 shape rather than by procedure:</p>
 <div class="table-wrapper docutils container">
@@ -559,21 +561,21 @@ surfaced as first-class fields on
 <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP" title="pcapkit.protocols.data.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> regardless.</p>
 </section>
 <section id="known-limitations">
-<h2>Known limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
+<h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>PPID 66 payloads are not decoded.</strong> <code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code> wraps the
 <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> in a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements no DTLS, so the
 bytes reaching <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.read" title="pcapkit.protocols.application.ngap.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NGAP.read()</span></code></a> are not an APER encoding. The PPID is
 registered so that it is <em>named</em> rather than anonymous; the payload itself
 degrades to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
-<li><p><strong>The specification version is |pycrate|_’s, not this package’s.</strong> The IE and
-procedure enumerations were generated from <code class="docutils literal notranslate"><span class="pre">NGAP_Constants</span></code> of <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a>
-0.8.1 (Release-18-era: 81 procedure codes, 438 protocol IE IDs, highest 443).
-A <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> that carries a newer NGAP will decode IEs that
+<li><p><strong>The specification version is that of the installed decoder, not this
+package’s.</strong> The IE and procedure enumerations were generated from
+<code class="docutils literal notranslate"><span class="pre">NGAP_Constants</span></code> of <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> 0.8.1 (Release-18-era: 81 procedure codes,
+438 protocol IE IDs, highest 443). A <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> that carries a newer NGAP will decode IEs that
 <a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a> do not name; both
-extend themselves at lookup time rather than failing, so such a value is
-reported as <code class="docutils literal notranslate"><span class="pre">Unassigned_&lt;n&gt;</span></code>.</p></li>
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a> do not name. Such a
+value resolves to a non-registering member called <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> rather than
+failing or adding a member to either enumeration.</p></li>
 <li><p><strong>NGAP over a fragmented SCTP association is not reassembled.</strong> A DATA chunk
 is decoded on its own, so an <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> split across chunks by SCTP
 fragmentation fails to decode rather than being reassembled first.</p></li>
@@ -736,10 +738,9 @@ should pay for it.</p>
 <p>Which alternative of the <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code> a PDU is.</p>
 <p>The values are spelled as the ASN.1 identifiers, so that a name decoded by
 <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> resolves by value.</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
-lookup contract – pure re-parenting, since this class defines neither
-<code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
+<p>Built on <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, the lookup contract
+shared by every non-registry enumeration (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). The class defines
+neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.PDUKind.INITIATING_MESSAGE">
 <span class="sig-name descname"><span class="pre">INITIATING_MESSAGE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'initiatingMessage'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.PDUKind.INITIATING_MESSAGE" title="Link to this definition">¶</a></dt>
@@ -775,25 +776,17 @@ lookup contract – pure re-parenting, since this class defines neither
 that <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> resolves a name decoded
 by <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> through the standard member map. The values are the
 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> indices, which is what goes on the wire.</p>
-<p>Carries no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented this class onto
-<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and kept a delegating override for
-one reason only: it converted the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so that an unknown <em>name</em> and an unknown <em>value</em> reported
-identically. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s ruling retired that conversion – a name
-miss is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-shaped, exactly as <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> is on a stdlib
-<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> – which left the override a pure pass-through, so it
-went with it.</p>
-<p>The one thing that could have made the deletion unsafe is <code class="docutils literal notranslate"><span class="pre">default</span></code>
-handling, and there the inherited base is identical to what the override
-forwarded: <code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">Criticality.reject)</span></code> answers <code class="docutils literal notranslate"><span class="pre">reject</span></code> on both,
-and <code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">99)</span></code> raises on both, since a <code class="docutils literal notranslate"><span class="pre">default</span></code> naming no
-registered value is not honoured. That is also what keeps the deletion safe
-on a closed ASN.1 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> with no extension marker – a member-valued
-<code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> and never through the
-constructor, so no path here can mint a fourth value; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality._missing_" title="pcapkit.protocols.application.ngap.Criticality._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>,
-which refuses one outright. The only loss is the narrower
-<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">Criticality</span></code> key annotation, a typing nicety rather than
-behaviour.</p>
+<p>Carries no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own: the inherited
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is used as is, so an unknown
+<em>name</em> is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-shaped, exactly as <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> is on a stdlib
+<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>), and an unknown <em>value</em> raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">default</span></code> is honoured only when it names a registered value:
+<code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">Criticality.reject)</span></code> answers <code class="docutils literal notranslate"><span class="pre">reject</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">99)</span></code> raises. A member-valued <code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> and never through the constructor, so on this closed
+ASN.1 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> with no extension marker no path can mint a fourth
+value; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality._missing_" title="pcapkit.protocols.application.ngap.Criticality._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which refuses one outright.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality.reject">
 <span class="sig-name descname"><span class="pre">reject</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality.reject" title="Link to this definition">¶</a></dt>
@@ -838,9 +831,9 @@ behaviour.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">ProcedureCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/const/ngap/procedure_code.html#ProcedureCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>Re-exported from <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.procedure_code.ProcedureCode</span></code></a>
-under this module’s historical name – see the <code class="docutils literal notranslate"><span class="pre">Enumerations</span></code> comment
-above. A plain alias, not a subclass: <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> refuses to extend an
-enumeration that already has members, and this one carries 81 of them.</p>
+under its original name – see the <code class="docutils literal notranslate"><span class="pre">Enumerations</span></code> comment above. A plain
+alias, not a subclass: <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> refuses to extend an enumeration that
+already has members, and this one carries 81 of them.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -848,7 +841,7 @@ enumeration that already has members, and this one carries 81 of them.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">ProtocolIE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/const/ngap/protocol_ie.html#ProtocolIE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>Re-exported from <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.protocol_ie.ProtocolIE</span></code></a> under
-this module’s historical name – see <a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-data docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> above for why
+its original name – see <a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-data docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> above for why
 this is an alias rather than a subclass.</p>
 <p>An IE’s ID name and the name of the open type its value is keyed under
 differ in places – IE 21 is <code class="docutils literal notranslate"><span class="pre">id-DefaultPagingDRX</span></code> but its value arrives
@@ -1105,9 +1098,9 @@ identifiers are hyphenated where Python identifiers cannot be, e.g.
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">NGAP - NG Application Protocol</a><ul>
-<li><a class="reference internal" href="#why-pycrate-rather-than-a-per-codec-of-our-own">Why <code class="docutils literal notranslate"><span class="pre">pycrate</span></code> rather than a PER codec of our own</a></li>
-<li><a class="reference internal" href="#generic-conversion-not-81-hand-written-procedures">Generic conversion, not 81 hand-written procedures</a></li>
-<li><a class="reference internal" href="#known-limitations">Known limitations</a></li>
+<li><a class="reference internal" href="#decoder-dependency">Decoder Dependency</a></li>
+<li><a class="reference internal" href="#generic-conversion">Generic Conversion</a></li>
+<li><a class="reference internal" href="#known-limitations">Known Limitations</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.application.ngap">Header Schemas</a></li>

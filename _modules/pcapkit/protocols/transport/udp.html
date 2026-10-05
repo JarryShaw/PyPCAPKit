@@ -536,14 +536,11 @@
 <span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Both HTTP ports here resolve to</span>
+<span class="sd">        Both HTTP ports resolve to</span>
 <span class="sd">        :class:`pcapkit.protocols.application.http.HTTP`, which identifies the</span>
 <span class="sd">        version from the payload and delegates.</span>
 <span class="sd">        :attr:`TCP.__proto__ &lt;pcapkit.protocols.transport.tcp.TCP.__proto__&gt;`</span>
-<span class="sd">        bound :class:`pcapkit.protocols.application.httpv1.HTTP` directly for the</span>
-<span class="sd">        same ports until :issue:`682`, which repointed it here and so removed an</span>
-<span class="sd">        asymmetry that had predated the 8080 entries -- port 80 was already split</span>
-<span class="sd">        that way. Both tables now agree.</span>
+<span class="sd">        binds the same class for its HTTP ports.</span>
 
 <span class="sd">    """</span>
 
@@ -565,19 +562,17 @@
             <span class="c1">#   1701  l2tp       l2tp</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
-            <span class="c1"># Both HTTP entries keep pointing at the version-dispatching</span>
-            <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP`, which is what</span>
-            <span class="c1"># port 80 already used here. TCP bound HTTP/1 directly for the same</span>
-            <span class="c1"># ports until #682 repointed it at the proxy too, so the two tables</span>
-            <span class="c1"># no longer disagree. c.f. the note in the class docstring.</span>
+            <span class="c1"># Both HTTP entries bind the version-dispatching</span>
+            <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP`, as TCP's table</span>
+            <span class="c1"># does. c.f. the note in the class docstring.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
 
-            <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version the</span>
-            <span class="c1"># package implements, so the concrete class is bound rather than the</span>
-            <span class="c1"># abstract L2TP base. IANA protocol number 115 stays unbound because</span>
-            <span class="c1"># it is L2TPv3 (RFC 3931), which has no class yet -- when it does, it</span>
-            <span class="c1"># takes 115 and this entry becomes a version switch on the Ver</span>
+            <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version</span>
+            <span class="c1"># implemented, so the concrete class is bound rather than the</span>
+            <span class="c1"># abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)</span>
+            <span class="c1"># stays unbound because that version has no class; once it has,</span>
+            <span class="c1"># it takes 115 and this entry becomes a version switch on the Ver</span>
             <span class="c1"># nibble. c.f. pcapkit.protocols.link.l2tp.</span>
             <span class="mi">1701</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">),</span>
         <span class="p">},</span>

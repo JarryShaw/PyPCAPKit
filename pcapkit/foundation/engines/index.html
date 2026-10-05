@@ -603,12 +603,11 @@ PCAP savefiles only, otherwise
 </div>
 <section id="availability">
 <h2>Availability<a class="headerlink" href="#availability" title="Link to this heading">¶</a></h2>
-<p>A third-party engine is only usable where its backing package is, and three of
-them are harder to obtain than a plain <strong class="program">pip install</strong> suggests. Asking
-for an engine whose package is missing is not fatal – <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> emits an
+<p>A third-party engine is usable only where its backing package is, and three are
+harder to obtain than a plain <strong class="program">pip install</strong> suggests. A missing package
+is not fatal – <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> emits an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> and falls back to its own
-parser – but the extraction then has nothing to do with the engine requested,
-so it is worth knowing in advance.</p>
+parser – but the extraction then does not use the engine requested.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -623,8 +622,7 @@ so it is worth knowing in advance.</p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a>,
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a></p></td>
-<td><p>nothing – both ship pure-Python wheels, and both were
-measured reading a capture on Python 3.14, so neither
+<td><p>nothing – both are pure Python, and neither
 overrides <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
@@ -653,12 +651,17 @@ carry is not what gets loaded by default</p></td>
 </tbody>
 </table>
 </div>
-<p>Every one of these constraints is also enforced in code rather than only
-documented: each engine overrides
+<p>A constraint that an import cannot reveal is enforced by overriding
 <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>, which
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> consults
 <em>before</em> the import test, so asking for an engine that cannot run here produces
-one warning naming the actual cause and a clean fall back to the built-in parser.</p>
+one warning naming the actual cause and a fall back to the built-in parser.
+<code class="docutils literal notranslate"><span class="pre">PyShark</span></code> checks its Python ceiling and for <code class="docutils literal notranslate"><span class="pre">tshark</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAPFile</span></code> its
+Python ceiling, <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> for a system <code class="docutils literal notranslate"><span class="pre">libpcap</span></code>, and <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> and
+<code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> which distribution owns <code class="docutils literal notranslate"><span class="pre">pcap</span></code>. <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> deliberately has no
+Python ceiling check, even though upstream cannot be installed on 3.12 or newer:
+what matters is which distribution is present, and a version check would refuse
+a working build.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../../../index.html"><span class="doc">PyPCAPKit - Comprehensive Network Packet Analysis Library</span></a> covers the installation prerequisites in full,
@@ -666,8 +669,8 @@ including how <code class="docutils literal notranslate"><span class="pre">pypca
 a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> is not always found.</p>
 </div>
 </section>
-<section id="two-engines-one-interface-choosing-between-pypcap-and-pcap-ct">
-<h2>Two engines, one interface: choosing between PyPCAP and PCAP_CT<a class="headerlink" href="#two-engines-one-interface-choosing-between-pypcap-and-pcap-ct" title="Link to this heading">¶</a></h2>
+<section id="choosing-between-pypcap-and-pcap-ct">
+<h2>Choosing Between PyPCAP and PCAP_CT<a class="headerlink" href="#choosing-between-pypcap-and-pcap-ct" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> and
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> read the same
 <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> interface from two independent distributions, both of which
@@ -722,7 +725,7 @@ and turns it into an ordinary fall back to the default engine, instead of the
 hard error it would otherwise be.</p>
 </div>
 <p><strong>The two distributions collide, so install exactly one.</strong> Both own the top-level
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, and pip will happily install both – measured on Python 3.10,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, and pip will happily install both – on Python 3.10,
 the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package then wins the import and upstream’s extension module is
 shadowed and unreachable. Each engine therefore detects which distribution it
 actually got, via
@@ -798,7 +801,7 @@ unselectable and nothing else would explain why.</p></li>
             <ul>
 <li><a class="reference internal" href="#">Engine Support</a><ul>
 <li><a class="reference internal" href="#availability">Availability</a></li>
-<li><a class="reference internal" href="#two-engines-one-interface-choosing-between-pypcap-and-pcap-ct">Two engines, one interface: choosing between PyPCAP and PCAP_CT</a></li>
+<li><a class="reference internal" href="#choosing-between-pypcap-and-pcap-ct">Choosing Between PyPCAP and PCAP_CT</a></li>
 </ul>
 </li>
 </ul>

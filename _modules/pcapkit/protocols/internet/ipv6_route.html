@@ -542,8 +542,8 @@
                  <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Routing Header for IPv6.</span>
 
-<span class="sd">    This class currently supports parsing of the following Routing Header for IPv6</span>
-<span class="sd">    routing data types, which are registered in the</span>
+<span class="sd">    This class parses the following Routing Header for IPv6 routing data types,</span>
+<span class="sd">    which are registered in the</span>
 <span class="sd">    :attr:`self.__routing__ &lt;pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -696,25 +696,20 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_hdr_ext_len</span><span class="p">(</span><span class="n">data_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.</span>
 
-<span class="sd">        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is *"the length of the</span>
-<span class="sd">        Routing header in 8-octet units, not including the first 8</span>
-<span class="sd">        octets"*. The routing header's fixed part (``next``/``length``/</span>
-<span class="sd">        ``type``/``seg_left``) is 4 octets, so the total on-the-wire header</span>
-<span class="sd">        is ``4 + data_length`` octets; equating that to ``8 + 8 *</span>
-<span class="sd">        hdr_ext_len`` and solving gives ``hdr_ext_len = (data_length - 4) /</span>
-<span class="sd">        8``. ``ipv6_route_data_length`` in</span>
-<span class="sd">        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is this</span>
-<span class="sd">        expression's inverse, used on the read side.</span>
+<span class="sd">        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is the length of the</span>
+<span class="sd">        Routing header in 8-octet units, not including the first 8 octets. The</span>
+<span class="sd">        fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so</span>
+<span class="sd">        the on-the-wire header is ``4 + data_length`` octets; equating that to</span>
+<span class="sd">        ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.</span>
+<span class="sd">        ``ipv6_route_data_length`` in</span>
+<span class="sd">        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is the inverse,</span>
+<span class="sd">        used on the read side.</span>
 
-<span class="sd">        This is the *only* place ``Hdr Ext Len`` is computed on the write</span>
-<span class="sd">        side: :meth:`make` used to compute it twice, once per branch, in two</span>
-<span class="sd">        different (and both wrong) units -- that duplication, not either</span>
-<span class="sd">        expression individually, is what let the two drift and is why there</span>
-<span class="sd">        is one helper now rather than two call sites. Do NOT "simplify" the</span>
-<span class="sd">        ``- 4`` / ``/ 8`` away: the units either side of it differ (octets</span>
-<span class="sd">        vs. 8-octet units), and dropping the offset silently reinterprets</span>
-<span class="sd">        the field, which is exactly the defect :issue:`487` fixed (compare the</span>
-<span class="sd">        ``* 8`` unit bug behind :issue:`483` in the scapy adapter).</span>
+<span class="sd">        This is the *only* place ``Hdr Ext Len`` is computed on the write side.</span>
+<span class="sd">        Computing it separately per branch in :meth:`make` let the copies</span>
+<span class="sd">        drift apart, so keep one helper. Do NOT "simplify" the ``- 4`` / ``/ 8``</span>
+<span class="sd">        away: the units either side differ (octets vs. 8-octet units), and</span>
+<span class="sd">        dropping the offset silently reinterprets the field.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data_length: packed length, in octets, of the type-specific data</span>
@@ -779,10 +774,9 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="c1"># ``data`` here *is* the type-specific data (no per-type</span>
-            <span class="c1"># constructor involved), so pad it out to the next octet count</span>
-            <span class="c1"># ``_make_hdr_ext_len`` can express exactly, then use that same</span>
-            <span class="c1"># helper -- rather than a third, separate expression -- to derive</span>
-            <span class="c1"># ``Hdr Ext Len`` from the now-aligned length.</span>
+            <span class="c1"># constructor involved), so pad it to the next octet count</span>
+            <span class="c1"># ``_make_hdr_ext_len`` can express exactly, then derive</span>
+            <span class="c1"># ``Hdr Ext Len`` from the aligned length with that same helper.</span>
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
             <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_IPv6_Route</span><span class="p">)):</span>
@@ -795,10 +789,9 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
-            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an</span>
-            <span class="c1"># ``int`` subclass the latter accepts without complaint. Before</span>
-            <span class="c1"># this, ``dst=True`` converted to ``::1`` with no exception at</span>
-            <span class="c1"># all (c.f. #508, #540).</span>
+            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``</span>
+            <span class="c1"># subclass the latter accepts silently: ``dst=True`` would become</span>
+            <span class="c1"># ``::1``.</span>
             <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">dst</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid destination address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -863,6 +856,13 @@
 <span class="sd">            src_ip: source IP address</span>
 <span class="sd">            dst_ip: destination IP address</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            ``src_ip`` and ``dst_ip`` are declared only in the ``@overload``</span>
+<span class="sd">            stub above, which types them as optional keyword parameters. The</span>
+<span class="sd">            runtime accepts them through ``**kwargs`` without defaulting them.</span>
+<span class="sd">            The discrepancy with the implementation signature is deliberate</span>
+<span class="sd">            (GitHub issue :issue:`505`).</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction argument, please refer to :meth:`self.make &lt;IPv6_Route.make&gt;`.</span>
@@ -1009,11 +1009,10 @@
 
 <span class="sd">        """</span>
         <span class="c1"># ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200</span>
-        <span class="c1"># #section-4.4`), not octets -- each 16-octet address costs 2 of</span>
-        <span class="c1"># those units, so a well-formed Source Route header always carries</span>
-        <span class="c1"># an even ``Hdr Ext Len``. The previous ``(header.length - 8) % 16``</span>
-        <span class="c1"># check assumed ``header.length`` was already a total octet count,</span>
-        <span class="c1"># which is never true of this field; see #487.</span>
+        <span class="c1"># #section-4.4`), not octets. Each 16-octet address costs 2 of those</span>
+        <span class="c1"># units, so a well-formed Source Route header always carries an even</span>
+        <span class="c1"># ``Hdr Ext Len``; a check that assumes it is a total octet count</span>
+        <span class="c1"># rejects most well-formed headers.</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -1061,10 +1060,10 @@
 <span class="sd">            ProtocolError: If ``Hdr Ext Len`` is **NOT** ``2``.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># A Type 2 Routing header is fixed at 24 octets total (4 fixed + 4</span>
-        <span class="c1"># reserved + 16-octet home address), so its ``Hdr Ext Len`` -- in</span>
-        <span class="c1"># 8-octet units, not octets (:rfc:`8200#section-4.4`) -- is always</span>
-        <span class="c1"># ``2``; a literal ``24`` here could never match. See #487.</span>
+        <span class="c1"># A Type 2 Routing header is fixed at 24 octets (4 fixed + 4 reserved</span>
+        <span class="c1"># + 16-octet home address), so its ``Hdr Ext Len``, in 8-octet units</span>
+        <span class="c1"># rather than octets (:rfc:`8200#section-4.4`), is always ``2``; a</span>
+        <span class="c1"># literal ``24`` could never match.</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -1109,31 +1108,24 @@
 <span class="sd">            Parsed route data.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: the ``% 16`` bound that stood here had the same surface shape</span>
-        <span class="c1"># as the Source Route and Type 2 unit confusion #487 fixed above --</span>
-        <span class="c1"># ``header.length`` is ``Hdr Ext Len``, in the 8-octet units</span>
-        <span class="c1"># :rfc:`6554#section-3` specifies, not octets -- and it additionally</span>
-        <span class="c1"># assumed 16-octet addresses, which an SRH only carries when ``CmprI``</span>
-        <span class="c1"># and ``CmprE`` are both 0. #487 called it out but deliberately left</span>
-        <span class="c1"># it alone, because ``RPL.post_process`` raised on every pack back</span>
-        <span class="c1"># then so there was no round trip to validate a replacement against.</span>
-        <span class="c1"># #556 removed that blocker and #564 the mis-sized fixed area behind</span>
-        <span class="c1"># it, so the replacement is written here rather than guessed at.</span>
+        <span class="c1"># NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units</span>
+        <span class="c1"># :rfc:`6554#section-3` specifies, not octets, and the addresses are</span>
+        <span class="c1"># not always 16 octets: an SRH carries full addresses only when</span>
+        <span class="c1"># ``CmprI`` and ``CmprE`` are both 0. A plain ``% 16`` bound on the</span>
+        <span class="c1"># length is therefore wrong on both counts.</span>
         <span class="c1">#</span>
-        <span class="c1"># :rfc:`6554#section-4.2` derives the address count from the same</span>
-        <span class="c1"># fields this reader has to hand:</span>
+        <span class="c1"># :rfc:`6554#section-4.2` derives the address count from the fields</span>
+        <span class="c1"># this reader has to hand:</span>
         <span class="c1">#</span>
         <span class="c1">#     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1</span>
         <span class="c1">#</span>
-        <span class="c1"># so the invariant actually available is that the division closes --</span>
-        <span class="c1"># non-negative, and whole. ``16 - cmpr_i`` cannot be zero: ``CmprI``</span>
-        <span class="c1"># is a *"4-bit unsigned integer"* per :rfc:`6554#section-3`, hence at</span>
-        <span class="c1"># most 15. Note this is a well-formedness check the library needs in</span>
-        <span class="c1"># order to walk ``Addresses[1..n]`` at all; :rfc:`6554#section-4.2`</span>
-        <span class="c1"># itself specifies no malformed-header drop condition, only</span>
-        <span class="c1"># ``Segments Left &gt; n``, so nothing stricter is imposed here. Still</span>
-        <span class="c1"># not checked against a real RPL capture, which is the caveat the</span>
-        <span class="c1"># ``% 16`` bound carried too.</span>
+        <span class="c1"># so the invariant available is that the division closes: non-negative</span>
+        <span class="c1"># and whole. ``16 - cmpr_i`` cannot be zero, since ``CmprI`` is a</span>
+        <span class="c1"># 4-bit unsigned integer (:rfc:`6554#section-3`), at most 15. This is</span>
+        <span class="c1"># the well-formedness check the library needs to walk</span>
+        <span class="c1"># ``Addresses[1..n]`` at all; the RFC specifies no malformed-header</span>
+        <span class="c1"># drop condition beyond ``Segments Left &gt; n``, so nothing stricter is</span>
+        <span class="c1"># imposed. Not checked against a real RPL capture.</span>
         <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_i'</span><span class="p">]</span>
         <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_e'</span><span class="p">]</span>
         <span class="n">pad_len</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span>
@@ -1276,13 +1268,11 @@
             <span class="n">ip</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ip</span>
 
             <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
-            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an</span>
-            <span class="c1"># ``int`` subclass the latter accepts without complaint -- and</span>
-            <span class="c1"># here the laundered value would not just pack wrong, it would</span>
-            <span class="c1"># feed ``cmpr_i``/``cmpr_e`` below, corrupting the compression</span>
-            <span class="c1"># metadata alongside the address list. Before this,</span>
-            <span class="c1"># ``ip=[True]`` packed with ``cmpr_e=0`` and an address of</span>
-            <span class="c1"># ``00000001`` instead of raising (c.f. #508, #540).</span>
+            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``</span>
+            <span class="c1"># subclass the latter accepts silently. Here the value would not</span>
+            <span class="c1"># just pack wrong but also feed ``cmpr_i``/``cmpr_e`` below,</span>
+            <span class="c1"># corrupting the compression metadata: ``ip=[True]`` would pack an</span>
+            <span class="c1"># address of ``00000001`` with ``cmpr_e=0``.</span>
             <span class="n">descr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid RPL source address'</span>
 
             <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1310,15 +1300,13 @@
                 <span class="n">prefix_e</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_e</span><span class="p">)</span>
 
-                <span class="c1"># NOTE: the outer ``% 8`` is what keeps a vector that is</span>
-                <span class="c1"># already 8-octet aligned from being handed a *full* 8 octets</span>
-                <span class="c1"># of padding -- ``8 - 0`` is 8, not 0. That is reachable</span>
-                <span class="c1"># whenever ``dst`` shares no prefix with the addresses, which</span>
-                <span class="c1"># makes ``cmpr_i`` and ``cmpr_e`` both 0 and the vector a</span>
-                <span class="c1"># multiple of 16, and it contradicts :rfc:`6554#section-3`:</span>
-                <span class="c1"># *"Note that when CmprI and CmprE are both 0, Pad MUST carry</span>
-                <span class="c1"># a value of 0."* ``_make_data_type_none`` above already</span>
-                <span class="c1"># spells the idiom this way; this branch did not.</span>
+                <span class="c1"># NOTE: the outer ``% 8`` keeps an already 8-octet-aligned</span>
+                <span class="c1"># vector from being handed a *full* 8 octets of padding</span>
+                <span class="c1"># (``8 - 0`` is 8, not 0). That is reachable whenever ``dst``</span>
+                <span class="c1"># shares no prefix with the addresses, making ``cmpr_i`` and</span>
+                <span class="c1"># ``cmpr_e`` both 0 and the vector a multiple of 16, and it</span>
+                <span class="c1"># contradicts :rfc:`6554#section-3`: when CmprI and CmprE are</span>
+                <span class="c1"># both 0, Pad MUST be 0. Same idiom as ``_make_data_type_none``.</span>
                 <span class="n">pad</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_i</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_e</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
 
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[]</span>

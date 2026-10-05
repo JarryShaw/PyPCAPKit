@@ -12,14 +12,14 @@ as below:
 ======= ========= ===================== =======================================
 Octets      Bits        Name                    Description
 ======= ========= ===================== =======================================
-  0           0   ``ip.version``              Version (``6``)
-  0           4   ``ip.class``                Traffic Class
-  1          12   ``ip.label``                Flow Label
-  4          32   ``ip.payload``              Payload Length (header excludes)
-  6          48   ``ip.next``                 Next Header
-  7          56   ``ip.limit``                Hop Limit
-  8          64   ``ip.src``                  Source Address
-  24        192   ``ip.dst``                  Destination Address
+  0           0   ``ipv6.version``            Version (``6``)
+  0           4   ``ipv6.class``              Traffic Class
+  1          12   ``ipv6.label``              Flow Label
+  4          32   ``ipv6.payload``            Payload Length (header excludes)
+  6          48   ``ipv6.next``               Next Header
+  7          56   ``ipv6.limit``              Hop Limit
+  8          64   ``ipv6.src``                Source Address
+  24        192   ``ipv6.dst``                Destination Address
 ======= ========= ===================== =======================================
 
 .. autoclass:: pcapkit.protocols.internet.ipv6.IPv6

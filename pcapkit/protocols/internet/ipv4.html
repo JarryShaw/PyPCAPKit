@@ -502,47 +502,47 @@ as below:</p>
 <tbody>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.version</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.version</span></code></p></td>
 <td><p>Version (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p>0</p></td>
 <td><p>4</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.hdr_len</span></code></p></td>
-<td><p>Internal Header Length (IHL)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.hdr_len</span></code></p></td>
+<td><p>Internet Header Length (IHL)</p></td>
 </tr>
 <tr class="row-even"><td><p>1</p></td>
 <td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.tos.pre</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.tos.pre</span></code></p></td>
 <td><p>Precedence</p></td>
 </tr>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>11</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.tos.del</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.tos.del</span></code></p></td>
 <td><p>Delay</p></td>
 </tr>
 <tr class="row-even"><td><p>1</p></td>
 <td><p>12</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.tos.thr</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.tos.thr</span></code></p></td>
 <td><p>Throughput</p></td>
 </tr>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>13</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.tos.rel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.tos.rel</span></code></p></td>
 <td><p>Reliability</p></td>
 </tr>
 <tr class="row-even"><td><p>1</p></td>
 <td><p>14</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.tos.ecn</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.tos.ecn</span></code></p></td>
 <td><p>Explicit Congestion Notification (ECN)</p></td>
 </tr>
 <tr class="row-odd"><td><p>2</p></td>
 <td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.len</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.len</span></code></p></td>
 <td><p>Total Length</p></td>
 </tr>
 <tr class="row-even"><td><p>4</p></td>
 <td><p>32</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.id</span></code></p></td>
 <td><p>Identification</p></td>
 </tr>
 <tr class="row-odd"><td><p>6</p></td>
@@ -552,47 +552,47 @@ as below:</p>
 </tr>
 <tr class="row-even"><td><p>6</p></td>
 <td><p>49</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.flags.df</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.flags.df</span></code></p></td>
 <td><p>Don’t Fragment (DF)</p></td>
 </tr>
 <tr class="row-odd"><td><p>6</p></td>
 <td><p>50</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.flags.mf</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.flags.mf</span></code></p></td>
 <td><p>More Fragments (MF)</p></td>
 </tr>
 <tr class="row-even"><td><p>6</p></td>
 <td><p>51</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.offset</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.offset</span></code></p></td>
 <td><p>Fragment Offset</p></td>
 </tr>
 <tr class="row-odd"><td><p>8</p></td>
 <td><p>64</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.ttl</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.ttl</span></code></p></td>
 <td><p>Time To Live (TTL)</p></td>
 </tr>
 <tr class="row-even"><td><p>9</p></td>
 <td><p>72</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.protocol</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.protocol</span></code></p></td>
 <td><p>Protocol (Transport Layer)</p></td>
 </tr>
 <tr class="row-odd"><td><p>10</p></td>
 <td><p>80</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.checksum</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.checksum</span></code></p></td>
 <td><p>Header Checksum</p></td>
 </tr>
 <tr class="row-even"><td><p>12</p></td>
 <td><p>96</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.src</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code></p></td>
 <td><p>Source IP Address</p></td>
 </tr>
 <tr class="row-odd"><td><p>16</p></td>
 <td><p>128</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.dst</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code></p></td>
 <td><p>Destination IP Address</p></td>
 </tr>
 <tr class="row-even"><td><p>20</p></td>
 <td><p>160</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ip.options</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ipv4.options</span></code></p></td>
 <td><p>IP Options (if IHL &gt; <code class="docutils literal notranslate"><span class="pre">5</span></code>)</p></td>
 </tr>
 </tbody>
@@ -603,8 +603,8 @@ as below:</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv4.html#IPv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv4.IPv4" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.IPv4" title="pcapkit.protocols.data.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.IPv4" title="pcapkit.protocols.schema.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>]</p>
 <p>This class implements Internet Protocol version 4.</p>
-<p>This class currently supports parsing of the following IPv4 options,
-which are registered in the <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4.__option__" title="pcapkit.protocols.internet.ipv4.IPv4.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__option__</span></code></a>
+<p>This class parses the following IPv4 options, which are registered in the
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4.__option__" title="pcapkit.protocols.internet.ipv4.IPv4.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__option__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -896,7 +896,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool">
 <span class="sig-name descname"><span class="pre">_read_opt_eool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv4.html#IPv4._read_opt_eool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv4 End of Option List (<code class="docutils literal notranslate"><span class="pre">EOOL</span></code>) option.</p>
-<p>Structure of IPv4 End of Option List (<code class="docutils literal notranslate"><span class="pre">EOOL</span></code>) option [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc719.html"><strong>RFC 719</strong></a>]:</p>
+<p>Structure of IPv4 End of Option List (<code class="docutils literal notranslate"><span class="pre">EOOL</span></code>) option [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+--------+
 |00000000|
 +--------+
@@ -923,7 +923,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop">
 <span class="sig-name descname"><span class="pre">_read_opt_nop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv4.html#IPv4._read_opt_nop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv4 No Operation (<code class="docutils literal notranslate"><span class="pre">NOP</span></code>) option.</p>
-<p>Structure of IPv4 No Operation (<code class="docutils literal notranslate"><span class="pre">NOP</span></code>) option [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc719.html"><strong>RFC 719</strong></a>]:</p>
+<p>Structure of IPv4 No Operation (<code class="docutils literal notranslate"><span class="pre">NOP</span></code>) option [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+--------+
 |00000001|
 +--------+
@@ -1371,7 +1371,7 @@ attribute:</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1392,7 +1392,7 @@ attribute:</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.EOOLOption" title="pcapkit.protocols.schema.internet.ipv4.EOOLOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">EOOLOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1413,7 +1413,7 @@ attribute:</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.NOPOption" title="pcapkit.protocols.schema.internet.ipv4.NOPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">NOPOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1439,7 +1439,7 @@ attribute:</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.SECOption" title="pcapkit.protocols.schema.internet.ipv4.SECOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SECOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">authorities</span></code> names a bit position that is not a
@@ -1479,7 +1479,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.LSROption" title="pcapkit.protocols.schema.internet.ipv4.LSROption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LSROption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1502,7 +1502,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.TSOption" title="pcapkit.protocols.schema.internet.ipv4.TSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TSOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1519,7 +1519,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – additional security information format code</p></li>
 <li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – additional security information</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
-<li><p><strong>Returns</strong> – Constructured option schema.</p></li>
+<li><p><strong>Returns</strong> – Constructed option schema.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1546,7 +1546,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.RROption" title="pcapkit.protocols.schema.internet.ipv4.RROption"><code class="xref py py-class docutils literal notranslate"><span class="pre">RROption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1568,7 +1568,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.SIDOption" title="pcapkit.protocols.schema.internet.ipv4.SIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SIDOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1591,7 +1591,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.SSROption" title="pcapkit.protocols.schema.internet.ipv4.SSROption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSROption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1613,7 +1613,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.MTUPOption" title="pcapkit.protocols.schema.internet.ipv4.MTUPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MTUPOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1635,7 +1635,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.MTUROption" title="pcapkit.protocols.schema.internet.ipv4.MTUROption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MTUROption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1660,7 +1660,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.TROption" title="pcapkit.protocols.schema.internet.ipv4.TROption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TROption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1685,7 +1685,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.RTRALTOption" title="pcapkit.protocols.schema.internet.ipv4.RTRALTOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTRALTOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1713,7 +1713,7 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructured option schema.</p>
+<dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2002,12 +2002,9 @@ from public <a class="reference internal" href="#pcapkit.protocols.internet.ipv4
 caller-built option schema and packs it, and
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data" title="pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_data</span></code></a>’s <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a>
 item type takes a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> as the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> it is a subclass
-of, so nothing downstream can question it. Measured before this
-fix: <code class="docutils literal notranslate"><span class="pre">ts_data=[True,</span> <span class="pre">5]</span></code> packed as <code class="docutils literal notranslate"><span class="pre">0000000100000005</span></code> and
-reported <code class="docutils literal notranslate"><span class="pre">IPv4Address('0.0.0.1')</span></code> with no exception and no
-warning. This was the fifth site of that defect – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/508">#508</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/540">#540</a> are the first four – and the reason it is the fifth
-is that each of those fixed the sites it could see. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a>.</p>
+of, so nothing downstream can question it: <code class="docutils literal notranslate"><span class="pre">ts_data=[True,</span> <span class="pre">5]</span></code>
+would otherwise pack as <code class="docutils literal notranslate"><span class="pre">0000000100000005</span></code> and report
+<code class="docutils literal notranslate"><span class="pre">IPv4Address('0.0.0.1')</span></code> with no exception and no warning.</p>
 </div>
 </dd></dl>
 
@@ -2067,12 +2064,7 @@ is that each of those fixed the sites it could see. See <a class="extlink-issue 
 <span class="sig-name descname"><span class="pre">sid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">sid&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SIDOption.sid" title="Link to this definition">¶</a></dt>
 <dd><p>Stream identifier. Two octets, per <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> section 3.1, which gives the
 option as four octets in total: one of type, one of length, and a 16-bit
-stream identifier. This was a <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a>,
-which over-read a well-formed option by two octets on the way in – the
-<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-2</span></code> the library warned about – and re-emitted it two
-octets too wide on the way out, against the <code class="docutils literal notranslate"><span class="pre">length=4</span></code> that
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid" title="pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_sid()</span></code></a> had always
-written. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/534">#534</a>.</p>
+stream identifier.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2254,18 +2246,14 @@ Report of Approved Rate, the fourth byte of the Quick-Start Option is not
 used”</em>, and that <em>“bytes 5-8 contain a 30-bit QS Nonce and a 2-bit
 Reserved field”</em> – so the nonce begins at the fifth octet for both
 functions, and figure 4 gives this option as <code class="docutils literal notranslate"><span class="pre">Length=8</span></code> like figure 3
-gives its sibling. The field was missing, so the schema was seven octets
+gives its sibling. Without this field the schema would be seven octets
 wide against the eight
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_qs()</span></code></a> writes into
 <code class="docutils literal notranslate"><span class="pre">length</span></code> and the eight
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a> demands of it,
-which meant a spec-correct Report of Approved Rate read off the wire
-decoded its <code class="docutils literal notranslate"><span class="pre">nonce</span></code> one octet early – measured, with the selector
-length fixed and this field still absent: <code class="docutils literal notranslate"><span class="pre">19088100deadbee0</span></code> warned
-<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-1</span></code> and then died with a bare <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">bad</span>
-<span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>, the unconsumed octet having been read as another
-option. Declared as padding rather than as data because <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> gives
-it no meaning and no caller should be setting it. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a>.</p>
+and the <code class="docutils literal notranslate"><span class="pre">nonce</span></code> would decode one octet early. Declared as padding rather
+than as data because <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> gives it no meaning and no caller should
+be setting it.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2414,14 +2402,11 @@ byte of the Quick-Start Option is not used”</em>. And
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a> rejects any other
 value in the <code class="docutils literal notranslate"><span class="pre">length</span></code> field outright.</p>
 <p>It is summed from the resolved schema’s own fields rather than written as
-that literal, for two reasons. The registry is open –
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a> is an <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>,
-so a caller may register a further function code with a schema of its own
-width – and a number written here has to be kept in step by hand with every
-field the suboptions declare, which is precisely how <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a> arose: the length
-was <code class="docutils literal notranslate"><span class="pre">5</span></code>, the width of a Quick-Start Request’s <code class="docutils literal notranslate"><span class="pre">ttl</span></code> and <code class="docutils literal notranslate"><span class="pre">nonce</span></code> alone,
-with the <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code> and <code class="docutils literal notranslate"><span class="pre">flags</span></code> octets in front of them
-unaccounted for.</p>
+that literal, because the registry is open – <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a> is an
+<a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>, so a caller may
+register a further function code with a schema of its own width – and a
+number written here would have to be kept in step by hand with every field
+the suboptions declare.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a>]</span>) – Quick-Start suboption schema, as resolved from the <code class="docutils literal notranslate"><span class="pre">func</span></code>
@@ -2439,8 +2424,7 @@ sub-field by <a class="reference internal" href="#pcapkit.protocols.schema.inter
     because the option is, and a variable-width one cannot be summed
     here without a packet to size it against – which is the one thing
     a selector does not have for the schema it is about to return. It
-    fails rather than guessing, since guessing is the defect being
-    fixed.</p>
+    fails rather than guessing a width.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2472,14 +2456,9 @@ instance.</p></li>
 <p class="admonition-title">Notes</p>
 <p>The length handed to the <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
 comes from <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_option_length" title="pcapkit.protocols.schema.internet.ipv4.quick_start_option_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">quick_start_option_length()</span></code></a>, i.e. from the suboption that
-was just resolved. It used to be the literal <code class="docutils literal notranslate"><span class="pre">5</span></code> for both, which is not
-the width of either: a well-formed eight-octet Quick-Start Request
-<code class="docutils literal notranslate"><span class="pre">1908002adeadbee0</span></code> parsed with <code class="docutils literal notranslate"><span class="pre">SchemaWarning:</span> <span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-3</span></code>
-and decoded its <code class="docutils literal notranslate"><span class="pre">nonce</span></code> as <strong>55</strong> instead of 933982136, then left three
-octets to be read as a further, fabricated option – which made the
-enclosing datagram fail with <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">IPv4:</span> <span class="pre">invalid</span> <span class="pre">format</span></code>. That
-is silent corruption on the way to a misleading failure, and it was logged
-in review twice before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/552">#552</a> filed it.</p>
+was just resolved, rather than from a fixed literal: a wrong width
+mis-sizes the nested read, so the <code class="docutils literal notranslate"><span class="pre">nonce</span></code> decodes wrongly and the
+leftover octets are read as a further, fabricated option.</p>
 </div>
 </dd></dl>
 

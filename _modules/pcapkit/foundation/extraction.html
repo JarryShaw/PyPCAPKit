@@ -1175,8 +1175,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span>
                 <span class="k">return</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> (`</span><span class="si">{</span><span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="si">}</span><span class="s1">`) is not installed; '</span>
-                     <span class="s1">'using default engine instead'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="c1"># ``import_test`` has already warned that the package is absent;</span>
+                <span class="c1"># warning again here would report one problem twice.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">):</span>
@@ -1222,7 +1222,8 @@
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="n">module</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'engine module </span><span class="si">%r</span><span class="s1"> is not importable'</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"extraction engine '</span><span class="si">{</span><span class="n">name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">engine</span><span class="si">}</span><span class="s2">' not available; "</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> (`</span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1">`)'</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="n">engine</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> is not installed; '</span>
                  <span class="s1">'using default engine instead'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">module</span></div>
 

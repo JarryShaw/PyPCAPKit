@@ -548,16 +548,14 @@ configured separately, through the <a class="reference external" href="https://d
 </div>
 <div class="admonition attention">
 <p class="admonition-title">Attention</p>
-<p>Up to and including v1.4.1, <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>
-installed an <code class="docutils literal notranslate"><span class="pre">ignore</span></code> filter for its own class as a side effect of being
-constructed, so <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> warnings were invisible on the <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>
-channel by default and a caller could not re-enable them. They are now
-delivered, which means a consumer who was relying on that silence will start
-seeing them; the first snippet above restores the old quiet. Since the filter
-was installed at the <em>front</em> of the process-global <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code>,
+<p>Up to and including v1.4.1, constructing a
+<a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> installed an <code class="docutils literal notranslate"><span class="pre">ignore</span></code>
+filter for its own class, so <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> warnings were invisible on the
+<a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> channel by default and a caller could not re-enable them.
+They are now delivered; the first snippet above restores the old quiet. The
+filter went at the <em>front</em> of the process-global <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so
 it also overrode the host application’s own configuration for those
-categories and made unrelated warnings re-fire, so it is not something that
-can be kept.</p>
+categories and made unrelated warnings re-fire.</p>
 </div>
 <dl class="py exception">
 <dt class="sig sig-object py" id="pcapkit.utilities.warnings.BaseWarning">

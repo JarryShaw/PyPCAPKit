@@ -731,17 +731,15 @@
         <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># NOTE: Anchored to UTC, and aware rather than naive. ``ts_sec`` is an</span>
-            <span class="c1"># offset from the UNIX epoch, so the instant it names does not depend</span>
-            <span class="c1"># on where the file is read; a bare ``fromtimestamp`` renders it in</span>
-            <span class="c1"># the reading host's zone and drops the offset, leaving a datetime</span>
-            <span class="c1"># that reads as a different wall-clock time on every machine and</span>
-            <span class="c1"># cannot be compared against an aware one at all. The ``except``</span>
-            <span class="c1"># branch below has always returned an aware UTC datetime, and the</span>
-            <span class="c1"># PCAP-NG reader returns one too -- the same</span>
+            <span class="c1"># NOTE: Aware and anchored to UTC, not naive. ``ts_sec`` is an offset</span>
+            <span class="c1"># from the UNIX epoch, so the instant it names must not depend on</span>
+            <span class="c1"># where the file is read; a bare ``fromtimestamp`` renders it in the</span>
+            <span class="c1"># reading host's zone, drops the offset, and cannot be compared</span>
+            <span class="c1"># against an aware datetime. The ``except`` branch below returns an</span>
+            <span class="c1"># aware UTC datetime too, and so does the PCAP-NG reader, which fills</span>
+            <span class="c1"># the same</span>
             <span class="c1"># :attr:`Data_Frame.time &lt;pcapkit.protocols.data.misc.pcap.frame.Frame.time&gt;`</span>
-            <span class="c1"># field is filled from there by</span>
-            <span class="c1"># :func:`pcapkit.toolkit.pcapng.block2frame`, so the two have to agree.</span>
+            <span class="c1"># field through :func:`pcapkit.toolkit.pcapng.block2frame`.</span>
             <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: invalid timestamp: </span><span class="si">{</span><span class="n">_epch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -757,28 +755,19 @@
             <span class="n">time</span><span class="o">=</span><span class="n">_time</span><span class="p">,</span>
             <span class="n">number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
             <span class="n">time_epoch</span><span class="o">=</span><span class="n">_epch</span><span class="p">,</span>
-            <span class="c1"># NOTE: ``len`` is the on-wire length and ``cap_len`` the captured</span>
-            <span class="c1"># one, i.e. ``orig_len`` and ``incl_len`` respectively -- not the</span>
-            <span class="c1"># other way round, which is what this reader used to do (see #618).</span>
+            <span class="c1"># NOTE: ``len`` is the on-wire length (``orig_len``) and ``cap_len``</span>
+            <span class="c1"># the captured one (``incl_len``). The two differ only for a frame</span>
+            <span class="c1"># the snapshot length cut short.</span>
             <span class="c1">#</span>
-            <span class="c1"># The two only differ for a frame the snapshot length cut short, so</span>
-            <span class="c1"># until ``big_endian.pcap`` arrived with #605 no fixture here could</span>
-            <span class="c1"># tell the two assignments apart.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Worth knowing *why* this reader moved rather than the other one,</span>
-            <span class="c1"># because it was not the newer of the two: this convention dates to</span>
-            <span class="c1"># c43892af (2022-01-11) and the data model's docstrings agreed with</span>
-            <span class="c1"># it a day later, while the opposite convention in</span>
-            <span class="c1"># :func:`pcapkit.toolkit.pcapng.block2frame` arrived 15 months after</span>
-            <span class="c1"># that in 25f216f4 (2023-04-27). Both were internally consistent, so</span>
-            <span class="c1"># neither is a typo and seniority does not settle it. What settles it</span>
-            <span class="c1"># is that the names are Wireshark's, and its ``packet-frame.c``</span>
-            <span class="c1"># registers ``frame.len`` as "Frame length on the wire" and</span>
-            <span class="c1"># ``frame.cap_len`` as "Frame length stored into the capture file",</span>
-            <span class="c1"># and raises ``frame.len_lt_caplen`` -- ``PI_MALFORMED`` -- on</span>
-            <span class="c1"># ``frame_len &lt; cap_len``, which could not be malformed if ``len``</span>
-            <span class="c1"># were the smaller, captured one. So the later convention is the one</span>
-            <span class="c1"># that matches the names, and this one is brought into line with it.</span>
+            <span class="c1"># The names are Wireshark's: its ``packet-frame.c`` registers</span>
+            <span class="c1"># ``frame.len`` as "Frame length on the wire" and ``frame.cap_len``</span>
+            <span class="c1"># as "Frame length stored into the capture file", and raises</span>
+            <span class="c1"># ``frame.len_lt_caplen`` (``PI_MALFORMED``) on ``frame_len &lt;</span>
+            <span class="c1"># cap_len``, which could not be malformed if ``len`` were the smaller,</span>
+            <span class="c1"># captured one. Age does not settle it: this reader's older</span>
+            <span class="c1"># convention (c43892af, 2022-01-11) was the swapped one, and the</span>
+            <span class="c1"># PCAP-NG reader's later one (25f216f4, 2023-04-27) matches the names,</span>
+            <span class="c1"># so this reader was brought into line with it.</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
             <span class="n">cap_len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
         <span class="p">)</span>
@@ -790,17 +779,16 @@
             <span class="c1"># NOTE: We create a copy of the frame data here for parsing</span>
             <span class="c1"># scenarios to keep the original frame data intact.</span>
             <span class="c1">#</span>
-            <span class="c1"># NOTE: The record spans ``self.length + incl_len`` octets, and by</span>
-            <span class="c1"># the time we get here :meth:`self.unpack &lt;unpack&gt;` has consumed</span>
-            <span class="c1"># *all* of them -- the schema's payload field carries the</span>
-            <span class="c1"># ``incl_len`` octets of packet data, not just the 16-octet record</span>
-            <span class="c1"># header. So the frame's own start cannot be reached by seeking</span>
-            <span class="c1"># backwards over ``self.length`` alone: that lands ``incl_len``</span>
-            <span class="c1"># octets too late and captures the tail of this record followed by</span>
-            <span class="c1"># the head of the next one (see #357). It is recorded before the</span>
-            <span class="c1"># unpack instead, in :meth:`self.__post_init__ &lt;__post_init__&gt;`, and</span>
-            <span class="c1"># seeked to absolutely -- which is what the PCAP-NG reader has</span>
-            <span class="c1"># always done, c.f. :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.</span>
+            <span class="c1"># NOTE: The record spans ``self.length + incl_len`` octets, and</span>
+            <span class="c1"># :meth:`self.unpack &lt;unpack&gt;` has consumed *all* of them by now --</span>
+            <span class="c1"># the schema's payload field carries the ``incl_len`` octets of</span>
+            <span class="c1"># packet data, not just the 16-octet record header. Seeking back</span>
+            <span class="c1"># over ``self.length`` alone would land ``incl_len`` octets too late,</span>
+            <span class="c1"># on the tail of this record followed by the head of the next one.</span>
+            <span class="c1"># So the start is recorded before the unpack, in</span>
+            <span class="c1"># :meth:`self.__post_init__ &lt;__post_init__&gt;`, and seeked to</span>
+            <span class="c1"># absolutely, as the PCAP-NG reader does, c.f.</span>
+            <span class="c1"># :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.</span>
             <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span>
 
             <span class="c1"># move backward to the beginning of the frame</span>
@@ -815,22 +803,17 @@
             <span class="c1">#: io.BytesIO: Source data stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The dissector is handed the octets that are actually *present*,</span>
-        <span class="c1"># i.e. ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame</span>
-        <span class="c1"># the snapshot length cut short the latter is larger than the file holds,</span>
-        <span class="c1"># and handing it over is the declared-length-exceeds-available-octets</span>
-        <span class="c1"># fault of #554, #573 and #594. This read ``frame.len`` before #618, when</span>
-        <span class="c1"># that *was* the captured length -- so the value handed over here is the</span>
-        <span class="c1"># same one as before and the dissection is unchanged; only the spelling</span>
-        <span class="c1"># moved, to the attribute that now means what this call site needs.</span>
+        <span class="c1"># NOTE: The dissector is handed the octets actually *present*, i.e.</span>
+        <span class="c1"># ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame the</span>
+        <span class="c1"># snapshot length cut short the latter exceeds what the file holds, and</span>
+        <span class="c1"># handing it over is the declared-length-exceeds-available-octets fault.</span>
         <span class="c1">#</span>
-        <span class="c1"># No test pins this line, and that is a known gap rather than an</span>
-        <span class="c1"># oversight: reverting just this argument to ``frame.len`` leaves the</span>
-        <span class="c1"># whole suite green. ``big_endian.pcap``'s truncated frame dissects to</span>
-        <span class="c1"># ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the ``length``</span>
-        <span class="c1"># it is handed, so the over-long value never reaches anything that checks</span>
-        <span class="c1"># it. Catching a regression here needs a fixture whose truncation lands</span>
-        <span class="c1"># in a length-checked field instead of bottoming out in ``Raw``.</span>
+        <span class="c1"># No test pins this line: reverting just this argument to ``frame.len``</span>
+        <span class="c1"># leaves the whole suite green. ``big_endian.pcap``'s truncated frame</span>
+        <span class="c1"># dissects to ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the</span>
+        <span class="c1"># ``length`` it is handed, so the over-long value never reaches anything</span>
+        <span class="c1"># that checks it. Catching a regression needs a fixture whose truncation</span>
+        <span class="c1"># lands in a length-checked field instead of bottoming out in ``Raw``.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">cap_len</span><span class="p">)</span></div>
 
 

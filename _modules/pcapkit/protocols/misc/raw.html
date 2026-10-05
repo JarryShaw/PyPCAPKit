@@ -624,7 +624,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">alias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span>
 
-        <span class="c1">#: pcapkit.protocols.null.NoPayload: Next layer (no payload).</span>
+        <span class="c1">#: pcapkit.protocols.misc.null.NoPayload: Next layer (no payload).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>
         <span class="c1">#: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">alias</span><span class="p">)</span></div>

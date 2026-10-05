@@ -552,10 +552,10 @@
     <span class="n">Flags</span> <span class="o">=</span> <span class="n">Schema_FrameType</span><span class="o">.</span><span class="n">Flags</span>
 
     <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
-    <span class="c1"># NB: ``Flags`` is bound just above, so it goes in unquoted. Quoting it left a</span>
-    <span class="c1"># bare ``ForwardRef('Flags')`` inside the alias, which every *other* module</span>
-    <span class="c1"># that spells ``FrameConstructor`` in an annotation then had to resolve in its</span>
-    <span class="c1"># own namespace -- where the name does not exist.</span>
+    <span class="c1"># NB: ``Flags`` is bound just above, so it goes in unquoted. Quoted, it would</span>
+    <span class="c1"># leave a bare ``ForwardRef('Flags')`` inside the alias, which every *other*</span>
+    <span class="c1"># module that spells ``FrameConstructor`` in an annotation would have to</span>
+    <span class="c1"># resolve in its own namespace -- where the name does not exist.</span>
     <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">Flags</span><span class="p">]]</span>
 
@@ -568,7 +568,7 @@
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HTTP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Hypertext Transfer Protocol (HTTP/2).</span>
 
-<span class="sd">    This class currently supports parsing of the following HTTP/2 frames,</span>
+<span class="sd">    This class supports parsing of the following HTTP/2 frames,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`</span>
 <span class="sd">    enumeration:</span>
 
@@ -675,49 +675,40 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            This guards ahead of :meth:`Schema.unpack</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` rather than</span>
-<span class="sd">            leaving the same check to :meth:`read`, because a buffer shorter</span>
-<span class="sd">            than the fixed 9-octet header is not merely invalid -- it can</span>
-<span class="sd">            crash the schema layer outright. ``pkt['__length__']`` there is</span>
-<span class="sd">            decremented by each field's *nominal* width regardless of how</span>
-<span class="sd">            many octets the buffer actually had, so it goes negative, and the</span>
-<span class="sd">            frame payload's length-derived fields (e.g. an unpadded ``DATA``</span>
-<span class="sd">            frame's ``data: BytesField(length=lambda pkt: pkt['__length__'])``)</span>
-<span class="sd">            resolve to that negative number. A negative field length becomes</span>
-<span class="sd">            a struct template such as ``'-5s'``, and :func:`struct.calcsize`</span>
-<span class="sd">            raises :exc:`struct.error` for it -- uncaught, since nothing</span>
-<span class="sd">            downstream expects a :exc:`ProtocolError` to be spelled that way.</span>
-<span class="sd">            Rejecting here, before :meth:`Schema.unpack` ever runs, keeps a</span>
-<span class="sd">            frame too short to hold a header from reaching that arithmetic at</span>
-<span class="sd">            all. This closes the *outer*-header class only -- an inner payload</span>
-<span class="sd">            field can still drive ``pkt['__length__']`` negative on a buffer</span>
-<span class="sd">            that clears nine (e.g. a ``GOAWAY`` frame at 9-16 octets, whose</span>
-<span class="sd">            fixed ``stream`` and ``error`` fields alone consume eight); that</span>
-<span class="sd">            residual is why :meth:`HTTP._guess_version</span>
-<span class="sd">            &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;` still</span>
-<span class="sd">            suppresses :exc:`struct.error` on its last arm. See :issue:`799`.</span>
+<span class="sd">            leaving the check to :meth:`read`, because a buffer shorter than the</span>
+<span class="sd">            fixed 9-octet header cannot be parsed meaningfully.</span>
+<span class="sd">            ``pkt['__length__']`` there is decremented by each field's</span>
+<span class="sd">            *nominal* width regardless of how many octets the buffer had, so it</span>
+<span class="sd">            goes negative and the frame payload's length-derived fields (e.g. an</span>
+<span class="sd">            unpadded ``DATA`` frame's ``data: BytesField(length=lambda pkt:</span>
+<span class="sd">            pkt['__length__'])``) resolve to a negative width. Rejecting here</span>
+<span class="sd">            keeps such a frame from reaching that arithmetic. An inner field can</span>
+<span class="sd">            still drive it negative on a buffer that clears nine (e.g. a</span>
+<span class="sd">            ``GOAWAY`` frame at 9-16 octets, whose fixed ``stream`` and</span>
+<span class="sd">            ``error`` fields alone consume eight); the schema layer raises</span>
+<span class="sd">            :exc:`ProtocolError` for that itself.</span>
 
 <span class="sd">            ``length`` is resolved against :func:`len` only for *this*</span>
 <span class="sd">            method's own check, and the *original* argument -- ``None``</span>
-<span class="sd">            included -- is what is actually forwarded to :meth:`Protocol.unpack</span>
+<span class="sd">            included -- is what is forwarded to :meth:`Protocol.unpack</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`. Collapsing</span>
-<span class="sd">            ``None`` to a concrete ``0`` before forwarding would change what</span>
-<span class="sd">            :meth:`Schema.unpack`'s own ``prepare`` decorator does with a</span>
-<span class="sd">            now-exhausted stream: it raises</span>
+<span class="sd">            ``None`` to a concrete ``0`` would change what</span>
+<span class="sd">            :meth:`Schema.unpack`'s own ``prepare`` decorator does with an</span>
+<span class="sd">            exhausted stream: it raises</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.StreamEOFError` (an</span>
 <span class="sd">            :exc:`EOFError`, the documented "no more packets" signal) only when</span>
-<span class="sd">            the *caller* left ``length`` unspecified, and forwarding a resolved</span>
-<span class="sd">            ``0`` instead would report an exhausted stream as a malformed</span>
-<span class="sd">            packet. A *non-zero* short buffer is unambiguously malformed either</span>
-<span class="sd">            way, so it is rejected here regardless of whether ``length`` was</span>
-<span class="sd">            given explicitly.</span>
+<span class="sd">            the *caller* left ``length`` unspecified, and a resolved ``0``</span>
+<span class="sd">            would report an exhausted stream as a malformed packet. A</span>
+<span class="sd">            *non-zero* short buffer is malformed either way, so it is rejected</span>
+<span class="sd">            here whether or not ``length`` was given.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ``0 &lt; ... &lt; 9`` rather than ``... &lt; 9``: an exhausted stream</span>
-            <span class="c1"># (``len(self) == 0``) is left alone here, so ``length`` reaches</span>
+            <span class="c1"># (``len(self) == 0``) is left alone, so ``length`` reaches</span>
             <span class="c1"># :meth:`Protocol.unpack &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`</span>
             <span class="c1"># still ``None`` and its ``prepare`` decorator raises</span>
-            <span class="c1"># :exc:`StreamEOFError` as documented above -- only a *non-empty*</span>
+            <span class="c1"># :exc:`StreamEOFError` as documented above; only a *non-empty*</span>
             <span class="c1"># short stream is rejected as malformed here.</span>
             <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
@@ -766,21 +757,16 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="c1"># NOTE: ``schema.length`` is the *declared* length off the wire -- the</span>
-        <span class="c1"># 24-bit field a hostile or truncated capture controls outright -- and</span>
-        <span class="c1"># checking only it lets a frame whose buffer holds far fewer octets than</span>
-        <span class="c1"># it claims sail through this guard and report a length nothing backs.</span>
-        <span class="c1"># ``length`` is the actual number of octets available for this frame</span>
-        <span class="c1"># (``Protocol.__len__`` returns ``len(self._data)``, and a caller that</span>
-        <span class="c1"># supplies ``length`` explicitly means the same thing by it), so both</span>
-        <span class="c1"># have to clear the minimum header size for the frame to be viable at</span>
-        <span class="c1"># all, *and* the declared value must not exceed what is actually</span>
-        <span class="c1"># available -- this library's convention (see ``_make_http_length``)</span>
-        <span class="c1"># is that ``length`` counts the whole frame, header included, so the</span>
-        <span class="c1"># two are directly comparable. Without the third clause a frame that</span>
-        <span class="c1"># declares far more than its buffer holds -- the headline case in</span>
-        <span class="c1"># #799, e.g. a nine-octet buffer declaring 16777215 -- still passed</span>
-        <span class="c1"># this guard and reported the declared, attacker-controlled length as</span>
-        <span class="c1"># if the capture actually contained it. See #799.</span>
+        <span class="c1"># 24-bit field a hostile or truncated capture controls outright -- so</span>
+        <span class="c1"># checking only it would let a frame whose buffer holds far fewer octets</span>
+        <span class="c1"># than it claims report a length nothing backs (e.g. a nine-octet buffer</span>
+        <span class="c1"># declaring 16777215). ``length`` is the number of octets actually</span>
+        <span class="c1"># available for this frame (``Protocol.__len__`` returns</span>
+        <span class="c1"># ``len(self._data)``, and an explicit ``length`` means the same), so</span>
+        <span class="c1"># both have to clear the minimum header size *and* the declared value</span>
+        <span class="c1"># must not exceed what is available. This library's convention (see</span>
+        <span class="c1"># ``_make_http_length``) is that ``length`` counts the whole frame,</span>
+        <span class="c1"># header included, so the two are directly comparable.</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>

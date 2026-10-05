@@ -484,16 +484,19 @@
 <span class="sd">======= ========= ====================== =============================================</span>
 <span class="sd">  0           0   ``ip.version``              Version (``4``)</span>
 <span class="sd">  0           4   ``ip.hdr_len``              Internal Header Length (IHL)</span>
-<span class="sd">  1           8   ``ip.dsfield.dscp``         Differentiated Services Code Point (DSCP)</span>
-<span class="sd">  1          14   ``ip.dsfield.ecn``          Explicit Congestion Notification (ECN)</span>
+<span class="sd">  1           8   ``ip.tos.pre``              ToS Precedence</span>
+<span class="sd">  1          11   ``ip.tos.del``              ToS Delay</span>
+<span class="sd">  1          12   ``ip.tos.thr``              ToS Throughput</span>
+<span class="sd">  1          13   ``ip.tos.rel``              ToS Reliability</span>
+<span class="sd">  1          14   ``ip.tos.ecn``              Explicit Congestion Notification (ECN)</span>
 <span class="sd">  2          16   ``ip.len``                  Total Length</span>
 <span class="sd">  4          32   ``ip.id``                   Identification</span>
 <span class="sd">  6          48                               Reserved Bit (must be ``\\x00``)</span>
 <span class="sd">  6          49   ``ip.flags.df``             Don't Fragment (DF)</span>
 <span class="sd">  6          50   ``ip.flags.mf``             More Fragments (MF)</span>
-<span class="sd">  6          51   ``ip.frag_offset``          Fragment Offset</span>
+<span class="sd">  6          51   ``ip.offset``               Fragment Offset</span>
 <span class="sd">  8          64   ``ip.ttl``                  Time To Live (TTL)</span>
-<span class="sd">  9          72   ``ip.proto``                Protocol (Transport Layer)</span>
+<span class="sd">  9          72   ``ip.protocol``             Protocol (Transport Layer)</span>
 <span class="sd">  10         80   ``ip.checksum``             Header Checksum</span>
 <span class="sd">  12         96   ``ip.src``                  Source IP Address</span>
 <span class="sd">  16        128   ``ip.dst``                  Destination IP Address</span>
@@ -599,8 +602,8 @@
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv4</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Internet Protocol version 4.</span>
 
-<span class="sd">    This class currently supports parsing of the following IPv4 options,</span>
-<span class="sd">    which are registered in the :attr:`self.__option__ &lt;pcapkit.protocols.internet.ipv4.IPv4.__option__&gt;`</span>
+<span class="sd">    This class parses the following IPv4 options, which are registered in the</span>
+<span class="sd">    :attr:`self.__option__ &lt;pcapkit.protocols.internet.ipv4.IPv4.__option__&gt;`</span>
 <span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
@@ -1152,7 +1155,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EOOLOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EOOLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read IPv4 End of Option List (``EOOL``) option.</span>
 
-<span class="sd">        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:</span>
+<span class="sd">        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`791`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -1182,7 +1185,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_NOPOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NOPOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read IPv4 No Operation (``NOP``) option.</span>
 
-<span class="sd">        Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:</span>
+<span class="sd">        Structure of IPv4 No Operation (``NOP``) option [:rfc:`791`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -1794,16 +1797,12 @@
                 <span class="c1"># force alignment to 32-bit boundary</span>
                 <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
                     <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-                    <span class="c1"># NOTE: The terminator goes in as an EOOL option *schema*, the</span>
-                    <span class="c1"># way the padding above goes in as a NOP schema. What used to be</span>
-                    <span class="c1"># appended was ``Enum_OptionNumber.EOOL`` itself -- the wire code</span>
-                    <span class="c1"># rather than an option -- and the enclosing ``options`` field</span>
-                    <span class="c1"># takes only schemas and :obj:`bytes`, so packing the header</span>
-                    <span class="c1"># failed with ``FieldValueError: Field options has invalid</span>
-                    <span class="c1"># value``. Any option whose length is not already a multiple of</span>
-                    <span class="c1"># four reaches this branch, so that made the packet unpackable</span>
-                    <span class="c1"># whether it was built by hand or rebuilt from a parsed one. See</span>
-                    <span class="c1"># #506.</span>
+                    <span class="c1"># NOTE: The terminator is an EOOL option *schema*, like the NOP</span>
+                    <span class="c1"># padding. The bare ``Enum_OptionNumber.EOOL`` wire code is not</span>
+                    <span class="c1"># an option, and the ``options`` field takes only schemas and</span>
+                    <span class="c1"># :obj:`bytes`, so packing would fail with ``FieldValueError:</span>
+                    <span class="c1"># Field options has invalid value`` for any option whose</span>
+                    <span class="c1"># length is not a multiple of four.</span>
                     <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                     <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                     <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
@@ -1836,10 +1835,9 @@
             <span class="c1"># force alignment to 32-bit boundary</span>
             <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
                 <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-                <span class="c1"># NOTE: An EOOL option schema rather than the bare wire code, for the</span>
-                <span class="c1"># reason spelled out in the list branch above. This is the branch the</span>
-                <span class="c1"># ``from_data`` path takes, since a parsed packet hands its options</span>
-                <span class="c1"># back as a container. See #506.</span>
+                <span class="c1"># NOTE: An EOOL option schema rather than the bare wire code, as in</span>
+                <span class="c1"># the list branch above. This is the ``from_data`` branch, since a</span>
+                <span class="c1"># parsed packet hands its options back as a container.</span>
                 <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                 <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
@@ -1864,7 +1862,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1889,7 +1887,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Schema_EOOLOption</span><span class="p">(</span>
@@ -1910,7 +1908,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Schema_NOPOption</span><span class="p">(</span>
@@ -1941,7 +1939,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``authorities`` names a bit position that is not a</span>
@@ -1984,10 +1982,10 @@
                                         <span class="sa">f</span><span class="s1">'termination indicator, not an authority'</span><span class="p">)</span>
 
             <span class="c1"># ``max_auth`` is the highest bit *index*, so the octet count comes</span>
-            <span class="c1"># from the bit *count* one past it. Sizing from the index itself put</span>
-            <span class="c1"># a single ``GENSER`` (index 0) in a zero-octet bitmap and then</span>
-            <span class="c1"># indexed into it, raising a bare ``IndexError``; and it under-sized</span>
-            <span class="c1"># by an octet at every exact multiple of eight. See #537.</span>
+            <span class="c1"># from the bit *count* one past it. Sizing from the index would put</span>
+            <span class="c1"># a single ``GENSER`` (index 0) in a zero-octet bitmap and raise</span>
+            <span class="c1"># ``IndexError``, and under-size by an octet at every exact</span>
+            <span class="c1"># multiple of eight.</span>
             <span class="n">max_auth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">authorities</span><span class="p">)</span>
             <span class="n">int_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">max_auth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
 
@@ -1996,10 +1994,9 @@
                 <span class="n">data_list</span><span class="p">[</span><span class="n">auth</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
 
             <span class="c1"># Bit 0 of the *last* octet terminates the field. The intermediate</span>
-            <span class="c1"># octets keep the ``0`` they were initialised with, which is what</span>
-            <span class="c1"># says "another octet follows" -- so this single assignment is the</span>
-            <span class="c1"># whole of the indicator, and without it every option this method</span>
-            <span class="c1"># wrote was one its own reader warned about.</span>
+            <span class="c1"># octets keep their initial ``0``, meaning "another octet follows",</span>
+            <span class="c1"># so this one assignment is the whole indicator; without it the</span>
+            <span class="c1"># reader warns on every option written here.</span>
             <span class="n">data_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_list</span><span class="p">),</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">int_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -2030,7 +2027,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2067,7 +2064,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2139,16 +2136,13 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid timestamp value: </span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
-        <span class="c1"># NOTE: ``ts_data``, the name of the field on</span>
-        <span class="c1"># :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, and not the</span>
-        <span class="c1"># ``data`` this used to pass. ``data`` is the attribute that schema's</span>
-        <span class="c1"># ``post_process`` *derives* from ``ts_data``, so naming it here dropped</span>
-        <span class="c1"># every timestamp: :meth:`Schema.__update__</span>
-        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` warns</span>
-        <span class="c1"># ``UnknownFieldWarning`` for a name it does not know and carries on, which</span>
-        <span class="c1"># left ``ts_data`` bound to its class-level ``ListField`` -- and made the</span>
-        <span class="c1"># IPv4 Timestamp option unbuildable through ``make``, since</span>
-        <span class="c1"># ``post_process`` then iterated the field object itself. See #552.</span>
+        <span class="c1"># NOTE: ``ts_data`` is the field on</span>
+        <span class="c1"># :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`; ``data`` is</span>
+        <span class="c1"># the attribute its ``post_process`` *derives* from ``ts_data``. Passing</span>
+        <span class="c1"># ``data`` would drop every timestamp, since :meth:`Schema.__update__</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` only warns</span>
+        <span class="c1"># ``UnknownFieldWarning`` for an unknown name, leaving ``ts_data`` bound</span>
+        <span class="c1"># to its class-level ``ListField`` for ``post_process`` to iterate.</span>
         <span class="k">return</span> <span class="n">Schema_TSOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -2177,7 +2171,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">            Returns:</span>
-<span class="sd">                Constructured option schema.</span>
+<span class="sd">                Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2211,7 +2205,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2245,7 +2239,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2274,7 +2268,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2308,7 +2302,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2335,7 +2329,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2368,7 +2362,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2407,7 +2401,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2449,7 +2443,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

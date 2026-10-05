@@ -764,7 +764,8 @@ Added
   run in the current environment now gives one warning naming the real cause (a
   Python version, a missing ``tshark`` or ``libpcap``, the wrong ``pcap``
   distribution) and a clean fall back to ``pcapkit``'s own parser, rather than an
-  error from inside the third-party package (:pr:`396`, :pr:`405`).
+  error from inside the third-party package (:pr:`396`, :pr:`405`). The same holds
+  for an engine whose package is not installed at all (:issue:`1045`).
 * ``conflict`` on the reassembly data models: absolute, inclusive ranges where
   two fragments claimed the same span with different bytes, previously lost
   silently on both the IP (:pr:`482`) and TCP (:issue:`443`, :pr:`478`) paths.
@@ -1029,6 +1030,16 @@ Fixed
   is gated on ``cls is Transport`` and so fires only for the abstract class -- the guard
   below it leaks through ``TCP.register`` and ``UDP.register``, which is the only way it
   is ever called. :issue:`1026` tracks all seven (:issue:`1021`).
+* a missing extraction engine package now gives one ``EngineWarning`` rather than two
+  (:issue:`1045`, :pr:`1046`). ``Extractor.import_test`` warned that the package was
+  absent, then ``Extractor.run`` warned again when it fell back to the default engine;
+  ``run`` now stays silent there. The surviving message is the one ``run`` already
+  emitted, ``engine <name> (<module>) is not installed; using default engine instead``
+  (the module name is in backticks in the real message, which this changelog's
+  Markdown generator cannot show literally), so ``import_test`` now says the same.
+  Only code that matched ``import_test``'s old wording,
+  ``extraction engine '<name>' not available; using default engine instead``, or
+  that expects two warnings, breaks.
 
 pcapkit.protocols
 -----------------
@@ -2140,6 +2151,18 @@ Fixed
   so the fix makes the two consistent rather than introducing something new.
   Follows the same fix for the foundation registrars (:issue:`1021`)
   (:issue:`1026`).
+* ``PCAPNG``'s ``ns_dnsname``, ``ns_dnsIP4addr`` and ``ns_dnsIP6addr`` scope guards,
+  on both the read and the make side, now say the option "must be in Name Resolution
+  Block", which is the block they check; they used to name the systemd(1) Journal
+  Export Block, with a literal ``:manpage:`` role in the text. ``register_record``'s
+  ``RegistryWarning`` likewise now says "name resolution record already registered".
+  The make-side ``ns_dnsIP4addr``/``ns_dnsIP6addr`` messages also drop the lowercase
+  ``ns_dnsip4addr``/``ns_dnsip6addr`` spelling for the ``OptionType`` member name.
+  Two more guards named the wrong option: ``_make_option_if_rxspeed``'s scope and
+  duplicate guards now say ``[if_rxspeed]`` rather than ``[if_txspeed]``, and
+  ``_read_option_epb_queue``'s length guard says ``[epb_queue]`` rather than
+  ``[epb_packetid]``. Only message text changes; the exception and warning types are unchanged
+  (:issue:`1038`).
 
 pcapkit.toolkit
 ---------------

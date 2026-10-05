@@ -947,8 +947,7 @@
 <span class="sd">        :class:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes</span>
 <span class="sd">        an unusable :mod:`struct` template and surfaces much later as an opaque</span>
-<span class="sd">        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to</span>
-<span class="sd">        fail to parse.</span>
+<span class="sd">        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.</span>
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -1367,8 +1366,7 @@
         <span class="c1"># ``IPv6_Address`` to a</span>
         <span class="c1"># :class:`~pcapkit.corekit.fields.strings.StringField` or</span>
         <span class="c1"># :class:`~pcapkit.corekit.fields.strings.BytesField`, and handing either</span>
-        <span class="c1"># a raw ``int`` is precisely the #467 defect -- ``struct.pack()`` cannot</span>
-        <span class="c1"># consume it (c.f. #467).</span>
+        <span class="c1"># a raw ``int`` would fail, since ``struct.pack()`` cannot consume it.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2676,7 +2674,7 @@
 <span class="sd">        prose fixes ``ANI Length`` at ``2``, but the field description then calls</span>
 <span class="sd">        it "a 3-octet unsigned integer value". Two of the three statements agree</span>
 <span class="sd">        on **two** octets and are the ones that constrain the wire, so that is</span>
-<span class="sd">        what is parsed here. No erratum has been filed against the RFC.</span>
+<span class="sd">        what is parsed here.</span>
 
 <span class="sd">    """</span>
 

@@ -544,7 +544,7 @@ both of which are in shared field machinery rather than here.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.mh.</span></span><span class="sig-name descname"><span class="pre">MH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MH" title="pcapkit.protocols.data.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MH" title="pcapkit.protocols.schema.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a>]</p>
 <p>This class implements Mobility Header.</p>
-<p>This class currently supports parsing of the following MH message types,
+<p>This class supports parsing of the following MH message types,
 which are registered in the <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH.__message__" title="pcapkit.protocols.internet.mh.MH.__message__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__message__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
@@ -655,7 +655,7 @@ attribute:</p>
 </tbody>
 </table>
 </div>
-<p>This class currently supports parsing the following MH options, which are
+<p>This class supports parsing the following MH options, which are
 registered in the <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__option__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
@@ -954,7 +954,7 @@ attribute:</p>
 </tbody>
 </table>
 </div>
-<p>This class currently supports parsing of the following MH CGA extensions,
+<p>This class supports parsing of the following MH CGA extensions,
 which are registered in the <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__extension__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
@@ -2864,8 +2864,7 @@ then makes <code class="docutils literal notranslate"><span class="pre">isinstan
 <a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.pack" title="pcapkit.corekit.fields.collections.ListField.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.pack</span></code></a> consults, so
 packing a perfectly good option fails with
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a>. Python 3.11 and
-newer give each class its own cache and the checks behave, which is why
-this was invisible on a modern interpreter.</p>
+newer give each class its own cache, so the checks behave there.</p>
 <p>The code is on the wire and the registry keys on it, so it is both the
 cheaper discriminator and the only one that cannot be poisoned. The
 same reasoning applies to <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_ani_suboptions" title="pcapkit.protocols.internet.mh.MH._read_ani_suboptions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ani_suboptions()</span></code></a>,
@@ -5832,17 +5831,14 @@ pairs, or raw octets.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The data model parameter is named <code class="docutils literal notranslate"><span class="pre">option</span></code> rather than <code class="docutils literal notranslate"><span class="pre">data</span></code>, and
-that is not cosmetic. The vendor-specific attribute of
+<p>The data model parameter is named <code class="docutils literal notranslate"><span class="pre">option</span></code> rather than <code class="docutils literal notranslate"><span class="pre">data</span></code>
+deliberately. The vendor-specific attribute of
 <span class="target" id="index-190"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html#section-4.2.11"><strong>RFC 7222 Section 4.2.11</strong></a> has a field of its own called <code class="docutils literal notranslate"><span class="pre">data</span></code>, so
-with the parameter named <code class="docutils literal notranslate"><span class="pre">data</span></code> a caller’s <code class="docutils literal notranslate"><span class="pre">data=</span></code> bound to the
-model parameter instead of reaching <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> – and the
-<code class="docutils literal notranslate"><span class="pre">kwargs.get('data')</span></code> fallback then always saw nothing. Building the
-attribute the natural way, mirroring the data model’s own field names,
-silently dropped the vendor payload and wrote the length as though it
-were empty. <code class="docutils literal notranslate"><span class="pre">vendor</span></code> and <code class="docutils literal notranslate"><span class="pre">subtype</span></code> survived because those names do
-not collide, which made the loss look like a partial success rather
-than a bug.</p>
+a parameter of that name would capture a caller’s <code class="docutils literal notranslate"><span class="pre">data=</span></code> and leave
+the <code class="docutils literal notranslate"><span class="pre">kwargs.get('data')</span></code> fallback empty, silently dropping the vendor
+payload and writing the length as though it were empty. <code class="docutils literal notranslate"><span class="pre">vendor</span></code> and
+<code class="docutils literal notranslate"><span class="pre">subtype</span></code> do not collide, so the loss would look like a partial
+success rather than a bug.</p>
 <p>Dispatch is on <code class="docutils literal notranslate"><span class="pre">code</span></code> rather than on <code class="docutils literal notranslate"><span class="pre">isinstance</span></code>, for the reason
 given in <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_fid_suboptions" title="pcapkit.protocols.internet.mh.MH._read_fid_suboptions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_fid_suboptions()</span></code></a>.</p>
 </div>
@@ -5964,8 +5960,8 @@ padding octets <em>after</em> the two octets of the option header.</p></li>
 <p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts the
 <em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.length</span></code> is the
 <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">Length</span></code> field – two octets fewer, and absent altogether
-for a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. Copying one into the other unconverted is why
-re-making a parsed <code class="docutils literal notranslate"><span class="pre">PadN</span></code> used to come back two octets too long.</p>
+for a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. Copying one into the other unconverted would make a
+re-made parsed <code class="docutils literal notranslate"><span class="pre">PadN</span></code> come back two octets too long.</p>
 </div>
 </dd></dl>
 
@@ -6129,7 +6125,7 @@ own minimal big-endian octets, at least one. <code class="docutils literal notra
 (RFC 4283’s <code class="docutils literal notranslate"><span class="pre">user&#64;realm</span></code> form) rather than a numeric
 identifier, so there is no non-arbitrary int-to-text mapping
 the way there is int-to-address or int-to-octets, and an
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> is rejected there (c.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/467">#467</a>).</p></li>
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> is rejected there.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -6146,7 +6142,7 @@ the way there is int-to-address or int-to-octets, and an
     <code class="docutils literal notranslate"><span class="pre">::1</span></code> for <code class="docutils literal notranslate"><span class="pre">IPv6_Address</span></code> and to a one-octet identifier for
     the other six, neither of which a caller passing a flag can
     plausibly have meant; pass <code class="docutils literal notranslate"><span class="pre">int(...)</span></code> to get the numeric
-    value (c.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>). If <code class="docutils literal notranslate"><span class="pre">identifier</span></code> is a negative <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>
+    value. If <code class="docutils literal notranslate"><span class="pre">identifier</span></code> is a negative <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>
     (no subtype has a wire form for one), an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> of any value
     with the <code class="docutils literal notranslate"><span class="pre">NAI</span></code> subtype, an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> of <code class="docutils literal notranslate"><span class="pre">2**128</span></code> or
     above with the <code class="docutils literal notranslate"><span class="pre">IPv6_Address</span></code> subtype (whose wire form is a
@@ -6155,9 +6151,9 @@ the way there is int-to-address or int-to-octets, and an
     type its subtype’s field cannot hold at all: anything but
     <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> for <code class="docutils literal notranslate"><span class="pre">NAI</span></code>, anything but <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>/
     <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> for the other six – an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>
-    is converted rather than rejected there, per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/467">#467</a> – or anything
+    is converted rather than rejected there – or anything
     <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ipaddress.IPv6Address</span></code></a> itself does not accept for
-    <code class="docutils literal notranslate"><span class="pre">IPv6_Address</span></code> (c.f. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>).</p>
+    <code class="docutils literal notranslate"><span class="pre">IPv6_Address</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -7919,7 +7915,7 @@ parse the message type by itself.</p>
 <span class="sig-name descname"><span class="pre">__option__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><span class="pre">Option</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option" title="pcapkit.protocols.schema.internet.mh.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><span class="pre">Option</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option" title="pcapkit.protocols.schema.internet.mh.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.__option__" title="Link to this definition">¶</a></dt>
 <dd><p>DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
 Option type to method mapping. Method names are expected to be referred
-to the class by <code class="docutils literal notranslate"><span class="pre">_read_option_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>,
+to the class by <code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>,
 and if such name not found, the value should then be a method that can
 parse the option by itself.</p>
 </dd></dl>
@@ -7929,7 +7925,7 @@ parse the option by itself.</p>
 <span class="sig-name descname"><span class="pre">__extension__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.cga_extension.CGAExtension" title="pcapkit.const.mh.cga_extension.CGAExtension"><span class="pre">CGAExtension</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAExtension" title="pcapkit.protocols.schema.internet.mh.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.cga_extension.CGAExtension" title="pcapkit.const.mh.cga_extension.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAExtension" title="pcapkit.protocols.data.internet.mh.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAExtension" title="pcapkit.protocols.data.internet.mh.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.cga_extension.CGAExtension" title="pcapkit.const.mh.cga_extension.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAExtension" title="pcapkit.protocols.data.internet.mh.CGAExtension"><span class="pre">CGAExtension</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAExtension" title="pcapkit.protocols.schema.internet.mh.CGAExtension"><span class="pre">CGAExtension</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.__extension__" title="Link to this definition">¶</a></dt>
 <dd><p>DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:
 CGA extension type to method mapping. Method names are expected to be referred
-to the class by <code class="docutils literal notranslate"><span class="pre">_read_extension_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_ext_${name}</span></code>,
+to the class by <code class="docutils literal notranslate"><span class="pre">_read_ext_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_ext_${name}</span></code>,
 and if such name not found, the value should then be a method that can
 parse the CGA extension by itself.</p>
 </dd></dl>
@@ -8008,49 +8004,6 @@ binding update was accepted by the receiving node, values of <code class="docuti
 above that it was rejected.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2. <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> below is
-untouched, since <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> does not touch that hook.</p>
-<p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, and briefly again through GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>’s first attempt,
-which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. An earlier lean on issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> had preferred that
-widening; a later ruling in review of the attempt went the other
-way: delete both <code class="docutils literal notranslate"><span class="pre">get</span></code> overrides in this module rather than widen
-them, so <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> inherit
-<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> outright. That also
-removes the <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span></code> suppressions the overrides
-needed, and makes all seven re-parented classes behave alike on
-<code class="docutils literal notranslate"><span class="pre">get</span></code>, which had not been literally true. Measured before acting
-on it: the override’s own docstring called it a “Backport support
-for original codes”, but this class mints no alias –
-<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> agree at 6 – so what the override
-actually did was resolve an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and
-a name by subscript, exactly the dual resolution
-<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> already provides for
-every other <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry in this tree. There was
-nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the base
-alone, the same as the five other re-parents <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> finished alongside
-this one – including <a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a> below, whose own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code>
-GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a> had already deleted outright, for the same reason:
-zero callers depended on anything the base does not already do.</p>
-<p>A behaviour change comes with the deletion, deliberately: the
-override branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and routed every
-other type – <code class="docutils literal notranslate"><span class="pre">None</span></code>, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, … – through the
-<em>name</em> path, so <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> and <code class="docutils literal notranslate"><span class="pre">get(1.5)</span></code> used to answer with
-a quiet <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> here
-while the base – branching on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">str)</span></code> instead –
-answers every other <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
-subclass, and now this one too, with a loud
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. Nothing in
-this tree calls <code class="docutils literal notranslate"><span class="pre">get</span></code> with such a key: the 20 call sites this
-class and <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> had between them, all in
-tests, all passed an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, so the
-divergence was live but unreached – and its removal is what makes
-“all seven behave alike” literally true, rather than true only for
-the keys a caller happens to pass today.</p>
 <p><span class="target" id="index-209"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> defines these values inline and IANA keeps no
 registry of them, so the enumeration lives here rather than in
 <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. It is also <strong>not</strong> interchangeable with the
@@ -8060,23 +8013,22 @@ but <em>accepted but prefix discovery necessary</em> there, and <code class="doc
 <em>incorrect interface identifier length</em> here but <em>home registration not
 supported</em> there.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-210"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> leaves
-unassigned is not minted a placeholder member. Per the owner’s ruling
-on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
-instead of extending the class. That is not a capture-level failure
-– sibling frames are unaffected – but the cost is bigger than one
-message. Mobility Header is itself one of IPv6’s own chained
-extension headers, and IPv6’s own extension-header walk then does
-<code class="docutils literal notranslate"><span class="pre">proto</span> <span class="pre">=</span> <span class="pre">info.next</span></code> (<a class="reference internal" href="ipv6.html#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a>, line
-338) on whatever <code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code> handed back; a <code class="docutils literal notranslate"><span class="pre">Raw</span></code>
-fallback’s info carries no <code class="docutils literal notranslate"><span class="pre">.next</span></code>. That <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>,
-not this exception, is what a further-out <code class="docutils literal notranslate"><span class="pre">&#64;beholder</span></code> actually
-catches – degrading the <strong>whole IPv6 packet</strong>, header fields
-included, to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, rather than
-just this one MH message. The walk defect predates this change and
-already fires on a malformed extension header; a well-formed packet
-naming merely an unassigned byte is simply a more likely way to
-reach it. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>.</p>
+unassigned raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
+from <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> instead of minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> member,
+because this RFC-inline value set stays immutable (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). Within an IPv6 chain only the Mobility Header layer is
+lost to it: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> substitutes
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> for a
+Mobility Header whose parser raises, and the rest of the packet is kept.</p>
+<p>The class defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own: <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> come from
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, like every other
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry here, so a key that is neither an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> nor a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> raises
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. A <code class="docutils literal notranslate"><span class="pre">get</span></code> override
+was rejected (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>; the override was deleted, not
+widened to accept <code class="docutils literal notranslate"><span class="pre">default</span></code>): this class mints no alias
+(<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> both hold 6 members), so an override
+could only repeat the base’s dual <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/name resolution.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted">
@@ -8125,9 +8077,9 @@ the “alternate” care-of address option [<span class="target" id="index-212">
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-217"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> names this value
-    set inline with no IANA registry behind it, and the owner’s
-    ruling on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> is that it stays immutable rather
-    than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
+    set inline with no IANA registry behind it, and it stays
+    immutable (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>) rather than minting an
+    <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
@@ -8147,74 +8099,28 @@ identify which address the option carries, c.f.,
 <span class="target" id="index-219"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2. <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> below is
-untouched, since <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> does not touch that hook.</p>
-<p>This class carried its own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> override through
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, and briefly again through GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>’s first attempt,
-which widened the override to accept <code class="docutils literal notranslate"><span class="pre">default</span></code> rather than delete
-it outright. An earlier lean on issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> had preferred that
-widening; a later ruling in review of the attempt went the other
-way: delete both <code class="docutils literal notranslate"><span class="pre">get</span></code> overrides in this module rather than widen
-them, so <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> inherit
-<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> outright. That also
-removes the <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore[override]</span></code> suppressions the overrides
-needed, and makes all seven re-parented classes behave alike on
-<code class="docutils literal notranslate"><span class="pre">get</span></code>, which had not been literally true. Measured before acting
-on it: the override’s own docstring called it a “Backport support
-for original codes”, but this class mints no alias –
-<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> agree at 4 – so what the override
-actually did was resolve an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> by direct construction and
-a name by subscript, exactly the dual resolution
-<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> already provides for
-every other <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry in this tree. There was
-nothing left to backport. <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> now come from the base
-alone, the same as the five other re-parents <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> finished alongside
-this one – including
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a> below, whose
-own hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a> had already deleted
-outright, for the same reason: zero callers depended on anything the
-base does not already do.</p>
-<p>A behaviour change comes with the deletion, deliberately: the
-override branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and routed every
-other type – <code class="docutils literal notranslate"><span class="pre">None</span></code>, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, … – through the
-<em>name</em> path, so <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> and <code class="docutils literal notranslate"><span class="pre">get(1.5)</span></code> used to answer with
-a quiet <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> here
-while the base – branching on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">str)</span></code> instead –
-answers every other <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
-subclass, and now this one too, with a loud
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. Nothing in
-this tree calls <code class="docutils literal notranslate"><span class="pre">get</span></code> with such a key: the 20 call sites this
-class and <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> had between
-them, all in tests, all passed an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>,
-so the divergence was live but unreached – and its removal is
-what makes “all seven behave alike” literally true, rather than
-true only for the keys a caller happens to pass today.</p>
 <p><span class="target" id="index-220"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> defines these values inline and IANA keeps no
 registry of them, so the enumeration lives here rather than in
 <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>. The identical code space of the neighbor
 discovery IP address/prefix option of <span class="target" id="index-221"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.1"><strong>RFC 5568 Section 6.4.1</strong></a> is
 likewise unregistered.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-222"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> leaves
-unassigned is not minted a placeholder member. Per the owner’s ruling
-on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
-instead of extending the class. That is not a capture-level failure
-– sibling frames are unaffected – but the cost is bigger than one
-message. Mobility Header is itself one of IPv6’s own chained
-extension headers, and IPv6’s own extension-header walk then does
-<code class="docutils literal notranslate"><span class="pre">proto</span> <span class="pre">=</span> <span class="pre">info.next</span></code> (<a class="reference internal" href="ipv6.html#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a>, line
-338) on whatever <code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code> handed back; a <code class="docutils literal notranslate"><span class="pre">Raw</span></code>
-fallback’s info carries no <code class="docutils literal notranslate"><span class="pre">.next</span></code>. That <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>,
-not this exception, is what a further-out <code class="docutils literal notranslate"><span class="pre">&#64;beholder</span></code> actually
-catches – degrading the <strong>whole IPv6 packet</strong>, header fields
-included, to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, rather than
-just this one MH message. The walk defect predates this change and
-already fires on a malformed extension header; a well-formed packet
-naming merely an unassigned byte is simply a more likely way to
-reach it. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>.</p>
+unassigned raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
+from <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> instead of minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> member,
+because this RFC-inline value set stays immutable (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). Within an IPv6 chain only the Mobility Header layer is
+lost to it: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> substitutes
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> for a
+Mobility Header whose parser raises, and the rest of the packet is kept.</p>
+<p>The class defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own: <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> come from
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, like every other
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued registry here, so a key that is neither an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> nor a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> raises
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. A <code class="docutils literal notranslate"><span class="pre">get</span></code> override
+was rejected (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>; the override was deleted, not
+widened to accept <code class="docutils literal notranslate"><span class="pre">default</span></code>): this class mints no alias
+(<code class="docutils literal notranslate"><span class="pre">__members__</span></code> and <code class="docutils literal notranslate"><span class="pre">list(cls)</span></code> both hold 4 members), so an override
+could only repeat the base’s dual <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/name resolution.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.Old_Care_of_Address">
@@ -8251,9 +8157,9 @@ of valid leading bits in the prefix [<span class="target" id="index-226"></span>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-227"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> names this value
-    set inline with no IANA registry behind it, and the owner’s
-    ruling on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> is that it stays immutable rather
-    than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
+    set inline with no IANA registry behind it, and it stays
+    immutable (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>) rather than minting an
+    <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
@@ -8287,12 +8193,6 @@ rather than 32/32, so each field means something different in the two.</p>
 was processed successfully, values of <code class="docutils literal notranslate"><span class="pre">128</span></code> and above that it was rejected.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2 – pure re-parenting as far as
-<code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> are concerned, since this class defines no
-<code class="docutils literal notranslate"><span class="pre">get</span></code> of its own to reconcile with the base; its own
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> below is untouched, since <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> does
-not touch that hook.</p>
 <p><span class="target" id="index-232"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a> defines these values inline and IANA keeps no
 registry of them – neither a dedicated one nor entries in the general
 <em>Status Codes</em> registry – so the enumeration lives here rather than in
@@ -8300,36 +8200,19 @@ registry of them – neither a dedicated one nor entries in the general
 registered <a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.status_code.StatusCode" title="pcapkit.const.mh.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>, whose
 <code class="docutils literal notranslate"><span class="pre">128</span></code> and <code class="docutils literal notranslate"><span class="pre">129</span></code> mean something else entirely.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-233"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html"><strong>RFC 6705</strong></a> leaves
-unassigned is not minted a placeholder member. Per the owner’s ruling
-on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
-instead of extending the class. That is not a capture-level failure
-– sibling frames are unaffected – but the cost is bigger than one
-message. Mobility Header is itself one of IPv6’s own chained
-extension headers, and IPv6’s own extension-header walk then does
-<code class="docutils literal notranslate"><span class="pre">proto</span> <span class="pre">=</span> <span class="pre">info.next</span></code> (<a class="reference internal" href="ipv6.html#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a>, line
-338) on whatever <code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code> handed back; a <code class="docutils literal notranslate"><span class="pre">Raw</span></code>
-fallback’s info carries no <code class="docutils literal notranslate"><span class="pre">.next</span></code>. That <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>,
-not this exception, is what a further-out <code class="docutils literal notranslate"><span class="pre">&#64;beholder</span></code> actually
-catches – degrading the <strong>whole IPv6 packet</strong>, header fields
-included, to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, rather than
-just this one MH message. The walk defect predates this change and
-already fires on a malformed extension header; a well-formed packet
-naming merely an unassigned byte is simply a more likely way to
-reach it. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>.</p>
-<p>There is no hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> backport here – nor, since GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>, on <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> or
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> either: it had zero callers repo-wide
-– tests included – so GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a> deleted it outright rather
-than rebuilding it on the immutable contract, the same conclusion
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> reached separately for the other two, on a ruling given in
-review of that work: delete those two overrides rather than widen
-them to match the base, which an earlier lean on the issue had
-preferred. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>’s re-parenting above gives this class
-<code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
-than a bespoke override – it still cannot mint, so an unassigned
-value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the bare
-constructor.</p>
+unassigned raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
+from <a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> instead of minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> member,
+because this RFC-inline value set stays immutable (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). Within an IPv6 chain only the Mobility Header layer is
+lost to it: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> substitutes
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> for a
+Mobility Header whose parser raises, and the rest of the packet is kept.</p>
+<p>The class defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own: <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> come from
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, and since it cannot mint, an
+unassigned value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the
+bare constructor. A <code class="docutils literal notranslate"><span class="pre">get</span></code> override was rejected (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>): it had no callers, and rebuilding it on the immutable
+contract would add nothing to the base.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.LocalizedRoutingStatus.Success">
@@ -8359,9 +8242,9 @@ constructor.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-237"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a> names this value
-    set inline with no IANA registry behind it, and the owner’s
-    ruling on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> is that it stays immutable rather
-    than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
+    set inline with no IANA registry behind it, and it stays
+    immutable (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>) rather than minting an
+    <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
@@ -8380,46 +8263,23 @@ constructor.</p>
 address family the option carries, c.f., <span class="target" id="index-239"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2 – pure re-parenting as far as
-<code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> are concerned, since this class defines no
-<code class="docutils literal notranslate"><span class="pre">get</span></code> of its own to reconcile with the base; its own
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode._missing_" title="pcapkit.protocols.internet.mh.LMAAddressCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> below is untouched, since <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> does
-not touch that hook.</p>
 <p><span class="target" id="index-240"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a> defines these values inline and IANA keeps no
 registry of them, so the enumeration lives here rather than in
 <a class="reference internal" href="../../const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-241"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html"><strong>RFC 5949</strong></a> leaves
-unassigned is not minted a placeholder member. Per the owner’s ruling
-on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode._missing_" title="pcapkit.protocols.internet.mh.LMAAddressCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
-instead of extending the class. That is not a capture-level failure
-– sibling frames are unaffected – but the cost is bigger than one
-message. Mobility Header is itself one of IPv6’s own chained
-extension headers, and IPv6’s own extension-header walk then does
-<code class="docutils literal notranslate"><span class="pre">proto</span> <span class="pre">=</span> <span class="pre">info.next</span></code> (<a class="reference internal" href="ipv6.html#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a>, line
-338) on whatever <code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code> handed back; a <code class="docutils literal notranslate"><span class="pre">Raw</span></code>
-fallback’s info carries no <code class="docutils literal notranslate"><span class="pre">.next</span></code>. That <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>,
-not this exception, is what a further-out <code class="docutils literal notranslate"><span class="pre">&#64;beholder</span></code> actually
-catches – degrading the <strong>whole IPv6 packet</strong>, header fields
-included, to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, rather than
-just this one MH message. The walk defect predates this change and
-already fires on a malformed extension header; a well-formed packet
-naming merely an unassigned byte is simply a more likely way to
-reach it. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>.</p>
-<p>There is no hand-rolled <code class="docutils literal notranslate"><span class="pre">get()</span></code> backport here – nor, since GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a>, on <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a> or
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a> either: it had zero callers repo-wide
-– tests included – so GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a> deleted it outright rather
-than rebuilding it on the immutable contract, the same conclusion
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/935">#935</a> reached separately for the other two, on a ruling given in
-review of that work: delete those two overrides rather than widen
-them to match the base, which an earlier lean on the issue had
-preferred. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>’s re-parenting above gives this class
-<code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> again, but as the base’s own bare lookup rather
-than a bespoke override – it still cannot mint, so an unassigned
-value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the bare
-constructor.</p>
+unassigned raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
+from <a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode._missing_" title="pcapkit.protocols.internet.mh.LMAAddressCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> instead of minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> member,
+because this RFC-inline value set stays immutable (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). Within an IPv6 chain only the Mobility Header layer is
+lost to it: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> substitutes
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> for a
+Mobility Header whose parser raises, and the rest of the packet is kept.</p>
+<p>The class defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own: <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> come from
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, and since it cannot mint, an
+unassigned value raises through <code class="docutils literal notranslate"><span class="pre">get</span></code> exactly as it does through the
+bare constructor. A <code class="docutils literal notranslate"><span class="pre">get</span></code> override was rejected (decided on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>): it had no callers, and rebuilding it on the immutable
+contract would add nothing to the base.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.LMAAddressCode.Reserved">
@@ -8449,9 +8309,9 @@ constructor.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-245"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a> names this value
-    set inline with no IANA registry behind it, and the owner’s
-    ruling on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> is that it stays immutable rather
-    than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
+    set inline with no IANA registry behind it, and it stays
+    immutable (decided on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>) rather than minting an
+    <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
@@ -11320,7 +11180,7 @@ diagram places <code class="docutils literal notranslate"><span class="pre">grou
 prose fixes <code class="docutils literal notranslate"><span class="pre">ANI</span> <span class="pre">Length</span></code> at <code class="docutils literal notranslate"><span class="pre">2</span></code>, but the field description then calls
 it “a 3-octet unsigned integer value”. Two of the three statements agree
 on <strong>two</strong> octets and are the ones that constrain the wire, so that is
-what is parsed here. No erratum has been filed against the RFC.</p>
+what is parsed here.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.ANIMAGGroupIdentifierSuboption.group_id">
@@ -12174,8 +12034,7 @@ presence of the key: <code class="docutils literal notranslate"><span class="pre
 <a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a> straight to
 <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, where it becomes
 an unusable <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template and surfaces much later as an opaque
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> – which is exactly how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option used to
-fail to parse.</p>
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, which is how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option would fail to parse.</p>
 </div>
 </dd></dl>
 

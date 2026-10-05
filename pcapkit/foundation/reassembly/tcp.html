@@ -827,8 +827,8 @@ and still carry a non-empty <code class="docutils literal notranslate"><span cla
 conflicting overlap is first-write-wins (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>), so
 it never leaves a hole, and a contested range that was later filled in
 around does not stop the datagram from completing. <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is
-what lets a caller tell a clean stream from a contested one, now that
-<code class="docutils literal notranslate"><span class="pre">completed</span></code> alone no longer can.</p>
+what lets a caller tell a clean stream from a contested one, which
+<code class="docutils literal notranslate"><span class="pre">completed</span></code> alone cannot.</p>
 </dd>
 <dt id="term-reasm.tcp.buffer">reasm.tcp.buffer<a class="headerlink" href="#term-reasm.tcp.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
 (<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP._buffer</span></code></a>)

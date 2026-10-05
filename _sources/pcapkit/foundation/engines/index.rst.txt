@@ -99,12 +99,11 @@ offers, and the ones that cannot say so rather than quietly doing less:
 Availability
 ------------
 
-A third-party engine is only usable where its backing package is, and three of
-them are harder to obtain than a plain :program:`pip install` suggests. Asking
-for an engine whose package is missing is not fatal -- :mod:`pcapkit` emits an
+A third-party engine is usable only where its backing package is, and three are
+harder to obtain than a plain :program:`pip install` suggests. A missing package
+is not fatal -- :mod:`pcapkit` emits an
 :class:`~pcapkit.utilities.warnings.EngineWarning` and falls back to its own
-parser -- but the extraction then has nothing to do with the engine requested,
-so it is worth knowing in advance.
+parser -- but the extraction then does not use the engine requested.
 
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | What it needs beyond ``pip install``                          |
@@ -112,9 +111,8 @@ so it is worth knowing in advance.
 | :class:`~pcapkit.foundation.engines.pcap.PCAP`,                 | nothing -- built in                                           |
 | :class:`~pcapkit.foundation.engines.pcapng.PCAPNG`              |                                                               |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | nothing -- both ship pure-Python wheels, and both were        |
-| :class:`~pcapkit.foundation.engines.scapy.Scapy`                | measured reading a capture on Python 3.14, so neither         |
-|                                                                 | overrides ``unsupported_reason()``                            |
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | nothing -- both are pure Python, and neither                  |
+| :class:`~pcapkit.foundation.engines.scapy.Scapy`                | overrides ``unsupported_reason()``                            |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | Wireshark's :program:`tshark` binary -- on :envvar:`PATH`, or |
 |                                                                 | wherever ``pyshark``'s :file:`config.ini` points -- **and**   |
@@ -136,12 +134,17 @@ so it is worth knowing in advance.
 |                                                                 | ``imp`` module, removed in Python 3.12                        |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 
-Every one of these constraints is also enforced in code rather than only
-documented: each engine overrides
+A constraint that an import cannot reveal is enforced by overriding
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 *before* the import test, so asking for an engine that cannot run here produces
-one warning naming the actual cause and a clean fall back to the built-in parser.
+one warning naming the actual cause and a fall back to the built-in parser.
+``PyShark`` checks its Python ceiling and for ``tshark``, ``PyPCAPFile`` its
+Python ceiling, ``PCAP_CT`` for a system ``libpcap``, and ``PyPCAP`` and
+``PCAP_CT`` which distribution owns ``pcap``. ``PyPCAP`` deliberately has no
+Python ceiling check, even though upstream cannot be installed on 3.12 or newer:
+what matters is which distribution is present, and a version check would refuse
+a working build.
 
 .. seealso::
 
@@ -149,8 +152,8 @@ one warning naming the actual cause and a clean fall back to the built-in parser
    including how ``pypcap``'s :file:`setup.py` looks for :file:`pcap.h` and why
    a Homebrew ``libpcap`` is not always found.
 
-Two engines, one interface: choosing between PyPCAP and PCAP_CT
----------------------------------------------------------------
+Choosing Between PyPCAP and PCAP_CT
+-----------------------------------
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` read the same
@@ -189,7 +192,7 @@ installed.** Pick on availability, not on features.
    hard error it would otherwise be.
 
 **The two distributions collide, so install exactly one.** Both own the top-level
-:mod:`pcap` module, and pip will happily install both -- measured on Python 3.10,
+:mod:`pcap` module, and pip will happily install both -- on Python 3.10,
 the ``pcap-ct`` package then wins the import and upstream's extension module is
 shadowed and unreachable. Each engine therefore detects which distribution it
 actually got, via

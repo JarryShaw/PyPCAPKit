@@ -23,24 +23,23 @@ The tag structure is described as below:
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================
-  1           0   ``vlan.tci``              Tag Control Information
-  1           0   ``vlan.tci.pcp``          Priority Code Point
-  1           3   ``vlan.tci.dei``          Drop Eligible Indicator
-  1           4   ``vlan.tci.vid``          VLAN Identifier
-  3          24   ``vlan.type``             Protocol (Internet Layer)
+  0           0   ``vlan.tci``              Tag Control Information
+  0           0   ``vlan.tci.pcp``          Priority Code Point
+  0           3   ``vlan.tci.dei``          Drop Eligible Indicator
+  0           4   ``vlan.tci.vid``          VLAN Identifier
+  2          16   ``vlan.type``             Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
-The two tags carry an identical tag control information layout and are told apart
-solely by the tag protocol identifier (TPID) that selected them -- ``0x8100`` for
-the customer tag against ``0x88A8`` for the service tag. That TPID is not part of
-either tag: it is the EtherType field of whatever encapsulates the tag, so both
-classes read the same four octets and share every byte of parsing and
-construction code, which is what this base holds.
+The two tags carry an identical tag control information layout and differ only
+in the tag protocol identifier (TPID) that selected them -- ``0x8100`` for the
+customer tag, ``0x88A8`` for the service tag. The TPID is not part of either tag:
+it is the EtherType field of whatever encapsulates the tag. Both classes read the
+same four octets and share all parsing and construction code, which this base
+holds.
 
-They are nonetheless distinct classes rather than one class bound at two
-EtherTypes, because 802.1ad *stacks* them. In a Q-in-Q frame the service tag's
-own next-EtherType is ``0x8100``, which selects a customer tag in turn, so both
-tags appear in one frame:
+They are still distinct classes rather than one class bound at two EtherTypes,
+because 802.1ad *stacks* them. In a Q-in-Q frame the service tag's own
+next-EtherType is ``0x8100``, which selects a customer tag in turn:
 
 .. code-block:: text
 
@@ -52,18 +51,17 @@ tags appear in one frame:
 
 :attr:`~pcapkit.protocols.protocol.Protocol.info_name` -- ``s_tag`` against
 ``c_tag`` -- is what keeps the two apart in the parsed
-:class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes
-would nest one ``c_tag`` inside another, leaving nothing in the output to say
-which of the two was the service tag.
+:class:`~pcapkit.corekit.infoclass.Info`. One class bound at both EtherTypes
+would nest a ``c_tag`` inside a ``c_tag``, leaving nothing to say which was the
+service tag.
 
-Two distinct EtherTypes also means two distinct
-:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the
-project's rule for when protocols get separate modules: siblings that *share* an
+Two EtherTypes also mean two :meth:`~pcapkit.protocols.protocol.Protocol.__index__`
+values, which is the project's rule for separate modules: siblings that *share* an
 index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
 :mod:`~pcapkit.protocols.link.arp` and
 :class:`~pcapkit.protocols.application.rarp.DRARP` shares
-:mod:`~pcapkit.protocols.application.rarp`. This base declares no index of its own --
-it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
+:mod:`~pcapkit.protocols.application.rarp`. This base is abstract, nothing
+dispatches to it, and it declares no index, so its ``__index__`` raises.
 
 .. autoclass:: pcapkit.protocols.link.vlan.VLAN
    :no-members:

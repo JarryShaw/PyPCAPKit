@@ -501,12 +501,11 @@
 <span class="sd">        both write it from the global header's magic number. The fallback to</span>
 <span class="sd">        :data:`sys.byteorder` is for a schema packed or unpacked on its own, with</span>
 <span class="sd">        no global header to ask -- which also means a *misspelled* key looks</span>
-<span class="sd">        exactly like an absent one and reports nothing. That is what hid GitHub</span>
-<span class="sd">        issue :issue:`605`: ``unpack`` wrote ``bytesorder``, so every field here was read</span>
-<span class="sd">        in the host's order rather than the file's, which is right by coincidence</span>
-<span class="sd">        on a little-endian capture and byte-swapped on a big-endian one. See</span>
-<span class="sd">        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` for the</span>
-<span class="sd">        fixtures that now take the other side of the branch.</span>
+<span class="sd">        exactly like an absent one and reports nothing: every field here would be</span>
+<span class="sd">        read in the host's order rather than the file's, which is right by</span>
+<span class="sd">        coincidence on a little-endian capture and byte-swapped on a big-endian</span>
+<span class="sd">        one. See :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py`</span>
+<span class="sd">        for the fixtures that take the other side of the branch.</span>
 
 <span class="sd">    """</span>
     <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>

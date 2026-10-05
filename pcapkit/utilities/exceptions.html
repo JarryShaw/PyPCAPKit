@@ -508,15 +508,14 @@ It is still an ordinary exception carrying its message, so <code class="docutils
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#repr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> are unaffected.</p>
 <div class="admonition attention">
 <p class="admonition-title">Attention</p>
-<p>Up to and including v1.4.1, <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> meant “log at <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> instead of
-<code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>” rather than “do not log”, and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> was set
+<p>Up to and including v1.4.1, <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> logged at <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> rather than not logging, and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> was set
 on both paths. A single <code class="docutils literal notranslate"><span class="pre">MultiDict.get()</span></code> miss therefore produced an
-<code class="docutils literal notranslate"><span class="pre">ERROR</span></code> record – one per frame when parsing a capture containing
-unfragmented IPv6 with reassembly enabled – and truncated the tracebacks of
-unrelated exceptions for the remainder of the process. A consumer who was
-watching for those <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> records will no longer see them; they never
-corresponded to a fault. Anything that genuinely wants to observe internal
-lookup misses should catch the exception rather than read the log.</p>
+<code class="docutils literal notranslate"><span class="pre">ERROR</span></code> record – one per frame when parsing unfragmented IPv6 with
+reassembly enabled – and truncated the tracebacks of unrelated exceptions
+for the rest of the process. Those records never corresponded to a fault and
+are gone; to observe internal lookup misses, catch the exception rather than
+read the log.</p>
 </div>
 <dl class="py exception">
 <dt class="sig sig-object py" id="pcapkit.utilities.exceptions.BaseError">

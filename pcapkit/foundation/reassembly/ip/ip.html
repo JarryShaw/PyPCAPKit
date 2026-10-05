@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/ip/ip.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin. The following algorithm implement is based on IP reassembly procedure introduced in RFC 7..." />
-<meta name="description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin. The following algorithm implement is based on IP reassembly procedure introduced in RFC 7..." />
+<meta property="og:description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin, using the RFC 791 procedure described in IP Datagram Reassembly. Data Models: Type Variab..." />
+<meta name="description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin, using the RFC 791 procedure described in IP Datagram Reassembly. Data Models: Type Variab..." />
 <link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="IPv4 Datagram Reassembly" href="ipv4.html"><link rel="prev" title="IP Datagram Reassembly" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -488,11 +488,7 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.ip" title="pcapkit.foundation.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ip</span></code></a> contains
 <a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP" title="pcapkit.foundation.reassembly.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>
 only, which reconstructs fragmented IP packets back to
-origin. The following algorithm implement is based on IP
-reassembly procedure introduced in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>, using
-<code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> (fragment receivedbit table). Though another
-algorithm is explained in <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, replacing <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>,
-however, this implement still used the elder one.</p>
+origin, using the <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure described in <a class="reference internal" href="index.html"><span class="doc">IP Datagram Reassembly</span></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">IP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP" title="Link to this definition">¶</a></dt>
@@ -618,8 +614,8 @@ from
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.timestamp">
 <span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.timestamp" title="Link to this definition">¶</a></dt>
 <dd><p>Capture timestamp of the fragment, in seconds since the Unix epoch. This
-is the <em>capture’s</em> clock, not the host’s: it is what drives the <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>
-and <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> reassembly timeout, since an offline parser
+is the <em>capture’s</em> clock, not the host’s: it is what drives the <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>
+and <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> reassembly timeout, since an offline parser
 replaying a file has no other notion of time passing.</p>
 </dd></dl>
 
@@ -672,7 +668,7 @@ replaying a file has no other notion of time passing.</p>
 <span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.timestamp" title="Link to this definition">¶</a></dt>
 <dd><p>Capture timestamp of the <strong>first-arriving</strong> fragment of this datagram, in
 seconds since the Unix epoch. This is the origin of the reassembly timer:
-<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> counts its 60 seconds “of the reception of the
+<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> counts its 60 seconds “of the reception of the
 first-arriving fragment”, so a later fragment does not extend the
 deadline and this field is never revised once set.</p>
 </dd></dl>
@@ -777,13 +773,13 @@ then runs it and keeps the result.</p>
 its length – on which two fragments disagreed, i.e. an arriving
 fragment overlapped octets already buffered but did not repeat them.
 Empty when the datagram never saw a contested octet.</p>
-<p><span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves the disagreement itself: “In the case that two or
+<p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves the disagreement itself: “In the case that two or
 more fragments contain the same data either identically or through a
 partial overlap, this procedure will use the more recently arrived copy
 in the data buffer and datagram delivered.” So <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.payload" title="pcapkit.foundation.reassembly.data.ip.Datagram.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> always
 holds whichever fragment arrived <em>last</em> over a contested range – the
 opposite resolution from TCP’s first-write-wins
-(<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – and this field is what lets a caller tell
+(<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – and this field is what lets a caller tell
 a clean datagram from a contested one, since a resolved conflict does
 not, on its own, leave a hole for <code class="docutils literal notranslate"><span class="pre">completed</span></code> to report.</p>
 <p><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.RCVBT</span></code></a>

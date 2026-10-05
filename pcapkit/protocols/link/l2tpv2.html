@@ -592,10 +592,10 @@ reading <code class="docutils literal notranslate"><span class="pre">2</span></c
 version-agnostic base so that a consumer finds the data at the same key
 whichever version was on the wire. The version is reported by
 <a class="reference internal" href="#pcapkit.protocols.link.l2tpv2.L2TPv2.alias" title="pcapkit.protocols.link.l2tpv2.L2TPv2.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> instead.</p>
-<p>IANA protocol number 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) is deliberately left unbound. It
-references <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. <strong>L2TPv3</strong>, whose session and control message
-headers are a different shape – so the binding waits on an <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class
-rather than on this one. See <a class="reference internal" href="l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a>.</p>
+<p>IANA protocol number 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) is deliberately left unbound: it
+references <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. <strong>L2TPv3</strong>, whose headers have a different shape,
+so the binding waits on an <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class rather than this one. See
+<a class="reference internal" href="l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a>.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tpv2.L2TPv2">
@@ -612,10 +612,10 @@ version nibble is not <code class="docutils literal notranslate"><span class="pr
 <p>IANA protocol number 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) is deliberately left unbound. It
 references <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. <strong>L2TPv3</strong>, whose session and control
 message headers are a different shape – so the binding waits on an
-<code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class rather than on this one. Binding <em>this</em> class there was
-proposed in GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a> and does not work: over IP the v3 session
-header carries no version nibble at all, so this class cannot recognise
-that the datagram is not its own. See
+<code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class rather than on this one. Binding <em>this</em> class there does
+not work (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a>): over IP the v3 session header carries no
+version nibble at all, so this class cannot recognise that the datagram
+is not its own. See
 <a class="reference internal" href="l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> for the measurement.</p>
 <p>The class subclasses <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> and so
 reports <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code> even though it is carried inside UDP: a

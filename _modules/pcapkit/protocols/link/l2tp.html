@@ -507,18 +507,17 @@
 <span class="sd">IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second</span>
 <span class="sd">route is why</span>
 <span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
-<span class="sd">leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a</span>
+<span class="sd">leaves 115 unbound: the binding waits on an ``L2TPv3`` class, not on a</span>
 <span class="sd">different framing decision. It also means v3 is the first member of this family</span>
 <span class="sd">to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.</span>
 
-<span class="sd">GitHub issue :issue:`548` proposed closing that gap by binding</span>
-<span class="sd">:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead, which does not</span>
-<span class="sd">work and is worth recording so it is not proposed again. Over IP the v3 session</span>
-<span class="sd">header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions imposed</span>
-<span class="sd">by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw 32-bit</span>
-<span class="sd">Session ID and carries **no version nibble at all**, so there is nothing a v2</span>
-<span class="sd">parser could even test to recognise that the datagram is not its own. Measured,</span>
-<span class="sd">that binding reported ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``</span>
+<span class="sd">Binding :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead does not</span>
+<span class="sd">work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3</span>
+<span class="sd">session header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions</span>
+<span class="sd">imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw</span>
+<span class="sd">32-bit Session ID and carries **no version nibble at all**, so there is nothing a</span>
+<span class="sd">v2 parser could test to recognise that the datagram is not its own. Measured,</span>
+<span class="sd">that binding reports ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``</span>
 <span class="sd">for a v3-over-IP datagram: a complete header assembled out of the top half of a</span>
 <span class="sd">Session ID and the first two octets of the PPP frame behind it. 115 is a missing</span>
 <span class="sd">*class*, not a missing registration, and until that class exists an undissected</span>
@@ -538,7 +537,7 @@
 <span class="sd">Selecting a version</span>
 <span class="sd">-------------------</span>
 
-<span class="sd">Nothing *dispatches* on the version nibble yet, because only one version exists</span>
+<span class="sd">Nothing *dispatches* on the version nibble, because only one version exists</span>
 <span class="sd">-- but :meth:`L2TPv2.read &lt;pcapkit.protocols.link.l2tpv2.L2TPv2.read&gt;` does</span>
 <span class="sd">**check** it, and refuses anything other than ``2``. That is the half of the</span>
 <span class="sd">mechanism which is useful with one version implemented: it keeps v3 traffic on</span>

@@ -554,7 +554,7 @@
 <span class="sd">    :doc:`/contributing/conventions/protocol-layer-placement`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The subpackage does not track the dispatch tier. OSPF is still dispatched</span>
+<span class="sd">        The subpackage does not track the dispatch tier. OSPF is dispatched</span>
 <span class="sd">        from :attr:`Internet.__proto__</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;` at</span>
 <span class="sd">        :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol</span>
@@ -564,13 +564,11 @@
     <span class="c1">#: Version number of corresponding protocol, as read off the header. Held on</span>
     <span class="c1">#: the instance rather than read back out of :attr:`self._info</span>
     <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._info&gt;` because :attr:`name` and</span>
-    <span class="c1">#: :attr:`alias` are both needed *during* :meth:`read` -- it is</span>
-    <span class="c1">#: :meth:`self._decode_next_layer</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;` that builds</span>
-    <span class="c1">#: the protocol chain out of :attr:`alias` -- and ``_info`` is not assigned</span>
-    <span class="c1">#: until :meth:`read` has returned. c.f. ``ARP._acnm`` on</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.link.arp.ARP`, which carries the same</span>
-    <span class="c1">#: constraint.</span>
+    <span class="c1">#: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;` builds the</span>
+    <span class="c1">#: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until</span>
+    <span class="c1">#: :meth:`read` has returned. c.f. ``ARP._acnm`` on</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.link.arp.ARP`, which has the same constraint.</span>
     <span class="n">_version</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="c1">##########################################################################</span>
@@ -815,13 +813,12 @@
 <span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            Latent rather than live: nothing in this module calls this</span>
-<span class="sd">            method today (:meth:`make` builds ``router_id``/``area_id``</span>
-<span class="sd">            straight from its own arguments), so the only caller is a unit</span>
-<span class="sd">            test. It is routed through :func:`parse_ip_address` anyway, so</span>
-<span class="sd">            that it does not resurface the defect the moment a caller</span>
-<span class="sd">            reaches it -- the same kind of omission is how :issue:`469`'s single-site</span>
-<span class="sd">            fix survived to become :issue:`491` and then :issue:`508` (c.f. :issue:`540`).</span>
+<span class="sd">            Latent rather than live: nothing in this module calls this method</span>
+<span class="sd">            (:meth:`make` builds ``router_id``/``area_id`` straight from its</span>
+<span class="sd">            own arguments), so the only caller is a unit test. It is routed</span>
+<span class="sd">            through :func:`parse_ip_address` anyway, so that a future caller passing a</span>
+<span class="sd">            :obj:`bool` gets :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">            rather than a silent ``0.0.0.1``.</span>
 
 <span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
 <span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>

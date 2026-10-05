@@ -504,8 +504,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Internet</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
 <span class="w">    </span><span class="sd">"""Abstract base class for internet layer protocol family.</span>
 
-<span class="sd">    This class currently supports parsing of the following protocols, which are</span>
-<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
+<span class="sd">    This class parses the following protocols, which are registered in the</span>
+<span class="sd">    :attr:`self.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
 <span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
@@ -609,8 +609,8 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            The full qualified class name of the new protocol class</span>
-<span class="sd">            should be as ``{protocol.module}.{protocol.name}``.</span>
+<span class="sd">            The fully qualified class name should be</span>
+<span class="sd">            ``{protocol.module}.{protocol.name}``.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
@@ -622,11 +622,10 @@
 <span class="sd">                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
 
 <span class="sd">        Warns:</span>
-<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this transport-layer</span>
-<span class="sd">                protocol number is already registered, naming the displaced</span>
-<span class="sd">                entry and its replacement so a caller can tell *what* was lost.</span>
-<span class="sd">                Fires only when the incumbent differs from the replacement --</span>
-<span class="sd">                see :meth:`ProtocolBase.register</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this protocol number</span>
+<span class="sd">                is already registered, naming the displaced entry and its</span>
+<span class="sd">                replacement so a caller can tell *what* was lost. Fires only</span>
+<span class="sd">                when the incumbent differs from the replacement; see :meth:`ProtocolBase.register</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
 <span class="sd">                guard this shares with ``register_protocol``.</span>
 
@@ -684,10 +683,9 @@
 <span class="sd">            Current protocol with next layer extracted.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
-<span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
-<span class="sd">            store the next layer protocol name. These two keys will **NOT**</span>
-<span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
+<span class="sd">            ``dict_`` gains the key ``__next_type__`` (next layer protocol</span>
+<span class="sd">            type) and ``__next_name__`` (next layer protocol name). Neither</span>
+<span class="sd">            is included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
 
 <span class="sd">        """</span>
         <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>

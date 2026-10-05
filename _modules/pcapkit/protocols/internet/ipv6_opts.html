@@ -599,8 +599,8 @@
                 <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_Opts</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_Opts</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Destination Options for IPv6.</span>
 
-<span class="sd">    This class currently supports parsing of the following IPv6 destination</span>
-<span class="sd">    options, which are registered in the</span>
+<span class="sd">    This class parses the following IPv6 destination options, which are</span>
+<span class="sd">    registered in the</span>
 <span class="sd">    :attr:`self.__option__ &lt;pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -821,17 +821,15 @@
         <span class="n">next_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: No options at all is not the same thing as no options area: the</span>
-        <span class="c1"># header is at least 8 octets, 2 of which are the fixed part, so the</span>
-        <span class="c1"># remaining 6 have to be padding options rather than nothing. Passing the</span>
-        <span class="c1"># empty list through the same path is what produces them -- returning</span>
-        <span class="c1"># ``[], 0`` here instead declared an 8-octet header and emitted 2.</span>
+        <span class="c1"># NOTE: No options is not the same as no options area. The header is at</span>
+        <span class="c1"># least 8 octets, 2 of them the fixed part, so the remaining 6 must be</span>
+        <span class="c1"># padding options. Passing the empty list through the same path produces</span>
+        <span class="c1"># them; returning ``[], 0`` would declare an 8-octet header and emit 2.</span>
         <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ipv6_opts</span><span class="p">(</span>
             <span class="n">options</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[])</span>
 
         <span class="c1"># NOTE: ``_make_ipv6_opts`` has aligned the header, so this division is</span>
-        <span class="c1"># exact; rounding up here used to hide the 6-octet shortfall that the</span>
-        <span class="c1"># per-option alignment left behind.</span>
+        <span class="c1"># exact and rounding up is unnecessary.</span>
         <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_length</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv6_Opts</span><span class="p">(</span>
@@ -959,20 +957,16 @@
 <span class="sd">        excludes the Option Type and Opt Data Len fields themselves, so the</span>
 <span class="sd">        whole option, which is what every ``_read_opt_*`` below reports back</span>
 <span class="sd">        as the parsed option's own ``.length``, is two octets more. This is</span>
-<span class="sd">        the exact ``+2``/``-2`` mismatch independently fixed in six</span>
-<span class="sd">        places (see ``Data_PadOption.length`` vs. ``Schema_PadOption.length``</span>
-<span class="sd">        below, at the surviving explanation of that fix); collecting the</span>
-<span class="sd">        read-side half of it into one helper is so a future fix to this</span>
-<span class="sd">        arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is</span>
-<span class="sd">        precisely this mismatch.</span>
+<span class="sd">        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``</span>
+<span class="sd">        vs. ``Schema_PadOption.length`` below). The read-side half lives in this</span>
+<span class="sd">        one helper so the arithmetic has a single home. Do NOT drop the</span>
+<span class="sd">        ``+ 2``.</span>
 
-<span class="sd">        Section 4.2 is the citation because it is what defines the TLV option</span>
-<span class="sd">        format, and it is where the sentence quoted above actually appears.</span>
-<span class="sd">        IPv6-Opts itself is the Destination Options header of</span>
-<span class="sd">        :rfc:`8200#section-4.6`, which carries those TLVs but says nothing</span>
-<span class="sd">        about their internal length arithmetic. This cited</span>
-<span class="sd">        :rfc:`8200#section-4.3` until :issue:`517` -- that is the Hop-by-Hop Options</span>
-<span class="sd">        header, which is a different header and not the one this class</span>
+<span class="sd">        Section 4.2 is the citation because it defines the TLV option format and</span>
+<span class="sd">        contains the sentence quoted above. IPv6-Opts itself is the Destination</span>
+<span class="sd">        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but</span>
+<span class="sd">        says nothing about their internal length arithmetic. Section 4.3 is the</span>
+<span class="sd">        Hop-by-Hop Options header, a different header from the one this class</span>
 <span class="sd">        implements.</span>
 
 <span class="sd">        Note that only the *stored-length* read-side call sites are</span>
@@ -1307,10 +1301,10 @@
             <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
                 <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_SMFIdentificationBasedDPDOption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError</span>
-            <span class="c1"># instead of minting a member; only a hand-constructed schema hits</span>
-            <span class="c1"># this guard. An unassigned *wire* value still mints via _missing_</span>
-            <span class="c1"># (tier 2, deferred), so it never reaches here.</span>
+            <span class="c1"># NOTE: An unresolvable *string* key raises KeyError rather than</span>
+            <span class="c1"># minting a member, so only a hand-constructed schema hits this</span>
+            <span class="c1"># guard. An unassigned *wire* value still mints via _missing_ and</span>
+            <span class="c1"># never reaches here.</span>
             <span class="n">tid_key</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">tid_key</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
@@ -1553,10 +1547,10 @@
 <span class="sd">            ProtocolError: If the option is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError</span>
-        <span class="c1"># instead of minting a member; only a hand-constructed schema hits</span>
-        <span class="c1"># this guard. An unassigned *wire* value still mints via _missing_</span>
-        <span class="c1"># (tier 2, deferred), so it never reaches here.</span>
+        <span class="c1"># NOTE: An unresolvable *string* key raises KeyError rather than</span>
+        <span class="c1"># minting a member, so only a hand-constructed schema hits this guard.</span>
+        <span class="c1"># An unassigned *wire* value still mints via _missing_ and never</span>
+        <span class="c1"># reaches here.</span>
         <span class="n">seed_key</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">seed_key</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
@@ -1957,7 +1951,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1985,16 +1979,16 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`Data_PadOption.length</span>
 <span class="sd">            &lt;pcapkit.protocols.data.internet.ipv6_opts.Option.length&gt;` counts</span>
 <span class="sd">            the *whole* option, whereas :attr:`Schema_PadOption.len</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len&gt;` is the</span>
-<span class="sd">            ``Opt Data Len`` field -- two octets fewer, and absent altogether for</span>
-<span class="sd">            a ``Pad1``. ``opt`` used to be ignored here, so re-making a parsed</span>
-<span class="sd">            padding option silently collapsed it to a single ``Pad1``.</span>
+<span class="sd">            ``Opt Data Len`` field: two octets fewer, and absent altogether for a</span>
+<span class="sd">            ``Pad1``. ``opt`` is honoured so that re-making a parsed padding</span>
+<span class="sd">            option keeps its size instead of collapsing to a single ``Pad1``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2029,7 +2023,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2062,7 +2056,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2098,7 +2092,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2145,7 +2139,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2253,7 +2247,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2312,7 +2306,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2377,7 +2371,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2420,7 +2414,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2473,7 +2467,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2481,16 +2475,15 @@
 
         <span class="c1"># NOTE: ``nonce`` is packed by a NumberField whose width is this very</span>
         <span class="c1"># ``len`` (c.f. pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),</span>
-        <span class="c1"># so the declared octet count has to be the ceiling of the bit length over</span>
-        <span class="c1"># eight -- ``bit_length() // 8`` floors instead, and wrapping a float-free</span>
-        <span class="c1"># floor division in ``math.ceil`` is a no-op, so every nonce whose bit</span>
-        <span class="c1"># length is not a multiple of eight used to be sized short and silently</span>
-        <span class="c1"># truncated on the wire (a nonce below 256 was declared as *zero* octets</span>
-        <span class="c1"># and vanished outright). ``bit_length()`` is 0 for 0 itself, which would</span>
-        <span class="c1"># likewise declare a zero-octet nonce -- collapsing "the nonce is 0" into</span>
-        <span class="c1"># "there is no nonce", when RFC 6744 gives the option a Nonce Value field</span>
-        <span class="c1"># -- so the width is floored at one octet, matching</span>
-        <span class="c1"># pcapkit.protocols.internet.mh.MH._make_opt_mn_id (c.f. #601).</span>
+        <span class="c1"># so the declared octet count must be the ceiling of the bit length over</span>
+        <span class="c1"># eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an</span>
+        <span class="c1"># integer division is a no-op, so any nonce whose bit length is not a</span>
+        <span class="c1"># multiple of eight would be sized short and truncated on the wire (a</span>
+        <span class="c1"># nonce below 256 as *zero* octets). ``bit_length()`` is 0 for 0, which</span>
+        <span class="c1"># would collapse "the nonce is 0" into "there is no nonce" although</span>
+        <span class="c1"># RFC 6744 gives the option a Nonce Value field, so the width is</span>
+        <span class="c1"># floored at one octet, as in</span>
+        <span class="c1"># pcapkit.protocols.internet.mh.MH._make_opt_mn_id.</span>
         <span class="k">return</span> <span class="n">Schema_ILNPOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nonce</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)),</span>
@@ -2512,7 +2505,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2540,7 +2533,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2567,7 +2560,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2600,7 +2593,7 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructured option schema.</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

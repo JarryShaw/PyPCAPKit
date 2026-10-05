@@ -493,15 +493,14 @@ the 802.1ad Service VLAN Tag Type (S-Tag) <a class="footnote-reference brackets"
 identity – <a class="reference internal" href="#pcapkit.protocols.link.s_tag.S_Tag.name" title="pcapkit.protocols.link.s_tag.S_Tag.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.link.s_tag.S_Tag.alias" title="pcapkit.protocols.link.s_tag.S_Tag.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.link.s_tag.S_Tag.info_name" title="pcapkit.protocols.link.s_tag.S_Tag.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a> – and its registry index.</p>
-<p>It lives in a module of its own rather than beside
-<a class="reference internal" href="c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a> because the two are reached through
-<em>different</em> registry indices, <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> against <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, which is the
-project’s rule for when protocols share a module.</p>
+<p>It has a module of its own, apart from
+<a class="reference internal" href="c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a>, because the two are reached through
+<em>different</em> registry indices, <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> against <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>; see
+<a class="reference internal" href="vlan.html#module-pcapkit.protocols.link.vlan" title="pcapkit.protocols.link.vlan"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan</span></code></a> for the rule.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>802.1ad was incorporated into IEEE 802.1Q-2011, so the service tag is
-specified by 802.1Q today. The <code class="docutils literal notranslate"><span class="pre">802.1ad</span></code> name is kept because it is what the
-provider-bridging tag is universally called.</p>
+<p>802.1ad is part of IEEE 802.1Q-2011. The <code class="docutils literal notranslate"><span class="pre">802.1ad</span></code> name is kept because it
+is what the provider-bridging tag is universally called.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.s_tag.S_Tag">
@@ -511,7 +510,7 @@ provider-bridging tag is universally called.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>802.1ad was incorporated into IEEE 802.1Q-2011, so the service tag is
-specified by 802.1Q today. The <code class="docutils literal notranslate"><span class="pre">802.1ad</span></code> name is kept because it is
+specified by 802.1Q. The <code class="docutils literal notranslate"><span class="pre">802.1ad</span></code> name is kept because it is
 what the provider-bridging tag is universally called, and because it is
 the only thing distinguishing this class from
 <a class="reference internal" href="c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a> by name.</p>

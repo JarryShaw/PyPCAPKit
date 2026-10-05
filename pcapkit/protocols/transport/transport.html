@@ -536,19 +536,21 @@ transport layer protocol type.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this port is already
-registered, naming the displaced entry and its replacement so a
-caller can tell <em>what</em> was lost. Fires only when the
-incumbent differs from the replacement – see
+registered and the incumbent differs from the replacement; the
+message names both. An unresolved
+<a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> counts as
+different from the class it names. See
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for the
 guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">cls.__proto__</span></code> belongs to the concrete protocol, not to
-<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>, so <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> reaching this method
-twice for one call – once as <code class="docutils literal notranslate"><span class="pre">TCP</span></code>, once as <code class="docutils literal notranslate"><span class="pre">UDP</span></code> – inspects
-two different registries and cannot warn spuriously.</p>
+<p><a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
+<a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> each define their own
+<code class="docutils literal notranslate"><span class="pre">__proto__</span></code> rather than sharing one on <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> reaches this method once per protocol and
+inspects two different registries, so it cannot warn spuriously.</p>
 </div>
 </dd></dl>
 
@@ -596,13 +598,12 @@ distinguishes e.g. TCP/80 from UDP/80</p></li>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.make</span></code> accepts a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> for a
-port, and the schema field only converts one on the way <em>out</em> (in
+port, but the schema field converts it only on the way <em>out</em> (in
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.pre_process</span></code>),
-leaving the schema attribute holding whatever it was handed. A
-constructed packet therefore reached <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.read</span></code> with an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> where a parsed one carries an
-<code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code>, and reading <code class="docutils literal notranslate"><span class="pre">.port</span></code>
-off it raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>. Normalising here keeps the two
-paths agreeing on the type the schema declares.</p>
+so the schema attribute keeps whatever it was handed. Normalising
+here makes a constructed packet carry the same
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code> as a parsed one, so
+reading <code class="docutils literal notranslate"><span class="pre">.port</span></code> off it works on both paths.</p>
 </div>
 </dd></dl>
 
@@ -610,9 +611,9 @@ paths agreeing on the type the schema declares.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport._decode_next_layer">
 <span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ports</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/transport.html#Transport._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="Link to this definition">¶</a></dt>
 <dd><p>Decode next layer protocol.</p>
-<p>The method will check if the next layer protocol is supported based on
-the source and destination port numbers. We will use the lower port
-number from both ports as the primary key to lookup the next layer.</p>
+<p>The next layer is looked up by port number. The lower of the two ports
+is the primary key; the higher one is used only when it alone is
+registered.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -631,17 +632,16 @@ number from both ports as the primary key to lookup the next layer.</p>
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The port is forwarded <strong>whether or not it is registered</strong>, since
+<p>The port is forwarded <strong>whether or not it is registered</strong>:
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code></a> passes
 it on as <code class="docutils literal notranslate"><span class="pre">alias</span></code> and <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
-records it as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.data.misc.raw.Raw.protocol" title="pcapkit.protocols.data.misc.raw.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_Raw.protocol</span></code></a>. Dropping it – as
-this used to, by falling back to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> – anonymised the very
-case the field is most useful for: a payload on a port we do not
-decode is then indistinguishable from one on port 22. The lower port
-is the one carried, for the same reason it is the primary lookup
-key. <a class="reference internal" href="sctp.html#pcapkit.protocols.transport.sctp.SCTP._decode_next_layer" title="pcapkit.protocols.transport.sctp.SCTP._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP._decode_next_layer</span></code></a> and
+records it as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.data.misc.raw.Raw.protocol" title="pcapkit.protocols.data.misc.raw.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_Raw.protocol</span></code></a>. Dropping it would
+make a payload on a port we do not decode indistinguishable from
+one on port 22. The lower port is the one carried, for the same
+reason it is the primary lookup key.
+<a class="reference internal" href="sctp.html#pcapkit.protocols.transport.sctp.SCTP._decode_next_layer" title="pcapkit.protocols.transport.sctp.SCTP._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP._decode_next_layer</span></code></a> and
 <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>
-already behave this way for an unregistered PPID and transport type.</p>
+behave the same way for an unregistered PPID and transport type.</p>
 </div>
 </dd></dl>
 

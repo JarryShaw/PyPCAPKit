@@ -565,18 +565,20 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this port is already</span>
-<span class="sd">                registered, naming the displaced entry and its replacement so a</span>
-<span class="sd">                caller can tell *what* was lost. Fires only when the</span>
-<span class="sd">                incumbent differs from the replacement -- see</span>
+<span class="sd">                registered and the incumbent differs from the replacement; the</span>
+<span class="sd">                message names both. An unresolved</span>
+<span class="sd">                :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as</span>
+<span class="sd">                different from the class it names. See</span>
 <span class="sd">                :meth:`ProtocolBase.register</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
 <span class="sd">                guard this shares with ``register_protocol``.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            ``cls.__proto__`` belongs to the concrete protocol, not to</span>
-<span class="sd">            :class:`Transport`, so ``register_apptype`` reaching this method</span>
-<span class="sd">            twice for one call -- once as ``TCP``, once as ``UDP`` -- inspects</span>
-<span class="sd">            two different registries and cannot warn spuriously.</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` each define their own</span>
+<span class="sd">            ``__proto__`` rather than sharing one on :class:`Transport`.</span>
+<span class="sd">            ``register_apptype`` reaches this method once per protocol and</span>
+<span class="sd">            inspects two different registries, so it cannot warn spuriously.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">Transport</span><span class="p">:</span>
@@ -652,15 +654,13 @@
 
 <span class="sd">        Important:</span>
 <span class="sd">            :meth:`self.make &lt;ProtocolBase.make&gt;` accepts a bare :obj:`int` for a</span>
-<span class="sd">            port, and the schema field only converts one on the way *out* (in</span>
+<span class="sd">            port, but the schema field converts it only on the way *out* (in</span>
 <span class="sd">            :meth:`PortEnumField.pre_process</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.transport.tcp.PortEnumField.pre_process&gt;`),</span>
-<span class="sd">            leaving the schema attribute holding whatever it was handed. A</span>
-<span class="sd">            constructed packet therefore reached :meth:`self.read</span>
-<span class="sd">            &lt;ProtocolBase.read&gt;` with an :obj:`int` where a parsed one carries an</span>
-<span class="sd">            :class:`~pcapkit.const.reg.apptype.AppType`, and reading ``.port``</span>
-<span class="sd">            off it raised :exc:`AttributeError`. Normalising here keeps the two</span>
-<span class="sd">            paths agreeing on the type the schema declares.</span>
+<span class="sd">            so the schema attribute keeps whatever it was handed. Normalising</span>
+<span class="sd">            here makes a constructed packet carry the same</span>
+<span class="sd">            :class:`~pcapkit.const.reg.apptype.AppType` as a parsed one, so</span>
+<span class="sd">            reading ``.port`` off it works on both paths.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
@@ -674,9 +674,9 @@
                            <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-renamed</span>
 <span class="w">        </span><span class="sd">"""Decode next layer protocol.</span>
 
-<span class="sd">        The method will check if the next layer protocol is supported based on</span>
-<span class="sd">        the source and destination port numbers. We will use the lower port</span>
-<span class="sd">        number from both ports as the primary key to lookup the next layer.</span>
+<span class="sd">        The next layer is looked up by port number. The lower of the two ports</span>
+<span class="sd">        is the primary key; the higher one is used only when it alone is</span>
+<span class="sd">        registered.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            dict_: info buffer</span>
@@ -688,21 +688,20 @@
 <span class="sd">            Current protocol with next layer extracted.</span>
 
 <span class="sd">        Important:</span>
-<span class="sd">            The port is forwarded **whether or not it is registered**, since</span>
+<span class="sd">            The port is forwarded **whether or not it is registered**:</span>
 <span class="sd">            :meth:`ProtocolBase._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;` passes</span>
 <span class="sd">            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            records it as :attr:`Data_Raw.protocol</span>
-<span class="sd">            &lt;pcapkit.protocols.data.misc.raw.Raw.protocol&gt;`. Dropping it -- as</span>
-<span class="sd">            this used to, by falling back to :obj:`None` -- anonymised the very</span>
-<span class="sd">            case the field is most useful for: a payload on a port we do not</span>
-<span class="sd">            decode is then indistinguishable from one on port 22. The lower port</span>
-<span class="sd">            is the one carried, for the same reason it is the primary lookup</span>
-<span class="sd">            key. :meth:`SCTP._decode_next_layer</span>
+<span class="sd">            &lt;pcapkit.protocols.data.misc.raw.Raw.protocol&gt;`. Dropping it would</span>
+<span class="sd">            make a payload on a port we do not decode indistinguishable from</span>
+<span class="sd">            one on port 22. The lower port is the one carried, for the same</span>
+<span class="sd">            reason it is the primary lookup key.</span>
+<span class="sd">            :meth:`SCTP._decode_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.transport.sctp.SCTP._decode_next_layer&gt;` and</span>
 <span class="sd">            :meth:`Internet._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`</span>
-<span class="sd">            already behave this way for an unregistered PPID and transport type.</span>
+<span class="sd">            behave the same way for an unregistered PPID and transport type.</span>
 
 <span class="sd">        """</span>
         <span class="n">sort_port</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span>

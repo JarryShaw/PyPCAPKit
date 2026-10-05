@@ -568,23 +568,23 @@ as below:</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.hip.</span></span><span class="sig-name descname"><span class="pre">HIP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/hip.html#HIP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.hip.HIP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.hip.HIP" title="pcapkit.protocols.data.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIP" title="pcapkit.protocols.schema.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>], <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.hip.HIP" title="pcapkit.protocols.data.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIP" title="pcapkit.protocols.schema.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>]</p>
 <p>This class implements Host Identity Protocol.</p>
-<p>Double-inherited, per the maintainer’s convention given in review of the
-work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>: a header that is <em>only</em> usable as an extension header
-inherits <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone,
-while one that is also usable as a standalone protocol names
-<a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> as well. HIP is
-both, on two independent grounds:</p>
+<p>Double-inherited, per the convention set on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>: a header usable
+<em>only</em> as an extension header inherits
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> alone, while one also
+usable as a standalone protocol names
+<a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> as well. HIP is both,
+on two independent grounds:</p>
 <ul class="simple">
 <li><p><span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.1"><strong>RFC 7401 Section 5.1</strong></a> states that “the HIP header is logically an
 IPv6 extension header”, and IANA lists protocol 139 in its <em>IPv6
-Extension Header Types</em> registry – 11 entries, HIP among them.</p></li>
-<li><p><span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#appendix-C.2"><strong>RFC 7401 Appendix C.2</strong></a>, “IPv4 HIP Packet (I1 Packet)”, works a
-checksum for an <strong>IPv4</strong> header carrying <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header:</span> <span class="pre">139</span></code> with
+Extension Header Types</em> registry (11 entries).</p></li>
+<li><p><span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#appendix-C.2"><strong>RFC 7401 Appendix C.2</strong></a>, “IPv4 HIP Packet (I1 Packet)”, works a checksum
+for an <strong>IPv4</strong> header carrying <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header:</span> <span class="pre">139</span></code> with
 <code class="docutils literal notranslate"><span class="pre">Payload</span> <span class="pre">Protocol:</span> <span class="pre">59</span></code>. HIP therefore travels directly as an IPv4
-payload, exactly as <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
-<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> do.</p></li>
+payload, as do <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
+<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>.</p></li>
 </ul>
-<p>The second ground is what separates HIP from
+<p>The second ground separates HIP from
 <a class="reference internal" href="mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> and Shim6, which are protocols
 in their own right but cannot appear under IPv4:
 <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.1.1"><strong>RFC 6275 Section 6.1.1</strong></a> defines the Mobility Header checksum over a
@@ -592,10 +592,10 @@ pseudo-header of IPv6 header fields with no IPv4 variant, and Mobile IPv4
 carries its equivalent messages over UDP port 434 (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5944.html"><strong>RFC 5944</strong></a>) rather
 than as protocol 135.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Internet</span></code> is already reached transitively through <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code>; naming
-it is what records the classification, so a future reader can tell a
-deliberate standalone protocol from a header that merely inherits one.</p>
-<p>This class currently supports parsing of the following HIP parameters,
-which are registered in the <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP.__parameter__" title="pcapkit.protocols.internet.hip.HIP.__parameter__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__parameter__</span></code></a>
+it records the classification, so a reader can tell a deliberate standalone
+protocol from a header that merely inherits one.</p>
+<p>This class parses the following HIP parameters, which are registered in the
+<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP.__parameter__" title="pcapkit.protocols.internet.hip.HIP.__parameter__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__parameter__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -4241,17 +4241,15 @@ parameter by itself.</p>
 layout to code 128 (<code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code>) and code 129 (<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code>) –
 one parameter under two numbers, the difference being HIP’s own C-bit
 rather than an unrelated code – and the field list below is that layout
-exactly, since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/672">#672</a> widened <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter" title="pcapkit.protocols.schema.internet.hip.R1CounterParameter.counter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">counter</span></code></a> to eight octets.
-<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP.__parameter__" title="pcapkit.protocols.internet.hip.HIP.__parameter__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__parameter__</span></code></a> already carries
+exactly. <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP.__parameter__" title="pcapkit.protocols.internet.hip.HIP.__parameter__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__parameter__</span></code></a> carries
 two hand-written entries – not a name-normalisation rule; <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code>
-and <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> differ only in case, and each needed its own line –
+and <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> differ only in case, and each needs its own line –
 mapping both codes to the same <code class="docutils literal notranslate"><span class="pre">_read_param_r1_counter</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">_make_param_r1_counter</span></code> already built this class for 128; it was only
-the schema lookup this class’s own <code class="docutils literal notranslate"><span class="pre">code=</span></code> feeds – consulted on the
-parse path by <a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>
-– that fell back to <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.UnassignedParameter" title="pcapkit.protocols.schema.internet.hip.UnassignedParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedParameter</span></code></a> for 128, since a
-single-code <code class="docutils literal notranslate"><span class="pre">code=</span></code> registered 129 alone and left 128 unclaimed.
-See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/690">#690</a>.</p>
+<code class="docutils literal notranslate"><span class="pre">_make_param_r1_counter</span></code> builds this class for 128. The schema lookup
+this class’s own <code class="docutils literal notranslate"><span class="pre">code=</span></code> feeds – consulted on the parse path by
+<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> – would fall
+back to <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.UnassignedParameter" title="pcapkit.protocols.schema.internet.hip.UnassignedParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedParameter</span></code></a> for 128 if a single-code <code class="docutils literal notranslate"><span class="pre">code=</span></code>
+registered 129 alone and left 128 unclaimed.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.R1CounterParameter.reserved">
 <span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.R1CounterParameter.reserved" title="Link to this definition">¶</a></dt>
@@ -4269,12 +4267,8 @@ order”, so the width is stated twice and inferred from neither.
 <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.3"><strong>RFC 5201 Section 5.2.3</strong></a> gives the same 4 + 8 layout, so there is no
 version under which four octets is right, and both codes that reach this
 class – <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> (128, HIPv1) and <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> (129) – are
-affected. It was a <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a>
-until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/672">#672</a>: the parameter declared the correct <code class="docutils literal notranslate"><span class="pre">len=12</span></code> and packed 12
-octets in total where <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1’s arithmetic makes the
-record 16, leaving it four short at <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">(mod</span> <span class="pre">8)</span></code>. Measured before the
-fix, at <code class="docutils literal notranslate"><span class="pre">counter=1</span></code>: <code class="docutils literal notranslate"><span class="pre">00</span> <span class="pre">80</span> <span class="pre">00</span> <span class="pre">0c</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">00</span> <span class="pre">01</span></code> for code
-128 and the same twelve octets under <code class="docutils literal notranslate"><span class="pre">00</span> <span class="pre">81</span></code> for code 129.</p>
+affected. With the four <code class="docutils literal notranslate"><span class="pre">reserved</span></code> octets the contents are 12 octets,
+which <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1’s arithmetic pads to a 16-octet record.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4297,22 +4291,19 @@ fix, at <code class="docutils literal notranslate"><span class="pre">counter=1</
 <p>The <code class="docutils literal notranslate"><span class="pre">length</span></code> callback is the parameter’s own <code class="docutils literal notranslate"><span class="pre">Length</span></code>, and that is
 correct on the unpacking path for the reason <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN" title="pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">LOCATOR_SET_LEN</span></code></a>
 gives – nothing has shadowed <code class="docutils literal notranslate"><span class="pre">len</span></code> yet when this field is resolved,
-since <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">len</span></code> are the only fields ahead of it. What was
-wrong until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/679">#679</a> is the <em>quantity</em> it was being handed:
-<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_locator_set" title="pcapkit.protocols.internet.hip.HIP._make_param_locator_set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_locator_set()</span></code></a> wrote
-<code class="docutils literal notranslate"><span class="pre">Length</span></code> as <code class="docutils literal notranslate"><span class="pre">sum(Locator.len)</span></code>, in the 4-octet units
-<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8046.html#section-4"><strong>RFC 8046 Section 4</strong></a> gives <code class="docutils literal notranslate"><span class="pre">Locator</span> <span class="pre">Length</span></code>, where <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>
-Section 5.2.1’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> is a byte count. <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> reads exactly
+since <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">len</span></code> are the only fields ahead of it. What matters
+is the <em>quantity</em> it is handed: <span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> is
+a byte count, not the 4-octet units <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8046.html#section-4"><strong>RFC 8046 Section 4</strong></a> gives
+<code class="docutils literal notranslate"><span class="pre">Locator</span> <span class="pre">Length</span></code>, and
+<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_locator_set" title="pcapkit.protocols.internet.hip.HIP._make_param_locator_set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_locator_set()</span></code></a>
+writes it as one. <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> reads exactly
 <code class="docutils literal notranslate"><span class="pre">field.length</span></code> octets off the stream and hands only those to
-<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.unpack</span></code></a>, so a set of <em>n</em>
-plain IPv6 locators offered <code class="docutils literal notranslate"><span class="pre">4n</span></code> octets of a <code class="docutils literal notranslate"><span class="pre">24n</span></code>-octet contents:
-measured on <code class="docutils literal notranslate"><span class="pre">f0999858e</span></code>, n = 2 and n = 5 both parsed <strong>one</strong> truncated
-locator and left the rest of the record unconsumed, with
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning" title="pcapkit.utilities.warnings.SchemaWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SchemaWarning</span></code></a> for the negative
-remainder and a repack that did not match the octets read. With
-<code class="docutils literal notranslate"><span class="pre">Length</span></code> a byte count the budget is the contents, each locator bills
-the 8 + <code class="docutils literal notranslate"><span class="pre">Locator</span> <span class="pre">Length</span></code> * 4 octets it actually consumed, and the
-count comes out exact.</p>
+<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.unpack</span></code></a>, so a <code class="docutils literal notranslate"><span class="pre">Length</span></code>
+in locator units would offer a set of <em>n</em> plain IPv6 locators <code class="docutils literal notranslate"><span class="pre">4n</span></code>
+octets of a <code class="docutils literal notranslate"><span class="pre">24n</span></code>-octet contents, parse one truncated locator and leave
+the rest of the record unconsumed. With <code class="docutils literal notranslate"><span class="pre">Length</span></code> a byte count the
+budget is the contents, and each locator bills the 8 + <code class="docutils literal notranslate"><span class="pre">Locator</span>
+<span class="pre">Length</span></code> * 4 octets it actually consumed.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4326,26 +4317,9 @@ read off a snapshot of this parameter’s <code class="docutils literal notransl
 read does not work here: the nested <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.Locator" title="pcapkit.protocols.schema.internet.hip.Locator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Locator</span></code></a> schemas share this
 parameter’s packet context while they pack, and their own <code class="docutils literal notranslate"><span class="pre">len</span></code>
 overwrites it before <code class="docutils literal notranslate"><span class="pre">padding</span></code> is reached.</p>
-<p>This is the site <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a> deliberately left alone, and its fix
-documented as an exclusion, because two defects in this parameter
-cancelled at the shape its tests sampled and correcting either alone
-made the wire output worse.
-The shadowed <code class="docutils literal notranslate"><span class="pre">len</span></code> is 4 for any IPv6 locator, so the old expression
-appended exactly four octets whatever the locator count; and the wrong
-<code class="docutils literal notranslate"><span class="pre">Length</span></code> unit above made the declared <code class="docutils literal notranslate"><span class="pre">Length</span></code> <code class="docutils literal notranslate"><span class="pre">4n</span></code> where the
-contents were <code class="docutils literal notranslate"><span class="pre">24n</span></code>. <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">24n</span> <span class="pre">+</span> <span class="pre">4</span></code> is <code class="docutils literal notranslate"><span class="pre">24n</span> <span class="pre">+</span> <span class="pre">8</span></code>, and since <code class="docutils literal notranslate"><span class="pre">24n</span></code>
-is a multiple of eight the RFC total for a byte-count <code class="docutils literal notranslate"><span class="pre">Length</span></code> of
-<code class="docutils literal notranslate"><span class="pre">24n</span></code> is <code class="docutils literal notranslate"><span class="pre">11</span> <span class="pre">+</span> <span class="pre">24n</span> <span class="pre">-</span> <span class="pre">3</span></code>, the same <code class="docutils literal notranslate"><span class="pre">24n</span> <span class="pre">+</span> <span class="pre">8</span></code>. Hence 32, 56 and 128
-octets at n = 1, 2, 5 – conformant, by two wrongs.</p>
-<p>That cancellation was never general, which is why the pair had to move
-together rather than one at a time. It needs every locator to be 24
-octets and there to be at least one, and measured on <code class="docutils literal notranslate"><span class="pre">f0999858e</span></code> the
-shapes that break it were non-conformant before this fix: an empty set
-packed 4 octets where <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 wants 8, one SPI-bearing
-locator packed 35, two packed 63, and a mixed plain-and-SPI pair packed
-59 or 60 depending on order. Afterwards all seven shapes are the RFC’s
-own total: 8, 32, 56, 128, 32, 64, 56 and 56 respectively, with the three
-plain figures unchanged.</p>
+<p>The shadowed <code class="docutils literal notranslate"><span class="pre">len</span></code> is 4 for any IPv6 locator, so a padding read off
+<code class="docutils literal notranslate"><span class="pre">pkt['len']</span></code> directly would append exactly four octets whatever the
+locator count.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4458,10 +4432,10 @@ plain figures unchanged.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.SolutionParameter.reserved">
 <span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.SolutionParameter.reserved" title="Link to this definition">¶</a></dt>
 <dd><p>Reserved octet – “zero when sent, ignored when received”
-(<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically).
+(<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically).
 This octet is <em>not</em> a lifetime: only <code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> carries one, at the same
-offset, and only <span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines the <code class="docutils literal notranslate"><span class="pre">2^(value</span> <span class="pre">-</span> <span class="pre">32)</span></code>
-seconds encoding that goes in it. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/654">#654</a>.</p>
+offset, and only <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines the <code class="docutils literal notranslate"><span class="pre">2^(value</span> <span class="pre">-</span> <span class="pre">32)</span></code>
+seconds encoding that goes in it.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4706,8 +4680,7 @@ does when this schema was built via
 sets it as a plain attribute so <code class="docutils literal notranslate"><span class="pre">pack()</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">packet.update(self.__dict__)</span></code> carries it in here – that value
 is trusted over the <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code> sibling lookup below, which a
-parameter packed on its own has no <code class="docutils literal notranslate"><span class="pre">options</span></code> list for. See
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/556">#556</a>.</p>
+parameter packed on its own has no <code class="docutils literal notranslate"><span class="pre">options</span></code> list for.</p>
 </div>
 </dd></dl>
 
@@ -4735,7 +4708,7 @@ parameter packed on its own has no <code class="docutils literal notranslate"><s
 by <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process" title="pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> after unpacking, or by
 <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_encrypted" title="pcapkit.protocols.internet.hip.HIP._make_param_encrypted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP._make_param_encrypted</span></code></a> before
 packing – so it is documented here rather than accepted by
-<code class="docutils literal notranslate"><span class="pre">__init__</span></code>. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/556">#556</a>.</p>
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -5898,7 +5871,7 @@ subtract.</p>
 <p>Used by the <code class="docutils literal notranslate"><span class="pre">formats</span></code> field of <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter" title="pcapkit.protocols.schema.internet.hip.TransportFormatListParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportFormatListParameter</span></code></a>.
 Unlike <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len" title="pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">two_octet_prefix_list_len()</span></code></a>’s three call sites, this
 parameter has no <code class="docutils literal notranslate"><span class="pre">reserved</span></code> or <code class="docutils literal notranslate"><span class="pre">port</span></code> field between <code class="docutils literal notranslate"><span class="pre">Length</span></code> and
-the list: <span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.11 defines <code class="docutils literal notranslate"><span class="pre">Length</span></code> as literally
+the list: <span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.11 defines <code class="docutils literal notranslate"><span class="pre">Length</span></code> as literally
 “2x number of TF types” and places the list directly after it –</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|</span>             <span class="n">Type</span>              <span class="o">|</span>             <span class="n">Length</span>            <span class="o">|</span>
 <span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
@@ -5950,7 +5923,7 @@ dropping octets.</p>
 <dd><p>Return <code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code> encrypted-data length.</p>
 <p>Used by the <code class="docutils literal notranslate"><span class="pre">data</span></code> field of <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.EncryptedParameter" title="pcapkit.protocols.schema.internet.hip.EncryptedParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncryptedParameter</span></code></a>, which follows a
 four-octet <code class="docutils literal notranslate"><span class="pre">reserved</span></code> field and a conditional sixteen-octet <code class="docutils literal notranslate"><span class="pre">iv</span></code> with
-the ciphertext, sized by the remainder of the parameter. <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>
+the ciphertext, sized by the remainder of the parameter. <span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>
 Section 5.2.18 puts all three inside <code class="docutils literal notranslate"><span class="pre">Length</span></code> –</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|</span>             <span class="n">Type</span>              <span class="o">|</span>             <span class="n">Length</span>            <span class="o">|</span>
 <span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
@@ -5964,25 +5937,6 @@ Section 5.2.18 puts all three inside <code class="docutils literal notranslate">
 <p>– so both have to come off <code class="docutils literal notranslate"><span class="pre">Length</span></code> to leave the data, and
 <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_encrypted" title="pcapkit.protocols.internet.hip.HIP._make_param_encrypted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_encrypted()</span></code></a> writes
 <code class="docutils literal notranslate"><span class="pre">len=4</span> <span class="pre">+</span> <span class="pre">len(iv)</span> <span class="pre">+</span> <span class="pre">len(data)</span></code> to match.</p>
-<p>This subtracted the <code class="docutils literal notranslate"><span class="pre">iv</span></code> but not the <code class="docutils literal notranslate"><span class="pre">reserved</span></code>, so the field claimed
-four octets more than the parameter holds: on unpack it read four octets
-of the <em>next</em> parameter into <code class="docutils literal notranslate"><span class="pre">data</span></code>, and on pack it zero-extended the
-ciphertext by four. That was recorded as the second half of
-<code class="docutils literal notranslate"><span class="pre">hip-parameter/ENCRYPTED</span></code> in the round-trip suite’s expected-failure
-table, and left alone – because while the padding rule was also four
-octets out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>), the two errors cancelled at some residues of <code class="docutils literal notranslate"><span class="pre">Length</span></code>
-and not others. Measured by packing through the public maker at every
-residue, the old record total agreed with <span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 at
-<code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">%</span> <span class="pre">8</span></code> in <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7}</span></code> and was eight octets over at
-<code class="docutils literal notranslate"><span class="pre">{1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4}</span></code> – so <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">8</span></code>, which the unit suite happened to
-use, is one of the four where the module emitted RFC-conformant
-<code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code> octets while getting both halves wrong.</p>
-<p>Fixing the padding without fixing this would therefore have <em>regressed</em>
-<code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code>, from right-by-accident at four of the eight residues to four
-octets too long at all eight: with only the padding corrected the total
-becomes <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">Length</span> <span class="pre">+</span> <span class="pre">pad</span></code> against a correct <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">Length</span> <span class="pre">+</span> <span class="pre">pad</span></code>, which
-is a uniform four-octet surplus with no residue left where it cancels. So
-the two go together.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Parameter unpacked schema.</p>
@@ -6006,7 +5960,7 @@ the two go together.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.parameter_total_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">parameter_total_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#parameter_total_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.parameter_total_len" title="Link to this definition">¶</a></dt>
 <dd><p>Return the total on-wire length of a HIP parameter.</p>
-<p><span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 states the arithmetic outright, so there is
+<p><span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 states the arithmetic outright, so there is
 nothing here to infer from the diagram –</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">All</span> <span class="n">of</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">TLV</span> <span class="n">parameters</span> <span class="n">have</span> <span class="n">a</span> <span class="n">length</span> <span class="p">(</span><span class="n">that</span> <span class="n">includes</span> <span class="n">the</span>
 <span class="n">Type</span> <span class="ow">and</span> <span class="n">Length</span> <span class="n">fields</span><span class="p">),</span> <span class="n">which</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">multiple</span> <span class="n">of</span> <span class="mi">8</span> <span class="nb">bytes</span><span class="o">.</span>  <span class="n">When</span>
@@ -6021,16 +5975,15 @@ nothing here to infer from the diagram –</p>
 is “Length of the Contents, in bytes, excluding Type, Length, and
 Padding”, and it is the <strong>total</strong> – contents plus the four octets of
 <code class="docutils literal notranslate"><span class="pre">Type</span></code> and <code class="docutils literal notranslate"><span class="pre">Length</span></code> plus padding – that must land on a multiple of
-eight. Aligning the contents alone instead, as every padding site in this
-module and in <a class="reference internal" href="#module-pcapkit.protocols.internet.hip" title="pcapkit.protocols.internet.hip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hip</span></code></a> did before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>, puts
-every parameter at <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">(mod</span> <span class="pre">8)</span></code> for every possible <code class="docutils literal notranslate"><span class="pre">Length</span></code>: never a
-multiple of eight and never the length the RFC gives. It is not even a
-consistent offset, because the two formulas disagree in both directions –
-at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">4</span></code> (a whole <code class="docutils literal notranslate"><span class="pre">SEQ</span></code>) the contents are already 8-aligned
-with the header, so the RFC requires no padding at all and aligning the
-contents appends four octets that must not be there; at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">8</span></code> the
-contents are 8-aligned on their own, so aligning them appends nothing and
-the record is left four octets short.</p>
+eight. Aligning the contents alone would put every parameter at
+<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">(mod</span> <span class="pre">8)</span></code> for every possible <code class="docutils literal notranslate"><span class="pre">Length</span></code>: never a multiple of eight and
+never the length the RFC gives. It is not even a consistent offset,
+because the two formulas disagree in both directions – at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">4</span></code>
+(a whole <code class="docutils literal notranslate"><span class="pre">SEQ</span></code>) the contents are already 8-aligned with the header, so
+the RFC requires no padding at all and aligning the contents would append
+four octets that must not be there; at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">8</span></code> the contents are
+8-aligned on their own, so aligning them would append nothing and leave
+the record four octets short.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The parameter’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> field, i.e. its contents length in
@@ -6062,14 +6015,10 @@ octets, excluding <code class="docutils literal notranslate"><span class="pre">T
 <p>Used by the <code class="docutils literal notranslate"><span class="pre">padding</span></code> field of every parameter schema in this module.
 The count is whatever <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.parameter_total_len" title="pcapkit.protocols.schema.internet.hip.parameter_total_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">parameter_total_len()</span></code></a> leaves over once the
 four-octet <code class="docutils literal notranslate"><span class="pre">Type</span></code> and <code class="docutils literal notranslate"><span class="pre">Length</span></code> header and the <code class="docutils literal notranslate"><span class="pre">Length</span></code> octets of
-contents are accounted for, which <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 bounds at
+contents are accounted for, which <span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.1 bounds at
 “0-7 bytes”.</p>
 <p>This is one function shared by every parameter rather than a lambda
-repeated per class because it was previously the latter – 46 copies of
-the same wrong expression here and 49 of its counterpart in
-<a class="reference internal" href="#module-pcapkit.protocols.internet.hip" title="pcapkit.protocols.internet.hip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hip</span></code></a>, which is 95 places for the
-arithmetic to be wrong in and one place too few to state the RFC’s reason
-for it.</p>
+repeated per class, so the RFC’s arithmetic is stated in one place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Parameter unpacked schema.</p>
@@ -6144,9 +6093,8 @@ enclosing packet context</strong>: <a class="reference internal" href="../index.
 <code class="docutils literal notranslate"><span class="pre">packet.update(self.__dict__)</span></code>, and <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.Locator" title="pcapkit.protocols.schema.internet.hip.Locator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Locator</span></code></a> declares a <code class="docutils literal notranslate"><span class="pre">len</span></code> of
 its own. So by the time <code class="docutils literal notranslate"><span class="pre">padding</span></code> is evaluated – after the list, since
 fields are packed in declaration order – <code class="docutils literal notranslate"><span class="pre">pkt['len']</span></code> is the <em>last
-locator’s</em> <code class="docutils literal notranslate"><span class="pre">len</span></code>, not the parameter’s. That is 4 for any IPv6 locator
-whatever the locator count, which is how the pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/679">#679</a> padding expression came
-to append exactly four octets to every <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> regardless of size.</p>
+locator’s</em> <code class="docutils literal notranslate"><span class="pre">len</span></code>, not the parameter’s – 4 for any IPv6 locator,
+whatever the locator count.</p>
 <p>The shadowing is specific to the packing path. <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> hands each field
 <code class="docutils literal notranslate"><span class="pre">packet.copy()</span></code>, so nested writes do not propagate back and <code class="docutils literal notranslate"><span class="pre">pkt['len']</span></code>
 stays the parameter’s there. Snapshotting under a key no nested schema
@@ -6416,7 +6364,7 @@ accidentally correct on one.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.PuzzleParameter.rhash_len">
 <span class="sig-name descname"><span class="pre">rhash_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.PuzzleParameter.rhash_len" title="Link to this definition">¶</a></dt>
 <dd><p>On-wire width of <a class="reference internal" href="#pcapkit.protocols.data.internet.hip.PuzzleParameter.random" title="pcapkit.protocols.data.internet.hip.PuzzleParameter.random"><code class="xref py py-attr docutils literal notranslate"><span class="pre">random</span></code></a>, in bits – <code class="docutils literal notranslate"><span class="pre">RHASH_len</span></code> in
-<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-2.3"><strong>RFC 7401 Section 2.3</strong></a> terms, which <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> makes the
+<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-2.3"><strong>RFC 7401 Section 2.3</strong></a> terms, which <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> makes the
 exact width of <code class="docutils literal notranslate"><span class="pre">Random</span> <span class="pre">#I</span></code>. Declared rather than recomputed from
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.bit_length" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.bit_length()</span></code></a>, which cannot see a leading zero octet: without it
 a parameter read with <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">12</span></code> re-serialised as <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">5</span></code>.
@@ -6440,10 +6388,10 @@ See <a class="extlink-issue reference external" href="https://github.com/JarrySh
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.SolutionParameter.reserved">
 <span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.SolutionParameter.reserved" title="Link to this definition">¶</a></dt>
 <dd><p>Reserved octet – “zero when sent, ignored when received”
-(<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically).
+(<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically).
 Carried verbatim rather than interpreted, so that re-serialising a parsed
 parameter reproduces the octet it arrived with. It used to be read as a
-<code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> <code class="docutils literal notranslate"><span class="pre">Lifetime</span></code>, which only <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines, and
+<code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> <code class="docutils literal notranslate"><span class="pre">Lifetime</span></code>, which only <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines, and
 the conformant <code class="docutils literal notranslate"><span class="pre">0x00</span></code> then could not be re-serialised at all. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/654">#654</a>.</p>
 </dd></dl>
 
@@ -6470,7 +6418,7 @@ the conformant <code class="docutils literal notranslate"><span class="pre">0x00
 <span class="sig-name descname"><span class="pre">rhash_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.SolutionParameter.rhash_len" title="Link to this definition">¶</a></dt>
 <dd><p>On-wire width of <a class="reference internal" href="#pcapkit.protocols.data.internet.hip.SolutionParameter.random" title="pcapkit.protocols.data.internet.hip.SolutionParameter.random"><code class="xref py py-attr docutils literal notranslate"><span class="pre">random</span></code></a> and of <a class="reference internal" href="#pcapkit.protocols.data.internet.hip.SolutionParameter.solution" title="pcapkit.protocols.data.internet.hip.SolutionParameter.solution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">solution</span></code></a> – which are equal
 and each <code class="docutils literal notranslate"><span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">8</span></code> octets – in bits. <code class="docutils literal notranslate"><span class="pre">RHASH_len</span></code> in
-<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-2.3"><strong>RFC 7401 Section 2.3</strong></a> terms; <span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a> makes it the exact
+<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-2.3"><strong>RFC 7401 Section 2.3</strong></a> terms; <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a> makes it the exact
 width of both fields. Declared rather than recomputed from
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.bit_length" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.bit_length()</span></code></a>, which cannot see a leading zero octet: without it a
 parameter read with <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">20</span></code> re-serialised as <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">6</span></code>.

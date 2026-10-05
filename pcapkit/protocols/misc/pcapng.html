@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel lives in pcapkit.const.pcapng.tls_key_label, generated the same ..." />
-<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel lives in pcapkit.const.pcapng.tls_key_label, generated the same ..." />
+<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel is defined in pcapkit.const.pcapng.tls_key_label, generated like..." />
+<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel is defined in pcapkit.const.pcapng.tls_key_label, generated like..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Raw Packet Data" href="raw.html"><link rel="prev" title="PCAP File Headers" href="pcap.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -595,146 +595,153 @@ attribute:</p>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_comment" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_comment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_comment()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_comment" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_comment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_comment()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_name" title="pcapkit.const.pcapng.option_type.OptionType.if_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_name</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_2988" title="pcapkit.const.pcapng.option_type.OptionType.opt_custom_2988"><code class="xref py py-attr docutils literal notranslate"><span class="pre">opt_custom_2988</span></code></a>,
+<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_2989" title="pcapkit.const.pcapng.option_type.OptionType.opt_custom_2989"><code class="xref py py-attr docutils literal notranslate"><span class="pre">opt_custom_2989</span></code></a>,
+<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_19372" title="pcapkit.const.pcapng.option_type.OptionType.opt_custom_19372"><code class="xref py py-attr docutils literal notranslate"><span class="pre">opt_custom_19372</span></code></a>,
+<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_19373" title="pcapkit.const.pcapng.option_type.OptionType.opt_custom_19373"><code class="xref py py-attr docutils literal notranslate"><span class="pre">opt_custom_19373</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_custom" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_custom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_custom()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_custom" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_custom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_custom()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_name" title="pcapkit.const.pcapng.option_type.OptionType.if_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_name</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_name" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_name()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_name" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_name()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_description" title="pcapkit.const.pcapng.option_type.OptionType.if_description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_description</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_description" title="pcapkit.const.pcapng.option_type.OptionType.if_description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_description</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_description" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_description"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_description()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_description" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_description"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_description()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr" title="pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_IPv4addr</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr" title="pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_IPv4addr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv4" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_ipv4()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv4" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_ipv4()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr" title="pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_IPv6addr</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr" title="pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_IPv6addr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv6" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_ipv6()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv6" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_ipv6()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_MACaddr" title="pcapkit.const.pcapng.option_type.OptionType.if_MACaddr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_MACaddr</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_MACaddr" title="pcapkit.const.pcapng.option_type.OptionType.if_MACaddr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_MACaddr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_mac" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_mac"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_mac()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_mac" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_mac"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_mac()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr" title="pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_EUIaddr</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr" title="pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_EUIaddr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_eui" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_eui"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_eui()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_eui" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_eui"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_eui()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_speed" title="pcapkit.const.pcapng.option_type.OptionType.if_speed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_speed</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_speed" title="pcapkit.const.pcapng.option_type.OptionType.if_speed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_speed</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_speed" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_speed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_speed()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_speed()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tsresol" title="pcapkit.const.pcapng.option_type.OptionType.if_tsresol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tsresol</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tsresol" title="pcapkit.const.pcapng.option_type.OptionType.if_tsresol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tsresol</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsresol" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsresol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_tsresol()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_tsresol()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tzone" title="pcapkit.const.pcapng.option_type.OptionType.if_tzone"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tzone</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tzone" title="pcapkit.const.pcapng.option_type.OptionType.if_tzone"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tzone</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tzone" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tzone"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_tzone()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tzone" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tzone"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_tzone()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_filter" title="pcapkit.const.pcapng.option_type.OptionType.if_filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_filter</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_filter" title="pcapkit.const.pcapng.option_type.OptionType.if_filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_filter</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_filter" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_filter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_filter()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_filter" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_filter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_filter()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_os" title="pcapkit.const.pcapng.option_type.OptionType.if_os"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_os</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_os" title="pcapkit.const.pcapng.option_type.OptionType.if_os"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_os</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_os" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_os"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_os()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_os" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_os"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_os()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_fcslen" title="pcapkit.const.pcapng.option_type.OptionType.if_fcslen"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_fcslen</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_fcslen" title="pcapkit.const.pcapng.option_type.OptionType.if_fcslen"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_fcslen</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_fcslen" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_fcslen"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_fcslen()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_fcslen" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_fcslen"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_fcslen()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tsoffset" title="pcapkit.const.pcapng.option_type.OptionType.if_tsoffset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tsoffset</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_tsoffset" title="pcapkit.const.pcapng.option_type.OptionType.if_tsoffset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_tsoffset</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsoffset" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsoffset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_tsoffset()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_tsoffset()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_hardware" title="pcapkit.const.pcapng.option_type.OptionType.if_hardware"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_hardware</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_hardware" title="pcapkit.const.pcapng.option_type.OptionType.if_hardware"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_hardware</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_hardware" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_hardware"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_hardware()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_hardware" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_hardware"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_hardware()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_txspeed" title="pcapkit.const.pcapng.option_type.OptionType.if_txspeed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_txspeed</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_txspeed" title="pcapkit.const.pcapng.option_type.OptionType.if_txspeed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_txspeed</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_txspeed" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_txspeed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_txspeed()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_txspeed" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_txspeed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_txspeed()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_rxspeed" title="pcapkit.const.pcapng.option_type.OptionType.if_rxspeed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_rxspeed</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.if_rxspeed" title="pcapkit.const.pcapng.option_type.OptionType.if_rxspeed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">if_rxspeed</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_rxspeed" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_rxspeed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_if_rxspeed()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_rxspeed" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_rxspeed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_if_rxspeed()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_flags" title="pcapkit.const.pcapng.option_type.OptionType.epb_flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_flags</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_flags" title="pcapkit.const.pcapng.option_type.OptionType.epb_flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_flags</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_flags()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_flags()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_hash" title="pcapkit.const.pcapng.option_type.OptionType.epb_hash"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_hash</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_hash" title="pcapkit.const.pcapng.option_type.OptionType.epb_hash"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_hash</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_hash()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_hash()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_dropcount" title="pcapkit.const.pcapng.option_type.OptionType.epb_dropcount"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_dropcount</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_dropcount" title="pcapkit.const.pcapng.option_type.OptionType.epb_dropcount"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_dropcount</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_dropcount" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_dropcount"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_dropcount()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_dropcount" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_dropcount"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_dropcount()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_packetid" title="pcapkit.const.pcapng.option_type.OptionType.epb_packetid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_packetid</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_packetid" title="pcapkit.const.pcapng.option_type.OptionType.epb_packetid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_packetid</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_packetid" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_packetid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_packetid()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_packetid" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_packetid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_packetid()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_queue" title="pcapkit.const.pcapng.option_type.OptionType.epb_queue"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_queue</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_queue" title="pcapkit.const.pcapng.option_type.OptionType.epb_queue"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_queue</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_queue" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_queue"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_queue()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_queue" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_queue"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_queue()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_verdict" title="pcapkit.const.pcapng.option_type.OptionType.epb_verdict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_verdict</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.epb_verdict" title="pcapkit.const.pcapng.option_type.OptionType.epb_verdict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epb_verdict</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_verdict" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_verdict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_verdict()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_verdict" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_verdict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_verdict()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsname" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsname</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsname" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsname"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsname</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsname" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsname"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_ns_dnsname()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsname" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsname"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_ns_dnsname()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv4" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_ns_dnsipv4()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_ns_dnsipv4()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr" title="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv6" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_ns_dnsipv6()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_ns_dnsipv6()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_starttime" title="pcapkit.const.pcapng.option_type.OptionType.isb_starttime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_starttime</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_starttime" title="pcapkit.const.pcapng.option_type.OptionType.isb_starttime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_starttime</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_starttime" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_starttime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_starttime()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_starttime" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_starttime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_starttime()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_endtime" title="pcapkit.const.pcapng.option_type.OptionType.isb_endtime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_endtime</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_endtime" title="pcapkit.const.pcapng.option_type.OptionType.isb_endtime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_endtime</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_endtime" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_endtime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_endtime()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_endtime" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_endtime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_endtime()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv" title="pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_ifrecv</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv" title="pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_ifrecv</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifrecv" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifrecv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_ifrecv()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifrecv" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifrecv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_ifrecv()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop" title="pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_ifdrop</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop" title="pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_ifdrop</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifdrop" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifdrop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_ifdrop()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifdrop" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifdrop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_ifdrop()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept" title="pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_filteraccept</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept" title="pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_filteraccept</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_filteraccept" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_filteraccept"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_filteraccept()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_filteraccept" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_filteraccept"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_filteraccept()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_osdrop" title="pcapkit.const.pcapng.option_type.OptionType.isb_osdrop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_osdrop</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_osdrop" title="pcapkit.const.pcapng.option_type.OptionType.isb_osdrop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_osdrop</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_osdrop" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_osdrop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_osdrop()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_osdrop" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_osdrop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_osdrop()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv" title="pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_usrdeliv</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv" title="pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isb_usrdeliv</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_usrdeliv" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_usrdeliv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_isb_usrdeliv()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_usrdeliv()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_flags" title="pcapkit.const.pcapng.option_type.OptionType.pack_flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_flags</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_flags" title="pcapkit.const.pcapng.option_type.OptionType.pack_flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_flags</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_flags()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_flags()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_hash" title="pcapkit.const.pcapng.option_type.OptionType.pack_hash"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_hash</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_hash" title="pcapkit.const.pcapng.option_type.OptionType.pack_hash"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_hash</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_hash()</span></code></a></p></td>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_hash()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The class currently supports parsing of the following <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export
+<p>The class currently supports parsing of the following name resolution
 record types, which are registered in the <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.__record__" title="pcapkit.protocols.misc.pcapng.PCAPNG.__record__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__record__</span></code></a>
 attribute:</p>
 <div class="table-wrapper docutils container">
@@ -810,8 +817,7 @@ same thing for a protocol whose payload runs to the end of its
 buffer, which is why
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.length</span></code>
 does not distinguish them, but a PCAP-NG block carries a trailer.
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.packet</span></code> is overridden accordingly; see there and
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/646">#646</a>.</p>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.packet</span></code> is overridden accordingly.</p>
 </div>
 </dd></dl>
 
@@ -860,7 +866,7 @@ given in <code class="xref py py-meth docutils literal notranslate"><span class=
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If current block is not a valid packet block, i.e.,
-    EPB, ISB or obsolete Packet Block.</p>
+    EPB, SPB or obsolete Packet Block.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -896,9 +902,9 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this link type is
 already registered against PCAP-NG blocks, naming the displaced
 entry and its replacement so a caller can tell <em>what</em> was lost.
-Fires only when the incumbent differs from the replacement, so
-re-registering the same class is a silent no-op. Note this
-registry is separate from the PCAP one, so
+Fires only when the incumbent differs from the replacement, and
+an unresolved module descriptor counts as different from the
+class it names. This registry is separate from the PCAP one, so
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
 writing to both cannot make either warn about the other.</p>
 </dd>
@@ -936,12 +942,12 @@ writing to both cannot make either warn about the other.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.register_record">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG.register_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.register_record" title="Link to this definition">¶</a></dt>
-<dd><p>Register a <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record parser.</p>
+<dd><p>Register a name resolution record parser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></span>) – PCAP-NG <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record type code.</p></li>
-<li><p><strong>meth</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>, <a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]], <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]]</span>) – Method name or callable to parse and/or construct the <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record.</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></span>) – PCAP-NG name resolution record type code.</p></li>
+<li><p><strong>meth</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>, <a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]], <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]]</span>) – Method name or callable to parse and/or construct the name resolution record.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2425,16 +2431,16 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._read_nrb_records">
 <span class="sig-name descname"><span class="pre">_read_nrb_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._read_nrb_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_nrb_records" title="Link to this definition">¶</a></dt>
-<dd><p>Read PCAP-NG <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd><p>Read PCAP-NG name resolution records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>records_schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd class="field-odd"><p><strong>records_schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed name resolution records.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Parsed PCAP-NG <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records data.</p>
+<dd class="field-odd"><p>Parsed PCAP-NG name resolution records data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2442,11 +2448,11 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._read_record_unknown">
 <span class="sig-name descname"><span class="pre">_read_record_unknown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._read_record_unknown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_unknown" title="Link to this definition">¶</a></dt>
-<dd><p>Read PCAP-MG unknown <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd><p>Read PCAP-NG unknown name resolution records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.UnknownRecord" title="pcapkit.protocols.schema.misc.pcapng.UnknownRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownRecord</span></code></a></span>) – Parsed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record schema.</p></li>
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.UnknownRecord" title="pcapkit.protocols.schema.misc.pcapng.UnknownRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownRecord</span></code></a></span>) – Parsed name resolution record schema.</p></li>
 <li><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed PCAP-NG records.</p></li>
 </ul>
 </dd>
@@ -2454,7 +2460,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.UnknownRecord" title="pcapkit.protocols.data.misc.pcapng.UnknownRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownRecord</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record data.</p>
+<dd class="field-odd"><p>Constructed name resolution record data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2462,11 +2468,11 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._read_record_end">
 <span class="sig-name descname"><span class="pre">_read_record_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._read_record_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_end" title="Link to this definition">¶</a></dt>
-<dd><p>Read PCAP-MG <code class="docutils literal notranslate"><span class="pre">nrb_record_end</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd><p>Read PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_end</span></code> name resolution records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.EndRecord" title="pcapkit.protocols.schema.misc.pcapng.EndRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">EndRecord</span></code></a></span>) – Parsed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record schema.</p></li>
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.EndRecord" title="pcapkit.protocols.schema.misc.pcapng.EndRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">EndRecord</span></code></a></span>) – Parsed name resolution record schema.</p></li>
 <li><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed PCAP-NG records.</p></li>
 </ul>
 </dd>
@@ -2474,7 +2480,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.EndRecord" title="pcapkit.protocols.data.misc.pcapng.EndRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">EndRecord</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record data.</p>
+<dd class="field-odd"><p>Constructed name resolution record data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2482,11 +2488,11 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv4">
 <span class="sig-name descname"><span class="pre">_read_record_ipv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._read_record_ipv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv4" title="Link to this definition">¶</a></dt>
-<dd><p>Read PCAP-MG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv4</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd><p>Read PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv4</span></code> name resolution records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.IPv4Record" title="pcapkit.protocols.schema.misc.pcapng.IPv4Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Record</span></code></a></span>) – Parsed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record schema.</p></li>
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.IPv4Record" title="pcapkit.protocols.schema.misc.pcapng.IPv4Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Record</span></code></a></span>) – Parsed name resolution record schema.</p></li>
 <li><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed PCAP-NG records.</p></li>
 </ul>
 </dd>
@@ -2494,7 +2500,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.IPv4Record" title="pcapkit.protocols.data.misc.pcapng.IPv4Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Record</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record data.</p>
+<dd class="field-odd"><p>Constructed name resolution record data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2502,11 +2508,11 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6">
 <span class="sig-name descname"><span class="pre">_read_record_ipv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._read_record_ipv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6" title="Link to this definition">¶</a></dt>
-<dd><p>Read PCAP-MG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv6</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd><p>Read PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv6</span></code> name resolution records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.IPv6Record" title="pcapkit.protocols.schema.misc.pcapng.IPv6Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Record</span></code></a></span>) – Parsed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record schema.</p></li>
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.IPv6Record" title="pcapkit.protocols.schema.misc.pcapng.IPv6Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Record</span></code></a></span>) – Parsed name resolution record schema.</p></li>
 <li><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>]</span>) – Parsed PCAP-NG records.</p></li>
 </ul>
 </dd>
@@ -2514,7 +2520,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.IPv6Record" title="pcapkit.protocols.data.misc.pcapng.IPv6Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Record</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record data.</p>
+<dd class="field-odd"><p>Constructed name resolution record data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3576,7 +3582,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4">
 <span class="sig-name descname"><span class="pre">_make_option_ns_dnsipv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'8.8.8.8'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_option_ns_dnsipv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsip4addr</span></code> option.</p>
+<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code> option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3598,7 +3604,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6">
 <span class="sig-name descname"><span class="pre">_make_option_ns_dnsipv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'8.8.8.8'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_option_ns_dnsipv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsip6addr</span></code> option.</p>
+<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code> option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3838,16 +3844,16 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_nrb_records">
 <span class="sig-name descname"><span class="pre">_make_nrb_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_nrb_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_nrb_records" title="Link to this definition">¶</a></dt>
-<dd><p>Make <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records for PCAP-NG.</p>
+<dd><p>Make name resolution records for PCAP-NG.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – PCAP-NG <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
+<dd class="field-odd"><p><strong>records</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – PCAP-NG name resolution records.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionRecord</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple of <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records and total length of the records.</p>
+<dd class="field-odd"><p>Tuple of name resolution records and total length of the records.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3855,7 +3861,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_record_unknown">
 <span class="sig-name descname"><span class="pre">_make_record_unknown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_record_unknown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_unknown" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG unknown <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record.</p>
+<dd><p>Make PCAP-NG unknown name resolution record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3877,7 +3883,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_record_end">
 <span class="sig-name descname"><span class="pre">_make_record_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_record_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_end" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_end</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record.</p>
+<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_end</span></code> name resolution record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3898,7 +3904,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv4">
 <span class="sig-name descname"><span class="pre">_make_record_ipv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_record_ipv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv4" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv4</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record.</p>
+<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv4</span></code> name resolution record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3921,7 +3927,7 @@ protocol chain of the current packet (frame).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6">
 <span class="sig-name descname"><span class="pre">_make_record_ipv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PCAPNG._make_record_ipv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6" title="Link to this definition">¶</a></dt>
-<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv6</span></code> <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export record.</p>
+<dd><p>Make PCAP-NG <code class="docutils literal notranslate"><span class="pre">nrb_record_ipv6</span></code> name resolution record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4102,11 +4108,11 @@ parse the option by itself.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.__record__">
 <span class="sig-name descname"><span class="pre">__record__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><span class="pre">RecordType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><span class="pre">NameResolutionRecord</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><span class="pre">RecordType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><span class="pre">NameResolutionRecord</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><span class="pre">NameResolutionRecord</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><span class="pre">RecordType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord"><span class="pre">NameResolutionRecord</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord" title="pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord"><span class="pre">NameResolutionRecord</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.__record__" title="Link to this definition">¶</a></dt>
-<dd><p><em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em>
-Journal Export record type to method mapping. Method names are expected
+<dd><p>Name
+Resolution Block record type to method mapping. Method names are expected
 to be referred to the class by <code class="docutils literal notranslate"><span class="pre">_read_record_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_record_${name}</span></code>,
 and if such name not found, the value should then be a method that can
-parse the name record by itself.</p>
+parse the record by itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DefaultDict[Enum_RecordType, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[RecordParser, RecordConstructor]]</p>
@@ -4175,7 +4181,7 @@ such that we can be sure that the first block is the section header block.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>If the object is initiated, i.e. <code class="docutils literal notranslate"><span class="pre">self._fnum</span></code> exists, and is of a
-packet block (EPB, ISB or Packet), returns the block index number of
+packet block (EPB, SPB or Packet), returns the block index number of
 itself; else raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -4193,10 +4199,9 @@ itself; else raises <code class="xref py py-exc docutils literal notranslate"><s
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">PacketDirection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PacketDirection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PacketDirection" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>Packet direction for <code class="docutils literal notranslate"><span class="pre">epb_flags</span></code> options.</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
-lookup contract – pure re-parenting, since this class defines neither
-<code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
+<p>Shares the <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> lookup contract that
+every non-registry enumeration follows (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>); it
+defines neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PacketDirection.UNKNOWN">
 <span class="sig-name descname"><span class="pre">UNKNOWN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PacketDirection.UNKNOWN" title="Link to this definition">¶</a></dt>
@@ -4222,10 +4227,9 @@ lookup contract – pure re-parenting, since this class defines neither
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">PacketReception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#PacketReception"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PacketReception" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>Reception type for <code class="docutils literal notranslate"><span class="pre">epb_flags</span></code> options.</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
-lookup contract – pure re-parenting, since this class defines neither
-<code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
+<p>Shares the <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> lookup contract that
+every non-registry enumeration follows (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>); it
+defines neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PacketReception.UNKNOWN">
 <span class="sig-name descname"><span class="pre">UNKNOWN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PacketReception.UNKNOWN" title="Link to this definition">¶</a></dt>
@@ -4258,21 +4262,18 @@ lookup contract – pure re-parenting, since this class defines neither
 
 </dd></dl>
 
-<p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> lives in
-<a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng.tls_key_label" title="pcapkit.const.pcapng.tls_key_label"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.tls_key_label</span></code></a>, generated the same way as its
-<a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng" title="pcapkit.const.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng</span></code></a> siblings since <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a> makes it an
-IANA registry rather than a hand-picked helper enum. This module still
-re-exports it under its own name, so
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pcapkit.protocols.misc.pcapng</span> <span class="pre">import</span> <span class="pre">TLSKeyLabel</span></code> keeps working.</p>
+<p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> is defined
+in <a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng.tls_key_label" title="pcapkit.const.pcapng.tls_key_label"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.tls_key_label</span></code></a>, generated like its
+<a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng" title="pcapkit.const.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng</span></code></a> siblings because <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a> makes it an
+IANA registry. This module re-exports it as <code class="docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">WireGuardKeyLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#WireGuardKeyLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>WireGuard key log label.</p>
-<p>Re-parented onto <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that
-lookup contract – pure re-parenting, since this class defines neither
-<code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile with the base.</p>
+<p>Shares the <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> lookup contract that
+every non-registry enumeration follows (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>); it
+defines neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel.LOCAL_STATIC_PRIVATE_KEY">
 <span class="sig-name descname"><span class="pre">LOCAL_STATIC_PRIVATE_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LOCAL_STATIC_PRIVATE_KEY'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel.LOCAL_STATIC_PRIVATE_KEY" title="Link to this definition">¶</a></dt>
@@ -4799,100 +4800,86 @@ the parsed schema.</p>
 raised, for the reason <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code> gives: a bare
 <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> is neither one of
 <a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> nor an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so it
-aborted the whole extraction rather than this one entry. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>.</p>
+would abort the whole extraction rather than this one entry.</p>
 <p>A line of nothing but NUL octets is the block’s own 32-bit padding
 and ends the entry. <code class="docutils literal notranslate"><span class="pre">bytes.strip()</span></code> takes only ASCII whitespace,
-so those octets survived it and were read as the <em>name</em> of a binary
-field – which made every journal entry whose length is not a
-multiple of four raise, valid or not, since the padding that follows
-it has no 64-bit length prefix behind it to unpack. Measured on a
-14-octet <code class="docutils literal notranslate"><span class="pre">MESSAGE=hello\n</span></code> entry, which is as ordinary as this
-block gets.</p>
+so those octets would survive it and be read as the <em>name</em> of a
+binary field – which would make every journal entry whose length is
+not a multiple of four raise, valid or not, since the padding that
+follows it has no 64-bit length prefix behind it to unpack. A
+14-octet <code class="docutils literal notranslate"><span class="pre">MESSAGE=hello\n</span></code> entry is as ordinary as this block
+gets.</p>
 <p>A name line whose 64-bit length prefix is itself cut short ends the
 entry too. There is nothing to read past the end of the entry, so
 stopping at it is what keeps the truncated block parsing.</p>
 <p>A binary field’s length is the widest declared length in the format,
-and nothing bounded it against the entry holding it: at <code class="docutils literal notranslate"><span class="pre">2**63</span></code> and
-above <code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BytesIO.read()</span></code> refuses it outright with a bare
+and nothing else bounds it against the entry holding it: at <code class="docutils literal notranslate"><span class="pre">2**63</span></code>
+and above <code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BytesIO.read()</span></code> refuses it outright with a bare
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OverflowError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">fit</span> <span class="pre">'int'</span> <span class="pre">into</span> <span class="pre">an</span> <span class="pre">index-sized</span>
-<span class="pre">integer</span></code>), and below that it silently returned whatever was there –
-so the same malformed prefix was either fatal or invisible depending
-only on its magnitude. It is clamped to the octets the entry has left
-and reported, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code>’s rule at the other end of
-the same range.</p>
+<span class="pre">integer</span></code>), and below that it silently returns whatever is there, so
+the same malformed prefix would be either fatal or invisible
+depending only on its magnitude. It is clamped to the octets the
+entry has left and reported, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code>’s rule at
+the other end of the same range.</p>
 <p>Field names, keys and values are decoded with <code class="docutils literal notranslate"><span class="pre">errors='replace'</span></code>
-rather than strictly. A non-UTF-8 octet in any of the three raised a
-bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> – a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so foreign on
-both counts, and fatal to the whole extraction over one bad octet in
-one field. <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> is the option this module’s own
+rather than strictly. A non-UTF-8 octet in any of the three would
+raise a bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> – a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so
+foreign on both counts, and fatal to the whole extraction over one
+bad octet in one field. <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> is the option this module’s own
 <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField" title="pcapkit.corekit.fields.strings.StringField"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringField</span></code></a> already takes for
 the same problem, and a value that is not text is a value the writer
 should have emitted as a <em>binary</em> field, so the entry is malformed
 however it is read.</p>
-<p>Entries used to be split apart with <code class="docutils literal notranslate"><span class="pre">self.entry.split(b'\n\n')</span></code>
-before a single field was read – delimiting a <em>length-prefixed</em>
-format by content, which a binary field’s own bytes need no
-escaping to defeat. A value that itself contains <code class="docutils literal notranslate"><span class="pre">b'\n\n'</span></code> was
-cut in the middle of its own data, turning what followed it into a
-bogus field in a fabricated second entry; a value 2,570 octets long
-is worse, since <code class="docutils literal notranslate"><span class="pre">struct.pack('&lt;Q',</span> <span class="pre">2570)</span> <span class="pre">==</span>
+<p>The entry is walked once, end to end, rather than split apart with
+<code class="docutils literal notranslate"><span class="pre">self.entry.split(b'\n\n')</span></code>: that delimits a <em>length-prefixed</em>
+format by content, which a binary field’s own bytes need no escaping
+to defeat. A value that itself contains <code class="docutils literal notranslate"><span class="pre">b'\n\n'</span></code> would be cut
+in the middle of its own data, turning what followed it into a bogus
+field in a fabricated second entry; a value 2,570 octets long is
+worse, since <code class="docutils literal notranslate"><span class="pre">struct.pack('&lt;Q',</span> <span class="pre">2570)</span> <span class="pre">==</span>
 <span class="pre">b'\n\n\x00\x00\x00\x00\x00\x00'</span></code> puts the separator <em>inside
-the length prefix itself</em>, so the split landed before a single
-field was read. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/723">#723</a>. The entry is
-now walked once, end to end: a length-prefixed field’s bytes are
-never inspected for structure, only counted out by the prefix that
-names them, and a blank line – found by <em>reading</em>, not by
-splitting – is what starts the next entry. The one-octet
-terminator that must follow a binary field’s value, and the warning
-when it is missing, are unchanged from <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/704">#704</a>; walking the
-buffer whole rather than pre-slicing it also retires that fix’s
-newline restoration, which existed only to undo what the slicing
-itself had taken away.</p>
-<p>A trailing separator – a blank line with nothing behind it – used
-to be swallowed instead of ending the entry: with nothing left to
-read, the walk stopped without recording that the separator had
-been seen at all, so a rebuild lost that one octet and wrote a
-<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> one short of what was read. It is now tracked
-explicitly, so a blank line actually read, rather than the block’s
-own NUL padding or plain end of data, still starts the next entry –
-even an empty one – matching what splitting on it always did.</p>
-<p>The guard above ends the entry on a line of <em>nothing but</em> NUL
-padding, but only catches it when the real content ahead of the
-padding ended with its own newline – which put the padding on a
-line by itself for <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> to return alone.
-An entry whose last field is missing that trailing newline, as
-the format requires, has no such separation: <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code>
-runs straight through the field’s own bytes and into the
-padding behind them, returning both as one line, and
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes.strip" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytes.strip()</span></code></a> still will not take the NUL octets off since
-they are not ASCII whitespace. The padding then went out as part
-of the field’s value with nothing to flag it, silently, however
-small – see <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/794">#794</a>.
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> returns a line without its own
-trailing newline only at end of stream, so a terminator-less
-line is necessarily the buffer’s last one; a binary field’s
-<em>name</em> landing on such a line fails its own 8-octet
-length-prefix read for the same reason, nothing being left
-behind it to hold one, so the guard below firing on that shape
-of line too is harmless. A binary field’s <em>value</em>, once its
-name and length prefix are known, is read by that length prefix
-directly, never by scanning for a line ending, so real block
-padding immediately behind one cannot land inside it this way:
-the one-octet terminator check already in place is always
-reached in that case, and either reads the real separator
-newline and passes silently, or reads padding’s first octet
-instead, fails, and reports it. Block padding is always 0-3
-octets, whatever the last field turns out to be, so at most the
-trailing three octets of a terminator-less line are stripped as
-padding and warned about, and only when the line’s own raw,
-unstripped tail is itself NUL – anything past three such
-octets, or a line whose actual last octet is not NUL at all,
-cannot be padding and is left as data. This cannot tell a
-padding octet from a text value that itself legitimately ends
-in one – NUL is valid UTF-8 – but that entry is already
-malformed for lacking the newline the format mandates, and
-returning the block’s own padding as field data is the one
-outcome that must not survive it.</p>
+the length prefix itself</em>. A length-prefixed field’s bytes are never
+inspected for structure, only counted out by the prefix that names
+them, and a blank line – found by <em>reading</em>, not by splitting – is
+what starts the next entry. The one-octet terminator that must follow
+a binary field’s value is checked, and a warning is raised when it is
+missing.</p>
+<p>A trailing separator – a blank line with nothing behind it – is
+tracked explicitly, so a blank line actually read, rather than the
+block’s own NUL padding or plain end of data, still starts the next
+entry, even an empty one. Otherwise a rebuild would lose that one
+octet and write a <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> one short of what was read.</p>
+<p>The NUL-only guard above ends the entry on a line of <em>nothing but</em>
+NUL padding, but only catches it when the content ahead of the
+padding ended with its own newline, which puts the padding on a line
+by itself for <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> to return alone. An entry
+whose last field is missing that trailing newline, as the format
+requires, has no such separation: <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> runs straight
+through the field’s own bytes and into the padding behind them,
+returning both as one line, and <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes.strip" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytes.strip()</span></code></a> still will not
+take the NUL octets off since they are not ASCII whitespace.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> returns a line without its own trailing
+newline only at end of stream, so a terminator-less line is
+necessarily the buffer’s last one; a binary field’s <em>name</em> landing on
+such a line fails its own 8-octet length-prefix read for the same
+reason, nothing being left behind it to hold one, so the guard below
+firing on that shape of line too is harmless. A binary field’s
+<em>value</em>, once its name and length prefix are known, is read by that
+length prefix directly, never by scanning for a line ending, so real
+block padding immediately behind one cannot land inside it this way:
+the one-octet terminator check is always reached in that case, and
+either reads the real separator newline and passes silently, or reads
+padding’s first octet instead, fails, and reports it. Block padding
+is always 0-3 octets, whatever the last field turns out to be, so at
+most the trailing three octets of a terminator-less line are stripped
+as padding and warned about, and only when the line’s own raw,
+unstripped tail is itself NUL – anything past three such octets, or a
+line whose actual last octet is not NUL at all, cannot be padding and
+is left as data. This cannot tell a padding octet from a text value
+that itself legitimately ends in one – NUL is valid UTF-8 – but
+that entry is already malformed for lacking the newline the format
+mandates, and returning the block’s own padding as field data is the
+one outcome that must not survive it.</p>
 </div>
 </dd></dl>
 
@@ -5114,8 +5101,7 @@ will be inferred from the option type code. Spelled <code class="docutils litera
 than <code class="docutils literal notranslate"><span class="pre">namespace</span></code> because <code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> names its
 own fourth parameter <code class="docutils literal notranslate"><span class="pre">namespace</span></code>, and before Python 3.11 that
 parameter is positional-or-keyword rather than positional-only –
-so a class keyword literally called <code class="docutils literal notranslate"><span class="pre">namespace</span></code> bound it twice.
-See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/439">#439</a>.</p></li>
+so a class keyword literally called <code class="docutils literal notranslate"><span class="pre">namespace</span></code> bound it twice.</p></li>
 <li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -5127,7 +5113,7 @@ not given, the subclass will not be registered.</p>
 <div class="admonition-examples admonition">
 <p class="admonition-title">Examples</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.option_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionType</span> <span class="k">as</span> <span class="n">Enum_OptionType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="n">improt</span> <span class="n">Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">NewOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_new</span><span class="p">):</span>
     <span class="o">...</span>
@@ -5160,22 +5146,15 @@ will be inferred from the option type code.</p></li>
 reported as a <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>, as
 every other registry in the package does – the lookup that follows
 cannot tell a deliberate replacement from an accidental one, so an
-unreported overwrite is a parser silently swapped out for another. See
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/675">#675</a> for the
-guard <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> added first, which this one now matches.</p>
+unreported overwrite is a parser silently swapped out for another.</p>
 <p>The guard is identity-based: it fires only when the incumbent differs
 from <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so re-registering the exact same class under the same
 <code class="docutils literal notranslate"><span class="pre">code</span></code> is a silent no-op – in every namespace <code class="docutils literal notranslate"><span class="pre">targets</span></code> reaches –
 rather than a warning about nothing displaced. That is what keeps
 <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__" title="pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> honest: it loops over a <code class="docutils literal notranslate"><span class="pre">code</span></code> list with no
 deduplication, so a repeated or aliased entry reaches this method twice
-with the same class, and the second call now finds itself already the
-incumbent. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> corrected the previous presence-only
-guard, which read every such repeat as a caller mistake whether or not
-the value had actually changed – the same fix the sibling
-<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.register" title="pcapkit.protocols.schema.misc.pcapng.Option.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> methods on
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and friends already
-received.</p>
+with the same class, and the second call finds itself already the
+incumbent.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">ns='opt'</span></code> fans one registration out across every namespace, so the
@@ -6606,8 +6585,8 @@ declares, and it is decremented by four for <a class="reference internal" href="
 or not those four octets were there to read –
 <a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.unpack" title="pcapkit.corekit.fields.field.FieldBase.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code></a>
 zero-pads a short read rather than refusing it. A tail of one, two or
-three octets therefore arrived here negative and
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase.read" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.RawIOBase.read()</span></code></a> raised a bare <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, which is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>. The floor is a
+three octets therefore arrives here negative, and
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase.read" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.RawIOBase.read()</span></code></a> would raise a bare <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. The floor is a
 backstop: <code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._check_block_floor</span></code> reports that
 tail as end-of-stream before it gets here, and on the packing path
 <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> seeds
@@ -7514,7 +7493,7 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">NS_DNSIP4AddrOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/pcapng.html#NS_DNSIP4AddrOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.Option" title="pcapkit.protocols.data.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
-<p>Data model for PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsip4addr</span></code> option.</p>
+<p>Data model for PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code> option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption.ip">
 <span class="sig-name descname"><span class="pre">ip</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption.ip" title="Link to this definition">¶</a></dt>
@@ -7527,7 +7506,7 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">NS_DNSIP6AddrOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/pcapng.html#NS_DNSIP6AddrOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.Option" title="pcapkit.protocols.data.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
-<p>Data model for PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsip6addr</span></code> option.</p>
+<p>Data model for PCAP-NG <code class="docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code> option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption.ip">
 <span class="sig-name descname"><span class="pre">ip</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption.ip" title="Link to this definition">¶</a></dt>

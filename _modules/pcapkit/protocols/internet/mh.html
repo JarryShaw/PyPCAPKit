@@ -469,7 +469,7 @@
           <h1>Source code for pcapkit.protocols.internet.mh</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=fixme</span>
-<span class="sd">"""mobility header</span>
+<span class="sd">"""Mobility Header</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.mh` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.mh.MH` only,</span>
@@ -1051,52 +1051,6 @@
 <span class="sd">    above that it was rejected.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is</span>
-<span class="sd">        untouched, since :class:`EnumLookup` does not touch that hook.</span>
-
-<span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
-<span class="sd">        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,</span>
-<span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. An earlier lean on issue :issue:`935` had preferred that</span>
-<span class="sd">        widening; a later ruling in review of the attempt went the other</span>
-<span class="sd">        way: delete both ``get`` overrides in this module rather than widen</span>
-<span class="sd">        them, so :class:`FastBindingAcknowledgmentStatus` and</span>
-<span class="sd">        :class:`IPv6AddressPrefixCode` inherit</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also</span>
-<span class="sd">        removes the ``# type: ignore[override]`` suppressions the overrides</span>
-<span class="sd">        needed, and makes all seven re-parented classes behave alike on</span>
-<span class="sd">        ``get``, which had not been literally true. Measured before acting</span>
-<span class="sd">        on it: the override's own docstring called it a "Backport support</span>
-<span class="sd">        for original codes", but this class mints no alias --</span>
-<span class="sd">        ``__members__`` and ``list(cls)`` agree at 6 -- so what the override</span>
-<span class="sd">        actually did was resolve an :class:`int` by direct construction and</span>
-<span class="sd">        a name by subscript, exactly the dual resolution</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for</span>
-<span class="sd">        every other :class:`int`-valued registry in this tree. There was</span>
-<span class="sd">        nothing left to backport. ``get``/``get_all`` now come from the base</span>
-<span class="sd">        alone, the same as the five other re-parents :issue:`930` finished alongside</span>
-<span class="sd">        this one -- including :class:`LocalizedRoutingStatus` and</span>
-<span class="sd">        :class:`LMAAddressCode` below, whose own hand-rolled ``get()``</span>
-<span class="sd">        GitHub issue :issue:`880` had already deleted outright, for the same reason:</span>
-<span class="sd">        zero callers depended on anything the base does not already do.</span>
-
-<span class="sd">        A behaviour change comes with the deletion, deliberately: the</span>
-<span class="sd">        override branched on ``isinstance(key, int)`` and routed every</span>
-<span class="sd">        other type -- ``None``, a :class:`float`, ... -- through the</span>
-<span class="sd">        *name* path, so ``get(None)`` and ``get(1.5)`` used to answer with</span>
-<span class="sd">        a quiet :exc:`~pcapkit.utilities.exceptions.EnumKeyError` here</span>
-<span class="sd">        while the base -- branching on ``isinstance(key, str)`` instead --</span>
-<span class="sd">        answers every other :class:`~pcapkit.corekit.enum.EnumLookup`</span>
-<span class="sd">        subclass, and now this one too, with a loud</span>
-<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Nothing in</span>
-<span class="sd">        this tree calls ``get`` with such a key: the 20 call sites this</span>
-<span class="sd">        class and :class:`IPv6AddressPrefixCode` had between them, all in</span>
-<span class="sd">        tests, all passed an :class:`int` or a :class:`str`, so the</span>
-<span class="sd">        divergence was live but unreached -- and its removal is what makes</span>
-<span class="sd">        "all seven behave alike" literally true, rather than true only for</span>
-<span class="sd">        the keys a caller happens to pass today.</span>
-
 <span class="sd">        :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the</span>
@@ -1107,23 +1061,23 @@
 <span class="sd">        supported* there.</span>
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
-<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
-<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
-<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
-<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
-<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
-<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
-<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
-<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
-<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
-<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
-<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
-<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
-<span class="sd">        just this one MH message. The walk defect predates this change and</span>
-<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
-<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
+<span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
+<span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
+<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
+<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+
+<span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other</span>
+<span class="sd">        :class:`int`-valued registry here, so a key that is neither an</span>
+<span class="sd">        :class:`int` nor a :class:`str` raises</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override</span>
+<span class="sd">        was rejected (decided on :issue:`935`; the override was deleted, not</span>
+<span class="sd">        widened to accept ``default``): this class mints no alias</span>
+<span class="sd">        (``__members__`` and ``list(cls)`` both hold 6 members), so an override</span>
+<span class="sd">        could only repeat the base's dual :class:`int`/name resolution.</span>
 
 <span class="sd">    """</span>
 
@@ -1157,9 +1111,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value</span>
-<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
-<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+<span class="sd">                set inline with no IANA registry behind it, and it stays</span>
+<span class="sd">                immutable (decided on :issue:`877`) rather than minting an</span>
+<span class="sd">                ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
@@ -1177,54 +1131,6 @@
 <span class="sd">    :rfc:`5568#section-6.4.2`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is</span>
-<span class="sd">        untouched, since :class:`EnumLookup` does not touch that hook.</span>
-
-<span class="sd">        This class carried its own hand-rolled ``get()`` override through</span>
-<span class="sd">        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,</span>
-<span class="sd">        which widened the override to accept ``default`` rather than delete</span>
-<span class="sd">        it outright. An earlier lean on issue :issue:`935` had preferred that</span>
-<span class="sd">        widening; a later ruling in review of the attempt went the other</span>
-<span class="sd">        way: delete both ``get`` overrides in this module rather than widen</span>
-<span class="sd">        them, so :class:`FastBindingAcknowledgmentStatus` and</span>
-<span class="sd">        :class:`IPv6AddressPrefixCode` inherit</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also</span>
-<span class="sd">        removes the ``# type: ignore[override]`` suppressions the overrides</span>
-<span class="sd">        needed, and makes all seven re-parented classes behave alike on</span>
-<span class="sd">        ``get``, which had not been literally true. Measured before acting</span>
-<span class="sd">        on it: the override's own docstring called it a "Backport support</span>
-<span class="sd">        for original codes", but this class mints no alias --</span>
-<span class="sd">        ``__members__`` and ``list(cls)`` agree at 4 -- so what the override</span>
-<span class="sd">        actually did was resolve an :class:`int` by direct construction and</span>
-<span class="sd">        a name by subscript, exactly the dual resolution</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for</span>
-<span class="sd">        every other :class:`int`-valued registry in this tree. There was</span>
-<span class="sd">        nothing left to backport. ``get``/``get_all`` now come from the base</span>
-<span class="sd">        alone, the same as the five other re-parents :issue:`930` finished alongside</span>
-<span class="sd">        this one -- including</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` and</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` below, whose</span>
-<span class="sd">        own hand-rolled ``get()`` GitHub issue :issue:`880` had already deleted</span>
-<span class="sd">        outright, for the same reason: zero callers depended on anything the</span>
-<span class="sd">        base does not already do.</span>
-
-<span class="sd">        A behaviour change comes with the deletion, deliberately: the</span>
-<span class="sd">        override branched on ``isinstance(key, int)`` and routed every</span>
-<span class="sd">        other type -- ``None``, a :class:`float`, ... -- through the</span>
-<span class="sd">        *name* path, so ``get(None)`` and ``get(1.5)`` used to answer with</span>
-<span class="sd">        a quiet :exc:`~pcapkit.utilities.exceptions.EnumKeyError` here</span>
-<span class="sd">        while the base -- branching on ``isinstance(key, str)`` instead --</span>
-<span class="sd">        answers every other :class:`~pcapkit.corekit.enum.EnumLookup`</span>
-<span class="sd">        subclass, and now this one too, with a loud</span>
-<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Nothing in</span>
-<span class="sd">        this tree calls ``get`` with such a key: the 20 call sites this</span>
-<span class="sd">        class and :class:`FastBindingAcknowledgmentStatus` had between</span>
-<span class="sd">        them, all in tests, all passed an :class:`int` or a :class:`str`,</span>
-<span class="sd">        so the divergence was live but unreached -- and its removal is</span>
-<span class="sd">        what makes "all seven behave alike" literally true, rather than</span>
-<span class="sd">        true only for the keys a caller happens to pass today.</span>
-
 <span class="sd">        :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`. The identical code space of the neighbor</span>
@@ -1232,23 +1138,23 @@
 <span class="sd">        likewise unregistered.</span>
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
-<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
-<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
-<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
-<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
-<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
-<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
-<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
-<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
-<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
-<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
-<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
-<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
-<span class="sd">        just this one MH message. The walk defect predates this change and</span>
-<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
-<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
+<span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
+<span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
+<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
+<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+
+<span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other</span>
+<span class="sd">        :class:`int`-valued registry here, so a key that is neither an</span>
+<span class="sd">        :class:`int` nor a :class:`str` raises</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override</span>
+<span class="sd">        was rejected (decided on :issue:`935`; the override was deleted, not</span>
+<span class="sd">        widened to accept ``default``): this class mints no alias</span>
+<span class="sd">        (``__members__`` and ``list(cls)`` both hold 4 members), so an override</span>
+<span class="sd">        could only repeat the base's dual :class:`int`/name resolution.</span>
 
 <span class="sd">    """</span>
 
@@ -1276,9 +1182,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value</span>
-<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
-<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+<span class="sd">                set inline with no IANA registry behind it, and it stays</span>
+<span class="sd">                immutable (decided on :issue:`877`) rather than minting an</span>
+<span class="sd">                ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
@@ -1296,13 +1202,6 @@
 <span class="sd">    was processed successfully, values of ``128`` and above that it was rejected.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as</span>
-<span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
-<span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
-<span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
-<span class="sd">        not touch that hook.</span>
-
 <span class="sd">        :rfc:`6705#section-10.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them -- neither a dedicated one nor entries in the general</span>
 <span class="sd">        *Status Codes* registry -- so the enumeration lives here rather than in</span>
@@ -1311,37 +1210,20 @@
 <span class="sd">        ``128`` and ``129`` mean something else entirely.</span>
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`6705` leaves</span>
-<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
-<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
-<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
-<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
-<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
-<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
-<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
-<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
-<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
-<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
-<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
-<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
-<span class="sd">        just this one MH message. The walk defect predates this change and</span>
-<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
-<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
+<span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
+<span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
+<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
+<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
 
-<span class="sd">        There is no hand-rolled ``get()`` backport here -- nor, since GitHub</span>
-<span class="sd">        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or</span>
-<span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
-<span class="sd">        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather</span>
-<span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        :issue:`935` reached separately for the other two, on a ruling given in</span>
-<span class="sd">        review of that work: delete those two overrides rather than widen</span>
-<span class="sd">        them to match the base, which an earlier lean on the issue had</span>
-<span class="sd">        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class</span>
-<span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
-<span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
-<span class="sd">        value raises through ``get`` exactly as it does through the bare</span>
-<span class="sd">        constructor.</span>
+<span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an</span>
+<span class="sd">        unassigned value raises through ``get`` exactly as it does through the</span>
+<span class="sd">        bare constructor. A ``get`` override was rejected (decided on</span>
+<span class="sd">        :issue:`880`): it had no callers, and rebuilding it on the immutable</span>
+<span class="sd">        contract would add nothing to the base.</span>
 
 <span class="sd">    """</span>
 
@@ -1365,9 +1247,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`6705#section-10.2` names this value</span>
-<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
-<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+<span class="sd">                set inline with no IANA registry behind it, and it stays</span>
+<span class="sd">                immutable (decided on :issue:`877`) rather than minting an</span>
+<span class="sd">                ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
@@ -1384,49 +1266,25 @@
 <span class="sd">    address family the option carries, c.f., :rfc:`5949#section-6.2.2`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as</span>
-<span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
-<span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
-<span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
-<span class="sd">        not touch that hook.</span>
-
 <span class="sd">        :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`.</span>
 
 <span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5949` leaves</span>
-<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
-<span class="sd">        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so</span>
-<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
-<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
-<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
-<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
-<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
-<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
-<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
-<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
-<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
-<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
-<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
-<span class="sd">        just this one MH message. The walk defect predates this change and</span>
-<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
-<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
-<span class="sd">        reach it. See GitHub issue :issue:`880`.</span>
+<span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
+<span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
+<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
+<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
 
-<span class="sd">        There is no hand-rolled ``get()`` backport here -- nor, since GitHub</span>
-<span class="sd">        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or</span>
-<span class="sd">        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide</span>
-<span class="sd">        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather</span>
-<span class="sd">        than rebuilding it on the immutable contract, the same conclusion</span>
-<span class="sd">        :issue:`935` reached separately for the other two, on a ruling given in</span>
-<span class="sd">        review of that work: delete those two overrides rather than widen</span>
-<span class="sd">        them to match the base, which an earlier lean on the issue had</span>
-<span class="sd">        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class</span>
-<span class="sd">        ``get``/``get_all`` again, but as the base's own bare lookup rather</span>
-<span class="sd">        than a bespoke override -- it still cannot mint, so an unassigned</span>
-<span class="sd">        value raises through ``get`` exactly as it does through the bare</span>
-<span class="sd">        constructor.</span>
+<span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an</span>
+<span class="sd">        unassigned value raises through ``get`` exactly as it does through the</span>
+<span class="sd">        bare constructor. A ``get`` override was rejected (decided on</span>
+<span class="sd">        :issue:`880`): it had no callers, and rebuilding it on the immutable</span>
+<span class="sd">        contract would add nothing to the base.</span>
 
 <span class="sd">    """</span>
 
@@ -1450,9 +1308,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value</span>
-<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
-<span class="sd">                ruling on GitHub issue :issue:`877` is that it stays immutable rather</span>
-<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+<span class="sd">                set inline with no IANA registry behind it, and it stays</span>
+<span class="sd">                immutable (decided on :issue:`877`) rather than minting an</span>
+<span class="sd">                ``Unassigned_N`` placeholder member.</span>
 
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
@@ -1466,7 +1324,7 @@
          <span class="n">schema</span><span class="o">=</span><span class="n">Schema_MH</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Mobility Header.</span>
 
-<span class="sd">    This class currently supports parsing of the following MH message types,</span>
+<span class="sd">    This class supports parsing of the following MH message types,</span>
 <span class="sd">    which are registered in the :attr:`self.__message__ &lt;pcapkit.protocols.internet.mh.MH.__message__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -1549,7 +1407,7 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_sr`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_sr`</span>
 
-<span class="sd">    This class currently supports parsing the following MH options, which are</span>
+<span class="sd">    This class supports parsing the following MH options, which are</span>
 <span class="sd">    registered in the :attr:`self.__option__ &lt;pcapkit.protocols.internet.mh.MH.__option__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -1773,7 +1631,7 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_dlif_lladdr`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_dlif_lladdr`</span>
 
-<span class="sd">    This class currently supports parsing of the following MH CGA extensions,</span>
+<span class="sd">    This class supports parsing of the following MH CGA extensions,</span>
 <span class="sd">    which are registered in the :attr:`self.__extension__ &lt;pcapkit.protocols.internet.mh.MH.__extension__&gt;`</span>
 <span class="sd">    attribute:</span>
 
@@ -1839,7 +1697,7 @@
 
     <span class="c1">#: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:</span>
     <span class="c1">#: Option type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_option_${name}`` and/or ``_make_opt_${name}``,</span>
+    <span class="c1">#: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``,</span>
     <span class="c1">#: and if such name not found, the value should then be a method that can</span>
     <span class="c1">#: parse the option by itself.</span>
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
@@ -1921,7 +1779,7 @@
 
     <span class="c1">#: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:</span>
     <span class="c1">#: CGA extension type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_extension_${name}`` and/or ``_make_ext_${name}``,</span>
+    <span class="c1">#: to the class by ``_read_ext_${name}`` and/or ``_make_ext_${name}``,</span>
     <span class="c1">#: and if such name not found, the value should then be a method that can</span>
     <span class="c1">#: parse the CGA extension by itself.</span>
     <span class="n">__extension__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
@@ -1950,14 +1808,14 @@
 <span class="sd">        Spelled out rather than left to</span>
 <span class="sd">        :attr:`ProtocolBase.alias &lt;pcapkit.protocols.protocol.ProtocolBase.alias&gt;`'s</span>
 <span class="sd">        class-name default, because</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits</span>
 <span class="sd">        between this class and that default in the MRO and carries a concrete</span>
-<span class="sd">        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would</span>
+<span class="sd">        ``'IPv6-Ext'`` of its own. Inheriting it would</span>
 <span class="sd">        rename this header in every</span>
 <span class="sd">        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in</span>
 <span class="sd">        :meth:`IPv6._decode_next_layer</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`'s packet</span>
-<span class="sd">        dict key. The value is exactly what the default produced before.</span>
+<span class="sd">        dict key. The value equals the class-name default.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="s1">'MH'</span>
@@ -2065,15 +1923,12 @@
 <span class="sd">        Mobility Header, in units of 8 octets, excluding the first 8</span>
 <span class="sd">        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,</span>
 <span class="sd">        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``</span>
-<span class="sd">        below reports this value back as the parsed message's own</span>
-<span class="sd">        ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`</span>
-<span class="sd">        then subtracts from the outer packet length to find the next</span>
-<span class="sd">        layer's length -- precisely the role ``Hdr Ext Len`` played in</span>
-<span class="sd">        :issue:`487`, and the same read-side duplication :meth:`make`'s write-side</span>
-<span class="sd">        expression (``(len(data_val) + 6) // 8 - 1``, this formula's</span>
-<span class="sd">        inverse) had already been unified out of. Do NOT drop the ``+ 1``:</span>
-<span class="sd">        the units either side of it differ (octets vs. 8-octet units), and</span>
-<span class="sd">        dropping the offset silently reinterprets the field.</span>
+<span class="sd">        below reports this value as the parsed message's own ``.length``,</span>
+<span class="sd">        which :meth:`~pcapkit.protocols.internet.mh.MH.read` subtracts from the</span>
+<span class="sd">        outer packet length to find the next layer's length. It is the inverse</span>
+<span class="sd">        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the</span>
+<span class="sd">        ``+ 1``: the units either side of it differ (octets vs. 8-octet</span>
+<span class="sd">        units), and dropping the offset silently reinterprets the field.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            header_len: raw ``Header Len`` field value, as read off the wire.</span>
@@ -2146,9 +2001,9 @@
 
         <span class="c1"># NOTE: The header has to be a multiple of 8 octets, so the message data</span>
         <span class="c1"># needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up</span>
-        <span class="c1"># without emitting that padding -- which is what ``math.ceil`` used to do</span>
-        <span class="c1"># here -- declares a header longer than the bytes that follow it, and the</span>
-        <span class="c1"># re-parse then reads whatever happens to be past the end of the buffer.</span>
+        <span class="c1"># without emitting that padding (as ``math.ceil`` would) declares a header</span>
+        <span class="c1"># longer than the bytes that follow it, and the re-parse then reads</span>
+        <span class="c1"># whatever happens to be past the end of the buffer.</span>
         <span class="n">data_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_mh_message</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MH</span><span class="p">(</span>
@@ -3509,14 +3364,11 @@
 <span class="sd">        of the option, in octets, excluding the Option Type and Option</span>
 <span class="sd">        Length fields"* -- so the whole option, which is what every</span>
 <span class="sd">        ``_read_opt_*`` below reports back as the parsed option's own</span>
-<span class="sd">        ``.length``, is two octets more. This is the exact ``+2``/``-2``</span>
-<span class="sd">        mismatch independently fixed in six places (see the ``Note:``</span>
-<span class="sd">        on :meth:`_read_opt_pad` below, which explains why a ``Pad1``</span>
-<span class="sd">        option -- the one option with no ``Option Length`` field at all --</span>
-<span class="sd">        is this helper's sole exception); collecting the read-side half of</span>
-<span class="sd">        it into one helper is so a future fix to this arithmetic only has</span>
-<span class="sd">        to happen once. Do NOT drop the ``+ 2``: that is precisely this</span>
-<span class="sd">        mismatch.</span>
+<span class="sd">        ``.length``, is two octets more. The read-side call sites share this</span>
+<span class="sd">        helper so the arithmetic lives in one place; a ``Pad1`` option -- the</span>
+<span class="sd">        one option with no ``Option Length`` field at all -- is its sole</span>
+<span class="sd">        exception (see the ``Note:`` on :meth:`_read_opt_pad` below). Do NOT</span>
+<span class="sd">        drop the ``+ 2``.</span>
 
 <span class="sd">        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility</span>
 <span class="sd">        option, whose Option Type and Option Length are one octet each. It</span>
@@ -3524,7 +3376,7 @@
 <span class="sd">        a CGA extension's Extension Type and Extension Data Length are two</span>
 <span class="sd">        octets each [:rfc:`4581#section-2`], so those readers use</span>
 <span class="sd">        :meth:`_mh_extension_length` instead. Reusing this helper for them</span>
-<span class="sd">        reported every parsed CGA extension two octets short (:issue:`512`).</span>
+<span class="sd">        would report every parsed CGA extension two octets short.</span>
 
 <span class="sd">        Note that only the *stored-length* read-side call sites are</span>
 <span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
@@ -5606,8 +5458,7 @@
 <span class="sd">            &lt;pcapkit.corekit.fields.collections.ListField.pack&gt;` consults, so</span>
 <span class="sd">            packing a perfectly good option fails with</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.FieldValueError`. Python 3.11 and</span>
-<span class="sd">            newer give each class its own cache and the checks behave, which is why</span>
-<span class="sd">            this was invisible on a modern interpreter.</span>
+<span class="sd">            newer give each class its own cache, so the checks behave there.</span>
 
 <span class="sd">            The code is on the wire and the registry keys on it, so it is both the</span>
 <span class="sd">            cheaper discriminator and the only one that cannot be poisoned. The</span>
@@ -7234,12 +7085,11 @@
 <span class="sd">        non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of</span>
 <span class="sd">        the Extension in octets, not including the first 4 octets"*.</span>
 
-<span class="sd">        Passing these lengths through :meth:`_mh_option_length` reported every</span>
-<span class="sd">        parsed CGA extension two octets short (:issue:`512`): an 8-octet extension with</span>
-<span class="sd">        an ``Extension Data Length`` of ``4`` came back as ``6``. Note</span>
-<span class="sd">        :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``</span>
-<span class="sd">        instead, so the write side was already right and only the read side</span>
-<span class="sd">        disagreed with the wire.</span>
+<span class="sd">        Passing these lengths through :meth:`_mh_option_length` would report</span>
+<span class="sd">        every parsed CGA extension two octets short: an 8-octet extension with</span>
+<span class="sd">        an ``Extension Data Length`` of ``4`` would come back as ``6``. The write</span>
+<span class="sd">        side is unaffected, since :meth:`_make_cga_extensions` measures</span>
+<span class="sd">        ``len(schema.pack())`` instead.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema_length: raw ``Extension Data Length`` field value, as read off the wire.</span>
@@ -8551,7 +8401,7 @@
 
 <span class="sd">            Appending is necessary rather than optional: ``length`` is</span>
 <span class="sd">            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body</span>
-<span class="sd">            short emitted 10, 12 or 14 octets while declaring 8, and a parser reads</span>
+<span class="sd">            short would emit 10, 12 or 14 octets while declaring 8, and a parser reads</span>
 <span class="sd">            8 and misinterprets the remainder. Since the caller asked for a packet</span>
 <span class="sd">            to be built and the shortfall is recoverable, completing it beats</span>
 <span class="sd">            refusing -- the warning is there because the emitted body is then not</span>
@@ -8693,8 +8543,8 @@
 <span class="sd">            *whole* option, whereas :attr:`Schema_PadOption.length</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.internet.mh.PadOption.length&gt;` is the</span>
 <span class="sd">            ``Option Length`` field -- two octets fewer, and absent altogether</span>
-<span class="sd">            for a ``Pad1``. Copying one into the other unconverted is why</span>
-<span class="sd">            re-making a parsed ``PadN`` used to come back two octets too long.</span>
+<span class="sd">            for a ``Pad1``. Copying one into the other unconverted would make a</span>
+<span class="sd">            re-made parsed ``PadN`` come back two octets too long.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8926,7 +8776,7 @@
 <span class="sd">                (RFC 4283's ``user@realm`` form) rather than a numeric</span>
 <span class="sd">                identifier, so there is no non-arbitrary int-to-text mapping</span>
 <span class="sd">                the way there is int-to-address or int-to-octets, and an</span>
-<span class="sd">                :obj:`int` is rejected there (c.f. :issue:`467`).</span>
+<span class="sd">                :obj:`int` is rejected there.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8939,7 +8789,7 @@
 <span class="sd">                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for</span>
 <span class="sd">                the other six, neither of which a caller passing a flag can</span>
 <span class="sd">                plausibly have meant; pass ``int(...)`` to get the numeric</span>
-<span class="sd">                value (c.f. :issue:`469`). If ``identifier`` is a negative :obj:`int`</span>
+<span class="sd">                value. If ``identifier`` is a negative :obj:`int`</span>
 <span class="sd">                (no subtype has a wire form for one), an :obj:`int` of any value</span>
 <span class="sd">                with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or</span>
 <span class="sd">                above with the ``IPv6_Address`` subtype (whose wire form is a</span>
@@ -8948,9 +8798,9 @@
 <span class="sd">                type its subtype's field cannot hold at all: anything but</span>
 <span class="sd">                :obj:`str` for ``NAI``, anything but :obj:`bytes`/</span>
 <span class="sd">                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`</span>
-<span class="sd">                is converted rather than rejected there, per :issue:`467` -- or anything</span>
+<span class="sd">                is converted rather than rejected there -- or anything</span>
 <span class="sd">                :class:`ipaddress.IPv6Address` itself does not accept for</span>
-<span class="sd">                ``IPv6_Address`` (c.f. :issue:`469`).</span>
+<span class="sd">                ``IPv6_Address``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8969,15 +8819,15 @@
             <span class="c1"># exactly the class of leak this handler exists to stop, and which a</span>
             <span class="c1"># guard living inside the ``elif isinstance(identifier, int)`` branch</span>
             <span class="c1"># could not catch, since the ``IPv6_Address`` dispatch never reaches</span>
-            <span class="c1"># it (c.f. #467).</span>
+            <span class="c1"># it.</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back</span>
                 <span class="c1"># into a named member for the message below -- but its own</span>
                 <span class="c1"># ``_missing_`` only auto-extends 9-15 and 16-255, so 0,</span>
                 <span class="c1"># negatives and anything above 255 make the constructor itself</span>
                 <span class="c1"># raise a bare ``ValueError``, which would defeat the point of</span>
-                <span class="c1"># this guard (c.f. #467). Caught here and the raw value</span>
-                <span class="c1"># used instead rather than let it propagate.</span>
+                <span class="c1"># this guard. Caught here and the raw value used instead</span>
+                <span class="c1"># rather than let it propagate.</span>
                 <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">Enum_MNIDSubtype</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">)</span>
@@ -8993,8 +8843,7 @@
             <span class="c1"># ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake</span>
             <span class="c1"># in every case rather than a value anyone means, so it is refused</span>
             <span class="c1"># before either path can give it a plausible-looking wire form. A</span>
-            <span class="c1"># caller who genuinely wants the integer should pass ``int(flag)``</span>
-            <span class="c1"># (c.f. #469 review).</span>
+            <span class="c1"># caller who genuinely wants the integer should pass ``int(flag)``.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID identifier must not be a '</span>
                 <span class="sa">f</span><span class="s1">'bool, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1"> -- pass int(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if the '</span>
@@ -9006,7 +8855,7 @@
         <span class="c1"># 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`</span>
         <span class="c1"># ignores any declared length), so ``identifier`` is normalised to that wire</span>
         <span class="c1"># form here as well, keeping the packed bytes and the declared length derived</span>
-        <span class="c1"># from one value instead of two independent computations (c.f. #448).</span>
+        <span class="c1"># from one value instead of two independent computations.</span>
         <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">128</span><span class="p">:</span>
                 <span class="c1"># NOTE: the upper-bound mirror of the negative-int guard above, and</span>
@@ -9017,10 +8866,10 @@
                 <span class="c1"># unguarded, :class:`ipaddress.IPv6Address` raises</span>
                 <span class="c1"># ``AddressValueError``, itself a bare :exc:`ValueError`, so this</span>
                 <span class="c1"># handler would otherwise ship with its lower bound guarded and its</span>
-                <span class="c1"># upper bound leaking (c.f. #467). Checked explicitly rather</span>
-                <span class="c1"># than by wrapping the construction below, because that would also</span>
+                <span class="c1"># upper bound leaking. Checked explicitly rather than by</span>
+                <span class="c1"># wrapping the construction below, because that would also</span>
                 <span class="c1"># swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or</span>
-                <span class="c1"># ``None`` reaching here -- which is #469's subject, not this one's.</span>
+                <span class="c1"># ``None`` reaching here -- which the branch below handles.</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype IPv6_Address '</span>
                     <span class="sa">f</span><span class="s1">'identifier must be an int below 2**128, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -9034,7 +8883,7 @@
                 <span class="c1"># bytes, int or str). The ``try`` wraps only this call, not</span>
                 <span class="c1"># the whole branch, so it cannot swallow the ProtocolError</span>
                 <span class="c1"># raised above for an out-of-range int, which is also a</span>
-                <span class="c1"># ValueError subclass (c.f. #467, #469).</span>
+                <span class="c1"># ValueError subclass.</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -9050,11 +8899,10 @@
                 <span class="c1"># there is no non-arbitrary way to do that. str(identifier) packs</span>
                 <span class="c1"># and round-trips fine, but an NAI is a network access identifier</span>
                 <span class="c1"># ('user@realm', RFC 4283), and a bare decimal-digit string is not</span>
-                <span class="c1"># one: it is mechanically valid and semantically nonsense, exactly</span>
-                <span class="c1"># the "silently accepting a value that cannot pack" #467 removed,</span>
-                <span class="c1"># just relocated to "silently accepting a value that packs into</span>
-                <span class="c1"># the wrong thing". Rejected instead, with the explicit spelling</span>
-                <span class="c1"># a caller who really wants a decimal-digit NAI can use.</span>
+                <span class="c1"># one: it is mechanically valid and semantically nonsense, i.e.</span>
+                <span class="c1"># a value that is silently accepted and packs into the wrong</span>
+                <span class="c1"># thing. Rejected instead, with the explicit spelling a caller</span>
+                <span class="c1"># who really wants a decimal-digit NAI can use.</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype NAI identifier '</span>
                     <span class="sa">f</span><span class="s1">'must be str, not int -- pass str(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if a '</span>
@@ -9064,13 +8912,10 @@
             <span class="c1"># numeric identifier, so unlike NAI there IS a non-arbitrary wire</span>
             <span class="c1"># form: its own minimal big-endian encoding. That is self-consistent</span>
             <span class="c1"># with the declared length by construction and round-trips exactly.</span>
-            <span class="c1"># ``id_len = math.ceil(identifier.bit_length() / 8)`` was the right</span>
-            <span class="c1"># width all along -- the pre-#467 defect was never the sizing, it</span>
-            <span class="c1"># was that ``identifier`` itself stayed an ``int`` afterwards and</span>
-            <span class="c1"># was handed to ``BytesField`` unconverted, which ``struct.pack()``</span>
-            <span class="c1"># cannot do anything with. #467 initially rejected outright instead</span>
-            <span class="c1"># of noticing that; converting is what this revision does (c.f.</span>
-            <span class="c1"># #467). ``bit_length()`` is 0 for 0 itself, which would</span>
+            <span class="c1"># ``math.ceil(identifier.bit_length() / 8)`` is the right width;</span>
+            <span class="c1"># the ``int`` itself must be converted, because handing it to</span>
+            <span class="c1"># ``BytesField`` unconverted leaves ``struct.pack()`` nothing it can</span>
+            <span class="c1"># pack. ``bit_length()`` is 0 for 0 itself, which would</span>
             <span class="c1"># otherwise declare a zero-octet identifier -- collapsing "the</span>
             <span class="c1"># identifier's value is 0" into "there is no identifier" -- so the</span>
             <span class="c1"># width is floored at one octet, matching what any reasonable</span>
@@ -9085,11 +8930,11 @@
             <span class="c1"># ipaddress.IPv6Address (no ``__len__`` either, so this branch's</span>
             <span class="c1"># own ``len()`` call below would be the one to raise). Guarded</span>
             <span class="c1"># here, before ``len()``, rather than relying on whichever of</span>
-            <span class="c1"># those two happens to fire first (c.f. #469). Deliberately not</span>
+            <span class="c1"># those two happens to fire first. Deliberately not</span>
             <span class="c1"># decoding a ``bytes`` identifier here: an NAI that happens to be</span>
             <span class="c1"># ASCII-encodable is still the caller handing over the wrong</span>
             <span class="c1"># representation, the same "accepts a value that means the wrong</span>
-            <span class="c1"># thing" #467 removed for int, just relocated to bytes.</span>
+            <span class="c1"># thing" as for an int.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype NAI '</span>
@@ -9104,8 +8949,7 @@
             <span class="c1"># format demands a bytes object), TypeError for float/None/an</span>
             <span class="c1"># ipaddress.IPv6Address (no ``__len__``, so this branch's own</span>
             <span class="c1"># ``len()`` call below would raise instead). Guarded here,</span>
-            <span class="c1"># before ``len()``, for the same reason as the NAI branch above</span>
-            <span class="c1"># (c.f. #469).</span>
+            <span class="c1"># before ``len()``, for the same reason as the NAI branch above.</span>
             <span class="c1">#</span>
             <span class="c1"># bytearray is accepted alongside bytes -- unlike every other</span>
             <span class="c1"># wrong type here, it already round-trips correctly through</span>
@@ -10091,9 +9935,9 @@
             <span class="c1"># the option length below is derived from the family, so it cannot</span>
             <span class="c1"># wait for the schema -- and a bare conversion therefore turns a</span>
             <span class="c1"># ``bool`` into a perfectly ordinary ``IPv4Address`` that the</span>
-            <span class="c1"># schema's own guard can no longer tell from a real address. Before</span>
-            <span class="c1"># this, ``address=True`` packed as ``23080001000000000001``, i.e. a</span>
-            <span class="c1"># care-of address of ``0.0.0.1`` (c.f. #508).</span>
+            <span class="c1"># schema's own guard can no longer tell from a real address: it</span>
+            <span class="c1"># would pack ``address=True`` as ``23080001000000000001``, i.e. a</span>
+            <span class="c1"># care-of address of ``0.0.0.1``.</span>
             <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid care-of address'</span><span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">20</span>
@@ -10354,8 +10198,8 @@
         <span class="c1"># two cannot be emitted disagreeing. Normalising *here*, ahead of the</span>
         <span class="c1"># schema, is also why the conversion goes through ``parse_ip_address``:</span>
         <span class="c1"># ``ipaddress.ip_address(True)`` is ``0.0.0.1``, and the schema's own</span>
-        <span class="c1"># guard cannot see that it was ever a ``bool``. Before this,</span>
-        <span class="c1"># ``address=True`` packed as ``2906010000000001`` (c.f. #508).</span>
+        <span class="c1"># guard cannot see that it was ever a ``bool``, and it would pack</span>
+        <span class="c1"># ``address=True`` as ``2906010000000001``.</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
             <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
 
@@ -10571,8 +10415,7 @@
             <span class="c1"># NOTE: Through ``parse_ip_address`` because the sub-option length</span>
             <span class="c1"># below is derived from the family here, ahead of the schema, so a</span>
             <span class="c1"># bare ``ipaddress.ip_address`` would launder a ``bool`` past the</span>
-            <span class="c1"># schema's guard. Before this, ``address=True`` packed as</span>
-            <span class="c1"># ``0506000000000001`` (c.f. #508).</span>
+            <span class="c1"># schema's guard, packing ``address=True`` as ``0506000000000001``.</span>
             <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid target care-of address'</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Schema_TargetCareofAddressSuboption</span><span class="p">(</span>
@@ -11121,10 +10964,9 @@
         <span class="c1"># NOTE: Through ``parse_ip_address`` because the ``V`` flag and the width</span>
         <span class="c1"># are both derived from the family here, ahead of the schema, so a bare</span>
         <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` past the schema's</span>
-        <span class="c1"># guard. Before this, ``prefix=True`` with an IPv4-valid</span>
-        <span class="c1"># ``prefix_length`` packed as ``3706801800000001``; the default</span>
-        <span class="c1"># ``prefix_length=64`` masked it behind the range check below, which is</span>
-        <span class="c1"># why #508's own sweep read this site as already guarded (c.f. #508).</span>
+        <span class="c1"># guard: ``prefix=True`` with an IPv4-valid ``prefix_length`` would pack</span>
+        <span class="c1"># as ``3706801800000001``. The default ``prefix_length=64`` masks it</span>
+        <span class="c1"># behind the range check below, so this site can look already guarded.</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
             <span class="n">prefix</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid mobile network prefix'</span><span class="p">)</span>
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span>
@@ -11251,17 +11093,14 @@
 <span class="sd">            Constructed attribute schema.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The data model parameter is named ``option`` rather than ``data``, and</span>
-<span class="sd">            that is not cosmetic. The vendor-specific attribute of</span>
+<span class="sd">            The data model parameter is named ``option`` rather than ``data``</span>
+<span class="sd">            deliberately. The vendor-specific attribute of</span>
 <span class="sd">            :rfc:`7222#section-4.2.11` has a field of its own called ``data``, so</span>
-<span class="sd">            with the parameter named ``data`` a caller's ``data=`` bound to the</span>
-<span class="sd">            model parameter instead of reaching ``**kwargs`` -- and the</span>
-<span class="sd">            ``kwargs.get('data')`` fallback then always saw nothing. Building the</span>
-<span class="sd">            attribute the natural way, mirroring the data model's own field names,</span>
-<span class="sd">            silently dropped the vendor payload and wrote the length as though it</span>
-<span class="sd">            were empty. ``vendor`` and ``subtype`` survived because those names do</span>
-<span class="sd">            not collide, which made the loss look like a partial success rather</span>
-<span class="sd">            than a bug.</span>
+<span class="sd">            a parameter of that name would capture a caller's ``data=`` and leave</span>
+<span class="sd">            the ``kwargs.get('data')`` fallback empty, silently dropping the vendor</span>
+<span class="sd">            payload and writing the length as though it were empty. ``vendor`` and</span>
+<span class="sd">            ``subtype`` do not collide, so the loss would look like a partial</span>
+<span class="sd">            success rather than a bug.</span>
 
 <span class="sd">            Dispatch is on ``code`` rather than on ``isinstance``, for the reason</span>
 <span class="sd">            given in :meth:`_read_fid_suboptions`.</span>
@@ -11416,9 +11255,9 @@
         <span class="c1"># NOTE: Through ``parse_ip_address`` because the option length below is</span>
         <span class="c1"># derived from the family here, ahead of the schema, so a bare</span>
         <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` past the schema's</span>
-        <span class="c1"># guard. Before this, ``address=True`` packed as ``3b06000000000001``.</span>
+        <span class="c1"># guard, packing ``address=True`` as ``3b06000000000001``.</span>
         <span class="c1"># ``None`` is handled above and stays an absent address, which is a</span>
-        <span class="c1"># legitimate value here and not what is being rejected (c.f. #508).</span>
+        <span class="c1"># legitimate value here and not what is being rejected.</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
             <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid LMA user-plane address'</span><span class="p">)</span>
 
@@ -12059,8 +11898,8 @@
             <span class="c1"># prefixes as a :obj:`tuple`, which</span>
             <span class="c1"># :class:`~pcapkit.corekit.fields.collections.ListField` refuses to</span>
             <span class="c1"># pack -- it raises ``ProtocolUnbound: unsupported type &lt;class</span>
-            <span class="c1"># 'tuple'&gt;``. The cast this replaced was a no-op at runtime, so</span>
-            <span class="c1"># re-making a parsed Multi-Prefix extension could not work at all.</span>
+            <span class="c1"># 'tuple'&gt;``; a cast would be a no-op at runtime, so re-making a</span>
+            <span class="c1"># parsed Multi-Prefix extension could not work at all.</span>
             <span class="n">prefixes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">prefixes</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prefixes</span> <span class="o">=</span> <span class="n">prefixes</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -12071,9 +11910,8 @@
             <span class="c1"># **8**-octet prefix apiece, since</span>
             <span class="c1"># :attr:`~pcapkit.protocols.schema.internet.mh.MultiPrefixExtension.prefixes`</span>
             <span class="c1"># is a list of :class:`~pcapkit.corekit.fields.numbers.UInt64Field`.</span>
-            <span class="c1"># This used to read ``1 + len(prefixes) * 16``, which declared 33</span>
-            <span class="c1"># octets where 20 were emitted for two prefixes, so a re-parse ran off</span>
-            <span class="c1"># the end of the extension.</span>
+            <span class="c1"># Counting 16 octets per prefix would declare more octets than are</span>
+            <span class="c1"># emitted, so a re-parse would run off the end of the extension.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefixes</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'P'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">),</span>

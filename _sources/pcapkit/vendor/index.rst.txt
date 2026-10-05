@@ -24,8 +24,8 @@ Protocol Numbers
 
    reg
 
-Miscellanous
-------------
+Miscellaneous
+-------------
 
 .. toctree::
    :maxdepth: 2

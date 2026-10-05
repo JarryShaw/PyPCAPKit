@@ -549,10 +549,9 @@
 
 <span class="sd">    This is a *classification* predicate and parses nothing: it answers "is this</span>
 <span class="sd">    HTTP/1?" for :meth:`HTTP._guess_version</span>
-<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`, which until :issue:`800`</span>
-<span class="sd">    answered that question by trial-parsing every version in the family and</span>
-<span class="sd">    keeping whichever one did not object -- so a payload that is not HTTP at all</span>
-<span class="sd">    was classified by which parser happened to fail less loudly.</span>
+<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`. Classifying by</span>
+<span class="sd">    trial-parsing every version in the family would decide a payload that is</span>
+<span class="sd">    not HTTP at all by which parser happened to fail less loudly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Payload to classify.</span>
@@ -582,9 +581,9 @@
 <span class="sd">        tested only the first line would answer :data:`True` for it. Split at the</span>
 <span class="sd">        header/body separator first, as :meth:`HTTP.read</span>
 <span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP.read&gt;` does, and the preface's</span>
-<span class="sd">        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is exactly</span>
-<span class="sd">        why the parser refuses it, and now why this does. Measured: without the</span>
-<span class="sd">        separator split this returned :data:`True` for the preface.</span>
+<span class="sd">        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is why the</span>
+<span class="sd">        parser refuses it, and why this does. Without the separator split this</span>
+<span class="sd">        returns :data:`True` for the preface.</span>
 
 <span class="sd">        An HTTP/0.9 request line carries only two tokens and so is not recognised</span>
 <span class="sd">        here either, matching the parser, which raises on fewer than three.</span>
@@ -615,10 +614,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""HTTP packet type.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract</span>
+<span class="sd">    shared by every non-registry enumeration (:issue:`877`). The class defines</span>
+<span class="sd">    neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 
@@ -693,14 +691,14 @@
         <span class="n">packet</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
 
         <span class="c1"># NOTE: A payload carrying no header/body separator at all unpacks short</span>
-        <span class="c1"># here, and the bare ``ValueError`` that used to escape is what made</span>
-        <span class="c1"># ``HTTP._guess_version``'s HTTP/2 arm unreachable: that dispatcher falls</span>
-        <span class="c1"># through on ``ProtocolError`` alone, so an HTTP/1 attempt on HTTP/2 wire</span>
-        <span class="c1"># bytes aborted the guess rather than failing it, and the HTTP/2 attempt</span>
-        <span class="c1"># never ran (#787). ``ProtocolError`` is what the ``Raises:`` section</span>
-        <span class="c1"># above already promises for a malformed packet, and the same conversion</span>
-        <span class="c1"># the explicit ``version=`` path performs at ``http.py:119``; chained, so</span>
-        <span class="c1"># the underlying unpacking error stays reachable as ``__cause__``.</span>
+        <span class="c1"># here. It must surface as ``ProtocolError``, not a bare ``ValueError``:</span>
+        <span class="c1"># ``HTTP._guess_version`` falls through to its HTTP/2 arm on</span>
+        <span class="c1"># ``ProtocolError`` alone, so any other exception from an HTTP/1 attempt</span>
+        <span class="c1"># on HTTP/2 wire bytes would abort the guess instead of failing it.</span>
+        <span class="c1"># ``ProtocolError`` is also what the ``Raises:`` section above promises,</span>
+        <span class="c1"># and the same conversion the explicit ``version=`` path of</span>
+        <span class="c1"># ``HTTP.read`` performs; chained, so the unpacking error stays</span>
+        <span class="c1"># reachable as ``__cause__``.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">header</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -866,9 +864,9 @@
         <span class="c1"># message: a header of one line with no CRLF -- the HTTP/2 connection</span>
         <span class="c1"># preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that</span>
         <span class="c1"># -- and a start line of fewer than three whitespace-separated tokens.</span>
-        <span class="c1"># Raised as ``ProtocolError`` for the reason ``read`` gives above, and</span>
-        <span class="c1"># to the same message this method already uses below for a start line it</span>
-        <span class="c1"># cannot recognise (#787).</span>
+        <span class="c1"># Raised as ``ProtocolError`` for the reason ``read`` gives above, with</span>
+        <span class="c1"># the same message this method uses below for a start line it cannot</span>
+        <span class="c1"># recognise.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">startline</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -878,17 +876,14 @@
         <span class="c1"># NOTE: A field line beginning with SP or HTAB is an ``obs-fold``</span>
         <span class="c1"># continuation of the line before it (:rfc:`9112#section-5.2`), and is</span>
         <span class="c1"># unfolded here -- the RFC's own remedy -- rather than treated as a field</span>
-        <span class="c1"># line of its own. Deprecated, but present in real captures, and the two</span>
-        <span class="c1"># ways it used to come out were both wrong: a continuation carrying no</span>
-        <span class="c1"># colon left the split below one element long and ``item[1]`` raised</span>
+        <span class="c1"># line of its own. Deprecated, but present in real captures. Treating a</span>
+        <span class="c1"># continuation as a field line of its own goes wrong twice: one carrying</span>
+        <span class="c1"># no colon leaves the split below one element long, so ``item[1]`` raises</span>
         <span class="c1"># :exc:`IndexError`, which is neither a :exc:`ValueError` nor a</span>
-        <span class="c1"># ``ProtocolError`` and so escaped ``HTTP._guess_version``'s suppression</span>
-        <span class="c1"># exactly as the bare :exc:`ValueError` of #787 did; a continuation that</span>
-        <span class="c1"># happened to contain one was worse, parsing silently into a spurious</span>
-        <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``)</span>
-        <span class="c1"># with nothing raised at all. Unfolded, a folded message parses to the</span>
-        <span class="c1"># field it actually carries, so this input class stops reaching the</span>
-        <span class="c1"># HTTP/2 arm by accident instead of merely failing more politely.</span>
+        <span class="c1"># ``ProtocolError`` and escapes ``HTTP._guess_version``'s suppression;</span>
+        <span class="c1"># one that happens to contain a colon parses silently into a spurious</span>
+        <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).</span>
+        <span class="c1"># Unfolded, a folded message parses to the field it actually carries.</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>

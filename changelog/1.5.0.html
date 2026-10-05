@@ -1251,7 +1251,8 @@ one can run, and even there two cannot coexist.</p></li>
 run in the current environment now gives one warning naming the real cause (a
 Python version, a missing <code class="docutils literal notranslate"><span class="pre">tshark</span></code> or <code class="docutils literal notranslate"><span class="pre">libpcap</span></code>, the wrong <code class="docutils literal notranslate"><span class="pre">pcap</span></code>
 distribution) and a clean fall back to <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>’s own parser, rather than an
-error from inside the third-party package (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/396">#396</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/405">#405</a>).</p></li>
+error from inside the third-party package (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/396">#396</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/405">#405</a>). The same holds
+for an engine whose package is not installed at all (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1045">#1045</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">conflict</span></code> on the reassembly data models: absolute, inclusive ranges where
 two fragments claimed the same span with different bytes, previously lost
 silently on both the IP (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/482">#482</a>) and TCP (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/443">#443</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/478">#478</a>) paths.</p></li>
@@ -1518,6 +1519,16 @@ non-class. <code class="docutils literal notranslate"><span class="pre">Transpor
 is gated on <code class="docutils literal notranslate"><span class="pre">cls</span> <span class="pre">is</span> <span class="pre">Transport</span></code> and so fires only for the abstract class – the guard
 below it leaks through <code class="docutils literal notranslate"><span class="pre">TCP.register</span></code> and <code class="docutils literal notranslate"><span class="pre">UDP.register</span></code>, which is the only way it
 is ever called. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1026">#1026</a> tracks all seven (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1021">#1021</a>).</p></li>
+<li><p>a missing extraction engine package now gives one <code class="docutils literal notranslate"><span class="pre">EngineWarning</span></code> rather than two
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1045">#1045</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1046">#1046</a>). <code class="docutils literal notranslate"><span class="pre">Extractor.import_test</span></code> warned that the package was
+absent, then <code class="docutils literal notranslate"><span class="pre">Extractor.run</span></code> warned again when it fell back to the default engine;
+<code class="docutils literal notranslate"><span class="pre">run</span></code> now stays silent there. The surviving message is the one <code class="docutils literal notranslate"><span class="pre">run</span></code> already
+emitted, <code class="docutils literal notranslate"><span class="pre">engine</span> <span class="pre">&lt;name&gt;</span> <span class="pre">(&lt;module&gt;)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">installed;</span> <span class="pre">using</span> <span class="pre">default</span> <span class="pre">engine</span> <span class="pre">instead</span></code>
+(the module name is in backticks in the real message, which this changelog’s
+Markdown generator cannot show literally), so <code class="docutils literal notranslate"><span class="pre">import_test</span></code> now says the same.
+Only code that matched <code class="docutils literal notranslate"><span class="pre">import_test</span></code>’s old wording,
+<code class="docutils literal notranslate"><span class="pre">extraction</span> <span class="pre">engine</span> <span class="pre">'&lt;name&gt;'</span> <span class="pre">not</span> <span class="pre">available;</span> <span class="pre">using</span> <span class="pre">default</span> <span class="pre">engine</span> <span class="pre">instead</span></code>, or
+that expects two warnings, breaks.</p></li>
 </ul>
 </section>
 </section>
@@ -2630,6 +2641,18 @@ pcapkit’s one <code class="docutils literal notranslate"><span class="pre">CRI
 so the fix makes the two consistent rather than introducing something new.
 Follows the same fix for the foundation registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1021">#1021</a>)
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1026">#1026</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code>’s <code class="docutils literal notranslate"><span class="pre">ns_dnsname</span></code>, <code class="docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code> and <code class="docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code> scope guards,
+on both the read and the make side, now say the option “must be in Name Resolution
+Block”, which is the block they check; they used to name the systemd(1) Journal
+Export Block, with a literal <code class="docutils literal notranslate"><span class="pre">:manpage:</span></code> role in the text. <code class="docutils literal notranslate"><span class="pre">register_record</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">RegistryWarning</span></code> likewise now says “name resolution record already registered”.
+The make-side <code class="docutils literal notranslate"><span class="pre">ns_dnsIP4addr</span></code>/<code class="docutils literal notranslate"><span class="pre">ns_dnsIP6addr</span></code> messages also drop the lowercase
+<code class="docutils literal notranslate"><span class="pre">ns_dnsip4addr</span></code>/<code class="docutils literal notranslate"><span class="pre">ns_dnsip6addr</span></code> spelling for the <code class="docutils literal notranslate"><span class="pre">OptionType</span></code> member name.
+Two more guards named the wrong option: <code class="docutils literal notranslate"><span class="pre">_make_option_if_rxspeed</span></code>’s scope and
+duplicate guards now say <code class="docutils literal notranslate"><span class="pre">[if_rxspeed]</span></code> rather than <code class="docutils literal notranslate"><span class="pre">[if_txspeed]</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">_read_option_epb_queue</span></code>’s length guard says <code class="docutils literal notranslate"><span class="pre">[epb_queue]</span></code> rather than
+<code class="docutils literal notranslate"><span class="pre">[epb_packetid]</span></code>. Only message text changes; the exception and warning types are unchanged
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1038">#1038</a>).</p></li>
 </ul>
 </section>
 </section>

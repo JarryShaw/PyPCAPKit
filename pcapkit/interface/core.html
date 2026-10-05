@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/interface/core.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Defintion: Output File Formats: Layer..." />
-<meta name="description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Defintion: Output File Formats: Layer..." />
+<meta property="og:description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Definition: Output File Formats: Laye..." />
+<meta name="description" content="pcapkit.interface.core defines core user-oriented interfaces, variables, and etc., which wraps around the foundation classes from pcapkit.foundation. Constants Definition: Output File Formats: Laye..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Auxiliary Interface" href="misc.html"><link rel="prev" title="User Interface" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -617,8 +617,8 @@ flow, which is the default</p></li>
 </dl>
 </dd></dl>
 
-<section id="constants-defintion">
-<h2>Constants Defintion<a class="headerlink" href="#constants-defintion" title="Link to this heading">¶</a></h2>
+<section id="constants-definition">
+<h2>Constants Definition<a class="headerlink" href="#constants-definition" title="Link to this heading">¶</a></h2>
 <section id="output-file-formats">
 <h3>Output File Formats<a class="headerlink" href="#output-file-formats" title="Link to this heading">¶</a></h3>
 <dl class="py data">
@@ -670,8 +670,8 @@ flow, which is the default</p></li>
 <dd></dd></dl>
 
 </section>
-<section id="extration-engines">
-<h3>Extration Engines<a class="headerlink" href="#extration-engines" title="Link to this heading">¶</a></h3>
+<section id="extraction-engines">
+<h3>Extraction Engines<a class="headerlink" href="#extraction-engines" title="Link to this heading">¶</a></h3>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.interface.core.DPKT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.interface.core.</span></span><span class="sig-name descname"><span class="pre">DPKT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dpkt'</span></span><a class="headerlink" href="#pcapkit.interface.core.DPKT" title="Link to this definition">¶</a></dt>
@@ -709,11 +709,9 @@ flow, which is the default</p></li>
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Every engine <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships now has a constant here. The <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>,
-<a class="reference external" href="https://pypi.org/project/pcap-ct">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> ones were added after the first four, so code
-written against an earlier release may still select them by their literal
-<code class="docutils literal notranslate"><span class="pre">engine=</span></code> values – <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code> and <code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code>. That
-keeps working: each constant <em>is</em> that string, so the two spellings are
+<p>Every engine <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships has a constant here. Each constant <em>is</em> its
+<code class="docutils literal notranslate"><span class="pre">engine=</span></code> string – <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pcap_ct'</span></code> and <code class="docutils literal notranslate"><span class="pre">'pypcapfile'</span></code> for the
+<a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> ones – so the two spellings are
 interchangeable. An engine registered at runtime with
 <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine" title="pcapkit.foundation.registry.foundation.register_extractor_engine"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_extractor_engine()</span></code></a> has
 no constant and is addressed by the name it was registered under.</p>
@@ -783,10 +781,10 @@ supports, and the installation prerequisites the third-party ones carry.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Core Interface</a><ul>
-<li><a class="reference internal" href="#constants-defintion">Constants Defintion</a><ul>
+<li><a class="reference internal" href="#constants-definition">Constants Definition</a><ul>
 <li><a class="reference internal" href="#output-file-formats">Output File Formats</a></li>
 <li><a class="reference internal" href="#layer-thresholds">Layer Thresholds</a></li>
-<li><a class="reference internal" href="#extration-engines">Extration Engines</a></li>
+<li><a class="reference internal" href="#extraction-engines">Extraction Engines</a></li>
 </ul>
 </li>
 </ul>

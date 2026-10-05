@@ -568,10 +568,10 @@
 <span class="sd">        IANA protocol number 115 (``L2TP``) is deliberately left unbound. It</span>
 <span class="sd">        references :rfc:`3931`, i.e. **L2TPv3**, whose session and control</span>
 <span class="sd">        message headers are a different shape -- so the binding waits on an</span>
-<span class="sd">        ``L2TPv3`` class rather than on this one. Binding *this* class there was</span>
-<span class="sd">        proposed in GitHub issue :issue:`548` and does not work: over IP the v3 session</span>
-<span class="sd">        header carries no version nibble at all, so this class cannot recognise</span>
-<span class="sd">        that the datagram is not its own. See</span>
+<span class="sd">        ``L2TPv3`` class rather than on this one. Binding *this* class there does</span>
+<span class="sd">        not work (:issue:`548`): over IP the v3 session header carries no</span>
+<span class="sd">        version nibble at all, so this class cannot recognise that the datagram</span>
+<span class="sd">        is not its own. See</span>
 <span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.</span>
 
 <span class="sd">        The class subclasses :class:`~pcapkit.protocols.link.link.Link` and so</span>
@@ -665,12 +665,12 @@
         <span class="c1"># Refuse it rather than parse it: every field after this word has a</span>
         <span class="c1"># different meaning (or no meaning) in another version, so continuing</span>
         <span class="c1"># reports a tunnel and session ID assembled out of octets that are</span>
-        <span class="c1"># neither. Reported as GitHub issue #548, where an :rfc:`3931` §4.1.1</span>
-        <span class="c1"># L2TPv3-over-IP datagram yielded ``version=4``, ``tunnelid=0x5678`` and</span>
-        <span class="c1"># ``sessionid=0xff03`` -- read out of the top half of a Session ID and</span>
-        <span class="c1"># the first two octets of the PPP frame behind it. This is also what</span>
-        <span class="c1"># makes the hard-coded ``Literal[2]`` of ``version`` true, instead of</span>
-        <span class="c1"># disagreeing with ``info.version`` on the same datagram.</span>
+        <span class="c1"># neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise</span>
+        <span class="c1"># yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read</span>
+        <span class="c1"># out of the top half of a Session ID and the first two octets of the PPP</span>
+        <span class="c1"># frame behind it (:issue:`548`). This is also what keeps the hard-coded</span>
+        <span class="c1"># ``Literal[2]`` of ``version`` true, instead of disagreeing with</span>
+        <span class="c1"># ``info.version`` on the same datagram.</span>
         <span class="k">if</span> <span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid version: </span><span class="si">{</span><span class="n">_flag</span><span class="p">[</span><span class="s2">"version"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Data Models, Internal Definitions, Type Variables., Link Layer- Base Protocol, Eth..." />
-<meta name="description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Data Models, Internal Definitions, Type Variables., Link Layer- Base Protocol, Eth..." />
+<meta property="og:description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Data Models, Internal Definitions, Type Variables., Link Layer- Base Protocol, Ethernet Protocol, ARP/InARP - (Inverse) ..." />
+<meta name="description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Data Models, Internal Definitions, Type Variables., Link Layer- Base Protocol, Ethernet Protocol, ARP/InARP - (Inverse) ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Root Protocol" href="protocol.html"><link rel="prev" title="Registry Management" href="../foundation/registry.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -485,8 +485,7 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols">
 <span id="protocol-family"></span><h1>Protocol Family<a class="headerlink" href="#module-pcapkit.protocols" title="Link to this heading">¶</a></h1>
-<p id="module-pcapkit.protocols.schema"><span id="module-pcapkit.protocols.data"></span><a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> is collection of all protocol families,
-with detailed implementation and methods.</p>
+<p id="module-pcapkit.protocols.schema"><span id="module-pcapkit.protocols.data"></span><a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> is the collection of all protocol families.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Root Protocol</a><ul>
@@ -555,10 +554,9 @@ with detailed implementation and methods.</p>
 </li>
 </ul>
 </div>
-<p>All protocol classes are implemented as <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
-subclasses, which are responsible for processing extracted binary packet data
-and/or construct protocol packet from given information. Below is a brief
-diagram of the class hierarchy of <a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>:</p>
+<p>All protocol classes are <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
+subclasses, which parse extracted binary packet data and/or construct a packet
+from given information. The class hierarchy of <a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>:</p>
 <pre  class="mermaid">
         flowchart LR
     A{{ProtocolMeta}} -.-&gt;|metaclass| B(ProtocolBase)
@@ -641,7 +639,7 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
     click C &quot;/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol&quot;
     click D &quot;/ext.html#what-s-in-for-protocols&quot;
 
-    click Link &quot;/pcapkit/protocols/link/link.html#pcapkit.protocols.link.Link&quot;
+    click Link &quot;/pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link&quot;
     click Ethernet &quot;/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet&quot;
     click L2TP &quot;/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP&quot;
     click L2TPv2 &quot;/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2&quot;
@@ -654,27 +652,27 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
     click RARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP&quot;
     click DRARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP&quot;
 
-    click Internet &quot;/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.Internet&quot;
+    click Internet &quot;/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet&quot;
     click AH &quot;/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH&quot;
     click ESP &quot;/pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP&quot;
     click HIP &quot;/pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP&quot;
     click HOPOPT &quot;/pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT&quot;
     click IP &quot;/pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP&quot;
     click IPsec &quot;/pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec&quot;
-    click IPv4 &quot;/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ip.ipv4.IPv4&quot;
-    click IPv6 &quot;/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ip.ipv6.IPv6&quot;
+    click IPv4 &quot;/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4&quot;
+    click IPv6 &quot;/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6&quot;
     click IPv6-Frag &quot;/pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag&quot;
     click IPv6-Opts &quot;/pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts&quot;
     click IPv6-Route &quot;/pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route&quot;
     click IPX &quot;/pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX&quot;
     click MH &quot;/pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH&quot;
 
-    click Transport &quot;/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.Transport&quot;
-    click TCP &quot;/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.internet.tcp.TCP&quot;
-    click UDP &quot;/pcapkit/protocols/transport/udp.html#pcapkit.protocols.internet.udp.UDP&quot;
+    click Transport &quot;/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport&quot;
+    click TCP &quot;/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP&quot;
+    click UDP &quot;/pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP&quot;
     click SCTP &quot;/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP&quot;
 
-    click Application &quot;/pcapkit/protocols/application/application.html#pcapkit.protocols.application.Application&quot;
+    click Application &quot;/pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application&quot;
     click HTTP &quot;/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP&quot;
     click h1 &quot;/pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP&quot;
     click h2 &quot;/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP&quot;
@@ -740,8 +738,7 @@ leaves the interpreter free to subclass it anyway. Every schema
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
 from the <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__fields__" title="pcapkit.protocols.schema.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
 subclass adding a field afterwards inherits a constructor that cannot
-set it – which is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/422">#422</a>’s failure shape, reached by a different route.
-This turns that promise into a rule the interpreter keeps.</p>
+set it. This turns that promise into a rule the interpreter keeps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -787,8 +784,8 @@ identical gap: a <code class="docutils literal notranslate"><span class="pre">&#
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">BASE</span></code> ancestor
 inherits <code class="docutils literal notranslate"><span class="pre">BASE</span></code> rather than <code class="docutils literal notranslate"><span class="pre">NONE</span></code> and so never reaches the
 branch below at all, regardless of its own marker. No <code class="docutils literal notranslate"><span class="pre">BASE</span></code>-state
-schema in the tree is marked <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> by hand today, so the escape
-is theoretical rather than live.</p>
+schema in the tree is marked <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> by hand, so the escape is
+theoretical.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1052,8 +1049,8 @@ by default is a <code class="docutils literal notranslate"><span class="pre">lam
 <dd><p>Mapping of enumeration numbers to schemas.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is also available as a class
-attribute.</p>
+<p>This property answers on an instance; on the class, the same
+mapping is served by <code class="docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code>.</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -1086,28 +1083,20 @@ registered, naming the displaced schema and its replacement.</p>
 <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> that accepts a
 <code class="docutils literal notranslate"><span class="pre">schema</span></code> registers two halves of one binding – a parser class
 through e.g. <a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.register_option" title="pcapkit.protocols.internet.ipv4.IPv4.register_option"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.register_option</span></code></a>, and a
-schema class through this method. The parser half has warned on an
-overwrite for as long as it has existed; this half assigned bare, so
-one <code class="docutils literal notranslate"><span class="pre">register_ipv4_option</span></code> call replacing a built-in reported the
-parser it displaced and said nothing about the schema. The guard
-here closes that asymmetry.</p>
-<p>It fires only when the incumbent differs from the replacement, the
-same guard <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a> applies,
-even though <code class="docutils literal notranslate"><span class="pre">code</span></code> here – unlike <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>’s key –
-is supplied by the caller and independent of <code class="docutils literal notranslate"><span class="pre">schema</span></code>. GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> corrected the previous presence-only guard: a repeat
-call that names the exact same schema object is a caller replaying
-a registration, not a mistake, so it is now a silent no-op.</p>
+schema class through this method. Both warn on an overwrite, so one
+<code class="docutils literal notranslate"><span class="pre">register_ipv4_option</span></code> call replacing a built-in reports the
+schema it displaced as well as the parser.</p>
+<p>The warning fires only when the incumbent differs from the
+replacement: a repeat call that names the exact same schema object
+is a caller replaying a registration, not a mistake, so it is a
+silent no-op.</p>
 <p>Presence is a faithful “was this really registered” test only because
 <a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> returns a miss without recording it. A plain
-<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would have inserted
-<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a> the first time any unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> was
-looked up, so parsing a single packet carrying an unknown code would
-have made the next legitimate registration for that code warn about
-an entry no caller ever asked for – the defect fixed for this layer
-in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>, for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, and for the option, chunk and block registries in
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>. That fix is what makes this guard safe to add.</p>
+<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would insert <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a> the
+first time any unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> was looked up, so parsing a
+single packet carrying an unknown code would make the next legitimate
+registration for that code warn about an entry no caller ever asked
+for.</p>
 <p><a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option" title="pcapkit.protocols.schema.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.Option</span></code></a> overrides this
 method with a namespaced registry of its own and does not delegate
 here, so it is guarded separately.</p>
@@ -1135,12 +1124,10 @@ not given, the subclass will not be registered.</p>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If any of <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 already registered, naming the displaced schema and its
-replacement. This is the same guard <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> applies,
-and it is here as well because a class declaration is the
-<em>other</em> way into <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> – <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MyOption(Option,</span>
-<span class="pre">code=...)</span></code> writes the registry without any call to
-<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, so guarding only the method would leave the
-declaration path silently displacing a built-in schema.</p>
+replacement. This is the guard <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> applies, repeated
+here because a class declaration is the <em>other</em> way into
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a>: <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MyOption(Option,</span> <span class="pre">code=...)</span></code> writes the
+registry without calling <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
@@ -1289,23 +1276,21 @@ proxy (similar to <a class="reference external" href="https://docs.python.org/3/
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaultdict</span></code></a></p>
 <p>A registry <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> that never inserts a miss.</p>
 <p><a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.registry" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.registry</span></code></a> (and its class-level twin,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code>) is read with a bare <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> at dozens
-of call sites across the schema layer, e.g. <code class="docutils literal notranslate"><span class="pre">Option.registry[type]</span></code>. A
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code>) is read with a bare <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> at many
+call sites across the schema layer, e.g. <code class="docutils literal notranslate"><span class="pre">Option.registry[type]</span></code>. A
 plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> inserts whatever
 <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict.default_factory" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_factory</span></code></a> returns the <em>first time</em>
 an unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> is looked up – and since the registry lives on
 the <em>class</em>, that insertion is permanent and shared by every instance of
 every subclass in the process. Parsing one packet carrying an unrecognised
-code is therefore enough to grow the registry for the remainder of the
-process, and to make a later, entirely legitimate
-<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call report an overwrite that never happened.</p>
-<p>This is the schema-layer instance of the defect <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
-fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, and for the option, chunk and block registries in
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>; see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>. The fallback itself is
-deliberate – it is how an unknown option, chunk or block falls back to its
-<code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this subclass keeps returning it,
-it just stops recording it.</p>
+code would therefore grow the registry for the remainder of the process,
+and make a later, entirely legitimate <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call
+report an overwrite that never happened.</p>
+<p>The fallback itself is deliberate – it is how an unknown option, chunk or
+block falls back to its <code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this
+subclass keeps returning it and just stops recording it.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
+does the same for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema._EnumRegistry.__missing__">
 <span class="sig-name descname"><span class="pre">__missing__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#_EnumRegistry.__missing__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema._EnumRegistry.__missing__" title="Link to this definition">¶</a></dt>

@@ -682,10 +682,10 @@
 <span class="sd">        ``Opt Data Len`` counts only what follows the option header</span>
 <span class="sd">        [:rfc:`8200#section-4.2`], while both schemas this may return inherit</span>
 <span class="sd">        :attr:`Option.type` and :attr:`Option.len` and so parse those two octets</span>
-<span class="sd">        themselves. Sizing the field at ``Opt Data Len`` handed them an area two</span>
+<span class="sd">        themselves. Sizing the field at ``Opt Data Len`` would hand them an area two</span>
 <span class="sd">        octets short of the option they read, which</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted</span>
-<span class="sd">        against the option area -- c.f. :issue:`431`.</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.collections.OptionField` would then</span>
+<span class="sd">        mis-count against the option area.</span>
 
 <span class="sd">    """</span>
     <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>
@@ -788,8 +788,7 @@
 <span class="sd">        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes</span>
 <span class="sd">        an unusable :mod:`struct` template and surfaces much later as an opaque</span>
-<span class="sd">        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to</span>
-<span class="sd">        fail to parse.</span>
+<span class="sd">        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.</span>
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>

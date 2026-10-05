@@ -598,17 +598,11 @@ and <a class="reference internal" href="httpv2.html#pcapkit.protocols.applicatio
 <span class="sig-name descname"><span class="pre">_guess_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http.html#HTTP._guess_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="Link to this definition">¶</a></dt>
 <dd><p>Identify the HTTP version of the payload, and parse it with that version.</p>
 <p>The payload is <em>identified</em> first and trial-parsed only as a last resort.
-Until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/800">#800</a> there was no identification step at all: both versions were
-tried in turn and whichever parser did not object was taken as the
-answer, which answers “did a parser accept this?” where the question is
-“what is this?” – and got both directions wrong. The HTTP/2 connection
-preface came back <code class="docutils literal notranslate"><span class="pre">version='2'</span></code> only because <code class="docutils literal notranslate"><span class="pre">httpv2.HTTP</span></code> read its
-leading <code class="docutils literal notranslate"><span class="pre">b'PRI'</span></code> as a 24-bit declared frame length of 5,265,993, and
-<code class="docutils literal notranslate"><span class="pre">b'foo</span> <span class="pre">bar</span> <span class="pre">baz\r\nX:</span> <span class="pre">y\r\n\r\n'</span></code> – not HTTP at all – came back
-<code class="docutils literal notranslate"><span class="pre">version='2'</span></code> the same way. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/799">#799</a> closed the second of those by
-requiring a frame’s declared length to be backed by its buffer, but that
-left the preface <em>unidentifiable</em>: a real HTTP/2 connection opening is
-refused by both arms and reported as not-HTTP.</p>
+Trying each version in turn and taking whichever parser does not object
+answers “did a parser accept this?” where the question is “what is
+this?”: the HTTP/2 preface reads as a frame whose declared length is
+5,265,993 (<code class="docutils literal notranslate"><span class="pre">b'PRI'</span></code> as a 24-bit integer), and text that is not HTTP at
+all can be accepted the same way.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Length of packet data.</p>
@@ -668,10 +662,10 @@ as identification.</p></li>
 the 24-octet HTTP/2 connection preface, when <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a>
 identified one and parsed the frame that follows it. They belong to this
 packet’s header rather than to its payload, so <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP.read" title="pcapkit.protocols.application.http.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> adds them to
-<a class="reference internal" href="#pcapkit.protocols.application.http.HTTP.length" title="pcapkit.protocols.application.http.HTTP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>; without that, <code class="docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">self._info.__update__(packet=self.packet.payload)</span></code> slices the payload
-from octet 9 of a buffer whose frame starts at octet 24 and reports the
-tail of the preface as packet payload. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/800">#800</a>.</p>
+<a class="reference internal" href="#pcapkit.protocols.application.http.HTTP.length" title="pcapkit.protocols.application.http.HTTP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>; otherwise <code class="docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">self._info.__update__(packet=self.packet.payload)</span></code> would slice the
+payload from octet 9 of a buffer whose frame starts at octet 24 and report
+the tail of the preface as packet payload.</p>
 </dd></dl>
 
 </dd></dl>
@@ -685,9 +679,8 @@ by sending exactly these 24 octets, and the sequence is <em>designed</em> to be
 identifiable without parsing: it is a well-formed HTTP/1.1 request line whose
 method <code class="docutils literal notranslate"><span class="pre">PRI</span></code> is reserved and permanently unregistered, so no valid HTTP/1
 message can begin with it and a prefix compare cannot false-positive on one.
-That is what makes it a positive identification rather than a heuristic, and
-it is why <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> tests it before attempting any parse
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/800">#800</a>).</p>
+That makes it a positive identification rather than a heuristic, which is why
+<a class="reference internal" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> tests it before attempting any parse.</p>
 </dd></dl>
 
 <p class="rubric">Footnotes</p>
