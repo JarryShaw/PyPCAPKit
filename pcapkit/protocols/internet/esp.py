@@ -22,8 +22,7 @@ Octets      Bits        Name                    Description
   ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)
 ======= ========= ===================== ==============================================
 
-Unlike every other protocol in :mod:`pcapkit`, ESP is **not** self
-describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``
+ESP is **not** self describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``
 fields *inside* the ciphertext, and leaves the length of the ``Integrity
 Check Value`` to be determined by the Security Association (SA), which is
 negotiated out of band. Therefore:
@@ -56,7 +55,7 @@ in :mod:`pcapkit.corekit.context`:
    )
    extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
 
-Registered algorithms, and supported ones
+Registered Algorithms, and Supported Ones
 -----------------------------------------
 
 ESP has no algorithm registry of its own -- an SA's algorithms are negotiated
@@ -139,7 +138,7 @@ as an alias, since that is how ESP and :rfc:`8221` name the algorithms, so
 :attr:`Cipher.ENCR_AES_CBC <pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC>`
 are the same member.
 
-Known limitations
+Known Limitations
 -----------------
 
 * **Extended Sequence Numbers (ESN,** :rfc:`4303` **§2.2.1) are not
@@ -458,10 +457,9 @@ INTEGRITY_SUITES = {
 class ESPStatus(EnumLookup, enum.IntEnum):
     """Outcome of ESP payload processing.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this
-    class defines neither ``get`` nor ``_missing_`` of its own to reconcile
-    with the base.
+    ``get`` / ``get_all`` come from :class:`~pcapkit.corekit.enum.EnumLookup`;
+    the class defines no ``_missing_``, so an unknown value raises
+    :exc:`ValueError`.
 
     """
 
@@ -525,7 +523,7 @@ class SecurityAssociation:
 
     Raises:
         ProtocolError: If the algorithms or key lengths are inconsistent, or
-            ``destination`` is a :obj:`bool` (c.f. :issue:`491`) -- :obj:`bool` is an
+            ``destination`` is a :obj:`bool` -- :obj:`bool` is an
             :class:`int` subclass, and :func:`ipaddress.ip_address` treats
             any :class:`int` below ``2**32`` as IPv4, so without this check
             ``destination=True`` would silently become
@@ -563,7 +561,7 @@ class SecurityAssociation:
             # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
             # ``2**32`` as IPv4 -- so without this check, ``destination=True``
             # would silently become ``IPv4Address('0.0.0.1')``, with no
-            # exception and no warning (c.f. #491).
+            # exception and no warning.
             raise ProtocolError(
                 f'invalid destination: must not be a bool, not {destination!r} -- '
                 f'pass int({destination!r}) if the numeric value is what is wanted')
@@ -975,18 +973,16 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
           schema=Schema_ESP, data=Data_ESP):
     """This class implements Encapsulating Security Payload.
 
-    Double-inherited (GitHub issue :issue:`917`), mirroring
-    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension
-    Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`
-    has it appear after the hop-by-hop, routing and fragmentation
-    extension headers in the IPv6 header chain), and this package's own
+    Double-inherited, mirroring :class:`~pcapkit.protocols.internet.ah.AH`:
+    IANA's *IPv6 Extension Header Types* registry lists ``ESP`` at 50
+    (:rfc:`4303#section-3.1.1` has it follow the hop-by-hop, routing and
+    fragmentation extension headers in the IPv6 header chain), and this
+    package's own
     :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry
-    agrees (``ESP = 50``), so it must honour the same extension-mode
-    contract as its siblings. The same section separately states that,
-    in the context of IPv4, ESP is placed after the IP header and
-    before the next-layer protocol -- the primary-source evidence that
-    it also travels directly as an IPv4 payload, which is what
-    qualifies it for a base besides
+    agrees, so it must honour the same extension-mode contract as its
+    siblings. The same section places ESP after the IP header and before the
+    next-layer protocol in IPv4, so it also travels directly as an IPv4
+    payload, which is what qualifies it for a base besides
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
     :attr:`payload` and :attr:`protochain` come from
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`
@@ -995,7 +991,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
     Note:
         :rfc:`8200#section-4.5` says outright that ESP "is not considered an
         extension header". The library follows IANA's registry rather than
-        that sentence, on the owner's ruling for GitHub issue :issue:`895`.
+        that sentence (decided on :issue:`895`).
 
     """
 
@@ -1015,13 +1011,13 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         Spelled out rather than left to
         :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
         class-name default, because
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits
         between this class and that default in the MRO and carries a concrete
         ``'IPv6-Ext'`` of its own. Inheriting it would rename this header in
         every :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
         :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
-        dict key. The value is exactly what the default produced before.
+        dict key. The value equals the class-name default.
 
         """
         return 'ESP'

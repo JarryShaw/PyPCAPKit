@@ -121,14 +121,11 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
     value in the ``length`` field outright.
 
     It is summed from the resolved schema's own fields rather than written as
-    that literal, for two reasons. The registry is open --
-    :class:`QSOption` is an :class:`~pcapkit.protocols.schema.schema.EnumSchema`,
-    so a caller may register a further function code with a schema of its own
-    width -- and a number written here has to be kept in step by hand with every
-    field the suboptions declare, which is precisely how :issue:`552` arose: the length
-    was ``5``, the width of a Quick-Start Request's ``ttl`` and ``nonce`` alone,
-    with the ``type``, ``length`` and ``flags`` octets in front of them
-    unaccounted for.
+    that literal, because the registry is open -- :class:`QSOption` is an
+    :class:`~pcapkit.protocols.schema.schema.EnumSchema`, so a caller may
+    register a further function code with a schema of its own width -- and a
+    number written here would have to be kept in step by hand with every field
+    the suboptions declare.
 
     Args:
         schema: Quick-Start suboption schema, as resolved from the ``func``
@@ -143,8 +140,7 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
             because the option is, and a variable-width one cannot be summed
             here without a packet to size it against -- which is the one thing
             a selector does not have for the schema it is about to return. It
-            fails rather than guessing, since guessing is the defect being
-            fixed.
+            fails rather than guessing a width.
 
     """
     length = 0
@@ -152,8 +148,7 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
         # NOTE: A forward match consumes nothing and contributes no octets to
         # ``bytes(schema)`` either, c.f. the ``ForwardMatchField`` branches of
         # :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` and
-        # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
-        # and the double-count #441/#446 fixed.
+        # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`.
         if isinstance(field, ForwardMatchField):
             continue
 
@@ -203,14 +198,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     Notes:
         The length handed to the :class:`~pcapkit.corekit.fields.misc.SchemaField`
         comes from :func:`quick_start_option_length`, i.e. from the suboption that
-        was just resolved. It used to be the literal ``5`` for both, which is not
-        the width of either: a well-formed eight-octet Quick-Start Request
-        ``1908002adeadbee0`` parsed with ``SchemaWarning: packet length < 0: -3``
-        and decoded its ``nonce`` as **55** instead of 933982136, then left three
-        octets to be read as a further, fabricated option -- which made the
-        enclosing datagram fail with ``ProtocolError: IPv4: invalid format``. That
-        is silent corruption on the way to a misleading failure, and it was logged
-        in review twice before :issue:`552` filed it.
+        was just resolved, rather than from a fixed literal: a wrong width
+        mis-sizes the nested read, so the ``nonce`` decodes wrongly and the
+        leftover octets are read as a further, fabricated option.
 
     """
     func = Enum_QSFunction.get(pkt['flags']['func'])
@@ -365,12 +355,9 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             caller-built option schema and packs it, and
             :attr:`ts_data`'s :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
             item type takes a :obj:`bool` as the :class:`int` it is a subclass
-            of, so nothing downstream can question it. Measured before this
-            fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and
-            reported ``IPv4Address('0.0.0.1')`` with no exception and no
-            warning. This was the fifth site of that defect -- :issue:`469`, :issue:`491`,
-            :issue:`508` and :issue:`540` are the first four -- and the reason it is the fifth
-            is that each of those fixed the sites it could see. See :issue:`552`.
+            of, so nothing downstream can question it: ``ts_data=[True, 5]``
+            would otherwise pack as ``0000000100000005`` and report
+            ``IPv4Address('0.0.0.1')`` with no exception and no warning.
 
         """
         ts_flag = Enum_TSFlag.get(self.flags['flag'])
@@ -426,15 +413,15 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             # but set the timestamp to 0
             #
             # NOTE: Through ``parse_ip_address`` like the two conversions above,
-            # even though #540 and #552 both judged this site unable to launder a
-            # :obj:`bool` -- ``remainder`` is a
+            # even though ``remainder`` is a
             # :class:`~pcapkit.corekit.fields.strings.PaddingField`, so what it
-            # holds is octets rather than anything the caller named. It is routed
-            # through anyway because a bare :func:`ipaddress.ip_address` here
-            # still raises a plain :exc:`ValueError` for a tail that is not a
-            # whole number of 8-octet pairs, which no ``except BaseError`` can
-            # catch, and because leaving one of this method's three conversions
-            # unguarded is exactly how #552 came to be the fifth site of #469.
+            # holds is octets rather than anything the caller named, and cannot
+            # launder a :obj:`bool`. It is routed through anyway because a bare
+            # :func:`ipaddress.ip_address` here still raises a plain
+            # :exc:`ValueError` for a tail that is not a whole number of 8-octet
+            # pairs, which no ``except BaseError`` can catch, and because leaving
+            # one of this method's three conversions unguarded invites the same
+            # defect back.
             pad = self.remainder
             for index in range(0, len(pad), 8):
                 buf_ip = pad[index:index + 4]
@@ -455,16 +442,15 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         data: 'list[int] | OrderedMultiDict[IPv4Address, int]'
         timestamp: 'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'
 
-        # NOTE: The keyword is ``ts_data``, the name of the field above, not the
-        # ``data`` this signature used to advertise. ``data`` is the *derived*
-        # attribute :meth:`post_process` writes and is declared three lines up;
-        # naming it here as a constructor argument too is what
-        # :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_ts` was written
-        # against, and because :meth:`Schema.__update__
+        # NOTE: The keyword is ``ts_data``, the name of the field above, not
+        # ``data``. ``data`` is the *derived* attribute :meth:`post_process`
+        # writes and is declared three lines up; passing it as a constructor
+        # argument would drop the timestamps in silence, because
+        # :meth:`Schema.__update__
         # <pcapkit.protocols.schema.schema.Schema.__update__>` answers an unknown
         # field name with an
         # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an
-        # error, the timestamps were dropped in silence. See #552.
+        # error.
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', ts_data: 'list[int]') -> 'None': ...
 
 
@@ -511,12 +497,7 @@ class SIDOption(Option, code=Enum_OptionNumber.SID):
 
     #: Stream identifier. Two octets, per :rfc:`791` section 3.1, which gives the
     #: option as four octets in total: one of type, one of length, and a 16-bit
-    #: stream identifier. This was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,
-    #: which over-read a well-formed option by two octets on the way in -- the
-    #: ``packet length < 0: -2`` the library warned about -- and re-emitted it two
-    #: octets too wide on the way out, against the ``length=4`` that
-    #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid` had always
-    #: written. See :issue:`534`.
+    #: stream identifier.
     sid: 'int' = UInt16Field()
 
     if TYPE_CHECKING:
@@ -667,18 +648,14 @@ class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_R
     #: used"*, and that *"bytes 5-8 contain a 30-bit QS Nonce and a 2-bit
     #: Reserved field"* -- so the nonce begins at the fifth octet for both
     #: functions, and figure 4 gives this option as ``Length=8`` like figure 3
-    #: gives its sibling. The field was missing, so the schema was seven octets
+    #: gives its sibling. Without this field the schema would be seven octets
     #: wide against the eight
     #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs` writes into
     #: ``length`` and the eight
     #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` demands of it,
-    #: which meant a spec-correct Report of Approved Rate read off the wire
-    #: decoded its ``nonce`` one octet early -- measured, with the selector
-    #: length fixed and this field still absent: ``19088100deadbee0`` warned
-    #: ``packet length < 0: -1`` and then died with a bare ``struct.error: bad
-    #: char in struct format``, the unconsumed octet having been read as another
-    #: option. Declared as padding rather than as data because :rfc:`4782` gives
-    #: it no meaning and no caller should be setting it. See :issue:`552`.
+    #: and the ``nonce`` would decode one octet early. Declared as padding rather
+    #: than as data because :rfc:`4782` gives it no meaning and no caller should
+    #: be setting it.
     reserved: 'bytes' = PaddingField(length=1)
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={

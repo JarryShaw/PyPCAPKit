@@ -83,10 +83,10 @@ if TYPE_CHECKING:
     Flags = Schema_FrameType.Flags
 
     FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
-    # NB: ``Flags`` is bound just above, so it goes in unquoted. Quoting it left a
-    # bare ``ForwardRef('Flags')`` inside the alias, which every *other* module
-    # that spells ``FrameConstructor`` in an annotation then had to resolve in its
-    # own namespace -- where the name does not exist.
+    # NB: ``Flags`` is bound just above, so it goes in unquoted. Quoted, it would
+    # leave a bare ``ForwardRef('Flags')`` inside the alias, which every *other*
+    # module that spells ``FrameConstructor`` in an annotation would have to
+    # resolve in its own namespace -- where the name does not exist.
     FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], Tuple[Schema_FrameType, Flags]]
 
@@ -97,7 +97,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
            schema=Schema_HTTP, data=Data_HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
-    This class currently supports parsing of the following HTTP/2 frames,
+    This class supports parsing of the following HTTP/2 frames,
     which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`
     enumeration:
 
@@ -204,49 +204,40 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Notes:
             This guards ahead of :meth:`Schema.unpack
             <pcapkit.protocols.schema.schema.Schema.unpack>` rather than
-            leaving the same check to :meth:`read`, because a buffer shorter
-            than the fixed 9-octet header is not merely invalid -- it can
-            crash the schema layer outright. ``pkt['__length__']`` there is
-            decremented by each field's *nominal* width regardless of how
-            many octets the buffer actually had, so it goes negative, and the
-            frame payload's length-derived fields (e.g. an unpadded ``DATA``
-            frame's ``data: BytesField(length=lambda pkt: pkt['__length__'])``)
-            resolve to that negative number. A negative field length becomes
-            a struct template such as ``'-5s'``, and :func:`struct.calcsize`
-            raises :exc:`struct.error` for it -- uncaught, since nothing
-            downstream expects a :exc:`ProtocolError` to be spelled that way.
-            Rejecting here, before :meth:`Schema.unpack` ever runs, keeps a
-            frame too short to hold a header from reaching that arithmetic at
-            all. This closes the *outer*-header class only -- an inner payload
-            field can still drive ``pkt['__length__']`` negative on a buffer
-            that clears nine (e.g. a ``GOAWAY`` frame at 9-16 octets, whose
-            fixed ``stream`` and ``error`` fields alone consume eight); that
-            residual is why :meth:`HTTP._guess_version
-            <pcapkit.protocols.application.http.HTTP._guess_version>` still
-            suppresses :exc:`struct.error` on its last arm. See :issue:`799`.
+            leaving the check to :meth:`read`, because a buffer shorter than the
+            fixed 9-octet header cannot be parsed meaningfully.
+            ``pkt['__length__']`` there is decremented by each field's
+            *nominal* width regardless of how many octets the buffer had, so it
+            goes negative and the frame payload's length-derived fields (e.g. an
+            unpadded ``DATA`` frame's ``data: BytesField(length=lambda pkt:
+            pkt['__length__'])``) resolve to a negative width. Rejecting here
+            keeps such a frame from reaching that arithmetic. An inner field can
+            still drive it negative on a buffer that clears nine (e.g. a
+            ``GOAWAY`` frame at 9-16 octets, whose fixed ``stream`` and
+            ``error`` fields alone consume eight); the schema layer raises
+            :exc:`ProtocolError` for that itself.
 
             ``length`` is resolved against :func:`len` only for *this*
             method's own check, and the *original* argument -- ``None``
-            included -- is what is actually forwarded to :meth:`Protocol.unpack
+            included -- is what is forwarded to :meth:`Protocol.unpack
             <pcapkit.protocols.protocol.ProtocolBase.unpack>`. Collapsing
-            ``None`` to a concrete ``0`` before forwarding would change what
-            :meth:`Schema.unpack`'s own ``prepare`` decorator does with a
-            now-exhausted stream: it raises
+            ``None`` to a concrete ``0`` would change what
+            :meth:`Schema.unpack`'s own ``prepare`` decorator does with an
+            exhausted stream: it raises
             :exc:`~pcapkit.utilities.exceptions.StreamEOFError` (an
             :exc:`EOFError`, the documented "no more packets" signal) only when
-            the *caller* left ``length`` unspecified, and forwarding a resolved
-            ``0`` instead would report an exhausted stream as a malformed
-            packet. A *non-zero* short buffer is unambiguously malformed either
-            way, so it is rejected here regardless of whether ``length`` was
-            given explicitly.
+            the *caller* left ``length`` unspecified, and a resolved ``0``
+            would report an exhausted stream as a malformed packet. A
+            *non-zero* short buffer is malformed either way, so it is rejected
+            here whether or not ``length`` was given.
 
         """
         if length is None:
             # ``0 < ... < 9`` rather than ``... < 9``: an exhausted stream
-            # (``len(self) == 0``) is left alone here, so ``length`` reaches
+            # (``len(self) == 0``) is left alone, so ``length`` reaches
             # :meth:`Protocol.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`
             # still ``None`` and its ``prepare`` decorator raises
-            # :exc:`StreamEOFError` as documented above -- only a *non-empty*
+            # :exc:`StreamEOFError` as documented above; only a *non-empty*
             # short stream is rejected as malformed here.
             if 0 < len(self) < 9:
                 raise ProtocolError(f'HTTP/2: invalid format, packet ({len(self)} octet(s)) '
@@ -293,21 +284,16 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         schema = self.__header__
 
         # NOTE: ``schema.length`` is the *declared* length off the wire -- the
-        # 24-bit field a hostile or truncated capture controls outright -- and
-        # checking only it lets a frame whose buffer holds far fewer octets than
-        # it claims sail through this guard and report a length nothing backs.
-        # ``length`` is the actual number of octets available for this frame
-        # (``Protocol.__len__`` returns ``len(self._data)``, and a caller that
-        # supplies ``length`` explicitly means the same thing by it), so both
-        # have to clear the minimum header size for the frame to be viable at
-        # all, *and* the declared value must not exceed what is actually
-        # available -- this library's convention (see ``_make_http_length``)
-        # is that ``length`` counts the whole frame, header included, so the
-        # two are directly comparable. Without the third clause a frame that
-        # declares far more than its buffer holds -- the headline case in
-        # #799, e.g. a nine-octet buffer declaring 16777215 -- still passed
-        # this guard and reported the declared, attacker-controlled length as
-        # if the capture actually contained it. See #799.
+        # 24-bit field a hostile or truncated capture controls outright -- so
+        # checking only it would let a frame whose buffer holds far fewer octets
+        # than it claims report a length nothing backs (e.g. a nine-octet buffer
+        # declaring 16777215). ``length`` is the number of octets actually
+        # available for this frame (``Protocol.__len__`` returns
+        # ``len(self._data)``, and an explicit ``length`` means the same), so
+        # both have to clear the minimum header size *and* the declared value
+        # must not exceed what is available. This library's convention (see
+        # ``_make_http_length``) is that ``length`` counts the whole frame,
+        # header included, so the two are directly comparable.
         if schema.length < 9 or length < 9 or schema.length > length:
             raise ProtocolError(f'HTTP/2: [Type {schema.type}] invalid format')
         if schema.type in (Enum_Frame.SETTINGS, Enum_Frame.PING) and schema.stream['sid'] != 0:

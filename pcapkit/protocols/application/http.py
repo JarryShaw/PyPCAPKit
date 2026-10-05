@@ -35,9 +35,8 @@ __all__ = ['HTTP']
 #: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose
 #: method ``PRI`` is reserved and permanently unregistered, so no valid HTTP/1
 #: message can begin with it and a prefix compare cannot false-positive on one.
-#: That is what makes it a positive identification rather than a heuristic, and
-#: it is why :meth:`HTTP._guess_version` tests it before attempting any parse
-#: (:issue:`800`).
+#: That makes it a positive identification rather than a heuristic, which is why
+#: :meth:`HTTP._guess_version` tests it before attempting any parse.
 _HTTP2_PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 
 
@@ -57,10 +56,10 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`
     #: identified one and parsed the frame that follows it. They belong to this
     #: packet's header rather than to its payload, so :meth:`read` adds them to
-    #: :attr:`length`; without that, ``ProtocolBase.__init__``'s
-    #: ``self._info.__update__(packet=self.packet.payload)`` slices the payload
-    #: from octet 9 of a buffer whose frame starts at octet 24 and reports the
-    #: tail of the preface as packet payload. See :issue:`800`.
+    #: :attr:`length`; otherwise ``ProtocolBase.__init__``'s
+    #: ``self._info.__update__(packet=self.packet.payload)`` would slice the
+    #: payload from octet 9 of a buffer whose frame starts at octet 24 and report
+    #: the tail of the preface as packet payload.
     _preface_length = 0
 
     #: This class is a version dispatcher rather than a protocol with a header of
@@ -68,11 +67,11 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: declares only ``version`` and forwards everything else to
     #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTP.make>` or
     #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
-    #: according to that value -- so the set of names that is correct here depends
-    #: on an argument. :obj:`None` therefore opts out of the construction keyword
-    #: check that :meth:`ProtocolBase.__init__
-    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs (:issue:`617`); the
-    #: two versioned classes are checked normally when constructed directly.
+    #: according to that value, so the correct set of names depends on an
+    #: argument. :obj:`None` therefore opts out of the construction keyword check
+    #: that :meth:`ProtocolBase.__init__
+    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs; the two
+    #: versioned classes are checked normally when constructed directly.
     __keywords__ = None
 
     ##########################################################################
@@ -140,12 +139,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 raise
             # NOTE: :exc:`struct.error` alongside :exc:`ValueError` because the
             # two are disjoint -- it derives straight from :exc:`Exception` --
-            # and a payload too short for a versioned parser's fixed header
-            # raises the former from deep inside the schema machinery
-            # (``FieldBase.length`` calls :func:`struct.calcsize` on a template
-            # built from a negative length). A caller of this method cannot
-            # catch that as a protocol error, which is the whole point of the
-            # conversion the next line performs, so it is converted too.
+            # and a payload too short for a versioned parser's fixed header can
+            # raise the former from inside the schema machinery. A caller cannot
+            # catch that as a protocol error, so it is converted too.
             except (ValueError, struct.error) as error:
                 raise ProtocolError(f'HTTP/{version}: invalid format') from error
 
@@ -177,18 +173,15 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # NOTE: ``protocol.make`` is an ordinary instance method (the abstract
         # declaration at ``ProtocolBase.make`` takes ``self``, and the
         # versioned overrides use instance-bound helpers such as
-        # ``self._make_index``/``self.__frame__``), so calling it on the
-        # class itself -- as this used to -- left ``self`` unfilled and raised
-        # ``TypeError`` for every real call; see GH-452. There is no ``file``
-        # or ``length`` to construct with here, since building a packet from
-        # keyword arguments is the inverse of parsing one, so a bare instance
-        # via ``protocol.__new__`` -- bypassing ``__init__``'s parse/pack
-        # machinery entirely -- is what the versioned ``make`` needs to be
-        # called on. This is safe only as long as the versioned ``make`` never
-        # reads state that ``__init__``/``__post_init__`` would otherwise have
-        # established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does today);
-        # a future ``make`` override that reaches for such state would need a
-        # different dispatch here.
+        # ``self._make_index``/``self.__frame__``), so it cannot be called on the
+        # class itself. There is no ``file`` or ``length`` to construct with here,
+        # since building a packet from keyword arguments is the inverse of
+        # parsing one, so a bare instance via ``protocol.__new__`` -- bypassing
+        # ``__init__``'s parse/pack machinery entirely -- is what the versioned
+        # ``make`` is called on. This is safe only while the versioned ``make``
+        # reads no state that ``__init__``/``__post_init__`` would otherwise have
+        # established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does); a
+        # ``make`` override that did would need a different dispatch here.
         return protocol.__new__(protocol).make(**kwargs)  # type: ignore[return-value]
 
     ##########################################################################
@@ -219,17 +212,11 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         """Identify the HTTP version of the payload, and parse it with that version.
 
         The payload is *identified* first and trial-parsed only as a last resort.
-        Until :issue:`800` there was no identification step at all: both versions were
-        tried in turn and whichever parser did not object was taken as the
-        answer, which answers "did a parser accept this?" where the question is
-        "what is this?" -- and got both directions wrong. The HTTP/2 connection
-        preface came back ``version='2'`` only because ``httpv2.HTTP`` read its
-        leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and
-        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back
-        ``version='2'`` the same way. :issue:`799` closed the second of those by
-        requiring a frame's declared length to be backed by its buffer, but that
-        left the preface *unidentifiable*: a real HTTP/2 connection opening is
-        refused by both arms and reported as not-HTTP.
+        Trying each version in turn and taking whichever parser does not object
+        answers "did a parser accept this?" where the question is "what is
+        this?": the HTTP/2 preface reads as a frame whose declared length is
+        5,265,993 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at
+        all can be accepted the same way.
 
         Args:
             length: Length of packet data.
@@ -282,9 +269,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # false-positive on HTTP/1, and it needs no parse to reach.
         #
         # ``length`` bounds the compare as well as ``self._data``, because a
-        # caller may hand this method fewer octets than the buffer holds, and
-        # claiming a preface out of octets that were not part of this payload
-        # would be the same kind of accident this change removes.
+        # caller may hand this method fewer octets than the buffer holds, and a
+        # preface must not be claimed out of octets outside this payload.
         preface_len = len(_HTTP2_PREFACE)
         if length >= preface_len and self._data[:preface_len] == _HTTP2_PREFACE:
             from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
@@ -292,15 +278,15 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             # The preface is not a frame -- the frames begin after it
             # (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately
             # following), so it is skipped rather than fed to ``httpv2.HTTP``,
-            # which is how it used to be misread as framing.
+            # which would misread it as framing.
             if length == preface_len:
                 # A preface with nothing after it *is* HTTP/2, but this library's
                 # HTTP/2 data model is one frame per packet and has no
                 # representation for a frameless segment, so there is nothing to
-                # return. Refused with a message that says which of the two it
-                # was -- an HTTP/2 connection opening truncated at the preface,
-                # not an unrecognised payload -- because that distinction is the
-                # whole point of identifying before parsing.
+                # return. Refused with a message that says so -- an HTTP/2
+                # connection opening truncated at the preface, not an
+                # unrecognised payload -- because that distinction is the point
+                # of identifying before parsing.
                 raise ProtocolError('HTTP/2: connection preface with no frame')
 
             try:
@@ -308,19 +294,15 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             except ProtocolError:
                 raise
             # NOTE: Converted, unlike the HTTP/1 commit below, because this route
-            # is new and has no escaping-error contract to keep: the old arm 2
-            # suppressed :exc:`struct.error` and fell through to ``unknown HTTP
-            # version``, so a preface followed by a frame that used to trip the
-            # #805 residual (an inner field shortfall, e.g. a 16-octet
-            # ``GOAWAY``) had to reach the caller as something it could catch,
-            # not as a bare stdlib error. That residual has since been closed at
-            # ``FieldBase.length``, so the same ``GOAWAY`` now raises
-            # ``ProtocolError`` on its own and is caught by the ``except
-            # ProtocolError: raise`` above, never reaching this clause -- but
-            # the conversion stays for whichever :exc:`ValueError` or
-            # :exc:`struct.error` the schema machinery has not been shown never
-            # to raise here again. Same normalisation, and the same reasoning,
-            # as ``read``'s explicit ``version=`` path above.
+            # has no escaping-error contract to keep: a preface followed by a
+            # malformed frame must reach the caller as something it can catch,
+            # not as a bare stdlib error. The schema machinery raises
+            # ``ProtocolError`` itself for a short inner field (e.g. a 16-octet
+            # ``GOAWAY``, via ``FieldBase.length``), which the ``except
+            # ProtocolError: raise`` above passes through, so this clause is a
+            # backstop for any :exc:`ValueError` or :exc:`struct.error` it has
+            # not been shown never to raise. Same normalisation as ``read``'s
+            # explicit ``version=`` path above.
             except (ValueError, struct.error) as error:
                 raise ProtocolError('HTTP/2: invalid format') from error
 
@@ -339,13 +321,10 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # disagree about what HTTP/1 looks like.
         #
         # Identified means *committed*: a malformed HTTP/1 message is reported as
-        # the malformed HTTP/1 message it is, instead of being handed to the
-        # HTTP/2 arm, which accepts any self-consistent nine-octet-or-longer
-        # buffer. Re-trying an identified HTTP/1 payload as HTTP/2 is exactly how
-        # HTTP/1 traffic acquires a confident HTTP/2 mislabel -- the failure #787
-        # exists to stop -- and #682 now routes 231 real HTTP/1 frames from the
-        # fixture corpus through here, TCP:80/8080 having been repointed at this
-        # class.
+        # such instead of being handed to the HTTP/2 arm, which accepts any
+        # self-consistent buffer of nine octets or more. Retrying an identified
+        # HTTP/1 payload as HTTP/2 is how HTTP/1 traffic acquires a confident
+        # HTTP/2 mislabel.
         #
         # Nothing is suppressed on this arm, deliberately: it is not a candidate
         # to be declined, so there is nothing to decline *to*, and
@@ -359,74 +338,32 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # NOTE: Neither identification matched, so this is the fall-through: a
         # trial parse, kept because a *mid-stream* payload carries no start line
         # and no preface, and a self-consistent HTTP/2 frame is still the best
-        # answer available for one. It is the last resort rather than the whole
-        # method, which is the #800 change.
+        # answer available for one. It is the last resort, not the whole method.
         #
-        # The two arms suppress different sets, and the asymmetry is
-        # deliberate. Only the *last* arm additionally suppresses
-        # :exc:`struct.error`, because a payload too short to hold HTTP/2's
-        # nine-octet frame header, or one whose frame-specific fields exceed
-        # what a slightly-longer buffer holds, used to fail inside the schema
-        # machinery with that stdlib exception rather than with a protocol
-        # error -- ``FieldBase.length`` called :func:`struct.calcsize` on a
-        # template built from a negative length -- and it was neither a
-        # ``ProtocolError`` nor a :exc:`ValueError`, so it used to leave this
-        # method uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8),
-        # 8)`` used to raise a bare :exc:`struct.error` instead of reaching
-        # the closing ``raise`` below. #799's nine-octet guard has since
-        # closed that particular route -- the same call now raises
-        # ``ProtocolError: unknown HTTP version``, the documented answer.
-        # Suppressing :exc:`struct.error` on the last arm stays regardless --
-        # kept deliberately, as defence in depth, rather than retired now
-        # that the case it was added for is closed. Whether anything
-        # can still reach it, and whether it should therefore go, is #825's
-        # open question, not settled here.
+        # The two arms suppress different sets, deliberately. Only the *last*
+        # arm also suppresses :exc:`struct.error`, as defence in depth: a payload
+        # too short for HTTP/2's nine-octet frame header, or whose frame-specific
+        # fields exceed what the buffer holds, must not escape as a stdlib
+        # exception that no caller of this method can catch. Such payloads raise
+        # ``ProtocolError`` at the source -- ``httpv2.HTTP.unpack`` rejects a
+        # buffer under nine octets, and :attr:`FieldBase.length
+        # <pcapkit.corekit.fields.field.FieldBase.length>` re-raises a
+        # negative-length template as
+        # :exc:`~pcapkit.utilities.exceptions.ProtocolError` -- so the
+        # suppression only guards whatever path is not yet known to do likewise.
         #
-        # #799 closed the *outer*-header slice of this: ``httpv2.HTTP.unpack``
-        # now rejects a buffer under nine octets before the schema layer runs
-        # at all, and ``read`` requires the declared length, the available
-        # buffer, and their consistency (``schema.length <= length``) all to
-        # hold. That did *not* retire this suppression, only shrink what it
-        # has to catch: a buffer that clears nine octets can still carry a
-        # frame type whose own fixed-width fields exceed what is left after
-        # the header -- a ``GOAWAY`` at 9-16 octets (``stream`` and ``error``
-        # alone are eight), a ``PUSH_PROMISE`` at 9-12, or any ``PADDED``
-        # ``DATA``/``HEADERS``/``PUSH_PROMISE`` whose ``pad_len`` exceeds the
-        # remainder -- and those still drive ``pkt['__length__']`` negative one
-        # field further in, past this guard's reach. Measured: a 16-octet
-        # ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)
-        # used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``
-        # directly. That class was closed at its actual root --
-        # :attr:`FieldBase.length
-        # <pcapkit.corekit.fields.field.FieldBase.length>` now catches
-        # :func:`struct.calcsize`'s failure on a negative-length template and
-        # re-raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
-        # generic across every schema in the tree rather than special-cased
-        # here. :meth:`Schema.unpack
-        # <pcapkit.protocols.schema.schema.Schema.unpack>`'s own
-        # running-counter warning was left alone on purpose: converting it too
-        # would reject a ``SETTINGS`` frame with a short trailing entry that
-        # parses successfully today while only warning, so that
-        # :class:`~pcapkit.utilities.warnings.SchemaWarning` still fires. The
-        # same ``GOAWAY`` now raises ``ProtocolError: Field debug resolved to
-        # a negative length; template='-1s'``.
-        #
-        # Widening the *first* arm the same way was measured and reverted, as it
-        # buys nothing and costs a great deal. Nothing reaches a
-        # :exc:`struct.error` through ``httpv1.HTTP``: nine byte patterns over
-        # lengths 0-24, on this route and on ``read(version=1)``, answered
-        # ``ProtocolError`` 450 times out of 450. And
+        # Suppressing it on the *first* arm is wrong: nine byte patterns over
+        # lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTP``, so
+        # it buys nothing, and
         # :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*
         # :exc:`struct.error`, so suppressing it on a non-final arm swallows
-        # pcapkit's own signal and hands the payload to the arm below -- which
+        # pcapkit's own signal and hands the payload to the arm below, which
         # accepts anything of at least nine octets. With a fault injected at arm
         # 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP
         # port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2
-        # mislabel of HTTP/1 traffic is the exact failure #787 exists to stop, and
-        # it is worse than letting the error escape to ``beholder``, which turns
-        # it into ``Raw``; it would also erase ``StructError.eof``, which
-        # ``NoPayload`` handling reads. ``unknown HTTP version`` is only the best
-        # case, needing arm 2 to decline as well.
+        # mislabel of HTTP/1 traffic is worse than letting the error escape to
+        # ``beholder``, which turns it into ``Raw``; it would also erase
+        # ``StructError.eof``, which ``NoPayload`` handling reads.
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._data, length, **kwargs)
 

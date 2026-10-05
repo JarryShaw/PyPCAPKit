@@ -16,19 +16,19 @@ as below:
    ====== ===== ================== ===============================
    0          0 ``ospf.version``   Version Number
    ------ ----- ------------------ -------------------------------
-   0          0 ``ospf.type``      Type
+   1          8 ``ospf.type``      Type
    ------ ----- ------------------ -------------------------------
-   0          1 ``ospf.len``       Packet Length (header included)
+   2         16 ``ospf.len``       Packet Length (header included)
    ------ ----- ------------------ -------------------------------
-   0          2 ``ospf.router_id`` Router ID
+   4         32 ``ospf.router_id`` Router ID
    ------ ----- ------------------ -------------------------------
-   0          4 ``ospf.area_id``   Area ID
+   8         64 ``ospf.area_id``   Area ID
    ------ ----- ------------------ -------------------------------
-   0          6 ``ospf.chksum``    Checksum
+   12        96 ``ospf.chksum``    Checksum
    ------ ----- ------------------ -------------------------------
-   0          7 ``ospf.autype``    Authentication Type
+   14       112 ``ospf.autype``    Authentication Type
    ------ ----- ------------------ -------------------------------
-   1          8 ``ospf.auth``      Authentication
+   16       128 ``ospf.auth``      Authentication
    ====== ===== ================== ===============================
 
 .. raw:: html

@@ -351,11 +351,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
             ptype: Protocol type.
 
         Returns:
-            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,
-            returns an :class:`~ipaddress.IPv4Address` object; if ``ptype`` is
-            ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`
-            object; otherwise, returns a raw :data:`str` representing the
-            protocol address.
+            Protocol address. If ``ptype`` is ``0x0800`` (IPv4), an
+            :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6), an
+            :class:`~ipaddress.IPv6Address`; otherwise, the address as a hex
+            :data:`str`.
 
         """
         if ptype == Enum_EtherType.Internet_Protocol_version_4:  # IPv4
@@ -371,8 +370,13 @@ class ARP(Link[Data_ARP, Schema_ARP],
             addr: Hardware address.
 
         Returns:
-            Hardware address. If ``htype`` is ``1``, i.e. MAC address,
-            returns ``:`` separated *hex* encoded MAC address.
+            Hardware address as :obj:`bytes`. If ``htype`` is ``1``, i.e. MAC
+            address, the ``:``- or ``-``-separated hex string is validated and
+            returned with the separators removed (still hex encoded).
+
+        Raises:
+            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a
+                well-formed MAC address.
 
         """
         _addr = addr.encode() if isinstance(addr, str) else addr
@@ -390,11 +394,11 @@ class ARP(Link[Data_ARP, Schema_ARP],
             addr: Protocol address.
 
         Returns:
-            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,
-            returns an :class:`~ipaddress.IPv4Address` object; if ``ptype`` is
-            ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`
-            object; otherwise, returns a raw :data:`str` representing the
-            protocol address.
+            Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or
+            ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16
+            octets; otherwise, a :data:`str` is encoded, an
+            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is
+            packed, and anything else is returned as given.
 
         Raises:
             FieldValueError: If ``addr`` is a :obj:`bool` (c.f.
@@ -404,9 +408,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Through :func:`parse_ip_address` rather than
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`
             directly, because :obj:`bool` is an :class:`int` subclass that
-            either constructor accepts without complaint. Before this,
-            ``addr=True`` packed as ``00000001`` (IPv4) or ``::1`` (IPv6) with
-            no exception and no warning at all (c.f. :issue:`508`, :issue:`540`).
+            either constructor accepts without complaint: ``addr=True`` would
+            pack as ``00000001`` (IPv4) or ``::1`` (IPv6) with no exception and
+            no warning.
 
             The description below uses :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias

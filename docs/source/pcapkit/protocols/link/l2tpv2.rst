@@ -57,10 +57,10 @@ reading ``2``. It is dispatched from
    whichever version was on the wire. The version is reported by
    :attr:`~pcapkit.protocols.link.l2tpv2.L2TPv2.alias` instead.
 
-   IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
-   references :rfc:`3931`, i.e. **L2TPv3**, whose session and control message
-   headers are a different shape -- so the binding waits on an ``L2TPv3`` class
-   rather than on this one. See :mod:`pcapkit.protocols.link.l2tp`.
+   IANA protocol number 115 (``L2TP``) is deliberately left unbound: it
+   references :rfc:`3931`, i.e. **L2TPv3**, whose headers have a different shape,
+   so the binding waits on an ``L2TPv3`` class rather than this one. See
+   :mod:`pcapkit.protocols.link.l2tp`.
 
 .. autoclass:: pcapkit.protocols.link.l2tpv2.L2TPv2
    :no-members:

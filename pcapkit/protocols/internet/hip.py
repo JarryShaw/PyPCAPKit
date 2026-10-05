@@ -259,23 +259,23 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
           schema=Schema_HIP, data=Data_HIP):
     """This class implements Host Identity Protocol.
 
-    Double-inherited, per the maintainer's convention given in review of the
-    work for :issue:`917`: a header that is *only* usable as an extension header
-    inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone,
-    while one that is also usable as a standalone protocol names
-    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is
-    both, on two independent grounds:
+    Double-inherited, per the convention set on :issue:`917`: a header usable
+    *only* as an extension header inherits
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one also
+    usable as a standalone protocol names
+    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is both,
+    on two independent grounds:
 
     * :rfc:`7401#section-5.1` states that "the HIP header is logically an
       IPv6 extension header", and IANA lists protocol 139 in its *IPv6
-      Extension Header Types* registry -- 11 entries, HIP among them.
-    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a
-      checksum for an **IPv4** header carrying ``Next Header: 139`` with
+      Extension Header Types* registry (11 entries).
+    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a checksum
+      for an **IPv4** header carrying ``Next Header: 139`` with
       ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4
-      payload, exactly as :class:`~pcapkit.protocols.internet.ah.AH` and
-      :class:`~pcapkit.protocols.internet.esp.ESP` do.
+      payload, as do :class:`~pcapkit.protocols.internet.ah.AH` and
+      :class:`~pcapkit.protocols.internet.esp.ESP`.
 
-    The second ground is what separates HIP from
+    The second ground separates HIP from
     :class:`~pcapkit.protocols.internet.mh.MH` and Shim6, which are protocols
     in their own right but cannot appear under IPv4:
     :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a
@@ -284,11 +284,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     than as protocol 135.
 
     ``Internet`` is already reached transitively through ``IPv6_Ext``; naming
-    it is what records the classification, so a future reader can tell a
-    deliberate standalone protocol from a header that merely inherits one.
+    it records the classification, so a reader can tell a deliberate standalone
+    protocol from a header that merely inherits one.
 
-    This class currently supports parsing of the following HIP parameters,
-    which are registered in the :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
+    This class parses the following HIP parameters, which are registered in the
+    :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
     attribute:
 
     .. list-table::
@@ -1018,11 +1018,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         locator_set = Data_LocatorSetParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            # NOTE: This was the one reported record length in this module left
-            # on the pre-#651 expression, held back to match the one padding
-            # site left on it. #679 moves both, together with the ``Length``
-            # unit they both read -- see ``LocatorSetParameter.padding`` in
-            # :mod:`pcapkit.protocols.schema.internet.hip`.
             length=parameter_total_len(schema.len),
             locator_set=tuple(_locs),
         )
@@ -1079,7 +1074,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # Keep the field's on-wire width, which ``_rand`` alone cannot carry:
             # ``int.bit_length()`` sees the value, not the octets it was padded
             # into. ``schema.len`` is ``4 + RHASH_len / 8``, so the width in bits
-            # is ``(schema.len - 4) * 8``. See #653.
+            # is ``(schema.len - 4) * 8``.
             rhash_len=(schema.len - 4) * 8,
         )
         return puzzle
@@ -1127,16 +1122,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         # :rfc:`7401#section-5.2.5` names this octet ``Reserved``, "zero when sent,
         # ignored when received", and only ``PUZZLE`` (:rfc:`7401#section-5.2.4`)
         # has a ``Lifetime`` at this offset. Record it verbatim rather than reading
-        # it as a ``2^(value - 32)`` duration: interpreting it wrote ``0x20`` into a
-        # field the RFC requires to be zero, and made the conformant ``0x00``
-        # impossible to re-serialise. See #654.
+        # it as a ``2^(value - 32)`` duration: that would write ``0x20`` into a
+        # field the RFC requires to be zero, and make the conformant ``0x00``
+        # impossible to re-serialise.
         _resv = schema.reserved
         _opak = schema.opaque
         _rand = schema.random
         # ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which
-        # is the same quantity as ``4 + 2 * (RHASH_len / 8)`` -- two equal-width fields
-        # of ``RHASH_len / 8`` octets -- only because ``RHASH_len`` is a whole number of
-        # octets. Do not reuse the ``/ 4`` shorthand on a width that is not; see #608.
+        # is the same quantity as ``4 + 2 * (RHASH_len / 8)`` (two equal-width fields
+        # of ``RHASH_len / 8`` octets) only because ``RHASH_len`` is a whole number of
+        # octets. Do not reuse the ``/ 4`` shorthand on a width that is not.
         _solt = schema.solution
 
         solution = Data_SolutionParameter(
@@ -1151,8 +1146,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # Keep the two fields' shared on-wire width, which the values alone
             # cannot carry. Each is ``RHASH_len / 8`` octets and ``schema.len`` is
             # ``4 + RHASH_len / 4``, so the width in bits is
-            # ``((schema.len - 4) // 2) * 8`` -- the same halving the schema's own
-            # field lengths do. See #653.
+            # ``((schema.len - 4) // 2) * 8``, the same halving the schema's own
+            # field lengths do.
             rhash_len=((schema.len - 4) // 2) * 8,
         )
         return solution
@@ -3128,12 +3123,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 # to octets *here*, ahead of the schema, so a bare
                 # ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``
                 # and hand the schema's ``SwitchField`` plain bytes that its guard
-                # cannot question. Before this, ``ip=True`` packed a locator of
-                # ``::1`` with no error at all. The ``version=6`` argument is the
-                # *IP* version rather than the HIP one the message names, and it is
-                # what keeps the ``int`` widening this signature documents --
-                # ``0x102`` is ``::102``, not the ``0.0.1.2`` that
-                # ``ipaddress.ip_address`` would give (c.f. #508).
+                # cannot question. The ``version=6`` argument is the *IP* version
+                # rather than the HIP one the message names, and it keeps the
+                # ``int`` widening this signature documents: ``0x102`` is
+                # ``::102``, not the ``0.0.1.2`` that ``ipaddress.ip_address``
+                # would give.
                 ip_val = parse_ip_address(
                     ip, f'HIPv{version}: [ParamNo {code}] invalid locator', version=6)
 
@@ -3172,16 +3166,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=code,
             # NOTE: ``Locator.len`` is ``Locator Length``, which
             # :rfc:`8046#section-4` gives "in 4-octet units" and which counts
-            # only the ``Locator`` field -- so a locator record is the eight
+            # only the ``Locator`` field, so a locator record is the eight
             # fixed octets (traffic type, locator type, locator length,
             # reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This
             # parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,
             # "length of the Contents, in bytes", so it is the sum of those
-            # record sizes. It was ``sum(locator['len'])`` until #679: ``4n``
+            # record sizes. Summing ``locator['len']`` instead gives ``4n``
             # where the contents are ``24n`` octets for plain IPv6 locators,
-            # which both mis-declared the record on the wire and starved the
-            # reader's ``ListField`` of the octets it needed -- see
-            # ``LocatorSetParameter.locators`` in
+            # mis-declaring the record and starving the reader's ``ListField``
+            # -- see ``LocatorSetParameter.locators`` in
             # :mod:`pcapkit.protocols.schema.internet.hip`.
             len=sum(8 + locator['len'] * 4 for locator in locators),
             locators=locators,
@@ -3211,28 +3204,27 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 to a value the one-octet field cannot hold.
 
         """
-        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: the old
-        # ``lifetime if isinstance(lifetime, int) else lifetime.total_seconds()``
-        # sent a plain ``float`` down the timedelta branch and escaped an
-        # :exc:`AttributeError` instead.
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
         seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
 
         # ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is
-        # not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it escapes the
-        # library's own error handling with a message naming neither HIP nor the
-        # field. It is reachable from conformant input rather than only from a
-        # crafted one: a ``Lifetime`` octet of ``0x00`` means ``2^-32`` seconds,
-        # below :class:`~datetime.timedelta`'s microsecond resolution, so parsing
-        # one yields ``timedelta(0)`` and re-serialising it lands here. See #654.
+        # not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it would
+        # escape the library's error handling with a message naming neither HIP
+        # nor the field. Conformant input reaches it: a ``Lifetime`` octet of
+        # ``0x00`` means ``2^-32`` seconds, below
+        # :class:`~datetime.timedelta`'s microsecond resolution, so parsing one
+        # yields ``timedelta(0)`` and re-serialising it lands here.
         if seconds <= 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
                                 f'{seconds} is not a positive number of seconds')
 
         octet = math.floor(math.log2(seconds) + 32)
 
-        # ``UInt8Field`` wraps rather than raising -- measured, ``300`` packs as
-        # ``0x2c`` -- so an out-of-range lifetime would otherwise be written as some
-        # other perfectly valid-looking duration.
+        # ``UInt8Field`` wraps rather than raising (``300`` packs as ``0x2c``), so
+        # an out-of-range lifetime would otherwise be written as some other
+        # valid-looking duration.
         if not 0 <= octet <= 0xFF:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
                                 f'{seconds} seconds encodes to {octet}, outside the '
@@ -3262,20 +3254,19 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Only case 4 can lose a leading zero octet, and it is the only case where the
         width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
-        declaring it. Reaching for it unconditionally is what re-serialised a
-        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (:issue:`653`) and what built, under
-        HIPv1, parameters this library's own reader then rejected (:issue:`655`).
+        declaring it. Using it unconditionally would re-serialise a
+        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,
+        parameters this library's own reader rejects.
 
         Two things this deliberately does *not* reject, both of which look like
         oversights and are not:
 
         * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
           zero-length output, so no conformant packet carries one -- but it is what
-          case 4 yields for the default ``random=0``, it is what a ``Length = 4``
-          parameter parses back to, and it is what this builder produced before this
-          change. Rejecting it would turn a degenerate-but-self-consistent case into
-          a new failure for callers that pass no value at all, which is beyond the
-          three defects this addresses.
+          case 4 yields for the default ``random=0``, and it is what a
+          ``Length = 4`` parameter parses back to. Rejecting it would turn a
+          degenerate-but-self-consistent case into a failure for callers that pass
+          no value at all.
         * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is
           treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and
           :meth:`_read_param_solution`, whose guards are likewise written as
@@ -3356,7 +3347,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_PuzzleParameter(
             type=code,
             # One field of ``RHASH_len / 8`` octets after the 4-octet
-            # ``#K``/``Lifetime``/``Opaque`` prefix -- :rfc:`7401#section-5.2.4`
+            # ``#K``/``Lifetime``/``Opaque`` prefix; :rfc:`7401#section-5.2.4`
             # spells the same quantity ``4 + RHASH_len / 8``.
             len=4 + self._make_puzzle_field_width(code, version, rhash_len, random),
             index=index,
@@ -3409,8 +3400,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # Both of these are `None`-sentinelled rather than overwritten
             # outright, unlike the data fields above. `Data_SolutionParameter` is
             # immutable, so a caller with a parsed parameter in hand has no other
-            # way to sanitise a peer's non-conformant `Reserved` -- or to re-frame
-            # the parameter for an association with a different `RHASH_len`.
+            # way to sanitise a peer's non-conformant `Reserved` or to re-frame
+            # the parameter for a different `RHASH_len`.
             if reserved is None:
                 reserved = param.reserved
             if rhash_len is None:
@@ -3422,13 +3413,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_SolutionParameter(
             type=code,
             # Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of
-            # ``RHASH_len / 8`` octets each -- so the contents length is necessarily
+            # ``RHASH_len / 8`` octets each, so the contents length is necessarily
             # even after the 4-octet ``#K``/``Reserved``/``Opaque`` prefix.
             # :rfc:`7401#section-5.2.5` spells the same quantity
-            # ``4 + RHASH_len / 4``, which is an identity only because a real
+            # ``4 + RHASH_len / 4``, an identity only because a real
             # ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an
             # arbitrary :meth:`int.bit_length` is not that quantity and yields an odd
-            # width that :meth:`_read_param_solution` rejects. See #608.
+            # width that :meth:`_read_param_solution` rejects.
             len=4 + 2 * self._make_puzzle_field_width(code, version, rhash_len,
                                                       random, solution),
             index=index,
@@ -3766,18 +3757,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             iv=iv,
             data=data,
         )
-        # NOTE: ``cipher`` is not a schema field -- ``ENCRYPTED``'s own wire
-        # format carries no cipher ID of its own, only the preceding
-        # ``HIP_CIPHER`` parameter does -- so passing it as a constructor
-        # keyword (as this used to) drew an ``UnknownFieldWarning`` and was
-        # dropped, leaving ``pre_unpack`` to fall back to its own sibling
-        # lookup, which a standalone ``make`` call gives no ``options`` to
-        # search and which then always treated the parameter as cipher-less
-        # and silently packed the ``ENCRYPTED`` parameter without its IV.
-        # Setting the already-resolved ``cipher_id`` as a plain attribute
-        # instead reaches ``pack()``'s packet context via
-        # ``packet.update(self.__dict__)``, where ``pre_unpack`` now honours
-        # it ahead of that lookup. See #556.
+        # NOTE: ``cipher`` is not a schema field: ``ENCRYPTED``'s own wire
+        # format carries no cipher ID, only the preceding ``HIP_CIPHER``
+        # parameter does. Passed as a constructor keyword it draws an
+        # ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall
+        # back to its sibling lookup, which a standalone ``make`` call gives no
+        # ``options`` to search; the parameter would then be treated as
+        # cipher-less and silently packed without its IV. Setting the
+        # already-resolved ``cipher_id`` as a plain attribute instead reaches
+        # ``pack()``'s packet context via ``packet.update(self.__dict__)``,
+        # where ``pre_unpack`` honours it ahead of that lookup.
         schema.cipher = cipher_id
         return schema
 

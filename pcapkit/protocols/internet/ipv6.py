@@ -60,59 +60,47 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     # Defaults.
     ##########################################################################
 
-    #: Extension header codes that have a *dedicated* parser class in this
-    #: package whose own layout follows :rfc:`6564#section-4`'s generic
-    #: ``next`` + ``Hdr Ext Len`` format (see the module docstring of
-    #: :mod:`pcapkit.protocols.internet.ipv6_ext` for the exception
-    #: table in full). When that dedicated parser raises,
-    #: :meth:`_import_next_layer` substitutes
-    #: :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #: Extension header codes with a *dedicated* parser class in this
+    #: package whose layout follows :rfc:`6564#section-4`'s generic ``next`` +
+    #: ``Hdr Ext Len`` format (see the module docstring of
+    #: :mod:`pcapkit.protocols.internet.ipv6_ext` for the exception table).
+    #: When that dedicated parser raises, :meth:`_import_next_layer`
+    #: substitutes :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     #: instead of letting the generic
     #: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
-    #: and used to crash the whole packet at :meth:`_decode_next_layer`'s
-    #: ``proto = info.next`` (GitHub issue :issue:`891`).
+    #: and so cannot continue the walk in :meth:`_decode_next_layer`.
     #:
-    #: :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
-    #: is deliberately absent, even though its wire format also conforms:
-    #: this package has never had a dedicated parser for it to begin with
-    #: (``pcapkit/protocols/internet/NotImplemented/shim6.py`` is a 0-byte
-    #: placeholder, excluded from the wheel by ``MANIFEST.in``), so there is
-    #: no "own parser" here for it to raise from -- ``Shim6`` reaches
-    #: :class:`IPv6_Ext` by *direct* registration instead (see the
-    #: bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which
-    #: already produces exactly this class without needing this set to name
-    #: it. ``ESP``, ``253`` and ``254`` are absent, but not for the same
-    #: reason as each other, and not because a generic fallback would help
-    #: them:
+    #: Three groups are deliberately absent:
     #:
+    #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
+    #:   has no dedicated parser (``pcapkit/protocols/internet/NotImplemented/shim6.py``
+    #:   is a 0-byte placeholder), so there is no "own parser" for it to raise
+    #:   from. It reaches :class:`IPv6_Ext` by *direct* registration (see the
+    #:   bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which already
+    #:   produces exactly this class.
     #: * ``ESP`` *does* have a dedicated, registered parser
-    #:   (:class:`~pcapkit.protocols.internet.esp.ESP`) -- it is excluded
+    #:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded
     #:   because :rfc:`4303` places the real Next Header byte inside the
     #:   encrypted trailer, so its own info always *carries* a ``next``
-    #:   attribute (unlike ``253``/``254`` below), just one that is
-    #:   :data:`None` whenever the payload could not be decrypted -- which,
-    #:   with no key material available to a generic parse, is always. The
-    #:   :meth:`_decode_next_layer` walk below still ends there, one iteration
-    #:   later, because :data:`None` fails
+    #:   attribute, just one that is :data:`None` whenever the payload could not
+    #:   be decrypted -- which, with no key material available to a generic
+    #:   parse, is always. The :meth:`_decode_next_layer` walk still ends
+    #:   there, one iteration later, because :data:`None` fails
     #:   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`'s
-    #:   constructor at the top of the loop -- the *existing* end-of-chain
-    #:   path, unrelated to the structural check this set exists for.
+    #:   constructor at the top of the loop -- the ordinary end-of-chain path,
+    #:   unrelated to the structural check this set exists for.
     #: * ``253`` and ``254`` have no dedicated parser at all, so they resolve
     #:   to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no
-    #:   ``next`` *attribute* -- this is what the structural check catches.
-    #:   (``BIT-EMU``/147 used to sit here too, until GitHub issue :issue:`925` found
-    #:   it was never in IANA's authoritative extension-header registry to
-    #:   begin with; :class:`~pcapkit.const.ipv6.extension_header
-    #:   .ExtensionHeader` no longer carries it, so a next-header byte of 147
-    #:   now fails that same constructor at the *top* of the loop instead --
-    #:   the ordinary end-of-chain path any unrecognised upper-layer protocol
-    #:   code already takes, one step earlier than it used to.)
+    #:   ``next`` *attribute*; the structural check in
+    #:   :meth:`_decode_next_layer` catches these. A next-header byte that is
+    #:   not in the extension-header registry at all (e.g. ``147``) fails the
+    #:   same constructor at the top of the loop, like any unrecognised
+    #:   upper-layer protocol code.
     #:
     #: :meth:`_decode_next_layer`'s walk stops cleanly at whichever of these
-    #: (or any other IANA code this package has not implemented) it meets,
-    #: and keeps this layer's own header intact instead of losing the whole
-    #: packet as it used to.
+    #: (or any other IANA code this package has not implemented) it meets, and
+    #: keeps this layer's own header intact.
     __generic_ext_codes__ = frozenset({
         Enum_ExtensionHeader.HOPOPT,
         Enum_ExtensionHeader.IPv6_Route,
@@ -416,30 +404,26 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # is what gets handed to ``super()._decode_next_layer`` below
             payload = payload[next_.length:]
 
-            # GitHub issue #891: a layer with no ``next`` field cannot
-            # safely continue the walk. This is a *structural* check --
-            # does the parsed info even carry a ``next`` attribute? -- not
-            # a fixed set of codes, and deliberately so: HOPOPT, IPv6-Route,
-            # IPv6-Opts, MH, HIP, IPv6-Frag and AH all have dedicated
-            # parsers whose data carries ``next``, and Shim6 and any
-            # recognised header whose own parser raised are both handled by
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`,
-            # which also carries ``next`` (possibly :data:`None`, on an
-            # overrun -- see its module docstring). Every IANA extension
-            # header code this package has not implemented a dedicated
-            # parser for -- today that is ``253`` and ``254``, and tomorrow
-            # it is whatever IANA assigns next -- has no
-            # generic fallback either (see :attr:`__generic_ext_codes__`'s
-            # docstring for why), so :meth:`_import_next_layer` returns a
-            # plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info
-            # carries no ``next`` at all. Reading ``info.next`` on that
-            # unconditionally is what used to raise ``AttributeError``
-            # here and let a further-out :func:`~pcapkit.utilities.decorators.beholder`
-            # catch it and degrade the *whole* packet -- the actual #891
-            # defect, for every code nobody has implemented. Stopping here
-            # instead keeps this layer's own fields (still recorded above,
-            # in ``self._exthdr`` and in the packet dict) and reports no
-            # further next header, exactly like the overrun case.
+            # A layer with no ``next`` field cannot safely continue the walk.
+            # This is a *structural* check -- does the parsed info even carry a
+            # ``next`` attribute? -- not a fixed set of codes, and deliberately
+            # so: HOPOPT, IPv6-Route, IPv6-Opts, MH, HIP, IPv6-Frag and AH all
+            # have dedicated parsers whose data carries ``next``, and Shim6 and
+            # any recognised header whose own parser raised are both handled by
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, which also
+            # carries ``next`` (possibly :data:`None`, on an overrun -- see its
+            # module docstring). Every IANA extension header code without a
+            # dedicated parser -- ``253`` and ``254`` today, and whatever IANA
+            # assigns next -- has no generic fallback either (see
+            # :attr:`__generic_ext_codes__`'s docstring for why), so
+            # :meth:`_import_next_layer` returns a plain
+            # :class:`~pcapkit.protocols.misc.raw.Raw`, whose info carries no
+            # ``next`` at all. Reading ``info.next`` on that unconditionally
+            # would raise ``AttributeError`` and let a further-out
+            # :func:`~pcapkit.utilities.decorators.beholder` degrade the *whole*
+            # packet. Stopping here instead keeps this layer's own fields (still
+            # recorded above, in ``self._exthdr`` and in the packet dict) and
+            # reports no further next header, exactly like the overrun case.
             #
             # This has to run -- and, on a hit, has to set ``proto`` --
             # *before* the fragment-header special case below: IPv6-Frag
@@ -495,31 +479,24 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Notes:
             If the dedicated parser for a code in :attr:`__generic_ext_codes__`
             raises, this substitutes
-            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-            for it rather than letting the exception reach the
+            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for it
+            rather than letting the exception reach the
             :func:`~pcapkit.utilities.decorators.beholder` decorating this
-            method, which would otherwise substitute plain
+            method, which would substitute plain
             :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no
-            ``next`` field, which is what used to crash the whole packet at
-            :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue
-            :issue:`891`). Every other exception -- including one raised by
-            ``IPv6_Ext`` itself, or by ``ESP``'s own dedicated
-            parser -- still reaches ``beholder`` unchanged, so *this
-            method's own* behaviour for anything outside that closed set is
-            exactly what it was before this method learned the
-            substitution: a plain ``Raw`` for that one layer. What changed
-            for ``253`` and ``254`` -- which have no dedicated parser at
-            all, so they were *already* reaching plain ``Raw`` with no
-            exception involved -- is one level up:
-            :meth:`_decode_next_layer` now stops its walk structurally on
+            ``next`` field, so it could not continue
+            :meth:`_decode_next_layer`'s walk. Every other exception --
+            including one raised by ``IPv6_Ext`` itself, or by ``ESP``'s own
+            dedicated parser -- still reaches ``beholder`` unchanged, giving a
+            plain ``Raw`` for that one layer. ``253`` and ``254`` have no
+            dedicated parser, so they reach plain ``Raw`` with no exception
+            involved; :meth:`_decode_next_layer` stops its walk structurally on
             any layer whose info carries no ``next`` attribute, ``Raw``
-            included, instead of reading ``info.next`` unconditionally and
-            crashing the whole packet. ``ESP`` is unaffected either way: its
-            info always carries a ``next`` (:data:`None`, since :rfc:`4303`
-            encrypts the real value), so neither this substitution nor that
-            structural check ever engages for it, and the walk ends after it
-            exactly as it always has -- see :attr:`__generic_ext_codes__`'s
-            docstring for the full distinction.
+            included. ``ESP``'s info always carries a ``next`` (:data:`None`,
+            since :rfc:`4303` encrypts the real value), so neither this
+            substitution nor that structural check engages for it, and the walk
+            ends after it -- see :attr:`__generic_ext_codes__`'s docstring for
+            the full distinction.
 
         """
         if TYPE_CHECKING:

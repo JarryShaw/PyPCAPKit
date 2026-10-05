@@ -6,11 +6,7 @@ Base Class
 :mod:`pcapkit.foundation.reassembly.ip` contains
 :class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
-origin. The following algorithm implement is based on IP
-reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment receivedbit table). Though another
-algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the elder one.
+origin, using the :rfc:`791` procedure described in :doc:`index`.
 
 .. autoclass:: pcapkit.foundation.reassembly.ip.IP
    :no-members:

@@ -12,25 +12,25 @@ as below:
 ======= ========= ====================== =============================================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================================
-  0           0   ``ip.version``          Version (``4``)
-  0           4   ``ip.hdr_len``          Internal Header Length (IHL)
-  1           8   ``ip.tos.pre``          Precedence
-  1          11   ``ip.tos.del``          Delay
-  1          12   ``ip.tos.thr``          Throughput
-  1          13   ``ip.tos.rel``          Reliability
-  1          14   ``ip.tos.ecn``          Explicit Congestion Notification (ECN)
-  2          16   ``ip.len``              Total Length
-  4          32   ``ip.id``               Identification
+  0           0   ``ipv4.version``        Version (``4``)
+  0           4   ``ipv4.hdr_len``        Internet Header Length (IHL)
+  1           8   ``ipv4.tos.pre``        Precedence
+  1          11   ``ipv4.tos.del``        Delay
+  1          12   ``ipv4.tos.thr``        Throughput
+  1          13   ``ipv4.tos.rel``        Reliability
+  1          14   ``ipv4.tos.ecn``        Explicit Congestion Notification (ECN)
+  2          16   ``ipv4.len``            Total Length
+  4          32   ``ipv4.id``             Identification
   6          48                           Reserved Bit (must be ``\x00``)
-  6          49   ``ip.flags.df``         Don't Fragment (DF)
-  6          50   ``ip.flags.mf``         More Fragments (MF)
-  6          51   ``ip.offset``           Fragment Offset
-  8          64   ``ip.ttl``              Time To Live (TTL)
-  9          72   ``ip.protocol``         Protocol (Transport Layer)
-  10         80   ``ip.checksum``         Header Checksum
-  12         96   ``ip.src``              Source IP Address
-  16        128   ``ip.dst``              Destination IP Address
-  20        160   ``ip.options``          IP Options (if IHL > ``5``)
+  6          49   ``ipv4.flags.df``       Don't Fragment (DF)
+  6          50   ``ipv4.flags.mf``       More Fragments (MF)
+  6          51   ``ipv4.offset``         Fragment Offset
+  8          64   ``ipv4.ttl``            Time To Live (TTL)
+  9          72   ``ipv4.protocol``       Protocol (Transport Layer)
+  10         80   ``ipv4.checksum``       Header Checksum
+  12         96   ``ipv4.src``            Source IP Address
+  16        128   ``ipv4.dst``            Destination IP Address
+  20        160   ``ipv4.options``        IP Options (if IHL > ``5``)
 ======= ========= ====================== =============================================
 
 .. autoclass:: pcapkit.protocols.internet.ipv4.IPv4

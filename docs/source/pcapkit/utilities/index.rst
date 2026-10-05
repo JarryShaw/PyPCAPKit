@@ -5,8 +5,8 @@ Module Utilities
 .. module:: pcapkit.utilities
 
 :mod:`pcapkit.utilities` contains several useful functions
-and classes which are fundations of :mod:`pcapkit`, including
-decorater function :func:`~pcapkit.utilities.decorators.seekset`
+and classes which are foundations of :mod:`pcapkit`, including
+decorator function :func:`~pcapkit.utilities.decorators.seekset`
 and :func:`~pcapkit.utilities.decorators.beholder`, and
 several user-refined exceptions and warnings.
 
@@ -51,7 +51,7 @@ following objects and functions:
    * - :class:`enum.StrEnum`
      - Python 3.11
    * - :func:`typing.final`
-     - Python 3.8
+     - Python 3.11
    * - :func:`decimal.localcontext(ctx=None, **kwargs) <decimal.localcontext>`
      - Python 3.11
    * - :func:`enum.show_flag_values`

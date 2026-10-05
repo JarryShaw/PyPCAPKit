@@ -1439,10 +1439,11 @@ class MHUnitTests(unittest.TestCase):
         ``_missing_``'s own ``0 <= value <= 255`` guard and, for an unknown
         *name*, aliased a second unknown key onto the first at a shared ``-1``
         sentinel. Both enums now raise instead of minting, so an unassigned
-        code degrades the MH parse to :class:`~pcapkit.protocols.misc.raw.Raw`
-        via ``@beholder`` rather than silently growing the class -- one
-        message's worth of damage over IPv4, the whole packet's over IPv6 --
-        see ``test_mh_local_enums_raise_and_do_not_alias`` for that
+        code no longer grows the class. Over IPv4 ``@beholder`` replaces the
+        MH layer and everything above it with
+        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 only the MH
+        header is replaced, by ``IPv6_Ext``, and the layers above it still
+        parse -- see ``test_mh_local_enums_raise_and_do_not_alias`` for that
         distinction and the other two RFC-inline enums.
         """
         from pcapkit.const.mh.option import Option

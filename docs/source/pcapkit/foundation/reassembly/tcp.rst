@@ -242,8 +242,8 @@ Terminology
        conflicting overlap is first-write-wins (:rfc:`9293#section-3.10`), so
        it never leaves a hole, and a contested range that was later filled in
        around does not stop the datagram from completing. ``conflict`` is
-       what lets a caller tell a clean stream from a contested one, now that
-       ``completed`` alone no longer can.
+       what lets a caller tell a clean stream from a contested one, which
+       ``completed`` alone cannot.
 
    reasm.tcp.buffer
        Data structure for internal buffering when performing reassembly algorithms

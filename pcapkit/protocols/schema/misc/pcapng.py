@@ -221,8 +221,8 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     Length less its fixed fields, an option's declared length less the part of
     itself it describes, an option area's leftover -- and every operand of those
     subtractions is a wire field that a malformed or truncated capture is free to
-    set to anything. Nothing made the difference non-negative, and the field
-    layer does not do it either: :meth:`_TextField.__call__
+    set to anything. Nothing else makes the difference non-negative, and the field
+    layer does not either: :meth:`_TextField.__call__
     <pcapkit.corekit.fields.strings._TextField.__call__>` builds its
     :mod:`struct` template as ``f'{length}s'`` unconditionally, so a negative
     length becomes the format ``'-8s'`` and :func:`struct.calcsize` raises a bare
@@ -230,8 +230,8 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     length reaches :meth:`io.RawIOBase.read` and raises a bare :exc:`ValueError`.
     Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell
     either from a bug in its own code, and neither is an :exc:`EOFError`, so
-    neither is caught by the frame loop -- one malformed block therefore cost the
-    whole extraction. See :issue:`678`.
+    neither is caught by the frame loop -- one malformed block would therefore
+    cost the whole extraction.
 
     Two shapes reach here. A Block Total Length below the block's own fixed-field
     floor -- 28 octets for a Section Header Block, 20 for an Interface
@@ -248,8 +248,8 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     :func:`bounded_area` already made, for the reason their docstrings give: a
     block read has no catch point above :meth:`FieldBase.unpack
     <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
-    whole extraction rather than one block, which is what the :issue:`431` accommodation exists
-    to prevent. The end of the file is the one case that is *not* a clamp, since
+    whole extraction rather than one block, so a capture cut short by its
+    snapshot length must keep parsing. The end of the file is the one case that is *not* a clamp, since
     there no block is being read at all -- see :meth:`PCAPNG._check_block_floor
     <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>`, which reports it
     as the :exc:`~pcapkit.utilities.exceptions.StreamEOFError` the frame loop
@@ -267,10 +267,8 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
         :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and
         :attr:`WireGuardKeyLog.data` -- out of this. They read ``__length__``
         *whole* rather than subtracting from it, and ``Schema.pack`` leaves it at
-        ``-1`` for "unknown", so flooring them packs nothing at all. Measured: it
-        emptied both secrets payloads, and the two ``EXPECTED_FAILURES`` entries
-        recording their round-trip mismatch then came back ``OK``, since an empty
-        payload compares equal to an empty payload. On the parsing path their
+        ``-1`` for "unknown", so flooring them packs nothing at all. On the
+        parsing path their
         ``__length__`` is the length the enclosing
         :class:`~pcapkit.corekit.fields.misc.SchemaField` declared from a 32-bit
         ``secrets_length``, which cannot be negative, so there is nothing there to
@@ -313,13 +311,12 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each
     with one option declaring 65,535 against none present, produced 131,070,000
     octets of zero padding, an amplification of 1,637x linear in the block
-    count. See :issue:`594`, and :issue:`573` for the
-    32-bit band the field layer's own budget already covers.
+    count. The field layer's own budget already covers the 32-bit band.
 
     The bound has to come from this layer because the field layer cannot see
     it. What distinguishes the crafted case from the legitimate one is not the
-    shortfall's size -- both are inside a 16-bit length, which is why :issue:`554`'s
-    ``len(buffer) < length`` rejection was declined -- but whether the option
+    shortfall's size -- both are inside a 16-bit length, which is why a plain
+    ``len(buffer) < length`` rejection does not work -- but whether the option
     is inconsistent with the framing the block itself declares. Block Total
     Length is authoritative and cross-checked against its own trailing copy, so
     the area is ``length`` less the fixed fields, ``captured_len`` and its
@@ -328,11 +325,12 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     capture says so through ``captured_len`` instead, and leaves its options
     whole, so it never trips this.
 
-    Clamping rather than refusing is what keeps the :issue:`431` accommodation: a
-    block read has no catch point above :meth:`FieldBase.unpack
-    <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
-    whole extraction rather than one block, and a truncated capture would stop
-    parsing at the cut instead of reporting the frames before it. The clamp is
+    Clamping rather than refusing keeps a capture cut short by its snapshot
+    length parsing: a block read has no catch point above
+    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
+    so one refusal aborts the whole extraction rather than one block, and a
+    truncated capture would stop parsing at the cut instead of reporting the
+    frames before it. The clamp is
     also history-independent -- it reads only this block's own declared framing
     -- which a running threshold would not be.
 
@@ -408,9 +406,8 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
         Secrets -- are deliberately left unclamped *against the block* here,
         since each computes its span with a different offset and the equality
         above has to be re-established per block rather than assumed. They do go
-        through :func:`nonnegative`, which is the part of :issue:`678` that stops a
-        declared length reaching a read at all; the per-block equality is still
-        open.
+        through :func:`nonnegative`, which stops a negative declared length
+        reaching a read at all; the per-block equality is not enforced for them.
 
         The nominal span goes through :func:`nonnegative` first here too. That
         closes a hole in this function's own arithmetic: a ``captured_len`` past
@@ -463,8 +460,8 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         or not those four octets were there to read --
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
         zero-pads a short read rather than refusing it. A tail of one, two or
-        three octets therefore arrived here negative and
-        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is :issue:`678`. The floor is a
+        three octets therefore arrives here negative, and
+        :meth:`io.RawIOBase.read` would raise a bare ``ValueError``. The floor is a
         backstop: :meth:`PCAPNG._check_block_floor
         <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>` reports that
         tail as end-of-stream before it gets here, and on the packing path
@@ -563,74 +560,49 @@ class OptionEnumField(EnumField):
             Processed field value -- the registry member declared for the
             option code in this namespace (or in the shared ``opt``
             namespace), or an unregistered member of the same registry,
-            carrying the code itself, when neither declares one. See GitHub
-            issue :issue:`575`.
+            carrying the code itself, when neither declares one.
 
         Notes:
-            Until GitHub issue :issue:`860`,
-            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` minted a
-            fresh member -- via :func:`aenum.extend_enum` -- for any code
-            neither namespace's row covers, unconditionally on a miss. :issue:`860`
-            converted that miss path to
-            :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
-            instead, so calling it now would no longer grow the registry
-            either. This still does not call it unconditionally, though, for
-            a reason that survives that fix: :meth:`EnumField.
-            _unregistered_member` (used below) carries its own
-            ``__reduce_ex__``, so a member built this way still round-trips
-            through :mod:`pickle` -- see that method's own docstring --
-            which :meth:`~pcapkit.const.pcapng.option_type.OptionType.
-            _unregistered_member`'s own override does not: its
-            :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is
-            the *formatted* display string (``'opt_unknown [8888]'``, not
-            ``8888``), so ``pickle.dumps`` on one succeeds but
-            ``pickle.loads`` of the result raises ``ValueError`` (measured
-            on Python 3.14.7) -- the default reduction reconstructs through
-            ``cls(self._value_)``, and ``_missing_``'s own int-only guard
-            rejects that formatted string outright. The base
-            :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
-            it overrides fails differently and earlier instead of not at
-            all: ``pickle.loads`` of its plain-built member's raw-code
-            ``_value_`` does succeed, but only by reconstructing through
-            ``_missing_`` -- and so through this override, not the base --
-            which is why the result's own ``_value_`` comes back as the
-            *formatted* string rather than the original code, and comparing
-            the two directly raises ``AttributeError`` on ``opt_value``.
-            What actually fails immediately on the base path is ``repr()``
-            itself, since
+            This replicates the read-only membership test
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` itself runs
+            first, and calls it only once that test finds the code declared. An
+            undeclared option type gets :meth:`EnumField._unregistered_member`
+            instead of ``get()``'s own miss path, for pickle-safety: that method
+            carries its own ``__reduce_ex__``, so a member built this way
+            round-trips through :mod:`pickle` -- see its own docstring -- which
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType.
+            _unregistered_member`'s override, the miss path, does not. The override's
+            :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is the
+            *formatted* display string (``'opt_unknown [8888]'``, not ``8888``),
+            so ``pickle.dumps`` on one succeeds but ``pickle.loads`` of the result
+            raises ``ValueError``: the default reduction reconstructs through
+            ``cls(self._value_)``, and ``_missing_``'s own int-only guard rejects
+            that formatted string outright.
+
+            The base :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+            that override replaces fails earlier, on ``repr()`` itself, since
             :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_name`/
-            :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_value`
-            are never set (measured) -- which is *why* the override exists
-            at all, choosing to render correctly over round-tripping
-            correctly. This method still reaches for
-            :meth:`EnumField._unregistered_member` rather than either of
-            :class:`OptionType`'s own two paths, base or override, because
-            it is the only one of the three that gets both right at once.
-            :func:`copy.deepcopy` is not the difference -- it succeeds on
-            both, unaffected by any of that: :class:`aenum.Enum` subclasses
-            the standard library's :class:`enum.Enum`, and it is *that*
-            stdlib base (not :class:`aenum.Enum` itself) that defines
+            :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_value` are
+            never set -- which is *why* the override exists, choosing to render
+            correctly over round-tripping correctly.
+            :meth:`EnumField._unregistered_member` is the only one of the three
+            that gets both right. :func:`copy.deepcopy` is not the difference: it
+            succeeds on both kinds, since the standard library's
+            :class:`enum.Enum` (which :class:`aenum.Enum` subclasses) defines
             ``__copy__``/``__deepcopy__`` to return ``self`` outright, so
-            deep-copying any member of either kind never reaches
-            ``__reduce_ex__`` in the first place. So this replicates the read-only
-            membership test :meth:`~pcapkit.const.pcapng.option_type.
-            OptionType.get` itself runs first, and only calls it once that
-            test finds the code already declared, so an undeclared option
-            type still gets :meth:`EnumField._unregistered_member` instead of
-            a registry row -- now for pickle-safety, not to avoid minting.
+            deep-copying any member never reaches ``__reduce_ex__``.
 
         """
         value = super(EnumField, self).post_process(value, packet)
         namespace = self._opt_ns
         members_ns = self._namespace.__members_ns__
         if value not in members_ns.get('opt', {}) and value not in members_ns.get(namespace, {}):
-            # NOTE: an unregistered member of self._namespace itself, per
-            # GitHub issue #575's owner ruling. ``.opt_name`` and
+            # NOTE: an unregistered member of self._namespace itself, per the
+            # ruling in EnumField._unregistered_member. ``.opt_name`` and
             # ``.opt_value`` are what a real OptionType member carries --
             # read unconditionally by e.g. pcapng's own ``_option_key`` --
-            # and the ``<namespace>_unknown`` name matches what the mint this
-            # replaces used to call it, so a rendered or re-keyed member
-            # reads the same either way. They are passed in the order
+            # and ``<namespace>_unknown`` names an undeclared code. They are
+            # passed in the order
             # OptionType.__new__ sets them, because DictDumper.object_hook
             # renders a member's addon keys straight out of its ``__dict__``
             # in insertion order, so any other order here would dump an
@@ -738,7 +710,6 @@ class Option(EnumSchema[Enum_OptionType]):
                 own fourth parameter ``namespace``, and before Python 3.11 that
                 parameter is positional-or-keyword rather than positional-only --
                 so a class keyword literally called ``namespace`` bound it twice.
-                See GitHub issue :issue:`439`.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
@@ -751,7 +722,7 @@ class Option(EnumSchema[Enum_OptionType]):
             .. code-block:: python
 
                from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
-               from pcapkit.protocols.schema.misc.pcapng improt Option
+               from pcapkit.protocols.schema.misc.pcapng import Option
 
                class NewOption(Option, ns='opt', code=Enum_OptionType.opt_new):
                    ...
@@ -765,9 +736,9 @@ class Option(EnumSchema[Enum_OptionType]):
         # move for the same reason. :meth:`Schema.__init_subclass__` is what
         # refuses to derive from a finalised schema, and a refusal has to land
         # before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling
-        # this last, as this method used to, let a raise discard the class object
-        # while leaving the registry pointing at it, so a rejected declaration
-        # still displaced a built-in option schema for the rest of the process.
+        # this last would let a raise discard the class object while leaving the
+        # registry pointing at it, so a rejected declaration would still
+        # displace a built-in option schema for the rest of the process.
         super().__init_subclass__()
 
         if ns is not None:
@@ -797,9 +768,7 @@ class Option(EnumSchema[Enum_OptionType]):
         reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`, as
         every other registry in the package does -- the lookup that follows
         cannot tell a deliberate replacement from an accidental one, so an
-        unreported overwrite is a parser silently swapped out for another. See
-        :issue:`675` for the
-        guard ``register_protocol`` added first, which this one now matches.
+        unreported overwrite is a parser silently swapped out for another.
 
         The guard is identity-based: it fires only when the incumbent differs
         from ``cls``, so re-registering the exact same class under the same
@@ -807,13 +776,8 @@ class Option(EnumSchema[Enum_OptionType]):
         rather than a warning about nothing displaced. That is what keeps
         :meth:`__init_subclass__` honest: it loops over a ``code`` list with no
         deduplication, so a repeated or aliased entry reaches this method twice
-        with the same class, and the second call now finds itself already the
-        incumbent. GitHub issue :issue:`718` corrected the previous presence-only
-        guard, which read every such repeat as a caller mistake whether or not
-        the value had actually changed -- the same fix the sibling
-        :meth:`register` methods on
-        :class:`~pcapkit.protocols.protocol.ProtocolBase` and friends already
-        received.
+        with the same class, and the second call finds itself already the
+        incumbent.
 
         Note:
             ``ns='opt'`` fans one registration out across every namespace, so the
@@ -1807,107 +1771,93 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             raised, for the reason :func:`nonnegative` gives: a bare
             :exc:`struct.error` is neither one of
             :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it
-            aborted the whole extraction rather than this one entry. See :issue:`678`.
+            would abort the whole extraction rather than this one entry.
 
             A line of nothing but NUL octets is the block's own 32-bit padding
             and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,
-            so those octets survived it and were read as the *name* of a binary
-            field -- which made every journal entry whose length is not a
-            multiple of four raise, valid or not, since the padding that follows
-            it has no 64-bit length prefix behind it to unpack. Measured on a
-            14-octet ``MESSAGE=hello\\n`` entry, which is as ordinary as this
-            block gets.
+            so those octets would survive it and be read as the *name* of a
+            binary field -- which would make every journal entry whose length is
+            not a multiple of four raise, valid or not, since the padding that
+            follows it has no 64-bit length prefix behind it to unpack. A
+            14-octet ``MESSAGE=hello\\n`` entry is as ordinary as this block
+            gets.
 
             A name line whose 64-bit length prefix is itself cut short ends the
             entry too. There is nothing to read past the end of the entry, so
             stopping at it is what keeps the truncated block parsing.
 
             A binary field's length is the widest declared length in the format,
-            and nothing bounded it against the entry holding it: at ``2**63`` and
-            above :meth:`io.BytesIO.read` refuses it outright with a bare
+            and nothing else bounds it against the entry holding it: at ``2**63``
+            and above :meth:`io.BytesIO.read` refuses it outright with a bare
             :exc:`OverflowError` (``cannot fit 'int' into an index-sized
-            integer``), and below that it silently returned whatever was there --
-            so the same malformed prefix was either fatal or invisible depending
-            only on its magnitude. It is clamped to the octets the entry has left
-            and reported, which is :func:`nonnegative`'s rule at the other end of
-            the same range.
+            integer``), and below that it silently returns whatever is there, so
+            the same malformed prefix would be either fatal or invisible
+            depending only on its magnitude. It is clamped to the octets the
+            entry has left and reported, which is :func:`nonnegative`'s rule at
+            the other end of the same range.
 
             Field names, keys and values are decoded with ``errors='replace'``
-            rather than strictly. A non-UTF-8 octet in any of the three raised a
-            bare :exc:`UnicodeDecodeError` -- a :exc:`ValueError`, so foreign on
-            both counts, and fatal to the whole extraction over one bad octet in
-            one field. ``'replace'`` is the option this module's own
+            rather than strictly. A non-UTF-8 octet in any of the three would
+            raise a bare :exc:`UnicodeDecodeError` -- a :exc:`ValueError`, so
+            foreign on both counts, and fatal to the whole extraction over one
+            bad octet in one field. ``'replace'`` is the option this module's own
             :class:`~pcapkit.corekit.fields.strings.StringField` already takes for
             the same problem, and a value that is not text is a value the writer
             should have emitted as a *binary* field, so the entry is malformed
             however it is read.
 
-            Entries used to be split apart with ``self.entry.split(b'\\n\\n')``
-            before a single field was read -- delimiting a *length-prefixed*
-            format by content, which a binary field's own bytes need no
-            escaping to defeat. A value that itself contains ``b'\\n\\n'`` was
-            cut in the middle of its own data, turning what followed it into a
-            bogus field in a fabricated second entry; a value 2,570 octets long
-            is worse, since ``struct.pack('<Q', 2570) ==
+            The entry is walked once, end to end, rather than split apart with
+            ``self.entry.split(b'\\n\\n')``: that delimits a *length-prefixed*
+            format by content, which a binary field's own bytes need no escaping
+            to defeat. A value that itself contains ``b'\\n\\n'`` would be cut
+            in the middle of its own data, turning what followed it into a bogus
+            field in a fabricated second entry; a value 2,570 octets long is
+            worse, since ``struct.pack('<Q', 2570) ==
             b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside
-            the length prefix itself*, so the split landed before a single
-            field was read. See :issue:`723`. The entry is
-            now walked once, end to end: a length-prefixed field's bytes are
-            never inspected for structure, only counted out by the prefix that
-            names them, and a blank line -- found by *reading*, not by
-            splitting -- is what starts the next entry. The one-octet
-            terminator that must follow a binary field's value, and the warning
-            when it is missing, are unchanged from :issue:`704`; walking the
-            buffer whole rather than pre-slicing it also retires that fix's
-            newline restoration, which existed only to undo what the slicing
-            itself had taken away.
+            the length prefix itself*. A length-prefixed field's bytes are never
+            inspected for structure, only counted out by the prefix that names
+            them, and a blank line -- found by *reading*, not by splitting -- is
+            what starts the next entry. The one-octet terminator that must follow
+            a binary field's value is checked, and a warning is raised when it is
+            missing.
 
-            A trailing separator -- a blank line with nothing behind it -- used
-            to be swallowed instead of ending the entry: with nothing left to
-            read, the walk stopped without recording that the separator had
-            been seen at all, so a rebuild lost that one octet and wrote a
-            :attr:`length` one short of what was read. It is now tracked
-            explicitly, so a blank line actually read, rather than the block's
-            own NUL padding or plain end of data, still starts the next entry --
-            even an empty one -- matching what splitting on it always did.
+            A trailing separator -- a blank line with nothing behind it -- is
+            tracked explicitly, so a blank line actually read, rather than the
+            block's own NUL padding or plain end of data, still starts the next
+            entry, even an empty one. Otherwise a rebuild would lose that one
+            octet and write a :attr:`length` one short of what was read.
 
-            The guard above ends the entry on a line of *nothing but* NUL
-            padding, but only catches it when the real content ahead of the
-            padding ended with its own newline -- which put the padding on a
-            line by itself for :meth:`~io.BytesIO.readline` to return alone.
-            An entry whose last field is missing that trailing newline, as
-            the format requires, has no such separation: :meth:`readline`
-            runs straight through the field's own bytes and into the
-            padding behind them, returning both as one line, and
-            :meth:`bytes.strip` still will not take the NUL octets off since
-            they are not ASCII whitespace. The padding then went out as part
-            of the field's value with nothing to flag it, silently, however
-            small -- see :issue:`794`.
-            :meth:`~io.BytesIO.readline` returns a line without its own
-            trailing newline only at end of stream, so a terminator-less
-            line is necessarily the buffer's last one; a binary field's
-            *name* landing on such a line fails its own 8-octet
-            length-prefix read for the same reason, nothing being left
-            behind it to hold one, so the guard below firing on that shape
-            of line too is harmless. A binary field's *value*, once its
-            name and length prefix are known, is read by that length prefix
-            directly, never by scanning for a line ending, so real block
-            padding immediately behind one cannot land inside it this way:
-            the one-octet terminator check already in place is always
-            reached in that case, and either reads the real separator
-            newline and passes silently, or reads padding's first octet
-            instead, fails, and reports it. Block padding is always 0-3
-            octets, whatever the last field turns out to be, so at most the
-            trailing three octets of a terminator-less line are stripped as
-            padding and warned about, and only when the line's own raw,
-            unstripped tail is itself NUL -- anything past three such
-            octets, or a line whose actual last octet is not NUL at all,
-            cannot be padding and is left as data. This cannot tell a
-            padding octet from a text value that itself legitimately ends
-            in one -- NUL is valid UTF-8 -- but that entry is already
-            malformed for lacking the newline the format mandates, and
-            returning the block's own padding as field data is the one
-            outcome that must not survive it.
+            The NUL-only guard above ends the entry on a line of *nothing but*
+            NUL padding, but only catches it when the content ahead of the
+            padding ended with its own newline, which puts the padding on a line
+            by itself for :meth:`~io.BytesIO.readline` to return alone. An entry
+            whose last field is missing that trailing newline, as the format
+            requires, has no such separation: :meth:`readline` runs straight
+            through the field's own bytes and into the padding behind them,
+            returning both as one line, and :meth:`bytes.strip` still will not
+            take the NUL octets off since they are not ASCII whitespace.
+            :meth:`~io.BytesIO.readline` returns a line without its own trailing
+            newline only at end of stream, so a terminator-less line is
+            necessarily the buffer's last one; a binary field's *name* landing on
+            such a line fails its own 8-octet length-prefix read for the same
+            reason, nothing being left behind it to hold one, so the guard below
+            firing on that shape of line too is harmless. A binary field's
+            *value*, once its name and length prefix are known, is read by that
+            length prefix directly, never by scanning for a line ending, so real
+            block padding immediately behind one cannot land inside it this way:
+            the one-octet terminator check is always reached in that case, and
+            either reads the real separator newline and passes silently, or reads
+            padding's first octet instead, fails, and reports it. Block padding
+            is always 0-3 octets, whatever the last field turns out to be, so at
+            most the trailing three octets of a terminator-less line are stripped
+            as padding and warned about, and only when the line's own raw,
+            unstripped tail is itself NUL -- anything past three such octets, or a
+            line whose actual last octet is not NUL at all, cannot be padding and
+            is left as data. This cannot tell a padding octet from a text value
+            that itself legitimately ends in one -- NUL is valid UTF-8 -- but
+            that entry is already malformed for lacking the newline the format
+            mandates, and returning the block's own padding as field data is the
+            one outcome that must not survive it.
 
         """
         self = cast('Self', super().post_process(packet))
@@ -1956,7 +1906,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                     # always NUL, never whitespace, so a `raw_line` ending in
                     # anything else -- ordinary trailing whitespace included
                     # -- proves the true padding is zero, and nothing here
-                    # may be stripped. See #794.
+                    # may be stripped.
                     # the outer gate above already requires `raw_line` --
                     # and therefore `line`, since `bytes.strip()` cannot
                     # remove a trailing NUL -- to end in one, so this loop
@@ -2006,11 +1956,9 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                         # the reader's position is well defined either way --
                         # exactly length + 1 octets past where the field name
                         # started -- so a bad octet here ends only this
-                        # entry's field collection, matching #704: it does not
-                        # abort the walk, which keeps looking for the next
-                        # entry's separator from here. See #723 for why an
-                        # outer abort was considered and rejected as
-                        # the default.
+                        # entry's field collection: it does not abort the
+                        # walk, which keeps looking for the next entry's
+                        # separator from here.
                         terminator = entry_data.read(1)
                         if terminator != b'\n':
                             warn(f'PCAP-NG: [systemd Journal Export] binary field '

@@ -127,14 +127,11 @@ class FrameType(EnumSchema[Enum_Frame]):
     class Flags(EnumLookup, enum.IntFlag):
         """Flags enumeration for HTTP/2 frames.
 
-        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per
-        GitHub issue :issue:`877`'s ruling that every non-registry enumeration
-        shares that lookup contract. The six concrete per-frame subclasses
-        below each declare ``class Flags(FrameType.Flags):`` with no base
-        list of their own, so they inherit :class:`EnumLookup` transitively
-        through this one re-parent rather than needing it repeated --
-        verified at runtime for GitHub issue :issue:`877` (see the session report),
-        not merely assumed from the MRO rules.
+        Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract
+        shared by every non-registry enumeration. The six concrete per-frame
+        subclasses below each declare ``class Flags(FrameType.Flags):`` with no
+        base list of their own, so they inherit :class:`EnumLookup`
+        transitively rather than needing it repeated.
 
         """
 
@@ -155,7 +152,7 @@ class FrameType(EnumSchema[Enum_Frame]):
         # ``0`` only as a side effect, so without this a flags octet of ``0x00``
         # -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and
         # a membership test against it raises :exc:`TypeError` rather than
-        # answering. This mirrors the construct path, which already seeds
+        # answering. This mirrors the construct path, which seeds
         # ``Flags(0)`` at every one of its six sites.
         #
         # ``FrameType.Flags`` itself declares no members, and from Python 3.11
@@ -213,12 +210,12 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
     # -- "read no payload at all" -- for every frame without the ``PADDED``
     # flag. ``__length__`` is the *remaining* declared length at this field, so
     # the unpadded arm wants ``__length__`` itself, which is what subtracting a
-    # zero padding length gives. Padding is rare in HTTP/2, so the broken arm
-    # was the common one: an unpadded ``DATA`` frame parsed with ``data`` as
-    # ``b''`` and nothing raised or warned. The parentheses also keep
+    # zero padding length gives. Padding is rare in HTTP/2, so that arm would be
+    # the common one: an unpadded ``DATA`` frame would parse with ``data`` as
+    # ``b''`` and nothing would raise or warn. The parentheses also keep
     # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
     # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
-    # it as :data:`~pcapkit.corekit.fields.field.NO_VALUE`. See #668.
+    # it as :data:`~pcapkit.corekit.fields.field.NO_VALUE`.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
@@ -237,7 +234,7 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
     """Header schema for HTTP/2 ``HEADERS`` frames."""
 
     class Flags(FrameType.Flags):
-        """Flags enumeration for HTTP/2 ``DATA`` frames."""
+        """Flags enumeration for HTTP/2 ``HEADERS`` frames."""
 
         END_STREAM  = BIT_0 = 0x1
         END_HEADERS = BIT_2 = 0x4
@@ -267,8 +264,7 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
     # NOTE: the conditional subtracts the padding length rather than replacing
     # the whole expression -- see :attr:`DataFrame.data` for why the outer
     # parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame
-    # read its header block fragment as ``b''``, which is exactly what HPACK
-    # decoding would need. See #668.
+    # would read its header block fragment as ``b''``.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
@@ -365,7 +361,7 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
     # NOTE: the conditional subtracts the padding length rather than replacing
     # the whole expression -- see :attr:`DataFrame.data` for why the outer
     # parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``
-    # frame read its header block fragment as ``b''``. See #668.
+    # frame would read its header block fragment as ``b''``.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))

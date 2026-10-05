@@ -38,18 +38,17 @@ message header from v2, and is reachable two ways -- over UDP port 1701 like v2
 IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second
 route is why
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
-leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a
+leaves 115 unbound: the binding waits on an ``L2TPv3`` class, not on a
 different framing decision. It also means v3 is the first member of this family
 to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
 
-GitHub issue :issue:`548` proposed closing that gap by binding
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead, which does not
-work and is worth recording so it is not proposed again. Over IP the v3 session
-header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions imposed
-by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw 32-bit
-Session ID and carries **no version nibble at all**, so there is nothing a v2
-parser could even test to recognise that the datagram is not its own. Measured,
-that binding reported ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``
+Binding :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead does not
+work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3
+session header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions
+imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw
+32-bit Session ID and carries **no version nibble at all**, so there is nothing a
+v2 parser could test to recognise that the datagram is not its own. Measured,
+that binding reports ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``
 for a v3-over-IP datagram: a complete header assembled out of the top half of a
 Session ID and the first two octets of the PPP frame behind it. 115 is a missing
 *class*, not a missing registration, and until that class exists an undissected
@@ -69,7 +68,7 @@ callers take element zero as canonical.
 Selecting a version
 -------------------
 
-Nothing *dispatches* on the version nibble yet, because only one version exists
+Nothing *dispatches* on the version nibble, because only one version exists
 -- but :meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` does
 **check** it, and refuses anything other than ``2``. That is the half of the
 mechanism which is useful with one version implemented: it keeps v3 traffic on

@@ -6,9 +6,8 @@ Root Protocol
 .. currentmodule:: pcapkit.protocols.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
-:class:`~pcapkit.protocols.protocol.Protocol` only, which is
-an abstract base class for all protocol family, with pre-defined
-utility arguments and methods of specified protocols.
+:class:`~pcapkit.protocols.protocol.Protocol` only, the abstract base class for
+all protocol families, with pre-defined utility arguments and methods.
 
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:

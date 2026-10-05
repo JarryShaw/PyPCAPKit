@@ -2,11 +2,9 @@
 IP Datagram Reassembly
 ======================
 
-The following algorithm implement is based on IP
-reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment receivedbit table). Though another
-algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the original one.
+The algorithm below follows the IP reassembly procedure of :rfc:`791`, using
+``RCVBT`` (fragment received bit table). :rfc:`815` explains an alternative
+that replaces ``RCVBT``; it is not used here.
 
 .. toctree::
    :maxdepth: 2

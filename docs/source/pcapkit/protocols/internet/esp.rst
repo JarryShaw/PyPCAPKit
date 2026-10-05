@@ -120,12 +120,8 @@ registered**: 3DES, AES-CTR, the AES-CCM and Camellia families,
 ChaCha20-Poly1305, the implicit IV variants of :rfc:`8750`, the :rfc:`9227`
 MGM suites, and the transforms long since deprecated.
 
-The enumerations themselves are generated into :mod:`pcapkit.const.esp` and
-re-exported here for convenience:
-:class:`Cipher <pcapkit.const.esp.cipher.Cipher>` is
-:class:`pcapkit.const.esp.cipher.Cipher` and :class:`Integrity
-<pcapkit.const.esp.integrity.Integrity>` is
-:class:`pcapkit.const.esp.integrity.Integrity`.
+Both enumerations are generated into :mod:`pcapkit.const.esp` and re-exported
+from this module.
 
 Both enumerations additionally carry each transform's prefix-stripped spelling
 as an alias, since that is how ESP and :rfc:`8221` name the algorithms, so

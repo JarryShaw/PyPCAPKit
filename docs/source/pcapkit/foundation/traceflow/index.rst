@@ -6,9 +6,7 @@ Flow Tracing
 
 .. note::
 
-   This was implemented at the demand of my mate
-   `@gousaiyang <https://github.com/gousaiyang>`__. It is
-   a approximate functionality of *Follow TCP Streams* in
+   This approximates the *Follow TCP Stream* feature of
    `Wireshark <https://www.wireshark.org/>`__.
 
 :mod:`pcapkit.foundation.traceflow` implements flow tracing functions

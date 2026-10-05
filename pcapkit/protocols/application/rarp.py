@@ -59,7 +59,7 @@ class RARP(Application, ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disab
         :class:`~pcapkit.protocols.link.link.Link`, which *owns* ``__layer__``,
         so ``class RARP(ARP, Application)`` would report ``'Link'``.
 
-        The subpackage does not track the dispatch tier either: RARP is still
+        The subpackage does not track the dispatch tier either: RARP is
         dispatched from :attr:`Link.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>` at
         :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`,
