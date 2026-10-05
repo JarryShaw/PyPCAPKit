@@ -13,16 +13,15 @@ identity -- :attr:`~pcapkit.protocols.link.s_tag.S_Tag.name`,
 :attr:`~pcapkit.protocols.link.s_tag.S_Tag.alias`,
 :attr:`~pcapkit.protocols.link.s_tag.S_Tag.info_name` -- and its registry index.
 
-It lives in a module of its own rather than beside
-:class:`~pcapkit.protocols.link.c_tag.C_Tag` because the two are reached through
-*different* registry indices, ``0x88A8`` against ``0x8100``, which is the
-project's rule for when protocols share a module.
+It has a module of its own, apart from
+:class:`~pcapkit.protocols.link.c_tag.C_Tag`, because the two are reached through
+*different* registry indices, ``0x88A8`` against ``0x8100``; see
+:mod:`pcapkit.protocols.link.vlan` for the rule.
 
 .. note::
 
-   802.1ad was incorporated into IEEE 802.1Q-2011, so the service tag is
-   specified by 802.1Q today. The ``802.1ad`` name is kept because it is what the
-   provider-bridging tag is universally called.
+   802.1ad is part of IEEE 802.1Q-2011. The ``802.1ad`` name is kept because it
+   is what the provider-bridging tag is universally called.
 
 .. autoclass:: pcapkit.protocols.link.s_tag.S_Tag
    :no-members:

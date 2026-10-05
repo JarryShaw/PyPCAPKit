@@ -11,15 +11,15 @@ below:
 
 .. table::
 
-   ====== ===== ============ =========================
-   Octets Bits  Name         Description
-   ====== ===== ============ =========================
-   0          0 ``eth.dst``  Destination MAC Address
-   ------ ----- ------------ -------------------------
-   1          8 ``eth.src``  Source MAC Address
-   ------ ----- ------------ -------------------------
-   2         16 ``eth.type`` Protocol (Internet Layer)
-   ====== ===== ============ =========================
+   ====== ===== ================= =========================
+   Octets Bits  Name              Description
+   ====== ===== ================= =========================
+   0          0 ``ethernet.dst``  Destination MAC Address
+   ------ ----- ----------------- -------------------------
+   6         48 ``ethernet.src``  Source MAC Address
+   ------ ----- ----------------- -------------------------
+   12        96 ``ethernet.type`` Protocol (Internet Layer)
+   ====== ===== ================= =========================
 
 .. autoclass:: pcapkit.protocols.link.ethernet.Ethernet
    :no-members:

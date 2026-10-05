@@ -12,9 +12,9 @@ as below:
 ======= ========= =================== =================================
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
-  0           0   ``opt.next``              Next Header
-  1           8   ``opt.length``            Header Extensive Length
-  2          16   ``opt.options``           Options
+  0           0   ``opts.next``             Next Header
+  1           8   ``opts.length``           Header Extensive Length
+  2          16   ``opts.options``          Options
 ======= ========= =================== =================================
 
 .. autoclass:: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts
