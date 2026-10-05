@@ -602,14 +602,11 @@
 <span class="sd">        :rfc:`8200#section-4.5` states that the Fragment header is not present in</span>
 <span class="sd">        the reassembled packet, and that the Next Header field of the last header</span>
 <span class="sd">        of the unfragmentable part comes from the Fragment header's. Left alone,</span>
-<span class="sd">        the reassembled datagram advertises a Fragment header on a datagram that</span>
-<span class="sd">        is by definition no longer a fragment, which is what every engine used to</span>
-<span class="sd">        report -- the toolkit adapters differ over whether the Fragment header's</span>
-<span class="sd">        *octets* belong to ``header``, but none of them rewrote the field that</span>
-<span class="sd">        points at it.</span>
-
-<span class="sd">        The Fragment header's own octets are already excluded by the adapters, so</span>
-<span class="sd">        only the field pointing at it is left to fix.</span>
+<span class="sd">        the reassembled datagram would advertise a Fragment header on a datagram</span>
+<span class="sd">        that is by definition no longer a fragment. The toolkit adapters differ</span>
+<span class="sd">        over whether the Fragment header's *octets* belong to ``header``, but none</span>
+<span class="sd">        rewrites the field that points at it; the octets are already excluded, so</span>
+<span class="sd">        only that field is left to fix.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            header: Raw header octets of the fragment at fragment offset zero.</span>

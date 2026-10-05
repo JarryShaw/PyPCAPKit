@@ -566,8 +566,8 @@
 
     <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped.</span>
     <span class="c1">#: Only :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:``</span>
-    <span class="c1">#: still reads as it did while this was a :obj:`bool`; equality against</span>
-    <span class="c1">#: :obj:`True` or :obj:`False` no longer holds.</span>
+    <span class="c1">#: reads as it would for a :obj:`bool`; equality against :obj:`True` or</span>
+    <span class="c1">#: :obj:`False` does not hold.</span>
     <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span>
     <span class="c1">#: Original packet identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
@@ -612,15 +612,15 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1"># NOTE: one signature, not a pair of ``@overload``\\ s keyed on</span>
-        <span class="c1"># ``completed``. There used to be two, correlating a complete datagram with</span>
-        <span class="c1"># a ``bytes`` payload and a parsed ``packet``, and an incomplete one with a</span>
-        <span class="c1"># tuple of fragments and ``packet=None``. That correlation does not hold:</span>
+        <span class="c1"># ``completed``. Such a pair would correlate a complete datagram with a</span>
+        <span class="c1"># ``bytes`` payload and a parsed ``packet``, and an incomplete one with a</span>
+        <span class="c1"># tuple of fragments and ``packet=None``, but that correlation does not hold:</span>
         <span class="c1"># under ``strict=False`` an *incomplete* datagram is reported as one</span>
         <span class="c1"># contiguous ``bytes`` with its holes zero-filled, and analysed, because</span>
         <span class="c1"># that is the payload buffer as it stands -- which is what</span>
         <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream</span>
         <span class="c1"># from. Overloads keyed on a literal cannot be selected from a ``completed``</span>
-        <span class="c1"># computed at runtime anyway, so they only made the reassemblers' own calls</span>
+        <span class="c1"># computed at runtime anyway, so they would make the reassemblers' own calls</span>
         <span class="c1"># untypeable while promising a correlation the code does not keep.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 

@@ -574,19 +574,15 @@
 <span class="sd">      the :mod:`sys` module.</span>
 
 <span class="sd">    The walk goes through :func:`inspect.currentframe` and ``f_back`` rather than</span>
-<span class="sd">    :func:`traceback.extract_stack`, which *used to* be unusable here for a sharper</span>
-<span class="sd">    reason than cost: :meth:`traceback.StackSummary.extract` honours</span>
-<span class="sd">    :data:`sys.tracebacklimit`, and :class:`BaseError` used to set that to ``0`` for</span>
-<span class="sd">    every loud error outside development mode. One such error therefore made</span>
-<span class="sd">    ``extract_stack()`` return an *empty* list for the rest of the process, which is</span>
-<span class="sd">    where the old ``-1`` came from -- so in ordinary use the first error silently</span>
-<span class="sd">    broke the attribution of every warning after it. :class:`BaseError` no longer</span>
-<span class="sd">    touches :data:`sys.tracebacklimit` at all (it prints its terse line through an</span>
-<span class="sd">    exception hook instead), which removes that failure mode -- but the frame walk</span>
-<span class="sd">    remains the right approach regardless of it: it skips building the</span>
+<span class="sd">    :func:`traceback.extract_stack`: it skips building the</span>
 <span class="sd">    :class:`~traceback.FrameSummary` objects and the :mod:`linecache` lookups</span>
 <span class="sd">    :func:`traceback.extract_stack` does for every frame, which is worth avoiding on</span>
-<span class="sd">    a function called once per warning.</span>
+<span class="sd">    a function called once per warning. It is also immune to</span>
+<span class="sd">    :data:`sys.tracebacklimit`, which :meth:`traceback.StackSummary.extract`</span>
+<span class="sd">    honours: a limit of ``0`` would make ``extract_stack()`` return an *empty* list</span>
+<span class="sd">    and silently break the attribution of every warning. :class:`BaseError` does not</span>
+<span class="sd">    set that limit (it prints its terse line through an exception hook instead), but</span>
+<span class="sd">    user code may.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        The level is relative to the *caller* of :func:`stacklevel`. A function</span>
@@ -658,14 +654,10 @@
 
 <span class="sd">    Important:</span>
 
-<span class="sd">        * This terseness used to come from setting :data:`sys.tracebacklimit` to</span>
-<span class="sd">          ``0``, which is process-global: one loud error truncated the tracebacks</span>
-<span class="sd">          of every *other*, unrelated exception for the rest of the process,</span>
-<span class="sd">          including ones that had nothing to do with :mod:`pcapkit`. It also,</span>
-<span class="sd">          incidentally, was what kept a loud error raised on a worker thread</span>
-<span class="sd">          terse, since the interpreter's default :data:`threading.excepthook`</span>
-<span class="sd">          itself consults :data:`sys.tracebacklimit`. The two hooks here replace</span>
-<span class="sd">          that mechanism precisely because neither has that reach -- each</span>
+<span class="sd">        * The terseness is deliberately not done by setting</span>
+<span class="sd">          :data:`sys.tracebacklimit` to ``0``: that is process-global, so one loud</span>
+<span class="sd">          error would truncate the tracebacks of every *other*, unrelated</span>
+<span class="sd">          exception for the rest of the process. Each of the two hooks here</span>
 <span class="sd">          shortens the printing of a :class:`BaseError` only, and hands every</span>
 <span class="sd">          other exception, unchanged, to whatever hook :mod:`pcapkit` found</span>
 <span class="sd">          installed before it first needed its own.</span>
@@ -679,10 +671,9 @@
 <span class="sd">          neither. See GitHub issue :issue:`719`.</span>
 <span class="sd">        * The ``stacklevel`` of the log record is the relative level</span>
 <span class="sd">          :func:`stacklevel` computes, so the record is attributed to the caller</span>
-<span class="sd">          whose operation failed rather than to this module. It used to be</span>
-<span class="sd">          *negated*, which :meth:`logging.Logger.findCaller` reads as "do not walk</span>
-<span class="sd">          out at all" and which therefore blamed :mod:`logging` itself for every</span>
-<span class="sd">          error pcapkit raised.</span>
+<span class="sd">          whose operation failed rather than to this module. It must not be</span>
+<span class="sd">          negated: :meth:`logging.Logger.findCaller` reads that as "do not walk</span>
+<span class="sd">          out at all" and would blame :mod:`logging` itself for every error.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :func:`pcapkit.utilities.exceptions.stacklevel`</span>
@@ -750,10 +741,9 @@
 <span class="sd">    only ever hands it the top exception's own traceback -- the chain's inner</span>
 <span class="sd">    links keep their *real* ``__cause__``/``__context__`` traceback attributes</span>
 <span class="sd">    regardless, untouched by this call, and get printed in full. ``limit=0``</span>
-<span class="sd">    against the real ``tb`` is what reaches every link, matching exactly what</span>
-<span class="sd">    :data:`sys.tracebacklimit` set to ``0`` used to produce for the same</span>
-<span class="sd">    exception -- the one-line answer for a plain :class:`BaseError` and the</span>
-<span class="sd">    *same* chain-without-frames answer this used to get wrong.</span>
+<span class="sd">    against the real ``tb`` is what reaches every link, giving the one-line</span>
+<span class="sd">    answer for a plain :class:`BaseError` and a chain without frames for a</span>
+<span class="sd">    chained one.</span>
 
 <span class="sd">    Anything else is handed to ``_previous_excepthook`` exactly as received, so</span>
 <span class="sd">    a program with its own hook installed before :mod:`pcapkit` needed one --</span>
@@ -830,15 +820,10 @@
 <span class="sd">    was previously installed -- unchanged, header included, since that path</span>
 <span class="sd">    does not touch the default hook's own printing at all.</span>
 
-<span class="sd">    Replacing this hook is the other half of why :data:`sys.tracebacklimit`</span>
-<span class="sd">    cannot simply be dropped without a replacement: the interpreter's *default*</span>
-<span class="sd">    :data:`threading.excepthook` itself consults :data:`sys.tracebacklimit` when</span>
-<span class="sd">    printing an uncaught exception from a worker thread, which is what made a</span>
-<span class="sd">    loud :class:`BaseError` there terse before this hook existed, incidentally</span>
-<span class="sd">    rather than by any thread-aware design on this module's part. Without this,</span>
-<span class="sd">    removing the global would have *regressed* that path from one line to a</span>
-<span class="sd">    full default traceback, even though the defect it was fixing is itself</span>
-<span class="sd">    thread-independent.</span>
+<span class="sd">    This hook is needed because the interpreter's *default*</span>
+<span class="sd">    :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which</span>
+<span class="sd">    :class:`BaseError` does not set; without it a loud :class:`BaseError` raised</span>
+<span class="sd">    on a worker thread would print a full default traceback.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_threading_hook_state</span><span class="p">,</span> <span class="s1">'running'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>

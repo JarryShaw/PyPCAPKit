@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/ext.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit is designed with extensive ability in customisation and extension. It is easy to add new protocols, layers, fields, and even new file formats. This section will introduce how to customise a..." />
-<meta name="description" content="pcapkit is designed with extensive ability in customisation and extension. It is easy to add new protocols, layers, fields, and even new file formats. This section will introduce how to customise a..." />
+<meta property="og:description" content="pcapkit is built for customisation: new protocols, layers, fields and even new file formats can all be added from outside the library. What’s in for Protocols?: Protocol is the most essential conce..." />
+<meta name="description" content="pcapkit is built for customisation: new protocols, layers, fields and even new file formats can all be added from outside the library. What’s in for Protocols?: Protocol is the most essential conce..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="How to …" href="demo.html"><link rel="prev" title="NGAP Vendor Crawlers" href="pcapkit/vendor/ngap.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -484,17 +484,15 @@
         <article role="main" id="furo-main-content">
           <section id="customisation-extensions">
 <h1>Customisation &amp; Extensions<a class="headerlink" href="#customisation-extensions" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is designed with extensive ability in customisation and
-extension. It is easy to add new protocols, layers, fields, and even new file
-formats. This section will introduce how to customise and extend <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-to meet your own needs.</p>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built for customisation: new protocols, layers, fields and
+even new file formats can all be added from outside the library.</p>
 <section id="what-s-in-for-protocols">
 <h2>What’s in for Protocols?<a class="headerlink" href="#what-s-in-for-protocols" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is the most essential concept
 and class in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. Every protocol is represented by a
 <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass, which is responsible
 for parsing and/or constructing the protocol packets, as in the network stack.</p>
-<p>The following table shows all available protocol classes in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>:</p>
+<p>The protocol classes <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -636,15 +634,11 @@ a <a class="reference internal" href="pcapkit/corekit/fields/field.html#pcapkit.
 attribute should be defined as a class attribute with no value besides the
 type annotations of the corresponding field.</p>
 </div>
-<p>Once the protocol class is implemented, you need to register it to the protocol
-registry, which is managed by the APIs provided by
-<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> module. Depending on the protocol
-type, you need to register the protocol class to the corresponding registry, e.g.,
-for a link layer protocol, you need to register it to the link layer protocol
-registry thru <a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
-function.</p>
-<p>The following table shows the type of protocols and the corresponding registry
-functions:</p>
+<p>Once the class exists, register it through
+<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>, picking the registry that matches
+the protocol’s layer – a link layer protocol goes to
+<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>, and so on.</p>
+<p>The registry function per protocol type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -791,13 +785,13 @@ two of your own mappings rather than a caller’s typo.</p>
 <p class="admonition-title">Warning</p>
 <p>The check lives in <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code>, where every producer’s
 keywords converge, so it covers <code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <code class="docutils literal notranslate"><span class="pre">pack</span></code> it
-leads to – but <strong>not a direct ``SomeProtocol.make(…)`` call</strong>, which still
+leads to – but <strong>not</strong> a direct <code class="docutils literal notranslate"><span class="pre">SomeProtocol.make(...)</span></code> call, which still
 discards an undeclared keyword in silence. <code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(...)</span></code>
 is the idiom that reaches it, used by this package’s own tests and by
 <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its
 versioned implementation. Covering that would mean interposing on every
-<code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree – a larger change that was deliberately not made.
-Construct through the constructor to get the check.</p>
+<code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree – a larger change this package deliberately does not
+make. Construct through the constructor to get the check.</p>
 </div>
 </div>
 <div class="admonition note">
@@ -830,28 +824,23 @@ what runs underneath it.</p>
 </section>
 <section id="extending-existing-protocol">
 <h3>Extending Existing Protocol<a class="headerlink" href="#extending-existing-protocol" title="Link to this heading">¶</a></h3>
-<p>In many cases, existing protocols have customisable attributes, e.g., the
-option headers in the IPv4 protocol. To extend an existing protocol with
-additional methods for handling option headers, and etc., you need to first
-redirect to the corresponding protocol class, and check if the protocol class
-supports the expected extension. If so, you can add the extension methods to
-the protocol class, as it may be discussed in the protocol documentation.</p>
+<p>Several protocols carry customisable attributes – the option headers of IPv4,
+for one. To add handling for one of them, check the protocol class for the
+extension point you need, then register your methods against it.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>It is not recommended to directly inherit from the protocol class, as it
-may cause unexpected errors. Instead, you should use the provided helper
-functions to extend the protocol class.</p>
-<p>See <a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> module for available
-helper registry functions and the corresponding protocol classes.</p>
+<p>Do not inherit from the protocol class directly – it may cause unexpected
+errors. Use the helper registry functions in
+<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> instead.</p>
 </div>
-<p>The following table shows the protocol classes with their corresponding
-available extensible items and the helper registry functions:</p>
+<p>The extension points of each protocol class, with the registry function that
+writes them:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Protocol Type</p></th>
 <th class="head"><p>Protocol Class</p></th>
-<th class="head"><p>Extensable Registry</p></th>
+<th class="head"><p>Extensible Registry</p></th>
 <th class="head"><p>Registry Function</p></th>
 </tr>
 </thead>
@@ -930,27 +919,24 @@ Protocols</p></td>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>All extensable items are to be implemented as class methods, whose first argument
-is the protocol class itself, and the rest arguments are the same as the other
-built-in methods’ signatures.</p>
+<p>Every extension point takes a class method: its first argument is the protocol
+class, and the rest match the built-in methods it sits beside.</p>
 </div>
 </section>
 </section>
 <section id="and-speaking-of-library-foundations">
 <h2>And Speaking of Library Foundations…<a class="headerlink" href="#and-speaking-of-library-foundations" title="Link to this heading">¶</a></h2>
-<p>The <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> library is built on top of the <a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>
-module, which provides the basic functionalities for the library. The
-<a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> module is designed to be extensible, and it is
-easy to add new features to the library.</p>
+<p><a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> carries the library’s own machinery – extraction,
+reassembly, flow tracing and the registries behind them – and each part of it
+is extensible in the same way the protocols are.</p>
 <section id="extractor-engines">
 <h3>Extractor Engines<a class="headerlink" href="#extractor-engines" title="Link to this heading">¶</a></h3>
-<p>The <a class="reference internal" href="pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> module provides several built-in engines
-for extracting network packets from the intput PCAP and/or PCAP-NG, etc., files.
-All engines are implemented as <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>
-subclasses, which are responsible for parsing the input files and extracting
-the network packets for further processing.</p>
-<p>The following table shows the available engines and the corresponding supported
-file formats:</p>
+<p><a class="reference internal" href="pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> holds the built-in engines that read packets
+out of an input PCAP, PCAP-NG or other capture file. The shipped engines derive
+from <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>;
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> is the subclass to build your
+own on, since it is the one carrying the <code class="docutils literal notranslate"><span class="pre">engine=</span></code> registration hook.</p>
+<p>The available engines and the file formats they read:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1046,7 +1032,7 @@ module.</p>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sendrecv</span>  <span class="c1"># import API entry point</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">sendrecv</span>  <span class="c1"># store API entry point</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># intermediate storage for the interator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># intermediate storage for the iterator</span>
                             <span class="c1"># generated by the API entry point</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>  <span class="c1"># initialise base class</span>
@@ -1071,10 +1057,10 @@ module.</p>
             <span class="c1"># third-party libraries, e.g., the `packet2chain` function is</span>
             <span class="c1"># to convert a given Packet instance of the Scapy library to a</span>
             <span class="c1"># human-readable string, which is used for verbose output.</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">pack2chain</span>  <span class="c1"># import utility function</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># import utility function</span>
 
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">extractor</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">extractor</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">pack2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">extractor</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
             <span class="p">)</span>  <span class="c1"># print verbose message as `Frame XXX: Ethernet:IP:TCP:...`</span>
 
         <span class="c1"># NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,</span>
@@ -1165,19 +1151,16 @@ module.</p>
 </section>
 <section id="output-dumpers">
 <h3>Output Dumpers<a class="headerlink" href="#output-dumpers" title="Link to this heading">¶</a></h3>
-<p>The <a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> module wraps the <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>
-library, which provides the basic functionalities for dumping the extracted
-network packets to the output file. The <a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> module is
-designed to be extensible, and it is easy to add new output formats to the
-library, based on the extensibility of the <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>
-library.</p>
+<p><a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> wraps <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>, which writes the
+extracted packets to the output file. New output formats are added by
+subclassing a dumper, on the same extensibility <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>
+itself offers.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Please refer to the documentation of <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> library
-for more information about the output dumpers.</p>
+<p><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>’s own documentation covers the dumpers in
+detail.</p>
 </div>
-<p>The following table shows the available output dumpers and the corresponding
-formats:</p>
+<p>The available output dumpers and their formats:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1262,7 +1245,7 @@ in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcap
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'MyDumper'</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">'ab'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># append value to the file</span>
-         <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
     <span class="c1"># NOTE: The following method will be called at the initialisation of the</span>
     <span class="c1"># dumper class, which is expected to write the top-level header of the</span>
@@ -1292,17 +1275,15 @@ in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcap
 </section>
 <section id="reassembly-and-flow-tracing">
 <h3>Reassembly and Flow Tracing<a class="headerlink" href="#reassembly-and-flow-tracing" title="Link to this heading">¶</a></h3>
-<p>The <a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> module provides several built-in
-reassembly classes for reassembling the fragmented network packets; and the
-<a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> module provides several built-in flow
-tracing classes for tracing the network packets as they will compose as a
-flow and/or stream. All reassembly and flow tracing classes are implemented
-as <a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> and
-<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> subclasses,
-respectively, which are responsible for reassembling and tracing the network
-packets for further processing.</p>
-<p>The following table shows the available reassembly and flow tracing classes
-per the supported protocols:</p>
+<p><a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> reassembles fragmented packets;
+<a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> follows packets that compose a flow or
+stream. The shipped classes derive from
+<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a> and
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>;
+<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> and
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> are the ones to build
+your own on, since they carry the <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> registration hook.</p>
+<p>The reassembly and flow tracing classes, per protocol:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1335,12 +1316,9 @@ reassembly and flow tracing classes, as well as the underlying algorithms.</p>
 </div>
 <section id="new-implementation">
 <h4>New Implementation<a class="headerlink" href="#new-implementation" title="Link to this heading">¶</a></h4>
-<p>To add a new reassembly or flow tracing class, you need to create a new class
-inherited from <a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>
-or <a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> class, which
-is responsible for reassembling or tracing the network packets for further
-processing.</p>
-<p>The following code snippet shows how to create a new reassembly class:</p>
+<p>A new reassembly or flow tracing class subclasses
+<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> or
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Following is a PoC implementation of a new reassembly class for the IPv4
@@ -1365,8 +1343,9 @@ example, where the comprehensive implementation can be found in the
 <span class="c1"># the reassembled packet and the reassembly table, respectively.</span>
 
 <span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># a tuple-like object to identify the reassembly</span>
-                             <span class="c1"># table entry's ID, e.g., (src, dst, id, proto)</span>
-                             <span class="c1"># for IPv4, (src, dst, spi) for IPv6, etc.</span>
+                             <span class="c1"># table entry's ID, e.g. (src, dst, id, proto)</span>
+                             <span class="c1"># for both IPv4 and IPv6, and</span>
+                             <span class="c1"># (src, srcport, dst, dstport) for TCP</span>
 
 
 <span class="nd">@info_final</span>
@@ -1459,16 +1438,13 @@ example, where the comprehensive implementation can be found in the
 </section>
 <section id="callback-functions">
 <h4>Callback Functions<a class="headerlink" href="#callback-functions" title="Link to this heading">¶</a></h4>
-<p>It is possible to register callback functions to the reassembly and flow
-tracing classes, which will be called at the end of the reassembly and
-flow tracing process, respectively. This feature is designed to create
-the ability to process the reassembled datagrams and/or flows, e.g., to
-check if the datagram and/or flows are to be discarded, etc.</p>
+<p>Callback functions can be registered on the reassembly and flow tracing
+classes, and run at the end of the respective process – to inspect the
+reassembled datagrams or flows, or to discard some of them.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For more information, you may refer to the documentation of
-<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> for the callback
-registry functions:</p>
+<p><a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> holds the callback registry
+functions:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_ipv4_callback()</span></code></a></p></li>
 <li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_ipv6_callback()</span></code></a></p></li>
@@ -1476,15 +1452,11 @@ registry functions:</p>
 <li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_tcp_callback()</span></code></a></p></li>
 </ul>
 </div>
-<p>All callback functions are expected to be a callback function, which
-accepts a single argument, i.e., the list of reassembled datagrams
-and/or flows, and returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>. Any return value will be ignored.</p>
-<p>It is possible to modify the reassembled datagrams and/or flows in the
-callback functions, e.e., to discard certain reassembled datagrams and/or
-flows, etc. However, it is not recommended to modify the reassembled
-datagrams and/or flows directly. Should that is the intended behaviour,
-you should create a new reassembly and/or flow tracing class, and modify
-the corresponding reassembly and/or flow tracing algorithm.</p>
+<p>A callback takes one argument – the list of reassembled datagrams or flows –
+and returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
+<p>That list can be modified in place, but prefer not to: if the reassembly or
+tracing result itself is wrong for your purpose, subclass the reassembly or
+flow tracing class and change its algorithm instead.</p>
 </section>
 </section>
 </section>

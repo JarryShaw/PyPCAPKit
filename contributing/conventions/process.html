@@ -497,7 +497,7 @@ beside it is where the original wording is.</p>
 <p><code class="docutils literal notranslate"><span class="pre">all</span></code> means <strong>core addons only</strong> – the things that let the library itself run at
 full functionality – rather than everything a user might conceivably want. The owner
 settled that on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/910">#910</a> and named
-the three that qualify to date: the CLI addon, the crypto addon, and <code class="docutils literal notranslate"><span class="pre">pycrate</span></code>.</p>
+the three that qualify: the CLI addon, the crypto addon, and <code class="docutils literal notranslate"><span class="pre">pycrate</span></code>.</p>
 <p>On the tree, in <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">cli</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"emoji"</span><span class="w"> </span><span class="p">]</span>
 <span class="n">crypto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"cryptography&gt;=3.4"</span><span class="w"> </span><span class="p">]</span>
@@ -706,9 +706,9 @@ remembered – a command someone else can run and get an answer from.</p></li>
 </ul>
 <p>Two things the board shows rather than the rule: <code class="docutils literal notranslate"><span class="pre">wip</span></code> and <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">decision</span></code>
 legitimately <strong>co-occur</strong>, when the bulk of an issue is being worked and one
-sub-question is held for the owner – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> itself was labelled that way while this
-page was being written. And an open issue with no state label at all is a gap rather
-than a category, which is worth checking for rather than assuming away:</p>
+sub-question is held for the owner – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> itself was labelled that way. And
+an open issue with no state label at all is a gap rather than a category, which is
+worth checking for rather than assuming away:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>-R<span class="w"> </span>JarryShaw/PyPCAPKit<span class="w"> </span>--state<span class="w"> </span>open<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--json<span class="w"> </span>number,labels<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.[]|"#\(.number) \(.labels|map(.name)|join(","))"'</span>
 </pre></div>

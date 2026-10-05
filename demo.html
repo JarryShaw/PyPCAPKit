@@ -516,7 +516,8 @@
 <li><p>extract a PCAP file and reassemble TCP payload
 (with no output file nor frame storage)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="c1"># set reasm_strict to make sure full reassembly</span>
+<span class="c1"># reasm_strict is the default: it submits incompletely reassembled</span>
+<span class="c1"># datagrams too, which is why the packet check below is needed</span>
 <span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
 <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>

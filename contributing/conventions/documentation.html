@@ -505,37 +505,34 @@ and <code class="docutils literal notranslate"><span class="pre">to</span></code
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and left standing. It is also what the tree does: <em>The</em> <code class="docutils literal notranslate"><span class="pre">all</span></code> <em>Extra</em> and
 <em>Issue and Pull Request Labels</em> on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> are both in it.</p>
 <p><strong>The casing is the easy half.</strong> A heading can be in Title Case already and still
-break the rule by being a clause rather than a title. The sweep of
-<code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/</span></code> under this ruling found, of 62 headings, 24 already
-right, 16 needing only re-casing, and <strong>22 to be rewritten</strong>. <em>What a Failed Lookup
-Raises</em> was correctly cased and is now <em>Failed-Lookup Exceptions</em>.</p>
-<p>The line that sweep drew, and the one to keep drawing: a <strong>finite verb</strong> makes a heading
-a sentence and earns a rewrite, while a gerund or infinitive phrase is a noun phrase and
-needs only re-casing – so <em>Running the tests</em> became <em>Running the Tests</em> rather than
-being reworded.</p>
+break the rule by being a clause rather than a title: <em>What a Failed Lookup Raises</em> was
+correctly cased and is now <em>Failed-Lookup Exceptions</em>. Of the 62 headings under
+<code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/</span></code> when this was ruled, 22 needed rewriting and 16 only
+re-casing.</p>
+<p>The line to draw: a <strong>finite verb</strong> makes a heading a sentence and earns a rewrite,
+while a gerund or infinitive phrase is a noun phrase and needs only re-casing – so
+<em>Running the tests</em> becomes <em>Running the Tests</em> rather than being reworded.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A heading also has to describe the section beneath it, and a rewrite is the moment
-to check that. Two of that sweep’s own new titles were renamed again in review for
-failing it. <em>One Approval, Whole Release</em> became <em>The Release Pipeline</em> because the
-section opens on a Mermaid flowchart while the approval prose it had been named for
-sat well below, leaving the page’s most navigable artefact unfindable from the table
-of contents.</p>
+to check that. <em>One Approval, Whole Release</em> was renamed <em>The Release Pipeline</em>
+because the section opens on a Mermaid flowchart while the approval prose it had
+been named for sat well below, leaving the page’s most navigable artefact
+unfindable from the table of contents.</p>
 </div>
 </section>
 <section id="renaming-a-heading">
 <h2>Renaming a Heading<a class="headerlink" href="#renaming-a-heading" title="Link to this heading">¶</a></h2>
-<p>Two mechanical traps, both of which bit on that sweep rather than being hypothetical.</p>
+<p>Two mechanical traps, both of which have bitten rather than being hypothetical.</p>
 <p><strong>Re-measure the underline against the new text.</strong> A case flip usually keeps the
 length; a rewrite almost never does, and docutils reports an underline shorter than
-its heading in a build that does not fail on warnings. The sweep re-checked all 62 and
-found none short, which is the standard to hold.</p>
+its heading in a build that does not fail on warnings. Re-check every heading; none
+of the 62 was short.</p>
 <p><strong>A heading is a link target, so a rename is a repository-wide sweep</strong> rather than a
 <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code> one. In scope: <code class="docutils literal notranslate"><span class="pre">.rst</span></code> prose, <code class="docutils literal notranslate"><span class="pre">:ref:</span></code> and <code class="docutils literal notranslate"><span class="pre">:doc:</span></code> link text,
 toctree entries, implicit <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`Text`_</span> <span class="pre">`</span></code> references, <strong>and</strong> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings
-and the files under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. Applying that scope to the heading rename took two
-passes: the first reported one surviving stale reference; review found <strong>five</strong>, spread
-across <code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>,
+and the files under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. A heading rename once left <strong>five</strong> stale
+references, spread across <code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>,
 <code class="file docutils literal notranslate"><span class="pre">tests/corekit/test_sentinel_exports_unit.py</span></code> and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code>. The first of those is a shipped
 module docstring that renders into the API reference, so a reader following it searches
@@ -544,9 +541,8 @@ the page for a string no longer on it.</p>
 <p class="admonition-title">Warning</p>
 <p><strong>Derive the list of old headings from the pre-change file, not from the diff.</strong> A
 diff-derived list silently drops any heading whose underline is not adjacent in the
-hunk, which is why the second pass undercounted as well as the first. What
-worked was a whitespace-flattened search for every pre-change heading string across
-every tracked file.</p>
+hunk. A whitespace-flattened search for every pre-change heading string across
+every tracked file is what works.</p>
 </div>
 <p>Nothing in CI catches a reference a rename left behind. <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>
 sets no <code class="docutils literal notranslate"><span class="pre">nitpicky</span></code> and <code class="file docutils literal notranslate"><span class="pre">docs/Makefile</span></code> leaves <code class="docutils literal notranslate"><span class="pre">SPHINXOPTS</span></code> empty, so the
@@ -588,7 +584,7 @@ type hierarchy. <strong>Quote a node label whose text Mermaid would otherwise tr
 and leave a bare identifier bare. That is what the exemplars do with <em>node</em> labels, and
 it falls close to the <code class="docutils literal notranslate"><span class="pre">TD</span></code>/<code class="docutils literal notranslate"><span class="pre">LR</span></code> line without following it: every node label in the
 six <code class="docutils literal notranslate"><span class="pre">TD</span></code> graphs is quoted, since every one of them is prose; the <code class="docutils literal notranslate"><span class="pre">LR</span></code> graphs quote
-only where the text forces it, which today is <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">h2[&quot;HTTP/2&quot;]</span></code> in
+only where the text forces it, which is <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">h2[&quot;HTTP/2&quot;]</span></code> in
 <code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> and nowhere else. Everything else there
 uses the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>, <code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and
 <code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, and spends its quotes on <code class="docutils literal notranslate"><span class="pre">click</span></code> targets instead.
@@ -633,7 +629,7 @@ is the duplication the owner ruled out on <a class="extlink-issue reference exte
 <p>For the same reason, do not add an inline <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">contents::</span></code> to a page. The <code class="docutils literal notranslate"><span class="pre">furo</span></code>
 theme already renders a sticky page-local table of contents on every page, so an
 inline directive is a second copy of it; the one in <code class="file docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code>
-has been commented out since 2023 and should stay that way.</p>
+is commented out and should stay that way.</p>
 <p>One setting there was decided by measurement rather than by preference:
 <code class="docutils literal notranslate"><span class="pre">toc_object_entries</span></code> carries, in a comment beside it, the figures that settled it,
 so that nobody reopens the question blind. That is worth copying the next time a
@@ -743,7 +739,7 @@ Asked and ruled on <a class="extlink-issue reference external" href="https://git
 <ul class="simple">
 <li><p><strong>reStructuredText under</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code>, <strong>Markdown outside it.</strong> The owner
 ruled this on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, correcting a blanket <em>always</em> <code class="docutils literal notranslate"><span class="pre">.rst</span></code> that had been in
-circulation until then: the Sphinx documentation is reST, and the other documents –
+circulation: the Sphinx documentation is reST, and the other documents –
 the READMEs included – are Markdown where that applies. <code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>’s own
 <em>Documentation</em> section records the same split. One trap arrived with the ruling:
 <code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> reaches the two READMEs under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code> through

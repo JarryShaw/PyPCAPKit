@@ -575,7 +575,7 @@
         <span class="c1"># :class:`~scapy.utils.PcapReader` then cannot map even link type 1 (plain</span>
         <span class="c1"># Ethernet), writes ``unknown LL type [1]/[0x1]`` to stderr and returns every</span>
         <span class="c1"># frame as one opaque :class:`~scapy.packet.Raw` layer. Nothing raises, so the</span>
-        <span class="c1"># engine used to deliver no dissection whatsoever and announce it only on</span>
+        <span class="c1"># engine would deliver no dissection whatsoever and announce it only on</span>
         <span class="c1"># stderr (#406).</span>
         <span class="c1">#</span>
         <span class="c1"># Naming the layer modules individually is not a cheaper way to the same</span>
@@ -620,7 +620,7 @@
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If :attr:`self.extractor._exlyr &lt;pcapkit.foundation.extraction.Extractor._exlyr&gt;`</span>
 <span class="sd">                and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
-<span class="sd">                is provided as the Scapy engine currently does not support such operations;</span>
+<span class="sd">                is provided as the Scapy engine does not support such operations;</span>
 <span class="sd">                or if :attr:`self.extractor._exctx &lt;pcapkit.foundation.extraction.Extractor._exctx&gt;`</span>
 <span class="sd">                is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own</span>
 <span class="sd">                protocol implementations.</span>

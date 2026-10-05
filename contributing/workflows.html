@@ -489,10 +489,9 @@
 <p>The eight workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
 the chain that results is not visible from any single file – reading one
 <code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
-to start. This page is the repository-wide graph. It does not
-cover the release <em>pipeline</em> itself – the job-by-job path from a version
-bump to a published package – which <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> already documents in
-full; this page cross-references that rather than duplicating it.</p>
+to start. This page is the repository-wide graph. The release <em>pipeline</em>
+itself, job by job from a version bump to a published package, is on
+<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>.</p>
 </div>
 <section id="at-a-glance">
 <h2>At a Glance<a class="headerlink" href="#at-a-glance" title="Link to this heading">¶</a></h2>
@@ -684,7 +683,7 @@ the caller’s own workflow run, as one of the caller’s own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:101</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:153</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml:43</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
@@ -705,7 +704,7 @@ would test the same commit several times over – and
 <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status Checks</a> below), gated out by its
 own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:695-701</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:892-898</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -722,18 +721,18 @@ carries:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}</span>
 </pre></div>
 </div>
-<p>(<code class="docutils literal notranslate"><span class="pre">create-release.yml:98</span></code>). On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path, this evaluates
+<p>(<code class="docutils literal notranslate"><span class="pre">create-release.yml:150</span></code>). On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path, this evaluates
 <strong>false</strong>, and the job is skipped outright, whenever the upstream Vendor
 Update run’s own conclusion was anything other than <code class="docutils literal notranslate"><span class="pre">success</span></code> – including
 <code class="docutils literal notranslate"><span class="pre">skipped</span></code>, which is exactly what Vendor Update’s <em>own</em> jobs report when
 <em>their</em> <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-path guards decline (see <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job). <code class="docutils literal notranslate"><span class="pre">version_check</span></code> then depends on that job with a
-plain <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">unit-tests</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:108</span></code>) and no
+plain <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">unit-tests</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:160</span></code>) and no
 <code class="docutils literal notranslate"><span class="pre">always()</span></code> override, so a skipped dependency skips it too – and every job
 past it is gated the same way: <code class="docutils literal notranslate"><span class="pre">github</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code>
-(<code class="docutils literal notranslate"><span class="pre">:156</span></code>), <code class="docutils literal notranslate"><span class="pre">tag</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:251</span></code>), <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
-needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:319</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs
-<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:406</span></code>).</p>
+(<code class="docutils literal notranslate"><span class="pre">:348</span></code>), <code class="docutils literal notranslate"><span class="pre">tag</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:449</span></code>), <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
+needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:527</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs
+<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:626</span></code>).</p>
 <pre  class="mermaid">
         flowchart TD
     WR[&quot;Vendor Update completed&lt;br/&gt;conclusion != success&quot;]
@@ -754,16 +753,12 @@ needs <code class="docutils literal notranslate"><span class="pre">[</span> <spa
 
     classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
     class UTX,VC,GH,TAGJ,PY,CD skipped
-    </pre><p>This is a transitive reduction, the same choice <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> makes for
-the identical fan-out: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> is also a direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of
-<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> in the file itself (<code class="docutils literal notranslate"><span class="pre">create-release.yml:251,319</span></code>), on
-top of the <code class="docutils literal notranslate"><span class="pre">github</span></code> edge drawn above, and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">version_check</span></code>
-directly too (<code class="docutils literal notranslate"><span class="pre">:406</span></code>) alongside <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code>. All three are
-omitted here for the reason <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for its own copy of this
-same graph: <code class="docutils literal notranslate"><span class="pre">github</span></code> already implies them, since <code class="docutils literal notranslate"><span class="pre">github</span></code> itself depends
-on <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, and drawing all of <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s direct
-dependents would add lines without changing which job can start before
-which, or which job a skip in <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reaches.</p>
+    </pre><p>This is a transitive reduction, as in <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> is
+also a direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:449,527</span></code>)
+and of <code class="docutils literal notranslate"><span class="pre">conda</span></code> (<code class="docutils literal notranslate"><span class="pre">:626</span></code>), but <code class="docutils literal notranslate"><span class="pre">github</span></code> already implies those edges, since
+it depends on <code class="docutils literal notranslate"><span class="pre">version_check</span></code> itself. Drawing them would add lines without
+changing which job can start before which, or which job a skip in
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code> reaches.</p>
 <p>The whole run then reports <strong>skipped</strong>, not failed – there is no red X to
 notice. Observed in production on runs <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36511610205">36511610205</a> and
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776">36510774776</a>, both
@@ -782,8 +777,8 @@ because the upstream Vendor Update run did not itself conclude <code class="docu
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
 <p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires six contexts, with
 <code class="docutils literal notranslate"><span class="pre">strict_required_status_checks_policy:</span> <span class="pre">true</span></code> (a branch must be up to date
-with <code class="docutils literal notranslate"><span class="pre">main</span></code> before it can merge, not merely green). Found by grepping every
-workflow file for each name rather than assuming the obvious one:</p>
+with <code class="docutils literal notranslate"><span class="pre">main</span></code> before it can merge, not merely green). Each was found by
+grepping every workflow file for its name:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -795,7 +790,7 @@ workflow file for each name rather than assuming the obvious one:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:945</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1142</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.10</span></code></p></td>
@@ -820,19 +815,16 @@ workflow file for each name rather than assuming the obvious one:</p>
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">grep</span> <span class="pre">-rn</span> <span class="pre">&quot;Required</span> <span class="pre">checks</span> <span class="pre">passed&quot;</span> <span class="pre">.github/workflows/*.yml</span></code> turns up
-exactly one job carrying that literal <code class="docutils literal notranslate"><span class="pre">name:</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:945</span></code>).
-<code class="docutils literal notranslate"><span class="pre">grep</span> <span class="pre">-rn</span> <span class="pre">&quot;Compat</span> <span class="pre">Python&quot;</span> <span class="pre">.github/workflows/*.yml</span></code> turns up two job
-<code class="docutils literal notranslate"><span class="pre">name:</span></code> lines in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> – the required
-<code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job’s template (<code class="docutils literal notranslate"><span class="pre">:31</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">${{</span>
-<span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, expanding to the five required legs at
-<code class="docutils literal notranslate"><span class="pre">:41-45</span></code>) and the separate, non-required <code class="docutils literal notranslate"><span class="pre">compatibility-nightly</span></code> job
-(<code class="docutils literal notranslate"><span class="pre">:69</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span> <span class="pre">(scheduled)</span></code>, cited again below for its own
-<code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> policy) – plus one comment in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>
-(<code class="docutils literal notranslate"><span class="pre">:806</span></code>) that references the string without defining it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1142</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by two in
+<code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>: the required <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job (<code class="docutils literal notranslate"><span class="pre">:31</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, expanding to the five required
+legs at <code class="docutils literal notranslate"><span class="pre">:41-45</span></code>) and the non-required <code class="docutils literal notranslate"><span class="pre">compatibility-nightly</span></code> job (<code class="docutils literal notranslate"><span class="pre">:69</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span> <span class="pre">(scheduled)</span></code>, see below). A comment in
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:1003</span></code>) mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is itself an aggregate, not a single check run –
 but it stands in for <strong>17</strong> of the ruleset’s originally-named 22 contexts,
-not all 22. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:805-826</span></code>) accounts for the
+not all 22. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:1002-1023</span></code>) accounts for the
 22: five each for <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code>, five for the live <code class="docutils literal notranslate"><span class="pre">Compat</span>
 <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> contexts (emitted by <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, a
 <em>different</em> workflow file – nothing in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> could ever stand
@@ -843,11 +835,11 @@ stopped producing once it became a Python x engine matrix, and two for
 <code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code>/dead-<code class="docutils literal notranslate"><span class="pre">Engines</span></code>/<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> slots – 5 + 5 +
 5 + 2 = 17 – via its own <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[test,</span> <span class="pre">integration,</span> <span class="pre">engine-tests,</span>
 <span class="pre">pypcap-parity]</span></code> plus an explicit per-dependency check
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:944-970</span></code>). The five <code class="docutils literal notranslate"><span class="pre">Compat</span></code> contexts stay required
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1141-1167</span></code>). The five <code class="docutils literal notranslate"><span class="pre">Compat</span></code> contexts stay required
 exactly as they are and are listed separately in the table above. This job
 runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> triggers; the
 <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">:947</span></code>), so it is never
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">:1144</span></code>), so it is never
 produced – and never expected – on those paths.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> are five ordinary matrix legs, not an
 aggregate: <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:37-40</span></code>) and
@@ -863,16 +855,16 @@ kept advisory (<code class="docutils literal notranslate"><span class="pre">cont
 <p>Four jobs, all in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>, declare a deployment
 <code class="docutils literal notranslate"><span class="pre">environment:</span></code> and can therefore pause for an approval:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:153</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:249</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:314</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:403</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:345</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:447</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:522</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:623</span></code>)</p></li>
 </ul>
 <p>No other workflow in scope here declares one – including
 <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">deploy-pages</span></code> job pushes straight to the
 <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch via <code class="docutils literal notranslate"><span class="pre">JamesIves/github-pages-deploy-action</span></code> rather than
 through an <code class="docutils literal notranslate"><span class="pre">environment:</span></code>-gated deployment. Of the four above, only
-<code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer today; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
+<code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
 repeating it here.</p>

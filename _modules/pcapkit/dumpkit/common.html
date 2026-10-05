@@ -596,12 +596,11 @@
 <span class="sd">        has guarded on its own ``code`` keyword all along.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The previous behaviour inferred ``fmt`` from the subclass'</span>
-<span class="sd">            :attr:`~dictdumper.dumper.Dumper.kind` property, which it could</span>
-<span class="sd">            only read off an *instance* -- so it constructed one against a</span>
-<span class="sd">            :func:`tempfile.NamedTemporaryFile` while the ``class`` statement</span>
-<span class="sd">            was still executing. Guarding on ``fmt`` removes that: a class</span>
-<span class="sd">            definition no longer touches the filesystem.</span>
+<span class="sd">            Inferring ``fmt`` from the subclass'</span>
+<span class="sd">            :attr:`~dictdumper.dumper.Dumper.kind` property would need an</span>
+<span class="sd">            *instance*, hence a :func:`tempfile.NamedTemporaryFile` created while</span>
+<span class="sd">            the ``class`` statement is still executing. Guarding on ``fmt``</span>
+<span class="sd">            avoids that: a class definition does not touch the filesystem.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            - :func:`pcapkit.foundation.registry.foundation.register_dumper`</span>
@@ -726,7 +725,7 @@
     <span class="c1"># double-escape those three. :class:`~dictdumper.xml.XML` itself defines</span>
     <span class="c1"># no ``_append_string`` of its own -- its own module docstring says not to</span>
     <span class="c1"># use it directly -- so :class:`~dictdumper.plist.PLIST` is the only</span>
-    <span class="c1"># concrete writer this applies to today.</span>
+    <span class="c1"># concrete writer this applies to.</span>
     <span class="n">escape_strings</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>

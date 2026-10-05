@@ -859,7 +859,7 @@
 <span class="sd">                which is shared across every acknowledgement number under the</span>
 <span class="sd">                same buffer ID: a *different* fragment closing a hole there</span>
 <span class="sd">                says nothing about what *this* fragment has received, and</span>
-<span class="sd">                using it here previously discarded this fragment's own real</span>
+<span class="sd">                using it here would discard this fragment's own real</span>
 <span class="sd">                bytes whenever another fragment happened to cover the same</span>
 <span class="sd">                absolute sequence numbers first.</span>
 <span class="sd">            old: already-buffered bytes of this fragment over the range.</span>
@@ -1003,9 +1003,8 @@
             <span class="c1"># NOTE: ``strict=False`` deliberately keeps reporting the whole</span>
             <span class="c1"># payload buffer with its holes zero-filled, which is what</span>
             <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream</span>
-            <span class="c1"># it is reconstructing best-effort. What changes is only that</span>
-            <span class="c1"># ``completed`` now says so: this branch used to report</span>
-            <span class="c1"># :attr:`Completion.COMPLETE` for a buffer it knew had holes in it.</span>
+            <span class="c1"># it is reconstructing best-effort. ``completed`` says so, rather than</span>
+            <span class="c1"># reporting :attr:`Completion.COMPLETE` for a buffer with holes in it.</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span>
                 <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>

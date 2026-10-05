@@ -39,7 +39,8 @@ Basic Samples
    .. code-block:: python
 
       from pcapkit import HTTP, extract
-      # set reasm_strict to make sure full reassembly
+      # reasm_strict is the default: it submits incompletely reassembled
+      # datagrams too, which is why the packet check below is needed
       extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, reasm_strict=True)
       # print extracted packet if HTTP in reassembled payloads
       for datagram in extraction.reassembly.tcp:

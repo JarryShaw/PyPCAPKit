@@ -669,14 +669,14 @@ registered; only the keyword decides registration.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This keyword was <code class="docutils literal notranslate"><span class="pre">name</span></code> when opt-in registration landed, and was
-renamed because <code class="docutils literal notranslate"><span class="pre">name</span></code> cannot be passed as a class keyword at all
-on Python 3.10: <code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>,
-<code class="docutils literal notranslate"><span class="pre">bases</span></code> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters
+<p>The keyword is <code class="docutils literal notranslate"><span class="pre">engine</span></code> rather than <code class="docutils literal notranslate"><span class="pre">name</span></code> because <code class="docutils literal notranslate"><span class="pre">name</span></code>
+cannot be passed as a class keyword at all on Python 3.10:
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and
+<code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters
 before 3.11, so a class keyword by any of those four names collides
 with one of them and the class statement raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> from
 the metaclass before this method is reached. <code class="docutils literal notranslate"><span class="pre">engine</span></code> is outside
-that set, so the documented registration path now works on every
+that set, so the documented registration path works on every
 supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
 four are the whole of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> collision
 surface. Separately, and for an unrelated reason that holds on every

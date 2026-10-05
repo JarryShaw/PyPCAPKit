@@ -530,7 +530,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Engine] | Type[Engine] | str'</span><span class="p">,</span>
                               <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new engine class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new engine class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new engine class</span>
@@ -542,7 +542,10 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: engine name</span>
 <span class="sd">        module: module name or module descriptor or an</span>
-<span class="sd">            :class:`~pcapkit.foundation.engines.engine.Engine` subclass</span>
+<span class="sd">            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass</span>
+<span class="sd">            (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass</span>
+<span class="sd">            is one too, but no built-in engine is: they all derive from the</span>
+<span class="sd">            base directly)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -569,7 +572,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -611,7 +614,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
                               <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -647,7 +650,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
                               <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -681,10 +684,10 @@
 <div class="viewcode-block" id="register_reassembly_ipv4_callback">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_ipv4_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Registered a new callback function.</span>
+<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`IPv4.__callback_fn__ &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__&gt;`</span>
+<span class="sd">    :attr:`IPv4.__callback_fn__ &lt;pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__&gt;`</span>
 <span class="sd">    registry.</span>
 
 <span class="sd">    Arguments:</span>
@@ -700,10 +703,10 @@
 <div class="viewcode-block" id="register_reassembly_ipv6_callback">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_ipv6_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Registered a new callback function.</span>
+<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`IPv6.__callback_fn__ &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__&gt;`</span>
+<span class="sd">    :attr:`IPv6.__callback_fn__ &lt;pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__&gt;`</span>
 <span class="sd">    registry.</span>
 
 <span class="sd">    Arguments:</span>
@@ -719,10 +722,10 @@
 <div class="viewcode-block" id="register_reassembly_tcp_callback">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_tcp_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Registered a new callback function.</span>
+<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__&gt;`</span>
+<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__&gt;`</span>
 <span class="sd">    registry.</span>
 
 <span class="sd">    Arguments:</span>
@@ -738,10 +741,10 @@
 <div class="viewcode-block" id="register_traceflow_tcp_callback">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_tcp_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Trace_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Registered a new callback function.</span>
+<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__&gt;`</span>
+<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__&gt;`</span>
 <span class="sd">    registry.</span>
 
 <span class="sd">    Arguments:</span>
@@ -769,7 +772,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Reassembly] | Type[Reassembly]'</span><span class="p">,</span>
                                   <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new reassembly class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new reassembly class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new reassembly class</span>
@@ -781,7 +784,10 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass</span>
+<span class="sd">            (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`</span>
+<span class="sd">            subclass is one too, but no built-in reassembly class is: they all</span>
+<span class="sd">            derive from the base directly)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -804,7 +810,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_traceflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]'</span><span class="p">,</span>
                                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new flow tracing class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new flow tracing class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new flow tracing class</span>
@@ -816,7 +822,10 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass</span>
+<span class="sd">            (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`</span>
+<span class="sd">            subclass is one too, but no built-in flow tracing class is: they all</span>
+<span class="sd">            derive from the base directly)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>

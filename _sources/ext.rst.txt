@@ -1,10 +1,8 @@
 Customisation & Extensions
 ==========================
 
-:mod:`pcapkit` is designed with extensive ability in customisation and
-extension. It is easy to add new protocols, layers, fields, and even new file
-formats. This section will introduce how to customise and extend :mod:`pcapkit`
-to meet your own needs.
+:mod:`pcapkit` is built for customisation: new protocols, layers, fields and
+even new file formats can all be added from outside the library.
 
 ------------------------
 What's in for Protocols?
@@ -15,7 +13,7 @@ and class in :mod:`pcapkit`. Every protocol is represented by a
 :class:`~pcapkit.protocols.protocol.Protocol` subclass, which is responsible
 for parsing and/or constructing the protocol packets, as in the network stack.
 
-The following table shows all available protocol classes in :mod:`pcapkit`:
+The protocol classes :mod:`pcapkit` ships:
 
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 | Protocol Type                                                    | Protocol Class                                                                                       |
@@ -132,16 +130,12 @@ attributes of the protocol.
    attribute should be defined as a class attribute with no value besides the
    type annotations of the corresponding field.
 
-Once the protocol class is implemented, you need to register it to the protocol
-registry, which is managed by the APIs provided by
-:mod:`pcapkit.foundation.registry.protocols` module. Depending on the protocol
-type, you need to register the protocol class to the corresponding registry, e.g.,
-for a link layer protocol, you need to register it to the link layer protocol
-registry thru :func:`~pcapkit.foundation.registry.protocols.register_linktype`
-function.
+Once the class exists, register it through
+:mod:`pcapkit.foundation.registry.protocols`, picking the registry that matches
+the protocol's layer -- a link layer protocol goes to
+:func:`~pcapkit.foundation.registry.protocols.register_linktype`, and so on.
 
-The following table shows the type of protocols and the corresponding registry
-functions:
+The registry function per protocol type:
 
 +-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
 | Protocol Type     | Registry Function                                                                                                                  | Notes              |
@@ -275,13 +269,13 @@ The following code snippet shows how to create a new protocol class:
       The check lives in :meth:`ProtocolBase.__init__
       <pcapkit.protocols.protocol.ProtocolBase.__init__>`, where every producer's
       keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
-      leads to -- but **not a direct ``SomeProtocol.make(...)`` call**, which still
+      leads to -- but **not** a direct ``SomeProtocol.make(...)`` call, which still
       discards an undeclared keyword in silence. ``object.__new__(cls).make(...)``
       is the idiom that reaches it, used by this package's own tests and by
       :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` to reach its
       versioned implementation. Covering that would mean interposing on every
-      ``make`` in the tree -- a larger change that was deliberately not made.
-      Construct through the constructor to get the check.
+      ``make`` in the tree -- a larger change this package deliberately does not
+      make. Construct through the constructor to get the check.
 
 .. note::
 
@@ -315,27 +309,21 @@ The following code snippet shows how to create a new protocol class:
 Extending Existing Protocol
 ---------------------------
 
-In many cases, existing protocols have customisable attributes, e.g., the
-option headers in the IPv4 protocol. To extend an existing protocol with
-additional methods for handling option headers, and etc., you need to first
-redirect to the corresponding protocol class, and check if the protocol class
-supports the expected extension. If so, you can add the extension methods to
-the protocol class, as it may be discussed in the protocol documentation.
+Several protocols carry customisable attributes -- the option headers of IPv4,
+for one. To add handling for one of them, check the protocol class for the
+extension point you need, then register your methods against it.
 
 .. warning::
 
-   It is not recommended to directly inherit from the protocol class, as it
-   may cause unexpected errors. Instead, you should use the provided helper
-   functions to extend the protocol class.
+   Do not inherit from the protocol class directly -- it may cause unexpected
+   errors. Use the helper registry functions in
+   :mod:`pcapkit.foundation.registry.protocols` instead.
 
-   See :mod:`pcapkit.foundation.registry.protocols` module for available
-   helper registry functions and the corresponding protocol classes.
-
-The following table shows the protocol classes with their corresponding
-available extensible items and the helper registry functions:
+The extension points of each protocol class, with the registry function that
+writes them:
 
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Protocol Type     | Protocol Class                                             | Extensable Registry                                                                           | Registry Function                                                          |
+| Protocol Type     | Protocol Class                                             | Extensible Registry                                                                           | Registry Function                                                          |
 +===================+============================================================+===============================================================================================+============================================================================+
 |                   | :class:`~pcapkit.protocols.internet.ipv4.IPv4`             | :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_ipv4_option`        |
 +                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
@@ -376,30 +364,27 @@ available extensible items and the helper registry functions:
 
 .. important::
 
-   All extensable items are to be implemented as class methods, whose first argument
-   is the protocol class itself, and the rest arguments are the same as the other
-   built-in methods' signatures.
+   Every extension point takes a class method: its first argument is the protocol
+   class, and the rest match the built-in methods it sits beside.
 
 --------------------------------------
 And Speaking of Library Foundations...
 --------------------------------------
 
-The :mod:`pcapkit` library is built on top of the :mod:`pcapkit.foundation`
-module, which provides the basic functionalities for the library. The
-:mod:`pcapkit.foundation` module is designed to be extensible, and it is
-easy to add new features to the library.
+:mod:`pcapkit.foundation` carries the library's own machinery -- extraction,
+reassembly, flow tracing and the registries behind them -- and each part of it
+is extensible in the same way the protocols are.
 
 Extractor Engines
 -----------------
 
-The :mod:`pcapkit.foundation.engines` module provides several built-in engines
-for extracting network packets from the intput PCAP and/or PCAP-NG, etc., files.
-All engines are implemented as :class:`~pcapkit.foundation.engines.engine.Engine`
-subclasses, which are responsible for parsing the input files and extracting
-the network packets for further processing.
+:mod:`pcapkit.foundation.engines` holds the built-in engines that read packets
+out of an input PCAP, PCAP-NG or other capture file. The shipped engines derive
+from :class:`~pcapkit.foundation.engines.engine.EngineBase`;
+:class:`~pcapkit.foundation.engines.engine.Engine` is the subclass to build your
+own on, since it is the one carrying the ``engine=`` registration hook.
 
-The following table shows the available engines and the corresponding supported
-file formats:
+The available engines and the file formats they read:
 
 +---------------------+-----------------------------------------------------------+----------------------------------------+
 | Engine Type         | Engine Class                                              | Supported File Formats                 |
@@ -489,7 +474,7 @@ The following code snippet shows how to create a new engine class:
            from scapy import sendrecv  # import API entry point
 
            self._expkg = sendrecv  # store API entry point
-           self._extmp = None  # intermediate storage for the interator
+           self._extmp = None  # intermediate storage for the iterator
                                # generated by the API entry point
 
            super().__init__(extractor)  # initialise base class
@@ -514,10 +499,10 @@ The following code snippet shows how to create a new engine class:
                # third-party libraries, e.g., the `packet2chain` function is
                # to convert a given Packet instance of the Scapy library to a
                # human-readable string, which is used for verbose output.
-               from pcapkit.toolkit.scapy import pack2chain  # import utility function
+               from pcapkit.toolkit.scapy import packet2chain  # import utility function
 
                ext._vfunc = lambda extractor, packet: print(
-                   f'Frame {extractor._frnum:>3d}: {pack2chain(packet)}'
+                   f'Frame {extractor._frnum:>3d}: {packet2chain(packet)}'
                )  # print verbose message as `Frame XXX: Ethernet:IP:TCP:...`
 
            # NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,
@@ -606,20 +591,17 @@ The following code snippet shows how to create a new engine class:
 Output Dumpers
 --------------
 
-The :mod:`pcapkit.dumpkit` module wraps the :mod:`DictDumper <dictdumper>`
-library, which provides the basic functionalities for dumping the extracted
-network packets to the output file. The :mod:`pcapkit.dumpkit` module is
-designed to be extensible, and it is easy to add new output formats to the
-library, based on the extensibility of the :mod:`DictDumper <dictdumper>`
-library.
+:mod:`pcapkit.dumpkit` wraps :mod:`DictDumper <dictdumper>`, which writes the
+extracted packets to the output file. New output formats are added by
+subclassing a dumper, on the same extensibility :mod:`DictDumper <dictdumper>`
+itself offers.
 
 .. seealso::
 
-   Please refer to the documentation of :mod:`DictDumper <dictdumper>` library
-   for more information about the output dumpers.
+   :mod:`DictDumper <dictdumper>`'s own documentation covers the dumpers in
+   detail.
 
-The following table shows the available output dumpers and the corresponding
-formats:
+The available output dumpers and their formats:
 
 +----------------------------------+------------------------------------------------+------------------+
 | Dumper Format                    | Dumper Class                                   | Output Extension |
@@ -691,7 +673,7 @@ The following code snippet shows how to create a new dumper class:
        def __call__(self, value: 'Frame', name: 'Optional[str]' = None) -> 'MyDumper':
            with open(self._file, 'ab') as file:
                self._append_value(value, file, name or f'Frame {self._fnum}')  # append value to the file
-            return self
+           return self
 
        # NOTE: The following method will be called at the initialisation of the
        # dumper class, which is expected to write the top-level header of the
@@ -719,18 +701,16 @@ The following code snippet shows how to create a new dumper class:
 Reassembly and Flow Tracing
 ---------------------------
 
-The :mod:`pcapkit.foundation.reassembly` module provides several built-in
-reassembly classes for reassembling the fragmented network packets; and the
-:mod:`pcapkit.foundation.traceflow` module provides several built-in flow
-tracing classes for tracing the network packets as they will compose as a
-flow and/or stream. All reassembly and flow tracing classes are implemented
-as :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and
-:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses,
-respectively, which are responsible for reassembling and tracing the network
-packets for further processing.
+:mod:`pcapkit.foundation.reassembly` reassembles fragmented packets;
+:mod:`pcapkit.foundation.traceflow` follows packets that compose a flow or
+stream. The shipped classes derive from
+:class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`;
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` are the ones to build
+your own on, since they carry the ``protocol=`` registration hook.
 
-The following table shows the available reassembly and flow tracing classes
-per the supported protocols:
+The reassembly and flow tracing classes, per protocol:
 
 +------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
 | Protocol                                       | Reassembly Class                                 | Flow Tracing Class                            |
@@ -751,13 +731,9 @@ per the supported protocols:
 New Implementation
 ~~~~~~~~~~~~~~~~~~
 
-To add a new reassembly or flow tracing class, you need to create a new class
-inherited from :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
-or :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` class, which
-is responsible for reassembling or tracing the network packets for further
-processing.
-
-The following code snippet shows how to create a new reassembly class:
+A new reassembly or flow tracing class subclasses
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` or
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`:
 
 .. note::
 
@@ -785,8 +761,9 @@ The following code snippet shows how to create a new reassembly class:
    # the reassembled packet and the reassembly table, respectively.
 
    BufferID: 'TypeAlias' = ...  # a tuple-like object to identify the reassembly
-                                # table entry's ID, e.g., (src, dst, id, proto)
-                                # for IPv4, (src, dst, spi) for IPv6, etc.
+                                # table entry's ID, e.g. (src, dst, id, proto)
+                                # for both IPv4 and IPv6, and
+                                # (src, srcport, dst, dstport) for TCP
 
 
    @info_final
@@ -878,30 +855,23 @@ The following code snippet shows how to create a new reassembly class:
 Callback Functions
 ~~~~~~~~~~~~~~~~~~
 
-It is possible to register callback functions to the reassembly and flow
-tracing classes, which will be called at the end of the reassembly and
-flow tracing process, respectively. This feature is designed to create
-the ability to process the reassembled datagrams and/or flows, e.g., to
-check if the datagram and/or flows are to be discarded, etc.
+Callback functions can be registered on the reassembly and flow tracing
+classes, and run at the end of the respective process -- to inspect the
+reassembled datagrams or flows, or to discard some of them.
 
 .. seealso::
 
-   For more information, you may refer to the documentation of
-   :mod:`pcapkit.foundation.registry.foundation` for the callback
-   registry functions:
+   :mod:`pcapkit.foundation.registry.foundation` holds the callback registry
+   functions:
 
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback`
 
-All callback functions are expected to be a callback function, which
-accepts a single argument, i.e., the list of reassembled datagrams
-and/or flows, and returns :obj:`None`. Any return value will be ignored.
+A callback takes one argument -- the list of reassembled datagrams or flows --
+and returns :obj:`None`; any return value is ignored.
 
-It is possible to modify the reassembled datagrams and/or flows in the
-callback functions, e.e., to discard certain reassembled datagrams and/or
-flows, etc. However, it is not recommended to modify the reassembled
-datagrams and/or flows directly. Should that is the intended behaviour,
-you should create a new reassembly and/or flow tracing class, and modify
-the corresponding reassembly and/or flow tracing algorithm.
+That list can be modified in place, but prefer not to: if the reassembly or
+tracing result itself is wrong for your purpose, subclass the reassembly or
+flow tracing class and change its algorithm instead.

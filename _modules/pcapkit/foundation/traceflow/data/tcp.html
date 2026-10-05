@@ -530,9 +530,8 @@
     <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: TCP reset (RST) flag. A connection can end abruptly as well as politely</span>
     <span class="c1">#: (:rfc:`9293#section-3.5.2`), and the tracer cannot notice that unless the</span>
-    <span class="c1">#: flag reaches it -- which it did not, so a reset connection used to look</span>
-    <span class="c1">#: merely idle and a later connection reusing the same endpoints merged into</span>
-    <span class="c1">#: it.</span>
+    <span class="c1">#: flag reaches it, otherwise a reset connection looks merely idle and a later</span>
+    <span class="c1">#: connection reusing the same endpoints merges into it.</span>
     <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Source IP.</span>
     <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>

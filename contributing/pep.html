@@ -1039,7 +1039,7 @@ likewise unhandled, so partial-reliability stream advancement is invisible.</p>
 methods,
 <a class="reference internal" href="../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code></a> and
 <a class="reference internal" href="../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a>. Registering
-it, though, is currently inert:
+it, though, is inert:
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register_reassembly" title="pcapkit.foundation.extraction.Extractor.register_reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_reassembly()</span></code></a> accepts any
 protocol name, while
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> only ever instantiates the
@@ -1403,7 +1403,7 @@ dissectors later. The third format, the <span class="target" id="index-40"></spa
 <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
 nobody has claimed it.</p>
 <p><strong>Wave 2 or 3 — per-entry coverage of the option and parameter registries.</strong> The
-option, parameter, block and frame registries are <em>enumerated</em> today but not
+option, parameter, block and frame registries are <em>enumerated</em> but not
 <em>implemented</em> throughout: a code can be registered, and named, and still have no
 working per-entry read/make pair behind it. The goal of this item is to close
 that gap to zero for every code whose format is actually specified.</p>

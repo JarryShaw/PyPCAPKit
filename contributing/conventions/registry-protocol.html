@@ -507,9 +507,9 @@ share the generated template: <a class="reference internal" href="../../pcapkit/
 bespoke <code class="docutils literal notranslate"><span class="pre">__new__</span></code> exempts a registry from the template, not from the protocol.</p>
 <section id="the-two-tier-hierarchy">
 <h2>The Two-Tier Hierarchy<a class="headerlink" href="#the-two-tier-hierarchy" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base any more. Since
-phase 1 of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
-parent, and the line between them is whether the enumeration may <em>grow</em>:</p>
+<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> is not the only base: per phase 1 of
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a parent, and the line between them is whether the enumeration
+may <em>grow</em>:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -545,7 +545,7 @@ itself and broken <code class="docutils literal notranslate"><span class="pre">i
 <em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: the base has
 to offer range-validation logic for its inheriting classes to hook into. The
 base implementation accepts everything; an override states a range, in the shape the
-generated registries currently spell by hand in <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>:</p>
+generated registries spell by hand in <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
@@ -582,10 +582,9 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 <p class="admonition-title">Note</p>
 <p>Re-parenting every non-registry enumeration onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> was <strong>phase 2</strong> of
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
-<strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
-<strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
-walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is <strong>complete</strong>: the phase landed for 24 of the 24
+non-registry enumerations. <strong>Zero enumerations remain outside the hierarchy</strong>,
+measured by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours.</p>
 </div>
 </section>
 <section id="failed-lookup-exceptions">
@@ -737,7 +736,7 @@ in <strong>zero</strong> of them, and neither class carried an alias (<code clas
 docstrings to refer to. Offered the choice between merging the widened copies and
 deleting them in a follow-up, the owner ruled for deleting them outright. Both
 <code class="docutils literal notranslate"><span class="pre">get</span></code> methods and both suppressions went with it, and
-<a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> now defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> at all.</p>
+<a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> at all.</p>
 <p>The one input where the copies <strong>did</strong> differ is why this matters beyond line count,
 and it is the trap for whoever writes the next override: the base branches on
 <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">str)</span></code> and treats everything else as a <em>value</em>, while those two
@@ -943,7 +942,7 @@ the CSV columns the crawler reads are lower case in every row (<code class="docu
 exactly as for the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above; <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code>’s are <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> ASN.1
 identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
 construction, so it lands the same way for a different reason.
-<strong>None</strong> of the six defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own any more. Two did when this
+<strong>None</strong> of the six defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. Two did when this
 audit was taken –
 <code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, for
 signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch)
@@ -991,7 +990,7 @@ design question rather than a case fold.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code>. By parity with
 <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code> – an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued enumeration whose <em>names</em> are the
 specification’s own tokens – the measured spelling disagreement above would make
-these two case-insensitive. Nothing looks them up by string today, though: the
+these two case-insensitive. Nothing looks them up by string, though: the
 crawler translates the CSV’s lower-case letters to the upper-case member names at
 generation time. Both classes inherit
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, since
@@ -1011,11 +1010,9 @@ resolver rather than a registry override, which is why the audit records it here
 rather than changing it.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The obstacle this page used to record – that the base’s string-key path does not
-fall through to a value lookup, so an <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code> registry would stop
-resolving a valid value that is not also a name – <strong>no longer applies.</strong>
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> now checks <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>
-when the name lookup misses, so such a value resolves:</p>
+<p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> checks <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> when
+the name lookup misses, so an <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code> registry still resolves a valid
+value that is not also a name:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">FEATCode</span><span class="p">[</span><span class="s1">'base'</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 <span class="go">'&lt;base&gt;'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s1">'&lt;base&gt;'</span> <span class="ow">in</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">_member_map_</span>

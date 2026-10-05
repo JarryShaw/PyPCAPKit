@@ -541,14 +541,10 @@ catches it.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <ul class="simple">
-<li><p>This terseness used to come from setting <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to
-<code class="docutils literal notranslate"><span class="pre">0</span></code>, which is process-global: one loud error truncated the tracebacks
-of every <em>other</em>, unrelated exception for the rest of the process,
-including ones that had nothing to do with <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. It also,
-incidentally, was what kept a loud error raised on a worker thread
-terse, since the interpreter’s default <code class="xref py py-data docutils literal notranslate"><span class="pre">threading.excepthook</span></code>
-itself consults <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a>. The two hooks here replace
-that mechanism precisely because neither has that reach – each
+<li><p>The terseness is deliberately not done by setting
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code>: that is process-global, so one loud
+error would truncate the tracebacks of every <em>other</em>, unrelated
+exception for the rest of the process. Each of the two hooks here
 shortens the printing of a <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> only, and hands every
 other exception, unchanged, to whatever hook <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> found
 installed before it first needed its own.</p></li>
@@ -562,10 +558,9 @@ than letting it reach the top level uncaught – passes through
 neither. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">stacklevel</span></code> of the log record is the relative level
 <a class="reference internal" href="functools.html#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> computes, so the record is attributed to the caller
-whose operation failed rather than to this module. It used to be
-<em>negated</em>, which <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a> reads as “do not walk
-out at all” and which therefore blamed <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself for every
-error pcapkit raised.</p></li>
+whose operation failed rather than to this module. It must not be
+negated: <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a> reads that as “do not walk
+out at all” and would blame <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself for every error.</p></li>
 </ul>
 </div>
 <div class="admonition seealso">

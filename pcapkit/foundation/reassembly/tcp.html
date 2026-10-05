@@ -583,6 +583,12 @@ abandoned it under the reassembly timeout</p></li>
 <dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon reassembled datagram.</p>
+</dd></dl>
+
 </dd></dl>
 
 <section id="algorithm">
@@ -1088,8 +1094,8 @@ Each entry is <code class="docutils literal notranslate"><span class="pre">(firs
 conflicting portion of whichever segment arrived later, per
 <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a> (“we reconstruct the segment to contain just
 the new data”); this field is what lets a caller tell a clean stream
-from a contested one now that <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="pcapkit.foundation.reassembly.data.tcp.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">completed</span></code></a> no longer does, since a
-contested range does not, on its own, leave a hole.</p>
+from a contested one, since a contested range does not, on its own, leave a
+hole for <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="pcapkit.foundation.reassembly.data.tcp.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">completed</span></code></a> to report.</p>
 </dd></dl>
 
 </dd></dl>

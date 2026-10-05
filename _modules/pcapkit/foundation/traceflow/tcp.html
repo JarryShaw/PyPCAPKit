@@ -521,13 +521,13 @@
 <span class="sd">        A TCP connection has two halves, and by default they are traced as **one</span>
 <span class="sd">        flow** -- which is what "following a TCP stream" means everywhere else,</span>
 <span class="sd">        and what this module's own title claims to do. Keying a flow on</span>
-<span class="sd">        (source, destination) instead put a client's packets and the server's</span>
-<span class="sd">        replies in separate flows, separate labels and separate output files,</span>
-<span class="sd">        leaving a caller to pair them up by inspecting the labels.</span>
+<span class="sd">        (source, destination) instead would put a client's packets and the</span>
+<span class="sd">        server's replies in separate flows, separate labels and separate output</span>
+<span class="sd">        files, leaving a caller to pair them up by inspecting the labels.</span>
 
-<span class="sd">        Two consequences of the change are worth knowing:</span>
+<span class="sd">        Two consequences are worth knowing:</span>
 
-<span class="sd">        * The reverse half of a conversation no longer produces a flow of its</span>
+<span class="sd">        * The reverse half of a conversation does not produce a flow of its</span>
 <span class="sd">          own, so a capture of *n* connections yields *n* flows rather than</span>
 <span class="sd">          ``2n``, and one output file each rather than two.</span>
 <span class="sd">        * **A teardown does not end a flow.** Seeing a connection close is not the</span>

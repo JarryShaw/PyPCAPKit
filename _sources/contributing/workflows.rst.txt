@@ -6,10 +6,9 @@ GitHub Actions Workflows
    The eight workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
-   to start. This page is the repository-wide graph. It does not
-   cover the release *pipeline* itself -- the job-by-job path from a version
-   bump to a published package -- which :doc:`releasing` already documents in
-   full; this page cross-references that rather than duplicating it.
+   to start. This page is the repository-wide graph. The release *pipeline*
+   itself, job by job from a version bump to a published package, is on
+   :doc:`releasing`.
 
 At a Glance
 -----------
@@ -194,7 +193,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:101`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:153`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:43`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -215,7 +214,7 @@ would test the same commit several times over -- and
 ``required-checks`` (see `Required Status Checks`_ below), gated out by its
 own ``if:`` rather than by having already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:695-701``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:892-898``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -236,18 +235,18 @@ carries:
 
    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
-(``create-release.yml:98``). On the ``workflow_run`` path, this evaluates
+(``create-release.yml:150``). On the ``workflow_run`` path, this evaluates
 **false**, and the job is skipped outright, whenever the upstream Vendor
 Update run's own conclusion was anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). ``version_check`` then depends on that job with a
-plain ``needs: [ unit-tests ]`` (``create-release.yml:108``) and no
+plain ``needs: [ unit-tests ]`` (``create-release.yml:160``) and no
 ``always()`` override, so a skipped dependency skips it too -- and every job
 past it is gated the same way: ``github`` needs ``[ version_check ]``
-(``:156``), ``tag`` needs ``[ github, version_check ]`` (``:251``), ``pypi``
-needs ``[ github, version_check ]`` (``:319``), and ``conda`` needs
-``[ tag, github, version_check ]`` (``:406``).
+(``:348``), ``tag`` needs ``[ github, version_check ]`` (``:449``), ``pypi``
+needs ``[ github, version_check ]`` (``:527``), and ``conda`` needs
+``[ tag, github, version_check ]`` (``:626``).
 
 .. mermaid::
 
@@ -271,16 +270,12 @@ needs ``[ github, version_check ]`` (``:319``), and ``conda`` needs
        classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
        class UTX,VC,GH,TAGJ,PY,CD skipped
 
-This is a transitive reduction, the same choice :doc:`releasing` makes for
-the identical fan-out: ``version_check`` is also a direct ``needs:`` of
-``tag`` and ``pypi`` in the file itself (``create-release.yml:251,319``), on
-top of the ``github`` edge drawn above, and ``conda`` needs ``version_check``
-directly too (``:406``) alongside ``tag`` and ``github``. All three are
-omitted here for the reason :doc:`releasing` gives for its own copy of this
-same graph: ``github`` already implies them, since ``github`` itself depends
-on ``version_check``, and drawing all of ``version_check``'s direct
-dependents would add lines without changing which job can start before
-which, or which job a skip in ``version_check`` reaches.
+This is a transitive reduction, as in :doc:`releasing`: ``version_check`` is
+also a direct ``needs:`` of ``tag`` and ``pypi`` (``create-release.yml:449,527``)
+and of ``conda`` (``:626``), but ``github`` already implies those edges, since
+it depends on ``version_check`` itself. Drawing them would add lines without
+changing which job can start before which, or which job a skip in
+``version_check`` reaches.
 
 The whole run then reports **skipped**, not failed -- there is no red X to
 notice. Observed in production on runs `36511610205
@@ -304,8 +299,8 @@ Required Status Checks
 
 Ruleset ``23497679`` on ``main`` requires six contexts, with
 ``strict_required_status_checks_policy: true`` (a branch must be up to date
-with ``main`` before it can merge, not merely green). Found by grepping every
-workflow file for each name rather than assuming the obvious one:
+with ``main`` before it can merge, not merely green). Each was found by
+grepping every workflow file for its name:
 
 .. list-table::
    :header-rows: 1
@@ -315,7 +310,7 @@ workflow file for each name rather than assuming the obvious one:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:945``
+     - ``unit-tests.yml:1142``
    * - ``Compat Python 3.10``
      - job ``compatibility``, matrix leg ``3.10``
      - ``python-compatibility.yml:31,41``
@@ -332,20 +327,17 @@ workflow file for each name rather than assuming the obvious one:
      - job ``compatibility``, matrix leg ``3.14``
      - ``python-compatibility.yml:31,45``
 
-``grep -rn "Required checks passed" .github/workflows/*.yml`` turns up
-exactly one job carrying that literal ``name:`` (``unit-tests.yml:945``).
-``grep -rn "Compat Python" .github/workflows/*.yml`` turns up two job
-``name:`` lines in ``python-compatibility.yml`` -- the required
-``compatibility`` job's template (``:31``, ``Compat Python ${{
-matrix.python-version }}``, expanding to the five required legs at
-``:41-45``) and the separate, non-required ``compatibility-nightly`` job
-(``:69``, ``Compat Python 3.15 (scheduled)``, cited again below for its own
-``continue-on-error`` policy) -- plus one comment in ``unit-tests.yml``
-(``:806``) that references the string without defining it.
+``Required checks passed`` is defined by exactly one job
+(``unit-tests.yml:1142``). ``Compat Python`` is defined by two in
+``python-compatibility.yml``: the required ``compatibility`` job (``:31``,
+``Compat Python ${{ matrix.python-version }}``, expanding to the five required
+legs at ``:41-45``) and the non-required ``compatibility-nightly`` job (``:69``,
+``Compat Python 3.15 (scheduled)``, see below). A comment in
+``unit-tests.yml`` (``:1003``) mentions the string without defining it.
 
 ``Required checks passed`` is itself an aggregate, not a single check run --
 but it stands in for **17** of the ruleset's originally-named 22 contexts,
-not all 22. ``unit-tests.yml``'s own comment (``:805-826``) accounts for the
+not all 22. ``unit-tests.yml``'s own comment (``:1002-1023``) accounts for the
 22: five each for ``test`` and ``integration``, five for the live ``Compat
 Python 3.10``-``3.14`` contexts (emitted by ``python-compatibility.yml``, a
 *different* workflow file -- nothing in ``unit-tests.yml`` could ever stand
@@ -356,11 +348,11 @@ stopped producing once it became a Python x engine matrix, and two for
 ``test``/``integration``/dead-``Engines``/``pypcap-parity`` slots -- 5 + 5 +
 5 + 2 = 17 -- via its own ``needs: [test, integration, engine-tests,
 pypcap-parity]`` plus an explicit per-dependency check
-(``unit-tests.yml:944-970``). The five ``Compat`` contexts stay required
+(``unit-tests.yml:1141-1167``). The five ``Compat`` contexts stay required
 exactly as they are and are listed separately in the table above. This job
 runs on Unit Tests' own ``push``/``pull_request`` triggers; the
 ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``:947``), so it is never
+``if: ${{ always() && inputs.gate-only != true }}`` (``:1144``), so it is never
 produced -- and never expected -- on those paths.
 
 ``Compat Python 3.10``-``3.14`` are five ordinary matrix legs, not an
@@ -378,16 +370,16 @@ Deployment ``environment:``
 Four jobs, all in ``create-release.yml``, declare a deployment
 ``environment:`` and can therefore pause for an approval:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:153``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:249``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:314``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:403``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:345``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:447``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:522``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:623``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
 ``gh-pages`` branch via ``JamesIves/github-pages-deploy-action`` rather than
 through an ``environment:``-gated deployment. Of the four above, only
-``github-release`` carries a required reviewer today; :doc:`releasing`
+``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
 repeating it here.

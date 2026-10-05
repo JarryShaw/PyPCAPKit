@@ -593,8 +593,8 @@
     <span class="c1">#: conflicting portion of whichever segment arrived later, per</span>
     <span class="c1">#: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just</span>
     <span class="c1">#: the new data"); this field is what lets a caller tell a clean stream</span>
-    <span class="c1">#: from a contested one now that :attr:`completed` no longer does, since a</span>
-    <span class="c1">#: contested range does not, on its own, leave a hole.</span>
+    <span class="c1">#: from a contested one, since a contested range does not, on its own, leave a</span>
+    <span class="c1">#: hole for :attr:`completed` to report.</span>
     <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

@@ -812,7 +812,7 @@
         <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
         <span class="c1"># type" and this must not paper over the miss with either. An</span>
         <span class="c1"># IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is</span>
-        <span class="c1"># not a LinkType member name, and now raises. Note the asymmetry, which</span>
+        <span class="c1"># not a LinkType member name, and raises. Note the asymmetry, which</span>
         <span class="c1"># is not a choice made here: an IPv6-rooted packet's name uppercases to</span>
         <span class="c1"># ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it</span>
         <span class="c1"># resolves silently -- to a DLT the caller never chose. Only the v4 name</span>

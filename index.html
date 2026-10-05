@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The PyPCAPKit project is an open source Python program focus on network packet parsing and analysis, which works as a comprehensive PCAP file extraction, construction and analysis library. About: P..." />
-<meta name="description" content="The PyPCAPKit project is an open source Python program focus on network packet parsing and analysis, which works as a comprehensive PCAP file extraction, construction and analysis library. About: P..." />
+<meta property="og:description" content="PyPCAPKit is an open source Python library for PCAP file extraction, construction and analysis. About: PyPCAPKit is an independent open source library, with DictDumper as its formatted output dumpe..." />
+<meta name="description" content="PyPCAPKit is an open source Python library for PCAP file extraction, construction and analysis. About: PyPCAPKit is an independent open source library, with DictDumper as its formatted output dumpe..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Module Documentation" href="pcapkit/index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -484,9 +484,8 @@
         <article role="main" id="furo-main-content">
           <section id="pypcapkit-comprehensive-network-packet-analysis-library">
 <h1>PyPCAPKit - Comprehensive Network Packet Analysis Library<a class="headerlink" href="#pypcapkit-comprehensive-network-packet-analysis-library" title="Link to this heading">¶</a></h1>
-<p>The PyPCAPKit project is an open source Python program focus on network packet
-parsing and analysis, which works as a comprehensive <a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> file extraction,
-construction and analysis library.</p>
+<p>PyPCAPKit is an open source Python library for <a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> file extraction,
+construction and analysis.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The whole project supports <strong>Python 3.6</strong> or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.</p>
@@ -516,7 +515,7 @@ comprehensive: more detailed packet information, and a more <em>Pythonic</em>
 interface.</p>
 <section id="module-structure">
 <h3>Module Structure<a class="headerlink" href="#module-structure" title="Link to this heading">¶</a></h3>
-<p>In <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, all files can be described as following eight parts.</p>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is made of nine subpackages.</p>
 <ul>
 <li><p>Interface (<a class="reference internal" href="pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>)</p>
 <p>User interface for the <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> library, which
@@ -548,6 +547,10 @@ extraction engines with a unified interface.</p>
 <li><p>Constants (<a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>)</p>
 <p>Constant enumerations used in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> for protocol
 family extraction and representation.</p>
+</li>
+<li><p>Vendor (<a class="reference internal" href="pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>)</p>
+<p>Crawlers that regenerate the <a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> enumerations
+from the upstream registries.</p>
 </li>
 </ul>
 </section>
@@ -783,8 +786,8 @@ Homebrew’s libpcap library prefix. It is also unsupported on Python 3.12+.</p>
 </aside>
 <aside class="footnote brackets" id="id12" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">4</a><span class="fn-bracket">]</span></span>
-<p>The prerelease <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> / <a class="reference external" href="https://www.tcpdump.org">libpcap</a> wheels currently load Linux
-<code class="docutils literal notranslate"><span class="pre">libc.so.6</span></code> on this macOS host, so their engine could not be preflighted.</p>
+<p>The prerelease <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> / <a class="reference external" href="https://www.tcpdump.org">libpcap</a> wheels load Linux <code class="docutils literal notranslate"><span class="pre">libc.so.6</span></code> on
+this macOS host, so their engine could not be preflighted.</p>
 </aside>
 </aside>
 </section>
@@ -794,21 +797,21 @@ Homebrew’s libpcap library prefix. It is also unsupported on Python 3.12+.</p>
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> declares support for <strong>Python 3.6 and later</strong>, and CI verifies
-<strong>3.10 through 3.14</strong>, plus 3.15 as an allowed-to-fail leg.</p>
 <p>The sources themselves use 3.8 syntax; the <code class="docutils literal notranslate"><span class="pre">bpc-walrus</span></code>/<code class="docutils literal notranslate"><span class="pre">bpc-poseur</span></code>
 backport tools in <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> convert it at install time, which is what
-makes the lower bound possible. Measured: 3.9 and 3.8 import and extract
-straight from source with no conversion needed, and 3.7 needs the conversion.</p>
+makes the <strong>3.6</strong> lower bound possible. Measured: 3.9 and 3.8 import and
+extract straight from source with no conversion needed, and 3.7 needs the
+conversion.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>The conversion is currently blocked by an upstream bug</strong>, so below 3.8 the
-declaration is intent rather than something that works today. <code class="docutils literal notranslate"><span class="pre">bpc-poseur</span></code>
-0.4.3.post1 crashes on positional-only parameters declared on a <em>method</em>
-rather than a plain function, and exits 0 so the build does not notice; the 12
-such parameters in <a class="reference internal" href="pcapkit/corekit/io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a> then survive into the installed
-package and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapkit</span></code> fails with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SyntaxError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>.</p>
+<p><strong>The conversion is blocked by an upstream bug</strong>, so below 3.8 the declaration
+is intent rather than something that works. <code class="docutils literal notranslate"><span class="pre">bpc-poseur</span></code> 0.4.3.post1 crashes
+on positional-only parameters declared on a <em>method</em> rather than a plain
+function, and exits 0 so the build does not notice; such methods – including
+the 13 on <a class="reference internal" href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, plus a dozen more across
+the protocols, foundation, dumpkit and corekit modules – then survive into the
+installed package and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapkit</span></code> fails with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SyntaxError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>.</p>
 <p>It is a one-line fix upstream – <code class="docutils literal notranslate"><span class="pre">poseur.py:744</span></code> passes <code class="docutils literal notranslate"><span class="pre">cls_ctx=name.name</span></code>
 where <code class="docutils literal notranslate"><span class="pre">name</span></code> is already a parso <code class="docutils literal notranslate"><span class="pre">Name</span></code> and wants <code class="docutils literal notranslate"><span class="pre">.value</span></code> – and with it
 applied, <code class="docutils literal notranslate"><span class="pre">walrus</span></code> then <code class="docutils literal notranslate"><span class="pre">poseur</span></code> produce a file Python 3.7 parses cleanly.</p>
@@ -887,7 +890,7 @@ explicitly: <code class="docutils literal notranslate"><span class="pre">pip</sp
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>Install only one of ``pypcap`` and ``pcap-ct``.</strong> Both own the top-level
+<p><strong>Install only one of</strong> <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>. Both own the top-level
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> module, and <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install both without complaint. With both
 present the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package wins the import and <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s extension
 module is shadowed and unreachable, so <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> stops working –
@@ -897,12 +900,10 @@ and which one won, but it cannot undo it.</p>
 </div>
 <section id="engine-prerequisites">
 <h3>Engine prerequisites<a class="headerlink" href="#engine-prerequisites" title="Link to this heading">¶</a></h3>
-<p>Four of the engines need something beyond a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>. Each constraint is
-also enforced in code, through the engine’s
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, so
-hitting one produces a warning naming the cause and a fall back to
-<a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own parser rather than an error from inside the third-party
-package.</p>
+<p>Four of the engines need something beyond a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>. Each constraint
+below is also enforced in code, by the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>
+preflight described under <a class="reference internal" href="#engine-comparison">Engine Comparison</a>.</p>
 <dl>
 <dt><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></dt><dd><p>Two requirements, and neither is visible to an import: the package imports
 cleanly and then fails when used.</p>
@@ -917,9 +918,9 @@ with <code class="docutils literal notranslate"><span class="pre">asyncio.get_ev
 <strong>3.14</strong> <a class="reference external" href="https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.get_event_loop()</span></code></a> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> when there
 is no current event loop instead of quietly creating one. Measured: a loop is
 returned silently on 3.10 and 3.11, returned with a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a> on 3.12, and refused on 3.14. (3.13 was not
-available to test and is expected to work, being on the
-deprecated-but-functional side of that change.)</p></li>
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a> on 3.12, and refused on 3.14. 3.13 sits on the
+deprecated-but-functional side of that change, and <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> extracted a
+capture there.</p></li>
 </ul>
 </dd>
 <dt><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></dt><dd><p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> ships <strong>no wheels</strong> – only an sdist – so <strong class="program">pip</strong> compiles
@@ -979,13 +980,10 @@ requires Python <strong>3.11 or older</strong> until 0.12.1 is published.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself, and its <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engines,
-work fine on current Python versions – <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were
-both measured reading a capture on Python 3.14. Only the four engines above
-carry extra constraints, and asking for an engine that cannot run in the
-current environment emits an
-<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> naming the reason and falls
-back to <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own parser rather than failing outright.</p>
+<p>Only the four engines above carry extra constraints. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself and
+its <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engines need nothing further –
+<code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were both measured reading a capture on
+Python 3.14.</p>
 </div>
 <p>For CLI usage, you will need to install the optional packages:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>cli<span class="o">]</span>

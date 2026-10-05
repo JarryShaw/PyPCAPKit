@@ -1049,10 +1049,10 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same</span>
         <span class="c1"># idea ``name`` -- so guessing ``name=`` by analogy is the expected</span>
-        <span class="c1"># mistake, not a careless one. It used to land in ``**kwargs``, get</span>
-        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, and leave</span>
-        <span class="c1"># the class registered under its own class name instead: no exception, no</span>
-        <span class="c1"># warning. See the sibling note in ``Engine.__init_subclass__``.</span>
+        <span class="c1"># mistake, not a careless one. Left in ``**kwargs`` it would be</span>
+        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, leaving the</span>
+        <span class="c1"># class registered under its own class name: no exception, no warning.</span>
+        <span class="c1"># See the sibling note in ``Engine.__init_subclass__``.</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>

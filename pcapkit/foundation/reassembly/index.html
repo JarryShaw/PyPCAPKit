@@ -608,11 +608,10 @@ submitted there as a trivially complete datagram – so the eager parse
 re-parsed captures holding no fragments at all: <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> has 1117
 IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP
 reassembly over it.</p>
-<p>TCP reassembly builds its <code class="docutils literal notranslate"><span class="pre">packet</span></code> eagerly too
-(<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>). It is a
-far smaller cost there, being FIN/RST-driven rather than per-frame – 222
-submits per <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> pass against 1117 – so it is left for its own
-change, but it can use this unmodified when someone gets to it.</p>
+<p>TCP reassembly defers its <code class="docutils literal notranslate"><span class="pre">packet</span></code> as well
+(<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>), at a far
+smaller saving, being FIN/RST-driven rather than per-frame – 222 submits per
+<code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> pass against 1117.</p>
 <p>Holding the call here defers it to the first read of
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code>, so a caller that wants the parsed payload still gets
 exactly the object the eager call produced, and one that does not never pays

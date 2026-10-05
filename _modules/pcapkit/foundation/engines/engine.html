@@ -749,14 +749,14 @@
 <span class="sd">            registered; only the keyword decides registration.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This keyword was ``name`` when opt-in registration landed, and was</span>
-<span class="sd">            renamed because ``name`` cannot be passed as a class keyword at all</span>
-<span class="sd">            on Python 3.10: :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``,</span>
-<span class="sd">            ``bases`` and ``namespace`` as positional-*or-keyword* parameters</span>
+<span class="sd">            The keyword is ``engine`` rather than ``name`` because ``name``</span>
+<span class="sd">            cannot be passed as a class keyword at all on Python 3.10:</span>
+<span class="sd">            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and</span>
+<span class="sd">            ``namespace`` as positional-*or-keyword* parameters</span>
 <span class="sd">            before 3.11, so a class keyword by any of those four names collides</span>
 <span class="sd">            with one of them and the class statement raises :exc:`TypeError` from</span>
 <span class="sd">            the metaclass before this method is reached. ``engine`` is outside</span>
-<span class="sd">            that set, so the documented registration path now works on every</span>
+<span class="sd">            that set, so the documented registration path works on every</span>
 <span class="sd">            supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those</span>
 <span class="sd">            four are the whole of the :meth:`abc.ABCMeta.__new__` collision</span>
 <span class="sd">            surface. Separately, and for an unrelated reason that holds on every</span>
@@ -772,10 +772,10 @@
         <span class="c1"># NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then</span>
         <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, since</span>
         <span class="c1"># ``object.__init_subclass__`` takes none. Silently swallowing it is how</span>
-        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` used to register under its class</span>
-        <span class="c1"># name instead -- no exception, no warning. Now that a missing keyword</span>
-        <span class="c1"># means "do not register", the same typo would silently skip</span>
-        <span class="c1"># registration altogether, which is quieter still. So reject it.</span>
+        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` would register under its class</span>
+        <span class="c1"># name instead -- no exception, no warning. Since a missing keyword means</span>
+        <span class="c1"># "do not register", the same typo would silently skip registration</span>
+        <span class="c1"># altogether, which is quieter still. So reject it.</span>
         <span class="c1">#</span>
         <span class="c1"># One typo this cannot catch is ``name=``, and only on Python 3.10: it is</span>
         <span class="c1"># one of the four names that collide with ``ABCMeta.__new__``, so it fails</span>

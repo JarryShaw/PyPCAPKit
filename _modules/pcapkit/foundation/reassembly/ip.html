@@ -798,10 +798,9 @@
                 <span class="c1"># zero-filled uses ``strict=True`` and gets the runs.</span>
                 <span class="n">stop</span> <span class="o">=</span> <span class="n">TDL</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># The length is not known, and this is the case that used to slice</span>
-                <span class="c1"># ``datagram[:-1]`` -- handing back 65534 octets of the</span>
-                <span class="c1"># preallocated buffer, almost all of them zeros the sender never</span>
-                <span class="c1"># sent, and calling the result complete.</span>
+                <span class="c1"># The length is not known. Slicing ``datagram[:-1]`` here would</span>
+                <span class="c1"># hand back 65534 octets of the preallocated buffer, almost all of</span>
+                <span class="c1"># them zeros the sender never sent, and call the result complete.</span>
                 <span class="c1">#</span>
                 <span class="c1"># Reporting nothing at all would be the other extreme, and it</span>
                 <span class="c1"># discards data that really did arrive. So report the **contiguous</span>

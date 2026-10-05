@@ -512,12 +512,12 @@ can be read</p></li>
 <p>A TCP connection has two halves, and by default they are traced as <strong>one
 flow</strong> – which is what “following a TCP stream” means everywhere else,
 and what this module’s own title claims to do. Keying a flow on
-(source, destination) instead put a client’s packets and the server’s
-replies in separate flows, separate labels and separate output files,
-leaving a caller to pair them up by inspecting the labels.</p>
-<p>Two consequences of the change are worth knowing:</p>
+(source, destination) instead would put a client’s packets and the
+server’s replies in separate flows, separate labels and separate output
+files, leaving a caller to pair them up by inspecting the labels.</p>
+<p>Two consequences are worth knowing:</p>
 <ul>
-<li><p>The reverse half of a conversation no longer produces a flow of its
+<li><p>The reverse half of a conversation does not produce a flow of its
 own, so a capture of <em>n</em> connections yields <em>n</em> flows rather than
 <code class="docutils literal notranslate"><span class="pre">2n</span></code>, and one output file each rather than two.</p></li>
 <li><p><strong>A teardown does not end a flow.</strong> Seeing a connection close is not the
@@ -736,6 +736,12 @@ cannot catch up. For a result that is final, read after <a class="reference inte
 <dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon reassembled datagram.</p>
+</dd></dl>
+
 </dd></dl>
 
 <section id="terminology">
@@ -906,9 +912,8 @@ capture order would corrupt.</p>
 <span class="sig-name descname"><span class="pre">rst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.rst" title="Link to this definition">¶</a></dt>
 <dd><p>TCP reset (RST) flag. A connection can end abruptly as well as politely
 (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.2"><strong>RFC 9293 Section 3.5.2</strong></a>), and the tracer cannot notice that unless the
-flag reaches it – which it did not, so a reset connection used to look
-merely idle and a later connection reusing the same endpoints merged into
-it.</p>
+flag reaches it, otherwise a reset connection looks merely idle and a later
+connection reusing the same endpoints merges into it.</p>
 </dd></dl>
 
 <dl class="py attribute">

@@ -622,7 +622,7 @@
             <span class="c1"># ProtocolUnbound('unknown field: payload') *from the recovery path*,</span>
             <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
             <span class="c1"># Raw into a crash. Unreachable until something was registered on an</span>
-            <span class="c1"># SCTP payload protocol identifier, which NGAP now is.</span>
+            <span class="c1"># SCTP payload protocol identifier, which NGAP is.</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
 
             <span class="c1"># NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so</span>
@@ -685,7 +685,7 @@
 <span class="sd">        nonetheless promised implementors a trailing ``*args, **kwargs``, which</span>
 <span class="sd">        the wrapper below never populated. A caller relying on that promise</span>
 <span class="sd">        got extras silently discarded instead of forwarded -- see :issue:`454` -- so the</span>
-<span class="sd">        wrapper now raises :exc:`TypeError` for a fifth positional argument or</span>
+<span class="sd">        wrapper raises :exc:`TypeError` for a fifth positional argument or</span>
 <span class="sd">        an unconsumed keyword, the same as an ordinary call with too many</span>
 <span class="sd">        arguments would.</span>
 

@@ -489,46 +489,40 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Completion</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""How completely a datagram was reassembled, and why it stopped.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`877`'s ruling that every non-registry enumeration shares that</span>
-<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
-<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+<span class="sd">    Derives from :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="sd">    :issue:`877`'s ruling that every non-registry enumeration shares that lookup</span>
+<span class="sd">    contract; the class defines neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    This is the value of</span>
-<span class="sd">    :attr:`Datagram.completed &lt;pcapkit.foundation.reassembly.data.ip.Datagram.completed&gt;`.</span>
-<span class="sd">    That field used to be a plain :obj:`bool`, and this enumeration is a widening</span>
-<span class="sd">    of it rather than a second channel beside it: reassembly now has *three*</span>
-<span class="sd">    outcomes to report, not two, since a buffer abandoned under the :rfc:`791` /</span>
-<span class="sd">    :rfc:`8200` reassembly timeout is a different event from one that simply had</span>
-<span class="sd">    not finished when the capture did. Telling them apart is the whole point of</span>
-<span class="sd">    having a timeout at all -- an expired datagram says "these fragments are</span>
-<span class="sd">    gone", a partial one says "these fragments had not arrived yet".</span>
+<span class="sd">    :attr:`Datagram.completed &lt;pcapkit.foundation.reassembly.data.ip.Datagram.completed&gt;`,</span>
+<span class="sd">    which widens a plain :obj:`bool` rather than adding a second channel beside</span>
+<span class="sd">    it: reassembly has *three* outcomes to report, not two, since a buffer</span>
+<span class="sd">    abandoned under the :rfc:`791` / :rfc:`8200` reassembly timeout is a different</span>
+<span class="sd">    event from one that simply had not finished when the capture did. An expired</span>
+<span class="sd">    datagram says "these fragments are gone", a partial one says "these fragments</span>
+<span class="sd">    had not arrived yet".</span>
 
-<span class="sd">    Truthiness is preserved, so ``if datagram.completed:`` reads exactly as it</span>
-<span class="sd">    did while ``completed`` was a :obj:`bool`: :attr:`COMPLETE` is the only</span>
-<span class="sd">    truthy member. Equality against :obj:`True` and :obj:`False` is *not*</span>
-<span class="sd">    preserved -- ``datagram.completed == True`` is now :data:`False` even for a</span>
-<span class="sd">    complete datagram -- so a caller comparing against a boolean has to compare</span>
-<span class="sd">    against a member instead.</span>
+<span class="sd">    Truthiness is that of a :obj:`bool`: :attr:`COMPLETE` is the only truthy</span>
+<span class="sd">    member, so ``if datagram.completed:`` reads as it would for a boolean.</span>
+<span class="sd">    Equality against :obj:`True` and :obj:`False` is *not* preserved --</span>
+<span class="sd">    ``datagram.completed == True`` is :data:`False` even for a complete datagram --</span>
+<span class="sd">    so a caller comparing against a boolean has to compare against a member</span>
+<span class="sd">    instead.</span>
 
 <span class="sd">    It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as</span>
 <span class="sd">    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys two</span>
 <span class="sd">    things a plain :class:`enum.Enum` does not: the value survives</span>
 <span class="sd">    :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and</span>
 <span class="sd">    :meth:`Datagram.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` hands this</span>
-<span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so the</span>
-<span class="sd">    new state can be tested for without importing this class.</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` used to be a third</span>
-<span class="sd">    precedent for the same :class:`~pcapkit.utilities.compat.StrEnum` base, but</span>
-<span class="sd">    GitHub issue :issue:`886` moved its canonical definition to</span>
-<span class="sd">    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated like its</span>
-<span class="sd">    :mod:`pcapkit.const.pcapng` siblings: it now derives from :class:`aenum`'s</span>
-<span class="sd">    own ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`) rather than</span>
-<span class="sd">    from :mod:`pcapkit.utilities.compat`'s version-branched one. Both</span>
-<span class="sd">    properties above still hold for it either way -- ``aenum.StrEnum`` is a</span>
-<span class="sd">    :class:`str` subclass same as the stdlib one -- but ``isinstance``/</span>
-<span class="sd">    ``issubclass`` against :class:`pcapkit.utilities.compat.StrEnum` no longer</span>
-<span class="sd">    does, which is why it is called out here rather than left silently stale.</span>
+<span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so a</span>
+<span class="sd">    state can be tested for without importing this class.</span>
+<span class="sd">    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of</span>
+<span class="sd">    string enumeration, but GitHub issue :issue:`886` made it generated like its</span>
+<span class="sd">    :mod:`pcapkit.const.pcapng` siblings, so it derives from :class:`aenum`'s own</span>
+<span class="sd">    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). Both</span>
+<span class="sd">    properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`</span>
+<span class="sd">    subclass, but ``isinstance``/``issubclass`` against</span>
+<span class="sd">    :class:`pcapkit.utilities.compat.StrEnum` does not.</span>
 
 <span class="sd">    Warning:</span>
 <span class="sd">        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are</span>
@@ -594,11 +588,10 @@
 <span class="sd">    IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP</span>
 <span class="sd">    reassembly over it.</span>
 
-<span class="sd">    TCP reassembly builds its ``packet`` eagerly too</span>
-<span class="sd">    (:meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`). It is a</span>
-<span class="sd">    far smaller cost there, being FIN/RST-driven rather than per-frame -- 222</span>
-<span class="sd">    submits per :file:`http.pcap` pass against 1117 -- so it is left for its own</span>
-<span class="sd">    change, but it can use this unmodified when someone gets to it.</span>
+<span class="sd">    TCP reassembly defers its ``packet`` as well</span>
+<span class="sd">    (:meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`), at a far</span>
+<span class="sd">    smaller saving, being FIN/RST-driven rather than per-frame -- 222 submits per</span>
+<span class="sd">    :file:`http.pcap` pass against 1117.</span>
 
 <span class="sd">    Holding the call here defers it to the first read of</span>
 <span class="sd">    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets</span>

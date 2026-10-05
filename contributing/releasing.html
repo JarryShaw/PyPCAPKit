@@ -518,30 +518,27 @@ starts the automated path described below.</p>
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a
 release that is not a vendor-registry refresh – a feature or a fix that has
 landed and is ready to go out.</p>
-<p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand instead, without also moving
-<code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code> field to match, is <strong>not</strong> a safe
-shortcut – it does not drift through silently, it blocks the release.
+<p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without also moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">version</span></code> field to match is <strong>not</strong> a safe shortcut: it blocks the release.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">RepositoryCitationTests.test_the_citation_file_names_the_packaged_version</span></code>
-(<code class="docutils literal notranslate"><span class="pre">:493-513</span></code>) asserts the two agree, and that assertion is not optional on
-the release path: <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job
-(<code class="docutils literal notranslate"><span class="pre">:142-149</span></code>) calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs
-the <strong>full</strong> suite rather than the tiered subset an ordinary push runs
-(its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:734-803</span></code>). <code class="docutils literal notranslate"><span class="pre">version_check</span></code> itself
-depends on that job (<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">unit-tests</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">:154</span></code>), so a citation left
-behind fails the gate before <code class="docutils literal notranslate"><span class="pre">version_check</span></code> ever runs, and well before any
-approval is requested. Either run the script, or move both fields by hand in
-the same commit.</p>
+(<code class="docutils literal notranslate"><span class="pre">:494-514</span></code>) asserts the two agree, and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job (<code class="docutils literal notranslate"><span class="pre">:148-155</span></code>) calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
+<code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs the <strong>full</strong> suite rather than the tiered
+subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:931-1000</span></code>).
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code> depends on that job (<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">unit-tests</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">:160</span></code>), so
+a citation left behind fails the gate before <code class="docutils literal notranslate"><span class="pre">version_check</span></code> runs, and well
+before any approval is requested. Either run the script, or move both fields by
+hand in the same commit.</p>
 <p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
 the Release, and every upload are the workflow’s job from here. Two other
-checks run unconditionally on the same path and are worth knowing about
-rather than being surprised by, though neither is a step in <em>this</em> process:
-the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:707-728</span></code>) fails outright if
+checks run unconditionally on the same path, though neither is a step in <em>this</em>
+process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:904-925</span></code>) fails outright if
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
 <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and the release-body step warns, without
 failing, if that entry’s heading still reads “unreleased”
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:395-396</span></code>). Both are enforcing work the changelog
-convention already asks for, not extra work this process adds.</p>
+(<code class="docutils literal notranslate"><span class="pre">create-release.yml:402-403</span></code>). Both enforce what the changelog convention
+already asks for.</p>
 </section>
 <section id="two-ways-to-start-a-release">
 <h2>Two Ways to Start a Release<a class="headerlink" href="#two-ways-to-start-a-release" title="Link to this heading">¶</a></h2>
@@ -551,11 +548,11 @@ neither is a workaround for the other:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">push:</span> <span class="pre">tags:</span> <span class="pre">['v*']</span></code></dt><dd><p>Pushing a tag matching <code class="docutils literal notranslate"><span class="pre">v*</span></code> yourself. This chooses <strong>which commit</strong> to
 release, not which version: <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s checkout
-(<code class="docutils literal notranslate"><span class="pre">:158-161</span></code>) carries no explicit <code class="docutils literal notranslate"><span class="pre">ref:</span></code>, so it checks out whatever
+(<code class="docutils literal notranslate"><span class="pre">:164-167</span></code>) carries no explicit <code class="docutils literal notranslate"><span class="pre">ref:</span></code>, so it checks out whatever
 commit the pushed tag points at, and reads <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> out of
-<em>that</em> tree (<code class="docutils literal notranslate"><span class="pre">:178</span></code>). Every downstream tag and release name is built
+<em>that</em> tree (<code class="docutils literal notranslate"><span class="pre">:184</span></code>). Every downstream tag and release name is built
 from that output – <code class="docutils literal notranslate"><span class="pre">tag_name:</span> <span class="pre">&quot;v${{</span> <span class="pre">needs.version_check.outputs.PCAPKIT_VERSION</span> <span class="pre">}}&quot;</span></code>
-appears at <code class="docutils literal notranslate"><span class="pre">:419</span></code>, <code class="docutils literal notranslate"><span class="pre">:597</span></code> and <code class="docutils literal notranslate"><span class="pre">:837</span></code>, always from
+appears at <code class="docutils literal notranslate"><span class="pre">:425</span></code>, <code class="docutils literal notranslate"><span class="pre">:603</span></code> and <code class="docutils literal notranslate"><span class="pre">:843</span></code>, always from
 <code class="docutils literal notranslate"><span class="pre">PCAPKIT_VERSION</span></code>, never from <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> – so the version
 actually released is whatever <code class="docutils literal notranslate"><span class="pre">__version__</span></code> says on the tagged commit,
 not the name of the tag that was pushed. The two agree only if the tag
@@ -591,7 +588,7 @@ past <code class="docutils literal notranslate"><span class="pre">version_check<
 published”. Those diverge exactly when a release half-completes – <code class="docutils literal notranslate"><span class="pre">github</span></code>
 tags, a later job fails or is rejected, and the tag is left behind with the
 publish incomplete – which is the whole subject of <a class="reference internal" href="#precautions">Precautions</a> below.
-<code class="docutils literal notranslate"><span class="pre">github</span></code> still uses that guard for its own artefact today, since the tag it
+<code class="docutils literal notranslate"><span class="pre">github</span></code> still uses that guard for its own artefact, since the tag it
 checks <em>is</em> the one it is about to create:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}</span>
 </pre></div>
@@ -615,10 +612,9 @@ rather than being absorbed.</p></li>
 <p>All three evidence checks run inside <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, curling PyPI’s and
 Anaconda’s public, unauthenticated JSON APIs; the per-leg check runs inside
 <code class="docutils literal notranslate"><span class="pre">conda</span></code> itself, once per matrix leg, against the same Anaconda endpoint.</p>
-<p>The two triggers still hit these guards the same way as before: on the
-tag-push path <code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> unconditionally bypasses
-the evidence check, for the reasons in the next section below; on the
-<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through to whichever evidence that job owns.</p>
+<p>On the tag-push path <code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> bypasses the
+evidence check unconditionally; on the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through
+to whichever evidence that job owns.</p>
 </section>
 <section id="the-skip-cascade-guard">
 <h2>The Skip-Cascade Guard<a class="headerlink" href="#the-skip-cascade-guard" title="Link to this heading">¶</a></h2>
@@ -677,19 +673,18 @@ produces the evidence the gates read, so a skipped or cancelled
     classDef gate stroke-dasharray:6 3,stroke-width:2px
     class GH gate
     </pre><p>A transitive reduction: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> is also a direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of
-<code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> in the file itself, alongside the edges drawn
-above – omitted here because <code class="docutils literal notranslate"><span class="pre">github</span></code> already implies it (<code class="docutils literal notranslate"><span class="pre">github</span></code>
-itself depends on <code class="docutils literal notranslate"><span class="pre">version_check</span></code>), and drawing it would add three more
+<code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> in the file, but <code class="docutils literal notranslate"><span class="pre">github</span></code> already implies it
+(<code class="docutils literal notranslate"><span class="pre">github</span></code> itself depends on <code class="docutils literal notranslate"><span class="pre">version_check</span></code>), so drawing it would add three
 lines without changing which job can start before which. <code class="docutils literal notranslate"><span class="pre">release_status</span></code>’s
-edges are drawn in full, since unlike the others it depends directly on
-<em>every</em> job precisely so that it can run regardless of which of them skipped.</p>
-<p>Only <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer today; <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>,
+edges are drawn in full, since it depends directly on <em>every</em> job precisely so
+that it can run regardless of which of them skipped.</p>
+<p>Only <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>,
 <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> kept their environments but had their reviewers
 removed on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>.
 What still makes one approval mean <em>the whole release</em> is the <code class="docutils literal notranslate"><span class="pre">needs:</span></code>
 graph: <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> both depend on <code class="docutils literal notranslate"><span class="pre">github</span></code>
-(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:443,521</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> depends on
-<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> (<code class="docutils literal notranslate"><span class="pre">:620</span></code>) – so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
+(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:449,527</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> depends on
+<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> (<code class="docutils literal notranslate"><span class="pre">:626</span></code>) – so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change <code class="docutils literal notranslate"><span class="pre">tag</span></code> depended on <code class="docutils literal notranslate"><span class="pre">version_check</span></code>
 alone, so removing its reviewer without moving this dependency would have let
@@ -708,33 +703,31 @@ because skipped is not failed – so nothing in the UI says the release did
 not happen.</p>
 <p><a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a>
 above is what prevents it: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
-<em>their own</em> artefact is missing rather than whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an incomplete
-release runs the jobs that did not finish instead of skipping them. A
-half-finished release now self-heals on the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered
+<em>their own</em> artefact is missing rather than whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an
+incomplete release runs the jobs that did not finish instead of skipping them.
+A half-finished release now self-heals on the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered
 attempt, or on re-running the workflow by hand – see <a class="reference internal" href="#recovery">Recovery</a> below.
 <code class="docutils literal notranslate"><span class="pre">release_status</span></code> is the other half: it runs unconditionally and reports,
 with a <code class="docutils literal notranslate"><span class="pre">::notice</span></code>, a <code class="docutils literal notranslate"><span class="pre">::warning</span></code> or a failing <code class="docutils literal notranslate"><span class="pre">::error</span></code>, why a run
-released nothing or that it released something – so a stranded release is
-never only a green checkmark with no explanation, even if the evidence
-checks above somehow disagree with reality.</p>
+released nothing or that it released something, so a stranded release is
+never only a green checkmark, even if the evidence checks disagree with
+reality.</p>
 </div>
-<p><strong>Do not hand-make a tag to route around a stuck release.</strong> This is a
-narrower rule than “never tag by hand” – pushing a <em>fresh</em> <code class="docutils literal notranslate"><span class="pre">v&lt;version&gt;</span></code>
-tag to start a release, as in <a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a> above, is fine
-and unchanged by any of this. What is not sanctioned is deleting and
-re-pushing a tag that a stuck run already created, to force a retry. A
-<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span></code> of a tag ref that already points at the same commit produces no
-new event (documented GitHub Actions behaviour, not measured here), so the
-only way to make that push fire again is to delete the tag first – which
-both touches a ref the release automation owns, and lands the retry back on
-the tag-push path, where every job’s guard is unconditionally bypassed (see
-<a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a> above) regardless of what has already gone
-out. Neither is worth the risk of a double upload to an index that cannot
-take one back – and it is no longer necessary either, since a plain re-run
-now self-heals; see <a class="reference internal" href="#recovery">Recovery</a> below.</p>
+<p><strong>Do not hand-make a tag to route around a stuck release.</strong> This is narrower
+than “never tag by hand”: pushing a <em>fresh</em> <code class="docutils literal notranslate"><span class="pre">v&lt;version&gt;</span></code> tag to start a
+release, as in <a class="reference internal" href="#two-ways-to-start-a-release">Two Ways to Start a Release</a>, is fine. What is not sanctioned
+is deleting and re-pushing a tag that a stuck run already created, to force a
+retry. A <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span></code> of a tag ref that already points at the same commit
+produces no new event (documented GitHub Actions behaviour, not measured
+here), so the push only fires again after the tag is deleted – which touches a
+ref the release automation owns, and lands the retry back on the tag-push path,
+where every job’s guard is bypassed regardless of what has already gone out.
+Neither is worth the risk of a double upload to an index that cannot take one
+back, and neither is needed, since a plain re-run now self-heals; see
+<a class="reference internal" href="#recovery">Recovery</a> below.</p>
 <p><strong>``environment: pypi`` stays even though its reviewer is gone.</strong> <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
 publishes through PyPI’s OIDC trusted publishing (<code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> at
-<code class="docutils literal notranslate"><span class="pre">:516</span></code>, <code class="docutils literal notranslate"><span class="pre">id-token:</span> <span class="pre">write</span></code> at <code class="docutils literal notranslate"><span class="pre">:520</span></code>), and PyPI’s trusted-publisher
+<code class="docutils literal notranslate"><span class="pre">:522</span></code>, <code class="docutils literal notranslate"><span class="pre">id-token:</span> <span class="pre">write</span></code> at <code class="docutils literal notranslate"><span class="pre">:526</span></code>), and PyPI’s trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
 project’s publisher on PyPI is scoped that way, removing the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> name
 – not just its reviewer – would break the upload with a claim mismatch;
@@ -744,7 +737,7 @@ the name regardless, since there is no upside to removing it.</p>
 <p><strong>``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.</strong> The <code class="docutils literal notranslate"><span class="pre">tag</span></code> job resets <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code>, commits that,
 and pushes straight to <code class="docutils literal notranslate"><span class="pre">main</span></code>
-(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:461-481</span></code>) before cutting the
+(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:467-487</span></code>) before cutting the
 <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> tag. Approving <code class="docutils literal notranslate"><span class="pre">github-release</span></code> therefore also
 approves a commit landing on the default branch, not only the artefacts that
 sound like they are the point.</p>
@@ -752,28 +745,26 @@ sound like they are the point.</p>
 <section id="recovery">
 <h2>Recovery<a class="headerlink" href="#recovery" title="Link to this heading">¶</a></h2>
 <p>The sanctioned recovery from a failed or partial release run is re-running
-the workflow – nothing more elaborate, and specifically not re-tagging by
-hand, for the reasons above. This is now the actual fix rather than a
-best-effort suggestion: <a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a> above means
-<code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check
-whether <em>their own</em> artefact is missing, so a re-run finishes whichever jobs
-did not complete last time instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere
+the workflow, not re-tagging by hand, for the reasons above. This is the
+actual fix rather than a best-effort suggestion: <a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a
+Shared Proxy</a> above means <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
+<em>their own</em> artefact is missing, so a re-run finishes whichever jobs did not
+complete last time instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere
 existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> was always safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>);
 <code class="docutils literal notranslate"><span class="pre">conda</span></code> now is too, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg’s
 upload if it is already there.</p>
-<p><strong>A re-run no longer needs to be verified by hand against the PyPI and
-Anaconda listings, because ``release_status`` does it for you.</strong> That job
-runs on every <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Release</span></code> attempt regardless of what else skipped, and
-reconciles each of <code class="docutils literal notranslate"><span class="pre">github</span></code>/<code class="docutils literal notranslate"><span class="pre">tag</span></code>/<code class="docutils literal notranslate"><span class="pre">pypi</span></code>/<code class="docutils literal notranslate"><span class="pre">conda</span></code> <em>against its own
-evidence</em> rather than demanding the same outcome from all four – a target
-counts as reconciled if it actually succeeded, or if it skipped <em>because</em> its
-own evidence already said it was done. This distinction is what makes a
-self-heal reportable at all: retrying after a partial release is supposed to
-produce a <strong>mixed</strong> result, <code class="docutils literal notranslate"><span class="pre">github</span></code>/<code class="docutils literal notranslate"><span class="pre">tag</span></code> skipping because their
-artefacts already exist while <code class="docutils literal notranslate"><span class="pre">pypi</span></code>/<code class="docutils literal notranslate"><span class="pre">conda</span></code> run and finish what did not
-complete last time, and a check that instead demanded uniformity across all
-four would read that legitimate mix as the failure it is trying to detect.</p>
+<p><strong>A re-run does not need to be verified by hand against the PyPI and Anaconda
+listings, because ``release_status`` does it.</strong> That job runs on every
+<code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Release</span></code> attempt regardless of what else skipped, and reconciles
+each of <code class="docutils literal notranslate"><span class="pre">github</span></code>/<code class="docutils literal notranslate"><span class="pre">tag</span></code>/<code class="docutils literal notranslate"><span class="pre">pypi</span></code>/<code class="docutils literal notranslate"><span class="pre">conda</span></code> <em>against its own evidence</em>
+rather than demanding the same outcome from all four – a target counts as
+reconciled if it succeeded, or if it skipped <em>because</em> its own evidence
+already said it was done. That is what makes a self-heal reportable: a retry
+after a partial release legitimately produces a <strong>mixed</strong> result
+(<code class="docutils literal notranslate"><span class="pre">github</span></code>/<code class="docutils literal notranslate"><span class="pre">tag</span></code> skipping because their artefacts exist while
+<code class="docutils literal notranslate"><span class="pre">pypi</span></code>/<code class="docutils literal notranslate"><span class="pre">conda</span></code> finish the rest), and a check demanding uniformity would
+read that mix as the failure it exists to detect.</p>
 <p>With that reconciliation, <code class="docutils literal notranslate"><span class="pre">release_status</span></code> reports exactly one of: nothing
 to release because the trigger had nothing to do (quiet <code class="docutils literal notranslate"><span class="pre">::notice</span></code>),
 nothing to release because every target was already reconciled by skipping,

@@ -559,10 +559,9 @@
 <span class="sd">        silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14</span>
 <span class="sd">        raises ``RuntimeError: There is no current event loop in thread</span>
 <span class="sd">        'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was</span>
-<span class="sd">        not available on the machine this was measured on; it is expected to work,</span>
-<span class="sd">        since it is on the deprecated-but-functional side of that progression, and</span>
-<span class="sd">        that expectation is the one thing here that is inferred rather than</span>
-<span class="sd">        observed.</span>
+<span class="sd">        not measured; it is expected to work, since it is on the</span>
+<span class="sd">        deprecated-but-functional side of that progression, and that expectation</span>
+<span class="sd">        is the one thing here that is inferred rather than observed.</span>
 
 <span class="sd">        **The** :program:`tshark` **binary.** ``pyshark`` is a wrapper around</span>
 <span class="sd">        Wireshark's command-line tool and does no parsing itself, so it is useless</span>
@@ -657,9 +656,9 @@
 
 <span class="sd">                * if :attr:`self.extractor._exlyr &lt;pcapkit.foundation.extraction.Extractor._exlyr&gt;`</span>
 <span class="sd">                  and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
-<span class="sd">                  is provided as the PyShark engine currently does not</span>
+<span class="sd">                  is provided as the PyShark engine does not</span>
 <span class="sd">                  support such operations.</span>
-<span class="sd">                * if reassembly is enabled, as the PyShark engine currently</span>
+<span class="sd">                * if reassembly is enabled, as the PyShark engine</span>
 <span class="sd">                  does not support such operation.</span>
 <span class="sd">                * if :attr:`self.extractor._exctx &lt;pcapkit.foundation.extraction.Extractor._exctx&gt;`</span>
 <span class="sd">                  is provided, as the PyShark engine does not parse with</span>

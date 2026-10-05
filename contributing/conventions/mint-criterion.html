@@ -610,7 +610,7 @@ only <code class="docutils literal notranslate"><span class="pre">ast.Name</span
 <p>Calling <code class="docutils literal notranslate"><span class="pre">Cls(value)</span></code> on a registry whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> mints <strong>mutates the
 class</strong>. A probe is not a read: it installs a member that every later lookup then
 finds. <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a> is the one registry this applies
-to today, but snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code> before any lookup
+to, but snapshot <code class="docutils literal notranslate"><span class="pre">{member.value</span> <span class="pre">for</span> <span class="pre">member</span> <span class="pre">in</span> <span class="pre">Cls}</span></code> before any lookup
 regardless, and use a throwaway process per registry when comparing behaviour across
 revisions.</p>
 </div>

@@ -614,10 +614,10 @@
 <div class="viewcode-block" id="register_protocol">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Registered protocol class.</span>
+<span class="w">    </span><span class="sd">"""Register a protocol class.</span>
 
 <span class="sd">    The protocol class must be a subclass of</span>
-<span class="sd">    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to</span>
+<span class="sd">    :class:`~pcapkit.protocols.protocol.ProtocolBase`, and will be registered to</span>
 <span class="sd">    the :data:`pcapkit.protocols.__proto__` registry.</span>
 
 <span class="sd">    The registry is keyed on ``protocol.__name__.upper()``, which is **not**</span>
@@ -630,29 +630,26 @@
 <span class="sd">    was there, and the replacement is observable through every reader of the</span>
 <span class="sd">    registry, e.g. :meth:`ProtocolBase.expand_comp</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;`, which resolves a</span>
-<span class="sd">    bare protocol name through it.</span>
-
-<span class="sd">    Per :issue:`675` the overwrite is now reported rather than silent, matching</span>
-<span class="sd">    :meth:`ProtocolBase.register</span>
+<span class="sd">    bare protocol name through it. Per :issue:`675` the overwrite is reported,</span>
+<span class="sd">    matching :meth:`ProtocolBase.register</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` and the other</span>
 <span class="sd">    overwrite-warning registries.</span>
 
-<span class="sd">    The guard here reads "key present **and** incumbent is a different</span>
-<span class="sd">    class" -- presence alone is not enough. This registry's key is *derived*</span>
-<span class="sd">    from the class rather than supplied by a caller, and this function is the</span>
-<span class="sd">    funnel every wrapper registrar calls -- :func:`register_tcp`,</span>
-<span class="sd">    :func:`register_udp`, :func:`register_apptype`, :func:`register_linktype`</span>
-<span class="sd">    and the rest all end in ``register_protocol(module)``. So registering one</span>
-<span class="sd">    class under two codes, a supported and documented thing to do, reaches</span>
-<span class="sd">    this function twice with the same class and nothing at stake; a</span>
-<span class="sd">    presence-only guard would warn about an overwrite that overwrote nothing.</span>
-<span class="sd">    Warning on the harmless case is not free: it is what teaches a caller to</span>
-<span class="sd">    filter :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and</span>
-<span class="sd">    that filter is what would then hide the ``HTTP`` collision this warning</span>
-<span class="sd">    exists to surface. The sibling ``register`` methods across the package --</span>
-<span class="sd">    each keyed on a caller-supplied ``code`` rather than a name derived from</span>
-<span class="sd">    the class -- apply the same identity criterion as of GitHub issue :issue:`718`;</span>
-<span class="sd">    before that they warned on presence alone, and none of them does now.</span>
+<span class="sd">    The guard reads "key present **and** incumbent is a different class" --</span>
+<span class="sd">    presence alone is not enough. This registry's key is *derived* from the</span>
+<span class="sd">    class rather than supplied by a caller, and this function is the funnel</span>
+<span class="sd">    every wrapper registrar calls -- :func:`register_tcp`, :func:`register_udp`,</span>
+<span class="sd">    :func:`register_apptype`, :func:`register_linktype` and the rest all end in</span>
+<span class="sd">    ``register_protocol(module)``. So registering one class under two codes, a</span>
+<span class="sd">    supported and documented thing to do, reaches this function twice with the</span>
+<span class="sd">    same class and nothing at stake; a presence-only guard would warn about an</span>
+<span class="sd">    overwrite that overwrote nothing. Warning on the harmless case is not free:</span>
+<span class="sd">    it teaches a caller to filter</span>
+<span class="sd">    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that</span>
+<span class="sd">    filter would then hide the ``HTTP`` collision this warning exists to</span>
+<span class="sd">    surface. The sibling ``register`` methods across the package, each keyed on a</span>
+<span class="sd">    caller-supplied ``code``, apply the same identity criterion as of GitHub</span>
+<span class="sd">    issue :issue:`718`.</span>
 
 <span class="sd">    Making the key itself unique would resolve the collision rather than</span>
 <span class="sd">    merely reporting it, but it is a registry-format change that the bare-name</span>
@@ -665,8 +662,8 @@
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
 <span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the</span>
-<span class="sd">    registry redesign in :issue:`514`, and reporting the collision here is the step that</span>
-<span class="sd">    redesign is sequenced behind.</span>
+<span class="sd">    registry redesign in :issue:`514`, and reporting the collision here is the</span>
+<span class="sd">    step that redesign is sequenced behind.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol class.</span>
@@ -814,8 +811,8 @@
 <span class="sd">    error.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        That example names ``L2TPv3``, which this package does not implement</span>
-<span class="sd">        yet, rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is</span>
+<span class="sd">        That example names ``L2TPv3``, which this package does not implement,</span>
+<span class="sd">        rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is</span>
 <span class="sd">        v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it</span>
 <span class="sd">        directly over IP on protocol 115 and §4.1.2 puts it over UDP on port</span>
 <span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.L2TPv2&gt;` answers on</span>
@@ -871,7 +868,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    See Also:</span>
@@ -916,7 +913,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -956,7 +953,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -1001,7 +998,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -1046,7 +1043,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -1320,7 +1317,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name, meaningful only when ``module`` is a :class:`str`.</span>
 <span class="sd">            Positional, at the same position as the sibling ``register_*``</span>
 <span class="sd">            functions -- but unlike them, a third positional argument here is</span>
@@ -1380,10 +1377,11 @@
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_sctp`</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: ``class_`` is back at the sibling position -- positional, ahead of</span>
-    <span class="c1"># ``*transport`` -- per maintainer ruling, and the swallow that made it</span>
-    <span class="c1"># keyword-only in the first place is disambiguated here by ``type(module)``</span>
-    <span class="c1"># alone, never by what ``class_`` itself looks like. A ``str`` module means</span>
+    <span class="c1"># NOTE: ``class_`` sits at the sibling position -- positional, ahead of</span>
+    <span class="c1"># ``*transport`` -- per maintainer ruling, so a third positional that is</span>
+    <span class="c1"># really a transport would be swallowed as a class name. That is</span>
+    <span class="c1"># disambiguated here by ``type(module)`` alone, never by what ``class_``</span>
+    <span class="c1"># itself looks like. A ``str`` module means</span>
     <span class="c1"># ``class_`` really is a class name, so it is left untouched -- including</span>
     <span class="c1"># when it happens to be a string like ``'tcp'``, which is not sniffed for</span>
     <span class="c1"># looking like a transport. Any other module type means the third</span>
@@ -1405,9 +1403,9 @@
     <span class="c1"># anything unrecognised, composite-spelled or not, and ``__getitem__``</span>
     <span class="c1"># raises a bare :exc:`KeyError` on a miss instead of that -- both</span>
     <span class="c1"># ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,</span>
-    <span class="c1"># now that GitHub issue #808 dropped the ``IntFlag`` base that used to</span>
-    <span class="c1"># make the first of those two silently compose into the value ``3``</span>
-    <span class="c1"># rather than miss at all. ``__members__.get(...)`` lets this function</span>
+    <span class="c1"># since GitHub issue #808 dropped the ``IntFlag`` base, which made the</span>
+    <span class="c1"># first of those two silently compose into the value ``3`` rather than</span>
+    <span class="c1"># miss at all. ``__members__.get(...)`` lets this function</span>
     <span class="c1"># raise its own exception on a miss instead of letting ``__getitem__``'s</span>
     <span class="c1"># propagate, and lowercasing does not turn ``'tcp|udp'`` into a member</span>
     <span class="c1"># name either way. Anything that is neither a ``str`` nor a</span>
@@ -1438,10 +1436,10 @@
 
     <span class="c1"># NOTE: the member's own ``proto`` is the single transport protocol of the</span>
     <span class="c1"># registry it lives in -- GitHub issue #806 -- so it names one destination</span>
-    <span class="c1"># rather than fanning out across every transport IANA gave the service. The</span>
-    <span class="c1"># fan-out this replaced made ``register_apptype(TCP.http, Dummy)`` displace</span>
-    <span class="c1"># the UDP handler for port 80 as well, which no caller naming the TCP member</span>
-    <span class="c1"># asked for.</span>
+    <span class="c1"># rather than fanning out across every transport IANA gave the service. A</span>
+    <span class="c1"># fan-out would make ``register_apptype(TCP.http, Dummy)`` displace the UDP</span>
+    <span class="c1"># handler for port 80 as well, which no caller naming the TCP member asked</span>
+    <span class="c1"># for.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">transport</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no transport protocol given for port </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">; name each '</span>
@@ -1497,7 +1495,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -1595,7 +1593,7 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -1638,7 +1636,7 @@
 <span class="sd">        code: payload protocol identifier (PPID), as in</span>
 <span class="sd">            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    Important:</span>

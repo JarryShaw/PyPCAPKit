@@ -569,12 +569,11 @@ matches <a class="reference internal" href="../protocols/index.html#pcapkit.prot
 has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The previous behaviour inferred <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the subclass’
-<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property, which it could
-only read off an <em>instance</em> – so it constructed one against a
-<a class="reference external" href="https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">tempfile.NamedTemporaryFile()</span></code></a> while the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement
-was still executing. Guarding on <code class="docutils literal notranslate"><span class="pre">fmt</span></code> removes that: a class
-definition no longer touches the filesystem.</p>
+<p>Inferring <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the subclass’
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property would need an
+<em>instance</em>, hence a <a class="reference external" href="https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">tempfile.NamedTemporaryFile()</span></code></a> created while
+the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement is still executing. Guarding on <code class="docutils literal notranslate"><span class="pre">fmt</span></code>
+avoids that: a class definition does not touch the filesystem.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>

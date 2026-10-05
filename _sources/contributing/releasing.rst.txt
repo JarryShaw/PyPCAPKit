@@ -39,31 +39,28 @@ The same script is also the manual entry point: run
 release that is not a vendor-registry refresh -- a feature or a fix that has
 landed and is ready to go out.
 
-Editing ``__version__`` by hand instead, without also moving
-:file:`CITATION.cff`'s ``version`` field to match, is **not** a safe
-shortcut -- it does not drift through silently, it blocks the release.
+Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
+``version`` field to match is **not** a safe shortcut: it blocks the release.
 ``tests/project/test_bump_version.py``'s
 ``RepositoryCitationTests.test_the_citation_file_names_the_packaged_version``
-(``:493-513``) asserts the two agree, and that assertion is not optional on
-the release path: ``create-release.yml``'s ``unit-tests`` job
-(``:142-149``) calls ``unit-tests.yml`` with ``gate-only: true``, which runs
-the **full** suite rather than the tiered subset an ordinary push runs
-(its ``gate`` job, ``unit-tests.yml:734-803``). ``version_check`` itself
-depends on that job (``needs: [ unit-tests ]``, ``:154``), so a citation left
-behind fails the gate before ``version_check`` ever runs, and well before any
-approval is requested. Either run the script, or move both fields by hand in
-the same commit.
+(``:494-514``) asserts the two agree, and ``create-release.yml``'s
+``unit-tests`` job (``:148-155``) calls ``unit-tests.yml`` with
+``gate-only: true``, which runs the **full** suite rather than the tiered
+subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:931-1000``).
+``version_check`` depends on that job (``needs: [ unit-tests ]``, ``:160``), so
+a citation left behind fails the gate before ``version_check`` runs, and well
+before any approval is requested. Either run the script, or move both fields by
+hand in the same commit.
 
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
-checks run unconditionally on the same path and are worth knowing about
-rather than being surprised by, though neither is a step in *this* process:
-the ``changelog`` job (``unit-tests.yml:707-728``) fails outright if
+checks run unconditionally on the same path, though neither is a step in *this*
+process: the ``changelog`` job (``unit-tests.yml:904-925``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
-(``create-release.yml:395-396``). Both are enforcing work the changelog
-convention already asks for, not extra work this process adds.
+(``create-release.yml:402-403``). Both enforce what the changelog convention
+already asks for.
 
 Two Ways to Start a Release
 ---------------------------
@@ -75,11 +72,11 @@ neither is a workaround for the other:
 ``push: tags: ['v*']``
    Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
    release, not which version: ``version_check``'s checkout
-   (``:158-161``) carries no explicit ``ref:``, so it checks out whatever
+   (``:164-167``) carries no explicit ``ref:``, so it checks out whatever
    commit the pushed tag points at, and reads ``pcapkit.__version__`` out of
-   *that* tree (``:178``). Every downstream tag and release name is built
+   *that* tree (``:184``). Every downstream tag and release name is built
    from that output -- ``tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"``
-   appears at ``:419``, ``:597`` and ``:837``, always from
+   appears at ``:425``, ``:603`` and ``:843``, always from
    ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
    actually released is whatever ``__version__`` says on the tagged commit,
    not the name of the tag that was pushed. The two agree only if the tag
@@ -118,7 +115,7 @@ using "the ``v*`` tag exists" as a proxy for "this version was already
 published". Those diverge exactly when a release half-completes -- ``github``
 tags, a later job fails or is rejected, and the tag is left behind with the
 publish incomplete -- which is the whole subject of `Precautions`_ below.
-``github`` still uses that guard for its own artefact today, since the tag it
+``github`` still uses that guard for its own artefact, since the tag it
 checks *is* the one it is about to create:
 
 .. code-block:: yaml
@@ -145,10 +142,9 @@ All three evidence checks run inside ``version_check``, curling PyPI's and
 Anaconda's public, unauthenticated JSON APIs; the per-leg check runs inside
 ``conda`` itself, once per matrix leg, against the same Anaconda endpoint.
 
-The two triggers still hit these guards the same way as before: on the
-tag-push path ``startsWith(github.ref_name, 'v')`` unconditionally bypasses
-the evidence check, for the reasons in the next section below; on the
-``workflow_run`` path it falls through to whichever evidence that job owns.
+On the tag-push path ``startsWith(github.ref_name, 'v')`` bypasses the
+evidence check unconditionally; on the ``workflow_run`` path it falls through
+to whichever evidence that job owns.
 
 The Skip-Cascade Guard
 ----------------------
@@ -213,20 +209,19 @@ The Release Pipeline
        class GH gate
 
 A transitive reduction: ``version_check`` is also a direct ``needs:`` of
-``tag``, ``pypi`` and ``conda`` in the file itself, alongside the edges drawn
-above -- omitted here because ``github`` already implies it (``github``
-itself depends on ``version_check``), and drawing it would add three more
+``tag``, ``pypi`` and ``conda`` in the file, but ``github`` already implies it
+(``github`` itself depends on ``version_check``), so drawing it would add three
 lines without changing which job can start before which. ``release_status``'s
-edges are drawn in full, since unlike the others it depends directly on
-*every* job precisely so that it can run regardless of which of them skipped.
+edges are drawn in full, since it depends directly on *every* job precisely so
+that it can run regardless of which of them skipped.
 
-Only ``github-release`` carries a required reviewer today; ``conda-tag``,
+Only ``github-release`` carries a required reviewer; ``conda-tag``,
 ``pypi`` and ``anaconda`` kept their environments but had their reviewers
 removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``
-(``.github/workflows/create-release.yml:443,521``), and ``conda`` depends on
-``tag`` and ``github`` (``:620``) -- so nothing downstream of ``github`` can
+(``.github/workflows/create-release.yml:449,527``), and ``conda`` depends on
+``tag`` and ``github`` (``:626``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
@@ -247,34 +242,32 @@ Precautions
 
    `Per-Job Evidence, Not a Shared Proxy`_
    above is what prevents it: ``tag``, ``pypi`` and ``conda`` each check whether
-   *their own* artefact is missing rather than whether the ``v*`` tag exists, so an incomplete
-   release runs the jobs that did not finish instead of skipping them. A
-   half-finished release now self-heals on the next ``workflow_run``-triggered
+   *their own* artefact is missing rather than whether the ``v*`` tag exists, so an
+   incomplete release runs the jobs that did not finish instead of skipping them.
+   A half-finished release now self-heals on the next ``workflow_run``-triggered
    attempt, or on re-running the workflow by hand -- see `Recovery`_ below.
    ``release_status`` is the other half: it runs unconditionally and reports,
    with a ``::notice``, a ``::warning`` or a failing ``::error``, why a run
-   released nothing or that it released something -- so a stranded release is
-   never only a green checkmark with no explanation, even if the evidence
-   checks above somehow disagree with reality.
+   released nothing or that it released something, so a stranded release is
+   never only a green checkmark, even if the evidence checks disagree with
+   reality.
 
-**Do not hand-make a tag to route around a stuck release.** This is a
-narrower rule than "never tag by hand" -- pushing a *fresh* ``v<version>``
-tag to start a release, as in `Two Ways to Start a Release`_ above, is fine
-and unchanged by any of this. What is not sanctioned is deleting and
-re-pushing a tag that a stuck run already created, to force a retry. A
-``git push`` of a tag ref that already points at the same commit produces no
-new event (documented GitHub Actions behaviour, not measured here), so the
-only way to make that push fire again is to delete the tag first -- which
-both touches a ref the release automation owns, and lands the retry back on
-the tag-push path, where every job's guard is unconditionally bypassed (see
-`Two Ways to Start a Release`_ above) regardless of what has already gone
-out. Neither is worth the risk of a double upload to an index that cannot
-take one back -- and it is no longer necessary either, since a plain re-run
-now self-heals; see `Recovery`_ below.
+**Do not hand-make a tag to route around a stuck release.** This is narrower
+than "never tag by hand": pushing a *fresh* ``v<version>`` tag to start a
+release, as in `Two Ways to Start a Release`_, is fine. What is not sanctioned
+is deleting and re-pushing a tag that a stuck run already created, to force a
+retry. A ``git push`` of a tag ref that already points at the same commit
+produces no new event (documented GitHub Actions behaviour, not measured
+here), so the push only fires again after the tag is deleted -- which touches a
+ref the release automation owns, and lands the retry back on the tag-push path,
+where every job's guard is bypassed regardless of what has already gone out.
+Neither is worth the risk of a double upload to an index that cannot take one
+back, and neither is needed, since a plain re-run now self-heals; see
+`Recovery`_ below.
 
 **``environment: pypi`` stays even though its reviewer is gone.** ``pypi``
 publishes through PyPI's OIDC trusted publishing (``environment: pypi`` at
-``:516``, ``id-token: write`` at ``:520``), and PyPI's trusted-publisher
+``:522``, ``id-token: write`` at ``:526``), and PyPI's trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
 project's publisher on PyPI is scoped that way, removing the ``pypi`` name
 -- not just its reviewer -- would break the upload with a claim mismatch;
@@ -285,7 +278,7 @@ the name regardless, since there is no upside to removing it.
 **``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.** The ``tag`` job resets :file:`conda/build` to ``0``, commits that,
 and pushes straight to ``main``
-(``.github/workflows/create-release.yml:461-481``) before cutting the
+(``.github/workflows/create-release.yml:467-487``) before cutting the
 ``conda-<version>+0`` tag. Approving ``github-release`` therefore also
 approves a commit landing on the default branch, not only the artefacts that
 sound like they are the point.
@@ -294,29 +287,27 @@ Recovery
 --------
 
 The sanctioned recovery from a failed or partial release run is re-running
-the workflow -- nothing more elaborate, and specifically not re-tagging by
-hand, for the reasons above. This is now the actual fix rather than a
-best-effort suggestion: `Per-Job Evidence, Not a Shared Proxy`_ above means
-``tag``, ``pypi`` and ``conda`` each check
-whether *their own* artefact is missing, so a re-run finishes whichever jobs
-did not complete last time instead of skipping them on the ``v*`` tag's mere
+the workflow, not re-tagging by hand, for the reasons above. This is the
+actual fix rather than a best-effort suggestion: `Per-Job Evidence, Not a
+Shared Proxy`_ above means ``tag``, ``pypi`` and ``conda`` each check whether
+*their own* artefact is missing, so a re-run finishes whichever jobs did not
+complete last time instead of skipping them on the ``v*`` tag's mere
 existence. ``pypi`` was always safe to re-run (``skip-existing: true``);
 ``conda`` now is too, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there.
 
-**A re-run no longer needs to be verified by hand against the PyPI and
-Anaconda listings, because ``release_status`` does it for you.** That job
-runs on every ``Create Release`` attempt regardless of what else skipped, and
-reconciles each of ``github``/``tag``/``pypi``/``conda`` *against its own
-evidence* rather than demanding the same outcome from all four -- a target
-counts as reconciled if it actually succeeded, or if it skipped *because* its
-own evidence already said it was done. This distinction is what makes a
-self-heal reportable at all: retrying after a partial release is supposed to
-produce a **mixed** result, ``github``/``tag`` skipping because their
-artefacts already exist while ``pypi``/``conda`` run and finish what did not
-complete last time, and a check that instead demanded uniformity across all
-four would read that legitimate mix as the failure it is trying to detect.
+**A re-run does not need to be verified by hand against the PyPI and Anaconda
+listings, because ``release_status`` does it.** That job runs on every
+``Create Release`` attempt regardless of what else skipped, and reconciles
+each of ``github``/``tag``/``pypi``/``conda`` *against its own evidence*
+rather than demanding the same outcome from all four -- a target counts as
+reconciled if it succeeded, or if it skipped *because* its own evidence
+already said it was done. That is what makes a self-heal reportable: a retry
+after a partial release legitimately produces a **mixed** result
+(``github``/``tag`` skipping because their artefacts exist while
+``pypi``/``conda`` finish the rest), and a check demanding uniformity would
+read that mix as the failure it exists to detect.
 
 With that reconciliation, ``release_status`` reports exactly one of: nothing
 to release because the trigger had nothing to do (quiet ``::notice``),
