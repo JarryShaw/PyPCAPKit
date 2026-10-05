@@ -15,6 +15,12 @@ all engine support functionality.
       For more information on customisation and extension, please
       refer to :doc:`../../../ext`.
 
+   .. automethod:: __init_subclass__
+
+.. autoclass:: pcapkit.foundation.engines.engine.EngineBase
+   :no-members:
+   :show-inheritance:
+
    .. property:: name
       :type: str
 
@@ -60,17 +66,12 @@ all engine support functionality.
    .. automethod:: close
 
    .. automethod:: __call__
-   .. automethod:: __init_subclass__
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
 
 Internal Definitions
 --------------------
-
-.. autoclass:: pcapkit.foundation.engines.engine.EngineBase
-   :no-members:
-   :show-inheritance:
 
 .. autoclass:: pcapkit.foundation.engines.engine.EngineMeta
    :no-members:
