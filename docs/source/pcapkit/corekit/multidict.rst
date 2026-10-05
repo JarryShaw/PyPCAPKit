@@ -3,9 +3,8 @@ Multi-Mapping Dictionary
 
 .. module:: pcapkit.corekit.multidict
 
-:mod:`pcapkit.corekit.multidict` contains multi-mapping dictionary classes,
-which are used to store multiple mappings of the same key. The implementation
-is inspired and based on the `Werkzeug`_ project.
+:mod:`pcapkit.corekit.multidict` contains dictionaries that store multiple
+values per key, based on the `Werkzeug`_ project.
 
 .. _Werkzeug: https://werkzeug.palletsprojects.com/
 

@@ -3,9 +3,9 @@ Seekable I/O Object
 
 .. module:: pcapkit.corekit.io
 
-:mod:`pcapkit.corekit.io` contains seekable I/O object
-:class:`~pcapkit.corekit.io.SeekableReader`, which is a customised
-implementation to :class:`io.BufferedReader`.
+:mod:`pcapkit.corekit.io` contains
+:class:`~pcapkit.corekit.io.SeekableReader`, a seekable customisation of
+:class:`io.BufferedReader`.
 
 .. autoclass:: pcapkit.corekit.io.SeekableReader
    :no-members:

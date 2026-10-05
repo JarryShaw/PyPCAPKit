@@ -3,15 +3,13 @@ Registry Management
 
 .. module:: pcapkit.foundation.registry
 
-This module (:mod:`pcapkit.foundation.registry`) provides the registry
-management for :mod:`pcapkit`, as the module contains various registry
-points.
+:mod:`pcapkit.foundation.registry` holds the registration functions for
+:mod:`pcapkit`'s engines, dumpers, callbacks and protocols.
 
-Every registration below takes a code that is already an enumeration member. For
-how a code the shipped registries do not define becomes one in the first place,
-see :ref:`unrecognised-values` -- the constant enumerations mint an in-range
-unknown value rather than rejecting it, which is what makes registering against a
-newly assigned number possible without regenerating them.
+A code the shipped enumerations do not define can still be registered: most
+constant enumerations return a member-like object for an in-range unknown value
+rather than rejecting it (see :ref:`unrecognised-values`), so a newly assigned
+number needs no regeneration.
 
 Foundation Registries
 ---------------------

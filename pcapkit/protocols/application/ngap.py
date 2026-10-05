@@ -27,22 +27,24 @@ Decoding therefore needs the optional |pycrate|_ dependency
 (``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without
 it; an NGAP payload simply degrades to the opaque payload path, exactly as an
 unregistered PPID would, because
-:meth:`SCTP._import_next_layer <pcapkit.protocols.transport.sctp.SCTP._import_next_layer>`
-is wrapped in :func:`~pcapkit.utilities.decorators.beholder` and falls back to
+:meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which
+:class:`~pcapkit.protocols.transport.sctp.SCTP` inherits, is wrapped in
+:func:`~pcapkit.utilities.decorators.beholder` and falls back to
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 
-Why |pycrate|_ rather than a PER codec of our own
--------------------------------------------------
+Decoder Dependency
+------------------
 
-Two things make it the cheaper answer. |pycrate|_ **ships NGAP already
-compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP ASN.1 source does not
-have to be vendored here and tracked across releases; and it is **pure
-Python**, with no compiled extension to build on any platform. Decoding costs
-0.15 ms per PDU, the same order as :mod:`pcapkit`'s own per-packet cost, so
-the generic strategy below is not paying for the convenience.
+|pycrate|_ is used rather than a PER codec of our own, for two reasons. It
+**ships NGAP already compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP
+ASN.1 source does not have to be vendored here and tracked across releases; and
+it is **pure Python**, with no compiled extension to build on any platform.
+Decoding costs 0.15 ms per PDU, the same order as :mod:`pcapkit`'s own
+per-packet cost, so the generic strategy below is not paying for the
+convenience.
 
-Generic conversion, not 81 hand-written procedures
---------------------------------------------------
+Generic Conversion
+------------------
 
 The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`
 objects **structurally**, by ASN.1 shape rather than by procedure:
@@ -67,7 +69,7 @@ kind, procedure code, criticality, message type name and the IE list -- are
 surfaced as first-class fields on
 :class:`~pcapkit.protocols.data.application.ngap.NGAP` regardless.
 
-Known limitations
+Known Limitations
 -----------------
 
 * **PPID 66 payloads are not decoded.** ``NGAP_over_DTLS_over_SCTP`` wraps the
@@ -75,15 +77,15 @@ Known limitations
   bytes reaching :meth:`NGAP.read` are not an APER encoding. The PPID is
   registered so that it is *named* rather than anonymous; the payload itself
   degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
-* **The specification version is |pycrate|_'s, not this package's.**
-  :class:`ProcedureCode` and :class:`ProtocolIE` (:class:`pcapkit.const.ngap.
-  procedure_code.ProcedureCode` and :class:`pcapkit.const.ngap.protocol_ie.
-  ProtocolIE`) were generated from ``NGAP_Constants`` of |pycrate|_ 0.8.1
-  (Release-18-era: 81 procedure codes, 438 protocol IE IDs, highest 443). A
-  |pycrate|_ that carries a newer NGAP will decode IEs that this release does
-  not name; such a value resolves to a throwaway, non-registering member
-  named ``Unassigned`` rather than failing or growing either enumeration --
-  see :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.
+* **The specification version is that of the installed decoder, not this
+  package's.** :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
+  :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` were generated from
+  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era: 81 procedure
+  codes, 438 protocol IE IDs, highest 443). A |pycrate|_ that carries a newer
+  NGAP will decode values these enumerations do not name. Such a value
+  resolves to a non-registering member called ``Unassigned`` rather than
+  failing or adding a member to either enumeration -- see
+  :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.
 * **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk
   is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP
   fragmentation fails to decode rather than being reassembled first.
