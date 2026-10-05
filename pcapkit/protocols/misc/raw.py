@@ -145,7 +145,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         else:
             alias = self.alias
 
-        #: pcapkit.protocols.null.NoPayload: Next layer (no payload).
+        #: pcapkit.protocols.misc.null.NoPayload: Next layer (no payload).
         self._next = NoPayload()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, alias)
