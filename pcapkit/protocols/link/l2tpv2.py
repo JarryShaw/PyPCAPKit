@@ -97,10 +97,10 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
         references :rfc:`3931`, i.e. **L2TPv3**, whose session and control
         message headers are a different shape -- so the binding waits on an
-        ``L2TPv3`` class rather than on this one. Binding *this* class there was
-        proposed in GitHub issue :issue:`548` and does not work: over IP the v3 session
-        header carries no version nibble at all, so this class cannot recognise
-        that the datagram is not its own. See
+        ``L2TPv3`` class rather than on this one. Binding *this* class there does
+        not work (:issue:`548`): over IP the v3 session header carries no
+        version nibble at all, so this class cannot recognise that the datagram
+        is not its own. See
         :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.
 
         The class subclasses :class:`~pcapkit.protocols.link.link.Link` and so
@@ -192,12 +192,12 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         # Refuse it rather than parse it: every field after this word has a
         # different meaning (or no meaning) in another version, so continuing
         # reports a tunnel and session ID assembled out of octets that are
-        # neither. Reported as GitHub issue #548, where an :rfc:`3931` §4.1.1
-        # L2TPv3-over-IP datagram yielded ``version=4``, ``tunnelid=0x5678`` and
-        # ``sessionid=0xff03`` -- read out of the top half of a Session ID and
-        # the first two octets of the PPP frame behind it. This is also what
-        # makes the hard-coded ``Literal[2]`` of ``version`` true, instead of
-        # disagreeing with ``info.version`` on the same datagram.
+        # neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise
+        # yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read
+        # out of the top half of a Session ID and the first two octets of the PPP
+        # frame behind it (:issue:`548`). This is also what keeps the hard-coded
+        # ``Literal[2]`` of ``version`` true, instead of disagreeing with
+        # ``info.version`` on the same datagram.
         if _flag['version'] != 2:
             raise ProtocolError(f'{self.alias}: invalid version: {_flag["version"]}')
 
