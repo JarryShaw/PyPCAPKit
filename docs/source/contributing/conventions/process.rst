@@ -170,7 +170,7 @@ Those are documented by GitHub rather than here, and are counted rather than lis
 this page does not go stale every time one is added::
 
    $ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
-   29
+   31
 
 One of those defaults carries a local ruling worth knowing: an issue closed as
 unnecessary takes ``invalid`` (or the nearest applicable) rather than ``bug``, since
@@ -218,11 +218,21 @@ were filed under it -- though not all, several having been settled on a ``bug`` 
 **State -- what is happening to it now.** An open issue is meant to carry one of
 these, so that its status is readable without opening it:
 
+*  ``pending`` -- accepted and unstarted: nobody is on it and nothing blocks it.
+   The default for a freshly filed issue, and what ``wip`` reverts to if the work
+   is abandoned without the issue being closed.
 *  ``wip`` -- in flight: a covering pull request is open, or an agent is on it.
 *  ``blocked`` -- deferred behind other work or a decision, with the last comment
    saying what unblocks it. The condition is meant to be *checkable* rather than
    remembered -- a command someone else can run and get an answer from.
 *  ``needs: decision`` -- waiting on the owner, and on nothing else.
+
+The four are **mutually exclusive**, so moving between them is a swap rather than an
+addition: dispatching work on a ``pending`` issue removes that label as it adds
+``wip``. ``pending`` exists because the alternative was an unlabelled issue, and
+nothing then distinguished *accepted but untouched* from *nobody has looked at the
+labels* -- the two want different responses, and the second is a gap to close rather
+than a state to leave alone.
 
 Two things the board shows rather than the rule: ``wip`` and ``needs: decision``
 legitimately **co-occur**, when the bulk of an issue is being worked and one
@@ -236,11 +246,19 @@ worth checking for rather than assuming away:
        --json number,labels -q '.[]|"#\(.number) \(.labels|map(.name)|join(","))"'
 
 **Review -- the cross-review verdict, at the current head.** Separate from CI, which
-has a status of its own: ``review: pending`` means no verdict for this head,
-either never reviewed or the head moved since; ``review: good-to-go`` and
-``review: needs-changes`` are the two verdicts. Because they are keyed on the head
-rather than on the pull request, a new push invalidates the label -- a verdict that
-outlives the commit it was given on is worse than none.
+has a status of its own. ``review: pending`` means no verdict **and nobody producing
+one** -- never reviewed, or the head moved since the last verdict; ``review: running``
+means a cross-review is in flight against this head, so a verdict is coming;
+``review: good-to-go`` and ``review: needs-changes`` are the two verdicts. Because all
+four are keyed on the head rather than on the pull request, a new push invalidates the
+label -- a verdict that outlives the commit it was given on is worse than none, and so
+is a ``running`` label pointing at a review of a commit that is no longer the head.
+
+``review: running`` exists because the alternative was reading ``review: pending`` two
+ways. A sweep that treats pending as "needs a reviewer dispatched" will dispatch one on
+top of a review already in progress, and the second verdict then arrives against a head
+the first was never given. Separating the two makes *which pull requests still need a
+reviewer* answerable from the board rather than from memory of what was dispatched.
 
 **Scope.** ``dependencies`` and ``python`` are dependabot's, per above.
 ``github_actions`` is the same kind of label -- it scopes a change to the workflows --
