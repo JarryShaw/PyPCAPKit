@@ -265,7 +265,9 @@ class Engine(EngineBase[_T], Generic[_T]):
         has guarded on its own ``code`` keyword all along.
 
         Note:
-            :attr:`__engine_name__` is *not* an opt-in. It supplies the
+            :attr:`__engine_name__
+            <pcapkit.foundation.engines.engine.EngineBase.__engine_name__>` is
+            *not* an opt-in. It supplies the
             :attr:`name <pcapkit.foundation.engines.engine.EngineMeta.name>`
             the engine reports, which it does whether or not the engine is
             registered; only the keyword decides registration.

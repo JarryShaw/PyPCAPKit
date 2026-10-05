@@ -770,9 +770,9 @@ class Extractor(Generic[_P]):
     def record_frames(self) -> 'None':
         """Read packet frames.
 
-        The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.Engine.read_frame>`
+        The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.EngineBase.read_frame>`
         to parse each frame from the input PCAP file; and
-        performs cleanup by calling :meth:`self._exeng.close <pcapkit.foundation.engines.engine.Engine.close>`
+        performs cleanup by calling :meth:`self._exeng.close <pcapkit.foundation.engines.engine.EngineBase.close>`
         upon completion of the parsing process.
 
         Notes:
@@ -1111,7 +1111,7 @@ class Extractor(Generic[_P]):
     def __next__(self) -> '_P':
         """Iterate and parse next PCAP frame.
 
-        It will call :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.Engine.read_frame>`
+        It will call :meth:`self._exeng.read_frame <pcapkit.foundation.engines.engine.EngineBase.read_frame>`
         to parse next PCAP frame internally, until the EOF reached;
         then it calls :meth:`self._cleanup <_cleanup>` for the aftermath.
 
@@ -1323,7 +1323,7 @@ class Extractor(Generic[_P]):
     def _cleanup(self) -> 'None':
         """Cleanup after extraction & analysis.
 
-        The method calls :meth:`self._exeng.close <pcapkit.foundation.engines.engine.Engine.close>`,
+        The method calls :meth:`self._exeng.close <pcapkit.foundation.engines.engine.EngineBase.close>`,
         sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
         as :data:`True` and closes the input file *if this class opened it*.
 

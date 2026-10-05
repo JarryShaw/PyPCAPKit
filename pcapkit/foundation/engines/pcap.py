@@ -100,8 +100,8 @@ class PCAP(EngineBase[Frame]):
 
         The method will parse the PCAP global header and save the parsed result
         as :attr:`self.header <header>`. Information such as PCAP version, data
-        link layer protocol type, nanosecond flag and byteorder will also be
-        save the current :class:`PCAP` engine instance.
+        link layer protocol type, nanosecond flag and byteorder are also saved
+        on the current :class:`PCAP` engine instance.
 
         For output, the method will dump the parsed PCAP global header under
         the name of ``Global Header``.

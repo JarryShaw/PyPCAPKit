@@ -535,9 +535,9 @@ rather than by silently returning nothing --
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses
 :class:`pcapkit.foundation.engines.engine.Engine` and implements just two
-methods, :meth:`~pcapkit.foundation.engines.engine.Engine.run`
-and :meth:`~pcapkit.foundation.engines.engine.Engine.read_frame`; subclassing
-registers it automatically. See :doc:`/ext` for a worked example. What does
+methods, :meth:`~pcapkit.foundation.engines.engine.EngineBase.run`
+and :meth:`~pcapkit.foundation.engines.engine.EngineBase.read_frame`; passing the
+``engine`` class keyword registers it. See :doc:`/ext` for a worked example. What does
 still apply is the unified auxiliary tools in :mod:`pcapkit.toolkit`, where
 each engine has a matching module.
 
