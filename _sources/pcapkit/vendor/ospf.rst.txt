@@ -1,11 +1,11 @@
-================================================================
-:class:`~pcapkit.protocols.link.ospf.OSPF` Vendor Crawlers
-================================================================
+=================================================================
+:class:`~pcapkit.protocols.application.ospf.OSPF` Vendor Crawlers
+=================================================================
 
 .. module:: pcapkit.vendor.ospf
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.ospf.OSPF` implementations. Available
+:class:`~pcapkit.protocols.application.ospf.OSPF` implementations. Available
 vendor crawlers include:
 
 .. list-table::

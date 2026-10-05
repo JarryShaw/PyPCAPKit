@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.data.link.ospf - PyPCAPKit</title>
+        <title>pcapkit.protocols.data.application.ospf - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
@@ -237,10 +237,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -278,6 +276,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -426,6 +426,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 </ul>
@@ -465,7 +466,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.data.link.ospf</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.protocols.data.application.ospf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">"""data models for OSPF protocol"""</span>
 
@@ -485,7 +486,7 @@
 
 
 <div class="viewcode-block" id="CrytographicAuthentication">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.data.application.ospf.CrytographicAuthentication">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for OSPF crytographic authentication."""</span>
@@ -503,7 +504,7 @@
 
 
 <div class="viewcode-block" id="OSPF">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.data.application.ospf.OSPF">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OSPF</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for OSPF packet."""</span>

@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.link.vlan contains VLAN only, an abstract base class holding the tag layout shared by every VLAN tag*. The two concrete tags live in modules of their own:,, EtherType, Class,,, 0x..." />
 <meta name="description" content="pcapkit.protocols.link.vlan contains VLAN only, an abstract base class holding the tag layout shared by every VLAN tag*. The two concrete tags live in modules of their own:,, EtherType, Class,,, 0x..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="C_Tag - 802.1Q Customer VLAN Tag Type" href="c_tag.html"><link rel="prev" title="OSPF - Open Shortest Path First" href="ospf.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="C_Tag - 802.1Q Customer VLAN Tag Type" href="c_tag.html"><link rel="prev" title="L2TPv2 - Layer Two Tunnelling Protocol version 2" href="l2tpv2.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>VLAN - 802.1Q/802.1ad VLAN Tag Types - PyPCAPKit</title>
@@ -244,10 +244,8 @@
 <li class="toctree-l4"><a class="reference internal" href="link.html">Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -285,6 +283,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -433,6 +433,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 </ul>
@@ -571,8 +572,8 @@ which of the two was the service tag.</p>
 project’s rule for when protocols get separate modules: siblings that <em>share</em> an
 index may share a module, as <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.InARP" title="pcapkit.protocols.link.arp.InARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">InARP</span></code></a> shares
 <a class="reference internal" href="arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">arp</span></code></a> and
-<a class="reference internal" href="rarp.html#pcapkit.protocols.link.rarp.DRARP" title="pcapkit.protocols.link.rarp.DRARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DRARP</span></code></a> shares
-<a class="reference internal" href="rarp.html#module-pcapkit.protocols.link.rarp" title="pcapkit.protocols.link.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rarp</span></code></a>. This base declares no index of its own –
+<a class="reference internal" href="../application/rarp.html#pcapkit.protocols.application.rarp.DRARP" title="pcapkit.protocols.application.rarp.DRARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DRARP</span></code></a> shares
+<a class="reference internal" href="../application/rarp.html#module-pcapkit.protocols.application.rarp" title="pcapkit.protocols.application.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rarp</span></code></a>. This base declares no index of its own –
 it is abstract and nothing dispatches to it – so its <code class="docutils literal notranslate"><span class="pre">__index__</span></code> raises.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN">
@@ -867,14 +868,14 @@ canonical name; they carry <code class="docutils literal notranslate"><span clas
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="ospf.html">
+          <a class="prev-page" href="l2tpv2.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">OSPF - Open Shortest Path First</div>
+                <div class="title">L2TPv2 - Layer Two Tunnelling Protocol version 2</div>
                 
               </div>
             </a>

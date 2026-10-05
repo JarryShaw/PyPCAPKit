@@ -1,10 +1,10 @@
 OSPF - Open Shortest Path First
 ===============================
 
-.. module:: pcapkit.protocols.link.ospf
+.. module:: pcapkit.protocols.application.ospf
 
-:mod:`pcapkit.protocols.link.ospf` contains
-:class:`~pcapkit.protocols.link.ospf.OSPF` only,
+:mod:`pcapkit.protocols.application.ospf` contains
+:class:`~pcapkit.protocols.application.ospf.OSPF` only,
 which implements extractor for Open Shortest Path
 First (OSPF) [*]_, whose structure is described
 as below:
@@ -35,7 +35,7 @@ as below:
 
    <br />
 
-.. autoclass:: pcapkit.protocols.link.ospf.OSPF
+.. autoclass:: pcapkit.protocols.application.ospf.OSPF
    :no-members:
    :show-inheritance:
 
@@ -57,31 +57,31 @@ as below:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.ospf
+.. module:: pcapkit.protocols.schema.application.ospf
 
-.. autoclass:: pcapkit.protocols.schema.link.ospf.OSPF
+.. autoclass:: pcapkit.protocols.schema.application.ospf.OSPF
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.ospf.CrytographicAuthentication
+.. autoclass:: pcapkit.protocols.schema.application.ospf.CrytographicAuthentication
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.link.ospf.ospf_auth_data_selector
+.. autofunction:: pcapkit.protocols.schema.application.ospf.ospf_auth_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.ospf
+.. module:: pcapkit.protocols.data.application.ospf
 
-.. autoclass:: pcapkit.protocols.data.link.ospf.OSPF
+.. autoclass:: pcapkit.protocols.data.application.ospf.OSPF
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.ospf.CrytographicAuthentication
+.. autoclass:: pcapkit.protocols.data.application.ospf.CrytographicAuthentication
    :members:
    :show-inheritance:
 

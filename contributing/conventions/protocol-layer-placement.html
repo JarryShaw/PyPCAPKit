@@ -1,0 +1,794 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Protocol Layer Placement" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/protocol-layer-placement.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="Which subpackage of pcapkit.protocols a new dissector belongs in, and which base classes it names. Settled by the owner on#719. The Rule: Layer is decided by designed function, not by encapsulation..." />
+<meta name="description" content="Which subpackage of pcapkit.protocols a new dissector belongs in, and which base classes it names. Settled by the owner on#719. The Rule: Layer is decided by designed function, not by encapsulation..." />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Running the Repository" href="process.html"><link rel="prev" title="Extension-Header Base Classes" href="extension-header-subclassing.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Protocol Layer Placement - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pcapkit/index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.4.html">1.3.4 – 2024-11-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.3.html">1.3.3 – 2024-11-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.1.html">1.3.1 – 2023-12-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.0.html">1.3.0 – 2023-10-04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.2.html">1.2.2 – 2023-09-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.1.html">1.2.1 – 2023-08-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.0.html">1.2.0 – 2023-08-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.1.html">1.1.1 – 2023-08-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.0.html">1.1.0 – 2023-07-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.3.html">1.0.3 – 2023-06-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.2.html">1.0.2 – 2023-06-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.1.html">1.0.1 – 2023-05-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.0.html">1.0.0 – 2023-05-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.3.html">0.16.3 – 2022-10-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.2.html">0.16.2 – 2022-08-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.1.html">0.16.1 – 2022-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.0.html">0.16.0 – 2022-05-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.5.html">0.15.5 – 2020-10-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.4.html">0.15.4 – 2020-08-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.3.html">0.15.3 – 2020-08-17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.2.html">0.15.2 – 2020-06-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.1.html">0.15.1 – 2020-06-18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.0.html">0.15.0 – 2020-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.5.html">0.14.5 – 2019-10-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.4.html">0.14.4 – 2019-09-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.3.html">0.14.3 – 2019-08-08</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.2.html">0.14.2 – 2019-03-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.1.html">0.14.1 – 2019-03-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.0.html">0.14.0 – 2019-03-02</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.3.html">0.13.3 – 2019-02-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.2.html">0.13.2 – 2019-01-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.1.html">0.13.1 – 2019-01-23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Protocol Layer Placement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">GitHub Actions Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/contributing/conventions/protocol-layer-placement.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/contributing/conventions/protocol-layer-placement.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="protocol-layer-placement">
+<span id="id1"></span><h1>Protocol Layer Placement<a class="headerlink" href="#protocol-layer-placement" title="Link to this heading">¶</a></h1>
+<p>Which subpackage of <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> a new dissector belongs in, and which
+base classes it names. Settled by the owner on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<section id="the-rule">
+<h2>The Rule<a class="headerlink" href="#the-rule" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Layer is decided by designed function, not by encapsulation.</strong> What carries a
+protocol on the wire is a separate question from what the protocol is <em>for</em>.</p></li>
+<li><p><strong>The IETF is the single source of truth</strong> – <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-1.1.3"><strong>RFC 1122 Section 1.1.3</strong></a> and
+<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-7"><strong>RFC 1812 Section 7</strong></a>. Where they place a protocol, so does this package.</p></li>
+<li><p><strong>The operative question for a new protocol</strong> is: <em>is this protocol a user of the
+stack, or part of its forwarding path?</em> A user is application-layer; the
+forwarding path is link, internet or transport by its own function.</p></li>
+<li><p><strong>In the inheritance chain the layer base comes first, then the protocol family.</strong></p></li>
+<li><p><strong>Encapsulation is the last tie-break</strong>, never the first.</p></li>
+</ol>
+<p>The subpackages, functionally rather than by carrier:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 78.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Subpackage</p></th>
+<th class="head"><p>What it holds</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">link</span></code></a></p></td>
+<td><p>frames, and link-address or tagging protocols</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/internet/index.html#module-pcapkit.protocols.internet" title="pcapkit.protocols.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">internet</span></code></a></p></td>
+<td><p>layer-3 addressing and the forwarding path itself –
+<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-4.1"><strong>RFC 1812 Section 4.1</strong></a> confines it to IP, ICMP and IGMP</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/transport/index.html#module-pcapkit.protocols.transport" title="pcapkit.protocols.transport"><code class="xref py py-mod docutils literal notranslate"><span class="pre">transport</span></code></a></p></td>
+<td><p>IANA transport protocols</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a></p></td>
+<td><p>protocols that are <strong>users of the stack rather than part of its forwarding
+path</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/misc/index.html#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">misc</span></code></a></p></td>
+<td><p>file formats and layerless sentinels</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a> is <strong>not</strong> “payloads reached by port or SCTP
+PPID”. <a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> is reached by IANA protocol
+number and <a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP" title="pcapkit.protocols.application.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> by EtherType, and
+neither has a port.</p>
+</div>
+</section>
+<section id="why-function-and-not-encapsulation">
+<h2>Why Function and Not Encapsulation<a class="headerlink" href="#why-function-and-not-encapsulation" title="Link to this heading">¶</a></h2>
+<p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html"><strong>RFC 1122</strong></a> settles this inside one document. It lists <strong>RARP in the application
+layer</strong> at <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-1.1.3"><strong>RFC 1122 Section 1.1.3</strong></a>, among the <em>“support protocols, used for host
+name mapping, booting, and management”</em>, while <strong>ARP</strong> sits in the Link Layer chapter
+at <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-2.3.2"><strong>RFC 1122 Section 2.3.2</strong></a>. Two sibling protocols, one frame format, one EtherType,
+two layers – decided on function alone.</p>
+<p>OSI says the same by construction. ITU-T X.200 §9.2.4.4 has a protocol declare its own
+layer in terms of <em>“functions which pertain to a particular layer”</em>, and clause 7
+defines every layer by its purpose rather than by what encapsulates it.</p>
+</section>
+<section id="iana-assignments-carry-no-layer-claim">
+<h2>IANA Assignments Carry No Layer Claim<a class="headerlink" href="#iana-assignments-carry-no-layer-claim" title="Link to this heading">¶</a></h2>
+<p>All three registries this package dispatches on – <em>Protocol Numbers</em>, <em>Ether Types</em>,
+and <em>Service Name and Transport Protocol Port Number</em> – have <strong>no layer field</strong>.
+<em>Protocol Numbers</em> frames itself as identifying <em>“the next level protocol”</em>, i.e. the
+<strong>encapsulated</strong> one. A registry assignment is evidence of encapsulation and of
+nothing else.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This <strong>retires the registration grid at</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/ext.rst</span></code> (the
+Protocol Type → Registry Function table) <strong>as a placement rule.</strong> It is a guide to
+which registrar to call when extending the library, and it was never a layer
+taxonomy. Read literally as one it makes ARP, RARP and both VLAN tags
+internet-layer and all eight IPv6 extension headers transport-layer. A
+contributor looking for a placement rule will find that grid first, which is why
+this page says so explicitly.</p>
+</div>
+</section>
+<section id="routing-protocols-control-plane-not-data-plane">
+<h2>Routing Protocols: Control Plane, Not Data Plane<a class="headerlink" href="#routing-protocols-control-plane-not-data-plane" title="Link to this heading">¶</a></h2>
+<p><span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html"><strong>RFC 1812</strong></a> is Standards Track and organises itself by layer. Its §7 is titled
+<strong>“APPLICATION LAYER - ROUTING PROTOCOLS”</strong>, with OSPF at §7.2.2, while
+<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-4.1"><strong>RFC 1812 Section 4.1</strong></a> reads <em>“This chapter and chapter 5 discuss the protocols used
+at the Internet Layer: IP, ICMP, and IGMP.”</em> So a routing protocol is application-layer
+and the internet layer holds three protocols.</p>
+<p><strong>X.200 does not contradict this, and must not be cited as though it did.</strong> X.200
+§7.5.2.1 says the Network Layer provides transport <em>“independence of routing and relay
+considerations”</em> – that is the network layer <strong>performing forwarding</strong> so transport
+need not care, which is the data plane. X.200 treats routing as a <em>generic</em> function
+parameterised by layer: §5.4.1.4 defines it as <em>“a function within a layer”</em>, and §5.9
+as <em>“a routing function within the (N)-layer enables communication to be relayed by a
+chain of (N)-entities.”</em> An (N)-layer function is not a layer assignment, and <strong>X.200
+assigns none</strong>.</p>
+<p>The distinction that dissolves the apparent conflict: computing a forwarding table is
+the <strong>control plane</strong> and makes the protocol a user of the stack; forwarding packets is
+the <strong>data plane</strong> and is internet-layer. OSPF does the former.</p>
+</section>
+<section id="tunnelling-protocols-follow-their-payload">
+<h2>Tunnelling Protocols Follow Their Payload<a class="headerlink" href="#tunnelling-protocols-follow-their-payload" title="Link to this heading">¶</a></h2>
+<p>A tunnelling protocol is placed by what it carries, not by what carries it. So
+<a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> stay in
+<a class="reference internal" href="../../pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">link</span></code></a> and are <strong>not</strong> application-layer, even though L2TP is
+commonly seen over UDP.</p>
+<p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4949.html"><strong>RFC 4949</strong></a>’s <code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">tunnel</span></code> entry is the citation: a tunnel is <em>“a logical
+point-to-point link – i.e., an OSIRM Layer 2 connection”</em>, and a tunnelling protocol
+<em>“e.g., L2TP”</em> is <em>“layered below the tunneled Layer 2 protocol and above the
+encapsulating protocol.”</em> <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html#section-3"><strong>RFC 2473 Section 3</strong></a> and <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4213.html#section-3.4"><strong>RFC 4213 Section 3.4</strong></a> (<em>“the
+tunnel is a link”</em>) agree.</p>
+<p>The carrier was never single-valued for L2TP anyway: <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html#section-4.1"><strong>RFC 3931 Section 4.1</strong></a> makes
+L2TP-over-IP (protocol 115) a <strong>MUST</strong> and UDP/1701 only a <strong>SHOULD</strong>.</p>
+</section>
+<section id="the-inheritance-convention">
+<h2>The Inheritance Convention<a class="headerlink" href="#the-inheritance-convention" title="Link to this heading">¶</a></h2>
+<p><strong>Layer base first, protocol family second.</strong> Where a protocol’s layer and its parsing
+family disagree, it names both, in that order.</p>
+<p>The order is load-bearing, and the mechanism is checkable. <code class="docutils literal notranslate"><span class="pre">__layer__</span></code> is resolved by
+the MRO, so whichever base owns it <em>earliest</em> wins:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'__layer__'</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">Link</span><span class="p">),</span> <span class="s1">'__layer__'</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">Raw</span><span class="p">)</span>
+<span class="go">(True, False)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> does <strong>not</strong> own <code class="docutils literal notranslate"><span class="pre">__layer__</span></code> – it inherits
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> from <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> – so
+<a class="reference internal" href="../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA" title="pcapkit.protocols.application.ftp.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_DATA</span></code></a> would report <code class="docutils literal notranslate"><span class="pre">'Application'</span></code> in
+either base order. <a class="reference internal" href="../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a>’s chain reaches
+<a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, which <strong>does</strong> own it, so
+<code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">RARP(ARP,</span> <span class="pre">Application)</span></code> would report <code class="docutils literal notranslate"><span class="pre">'Link'</span></code> and be wrong.</p>
+<p>Ordering layer-first is correct in both cases, which is the point: a contributor does
+not have to work out which case they are in.</p>
+</section>
+<section id="two-things-that-will-look-like-mistakes">
+<h2>Two Things That Will Look Like Mistakes<a class="headerlink" href="#two-things-that-will-look-like-mistakes" title="Link to this heading">¶</a></h2>
+<p>Both are deliberate. Do not “fix” either.</p>
+<p><strong>A parsing base may live in another subpackage.</strong>
+<a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#module-pcapkit.protocols.application.rarp" title="pcapkit.protocols.application.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.rarp</span></code></a> imports
+<a class="reference internal" href="../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a> from <a class="reference internal" href="../../pcapkit/protocols/link/arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.arp</span></code></a>. This
+is the first <code class="docutils literal notranslate"><span class="pre">application/</span> <span class="pre">→</span> <span class="pre">link/</span></code> dependency in the package, and it is the honest
+consequence of letting layer and parser disagree.</p>
+<p><strong>The dispatch tier is decoupled from the subpackage.</strong> A protocol’s subpackage says
+nothing about which registry reaches it, and the move did not touch any dispatch key:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24.0%" />
+<col style="width: 38.0%" />
+<col style="width: 38.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Dispatched from</p></th>
+<th class="head"><p>Subpackage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Internet.__proto__</span></code> by
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="pcapkit.const.reg.transtype.TransType.OSPFIGP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPFIGP</span></code></a></p></td>
+<td><p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP" title="pcapkit.protocols.application.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Link.__proto__</span></code> by EtherType</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Nothing else needs overriding. <a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>
+accepts the <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinel (the undissected remainder) and resolves it to
+<a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, so OSPF’s body and the padding Ethernet adds
+to a short RARP frame attach without either class touching
+<code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">_decode_next_layer</span></code> or <code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code>. Only a real
+protocol number is refused.</p>
+<p><strong>Swapping</strong> <a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> <strong>for</strong>
+<a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> <strong>is not name-for-name.</strong>
+Counting the names each class body sets, whether new or overriding
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>’s, <code class="docutils literal notranslate"><span class="pre">Link</span></code> has
+seven – <code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>, <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">__schema__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">_read_protos</span></code>, <code class="docutils literal notranslate"><span class="pre">register</span></code> and <code class="docutils literal notranslate"><span class="pre">layer</span></code> – and <code class="docutils literal notranslate"><span class="pre">Application</span></code> eight: the four
+they share (<code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>, <code class="docutils literal notranslate"><span class="pre">__schema__</span></code>, <code class="docutils literal notranslate"><span class="pre">layer</span></code>) plus
+<code class="docutils literal notranslate"><span class="pre">__index__</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">_decode_next_layer</span></code> and <code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Link</span></code> overrides three of those that <code class="docutils literal notranslate"><span class="pre">Application</span></code> does not – <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">register</span></code> and <code class="docutils literal notranslate"><span class="pre">_read_protos</span></code> – but all three also exist on <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code>, so
+the strict difference <code class="docutils literal notranslate"><span class="pre">Link</span></code> minus <code class="docutils literal notranslate"><span class="pre">Application</span></code> minus <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> is <strong>empty</strong>
+and every one of them still resolves on <code class="docutils literal notranslate"><span class="pre">OSPF</span></code>. What changes is which registry it
+resolves <em>to</em>: <code class="docutils literal notranslate"><span class="pre">OSPF.__proto__</span></code> is now <code class="docutils literal notranslate"><span class="pre">ProtocolBase.__proto__</span></code> rather than
+<code class="docutils literal notranslate"><span class="pre">Link.__proto__</span></code>, so OSPF no longer sees Link’s EtherType entries. That is inert –
+nothing reaches OSPF by EtherType, and a <code class="docutils literal notranslate"><span class="pre">-1</span></code> lookup misses in both registries alike
+and resolves to <a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, inserting nothing on the miss.
+<code class="docutils literal notranslate"><span class="pre">RARP</span></code> keeps <code class="docutils literal notranslate"><span class="pre">Link</span></code>’s through <code class="docutils literal notranslate"><span class="pre">ARP</span></code>.</p>
+</section>
+<section id="tie-break-order">
+<h2>Tie-Break Order<a class="headerlink" href="#tie-break-order" title="Link to this heading">¶</a></h2>
+<p>For a genuinely ambiguous protocol, in this order:</p>
+<ol class="arabic simple">
+<li><p>the protocol’s own RFC’s <strong>functional self-description</strong>;</p></li>
+<li><p>the placement of its <strong>closest functional peers</strong> already in this package;</p></li>
+<li><p><strong>encapsulation</strong>, last.</p></li>
+</ol>
+</section>
+<section id="why-not-osi-s-seven-layers">
+<h2>Why Not OSI’s Seven Layers<a class="headerlink" href="#why-not-osi-s-seven-layers" title="Link to this heading">¶</a></h2>
+<p>Asked and declined on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>. The
+four-layer Internet model is what the public API already declares –
+<code class="docutils literal notranslate"><span class="pre">Layers</span> <span class="pre">=</span> <span class="pre">Literal['link',</span> <span class="pre">'internet',</span> <span class="pre">'transport',</span> <span class="pre">'application',</span> <span class="pre">'none']</span></code> in
+<a class="reference internal" href="../../pcapkit/foundation/extraction.html#module-pcapkit.foundation.extraction" title="pcapkit.foundation.extraction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code></a> – and the session and presentation layers have
+no header on the wire and no IANA registry to dispatch on, so as subpackages they
+would be structurally empty rather than merely sparse. OSI also resolves neither of
+the cases that prompted this page: routing’s control/data-plane split and L2TP’s
+carrier/payload split exist identically in both models.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="process.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Running the Repository</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="extension-header-subclassing.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Extension-Header Base Classes</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2026, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Protocol Layer Placement</a><ul>
+<li><a class="reference internal" href="#the-rule">The Rule</a></li>
+<li><a class="reference internal" href="#why-function-and-not-encapsulation">Why Function and Not Encapsulation</a></li>
+<li><a class="reference internal" href="#iana-assignments-carry-no-layer-claim">IANA Assignments Carry No Layer Claim</a></li>
+<li><a class="reference internal" href="#routing-protocols-control-plane-not-data-plane">Routing Protocols: Control Plane, Not Data Plane</a></li>
+<li><a class="reference internal" href="#tunnelling-protocols-follow-their-payload">Tunnelling Protocols Follow Their Payload</a></li>
+<li><a class="reference internal" href="#the-inheritance-convention">The Inheritance Convention</a></li>
+<li><a class="reference internal" href="#two-things-that-will-look-like-mistakes">Two Things That Will Look Like Mistakes</a></li>
+<li><a class="reference internal" href="#tie-break-order">Tie-Break Order</a></li>
+<li><a class="reference internal" href="#why-not-osi-s-seven-layers">Why Not OSI’s Seven Layers</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=cc9393d6"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
