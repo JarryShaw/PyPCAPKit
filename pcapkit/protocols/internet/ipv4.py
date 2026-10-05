@@ -15,16 +15,19 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== =============================================
   0           0   ``ip.version``              Version (``4``)
   0           4   ``ip.hdr_len``              Internal Header Length (IHL)
-  1           8   ``ip.dsfield.dscp``         Differentiated Services Code Point (DSCP)
-  1          14   ``ip.dsfield.ecn``          Explicit Congestion Notification (ECN)
+  1           8   ``ip.tos.pre``              ToS Precedence
+  1          11   ``ip.tos.del``              ToS Delay
+  1          12   ``ip.tos.thr``              ToS Throughput
+  1          13   ``ip.tos.rel``              ToS Reliability
+  1          14   ``ip.tos.ecn``              Explicit Congestion Notification (ECN)
   2          16   ``ip.len``                  Total Length
   4          32   ``ip.id``                   Identification
   6          48                               Reserved Bit (must be ``\\x00``)
   6          49   ``ip.flags.df``             Don't Fragment (DF)
   6          50   ``ip.flags.mf``             More Fragments (MF)
-  6          51   ``ip.frag_offset``          Fragment Offset
+  6          51   ``ip.offset``               Fragment Offset
   8          64   ``ip.ttl``                  Time To Live (TTL)
-  9          72   ``ip.proto``                Protocol (Transport Layer)
+  9          72   ``ip.protocol``             Protocol (Transport Layer)
   10         80   ``ip.checksum``             Header Checksum
   12         96   ``ip.src``                  Source IP Address
   16        128   ``ip.dst``                  Destination IP Address
@@ -128,8 +131,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            schema=Schema_IPv4, data=Data_IPv4):
     """This class implements Internet Protocol version 4.
 
-    This class currently supports parsing of the following IPv4 options,
-    which are registered in the :attr:`self.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
+    This class parses the following IPv4 options, which are registered in the
+    :attr:`self.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
     attribute:
 
     .. list-table::
@@ -655,7 +658,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     def _read_opt_eool(self, schema: 'Schema_EOOLOption', *, options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
         """Read IPv4 End of Option List (``EOOL``) option.
 
-        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:
+        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`791`]:
 
         .. code-block:: text
 
@@ -682,7 +685,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     def _read_opt_nop(self, schema: 'Schema_NOPOption', *, options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
         """Read IPv4 No Operation (``NOP``) option.
 
-        Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:
+        Structure of IPv4 No Operation (``NOP``) option [:rfc:`791`]:
 
         .. code-block:: text
 
@@ -1255,16 +1258,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 # force alignment to 32-bit boundary
                 if data_len % 4:
                     pad_len = 4 - (data_len % 4)
-                    # NOTE: The terminator goes in as an EOOL option *schema*, the
-                    # way the padding above goes in as a NOP schema. What used to be
-                    # appended was ``Enum_OptionNumber.EOOL`` itself -- the wire code
-                    # rather than an option -- and the enclosing ``options`` field
-                    # takes only schemas and :obj:`bytes`, so packing the header
-                    # failed with ``FieldValueError: Field options has invalid
-                    # value``. Any option whose length is not already a multiple of
-                    # four reaches this branch, so that made the packet unpackable
-                    # whether it was built by hand or rebuilt from a parsed one. See
-                    # #506.
+                    # NOTE: The terminator is an EOOL option *schema*, like the NOP
+                    # padding. The bare ``Enum_OptionNumber.EOOL`` wire code is not
+                    # an option, and the ``options`` field takes only schemas and
+                    # :obj:`bytes`, so packing would fail with ``FieldValueError:
+                    # Field options has invalid value`` for any option whose
+                    # length is not a multiple of four.
                     pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
                     end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
                     total_length += pad_len
@@ -1297,10 +1296,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             # force alignment to 32-bit boundary
             if data_len % 4:
                 pad_len = 4 - (data_len % 4)
-                # NOTE: An EOOL option schema rather than the bare wire code, for the
-                # reason spelled out in the list branch above. This is the branch the
-                # ``from_data`` path takes, since a parsed packet hands its options
-                # back as a container. See #506.
+                # NOTE: An EOOL option schema rather than the bare wire code, as in
+                # the list branch above. This is the ``from_data`` branch, since a
+                # parsed packet hands its options back as a container.
                 pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
                 end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
                 total_length += pad_len
@@ -1322,7 +1320,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1344,7 +1342,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         return Schema_EOOLOption(
@@ -1362,7 +1360,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         return Schema_NOPOption(
@@ -1390,7 +1388,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         Raises:
             ProtocolError: If ``authorities`` names a bit position that is not a
@@ -1433,10 +1431,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                                         f'termination indicator, not an authority')
 
             # ``max_auth`` is the highest bit *index*, so the octet count comes
-            # from the bit *count* one past it. Sizing from the index itself put
-            # a single ``GENSER`` (index 0) in a zero-octet bitmap and then
-            # indexed into it, raising a bare ``IndexError``; and it under-sized
-            # by an octet at every exact multiple of eight. See #537.
+            # from the bit *count* one past it. Sizing from the index would put
+            # a single ``GENSER`` (index 0) in a zero-octet bitmap and raise
+            # ``IndexError``, and under-size by an octet at every exact
+            # multiple of eight.
             max_auth = max(authorities)
             int_len = math.ceil((max_auth + 1) / 8)
 
@@ -1445,10 +1443,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 data_list[auth] = b'1'
 
             # Bit 0 of the *last* octet terminates the field. The intermediate
-            # octets keep the ``0`` they were initialised with, which is what
-            # says "another octet follows" -- so this single assignment is the
-            # whole of the indicator, and without it every option this method
-            # wrote was one its own reader warned about.
+            # octets keep their initial ``0``, meaning "another octet follows",
+            # so this one assignment is the whole indicator; without it the
+            # reader warns on every option written here.
             data_list[-1] = b'1'
 
             data = int(b''.join(data_list), base=2).to_bytes(int_len, 'big', signed=False)
@@ -1476,7 +1473,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1510,7 +1507,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1582,16 +1579,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: {timestamp}')
             pointer = 5 + len(ts_list) * 4
 
-        # NOTE: ``ts_data``, the name of the field on
-        # :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, and not the
-        # ``data`` this used to pass. ``data`` is the attribute that schema's
-        # ``post_process`` *derives* from ``ts_data``, so naming it here dropped
-        # every timestamp: :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.schema.Schema.__update__>` warns
-        # ``UnknownFieldWarning`` for a name it does not know and carries on, which
-        # left ``ts_data`` bound to its class-level ``ListField`` -- and made the
-        # IPv4 Timestamp option unbuildable through ``make``, since
-        # ``post_process`` then iterated the field object itself. See #552.
+        # NOTE: ``ts_data`` is the field on
+        # :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`; ``data`` is
+        # the attribute its ``post_process`` *derives* from ``ts_data``. Passing
+        # ``data`` would drop every timestamp, since :meth:`Schema.__update__
+        # <pcapkit.protocols.schema.schema.Schema.__update__>` only warns
+        # ``UnknownFieldWarning`` for an unknown name, leaving ``ts_data`` bound
+        # to its class-level ``ListField`` for ``post_process`` to iterate.
         return Schema_TSOption(
             type=kind,
             length=length,
@@ -1617,7 +1611,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
             Returns:
-                Constructured option schema.
+                Constructed option schema.
 
         """
         if option is not None:
@@ -1648,7 +1642,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1679,7 +1673,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1705,7 +1699,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1736,7 +1730,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1760,7 +1754,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1790,7 +1784,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1826,7 +1820,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:
@@ -1865,7 +1859,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if option is not None:

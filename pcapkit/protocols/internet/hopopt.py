@@ -124,8 +124,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
              schema=Schema_HOPOPT, data=Data_HOPOPT):
     """This class implements IPv6 Hop-by-Hop Options.
 
-    This class currently supports parsing of the following IPv6 Hop-by-Hop
-    options, which are registered in the :attr:`self.__option__ <pcapkit.protocols.internet.hopopt.HOPOPT.__option__>`
+    This class parses the following IPv6 Hop-by-Hop options, which are
+    registered in the
+    :attr:`self.__option__ <pcapkit.protocols.internet.hopopt.HOPOPT.__option__>`
     attribute:
 
     .. list-table::
@@ -229,14 +230,13 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Spelled out rather than left to
         :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
         class-name default, because
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
-        between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
-        rename this header in every
-        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
-        :meth:`IPv6._decode_next_layer
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits between
+        this class and that default in the MRO and carries its own
+        ``'IPv6-Ext'`` (GitHub issue :issue:`917`). Inheriting it would rename
+        this header in every :class:`~pcapkit.corekit.protochain.ProtoChain`
+        string and in :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
-        dict key. The value is exactly what the default produced before.
+        dict key.
 
         """
         return 'HOPOPT'
@@ -353,17 +353,15 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
 
-        # NOTE: No options at all is not the same thing as no options area: the
-        # header is at least 8 octets, 2 of which are the fixed part, so the
-        # remaining 6 have to be padding options rather than nothing. Passing the
-        # empty list through the same path is what produces them -- returning
-        # ``[], 0`` here instead declared an 8-octet header and emitted 2.
+        # NOTE: No options is not the same as no options area. The header is at
+        # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
+        # padding options. Passing the empty list through the same path produces
+        # them; returning ``[], 0`` would declare an 8-octet header and emit 2.
         options_value, total_length = self._make_hopopt_options(
             options if options is not None else [])
 
         # NOTE: ``_make_hopopt_options`` has aligned the header, so this division
-        # is exact; rounding up here used to hide the 6-octet shortfall that the
-        # per-option alignment left behind.
+        # is exact and rounding up is unnecessary.
         length = (total_length - 6) // 8
 
         return Schema_HOPOPT(
@@ -478,30 +476,21 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         excludes the Option Type and Opt Data Len fields themselves, so the
         whole option, which is what every ``_read_opt_*`` below reports back
         as the parsed option's own ``.length``, is two octets more. This is
-        the exact ``+2``/``-2`` mismatch independently fixed in six
-        places (see ``Data_PadOption.length`` vs. ``Schema_PadOption.length``
-        below, at the surviving explanation of that fix); collecting the
-        read-side half of it into one helper is so a future fix to this
-        arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
-        precisely this mismatch.
+        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
+        vs. ``Schema_PadOption.length`` below). The read-side half lives in this
+        one helper so the arithmetic has a single home. Do NOT drop the
+        ``+ 2``.
 
-        Section 4.2 is the citation because it is what defines the TLV option
-        format, and it is where the sentence quoted above actually appears.
-        This cited :rfc:`8200#section-4.3` until :issue:`530`, which is a subtler
-        error than the one :issue:`517` fixed in the IPv6-Opts sibling: Section 4.3
-        is not the wrong *header* -- it is the Hop-by-Hop Options header,
-        which is exactly what this class implements -- but it is the wrong
-        place for this arithmetic. It defines no ``Opt Data Len`` at all,
-        deferring the option encoding to Section 4.2 (*"one or more
-        TLV-encoded options, as described in Section 4.2"*), and its own only
-        length field is ``Hdr Ext Len``, *"the length of the Hop-by-Hop
-        Options header in 8-octet units, not including the first 8 octets"* --
-        the whole header in 8-octet units, which is a different quantity from
-        one option's ``Opt Data Len`` in octets. So a reader who followed the
-        old citation found the right header and no such sentence. Section
-        4.3 stays the right reference for the header itself and is still
-        cited as such below, at the ``Note:`` on the whole extension header
-        having to be a multiple of 8 octets.
+        Section 4.2 is the citation because it defines the TLV option format and
+        contains the sentence quoted above. The Hop-by-Hop Options header this
+        class implements is :rfc:`8200#section-4.3`, but it defers option
+        encoding to Section 4.2 (*"one or more TLV-encoded options, as
+        described in Section 4.2"*) and its only length field is
+        ``Hdr Ext Len``, *"the length of the Hop-by-Hop Options header in
+        8-octet units, not including the first 8 octets"*: the whole header, a
+        different quantity from one option's ``Opt Data Len`` in octets.
+        Section 4.3 remains the reference for the header itself, as in the
+        ``Note:`` on the whole extension header being a multiple of 8 octets.
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
@@ -814,10 +803,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             if TYPE_CHECKING:
                 schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
-            # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
-            # instead of minting a member; only a hand-constructed schema hits
-            # this guard. An unassigned *wire* value still mints via _missing_
-            # (tier 2, deferred), so it never reaches here.
+            # NOTE: An unresolvable *string* key raises KeyError rather than
+            # minting a member, so only a hand-constructed schema hits this
+            # guard. An unassigned *wire* value still mints via _missing_ and
+            # never reaches here.
             tid_key = None
             try:
                 tid_key = schema.info['type']
@@ -1048,10 +1037,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             ProtocolError: If the option is malformed.
 
         """
-        # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
-        # instead of minting a member; only a hand-constructed schema hits
-        # this guard. An unassigned *wire* value still mints via _missing_
-        # (tier 2, deferred), so it never reaches here.
+        # NOTE: An unresolvable *string* key raises KeyError rather than
+        # minting a member, so only a hand-constructed schema hits this guard.
+        # An unassigned *wire* value still mints via _missing_ and never
+        # reaches here.
         seed_key = None
         try:
             seed_key = schema.flags['type']
@@ -1295,13 +1284,13 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Note:
             It is the *whole* extension header, fixed part included, that has to
-            be a multiple of 8 octets [:rfc:`8200#section-4.3`] -- which is why
+            be a multiple of 8 octets [:rfc:`8200#section-4.3`], which is why
             the alignment is computed from ``offset`` rather than from the
-            length of the option that has just been emitted. Aligning each
-            option to 8 octets on its own leaves the options area a multiple of
-            8 octets long, whereas :meth:`read` sizes it as
-            ``hdr_ext_len * 8 + 6`` -- six short of a multiple of 8 -- so the
-            constructed header declared 6 octets more than it actually carried.
+            length of the option just emitted. Aligning each option to 8 octets
+            on its own leaves the options area a multiple of 8, whereas
+            :meth:`read` sizes it as ``hdr_ext_len * 8 + 6``, six short of a
+            multiple of 8; the header would declare 6 octets more than it
+            carried.
 
             A ``PadN`` option spends two octets on its own type and
             ``Opt Data Len`` fields before any padding data, so occupying
@@ -1431,7 +1420,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1456,16 +1445,16 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         Note:
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.hopopt.Option.length>` counts the
             *whole* option, whereas :attr:`Schema_PadOption.len
             <pcapkit.protocols.schema.internet.hopopt.PadOption.len>` is the
-            ``Opt Data Len`` field -- two octets fewer, and absent altogether for
-            a ``Pad1``. ``opt`` used to be ignored here, so re-making a parsed
-            padding option silently collapsed it to a single ``Pad1``.
+            ``Opt Data Len`` field: two octets fewer, and absent altogether for a
+            ``Pad1``. ``opt`` is honoured so that re-making a parsed padding
+            option keeps its size instead of collapsing to a single ``Pad1``.
 
         """
         if opt is not None:
@@ -1497,7 +1486,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1527,7 +1516,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1560,7 +1549,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1604,7 +1593,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1709,7 +1698,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1765,7 +1754,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1827,7 +1816,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1867,7 +1856,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1917,7 +1906,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1925,16 +1914,15 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         # NOTE: ``nonce`` is packed by a NumberField whose width is this very
         # ``len`` (c.f. pcapkit.protocols.schema.internet.hopopt.ILNPOption), so
-        # the declared octet count has to be the ceiling of the bit length over
-        # eight -- ``bit_length() // 8`` floors instead, and wrapping a float-free
-        # floor division in ``math.ceil`` is a no-op, so every nonce whose bit
-        # length is not a multiple of eight used to be sized short and silently
-        # truncated on the wire (a nonce below 256 was declared as *zero* octets
-        # and vanished outright). ``bit_length()`` is 0 for 0 itself, which would
-        # likewise declare a zero-octet nonce -- collapsing "the nonce is 0" into
-        # "there is no nonce", when RFC 6744 gives the option a Nonce Value field
-        # -- so the width is floored at one octet, matching
-        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id (c.f. #601).
+        # the declared octet count must be the ceiling of the bit length over
+        # eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an
+        # integer division is a no-op, so any nonce whose bit length is not a
+        # multiple of eight would be sized short and truncated on the wire (a
+        # nonce below 256 as *zero* octets). ``bit_length()`` is 0 for 0, which
+        # would collapse "the nonce is 0" into "there is no nonce" although
+        # RFC 6744 gives the option a Nonce Value field, so the width is
+        # floored at one octet, as in
+        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id.
         return Schema_ILNPOption(
             type=code,
             len=max(1, math.ceil(nonce.bit_length() / 8)),
@@ -1953,7 +1941,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1978,7 +1966,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -2002,7 +1990,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -2032,7 +2020,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:

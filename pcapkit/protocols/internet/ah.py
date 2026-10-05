@@ -16,9 +16,9 @@ Octets      Bits        Name                    Description
   0           0   ``ah.next``               Next Header
   1           8   ``ah.length``             Payload Length
   2          16                             Reserved (must be zero)
-  4          32   ``sah.spi``               Security Parameters Index (SPI)
-  8          64   ``sah.seq``               Sequence Number Field
-  12         96   ``sah.icv``               Integrity Check Value (ICV)
+  4          32   ``ah.spi``                Security Parameters Index (SPI)
+  8          64   ``ah.seq``                Sequence Number Field
+  12         96   ``ah.icv``                Integrity Check Value (ICV)
 ======= ========= ======================= ===================================
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
@@ -52,19 +52,17 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
     """This class implements Authentication Header.
 
     Double-inherited (GitHub issue :issue:`917`): ``AH`` is both a member of the
-    IPsec family and an IPv6 extension header -- IANA's *IPv6 Extension
-    Header Types* registry lists it at 51 (:rfc:`4302#section-3.1.1` has
-    it appear after the hop-by-hop, routing and fragmentation extension
-    headers in the IPv6 header chain), and this package's own
-    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry
-    agrees. The same section separately states that, in the context of
-    IPv4, AH is placed after the IP header and before the next-layer
-    protocol -- the primary-source evidence that it also travels
-    directly as an IPv4 payload, which is what qualifies it for a base
-    besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
-    :class:`~pcapkit.protocols.internet.ipsec.IPsec` is first in the
-    bases so that its :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id`
-    keeps precedence.
+    IPsec family and an IPv6 extension header. IANA's *IPv6 Extension Header
+    Types* registry lists it at 51 (:rfc:`4302#section-3.1.1` has it appear
+    after the hop-by-hop, routing and fragmentation extension headers in the
+    IPv6 header chain), and
+    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` agrees. The
+    same section places it after the IP header and before the next-layer
+    protocol under IPv4, so it also travels directly as an IPv4 payload, which
+    is what qualifies it for a base besides
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
+    :class:`~pcapkit.protocols.internet.ipsec.IPsec` comes first so that its
+    :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id` takes precedence.
 
     """
 
@@ -84,14 +82,13 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         Spelled out rather than left to
         :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
         class-name default, because
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
-        between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
-        rename this header in every
-        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
-        :meth:`IPv6._decode_next_layer
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits between
+        this class and that default in the MRO and carries its own
+        ``'IPv6-Ext'`` (GitHub issue :issue:`917`). Inheriting it would rename
+        this header in every :class:`~pcapkit.corekit.protochain.ProtoChain`
+        string and in :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
-        dict key. The value is exactly what the default produced before.
+        dict key.
 
         """
         return 'AH'

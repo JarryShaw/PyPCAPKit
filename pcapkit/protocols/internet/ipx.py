@@ -13,7 +13,7 @@ as below:
 ======= ========= ====================== =====================================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =====================================
-  0           0   ``ipx.cksum``             Checksum
+  0           0   ``ipx.chksum``            Checksum
   2          16   ``ipx.len``               Packet Length (header includes)
   4          32   ``ipx.count``             Transport Control (hop count)
   5          40   ``ipx.type``              Packet Type
@@ -137,7 +137,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         type_val = self._make_index(type, type_default, namespace=type_namespace,

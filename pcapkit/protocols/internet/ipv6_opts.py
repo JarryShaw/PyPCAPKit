@@ -128,8 +128,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 schema=Schema_IPv6_Opts, data=Data_IPv6_Opts):
     """This class implements Destination Options for IPv6.
 
-    This class currently supports parsing of the following IPv6 destination
-    options, which are registered in the
+    This class parses the following IPv6 destination options, which are
+    registered in the
     :attr:`self.__option__ <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__>`
     attribute:
 
@@ -345,17 +345,15 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
 
-        # NOTE: No options at all is not the same thing as no options area: the
-        # header is at least 8 octets, 2 of which are the fixed part, so the
-        # remaining 6 have to be padding options rather than nothing. Passing the
-        # empty list through the same path is what produces them -- returning
-        # ``[], 0`` here instead declared an 8-octet header and emitted 2.
+        # NOTE: No options is not the same as no options area. The header is at
+        # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
+        # padding options. Passing the empty list through the same path produces
+        # them; returning ``[], 0`` would declare an 8-octet header and emit 2.
         options_value, total_length = self._make_ipv6_opts(
             options if options is not None else [])
 
         # NOTE: ``_make_ipv6_opts`` has aligned the header, so this division is
-        # exact; rounding up here used to hide the 6-octet shortfall that the
-        # per-option alignment left behind.
+        # exact and rounding up is unnecessary.
         length = (total_length - 6) // 8
 
         return Schema_IPv6_Opts(
@@ -470,20 +468,16 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         excludes the Option Type and Opt Data Len fields themselves, so the
         whole option, which is what every ``_read_opt_*`` below reports back
         as the parsed option's own ``.length``, is two octets more. This is
-        the exact ``+2``/``-2`` mismatch independently fixed in six
-        places (see ``Data_PadOption.length`` vs. ``Schema_PadOption.length``
-        below, at the surviving explanation of that fix); collecting the
-        read-side half of it into one helper is so a future fix to this
-        arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
-        precisely this mismatch.
+        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
+        vs. ``Schema_PadOption.length`` below). The read-side half lives in this
+        one helper so the arithmetic has a single home. Do NOT drop the
+        ``+ 2``.
 
-        Section 4.2 is the citation because it is what defines the TLV option
-        format, and it is where the sentence quoted above actually appears.
-        IPv6-Opts itself is the Destination Options header of
-        :rfc:`8200#section-4.6`, which carries those TLVs but says nothing
-        about their internal length arithmetic. This cited
-        :rfc:`8200#section-4.3` until :issue:`517` -- that is the Hop-by-Hop Options
-        header, which is a different header and not the one this class
+        Section 4.2 is the citation because it defines the TLV option format and
+        contains the sentence quoted above. IPv6-Opts itself is the Destination
+        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but
+        says nothing about their internal length arithmetic. Section 4.3 is the
+        Hop-by-Hop Options header, a different header from the one this class
         implements.
 
         Note that only the *stored-length* read-side call sites are
@@ -798,10 +792,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             if TYPE_CHECKING:
                 schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
-            # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
-            # instead of minting a member; only a hand-constructed schema hits
-            # this guard. An unassigned *wire* value still mints via _missing_
-            # (tier 2, deferred), so it never reaches here.
+            # NOTE: An unresolvable *string* key raises KeyError rather than
+            # minting a member, so only a hand-constructed schema hits this
+            # guard. An unassigned *wire* value still mints via _missing_ and
+            # never reaches here.
             tid_key = None
             try:
                 tid_key = schema.info['type']
@@ -1032,10 +1026,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
-        # instead of minting a member; only a hand-constructed schema hits
-        # this guard. An unassigned *wire* value still mints via _missing_
-        # (tier 2, deferred), so it never reaches here.
+        # NOTE: An unresolvable *string* key raises KeyError rather than
+        # minting a member, so only a hand-constructed schema hits this guard.
+        # An unassigned *wire* value still mints via _missing_ and never
+        # reaches here.
         seed_key = None
         try:
             seed_key = schema.flags['type']
@@ -1415,7 +1409,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1440,16 +1434,16 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         Note:
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.ipv6_opts.Option.length>` counts
             the *whole* option, whereas :attr:`Schema_PadOption.len
             <pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len>` is the
-            ``Opt Data Len`` field -- two octets fewer, and absent altogether for
-            a ``Pad1``. ``opt`` used to be ignored here, so re-making a parsed
-            padding option silently collapsed it to a single ``Pad1``.
+            ``Opt Data Len`` field: two octets fewer, and absent altogether for a
+            ``Pad1``. ``opt`` is honoured so that re-making a parsed padding
+            option keeps its size instead of collapsing to a single ``Pad1``.
 
         """
         if opt is not None:
@@ -1481,7 +1475,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1511,7 +1505,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1544,7 +1538,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1588,7 +1582,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1693,7 +1687,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1749,7 +1743,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1811,7 +1805,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1851,7 +1845,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1901,7 +1895,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1909,16 +1903,15 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         # NOTE: ``nonce`` is packed by a NumberField whose width is this very
         # ``len`` (c.f. pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),
-        # so the declared octet count has to be the ceiling of the bit length over
-        # eight -- ``bit_length() // 8`` floors instead, and wrapping a float-free
-        # floor division in ``math.ceil`` is a no-op, so every nonce whose bit
-        # length is not a multiple of eight used to be sized short and silently
-        # truncated on the wire (a nonce below 256 was declared as *zero* octets
-        # and vanished outright). ``bit_length()`` is 0 for 0 itself, which would
-        # likewise declare a zero-octet nonce -- collapsing "the nonce is 0" into
-        # "there is no nonce", when RFC 6744 gives the option a Nonce Value field
-        # -- so the width is floored at one octet, matching
-        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id (c.f. #601).
+        # so the declared octet count must be the ceiling of the bit length over
+        # eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an
+        # integer division is a no-op, so any nonce whose bit length is not a
+        # multiple of eight would be sized short and truncated on the wire (a
+        # nonce below 256 as *zero* octets). ``bit_length()`` is 0 for 0, which
+        # would collapse "the nonce is 0" into "there is no nonce" although
+        # RFC 6744 gives the option a Nonce Value field, so the width is
+        # floored at one octet, as in
+        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id.
         return Schema_ILNPOption(
             type=code,
             len=max(1, math.ceil(nonce.bit_length() / 8)),
@@ -1937,7 +1930,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1962,7 +1955,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -1986,7 +1979,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -2016,7 +2009,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructured option schema.
+            Constructed option schema.
 
         """
         if opt is not None:
