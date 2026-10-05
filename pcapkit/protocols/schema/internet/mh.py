@@ -380,8 +380,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         :class:`~pcapkit.corekit.fields.field.NoValueType` straight to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
         an unusable :mod:`struct` template and surfaces much later as an opaque
-        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to
-        fail to parse.
+        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.
 
     """
     length = pkt.get('length', 0)
@@ -740,8 +739,7 @@ class MNIDOption(Option, code=Enum_Option.MN_ID_OPTION_TYPE):
         # ``IPv6_Address`` to a
         # :class:`~pcapkit.corekit.fields.strings.StringField` or
         # :class:`~pcapkit.corekit.fields.strings.BytesField`, and handing either
-        # a raw ``int`` is precisely the #467 defect -- ``struct.pack()`` cannot
-        # consume it (c.f. #467).
+        # a raw ``int`` would fail, since ``struct.pack()`` cannot consume it.
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address') -> 'None': ...
 
 
@@ -1857,7 +1855,7 @@ class ANIMAGGroupIdentifierSuboption(ANISuboption, code=Enum_ANISuboption.MAG_Gr
         prose fixes ``ANI Length`` at ``2``, but the field description then calls
         it "a 3-octet unsigned integer value". Two of the three statements agree
         on **two** octets and are the ones that constrain the wire, so that is
-        what is parsed here. No erratum has been filed against the RFC.
+        what is parsed here.
 
     """
 

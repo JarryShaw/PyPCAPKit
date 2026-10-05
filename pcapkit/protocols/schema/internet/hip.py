@@ -326,27 +326,6 @@ def encrypted_data_len(pkt: 'dict[str, Any]') -> 'int':
     :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_encrypted` writes
     ``len=4 + len(iv) + len(data)`` to match.
 
-    This subtracted the ``iv`` but not the ``reserved``, so the field claimed
-    four octets more than the parameter holds: on unpack it read four octets
-    of the *next* parameter into ``data``, and on pack it zero-extended the
-    ciphertext by four. That was recorded as the second half of
-    ``hip-parameter/ENCRYPTED`` in the round-trip suite's expected-failure
-    table, and left alone -- because while the padding rule was also four
-    octets out (:issue:`651`), the two errors cancelled at some residues of ``Length``
-    and not others. Measured by packing through the public maker at every
-    residue, the old record total agreed with :rfc:`7401` Section 5.2.1 at
-    ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over at
-    ``{1, 2, 3, 4}`` -- so ``Length = 8``, which the unit suite happened to
-    use, is one of the four where the module emitted RFC-conformant
-    ``ENCRYPTED`` octets while getting both halves wrong.
-
-    Fixing the padding without fixing this would therefore have *regressed*
-    ``ENCRYPTED``, from right-by-accident at four of the eight residues to four
-    octets too long at all eight: with only the padding corrected the total
-    becomes ``8 + Length + pad`` against a correct ``4 + Length + pad``, which
-    is a uniform four-octet surplus with no residue left where it cancels. So
-    the two go together.
-
     Args:
         pkt: Parameter unpacked schema.
 
@@ -387,16 +366,15 @@ def parameter_total_len(length: 'int') -> 'int':
     is "Length of the Contents, in bytes, excluding Type, Length, and
     Padding", and it is the **total** -- contents plus the four octets of
     ``Type`` and ``Length`` plus padding -- that must land on a multiple of
-    eight. Aligning the contents alone instead, as every padding site in this
-    module and in :mod:`pcapkit.protocols.internet.hip` did before :issue:`651`, puts
-    every parameter at ``4 (mod 8)`` for every possible ``Length``: never a
-    multiple of eight and never the length the RFC gives. It is not even a
-    consistent offset, because the two formulas disagree in both directions --
-    at ``Length = 4`` (a whole ``SEQ``) the contents are already 8-aligned
-    with the header, so the RFC requires no padding at all and aligning the
-    contents appends four octets that must not be there; at ``Length = 8`` the
-    contents are 8-aligned on their own, so aligning them appends nothing and
-    the record is left four octets short.
+    eight. Aligning the contents alone would put every parameter at
+    ``4 (mod 8)`` for every possible ``Length``: never a multiple of eight and
+    never the length the RFC gives. It is not even a consistent offset,
+    because the two formulas disagree in both directions -- at ``Length = 4``
+    (a whole ``SEQ``) the contents are already 8-aligned with the header, so
+    the RFC requires no padding at all and aligning the contents would append
+    four octets that must not be there; at ``Length = 8`` the contents are
+    8-aligned on their own, so aligning them would append nothing and leave
+    the record four octets short.
 
     Args:
         length: The parameter's ``Length`` field, i.e. its contents length in
@@ -431,11 +409,7 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
     "0-7 bytes".
 
     This is one function shared by every parameter rather than a lambda
-    repeated per class because it was previously the latter -- 46 copies of
-    the same wrong expression here and 49 of its counterpart in
-    :mod:`pcapkit.protocols.internet.hip`, which is 95 places for the
-    arithmetic to be wrong in and one place too few to state the RFC's reason
-    for it.
+    repeated per class, so the RFC's arithmetic is stated in one place.
 
     Args:
         pkt: Parameter unpacked schema.
@@ -463,9 +437,8 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
 #: ``packet.update(self.__dict__)``, and :class:`Locator` declares a ``len`` of
 #: its own. So by the time ``padding`` is evaluated -- after the list, since
 #: fields are packed in declaration order -- ``pkt['len']`` is the *last
-#: locator's* ``len``, not the parameter's. That is 4 for any IPv6 locator
-#: whatever the locator count, which is how the pre-:issue:`679` padding expression came
-#: to append exactly four octets to every ``LOCATOR_SET`` regardless of size.
+#: locator's* ``len``, not the parameter's -- 4 for any IPv6 locator,
+#: whatever the locator count.
 #:
 #: The shadowing is specific to the packing path. :meth:`Schema.unpack
 #: <pcapkit.protocols.schema.schema.Schema.unpack>` hands each field
@@ -572,17 +545,15 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --
     one parameter under two numbers, the difference being HIP's own C-bit
     rather than an unrelated code -- and the field list below is that layout
-    exactly, since :issue:`672` widened :attr:`counter` to eight octets.
-    :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries
+    exactly. :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` carries
     two hand-written entries -- not a name-normalisation rule; ``R1_Counter``
-    and ``R1_COUNTER`` differ only in case, and each needed its own line --
+    and ``R1_COUNTER`` differ only in case, and each needs its own line --
     mapping both codes to the same ``_read_param_r1_counter``, and
-    ``_make_param_r1_counter`` already built this class for 128; it was only
-    the schema lookup this class's own ``code=`` feeds -- consulted on the
-    parse path by :class:`~pcapkit.corekit.fields.collections.OptionField`
-    -- that fell back to :class:`UnassignedParameter` for 128, since a
-    single-code ``code=`` registered 129 alone and left 128 unclaimed.
-    See :issue:`690`.
+    ``_make_param_r1_counter`` builds this class for 128. The schema lookup
+    this class's own ``code=`` feeds -- consulted on the parse path by
+    :class:`~pcapkit.corekit.fields.collections.OptionField` -- would fall
+    back to :class:`UnassignedParameter` for 128 if a single-code ``code=``
+    registered 129 alone and left 128 unclaimed.
 
     """
 
@@ -597,12 +568,8 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     #: :rfc:`5201#section-5.2.3` gives the same 4 + 8 layout, so there is no
     #: version under which four octets is right, and both codes that reach this
     #: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- are
-    #: affected. It was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
-    #: until :issue:`672`: the parameter declared the correct ``len=12`` and packed 12
-    #: octets in total where :rfc:`7401` Section 5.2.1's arithmetic makes the
-    #: record 16, leaving it four short at ``4 (mod 8)``. Measured before the
-    #: fix, at ``counter=1``: ``00 80 00 0c 00 00 00 00 00 00 00 01`` for code
-    #: 128 and the same twelve octets under ``00 81`` for code 129.
+    #: affected. With the four ``reserved`` octets the contents are 12 octets,
+    #: which :rfc:`7401` Section 5.2.1's arithmetic pads to a 16-octet record.
     counter: 'int' = UInt64Field()
     #: Padding.
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
@@ -648,24 +615,21 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: The ``length`` callback is the parameter's own ``Length``, and that is
     #: correct on the unpacking path for the reason :data:`LOCATOR_SET_LEN`
     #: gives -- nothing has shadowed ``len`` yet when this field is resolved,
-    #: since ``type`` and ``len`` are the only fields ahead of it. What was
-    #: wrong until :issue:`679` is the *quantity* it was being handed:
-    #: :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set` wrote
-    #: ``Length`` as ``sum(Locator.len)``, in the 4-octet units
-    #: :rfc:`8046#section-4` gives ``Locator Length``, where :rfc:`7401`
-    #: Section 5.2.1's ``Length`` is a byte count. :meth:`Schema.unpack
+    #: since ``type`` and ``len`` are the only fields ahead of it. What matters
+    #: is the *quantity* it is handed: :rfc:`7401` Section 5.2.1's ``Length`` is
+    #: a byte count, not the 4-octet units :rfc:`8046#section-4` gives
+    #: ``Locator Length``, and
+    #: :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set`
+    #: writes it as one. :meth:`Schema.unpack
     #: <pcapkit.protocols.schema.schema.Schema.unpack>` reads exactly
     #: ``field.length`` octets off the stream and hands only those to
     #: :meth:`ListField.unpack
-    #: <pcapkit.corekit.fields.collections.ListField.unpack>`, so a set of *n*
-    #: plain IPv6 locators offered ``4n`` octets of a ``24n``-octet contents:
-    #: measured on ``f0999858e``, n = 2 and n = 5 both parsed **one** truncated
-    #: locator and left the rest of the record unconsumed, with
-    #: :exc:`~pcapkit.utilities.warnings.SchemaWarning` for the negative
-    #: remainder and a repack that did not match the octets read. With
-    #: ``Length`` a byte count the budget is the contents, each locator bills
-    #: the 8 + ``Locator Length`` * 4 octets it actually consumed, and the
-    #: count comes out exact.
+    #: <pcapkit.corekit.fields.collections.ListField.unpack>`, so a ``Length``
+    #: in locator units would offer a set of *n* plain IPv6 locators ``4n``
+    #: octets of a ``24n``-octet contents, parse one truncated locator and leave
+    #: the rest of the record unconsumed. With ``Length`` a byte count the
+    #: budget is the contents, and each locator bills the 8 + ``Locator
+    #: Length`` * 4 octets it actually consumed.
     locators: 'list[Locator]' = ListField(
         length=lambda pkt: pkt['len'],
         item_type=SchemaField(schema=Locator),
@@ -681,27 +645,9 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: parameter's packet context while they pack, and their own ``len``
     #: overwrites it before ``padding`` is reached.
     #:
-    #: This is the site :issue:`651` deliberately left alone, and its fix
-    #: documented as an exclusion, because two defects in this parameter
-    #: cancelled at the shape its tests sampled and correcting either alone
-    #: made the wire output worse.
-    #: The shadowed ``len`` is 4 for any IPv6 locator, so the old expression
-    #: appended exactly four octets whatever the locator count; and the wrong
-    #: ``Length`` unit above made the declared ``Length`` ``4n`` where the
-    #: contents were ``24n``. ``4 + 24n + 4`` is ``24n + 8``, and since ``24n``
-    #: is a multiple of eight the RFC total for a byte-count ``Length`` of
-    #: ``24n`` is ``11 + 24n - 3``, the same ``24n + 8``. Hence 32, 56 and 128
-    #: octets at n = 1, 2, 5 -- conformant, by two wrongs.
-    #:
-    #: That cancellation was never general, which is why the pair had to move
-    #: together rather than one at a time. It needs every locator to be 24
-    #: octets and there to be at least one, and measured on ``f0999858e`` the
-    #: shapes that break it were non-conformant before this fix: an empty set
-    #: packed 4 octets where :rfc:`7401` Section 5.2.1 wants 8, one SPI-bearing
-    #: locator packed 35, two packed 63, and a mixed plain-and-SPI pair packed
-    #: 59 or 60 depending on order. Afterwards all seven shapes are the RFC's
-    #: own total: 8, 32, 56, 128, 32, 64, 56 and 56 respectively, with the three
-    #: plain figures unchanged.
+    #: The shadowed ``len`` is 4 for any IPv6 locator, so a padding read off
+    #: ``pkt['len']`` directly would append exactly four octets whatever the
+    #: locator count.
     padding: 'bytes' = PaddingField(length=locator_set_padding_len)
 
     if TYPE_CHECKING:
@@ -751,7 +697,7 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
     #: This octet is *not* a lifetime: only ``PUZZLE`` carries one, at the same
     #: offset, and only :rfc:`7401#section-5.2.4` defines the ``2^(value - 32)``
-    #: seconds encoding that goes in it. See :issue:`654`.
+    #: seconds encoding that goes in it.
     reserved: 'int' = UInt8Field()
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=2)
@@ -924,8 +870,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
             sets it as a plain attribute so ``pack()``'s own
             ``packet.update(self.__dict__)`` carries it in here -- that value
             is trusted over the ``HIP_CIPHER`` sibling lookup below, which a
-            parameter packed on its own has no ``options`` list for. See
-            :issue:`556`.
+            parameter packed on its own has no ``options`` list for.
 
         """
         if 'cipher' in packet:
@@ -984,7 +929,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         #: :meth:`HIP._make_param_encrypted
         #: <pcapkit.protocols.internet.hip.HIP._make_param_encrypted>` before
         #: packing -- so it is documented here rather than accepted by
-        #: ``__init__``. See :issue:`556`.
+        #: ``__init__``.
         cipher: 'Enum_Cipher'
 
         def __init__(self, type: 'Enum_Parameter', len: 'int',

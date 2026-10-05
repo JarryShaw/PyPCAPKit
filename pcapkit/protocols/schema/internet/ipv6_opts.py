@@ -181,10 +181,10 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         ``Opt Data Len`` counts only what follows the option header
         [:rfc:`8200#section-4.2`], while both schemas this may return inherit
         :attr:`Option.type` and :attr:`Option.len` and so parse those two octets
-        themselves. Sizing the field at ``Opt Data Len`` handed them an area two
+        themselves. Sizing the field at ``Opt Data Len`` would hand them an area two
         octets short of the option they read, which
-        :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted
-        against the option area -- c.f. :issue:`431`.
+        :class:`~pcapkit.corekit.fields.collections.OptionField` would then
+        mis-count against the option area.
 
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
@@ -278,8 +278,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
         an unusable :mod:`struct` template and surfaces much later as an opaque
-        :exc:`struct.error` -- which is exactly how a ``Pad1`` option used to
-        fail to parse.
+        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.
 
     """
     length = pkt.get('len', 0)

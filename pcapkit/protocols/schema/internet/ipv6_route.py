@@ -56,8 +56,8 @@ def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
     schema -- is ``4 + 8 * hdr_ext_len`` octets. This is the single place
     that arithmetic is done on the read side; see
     :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`
-    for its inverse on the write side. Do NOT drop the ``4 +``: that turns
-    the field back into raw octets and is the exact defect :issue:`487` fixed.
+    for its inverse on the write side. Dropping the ``4 +`` would leave the data
+    length 4 octets short.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
@@ -81,10 +81,9 @@ def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
     :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed
     route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.
     ipv6_route.IPv6_Route.read` then subtracts from the outer packet length
-    to find the next layer's length. :issue:`487` unified the write side
-    (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)
-    into one helper; this is the matching read-side helper for the total
-    header length, finishing that half of :issue:`487`.
+    to find the next layer's length. It is the read-side counterpart of
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`,
+    which does the inverse arithmetic on the write side.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
@@ -192,14 +191,13 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     #: NOTE: :rfc:`6554#section-3` gives ``CmprI`` and ``CmprE`` as *"4-bit
     #: unsigned integer"*, i.e. the high and low nibble of a single octet, so
     #: they cannot be two :class:`~pcapkit.corekit.fields.numbers.UInt8Field`
-    #: as they were before :issue:`564`. Together with :attr:`pad` below -- ``Pad``
+    #: (one octet each). Together with :attr:`pad` below -- ``Pad``
     #: (4 bits) plus ``Reserved`` (20 bits) -- this is the one 32-bit word the
     #: diagram in :rfc:`6554#section-3` draws, and the same word
     #: :meth:`IPv6_Route._read_data_type_rpl
     #: <pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl>`'s
-    #: own docstring already drew correctly. The split between the two fields
-    #: falls on the octet boundary between ``CmprE`` and ``Pad``, so neither
-    #: straddles an octet.
+    #: own docstring draws. The split between the two fields falls on the octet
+    #: boundary between ``CmprE`` and ``Pad``, so neither straddles an octet.
     cmpr: 'CmprInfo' = BitField(length=1, namespace={
         'cmpr_i': (0, 4),
         'cmpr_e': (4, 4),
@@ -238,9 +236,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             # :class:`~pcapkit.corekit.fields.collections.ListField` handling
             # packs that list directly. The SRH prefix-decompression below
             # only makes sense against the raw octets a real parse hands
-            # here -- treating the list as ``bytes`` (as a bare ``cast``
-            # used to, without a runtime check) raised trying to slice and
-            # re-join it. See #556.
+            # here.
             #
             # NOTE: ``ip`` still has to be *set*, though, rather than merely
             # left alone. :meth:`Protocol.__post_init__
@@ -249,19 +245,14 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             # <pcapkit.protocols.internet.ipv6_route.IPv6_Route.read>` hands
             # :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
             # *this* schema on that path, not a re-parsed one -- so returning
-            # early without ``ip`` raised a bare ``AttributeError: 'RPL'
-            # object has no attribute 'ip'`` from the reader. That was masked
-            # for as long as the reader's ``% 16`` guard rejected every
-            # constructed header first; fixing the guard alongside #564
-            # exposed it, so it is fixed in the same pass. Each item is one
-            # whole element of ``Addresses[1..n]``, so a full-width (16-octet)
-            # item is decoded the way the parse path below decodes an
-            # uncompressed one, and a compressed suffix is left as
-            # :obj:`bytes` -- which is exactly what that path does too. The
-            # :func:`isinstance` test keeps anything that is not :obj:`bytes`
-            # passing through untouched, as it did when this branch returned
-            # without setting ``ip`` at all, rather than failing here on a
-            # :func:`len` the item may not support.
+            # early without ``ip`` would raise a bare ``AttributeError`` from
+            # the reader. Each item is one whole element of
+            # ``Addresses[1..n]``, so a full-width (16-octet) item is decoded
+            # the way the parse path below decodes an uncompressed one, and a
+            # compressed suffix is left as :obj:`bytes` -- which is exactly what
+            # that path does too. The :func:`isinstance` test keeps anything
+            # that is not :obj:`bytes` passing through untouched, rather than
+            # failing here on a :func:`len` the item may not support.
             self.ip = [
                 cast('IPv6Address', ipaddress.ip_address(item))
                 if isinstance(item, bytes) and len(item) == 16 else item
@@ -285,15 +276,9 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         # NOTE: ``buffer`` is ``self.addresses``, whose own ``length`` callback
         # above already subtracted ``pad_len`` -- the trailing padding octets
         # are read by :attr:`padding`, not by this field. Subtracting
-        # ``pad_len`` a *second* time here dropped one address for every
+        # ``pad_len`` a *second* time here would drop one address for every
         # ``ilen`` octets of padding, so a padded (i.e. compressed) header
-        # parsed one address short; measured with ``cmpr_i=cmpr_e=4`` and three
-        # addresses, which yields ``pad_len=4`` and walked one element instead
-        # of two. Only reachable once the ``% 16`` guard in
-        # :meth:`IPv6_Route._read_data_type_rpl
-        # <pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl>`
-        # stopped rejecting every such header, which is why it is fixed in the
-        # same pass as #564.
+        # would parse one address short.
         for _ in range((len(buffer) - elen) // ilen):
             buf = buffer[counter:counter + ilen]
             if dst is None:
