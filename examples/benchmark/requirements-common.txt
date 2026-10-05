@@ -16,7 +16,7 @@ tbtrim==0.3.1
 # Engines available in every environment. Only `pypcap` and `pcap_ct` have to be
 # separated -- see requirements-pypcap.txt for why.
 dpkt==1.9.8
-scapy==2.7.0
+scapy==2.8.0
 pypcapfile==0.12.0
 pyshark==0.6
 
