@@ -69,16 +69,14 @@ configured separately, through the :mod:`logging` module::
 
 .. attention::
 
-   Up to and including v1.4.1, :class:`~pcapkit.utilities.warnings.BaseWarning`
-   installed an ``ignore`` filter for its own class as a side effect of being
-   constructed, so :mod:`pcapkit` warnings were invisible on the :mod:`warnings`
-   channel by default and a caller could not re-enable them. They are now
-   delivered, which means a consumer who was relying on that silence will start
-   seeing them; the first snippet above restores the old quiet. Since the filter
-   was installed at the *front* of the process-global :data:`warnings.filters`,
+   Up to and including v1.4.1, constructing a
+   :class:`~pcapkit.utilities.warnings.BaseWarning` installed an ``ignore``
+   filter for its own class, so :mod:`pcapkit` warnings were invisible on the
+   :mod:`warnings` channel by default and a caller could not re-enable them.
+   They are now delivered; the first snippet above restores the old quiet. The
+   filter went at the *front* of the process-global :data:`warnings.filters`, so
    it also overrode the host application's own configuration for those
-   categories and made unrelated warnings re-fire, so it is not something that
-   can be kept.
+   categories and made unrelated warnings re-fire.
 
 .. autoexception:: pcapkit.utilities.warnings.BaseWarning
    :no-members:

@@ -30,15 +30,14 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
 
 .. attention::
 
-   Up to and including v1.4.1, ``quiet=True`` meant "log at ``ERROR`` instead of
-   ``CRITICAL``" rather than "do not log", and :data:`sys.tracebacklimit` was set
+   Up to and including v1.4.1, ``quiet=True`` logged at ``ERROR`` instead of
+   ``CRITICAL`` rather than not logging, and :data:`sys.tracebacklimit` was set
    on both paths. A single ``MultiDict.get()`` miss therefore produced an
-   ``ERROR`` record -- one per frame when parsing a capture containing
-   unfragmented IPv6 with reassembly enabled -- and truncated the tracebacks of
-   unrelated exceptions for the remainder of the process. A consumer who was
-   watching for those ``ERROR`` records will no longer see them; they never
-   corresponded to a fault. Anything that genuinely wants to observe internal
-   lookup misses should catch the exception rather than read the log.
+   ``ERROR`` record -- one per frame when parsing unfragmented IPv6 with
+   reassembly enabled -- and truncated the tracebacks of unrelated exceptions
+   for the rest of the process. Those records never corresponded to a fault and
+   are gone; to observe internal lookup misses, catch the exception rather than
+   read the log.
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:
