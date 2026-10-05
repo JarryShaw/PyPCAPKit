@@ -92,18 +92,20 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this port is already
-                registered, naming the displaced entry and its replacement so a
-                caller can tell *what* was lost. Fires only when the
-                incumbent differs from the replacement -- see
+                registered and the incumbent differs from the replacement; the
+                message names both. An unresolved
+                :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as
+                different from the class it names. See
                 :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
                 guard this shares with ``register_protocol``.
 
         Note:
-            ``cls.__proto__`` belongs to the concrete protocol, not to
-            :class:`Transport`, so ``register_apptype`` reaching this method
-            twice for one call -- once as ``TCP``, once as ``UDP`` -- inspects
-            two different registries and cannot warn spuriously.
+            :class:`~pcapkit.protocols.transport.tcp.TCP` and
+            :class:`~pcapkit.protocols.transport.udp.UDP` each define their own
+            ``__proto__`` rather than sharing one on :class:`Transport`.
+            ``register_apptype`` reaches this method once per protocol and
+            inspects two different registries, so it cannot warn spuriously.
 
         """
         if cls is Transport:
@@ -173,15 +175,13 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Important:
             :meth:`self.make <ProtocolBase.make>` accepts a bare :obj:`int` for a
-            port, and the schema field only converts one on the way *out* (in
+            port, but the schema field converts it only on the way *out* (in
             :meth:`PortEnumField.pre_process
             <pcapkit.protocols.schema.transport.tcp.PortEnumField.pre_process>`),
-            leaving the schema attribute holding whatever it was handed. A
-            constructed packet therefore reached :meth:`self.read
-            <ProtocolBase.read>` with an :obj:`int` where a parsed one carries an
-            :class:`~pcapkit.const.reg.apptype.AppType`, and reading ``.port``
-            off it raised :exc:`AttributeError`. Normalising here keeps the two
-            paths agreeing on the type the schema declares.
+            so the schema attribute keeps whatever it was handed. Normalising
+            here makes a constructed packet carry the same
+            :class:`~pcapkit.const.reg.apptype.AppType` as a parsed one, so
+            reading ``.port`` off it works on both paths.
 
         """
         if isinstance(port, Enum_AppType):
@@ -192,9 +192,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':  # pylint: disable=arguments-renamed
         """Decode next layer protocol.
 
-        The method will check if the next layer protocol is supported based on
-        the source and destination port numbers. We will use the lower port
-        number from both ports as the primary key to lookup the next layer.
+        The next layer is looked up by port number. The lower of the two ports
+        is the primary key; the higher one is used only when it alone is
+        registered.
 
         Arguments:
             dict_: info buffer
@@ -206,21 +206,20 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             Current protocol with next layer extracted.
 
         Important:
-            The port is forwarded **whether or not it is registered**, since
+            The port is forwarded **whether or not it is registered**:
             :meth:`ProtocolBase._import_next_layer
             <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
             it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
             records it as :attr:`Data_Raw.protocol
-            <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it -- as
-            this used to, by falling back to :obj:`None` -- anonymised the very
-            case the field is most useful for: a payload on a port we do not
-            decode is then indistinguishable from one on port 22. The lower port
-            is the one carried, for the same reason it is the primary lookup
-            key. :meth:`SCTP._decode_next_layer
+            <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it would
+            make a payload on a port we do not decode indistinguishable from
+            one on port 22. The lower port is the one carried, for the same
+            reason it is the primary lookup key.
+            :meth:`SCTP._decode_next_layer
             <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` and
             :meth:`Internet._import_next_layer
             <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
-            already behave this way for an unregistered PPID and transport type.
+            behave the same way for an unregistered PPID and transport type.
 
         """
         sort_port = sorted(ports)

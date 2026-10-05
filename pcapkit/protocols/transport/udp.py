@@ -65,14 +65,11 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          - :class:`pcapkit.protocols.application.http.HTTP`
 
     Note:
-        Both HTTP ports here resolve to
+        Both HTTP ports resolve to
         :class:`pcapkit.protocols.application.http.HTTP`, which identifies the
         version from the payload and delegates.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
-        bound :class:`pcapkit.protocols.application.httpv1.HTTP` directly for the
-        same ports until :issue:`682`, which repointed it here and so removed an
-        asymmetry that had predated the 8080 entries -- port 80 was already split
-        that way. Both tables now agree.
+        binds the same class for its HTTP ports.
 
     """
 
@@ -94,19 +91,17 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #   1701  l2tp       l2tp
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
-            # Both HTTP entries keep pointing at the version-dispatching
-            # :class:`pcapkit.protocols.application.http.HTTP`, which is what
-            # port 80 already used here. TCP bound HTTP/1 directly for the same
-            # ports until #682 repointed it at the proxy too, so the two tables
-            # no longer disagree. c.f. the note in the class docstring.
+            # Both HTTP entries bind the version-dispatching
+            # :class:`pcapkit.protocols.application.http.HTTP`, as TCP's table
+            # does. c.f. the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
 
-            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version the
-            # package implements, so the concrete class is bound rather than the
-            # abstract L2TP base. IANA protocol number 115 stays unbound because
-            # it is L2TPv3 (RFC 3931), which has no class yet -- when it does, it
-            # takes 115 and this entry becomes a version switch on the Ver
+            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version
+            # implemented, so the concrete class is bound rather than the
+            # abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)
+            # stays unbound because that version has no class; once it has,
+            # it takes 115 and this entry becomes a version switch on the Ver
             # nibble. c.f. pcapkit.protocols.link.l2tp.
             1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
         },

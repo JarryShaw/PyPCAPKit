@@ -225,13 +225,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every
     other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
-    Only PPID 60 actually decodes, though. A PPID 66 payload is an NGAP PDU
-    wrapped in a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so
-    those bytes are not aligned PER and the parse degrades to
-    :class:`~pcapkit.protocols.misc.raw.Raw` -- every time, not only when
-    ``pycrate`` is absent. It is registered so that the PPID is *named* in the
-    protochain rather than reported as an unassigned number, which is strictly
-    more than leaving it out would give.
+    Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
+    a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so the bytes
+    are not aligned PER and the parse always degrades to
+    :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the PPID
+    is *named* in the protochain rather than reported as an unassigned number.
 
     This class currently supports parsing of the following SCTP chunks, which
     are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`
@@ -356,10 +354,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             # PPID 66 is NGAP wrapped in a DTLS record rather than a bare
-            # NGAP-PDU, and pcapkit implements no DTLS. It is registered anyway
-            # so that the PPID is *named*: the payload then fails in NGAP's own
-            # decoder and `beholder` degrades it to Raw, which is where an
-            # unregistered PPID would have left it regardless.
+            # NGAP-PDU, and pcapkit implements no DTLS. It is registered so
+            # that the PPID is *named*: the payload fails in NGAP's own decoder
+            # and `beholder` degrades it to Raw, as an unregistered PPID would.
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP over DTLS
         },
@@ -615,12 +612,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this PPID is already
-                registered, naming the displaced entry and its replacement so a
-                caller can tell *what* was lost. Fires only when the incumbent
-                differs from the replacement, as the port-keyed
+                registered and the incumbent differs from the replacement; the
+                message names both. As with the port-keyed
                 :meth:`Transport.register
                 <pcapkit.protocols.transport.transport.Transport.register>` it
-                overrides does.
+                overrides, an unresolved
+                :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent
+                counts as different from the class it names.
 
         """
         if isinstance(protocol, ModuleDescriptor):
@@ -824,15 +822,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
             The PPID is passed through **unchanged**, registered or not, so that
             an unregistered payload is still labelled with the identifier it
-            arrived with -- as :meth:`Internet._import_next_layer
+            arrived with, as :meth:`Internet._import_next_layer
             <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
             does for an unregistered transport type. Resolving it to
             :class:`~pcapkit.protocols.misc.raw.Raw` is
             :meth:`ProtocolBase._import_next_layer
             <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
-            which looks the PPID up through
-            :meth:`ProtocolBase._lookup_next_layer
-            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>` and so
+            through :meth:`ProtocolBase._lookup_next_layer
+            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`, which
             leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
 
         """
