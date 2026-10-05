@@ -550,21 +550,17 @@ class ScopeTests(unittest.TestCase):
             UnsupportedCall: HTTP: unexpected keyword(s): 'http_version', 'method', 'uri'
 
         Asserted through the real class rather than a dummy, because the point is
-        that this one protocol declines and the rest do not. The construction still
-        fails, with :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
-        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` -- which is the
-        outcome
-        :meth:`HTTPUnitTests.test_http_construction_reaches_the_versioned_make_callee`
-        already pins, and is the proof that the keywords reached the delegate
-        rather than being refused on the way.
+        that this one protocol declines and the rest do not. The construction
+        succeeds, and the packet it builds -- ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
+        which only :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>`'s
+        ``make`` produces from these keywords -- is the proof that they reached
+        the delegate rather than being refused on the way.
 
-        The asserted message was ``'HTTP/1: invalid format'`` until #787, and the
-        attribution above said ``HTTPv1.make``. Neither the exception type nor what
-        this test is *for* moved: ``HTTPv1.make`` accepts these keywords and builds
-        the packet, and it is reading that packet back that fails -- now as a
-        ``ProtocolError`` raised by ``httpv1.HTTP`` itself, which ``HTTP.read``
-        re-raises unchanged rather than re-labelling with the dispatched version.
-        See that method's docstring for the whole of it.
+        Until #1041 that packet failed to read back, as ``ProtocolError: HTTP:
+        invalid format``, because ``httpv1.HTTP`` refused a message with no header
+        fields; this test asserted that error as its proof of delegation.
+        :meth:`HTTPUnitTests.test_http_construction_reaches_the_versioned_make_callee`
+        pins the same outcome from the HTTP side.
 
         """
         from pcapkit.protocols.application.http import HTTP
@@ -572,7 +568,6 @@ class ScopeTests(unittest.TestCase):
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
         from pcapkit.protocols.protocol import _declared_keywords
         from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertIsNone(_declared_keywords(HTTP))
         self.assertIsNotNone(_declared_keywords(TCP))
@@ -588,9 +583,9 @@ class ScopeTests(unittest.TestCase):
                 self.assertIsNotNone(accepted)
                 self.assertIn(keyword, accepted)
 
-        with self.assertRaises(ProtocolError) as context:
-            HTTP(version=1, http_version='1.1', method='GET', uri='/')
-        self.assertEqual(str(context.exception), 'HTTP: invalid format')
+        proto = HTTP(version=1, http_version='1.1', method='GET', uri='/')
+        self.assertEqual(proto.data, b'GET / HTTP/1.1\r\n\r\n')
+        self.assertEqual(proto.version, '1.1')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

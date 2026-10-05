@@ -34,6 +34,7 @@ from pcapkit.const.http.method import Method as Enum_Method
 from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.protocols.application.http import _HTTP2_PREFACE
 from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
@@ -72,6 +73,12 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 # the syntax.
 _RE_STATUS = re.compile(rb'\d{3}\Z')
 
+# The HTTP/2 connection preface's header block, as ``HTTP.read`` splits it off at
+# the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field lines, so
+# the patterns above accept it; it is refused by name in ``_read_http_header``
+# and ``_test_start_line`` so that the preface never parses as HTTP/1.
+_HTTP2_PREFACE_HEADER = _HTTP2_PREFACE.split(b'\r\n\r\n', maxsplit=1)[0]
+
 
 def _test_start_line(data: 'bytes') -> 'bool':
     """Whether ``data`` opens with an HTTP/1.* start line.
@@ -102,17 +109,18 @@ def _test_start_line(data: 'bytes') -> 'bool':
         ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that
         agreement.
 
-        Both of the unpackings the parser performs *before* those patterns are
-        mirrored too, and this is not pedantry -- the second of them is the whole
-        reason the HTTP/2 connection preface is not claimed here. ``PRI *
+        The checks the parser performs *before* those patterns are mirrored too,
+        and this is not pedantry -- they are the whole reason the HTTP/2
+        connection preface is not claimed here. ``PRI *
         HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed
         HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that
         tested only the first line would answer :data:`True` for it. Split at the
         header/body separator first, as :meth:`HTTP.read
         <pcapkit.protocols.application.httpv1.HTTP.read>` does, and the preface's
-        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is why the
-        parser refuses it, and why this does. Without the separator split this
-        returns :data:`True` for the preface.
+        header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which
+        the parser refuses by name and so does this. Any *other* header with no
+        CRLF in it is a start line with zero field lines, which
+        :rfc:`9112#section-2.1` allows and both accept (:issue:`1041`).
 
         An HTTP/0.9 request line carries only two tokens and so is not recognised
         here either, matching the parser, which raises on fewer than three.
@@ -122,10 +130,10 @@ def _test_start_line(data: 'bytes') -> 'bool':
     if header == data:  # no header/body separator -- ``read`` raises
         return False
 
-    startline = header.split(b'\r\n', maxsplit=1)[0]
-    if startline == header:  # header holds no CRLF -- ``_read_http_header`` raises
+    if header == _HTTP2_PREFACE_HEADER:  # the preface -- ``_read_http_header`` raises
         return False
 
+    startline = header.split(b'\r\n', maxsplit=1)[0]
     try:
         para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
     except ValueError:
@@ -369,15 +377,21 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        # NOTE: Both unpackings are short for input that is not an HTTP/1
-        # message: a header of one line with no CRLF -- the HTTP/2 connection
-        # preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that
-        # -- and a start line of fewer than three whitespace-separated tokens.
-        # Raised as ``ProtocolError`` for the reason ``read`` gives above, with
-        # the same message this method uses below for a start line it cannot
-        # recognise.
+        # NOTE: A header with no CRLF is a start line with zero field lines,
+        # which :rfc:`9112#section-2.1` allows (``*( field-line CRLF )``). The
+        # one such header refused by name is the HTTP/2 connection preface's:
+        # ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`` splits in ``read`` to exactly
+        # ``PRI * HTTP/2.0``, which ``_RE_METHOD`` and ``_RE_VERSION`` would
+        # otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER``).
+        if header == _HTTP2_PREFACE_HEADER:
+            raise ProtocolError('HTTP: invalid format')
+        startline, _, headerfield = header.partition(b'\r\n')
+
+        # NOTE: Short for a start line of fewer than three whitespace-separated
+        # tokens. Raised as ``ProtocolError`` for the reason ``read`` gives
+        # above, with the same message this method uses below for a start line
+        # it cannot recognise.
         try:
-            startline, headerfield = header.split(b'\r\n', 1)
             para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
         except ValueError as error:
             raise ProtocolError('HTTP: invalid format') from error
@@ -394,7 +408,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         # extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).
         # Unfolded, a folded message parses to the field it actually carries.
         fields = []  # type: list[bytes]
-        for line in headerfield.split(b'\r\n'):
+        for line in headerfield.split(b'\r\n') if headerfield else ():
             if line.startswith((b' ', b'\t')):
                 # A continuation with nothing to continue -- the first field line
                 # folded -- is malformed rather than unfoldable.
