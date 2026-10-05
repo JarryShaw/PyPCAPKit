@@ -207,14 +207,14 @@ not one: ``gate`` (the full suite, one Python version) and ``changelog``
 (checks ``CHANGELOG.md`` against its source entry). It skips the other
 **six** -- the five matrix jobs, ``test`` (five Python legs),
 ``integration`` (five), ``engine-tests`` (a Python x engine matrix),
-``pypcap-parity`` (two) and ``unittest-ordering`` (ten ``tests/`` legs),
+``pypcap-parity`` (two) and ``unittest-ordering`` (eleven matrix cells),
 each of which has already run once for this commit from Unit Tests' own
 ``push``/``pull_request`` triggers, so running any of them again per caller
 would test the same commit several times over -- and
 ``required-checks`` (see `Required Status Checks`_ below), gated out by its
 own ``if:`` rather than by having already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:892-898``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:950-956``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -310,7 +310,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1142``
+     - ``unit-tests.yml:1200``
    * - ``Compat Python 3.10``
      - job ``compatibility``, matrix leg ``3.10``
      - ``python-compatibility.yml:31,41``
@@ -328,16 +328,16 @@ grepping every workflow file for its name:
      - ``python-compatibility.yml:31,45``
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1142``). ``Compat Python`` is defined by two in
+(``unit-tests.yml:1200``). ``Compat Python`` is defined by two in
 ``python-compatibility.yml``: the required ``compatibility`` job (``:31``,
 ``Compat Python ${{ matrix.python-version }}``, expanding to the five required
 legs at ``:41-45``) and the non-required ``compatibility-nightly`` job (``:69``,
 ``Compat Python 3.15 (scheduled)``, see below). A comment in
-``unit-tests.yml`` (``:1003``) mentions the string without defining it.
+``unit-tests.yml`` (``:1061``) mentions the string without defining it.
 
 ``Required checks passed`` is itself an aggregate, not a single check run --
 but it stands in for **17** of the ruleset's originally-named 22 contexts,
-not all 22. ``unit-tests.yml``'s own comment (``:1002-1023``) accounts for the
+not all 22. ``unit-tests.yml``'s own comment (``:1060-1081``) accounts for the
 22: five each for ``test`` and ``integration``, five for the live ``Compat
 Python 3.10``-``3.14`` contexts (emitted by ``python-compatibility.yml``, a
 *different* workflow file -- nothing in ``unit-tests.yml`` could ever stand
@@ -348,11 +348,11 @@ stopped producing once it became a Python x engine matrix, and two for
 ``test``/``integration``/dead-``Engines``/``pypcap-parity`` slots -- 5 + 5 +
 5 + 2 = 17 -- via its own ``needs: [test, integration, engine-tests,
 pypcap-parity]`` plus an explicit per-dependency check
-(``unit-tests.yml:1141-1167``). The five ``Compat`` contexts stay required
+(``unit-tests.yml:1199-1225``). The five ``Compat`` contexts stay required
 exactly as they are and are listed separately in the table above. This job
 runs on Unit Tests' own ``push``/``pull_request`` triggers; the
 ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``:1144``), so it is never
+``if: ${{ always() && inputs.gate-only != true }}`` (``:1202``), so it is never
 produced -- and never expected -- on those paths.
 
 ``Compat Python 3.10``-``3.14`` are five ordinary matrix legs, not an
