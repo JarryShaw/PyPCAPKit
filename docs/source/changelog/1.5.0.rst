@@ -2158,7 +2158,10 @@ Fixed
   ``RegistryWarning`` likewise now says "name resolution record already registered".
   The make-side ``ns_dnsIP4addr``/``ns_dnsIP6addr`` messages also drop the lowercase
   ``ns_dnsip4addr``/``ns_dnsip6addr`` spelling for the ``OptionType`` member name.
-  Only message text changes; the exception and warning types are unchanged
+  Two more guards named the wrong option: ``_make_option_if_rxspeed``'s scope and
+  duplicate guards now say ``[if_rxspeed]`` rather than ``[if_txspeed]``, and
+  ``_read_option_epb_queue``'s length guard says ``[epb_queue]`` rather than
+  ``[epb_packetid]``. Only message text changes; the exception and warning types are unchanged
   (:issue:`1038`).
 
 pcapkit.toolkit

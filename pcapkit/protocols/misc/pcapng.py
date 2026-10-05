@@ -2962,7 +2962,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG: [epb_packetid] invalid length (expected 4, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_queue] invalid length (expected 4, got {schema.length})')
 
         option = Data_EPB_QueueOption(
             type=schema.type,
@@ -4820,10 +4820,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
-            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
+            raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be in Interface Description Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
-            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
+            raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
 
         if option is not None:

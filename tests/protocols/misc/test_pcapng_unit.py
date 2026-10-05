@@ -200,6 +200,42 @@ class PCAPNGUnitTests(unittest.TestCase):
                     method(type_, ip=ip)
                 self.assertIn(f'[{option}] option must be only one', str(ctx.exception))
 
+    def test_pcapng_guard_messages_name_their_own_option(self) -> None:
+        # #1038: ``_make_option_if_rxspeed``'s guards said ``[if_txspeed]``, and
+        # ``_read_option_epb_queue``'s length guard said ``[epb_packetid]``.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import EPB_QueueOption
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        pcapng = object.__new__(PCAPNG)
+
+        def message(block_type: BlockType, opt: collections.Counter, call: object) -> str:
+            pcapng._type = block_type
+            pcapng._opt = opt
+            with self.assertRaises(ProtocolError) as ctx:
+                call()  # type: ignore[operator]
+            return str(ctx.exception)
+
+        make_rxspeed = lambda: pcapng._make_option_if_rxspeed(OptionType.if_rxspeed, speed=1)
+        with self.subTest(guard='if_rxspeed scope'):
+            self.assertIn('[if_rxspeed] option must be in Interface Description Block',
+                          message(BlockType.Enhanced_Packet_Block, collections.Counter(),
+                                  make_rxspeed))
+        with self.subTest(guard='if_rxspeed duplicate'):
+            self.assertIn('[if_rxspeed] option must be only one',
+                          message(BlockType.Interface_Description_Block,
+                                  collections.Counter({OptionType.if_rxspeed: 1}), make_rxspeed))
+        with self.subTest(guard='epb_queue length'):
+            schema = EPB_QueueOption(type=OptionType.epb_queue, length=4, queue_id=5)
+            object.__setattr__(schema, 'length', 3)
+            self.assertIn('[epb_queue] invalid length (expected 4, got 3)',
+                          message(BlockType.Enhanced_Packet_Block, collections.Counter(),
+                                  lambda: pcapng._read_option_epb_queue(
+                                      schema, options=OrderedMultiDict())))
+
     def test_pcapng_option_registry_preserves_duplicate_numeric_codes(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key

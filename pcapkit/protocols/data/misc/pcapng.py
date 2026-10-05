@@ -577,7 +577,7 @@ class NS_DNSNameOption(Option):
 
 @info_final
 class NS_DNSIP4AddrOption(Option):
-    """Data model for PCAP-NG ``ns_dnsip4addr`` option."""
+    """Data model for PCAP-NG ``ns_dnsIP4addr`` option."""
 
     #: IPv4 address.
     ip: 'IPv4Address'
@@ -588,7 +588,7 @@ class NS_DNSIP4AddrOption(Option):
 
 @info_final
 class NS_DNSIP6AddrOption(Option):
-    """Data model for PCAP-NG ``ns_dnsip6addr`` option."""
+    """Data model for PCAP-NG ``ns_dnsIP6addr`` option."""
 
     #: IPv6 address.
     ip: 'IPv6Address'
