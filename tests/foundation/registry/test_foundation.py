@@ -64,6 +64,51 @@ class FoundationRegistryTests(unittest.TestCase):
             registry.register_traceflow_dumper('unit-trace-class', NotImplementedIO, ext='.unit')
         traceflow.assert_called_once_with('unit-trace-class', NotImplementedIO, '.unit')
 
+    def test_dumper_registrars_reject_a_non_class_with_registry_error(self) -> None:
+        """GitHub issue #1021: every dumper registrar raises ``RegistryError``.
+
+        ``register_extractor_dumper`` and ``register_traceflow_dumper`` share a
+        signature and a docstring, and ``TraceFlow.register_dumper`` carried the same
+        bare ``issubclass`` guard as ``Extractor.register_dumper``, so a fix to one
+        left the other leaking ``TypeError``. Nothing is mocked: the point is what the
+        public wrappers really raise.
+        """
+        import sys
+        import types
+
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.registry import foundation as registry
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+        from pcapkit.utilities.exceptions import RegistryError
+
+        module = types.ModuleType('unit_foundation_non_class_mod')
+        module.NOT_A_CLASS = 42
+        sys.modules['unit_foundation_non_class_mod'] = module
+        self.addCleanup(lambda: sys.modules.pop('unit_foundation_non_class_mod', None))
+        descriptor = ModuleDescriptor('unit_foundation_non_class_mod', 'NOT_A_CLASS')
+
+        registrars = {
+            'Extractor.register_dumper':
+                lambda value: Extractor.register_dumper('unit-bad', value, '.bad'),
+            'TraceFlow.register_dumper':
+                lambda value: TraceFlow.register_dumper('unit-bad', value, '.bad'),
+            'register_extractor_dumper':
+                lambda value: registry.register_extractor_dumper('unit-bad', value, ext='.bad'),
+            'register_traceflow_dumper':
+                lambda value: registry.register_traceflow_dumper('unit-bad', value, ext='.bad'),
+        }
+        for name, register in registrars.items():
+            for label, value, expected in (
+                ('instance', 42, 'must be a class'),
+                ('descriptor to non-class', descriptor, 'must be a class'),
+                ('wrong class', object, 'subclass'),
+            ):
+                with self.subTest(registrar=name, value=label):
+                    with self.assertRaises(RegistryError) as caught:
+                        register(value)
+                    self.assertIn(expected, str(caught.exception))
+
     def test_callback_and_extractor_registration_wrappers(self) -> None:
         from pcapkit.foundation.registry import foundation as registry
 

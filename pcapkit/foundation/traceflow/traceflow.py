@@ -234,6 +234,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         """
         if isinstance(dumper, ModuleDescriptor):
             dumper = dumper.klass
+        if not isinstance(dumper, type):
+            raise RegistryError(f'dumper must be a class, not {dumper!r}')
         if not issubclass(dumper, Dumper):
             raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
         incumbent_entry = cls.__output__.get(format)

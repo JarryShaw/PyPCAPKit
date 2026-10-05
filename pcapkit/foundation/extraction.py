@@ -409,6 +409,8 @@ class Extractor(Generic[_P]):
         """
         if isinstance(dumper, ModuleDescriptor):
             dumper = dumper.klass
+        if not isinstance(dumper, type):
+            raise RegistryError(f'dumper must be a class, not {dumper!r}')
         if not issubclass(dumper, Dumper):
             raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
         incumbent_entry = cls.__output__.get(format)
@@ -449,6 +451,8 @@ class Extractor(Generic[_P]):
         """
         if isinstance(engine, ModuleDescriptor):
             engine = engine.klass
+        if not isinstance(engine, type):
+            raise RegistryError(f'engine must be a class, not {engine!r}')
         # NOTE: checked against the public ``Engine``, the class third-party engines are
         # meant to extend and the one carrying the ``engine=`` registration hook. The
         # built-ins derive from ``EngineBase`` directly, so this door refuses them;
@@ -520,6 +524,8 @@ class Extractor(Generic[_P]):
         """
         if isinstance(reassembly, ModuleDescriptor):
             reassembly = reassembly.klass
+        if not isinstance(reassembly, type):
+            raise RegistryError(f'reassembly must be a class, not {reassembly!r}')
         # NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in
         # :meth:`register_engine` above -- see #1016. Built-ins go through
         # :meth:`_register_internal_reassembly`.
@@ -589,6 +595,8 @@ class Extractor(Generic[_P]):
         """
         if isinstance(traceflow, ModuleDescriptor):
             traceflow = traceflow.klass
+        if not isinstance(traceflow, type):
+            raise RegistryError(f'traceflow must be a class, not {traceflow!r}')
         # NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in
         # :meth:`register_engine` above -- see #1016. Built-ins go through
         # :meth:`_register_internal_traceflow`.
