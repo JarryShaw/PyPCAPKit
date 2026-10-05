@@ -41,10 +41,9 @@ FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})(?P<more>\-)?( +(?P<args>.*))?\r
 class Type(EnumLookup, StrEnum):
     """FTP packet type.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`877`'s ruling that every non-registry enumeration shares that
-    lookup contract -- pure re-parenting, since this class defines neither
-    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+    Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract
+    shared by every non-registry enumeration (:issue:`877`). The class defines
+    neither ``get`` nor ``_missing_`` of its own.
 
     """
 

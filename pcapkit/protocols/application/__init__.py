@@ -28,7 +28,7 @@ from pcapkit.protocols.application.ngap import NGAP
 from pcapkit.protocols.application.ospf import OSPF
 from pcapkit.protocols.application.rarp import RARP, DRARP
 
-# Deprecated / Base Classes
+# Base Classes
 from pcapkit.protocols.application.http import HTTP
 
 # Transport Layer Protocol Numbers

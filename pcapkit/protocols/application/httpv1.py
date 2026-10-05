@@ -78,10 +78,9 @@ def _test_start_line(data: 'bytes') -> 'bool':
 
     This is a *classification* predicate and parses nothing: it answers "is this
     HTTP/1?" for :meth:`HTTP._guess_version
-    <pcapkit.protocols.application.http.HTTP._guess_version>`, which until :issue:`800`
-    answered that question by trial-parsing every version in the family and
-    keeping whichever one did not object -- so a payload that is not HTTP at all
-    was classified by which parser happened to fail less loudly.
+    <pcapkit.protocols.application.http.HTTP._guess_version>`. Classifying by
+    trial-parsing every version in the family would decide a payload that is
+    not HTTP at all by which parser happened to fail less loudly.
 
     Args:
         data: Payload to classify.
@@ -111,9 +110,9 @@ def _test_start_line(data: 'bytes') -> 'bool':
         tested only the first line would answer :data:`True` for it. Split at the
         header/body separator first, as :meth:`HTTP.read
         <pcapkit.protocols.application.httpv1.HTTP.read>` does, and the preface's
-        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is exactly
-        why the parser refuses it, and now why this does. Measured: without the
-        separator split this returned :data:`True` for the preface.
+        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is why the
+        parser refuses it, and why this does. Without the separator split this
+        returns :data:`True` for the preface.
 
         An HTTP/0.9 request line carries only two tokens and so is not recognised
         here either, matching the parser, which raises on fewer than three.
@@ -141,10 +140,9 @@ def _test_start_line(data: 'bytes') -> 'bool':
 class Type(EnumLookup, StrEnum):
     """HTTP packet type.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`877`'s ruling that every non-registry enumeration shares that
-    lookup contract -- pure re-parenting, since this class defines neither
-    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+    Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract
+    shared by every non-registry enumeration (:issue:`877`). The class defines
+    neither ``get`` nor ``_missing_`` of its own.
 
     """
 
@@ -214,14 +212,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         packet = schema.data
 
         # NOTE: A payload carrying no header/body separator at all unpacks short
-        # here, and the bare ``ValueError`` that used to escape is what made
-        # ``HTTP._guess_version``'s HTTP/2 arm unreachable: that dispatcher falls
-        # through on ``ProtocolError`` alone, so an HTTP/1 attempt on HTTP/2 wire
-        # bytes aborted the guess rather than failing it, and the HTTP/2 attempt
-        # never ran (#787). ``ProtocolError`` is what the ``Raises:`` section
-        # above already promises for a malformed packet, and the same conversion
-        # the explicit ``version=`` path performs at ``http.py:119``; chained, so
-        # the underlying unpacking error stays reachable as ``__cause__``.
+        # here. It must surface as ``ProtocolError``, not a bare ``ValueError``:
+        # ``HTTP._guess_version`` falls through to its HTTP/2 arm on
+        # ``ProtocolError`` alone, so any other exception from an HTTP/1 attempt
+        # on HTTP/2 wire bytes would abort the guess instead of failing it.
+        # ``ProtocolError`` is also what the ``Raises:`` section above promises,
+        # and the same conversion the explicit ``version=`` path of
+        # ``HTTP.read`` performs; chained, so the unpacking error stays
+        # reachable as ``__cause__``.
         try:
             header, body = packet.split(b'\r\n\r\n', maxsplit=1)
         except ValueError as error:
@@ -375,9 +373,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         # message: a header of one line with no CRLF -- the HTTP/2 connection
         # preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that
         # -- and a start line of fewer than three whitespace-separated tokens.
-        # Raised as ``ProtocolError`` for the reason ``read`` gives above, and
-        # to the same message this method already uses below for a start line it
-        # cannot recognise (#787).
+        # Raised as ``ProtocolError`` for the reason ``read`` gives above, with
+        # the same message this method uses below for a start line it cannot
+        # recognise.
         try:
             startline, headerfield = header.split(b'\r\n', 1)
             para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
@@ -387,17 +385,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         # NOTE: A field line beginning with SP or HTAB is an ``obs-fold``
         # continuation of the line before it (:rfc:`9112#section-5.2`), and is
         # unfolded here -- the RFC's own remedy -- rather than treated as a field
-        # line of its own. Deprecated, but present in real captures, and the two
-        # ways it used to come out were both wrong: a continuation carrying no
-        # colon left the split below one element long and ``item[1]`` raised
+        # line of its own. Deprecated, but present in real captures. Treating a
+        # continuation as a field line of its own goes wrong twice: one carrying
+        # no colon leaves the split below one element long, so ``item[1]`` raises
         # :exc:`IndexError`, which is neither a :exc:`ValueError` nor a
-        # ``ProtocolError`` and so escaped ``HTTP._guess_version``'s suppression
-        # exactly as the bare :exc:`ValueError` of #787 did; a continuation that
-        # happened to contain one was worse, parsing silently into a spurious
-        # extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``)
-        # with nothing raised at all. Unfolded, a folded message parses to the
-        # field it actually carries, so this input class stops reaching the
-        # HTTP/2 arm by accident instead of merely failing more politely.
+        # ``ProtocolError`` and escapes ``HTTP._guess_version``'s suppression;
+        # one that happens to contain a colon parses silently into a spurious
+        # extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).
+        # Unfolded, a folded message parses to the field it actually carries.
         fields = []  # type: list[bytes]
         for line in headerfield.split(b'\r\n'):
             if line.startswith((b' ', b'\t')):

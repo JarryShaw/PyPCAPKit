@@ -35,7 +35,7 @@ __all__ = ['Link']
 class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for link layer protocol family.
 
-    This class currently supports parsing of the following protocols, which are
+    This class supports parsing of the following protocols, which are
     registered in the :attr:`self.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`
     attribute:
 

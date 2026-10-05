@@ -83,7 +83,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
     :doc:`/contributing/conventions/protocol-layer-placement`.
 
     Note:
-        The subpackage does not track the dispatch tier. OSPF is still dispatched
+        The subpackage does not track the dispatch tier. OSPF is dispatched
         from :attr:`Internet.__proto__
         <pcapkit.protocols.internet.internet.Internet.__proto__>` at
         :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol
@@ -93,13 +93,11 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
     #: Version number of corresponding protocol, as read off the header. Held on
     #: the instance rather than read back out of :attr:`self._info
     #: <pcapkit.protocols.protocol.Protocol._info>` because :attr:`name` and
-    #: :attr:`alias` are both needed *during* :meth:`read` -- it is
-    #: :meth:`self._decode_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` that builds
-    #: the protocol chain out of :attr:`alias` -- and ``_info`` is not assigned
-    #: until :meth:`read` has returned. c.f. ``ARP._acnm`` on
-    #: :class:`~pcapkit.protocols.link.arp.ARP`, which carries the same
-    #: constraint.
+    #: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` builds the
+    #: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until
+    #: :meth:`read` has returned. c.f. ``ARP._acnm`` on
+    #: :class:`~pcapkit.protocols.link.arp.ARP`, which has the same constraint.
     _version: 'int'
 
     ##########################################################################
@@ -332,13 +330,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
 
         Notes:
-            Latent rather than live: nothing in this module calls this
-            method today (:meth:`make` builds ``router_id``/``area_id``
-            straight from its own arguments), so the only caller is a unit
-            test. It is routed through :func:`parse_ip_address` anyway, so
-            that it does not resurface the defect the moment a caller
-            reaches it -- the same kind of omission is how :issue:`469`'s single-site
-            fix survived to become :issue:`491` and then :issue:`508` (c.f. :issue:`540`).
+            Latent rather than live: nothing in this module calls this method
+            (:meth:`make` builds ``router_id``/``area_id`` straight from its
+            own arguments), so the only caller is a unit test. It is routed
+            through :func:`parse_ip_address` anyway, so that a future caller passing a
+            :obj:`bool` gets :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+            rather than a silent ``0.0.0.1``.
 
             The description below uses :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias
