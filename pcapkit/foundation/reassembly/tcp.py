@@ -386,7 +386,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 which is shared across every acknowledgement number under the
                 same buffer ID: a *different* fragment closing a hole there
                 says nothing about what *this* fragment has received, and
-                using it here previously discarded this fragment's own real
+                using it here would discard this fragment's own real
                 bytes whenever another fragment happened to cover the same
                 absolute sequence numbers first.
             old: already-buffered bytes of this fragment over the range.
@@ -528,9 +528,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # NOTE: ``strict=False`` deliberately keeps reporting the whole
             # payload buffer with its holes zero-filled, which is what
             # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream
-            # it is reconstructing best-effort. What changes is only that
-            # ``completed`` now says so: this branch used to report
-            # :attr:`Completion.COMPLETE` for a buffer it knew had holes in it.
+            # it is reconstructing best-effort. ``completed`` says so, rather than
+            # reporting :attr:`Completion.COMPLETE` for a buffer with holes in it.
             else:
                 payload = buffer.raw
                 if payload:    # strip empty buffer

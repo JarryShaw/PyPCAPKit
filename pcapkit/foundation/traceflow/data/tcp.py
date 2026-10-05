@@ -60,9 +60,8 @@ class Packet(Info, Generic[_AT]):
     fin: 'bool'
     #: TCP reset (RST) flag. A connection can end abruptly as well as politely
     #: (:rfc:`9293#section-3.5.2`), and the tracer cannot notice that unless the
-    #: flag reaches it -- which it did not, so a reset connection used to look
-    #: merely idle and a later connection reusing the same endpoints merged into
-    #: it.
+    #: flag reaches it, otherwise a reset connection looks merely idle and a later
+    #: connection reusing the same endpoints merges into it.
     rst: 'bool'
     #: Source IP.
     src: '_AT'

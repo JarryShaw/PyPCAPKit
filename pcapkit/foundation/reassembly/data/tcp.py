@@ -117,8 +117,8 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: conflicting portion of whichever segment arrived later, per
     #: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just
     #: the new data"); this field is what lets a caller tell a clean stream
-    #: from a contested one now that :attr:`completed` no longer does, since a
-    #: contested range does not, on its own, leave a hole.
+    #: from a contested one, since a contested range does not, on its own, leave a
+    #: hole for :attr:`completed` to report.
     conflict: 'tuple[tuple[int, int], ...]'
 
     if TYPE_CHECKING:

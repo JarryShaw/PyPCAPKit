@@ -132,14 +132,11 @@ class IPv6(IP):
         :rfc:`8200#section-4.5` states that the Fragment header is not present in
         the reassembled packet, and that the Next Header field of the last header
         of the unfragmentable part comes from the Fragment header's. Left alone,
-        the reassembled datagram advertises a Fragment header on a datagram that
-        is by definition no longer a fragment, which is what every engine used to
-        report -- the toolkit adapters differ over whether the Fragment header's
-        *octets* belong to ``header``, but none of them rewrote the field that
-        points at it.
-
-        The Fragment header's own octets are already excluded by the adapters, so
-        only the field pointing at it is left to fix.
+        the reassembled datagram would advertise a Fragment header on a datagram
+        that is by definition no longer a fragment. The toolkit adapters differ
+        over whether the Fragment header's *octets* belong to ``header``, but none
+        rewrites the field that points at it; the octets are already excluded, so
+        only that field is left to fix.
 
         Args:
             header: Raw header octets of the fragment at fragment offset zero.

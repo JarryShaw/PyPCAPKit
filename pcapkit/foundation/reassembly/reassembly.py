@@ -571,10 +571,10 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         """
         # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
         # idea ``name`` -- so guessing ``name=`` by analogy is the expected
-        # mistake, not a careless one. It used to land in ``**kwargs``, get
-        # dropped by the bare ``super().__init_subclass__()`` below, and leave
-        # the class registered under its own class name instead: no exception, no
-        # warning. See the sibling note in ``Engine.__init_subclass__``.
+        # mistake, not a careless one. Left in ``**kwargs`` it would be
+        # dropped by the bare ``super().__init_subclass__()`` below, leaving the
+        # class registered under its own class name: no exception, no warning.
+        # See the sibling note in ``Engine.__init_subclass__``.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
             raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')

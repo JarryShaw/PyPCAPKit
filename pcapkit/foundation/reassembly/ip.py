@@ -323,10 +323,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 # zero-filled uses ``strict=True`` and gets the runs.
                 stop = TDL
             else:
-                # The length is not known, and this is the case that used to slice
-                # ``datagram[:-1]`` -- handing back 65534 octets of the
-                # preallocated buffer, almost all of them zeros the sender never
-                # sent, and calling the result complete.
+                # The length is not known. Slicing ``datagram[:-1]`` here would
+                # hand back 65534 octets of the preallocated buffer, almost all of
+                # them zeros the sender never sent, and call the result complete.
                 #
                 # Reporting nothing at all would be the other extreme, and it
                 # discards data that really did arrive. So report the **contiguous

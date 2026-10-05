@@ -271,14 +271,14 @@ class Engine(EngineBase[_T], Generic[_T]):
             registered; only the keyword decides registration.
 
         Note:
-            This keyword was ``name`` when opt-in registration landed, and was
-            renamed because ``name`` cannot be passed as a class keyword at all
-            on Python 3.10: :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``,
-            ``bases`` and ``namespace`` as positional-*or-keyword* parameters
+            The keyword is ``engine`` rather than ``name`` because ``name``
+            cannot be passed as a class keyword at all on Python 3.10:
+            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and
+            ``namespace`` as positional-*or-keyword* parameters
             before 3.11, so a class keyword by any of those four names collides
             with one of them and the class statement raises :exc:`TypeError` from
             the metaclass before this method is reached. ``engine`` is outside
-            that set, so the documented registration path now works on every
+            that set, so the documented registration path works on every
             supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
             four are the whole of the :meth:`abc.ABCMeta.__new__` collision
             surface. Separately, and for an unrelated reason that holds on every
@@ -294,10 +294,10 @@ class Engine(EngineBase[_T], Generic[_T]):
         # NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then
         # dropped by the bare ``super().__init_subclass__()`` below, since
         # ``object.__init_subclass__`` takes none. Silently swallowing it is how
-        # ``class MyEngine(Engine, engnie='x')`` used to register under its class
-        # name instead -- no exception, no warning. Now that a missing keyword
-        # means "do not register", the same typo would silently skip
-        # registration altogether, which is quieter still. So reject it.
+        # ``class MyEngine(Engine, engnie='x')`` would register under its class
+        # name instead -- no exception, no warning. Since a missing keyword means
+        # "do not register", the same typo would silently skip registration
+        # altogether, which is quieter still. So reject it.
         #
         # One typo this cannot catch is ``name=``, and only on Python 3.10: it is
         # one of the four names that collide with ``ABCMeta.__new__``, so it fails

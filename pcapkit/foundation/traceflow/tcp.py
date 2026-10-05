@@ -51,13 +51,13 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         A TCP connection has two halves, and by default they are traced as **one
         flow** -- which is what "following a TCP stream" means everywhere else,
         and what this module's own title claims to do. Keying a flow on
-        (source, destination) instead put a client's packets and the server's
-        replies in separate flows, separate labels and separate output files,
-        leaving a caller to pair them up by inspecting the labels.
+        (source, destination) instead would put a client's packets and the
+        server's replies in separate flows, separate labels and separate output
+        files, leaving a caller to pair them up by inspecting the labels.
 
-        Two consequences of the change are worth knowing:
+        Two consequences are worth knowing:
 
-        * The reverse half of a conversation no longer produces a flow of its
+        * The reverse half of a conversation does not produce a flow of its
           own, so a capture of *n* connections yields *n* flows rather than
           ``2n``, and one output file each rather than two.
         * **A teardown does not end a flow.** Seeing a connection close is not the

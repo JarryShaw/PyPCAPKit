@@ -15,6 +15,8 @@ which reconstructs fragmented TCP packets back to origin.
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__
+   .. autoattribute:: __callback_fn__
+      :no-value:
 
 Algorithm
 =========
