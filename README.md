@@ -1,20 +1,17 @@
 # PyPCAPKit -- Comprehensive Network Packet Analysis Library
 
-> For any technical and/or maintenance information, please kindly refer to the
+> For technical and maintenance information, see the
 > **[Official Documentation](https://jarryshaw.github.io/PyPCAPKit/)**.
 
-The PyPCAPKit project is an open source Python program focused on network packet
-parsing and analysis, which works as a comprehensive
-[PCAP](https://en.wikipedia.org/wiki/Pcap) file extraction, construction and
-analysis library, with [DictDumper](https://github.com/JarryShaw/DictDumper) as
-its formatted output dumper.
+PyPCAPKit is an open-source Python library for parsing, constructing and analysing
+network packets and [PCAP](https://en.wikipedia.org/wiki/Pcap) files, with
+[DictDumper](https://github.com/JarryShaw/DictDumper) as its formatted output dumper.
 
-Unlike popular PCAP file extractors such as [Scapy](https://scapy.net),
+Unlike popular PCAP extractors such as [Scapy](https://scapy.net),
 [DPKT](https://dpkt.readthedocs.io) and [PyShark](https://kiminewt.github.io/pyshark),
-`pcapkit` is designed to be much more comprehensive: it reports more detailed
-information about each packet, and offers a more *Pythonic* interface to work
-with it. When that depth is not what you need, the same interface will also drive
-six third-party extraction engines instead.
+`pcapkit` reports more detail about each packet through a more *Pythonic* interface.
+Where that depth is not needed, the same interface also drives six third-party
+extraction engines.
 
 The whole project supports **Python 3.6** or later.
 
@@ -41,14 +38,14 @@ pip install pypcapkit[cli]          # command line interface
 pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
 ```
 
-Every engine above is on demand; `all` bundles only the core addons the library
-needs for full functionality. Four of the engines also need something beyond a
-`pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or an older
-interpreter -- and `pypcap`/`pcap-ct` must never be installed together.
-The [installation guide](https://jarryshaw.github.io/PyPCAPKit/#installation)
-covers every constraint and the reason for it, and `pcapkit` enforces each one in
-code: asking for an engine that cannot run in the current environment warns with
-the actual cause and falls back to `pcapkit`'s own parser.
+Engines are on demand; `all` bundles only the core addons the library needs for
+full functionality. Four engines also need something beyond `pip install` -- a
+`tshark` binary, a C compiler, `libpcap` headers, or an older interpreter -- and
+`pypcap`/`pcap-ct` must never be installed together. The
+[installation guide](https://jarryshaw.github.io/PyPCAPKit/#installation) gives each
+constraint and its reason. `pcapkit` enforces them in code: asking for an engine
+that cannot run in the current environment warns with the cause and falls back to
+its own parser.
 
 ## Usage
 
@@ -66,11 +63,10 @@ datetime.datetime(2017, 11, 19, 15, 49, 5, 471719, tzinfo=datetime.timezone.utc)
 IPv6Address('fe80::a6:87f9:2793:16ee')
 ```
 
-The output above is from `examples/captures/in.pcap`, which is committed, so it
-is reproducible from a clone.
+The output is from the committed `examples/captures/in.pcap`, so it is reproducible
+from a clone.
 
-Reassembly, TCP flow tracing and a different engine are all keyword arguments on
-the same call:
+Reassembly, TCP flow tracing and the engine are keyword arguments to the same call:
 
 ```python
 >>> scapy = pcapkit.extract('in.pcap', nofile=True, engine='scapy')
@@ -80,18 +76,18 @@ the same call:
 3
 ```
 
-More worked examples, including the command line interface, are in
+More examples, including the command line interface, are in
 [How to ...](https://jarryshaw.github.io/PyPCAPKit/demo.html).
 
 ## Documentation
 
 The [official documentation](https://jarryshaw.github.io/PyPCAPKit/) is the
-reference for everything below. The pages worth knowing by name:
+reference. Pages worth knowing by name:
 
 | Page | What is in it |
 |---|---|
 | [API reference](https://jarryshaw.github.io/PyPCAPKit/pcapkit/index.html) | Every module, protocol and constant |
-| [Module structure](https://jarryshaw.github.io/PyPCAPKit/#module-structure) | What each of the eight subpackages is for |
+| [Module structure](https://jarryshaw.github.io/PyPCAPKit/#module-structure) | What each of the nine subpackages is for |
 | [Engine comparison](https://jarryshaw.github.io/PyPCAPKit/#engine-comparison) | Which engines exist, which Python versions they run on, and measured speed per packet |
 | [Engine support](https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html) | What each engine does *not* support, and how the gap is surfaced |
 | [Installation](https://jarryshaw.github.io/PyPCAPKit/#installation) | Extras, engine prerequisites and the local development setup |
