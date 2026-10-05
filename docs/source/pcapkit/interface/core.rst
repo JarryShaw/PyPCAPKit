@@ -13,8 +13,8 @@ foundation classes from :mod:`pcapkit.foundation`.
 
 .. autofunction:: pcapkit.interface.core.trace
 
-Constants Defintion
--------------------
+Constants Definition
+--------------------
 
 Output File Formats
 ~~~~~~~~~~~~~~~~~~~
@@ -49,8 +49,8 @@ Layer Thresholds
 .. data:: APP
    :value: 'application'
 
-Extration Engines
-~~~~~~~~~~~~~~~~~
+Extraction Engines
+~~~~~~~~~~~~~~~~~~
 
 .. data:: DPKT
    :value: 'dpkt'
@@ -75,11 +75,9 @@ Extration Engines
 
 .. note::
 
-   Every engine :mod:`pcapkit` ships now has a constant here. The `PyPCAP`_,
-   `pcap-ct`_ and `PyPCAPFile`_ ones were added after the first four, so code
-   written against an earlier release may still select them by their literal
-   ``engine=`` values -- ``'pypcap'``, ``'pcap_ct'`` and ``'pypcapfile'``. That
-   keeps working: each constant *is* that string, so the two spellings are
+   Every engine :mod:`pcapkit` ships has a constant here. Each constant *is* its
+   ``engine=`` string -- ``'pypcap'``, ``'pcap_ct'`` and ``'pypcapfile'`` for the
+   `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_ ones -- so the two spellings are
    interchangeable. An engine registered at runtime with
    :func:`~pcapkit.foundation.registry.foundation.register_extractor_engine` has
    no constant and is addressed by the name it was registered under.
