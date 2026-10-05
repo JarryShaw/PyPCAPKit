@@ -81,7 +81,7 @@ class ReassemblyMeta(abc.ABCMeta):
         return protocol_registry.get(cls.name.upper(), Raw)
 
     @property
-    def registry(cls) -> 'dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]':
+    def registry(cls) -> 'dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]':
         """Mapping of protocol names to reassembly classes.
 
         Note:

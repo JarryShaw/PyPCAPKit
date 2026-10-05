@@ -295,6 +295,117 @@ class ExtractorTests(unittest.TestCase):
         Extractor.register_traceflow('unit-trace-descriptor',
                                      ModuleDescriptor('unit_extraction_trace_mod', 'UnitTraceFlow'))
 
+    def test_public_register_guards_take_public_class_and_internal_path_takes_base(self) -> None:
+        """GitHub issue #1016: ``register_*`` checks the public class, the internal path the base.
+
+        A subclass of the public ``Engine``/``Reassembly``/``TraceFlow`` is still
+        accepted by the public door; a class deriving only from the ``*Base`` is
+        refused there, with a message that names the public class, and accepted by
+        ``Extractor._register_internal_*``. The ``registry`` is one global table, so
+        every write here is rolled back.
+
+        """
+        from pcapkit.foundation.engines.engine import Engine, EngineBase
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly.reassembly import Reassembly, ReassemblyBase
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
+        from pcapkit.utilities.exceptions import RegistryError
+
+        class BaseOnlyEngine(EngineBase[str]):
+            __engine_name__ = 'BaseOnlyEngine'
+            __engine_module__ = __name__
+
+            def run(self) -> None:
+                pass
+
+            def read_frame(self) -> str:
+                return 'frame'
+
+        class PublicEngine(Engine[str]):
+            __engine_name__ = 'PublicEngine'
+            __engine_module__ = __name__
+
+            def run(self) -> None:
+                pass
+
+            def read_frame(self) -> str:
+                return 'frame'
+
+        class BaseOnlyReassembly(ReassemblyBase[object, object, tuple[str], object]):
+            def reassembly(self, info: object) -> None:
+                pass
+
+            def submit(self, buf: object, **kwargs: object) -> list[object]:
+                return []
+
+        class PublicReassembly(Reassembly[object, object, tuple[str], object]):
+            def reassembly(self, info: object) -> None:
+                pass
+
+            def submit(self, buf: object, **kwargs: object) -> list[object]:
+                return []
+
+        class BaseOnlyTraceFlow(TraceFlowBase[str, object, object, object]):
+            def dump(self, packet: object) -> None:
+                pass
+
+            def trace(self, packet: object, *, output: bool = False):
+                return object() if output else 'trace'
+
+            def submit(self) -> tuple[object, ...]:
+                return ()
+
+        class PublicTraceFlow(TraceFlow[str, object, object, object]):
+            def dump(self, packet: object) -> None:
+                pass
+
+            def trace(self, packet: object, *, output: bool = False):
+                return object() if output else 'trace'
+
+            def submit(self) -> tuple[object, ...]:
+                return ()
+
+        cases = (
+            ('engine', Extractor.register_engine, Extractor._register_internal_engine,
+             BaseOnlyEngine, PublicEngine, Extractor.__engine__,
+             'engine must be an Engine subclass'),
+            ('reassembly', Extractor.register_reassembly, Extractor._register_internal_reassembly,
+             BaseOnlyReassembly, PublicReassembly, Extractor.__reassembly__,
+             'reassembly must be a Reassembly subclass'),
+            ('traceflow', Extractor.register_traceflow, Extractor._register_internal_traceflow,
+             BaseOnlyTraceFlow, PublicTraceFlow, Extractor.__traceflow__,
+             'traceflow must be a TraceFlow subclass'),
+        )
+
+        with mock.patch.dict(Extractor.__engine__), \
+                mock.patch.dict(Extractor.__reassembly__), \
+                mock.patch.dict(Extractor.__traceflow__):
+            for kind, public, internal, base_only, public_cls, store, message in cases:
+                with self.subTest(kind=kind):
+                    # The public door refuses a base-only class, leaving no trace.
+                    with self.assertRaisesRegex(RegistryError, message):
+                        public(f'unit-1016-{kind}-base', base_only)  # type: ignore[arg-type]
+                    self.assertNotIn(f'unit-1016-{kind}-base', store)
+
+                    # A subclass of the public class is still accepted.
+                    public(f'unit-1016-{kind}-public', public_cls)  # type: ignore[arg-type]
+                    self.assertIs(store[f'unit-1016-{kind}-public'], public_cls)
+
+                    # The internal path accepts the base-only class, and the public one too.
+                    internal(f'unit-1016-{kind}-internal', base_only)
+                    self.assertIs(store[f'unit-1016-{kind}-internal'], base_only)
+                    internal(f'unit-1016-{kind}-internal-public', public_cls)
+                    self.assertIs(store[f'unit-1016-{kind}-internal-public'], public_cls)
+
+                    # And it is still a gate: it keeps the overwrite warning, and
+                    # refuses what is not a ``*Base`` subclass.
+                    with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                        internal(f'unit-1016-{kind}-internal', public_cls)
+                    warn.assert_called_once()
+                    with self.assertRaises(RegistryError):
+                        internal(f'unit-1016-{kind}-bad', object)  # type: ignore[arg-type]
+                    self.assertNotIn(f'unit-1016-{kind}-bad', store)
+
     def test_register_engine_identity_guard(self) -> None:
         """GitHub issue #739: re-registering the same engine class is silent.
 

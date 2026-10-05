@@ -223,9 +223,11 @@ class Extractor(Generic[_P]):
         },
     )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
-    #: Engine mapping for extracting frames. The values should be a tuple representing
-    #: the module name and class name, or an :class:`~pcapkit.foundation.engines.engine.Engine`
-    #: subclass.
+    #: Engine mapping for extracting frames. The values should be a module descriptor
+    #: or an :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass: every
+    #: built-in derives from the base directly, and the public ``register_engine``
+    #: additionally admits only :class:`~pcapkit.foundation.engines.engine.Engine`
+    #: subclasses.
     __engine__ = {
         'scapy': ModuleDescriptor('pcapkit.foundation.engines.scapy', 'Scapy'),
         'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
@@ -239,23 +241,27 @@ class Extractor(Generic[_P]):
         # explains how ``import_test`` tells them apart.
         'pcap_ct': ModuleDescriptor('pcapkit.foundation.engines.pcap_ct', 'PCAP_CT'),
         'pypcapfile': ModuleDescriptor('pcapkit.foundation.engines.pypcapfile', 'PyPCAPFile'),
-    }  # type: dict[str, ModuleDescriptor[Engine] | Type[Engine]]
+    }  # type: dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]
 
-    #: Reassembly support mapping for extracting frames. The values should be a tuple
-    #: representing the module name and class name, or a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
-    #: subclass.
+    #: Reassembly support mapping for extracting frames. The values should be a module
+    #: descriptor or a :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
+    #: subclass: every built-in derives from the base directly, and the public
+    #: ``register_reassembly`` additionally admits only
+    #: :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclasses.
     __reassembly__ = {
         'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
         'ipv6': ModuleDescriptor('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
         'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp', 'TCP'),
-    }  # type: dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]
+    }  # type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
 
-    #: Flow tracing support mapping for extracting frames. The values should be a tuple
-    #: representing the module name and class name, or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
-    #: subclass.
+    #: Flow tracing support mapping for extracting frames. The values should be a module
+    #: descriptor or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
+    #: subclass: every built-in derives from the base directly, and the public
+    #: ``register_traceflow`` additionally admits only
+    #: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses.
     __traceflow__ = {
         'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
-    }  # type: dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]
+    }  # type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
 
     ##########################################################################
     # Properties.
@@ -427,15 +433,14 @@ class Extractor(Generic[_P]):
 
         Arguments:
             name: engine name
-            engine: module descriptor or an
-                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
-                (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass
-                is one too, but no built-in engine is: they all derive from the
-                base directly); the ``Type[Engine]`` hint in the signature is
-                narrower than this check
+            engine: module descriptor or an :class:`~pcapkit.foundation.engines.engine.Engine`
+                subclass; a class deriving only from
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` is refused, as
+                that is the base for pcapkit's own engines, which the library
+                registers itself (GitHub issue :issue:`1016`)
 
         Raises:
-            RegistryError: If ``engine`` is not a class, or not an ``EngineBase`` subclass.
+            RegistryError: If ``engine`` is not a class, or not an ``Engine`` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -444,14 +449,40 @@ class Extractor(Generic[_P]):
         """
         if isinstance(engine, ModuleDescriptor):
             engine = engine.klass
-        # NOTE: checked against ``EngineBase`` rather than ``Engine``: every built-in
-        # engine subclasses the base directly (``engines/pcap.py`` declares
-        # ``class PCAP(EngineBase[Frame])``) precisely so that it is *not*
-        # auto-registered by ``Engine.__init_subclass__``, which made this check
-        # reject pcapkit's own classes. ``Engine`` is itself an ``EngineBase``, so
-        # this only widens. See #513.
-        if not issubclass(engine, EngineBase):
+        # NOTE: checked against the public ``Engine``, the class third-party engines are
+        # meant to extend and the one carrying the ``engine=`` registration hook. The
+        # built-ins derive from ``EngineBase`` directly, so this door refuses them;
+        # they go through :meth:`_register_internal_engine` instead, which checks the
+        # base. Checking the base here is what #513 did, and #1016 narrowed it back.
+        if not issubclass(engine, Engine):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
+        cls._register_internal_engine(name, engine)
+
+    @classmethod
+    def _register_internal_engine(cls, name: 'str', engine: 'ModuleDescriptor[EngineBase] | Type[EngineBase]') -> 'None':
+        """Register an engine for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_engine`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.engines.engine.EngineBase`, which is how every
+        built-in engine is written. Not part of the public API.
+
+        Arguments:
+            name: engine name
+            engine: module descriptor or an
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
+
+        Raises:
+            RegistryError: If ``engine`` is not an ``EngineBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``name``; it is overwritten.
+
+        """
+        if isinstance(engine, ModuleDescriptor):
+            engine = engine.klass
+        if not issubclass(engine, EngineBase):
+            raise RegistryError(f'Extractor._register_internal_engine: engine must be an EngineBase subclass, not {engine!r}')
         incumbent = cls.__engine__.get(name)
         if incumbent is not None and incumbent is not engine:
             warn(f'engine {name} already registered, overwriting', RegistryWarning)
@@ -474,13 +505,13 @@ class Extractor(Generic[_P]):
         Arguments:
             protocol: protocol name
             reassembly: module descriptor or a
-                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
-                subclass (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
-                subclass is one too, but no built-in reassembly class is: they all
-                derive from the base directly)
+                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass; a class deriving
+                only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` is refused, as
+                that is the base for pcapkit's own classes, which the library registers
+                itself (GitHub issue :issue:`1016`)
 
         Raises:
-            RegistryError: If ``reassembly`` is not a class, or not a ``ReassemblyBase`` subclass.
+            RegistryError: If ``reassembly`` is not a class, or not a ``Reassembly`` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -489,10 +520,38 @@ class Extractor(Generic[_P]):
         """
         if isinstance(reassembly, ModuleDescriptor):
             reassembly = reassembly.klass
-        # NOTE: ``ReassemblyBase`` rather than ``Reassembly``, for the reason given in
-        # :meth:`register_engine` above -- see #513.
-        if not issubclass(reassembly, ReassemblyBase):
+        # NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in
+        # :meth:`register_engine` above -- see #1016. Built-ins go through
+        # :meth:`_register_internal_reassembly`.
+        if not issubclass(reassembly, Reassembly):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
+        cls._register_internal_reassembly(protocol, reassembly)
+
+    @classmethod
+    def _register_internal_reassembly(cls, protocol: 'str', reassembly: 'ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]') -> 'None':
+        """Register a reassembly class for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_reassembly`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which is how every
+        built-in is written. Not part of the public API.
+
+        Arguments:
+            protocol: protocol name
+            reassembly: module descriptor or a
+                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
+
+        Raises:
+            RegistryError: If ``reassembly`` is not a ``ReassemblyBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
+
+        """
+        if isinstance(reassembly, ModuleDescriptor):
+            reassembly = reassembly.klass
+        if not issubclass(reassembly, ReassemblyBase):
+            raise RegistryError(f'Extractor._register_internal_reassembly: reassembly must be a ReassemblyBase subclass, not {reassembly!r}')
         incumbent = cls.__reassembly__.get(protocol)
         if incumbent is not None and incumbent is not reassembly:
             warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
@@ -515,13 +574,13 @@ class Extractor(Generic[_P]):
         Arguments:
             protocol: protocol name
             traceflow: module descriptor or a
-                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
-                subclass (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
-                subclass is one too, but no built-in flow tracing class is: they all
-                derive from the base directly)
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass; a class deriving
+                only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` is refused, as
+                that is the base for pcapkit's own classes, which the library registers
+                itself (GitHub issue :issue:`1016`)
 
         Raises:
-            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlowBase`` subclass.
+            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlow`` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -530,10 +589,38 @@ class Extractor(Generic[_P]):
         """
         if isinstance(traceflow, ModuleDescriptor):
             traceflow = traceflow.klass
-        # NOTE: ``TraceFlowBase`` rather than ``TraceFlow``, for the reason given in
-        # :meth:`register_engine` above -- see #513.
-        if not issubclass(traceflow, TraceFlowBase):
+        # NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in
+        # :meth:`register_engine` above -- see #1016. Built-ins go through
+        # :meth:`_register_internal_traceflow`.
+        if not issubclass(traceflow, TraceFlow):
             raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
+        cls._register_internal_traceflow(protocol, traceflow)
+
+    @classmethod
+    def _register_internal_traceflow(cls, protocol: 'str', traceflow: 'ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]') -> 'None':
+        """Register a traceflow class for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_traceflow`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which is how every
+        built-in is written. Not part of the public API.
+
+        Arguments:
+            protocol: protocol name
+            traceflow: module descriptor or a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
+
+        Raises:
+            RegistryError: If ``traceflow`` is not a ``TraceFlowBase`` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
+
+        """
+        if isinstance(traceflow, ModuleDescriptor):
+            traceflow = traceflow.klass
+        if not issubclass(traceflow, TraceFlowBase):
+            raise RegistryError(f'Extractor._register_internal_traceflow: traceflow must be a TraceFlowBase subclass, not {traceflow!r}')
         incumbent = cls.__traceflow__.get(protocol)
         if incumbent is not None and incumbent is not traceflow:
             warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)

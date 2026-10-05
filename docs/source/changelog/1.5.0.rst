@@ -827,6 +827,24 @@ Changed
   four are the whole collision surface (measured on 3.10.21, 3.11.15 and 3.14.7), and
   ``engine=``, ``protocol=`` and ``fmt=`` are outside it. There is no ``name=`` alias:
   a keyword that works on some interpreters and not others is the trap being removed.
+* **a breaking change to** ``Extractor.register_engine``, ``register_reassembly`` and
+  ``register_traceflow``, and the ``register_extractor_*`` wrappers over them: each
+  now accepts only a subclass of the public ``Engine``, ``Reassembly`` or
+  ``TraceFlow`` (:issue:`1016`). They had accepted a subclass of the matching
+  ``*Base`` class since :issue:`513`, which was a tolerance for pcapkit's own
+  built-ins (all 13 derive from the base, none from the public class) rather than
+  a contract: ``*Base`` is documented as internal, and the public class is the one
+  carrying the registration hook. Third-party code that subclasses ``EngineBase``,
+  ``ReassemblyBase`` or ``TraceFlowBase`` directly and registers through these
+  functions now gets ``RegistryError`` naming the public class; subclass the public
+  class instead. The error messages are unchanged. The built-ins are unaffected
+  because they are declared directly in ``Extractor``'s class-body mappings as
+  ``ModuleDescriptor`` literals and never pass through a registrar at all; a new
+  internal path, ``Extractor._register_internal_engine`` and its two siblings,
+  checks the base for programmatic internal registration and is what the
+  :issue:`513` regression test now exercises. ``register_protocol`` is
+  untouched: every in-house protocol derives from ``ProtocolBase`` and none from
+  ``Protocol``.
 * extraction is around 46% faster on a 1,117-frame HTTP capture, with byte-identical
   output (:pr:`420`). A reassembled datagram's payload is analysed on first read
   rather than eagerly, cutting IP reassembly's own cost by 90.7% and TCP's by 23.7%
