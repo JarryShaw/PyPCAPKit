@@ -7,7 +7,7 @@
 :mod:`pcapkit.protocols.misc.null` contains
 :class:`~pcapkit.protocols.misc.null.NoPayload` only, which
 implements a :class:`~pcapkit.protocols.protocol.Protocol` like
-object whose payload is recursively
+object whose payload is
 :class:`~pcapkit.protocols.misc.null.NoPayload` itself.
 
 """
@@ -29,7 +29,13 @@ __all__ = ['NoPayload']
 
 class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
                 schema=Schema_NoPayload, data=Data_NoPayload):
-    """This class implements no-payload protocol."""
+    """This class implements no-payload protocol.
+
+    Its ``payload`` is the instance itself, so a ``.payload`` walk over it
+    never terminates; bound any such loop, or walk the protocol chain of
+    the enclosing packet instead.
+
+    """
 
     ##########################################################################
     # Properties.
@@ -113,7 +119,7 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
         #: pcapkit.protocols.data.misc.null.NoPayload: Info dict of current instance.
         self._info = Data_NoPayload()
 
-        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
+        #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.
         self._next = self
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
         self._protos = None  # type: ignore[assignment]

@@ -249,17 +249,15 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         _irat = _epch.as_integer_ratio()
 
         try:
-            # NOTE: Anchored to UTC, and aware rather than naive. ``ts_sec`` is an
-            # offset from the UNIX epoch, so the instant it names does not depend
-            # on where the file is read; a bare ``fromtimestamp`` renders it in
-            # the reading host's zone and drops the offset, leaving a datetime
-            # that reads as a different wall-clock time on every machine and
-            # cannot be compared against an aware one at all. The ``except``
-            # branch below has always returned an aware UTC datetime, and the
-            # PCAP-NG reader returns one too -- the same
+            # NOTE: Aware and anchored to UTC, not naive. ``ts_sec`` is an offset
+            # from the UNIX epoch, so the instant it names must not depend on
+            # where the file is read; a bare ``fromtimestamp`` renders it in the
+            # reading host's zone, drops the offset, and cannot be compared
+            # against an aware datetime. The ``except`` branch below returns an
+            # aware UTC datetime too, and so does the PCAP-NG reader, which fills
+            # the same
             # :attr:`Data_Frame.time <pcapkit.protocols.data.misc.pcap.frame.Frame.time>`
-            # field is filled from there by
-            # :func:`pcapkit.toolkit.pcapng.block2frame`, so the two have to agree.
+            # field through :func:`pcapkit.toolkit.pcapng.block2frame`.
             _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1], datetime.timezone.utc)
         except ValueError:
             warn(f'PCAP: invalid timestamp: {_epch}', ProtocolWarning, stacklevel=stacklevel())
@@ -275,28 +273,19 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             time=_time,
             number=self._fnum,
             time_epoch=_epch,
-            # NOTE: ``len`` is the on-wire length and ``cap_len`` the captured
-            # one, i.e. ``orig_len`` and ``incl_len`` respectively -- not the
-            # other way round, which is what this reader used to do (see #618).
+            # NOTE: ``len`` is the on-wire length (``orig_len``) and ``cap_len``
+            # the captured one (``incl_len``). The two differ only for a frame
+            # the snapshot length cut short.
             #
-            # The two only differ for a frame the snapshot length cut short, so
-            # until ``big_endian.pcap`` arrived with #605 no fixture here could
-            # tell the two assignments apart.
-            #
-            # Worth knowing *why* this reader moved rather than the other one,
-            # because it was not the newer of the two: this convention dates to
-            # c43892af (2022-01-11) and the data model's docstrings agreed with
-            # it a day later, while the opposite convention in
-            # :func:`pcapkit.toolkit.pcapng.block2frame` arrived 15 months after
-            # that in 25f216f4 (2023-04-27). Both were internally consistent, so
-            # neither is a typo and seniority does not settle it. What settles it
-            # is that the names are Wireshark's, and its ``packet-frame.c``
-            # registers ``frame.len`` as "Frame length on the wire" and
-            # ``frame.cap_len`` as "Frame length stored into the capture file",
-            # and raises ``frame.len_lt_caplen`` -- ``PI_MALFORMED`` -- on
-            # ``frame_len < cap_len``, which could not be malformed if ``len``
-            # were the smaller, captured one. So the later convention is the one
-            # that matches the names, and this one is brought into line with it.
+            # The names are Wireshark's: its ``packet-frame.c`` registers
+            # ``frame.len`` as "Frame length on the wire" and ``frame.cap_len``
+            # as "Frame length stored into the capture file", and raises
+            # ``frame.len_lt_caplen`` (``PI_MALFORMED``) on ``frame_len <
+            # cap_len``, which could not be malformed if ``len`` were the smaller,
+            # captured one. Age does not settle it: this reader's older
+            # convention (c43892af, 2022-01-11) was the swapped one, and the
+            # PCAP-NG reader's later one (25f216f4, 2023-04-27) matches the names,
+            # so this reader was brought into line with it.
             len=_olen,
             cap_len=_ilen,
         )
@@ -308,17 +297,16 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # NOTE: We create a copy of the frame data here for parsing
             # scenarios to keep the original frame data intact.
             #
-            # NOTE: The record spans ``self.length + incl_len`` octets, and by
-            # the time we get here :meth:`self.unpack <unpack>` has consumed
-            # *all* of them -- the schema's payload field carries the
-            # ``incl_len`` octets of packet data, not just the 16-octet record
-            # header. So the frame's own start cannot be reached by seeking
-            # backwards over ``self.length`` alone: that lands ``incl_len``
-            # octets too late and captures the tail of this record followed by
-            # the head of the next one (see #357). It is recorded before the
-            # unpack instead, in :meth:`self.__post_init__ <__post_init__>`, and
-            # seeked to absolutely -- which is what the PCAP-NG reader has
-            # always done, c.f. :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
+            # NOTE: The record spans ``self.length + incl_len`` octets, and
+            # :meth:`self.unpack <unpack>` has consumed *all* of them by now --
+            # the schema's payload field carries the ``incl_len`` octets of
+            # packet data, not just the 16-octet record header. Seeking back
+            # over ``self.length`` alone would land ``incl_len`` octets too late,
+            # on the tail of this record followed by the head of the next one.
+            # So the start is recorded before the unpack, in
+            # :meth:`self.__post_init__ <__post_init__>`, and seeked to
+            # absolutely, as the PCAP-NG reader does, c.f.
+            # :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
             seek_cur = _seek_set + self.length + _ilen
 
             # move backward to the beginning of the frame
@@ -333,22 +321,17 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             #: io.BytesIO: Source data stream.
             self._file = io.BytesIO(self._data)
 
-        # NOTE: The dissector is handed the octets that are actually *present*,
-        # i.e. ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame
-        # the snapshot length cut short the latter is larger than the file holds,
-        # and handing it over is the declared-length-exceeds-available-octets
-        # fault of #554, #573 and #594. This read ``frame.len`` before #618, when
-        # that *was* the captured length -- so the value handed over here is the
-        # same one as before and the dissection is unchanged; only the spelling
-        # moved, to the attribute that now means what this call site needs.
+        # NOTE: The dissector is handed the octets actually *present*, i.e.
+        # ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame the
+        # snapshot length cut short the latter exceeds what the file holds, and
+        # handing it over is the declared-length-exceeds-available-octets fault.
         #
-        # No test pins this line, and that is a known gap rather than an
-        # oversight: reverting just this argument to ``frame.len`` leaves the
-        # whole suite green. ``big_endian.pcap``'s truncated frame dissects to
-        # ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the ``length``
-        # it is handed, so the over-long value never reaches anything that checks
-        # it. Catching a regression here needs a fixture whose truncation lands
-        # in a length-checked field instead of bottoming out in ``Raw``.
+        # No test pins this line: reverting just this argument to ``frame.len``
+        # leaves the whole suite green. ``big_endian.pcap``'s truncated frame
+        # dissects to ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the
+        # ``length`` it is handed, so the over-long value never reaches anything
+        # that checks it. Catching a regression needs a fixture whose truncation
+        # lands in a length-checked field instead of bottoming out in ``Raw``.
         return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
 
     def make(self,
