@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=fixme
-"""mobility header
+"""Mobility Header
 
 :mod:`pcapkit.protocols.internet.mh` contains
 :class:`~pcapkit.protocols.internet.mh.MH` only,
@@ -574,52 +574,6 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
     above that it was rejected.
 
     Note:
-        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is
-        untouched, since :class:`EnumLookup` does not touch that hook.
-
-        This class carried its own hand-rolled ``get()`` override through
-        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,
-        which widened the override to accept ``default`` rather than delete
-        it outright. An earlier lean on issue :issue:`935` had preferred that
-        widening; a later ruling in review of the attempt went the other
-        way: delete both ``get`` overrides in this module rather than widen
-        them, so :class:`FastBindingAcknowledgmentStatus` and
-        :class:`IPv6AddressPrefixCode` inherit
-        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
-        removes the ``# type: ignore[override]`` suppressions the overrides
-        needed, and makes all seven re-parented classes behave alike on
-        ``get``, which had not been literally true. Measured before acting
-        on it: the override's own docstring called it a "Backport support
-        for original codes", but this class mints no alias --
-        ``__members__`` and ``list(cls)`` agree at 6 -- so what the override
-        actually did was resolve an :class:`int` by direct construction and
-        a name by subscript, exactly the dual resolution
-        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
-        every other :class:`int`-valued registry in this tree. There was
-        nothing left to backport. ``get``/``get_all`` now come from the base
-        alone, the same as the five other re-parents :issue:`930` finished alongside
-        this one -- including :class:`LocalizedRoutingStatus` and
-        :class:`LMAAddressCode` below, whose own hand-rolled ``get()``
-        GitHub issue :issue:`880` had already deleted outright, for the same reason:
-        zero callers depended on anything the base does not already do.
-
-        A behaviour change comes with the deletion, deliberately: the
-        override branched on ``isinstance(key, int)`` and routed every
-        other type -- ``None``, a :class:`float`, ... -- through the
-        *name* path, so ``get(None)`` and ``get(1.5)`` used to answer with
-        a quiet :exc:`~pcapkit.utilities.exceptions.EnumKeyError` here
-        while the base -- branching on ``isinstance(key, str)`` instead --
-        answers every other :class:`~pcapkit.corekit.enum.EnumLookup`
-        subclass, and now this one too, with a loud
-        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Nothing in
-        this tree calls ``get`` with such a key: the 20 call sites this
-        class and :class:`IPv6AddressPrefixCode` had between them, all in
-        tests, all passed an :class:`int` or a :class:`str`, so the
-        divergence was live but unreached -- and its removal is what makes
-        "all seven behave alike" literally true, rather than true only for
-        the keys a caller happens to pass today.
-
         :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the
@@ -630,23 +584,23 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         supported* there.
 
         The enumeration is **closed**: an in-range value :rfc:`5568` leaves
-        unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
-        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
-        instead of extending the class. That is not a capture-level failure
-        -- sibling frames are unaffected -- but the cost is bigger than one
-        message. Mobility Header is itself one of IPv6's own chained
-        extension headers, and IPv6's own extension-header walk then does
-        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
-        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
-        fallback's info carries no ``.next``. That :exc:`AttributeError`,
-        not this exception, is what a further-out ``@beholder`` actually
-        catches -- degrading the **whole IPv6 packet**, header fields
-        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
-        just this one MH message. The walk defect predates this change and
-        already fires on a malformed extension header; a well-formed packet
-        naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue :issue:`880`.
+        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
+        because this RFC-inline value set stays immutable (decided on
+        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
+        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
+        Mobility Header whose parser raises, and the rest of the packet is kept.
+
+        The class defines no ``get`` of its own: ``get``/``get_all`` come from
+        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
+        :class:`int`-valued registry here, so a key that is neither an
+        :class:`int` nor a :class:`str` raises
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
+        was rejected (decided on :issue:`935`; the override was deleted, not
+        widened to accept ``default``): this class mints no alias
+        (``__members__`` and ``list(cls)`` both hold 6 members), so an override
+        could only repeat the base's dual :class:`int`/name resolution.
 
     """
 
@@ -678,9 +632,9 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
 
         Raises:
             EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value
-                set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue :issue:`877` is that it stays immutable rather
-                than minting an ``Unassigned_N`` placeholder member.
+                set inline with no IANA registry behind it, and it stays
+                immutable (decided on :issue:`877`) rather than minting an
+                ``Unassigned_N`` placeholder member.
 
         """
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -694,54 +648,6 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
     :rfc:`5568#section-6.4.2`.
 
     Note:
-        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue :issue:`930`, finishing :issue:`877`'s phase 2. :meth:`_missing_` below is
-        untouched, since :class:`EnumLookup` does not touch that hook.
-
-        This class carried its own hand-rolled ``get()`` override through
-        :issue:`930`, and briefly again through GitHub issue :issue:`935`'s first attempt,
-        which widened the override to accept ``default`` rather than delete
-        it outright. An earlier lean on issue :issue:`935` had preferred that
-        widening; a later ruling in review of the attempt went the other
-        way: delete both ``get`` overrides in this module rather than widen
-        them, so :class:`FastBindingAcknowledgmentStatus` and
-        :class:`IPv6AddressPrefixCode` inherit
-        :meth:`~pcapkit.corekit.enum.EnumLookup.get` outright. That also
-        removes the ``# type: ignore[override]`` suppressions the overrides
-        needed, and makes all seven re-parented classes behave alike on
-        ``get``, which had not been literally true. Measured before acting
-        on it: the override's own docstring called it a "Backport support
-        for original codes", but this class mints no alias --
-        ``__members__`` and ``list(cls)`` agree at 4 -- so what the override
-        actually did was resolve an :class:`int` by direct construction and
-        a name by subscript, exactly the dual resolution
-        :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for
-        every other :class:`int`-valued registry in this tree. There was
-        nothing left to backport. ``get``/``get_all`` now come from the base
-        alone, the same as the five other re-parents :issue:`930` finished alongside
-        this one -- including
-        :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` and
-        :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` below, whose
-        own hand-rolled ``get()`` GitHub issue :issue:`880` had already deleted
-        outright, for the same reason: zero callers depended on anything the
-        base does not already do.
-
-        A behaviour change comes with the deletion, deliberately: the
-        override branched on ``isinstance(key, int)`` and routed every
-        other type -- ``None``, a :class:`float`, ... -- through the
-        *name* path, so ``get(None)`` and ``get(1.5)`` used to answer with
-        a quiet :exc:`~pcapkit.utilities.exceptions.EnumKeyError` here
-        while the base -- branching on ``isinstance(key, str)`` instead --
-        answers every other :class:`~pcapkit.corekit.enum.EnumLookup`
-        subclass, and now this one too, with a loud
-        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Nothing in
-        this tree calls ``get`` with such a key: the 20 call sites this
-        class and :class:`FastBindingAcknowledgmentStatus` had between
-        them, all in tests, all passed an :class:`int` or a :class:`str`,
-        so the divergence was live but unreached -- and its removal is
-        what makes "all seven behave alike" literally true, rather than
-        true only for the keys a caller happens to pass today.
-
         :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`. The identical code space of the neighbor
@@ -749,23 +655,23 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         likewise unregistered.
 
         The enumeration is **closed**: an in-range value :rfc:`5568` leaves
-        unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
-        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
-        instead of extending the class. That is not a capture-level failure
-        -- sibling frames are unaffected -- but the cost is bigger than one
-        message. Mobility Header is itself one of IPv6's own chained
-        extension headers, and IPv6's own extension-header walk then does
-        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
-        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
-        fallback's info carries no ``.next``. That :exc:`AttributeError`,
-        not this exception, is what a further-out ``@beholder`` actually
-        catches -- degrading the **whole IPv6 packet**, header fields
-        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
-        just this one MH message. The walk defect predates this change and
-        already fires on a malformed extension header; a well-formed packet
-        naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue :issue:`880`.
+        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
+        because this RFC-inline value set stays immutable (decided on
+        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
+        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
+        Mobility Header whose parser raises, and the rest of the packet is kept.
+
+        The class defines no ``get`` of its own: ``get``/``get_all`` come from
+        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
+        :class:`int`-valued registry here, so a key that is neither an
+        :class:`int` nor a :class:`str` raises
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
+        was rejected (decided on :issue:`935`; the override was deleted, not
+        widened to accept ``default``): this class mints no alias
+        (``__members__`` and ``list(cls)`` both hold 4 members), so an override
+        could only repeat the base's dual :class:`int`/name resolution.
 
     """
 
@@ -791,9 +697,9 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
 
         Raises:
             EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value
-                set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue :issue:`877` is that it stays immutable rather
-                than minting an ``Unassigned_N`` placeholder member.
+                set inline with no IANA registry behind it, and it stays
+                immutable (decided on :issue:`877`) rather than minting an
+                ``Unassigned_N`` placeholder member.
 
         """
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -807,13 +713,6 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
     was processed successfully, values of ``128`` and above that it was rejected.
 
     Note:
-        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as
-        ``get``/``get_all`` are concerned, since this class defines no
-        ``get`` of its own to reconcile with the base; its own
-        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
-        not touch that hook.
-
         :rfc:`6705#section-10.2` defines these values inline and IANA keeps no
         registry of them -- neither a dedicated one nor entries in the general
         *Status Codes* registry -- so the enumeration lives here rather than in
@@ -822,37 +721,20 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         ``128`` and ``129`` mean something else entirely.
 
         The enumeration is **closed**: an in-range value :rfc:`6705` leaves
-        unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
-        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
-        instead of extending the class. That is not a capture-level failure
-        -- sibling frames are unaffected -- but the cost is bigger than one
-        message. Mobility Header is itself one of IPv6's own chained
-        extension headers, and IPv6's own extension-header walk then does
-        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
-        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
-        fallback's info carries no ``.next``. That :exc:`AttributeError`,
-        not this exception, is what a further-out ``@beholder`` actually
-        catches -- degrading the **whole IPv6 packet**, header fields
-        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
-        just this one MH message. The walk defect predates this change and
-        already fires on a malformed extension header; a well-formed packet
-        naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue :issue:`880`.
+        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
+        because this RFC-inline value set stays immutable (decided on
+        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
+        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
+        Mobility Header whose parser raises, and the rest of the packet is kept.
 
-        There is no hand-rolled ``get()`` backport here -- nor, since GitHub
-        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or
-        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
-        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather
-        than rebuilding it on the immutable contract, the same conclusion
-        :issue:`935` reached separately for the other two, on a ruling given in
-        review of that work: delete those two overrides rather than widen
-        them to match the base, which an earlier lean on the issue had
-        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class
-        ``get``/``get_all`` again, but as the base's own bare lookup rather
-        than a bespoke override -- it still cannot mint, so an unassigned
-        value raises through ``get`` exactly as it does through the bare
-        constructor.
+        The class defines no ``get`` of its own: ``get``/``get_all`` come from
+        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an
+        unassigned value raises through ``get`` exactly as it does through the
+        bare constructor. A ``get`` override was rejected (decided on
+        :issue:`880`): it had no callers, and rebuilding it on the immutable
+        contract would add nothing to the base.
 
     """
 
@@ -874,9 +756,9 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
 
         Raises:
             EnumValueError: Always. :rfc:`6705#section-10.2` names this value
-                set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue :issue:`877` is that it stays immutable rather
-                than minting an ``Unassigned_N`` placeholder member.
+                set inline with no IANA registry behind it, and it stays
+                immutable (decided on :issue:`877`) rather than minting an
+                ``Unassigned_N`` placeholder member.
 
         """
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -889,49 +771,25 @@ class LMAAddressCode(EnumLookup, IntEnum):
     address family the option carries, c.f., :rfc:`5949#section-6.2.2`.
 
     Note:
-        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-        issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting as far as
-        ``get``/``get_all`` are concerned, since this class defines no
-        ``get`` of its own to reconcile with the base; its own
-        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does
-        not touch that hook.
-
         :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`.
 
         The enumeration is **closed**: an in-range value :rfc:`5949` leaves
-        unassigned is not minted a placeholder member. Per the owner's ruling
-        on GitHub issue :issue:`877`, this RFC-inline value set stays immutable, so
-        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
-        instead of extending the class. That is not a capture-level failure
-        -- sibling frames are unaffected -- but the cost is bigger than one
-        message. Mobility Header is itself one of IPv6's own chained
-        extension headers, and IPv6's own extension-header walk then does
-        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
-        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
-        fallback's info carries no ``.next``. That :exc:`AttributeError`,
-        not this exception, is what a further-out ``@beholder`` actually
-        catches -- degrading the **whole IPv6 packet**, header fields
-        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
-        just this one MH message. The walk defect predates this change and
-        already fires on a malformed extension header; a well-formed packet
-        naming merely an unassigned byte is simply a more likely way to
-        reach it. See GitHub issue :issue:`880`.
+        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
+        because this RFC-inline value set stays immutable (decided on
+        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
+        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
+        Mobility Header whose parser raises, and the rest of the packet is kept.
 
-        There is no hand-rolled ``get()`` backport here -- nor, since GitHub
-        issue :issue:`935`, on :class:`FastBindingAcknowledgmentStatus` or
-        :class:`IPv6AddressPrefixCode` either: it had zero callers repo-wide
-        -- tests included -- so GitHub issue :issue:`880` deleted it outright rather
-        than rebuilding it on the immutable contract, the same conclusion
-        :issue:`935` reached separately for the other two, on a ruling given in
-        review of that work: delete those two overrides rather than widen
-        them to match the base, which an earlier lean on the issue had
-        preferred. GitHub issue :issue:`930`'s re-parenting above gives this class
-        ``get``/``get_all`` again, but as the base's own bare lookup rather
-        than a bespoke override -- it still cannot mint, so an unassigned
-        value raises through ``get`` exactly as it does through the bare
-        constructor.
+        The class defines no ``get`` of its own: ``get``/``get_all`` come from
+        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an
+        unassigned value raises through ``get`` exactly as it does through the
+        bare constructor. A ``get`` override was rejected (decided on
+        :issue:`880`): it had no callers, and rebuilding it on the immutable
+        contract would add nothing to the base.
 
     """
 
@@ -953,9 +811,9 @@ class LMAAddressCode(EnumLookup, IntEnum):
 
         Raises:
             EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value
-                set inline with no IANA registry behind it, and the owner's
-                ruling on GitHub issue :issue:`877` is that it stays immutable rather
-                than minting an ``Unassigned_N`` placeholder member.
+                set inline with no IANA registry behind it, and it stays
+                immutable (decided on :issue:`877`) rather than minting an
+                ``Unassigned_N`` placeholder member.
 
         """
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -965,7 +823,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          schema=Schema_MH, data=Data_MH):
     """This class implements Mobility Header.
 
-    This class currently supports parsing of the following MH message types,
+    This class supports parsing of the following MH message types,
     which are registered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`
     attribute:
 
@@ -1048,7 +906,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_sr`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_sr`
 
-    This class currently supports parsing the following MH options, which are
+    This class supports parsing the following MH options, which are
     registered in the :attr:`self.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`
     attribute:
 
@@ -1272,7 +1130,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_dlif_lladdr`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_dlif_lladdr`
 
-    This class currently supports parsing of the following MH CGA extensions,
+    This class supports parsing of the following MH CGA extensions,
     which are registered in the :attr:`self.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`
     attribute:
 
@@ -1338,7 +1196,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
     #: Option type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_option_${name}`` and/or ``_make_opt_${name}``,
+    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the option by itself.
     __option__ = collections.defaultdict(
@@ -1420,7 +1278,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     #: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:
     #: CGA extension type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_extension_${name}`` and/or ``_make_ext_${name}``,
+    #: to the class by ``_read_ext_${name}`` and/or ``_make_ext_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the CGA extension by itself.
     __extension__ = collections.defaultdict(
@@ -1449,14 +1307,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Spelled out rather than left to
         :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
         class-name default, because
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits
         between this class and that default in the MRO and carries a concrete
-        ``'IPv6-Ext'`` of its own (GitHub issue :issue:`917`). Inheriting it would
+        ``'IPv6-Ext'`` of its own. Inheriting it would
         rename this header in every
         :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
         :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
-        dict key. The value is exactly what the default produced before.
+        dict key. The value equals the class-name default.
 
         """
         return 'MH'
@@ -1561,15 +1419,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Mobility Header, in units of 8 octets, excluding the first 8
         octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,
         or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``
-        below reports this value back as the parsed message's own
-        ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`
-        then subtracts from the outer packet length to find the next
-        layer's length -- precisely the role ``Hdr Ext Len`` played in
-        :issue:`487`, and the same read-side duplication :meth:`make`'s write-side
-        expression (``(len(data_val) + 6) // 8 - 1``, this formula's
-        inverse) had already been unified out of. Do NOT drop the ``+ 1``:
-        the units either side of it differ (octets vs. 8-octet units), and
-        dropping the offset silently reinterprets the field.
+        below reports this value as the parsed message's own ``.length``,
+        which :meth:`~pcapkit.protocols.internet.mh.MH.read` subtracts from the
+        outer packet length to find the next layer's length. It is the inverse
+        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the
+        ``+ 1``: the units either side of it differ (octets vs. 8-octet
+        units), and dropping the offset silently reinterprets the field.
 
         Args:
             header_len: raw ``Header Len`` field value, as read off the wire.
@@ -1640,9 +1495,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         # NOTE: The header has to be a multiple of 8 octets, so the message data
         # needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up
-        # without emitting that padding -- which is what ``math.ceil`` used to do
-        # here -- declares a header longer than the bytes that follow it, and the
-        # re-parse then reads whatever happens to be past the end of the buffer.
+        # without emitting that padding (as ``math.ceil`` would) declares a header
+        # longer than the bytes that follow it, and the re-parse then reads
+        # whatever happens to be past the end of the buffer.
         data_val = self._pad_mh_message(data_val)
 
         return Schema_MH(
@@ -2909,14 +2764,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         of the option, in octets, excluding the Option Type and Option
         Length fields"* -- so the whole option, which is what every
         ``_read_opt_*`` below reports back as the parsed option's own
-        ``.length``, is two octets more. This is the exact ``+2``/``-2``
-        mismatch independently fixed in six places (see the ``Note:``
-        on :meth:`_read_opt_pad` below, which explains why a ``Pad1``
-        option -- the one option with no ``Option Length`` field at all --
-        is this helper's sole exception); collecting the read-side half of
-        it into one helper is so a future fix to this arithmetic only has
-        to happen once. Do NOT drop the ``+ 2``: that is precisely this
-        mismatch.
+        ``.length``, is two octets more. The read-side call sites share this
+        helper so the arithmetic lives in one place; a ``Pad1`` option -- the
+        one option with no ``Option Length`` field at all -- is its sole
+        exception (see the ``Note:`` on :meth:`_read_opt_pad` below). Do NOT
+        drop the ``+ 2``.
 
         The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
         option, whose Option Type and Option Length are one octet each. It
@@ -2924,7 +2776,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         a CGA extension's Extension Type and Extension Data Length are two
         octets each [:rfc:`4581#section-2`], so those readers use
         :meth:`_mh_extension_length` instead. Reusing this helper for them
-        reported every parsed CGA extension two octets short (:issue:`512`).
+        would report every parsed CGA extension two octets short.
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
@@ -4866,8 +4718,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             <pcapkit.corekit.fields.collections.ListField.pack>` consults, so
             packing a perfectly good option fails with
             :exc:`~pcapkit.utilities.exceptions.FieldValueError`. Python 3.11 and
-            newer give each class its own cache and the checks behave, which is why
-            this was invisible on a modern interpreter.
+            newer give each class its own cache, so the checks behave there.
 
             The code is on the wire and the registry keys on it, so it is both the
             cheaper discriminator and the only one that cannot be poisoned. The
@@ -6403,12 +6254,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of
         the Extension in octets, not including the first 4 octets"*.
 
-        Passing these lengths through :meth:`_mh_option_length` reported every
-        parsed CGA extension two octets short (:issue:`512`): an 8-octet extension with
-        an ``Extension Data Length`` of ``4`` came back as ``6``. Note
-        :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``
-        instead, so the write side was already right and only the read side
-        disagreed with the wire.
+        Passing these lengths through :meth:`_mh_option_length` would report
+        every parsed CGA extension two octets short: an 8-octet extension with
+        an ``Extension Data Length`` of ``4`` would come back as ``6``. The write
+        side is unaffected, since :meth:`_make_cga_extensions` measures
+        ``len(schema.pack())`` instead.
 
         Args:
             schema_length: raw ``Extension Data Length`` field value, as read off the wire.
@@ -7633,7 +7483,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
             Appending is necessary rather than optional: ``length`` is
             ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body
-            short emitted 10, 12 or 14 octets while declaring 8, and a parser reads
+            short would emit 10, 12 or 14 octets while declaring 8, and a parser reads
             8 and misinterprets the remainder. Since the caller asked for a packet
             to be built and the shortfall is recoverable, completing it beats
             refusing -- the warning is there because the emitted body is then not
@@ -7767,8 +7617,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             *whole* option, whereas :attr:`Schema_PadOption.length
             <pcapkit.protocols.schema.internet.mh.PadOption.length>` is the
             ``Option Length`` field -- two octets fewer, and absent altogether
-            for a ``Pad1``. Copying one into the other unconverted is why
-            re-making a parsed ``PadN`` used to come back two octets too long.
+            for a ``Pad1``. Copying one into the other unconverted would make a
+            re-made parsed ``PadN`` come back two octets too long.
 
         """
         if option is not None:
@@ -7979,7 +7829,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 (RFC 4283's ``user@realm`` form) rather than a numeric
                 identifier, so there is no non-arbitrary int-to-text mapping
                 the way there is int-to-address or int-to-octets, and an
-                :obj:`int` is rejected there (c.f. :issue:`467`).
+                :obj:`int` is rejected there.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7992,7 +7842,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 ``::1`` for ``IPv6_Address`` and to a one-octet identifier for
                 the other six, neither of which a caller passing a flag can
                 plausibly have meant; pass ``int(...)`` to get the numeric
-                value (c.f. :issue:`469`). If ``identifier`` is a negative :obj:`int`
+                value. If ``identifier`` is a negative :obj:`int`
                 (no subtype has a wire form for one), an :obj:`int` of any value
                 with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or
                 above with the ``IPv6_Address`` subtype (whose wire form is a
@@ -8001,9 +7851,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 type its subtype's field cannot hold at all: anything but
                 :obj:`str` for ``NAI``, anything but :obj:`bytes`/
                 :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
-                is converted rather than rejected there, per :issue:`467` -- or anything
+                is converted rather than rejected there -- or anything
                 :class:`ipaddress.IPv6Address` itself does not accept for
-                ``IPv6_Address`` (c.f. :issue:`469`).
+                ``IPv6_Address``.
 
         """
         if option is not None:
@@ -8022,15 +7872,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # exactly the class of leak this handler exists to stop, and which a
             # guard living inside the ``elif isinstance(identifier, int)`` branch
             # could not catch, since the ``IPv6_Address`` dispatch never reaches
-            # it (c.f. #467).
+            # it.
             try:
                 # ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back
                 # into a named member for the message below -- but its own
                 # ``_missing_`` only auto-extends 9-15 and 16-255, so 0,
                 # negatives and anything above 255 make the constructor itself
                 # raise a bare ``ValueError``, which would defeat the point of
-                # this guard (c.f. #467). Caught here and the raw value
-                # used instead rather than let it propagate.
+                # this guard. Caught here and the raw value used instead
+                # rather than let it propagate.
                 subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
             except ValueError:
                 subtype_repr = repr(subtype_val)
@@ -8046,8 +7896,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake
             # in every case rather than a value anyone means, so it is refused
             # before either path can give it a plausible-looking wire form. A
-            # caller who genuinely wants the integer should pass ``int(flag)``
-            # (c.f. #469 review).
+            # caller who genuinely wants the integer should pass ``int(flag)``.
             raise ProtocolError(
                 f'{self.alias}: [OptNo {type}] MN-ID identifier must not be a '
                 f'bool, not {identifier!r} -- pass int({identifier!r}) if the '
@@ -8059,7 +7908,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
         # ignores any declared length), so ``identifier`` is normalised to that wire
         # form here as well, keeping the packed bytes and the declared length derived
-        # from one value instead of two independent computations (c.f. #448).
+        # from one value instead of two independent computations.
         if subtype_val == Enum_MNIDSubtype.IPv6_Address:
             if isinstance(identifier, int) and identifier >= 1 << 128:
                 # NOTE: the upper-bound mirror of the negative-int guard above, and
@@ -8070,10 +7919,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # unguarded, :class:`ipaddress.IPv6Address` raises
                 # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
                 # handler would otherwise ship with its lower bound guarded and its
-                # upper bound leaking (c.f. #467). Checked explicitly rather
-                # than by wrapping the construction below, because that would also
+                # upper bound leaking. Checked explicitly rather than by
+                # wrapping the construction below, because that would also
                 # swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or
-                # ``None`` reaching here -- which is #469's subject, not this one's.
+                # ``None`` reaching here -- which the branch below handles.
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
                     f'identifier must be an int below 2**128, not {identifier!r}')
@@ -8087,7 +7936,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # bytes, int or str). The ``try`` wraps only this call, not
                 # the whole branch, so it cannot swallow the ProtocolError
                 # raised above for an out-of-range int, which is also a
-                # ValueError subclass (c.f. #467, #469).
+                # ValueError subclass.
                 try:
                     identifier = ipaddress.IPv6Address(identifier)
                 except ValueError as error:
@@ -8103,11 +7952,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # there is no non-arbitrary way to do that. str(identifier) packs
                 # and round-trips fine, but an NAI is a network access identifier
                 # ('user@realm', RFC 4283), and a bare decimal-digit string is not
-                # one: it is mechanically valid and semantically nonsense, exactly
-                # the "silently accepting a value that cannot pack" #467 removed,
-                # just relocated to "silently accepting a value that packs into
-                # the wrong thing". Rejected instead, with the explicit spelling
-                # a caller who really wants a decimal-digit NAI can use.
+                # one: it is mechanically valid and semantically nonsense, i.e.
+                # a value that is silently accepted and packs into the wrong
+                # thing. Rejected instead, with the explicit spelling a caller
+                # who really wants a decimal-digit NAI can use.
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI identifier '
                     f'must be str, not int -- pass str({identifier!r}) if a '
@@ -8117,13 +7965,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # numeric identifier, so unlike NAI there IS a non-arbitrary wire
             # form: its own minimal big-endian encoding. That is self-consistent
             # with the declared length by construction and round-trips exactly.
-            # ``id_len = math.ceil(identifier.bit_length() / 8)`` was the right
-            # width all along -- the pre-#467 defect was never the sizing, it
-            # was that ``identifier`` itself stayed an ``int`` afterwards and
-            # was handed to ``BytesField`` unconverted, which ``struct.pack()``
-            # cannot do anything with. #467 initially rejected outright instead
-            # of noticing that; converting is what this revision does (c.f.
-            # #467). ``bit_length()`` is 0 for 0 itself, which would
+            # ``math.ceil(identifier.bit_length() / 8)`` is the right width;
+            # the ``int`` itself must be converted, because handing it to
+            # ``BytesField`` unconverted leaves ``struct.pack()`` nothing it can
+            # pack. ``bit_length()`` is 0 for 0 itself, which would
             # otherwise declare a zero-octet identifier -- collapsing "the
             # identifier's value is 0" into "there is no identifier" -- so the
             # width is floored at one octet, matching what any reasonable
@@ -8138,11 +7983,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # ipaddress.IPv6Address (no ``__len__`` either, so this branch's
             # own ``len()`` call below would be the one to raise). Guarded
             # here, before ``len()``, rather than relying on whichever of
-            # those two happens to fire first (c.f. #469). Deliberately not
+            # those two happens to fire first. Deliberately not
             # decoding a ``bytes`` identifier here: an NAI that happens to be
             # ASCII-encodable is still the caller handing over the wrong
             # representation, the same "accepts a value that means the wrong
-            # thing" #467 removed for int, just relocated to bytes.
+            # thing" as for an int.
             if not isinstance(identifier, str):
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI '
@@ -8157,8 +8002,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # format demands a bytes object), TypeError for float/None/an
             # ipaddress.IPv6Address (no ``__len__``, so this branch's own
             # ``len()`` call below would raise instead). Guarded here,
-            # before ``len()``, for the same reason as the NAI branch above
-            # (c.f. #469).
+            # before ``len()``, for the same reason as the NAI branch above.
             #
             # bytearray is accepted alongside bytes -- unlike every other
             # wrong type here, it already round-trips correctly through
@@ -9063,9 +8907,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # the option length below is derived from the family, so it cannot
             # wait for the schema -- and a bare conversion therefore turns a
             # ``bool`` into a perfectly ordinary ``IPv4Address`` that the
-            # schema's own guard can no longer tell from a real address. Before
-            # this, ``address=True`` packed as ``23080001000000000001``, i.e. a
-            # care-of address of ``0.0.0.1`` (c.f. #508).
+            # schema's own guard can no longer tell from a real address: it
+            # would pack ``address=True`` as ``23080001000000000001``, i.e. a
+            # care-of address of ``0.0.0.1``.
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {type}] invalid care-of address')
             length = 8 if addr.version == 4 else 20
@@ -9308,8 +9152,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # two cannot be emitted disagreeing. Normalising *here*, ahead of the
         # schema, is also why the conversion goes through ``parse_ip_address``:
         # ``ipaddress.ip_address(True)`` is ``0.0.0.1``, and the schema's own
-        # guard cannot see that it was ever a ``bool``. Before this,
-        # ``address=True`` packed as ``2906010000000001`` (c.f. #508).
+        # guard cannot see that it was ever a ``bool``, and it would pack
+        # ``address=True`` as ``2906010000000001``.
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid address')
 
@@ -9510,8 +9354,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # NOTE: Through ``parse_ip_address`` because the sub-option length
             # below is derived from the family here, ahead of the schema, so a
             # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
-            # schema's guard. Before this, ``address=True`` packed as
-            # ``0506000000000001`` (c.f. #508).
+            # schema's guard, packing ``address=True`` as ``0506000000000001``.
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
             return Schema_TargetCareofAddressSuboption(
@@ -10021,10 +9864,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # NOTE: Through ``parse_ip_address`` because the ``V`` flag and the width
         # are both derived from the family here, ahead of the schema, so a bare
         # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
-        # guard. Before this, ``prefix=True`` with an IPv4-valid
-        # ``prefix_length`` packed as ``3706801800000001``; the default
-        # ``prefix_length=64`` masked it behind the range check below, which is
-        # why #508's own sweep read this site as already guarded (c.f. #508).
+        # guard: ``prefix=True`` with an IPv4-valid ``prefix_length`` would pack
+        # as ``3706801800000001``. The default ``prefix_length=64`` masks it
+        # behind the range check below, so this site can look already guarded.
         addr = parse_ip_address(
             prefix, f'{self.alias}: [OptNo {type}] invalid mobile network prefix')
         ipv4 = addr.version == 4
@@ -10139,17 +9981,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed attribute schema.
 
         Note:
-            The data model parameter is named ``option`` rather than ``data``, and
-            that is not cosmetic. The vendor-specific attribute of
+            The data model parameter is named ``option`` rather than ``data``
+            deliberately. The vendor-specific attribute of
             :rfc:`7222#section-4.2.11` has a field of its own called ``data``, so
-            with the parameter named ``data`` a caller's ``data=`` bound to the
-            model parameter instead of reaching ``**kwargs`` -- and the
-            ``kwargs.get('data')`` fallback then always saw nothing. Building the
-            attribute the natural way, mirroring the data model's own field names,
-            silently dropped the vendor payload and wrote the length as though it
-            were empty. ``vendor`` and ``subtype`` survived because those names do
-            not collide, which made the loss look like a partial success rather
-            than a bug.
+            a parameter of that name would capture a caller's ``data=`` and leave
+            the ``kwargs.get('data')`` fallback empty, silently dropping the vendor
+            payload and writing the length as though it were empty. ``vendor`` and
+            ``subtype`` do not collide, so the loss would look like a partial
+            success rather than a bug.
 
             Dispatch is on ``code`` rather than on ``isinstance``, for the reason
             given in :meth:`_read_fid_suboptions`.
@@ -10298,9 +10137,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # NOTE: Through ``parse_ip_address`` because the option length below is
         # derived from the family here, ahead of the schema, so a bare
         # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
-        # guard. Before this, ``address=True`` packed as ``3b06000000000001``.
+        # guard, packing ``address=True`` as ``3b06000000000001``.
         # ``None`` is handled above and stays an absent address, which is a
-        # legitimate value here and not what is being rejected (c.f. #508).
+        # legitimate value here and not what is being rejected.
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid LMA user-plane address')
 
@@ -10890,8 +10729,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # prefixes as a :obj:`tuple`, which
             # :class:`~pcapkit.corekit.fields.collections.ListField` refuses to
             # pack -- it raises ``ProtocolUnbound: unsupported type <class
-            # 'tuple'>``. The cast this replaced was a no-op at runtime, so
-            # re-making a parsed Multi-Prefix extension could not work at all.
+            # 'tuple'>``; a cast would be a no-op at runtime, so re-making a
+            # parsed Multi-Prefix extension could not work at all.
             prefixes = list(option.prefixes)
         else:
             prefixes = prefixes or []
@@ -10902,9 +10741,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # **8**-octet prefix apiece, since
             # :attr:`~pcapkit.protocols.schema.internet.mh.MultiPrefixExtension.prefixes`
             # is a list of :class:`~pcapkit.corekit.fields.numbers.UInt64Field`.
-            # This used to read ``1 + len(prefixes) * 16``, which declared 33
-            # octets where 20 were emitted for two prefixes, so a re-parse ran off
-            # the end of the extension.
+            # Counting 16 octets per prefix would declare more octets than are
+            # emitted, so a re-parse would run off the end of the extension.
             length=4 + len(prefixes) * 8,
             flags={
                 'P': int(flag),

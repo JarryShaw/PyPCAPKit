@@ -33,7 +33,7 @@ from pcapkit.protocols.internet.mh import MH
 # Ethertype IEEE 802 Numbers
 from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
 
-# Deprecated / Base Classes
+# Base Classes
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.internet.ipsec import IPsec
 
