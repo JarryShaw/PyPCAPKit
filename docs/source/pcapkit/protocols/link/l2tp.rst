@@ -56,10 +56,10 @@ second would follow the precedent of
 :class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and
 delegates to a per-version class. L2TP is the easier case:
 :meth:`HTTP._guess_version <pcapkit.protocols.application.http.HTTP._guess_version>`
-has to *infer* the version -- recognising the HTTP/2 preface, else trial-parsing
-each candidate -- because HTTP's wire format carries no version field, whereas
-L2TP states its version explicitly in those four bits. A deterministic switch on
-``Ver`` is enough, and no new registry is needed.
+has to *infer* the version -- recognising the HTTP/2 preface or an HTTP/1 start
+line, else trial-parsing each candidate -- because HTTP's wire format carries no
+version field, whereas L2TP states its version explicitly in those four bits. A
+deterministic switch on ``Ver`` is enough, and no new registry is needed.
 
 .. autoclass:: pcapkit.protocols.link.l2tp.L2TP
    :no-members:
