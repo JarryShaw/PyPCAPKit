@@ -1033,11 +1033,13 @@ Fixed
 * a missing extraction engine package now gives one ``EngineWarning`` rather than two
   (:issue:`1045`, :pr:`1046`). ``Extractor.import_test`` warned that the package was
   absent, then ``Extractor.run`` warned again when it fell back to the default engine;
-  ``run`` now stays silent there. The message text changed. It was
-  ``extraction engine '<name>' not available; using default engine instead`` and is
-  now ``engine <name> (<module>) is not installed; using default engine instead``.
-  An ``import_test`` call with no display name names the module once, not twice. Code
-  that matches the old wording, or expects two warnings, must be updated.
+  ``run`` now stays silent there. The surviving message is the one ``run`` already
+  emitted, ``engine <name> (<module>) is not installed; using default engine instead``
+  (the module name is in backticks in the real message, which this changelog's
+  Markdown generator cannot show literally), so ``import_test`` now says the same.
+  Only code that matched ``import_test``'s old wording,
+  ``extraction engine '<name>' not available; using default engine instead``, or
+  that expects two warnings, breaks.
 
 pcapkit.protocols
 -----------------
