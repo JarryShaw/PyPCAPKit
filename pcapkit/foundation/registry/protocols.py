@@ -209,6 +209,8 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
             same class under the same name is silent.
 
     """
+    if not isinstance(protocol, type):
+        raise RegistryError(f'protocol must be a class, not {protocol!r}')
     if not issubclass(protocol, ProtocolBase):
         raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 

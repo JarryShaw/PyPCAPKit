@@ -406,6 +406,44 @@ class ExtractorTests(unittest.TestCase):
                         internal(f'unit-1016-{kind}-bad', object)  # type: ignore[arg-type]
                     self.assertNotIn(f'unit-1016-{kind}-bad', store)
 
+    def test_register_helpers_reject_a_non_class_with_registry_error(self) -> None:
+        """GitHub issue #1021: a non-class raises ``RegistryError``, not ``TypeError``.
+
+        Each guard was a bare ``issubclass(x, Base)``, which refuses a non-class
+        itself -- ``register_dumper`` directly (``Dumper`` has a plain ``type``
+        metaclass), the other three from inside ``abc`` -- so the documented
+        ``RegistryError`` was unreachable. A wrong *class* still reaches the
+        subclass check and raises ``RegistryError`` as before.
+        """
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.exceptions import RegistryError
+
+        module = types.ModuleType('unit_extraction_non_class_mod')
+        module.NOT_A_CLASS = 42
+        sys.modules['unit_extraction_non_class_mod'] = module
+        self.addCleanup(lambda: sys.modules.pop('unit_extraction_non_class_mod', None))
+        descriptor = ModuleDescriptor('unit_extraction_non_class_mod', 'NOT_A_CLASS')
+
+        registrars = {
+            'dumper': lambda value: Extractor.register_dumper('unit-bad', value, '.bad'),
+            'engine': lambda value: Extractor.register_engine('unit-bad', value),
+            'reassembly': lambda value: Extractor.register_reassembly('unit-bad', value),
+            'traceflow': lambda value: Extractor.register_traceflow('unit-bad', value),
+        }
+        for name, register in registrars.items():
+            for label, value, expected in (
+                ('instance', object(), 'must be a class'),
+                ('string', 'not-a-class', 'must be a class'),
+                ('none', None, 'must be a class'),
+                ('descriptor to non-class', descriptor, 'must be a class'),
+                ('wrong class', object, 'subclass'),
+            ):
+                with self.subTest(registrar=name, value=label):
+                    with self.assertRaises(RegistryError) as caught:
+                        register(value)
+                    self.assertIn(expected, str(caught.exception))
+
     def test_register_engine_identity_guard(self) -> None:
         """GitHub issue #739: re-registering the same engine class is silent.
 

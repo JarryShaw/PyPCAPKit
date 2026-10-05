@@ -1008,6 +1008,27 @@ Fixed
   rather than comparing the full ``(dumper, ext)`` pair. Non-breaking: a correct
   caller sees strictly fewer warnings and no change to return value or exception. Five
   new tests pin the silent/warns-anyway split (:issue:`739`).
+* **six registrars** now raise ``RegistryError`` for a non-class argument, where a bare
+  ``TypeError`` ("issubclass() arg 1 must be a class") used to escape -- from the guard
+  itself for the two ``register_dumper`` methods, and from inside ``abc`` for the other
+  four. They are ``register_dumper``, ``register_engine``, ``register_reassembly`` and
+  ``register_traceflow`` on ``Extractor``, ``TraceFlow.register_dumper`` (reached
+  through ``register_traceflow_dumper``), and
+  ``pcapkit.foundation.registry.protocols.register_protocol``. Each guard gains an
+  explicit ``isinstance(x, type)`` test ahead of its ``issubclass``; in the five that
+  accept a ``ModuleDescriptor`` it runs after the descriptor is unwrapped, so a descriptor
+  naming a non-class attribute is rejected too, while ``register_protocol`` takes no
+  descriptor. No guard's target class changes, and a wrong class still raises
+  ``RegistryError`` as before. ``RegistryError`` subclasses ``TypeError``, so
+  ``except TypeError`` still catches it; a caller matching the exact type, or the old
+  message, does not. **Not every site is covered**: six of the thirteen bare
+  ``issubclass`` guards in the package are fixed here, and the same guard remains in
+  the ``register`` classmethods of ``ProtocolBase``, ``Frame``, ``PCAPNG``, ``SCTP``,
+  ``Link``, ``Internet`` and ``Transport``, all of which still leak ``TypeError`` for a
+  non-class. ``Transport.register`` is reachable despite its ``UnsupportedCall``, which
+  is gated on ``cls is Transport`` and so fires only for the abstract class -- the guard
+  below it leaks through ``TCP.register`` and ``UDP.register``, which is the only way it
+  is ever called. :issue:`1026` tracks all seven (:issue:`1021`).
 
 pcapkit.protocols
 -----------------

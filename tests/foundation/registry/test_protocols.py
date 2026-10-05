@@ -418,6 +418,30 @@ class ProtocolRegistryTests(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry.register_protocol(object)  # type: ignore[arg-type]
 
+    def test_register_protocol_rejects_a_non_class_with_registry_error(self) -> None:
+        """GitHub issue #1021: a non-class raises ``RegistryError``, not ``TypeError``.
+
+        ``ProtocolBase``'s metaclass is ``ABCMeta``-derived, so the bare
+        ``issubclass`` guard delegated to ``abc`` and the ``TypeError`` leaked
+        out of there before the ``raise`` was reached.
+        """
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import RegistryError
+
+        for label, value, expected in (
+            ('instance', object(), 'must be a class'),
+            ('string', 'not-a-class', 'must be a class'),
+            ('none', None, 'must be a class'),
+            ('descriptor argument (not unwrapped here)',
+             ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'), 'must be a class'),
+            ('wrong class', object, 'Protocol subclass'),
+        ):
+            with self.subTest(value=label):
+                with self.assertRaises(RegistryError) as caught:
+                    registry.register_protocol(value)  # type: ignore[arg-type]
+                self.assertIn(expected, str(caught.exception))
+
     def test_top_level_link_internet_and_transport_protocol_wrappers(self) -> None:
         # Members live in the per-transport registries GitHub issue #732 split
         # AppType into; the base class itself holds none. 3com-amp3 is registered
