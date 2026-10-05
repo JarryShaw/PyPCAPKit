@@ -11,7 +11,7 @@ that actually matters -- it is satisfied by a table whose target could not parse
 a packet if it tried.
 :file:`tests/protocols/test_dispatch_bindings_unit.py` exists because exactly
 that shipped once: its own docstring records that
-:class:`~pcapkit.protocols.link.ospf.OSPF` "was reachable from no table at all
+:class:`~pcapkit.protocols.application.ospf.OSPF` "was reachable from no table at all
 and could not have parsed a packet if it had been". But that module hand-picks
 its eleven cases rather than enumerating, so it guards the entries someone
 remembered rather than the registries themselves. See GitHub issue #496.
@@ -31,7 +31,7 @@ same call with a different global header), and asks whether the resulting
 :class:`~pcapkit.corekit.protochain.ProtoChain` actually contains the class
 :data:`PINNED_TARGETS` says the code is *supposed* to reach -- not merely that
 the alias string looks right, since several of these classes rename themselves
-on the wire (:class:`~pcapkit.protocols.link.arp.RARP` reports ``'ARP'`` for
+on the wire (:class:`~pcapkit.protocols.application.rarp.RARP` reports ``'ARP'`` for
 ``oper in (1, 2)``; :class:`~pcapkit.protocols.internet.hip.HIP` reports
 ``'HIPv2'``) and one table entry's target *is* itself
 :class:`~pcapkit.protocols.misc.raw.Raw` rather than a defect.
@@ -282,7 +282,7 @@ def _link_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.link.arp import ARP
         return bytes(ARP(oper=1))
     if code == EtherType.Reverse_Address_Resolution_Protocol:
-        from pcapkit.protocols.link.rarp import RARP
+        from pcapkit.protocols.application.rarp import RARP
 
         # ARP/RARP/InARP/DRARP all report their alias from the wire ``oper``
         # field rather than from the dispatching EtherType (link/arp.py:176-190
@@ -390,7 +390,7 @@ def _internet_payload(code: 'int') -> 'bytes':
                          next=6, packet=1, version=2, checksum=b'\x00\x00',
                          controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
     if code == TransType.OSPFIGP:
-        from pcapkit.protocols.link.ospf import OSPF
+        from pcapkit.protocols.application.ospf import OSPF
         return bytes(OSPF())
     if code == TransType.Shim6:
         # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
@@ -604,7 +604,7 @@ FAMILY_MAP = {family.label: family for family in FAMILIES}
 PINNED_TARGETS = {
     # -- Link.__proto__ (EtherType) -------------------------------------------
     'link/Address_Resolution_Protocol': ('pcapkit.protocols.link.arp', 'ARP'),
-    'link/Reverse_Address_Resolution_Protocol': ('pcapkit.protocols.link.rarp', 'RARP'),
+    'link/Reverse_Address_Resolution_Protocol': ('pcapkit.protocols.application.rarp', 'RARP'),
     'link/Customer_VLAN_Tag_Type': ('pcapkit.protocols.link.c_tag', 'C_Tag'),
     'link/IEEE_Std_802_1Q_Service_VLAN_tag_identifier': ('pcapkit.protocols.link.s_tag', 'S_Tag'),
     'link/Internet_Protocol_version_4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
@@ -627,7 +627,7 @@ PINNED_TARGETS = {
     'internet/Mobility_Header': ('pcapkit.protocols.internet.mh', 'MH'),
     'internet/HIP': ('pcapkit.protocols.internet.hip', 'HIP'),
     'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
-    'internet/OSPFIGP': ('pcapkit.protocols.link.ospf', 'OSPF'),
+    'internet/OSPFIGP': ('pcapkit.protocols.application.ospf', 'OSPF'),
     # #904: Shim6 (140) previously had no entry at all, and the default
     # factory made it resolve to Raw. It is now registered directly at
     # IPv6_Ext, which parses the RFC 6564 §4 generic layout it has

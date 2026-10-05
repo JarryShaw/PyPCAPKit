@@ -73,7 +73,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
        * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
          - :class:`pcapkit.protocols.transport.sctp.SCTP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
-         - :class:`pcapkit.protocols.link.ospf.OSPF`
+         - :class:`pcapkit.protocols.application.ospf.OSPF`
 
     """
 
@@ -107,13 +107,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp',      'SCTP'),
 
             # OSPF rides directly on IP, so IANA protocol number 89 is its only
-            # dispatch point. The dissector lives under ``protocols.link``
-            # despite that, and so reports ``__layer__ = 'Link'``; c.f. the note
-            # in :mod:`pcapkit.protocols.link.ospf`. The module is left where it
-            # is here -- moving it would break its import path -- and the
-            # mislabel is inert for layer-limited extraction, since IPv4/IPv6
-            # terminate an ``internet`` extraction before OSPF is reached.
-            Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.link.ospf',           'OSPF'),
+            # dispatch point. The dissector nonetheless lives under
+            # ``protocols.application`` and reports ``__layer__ = 'Application'``,
+            # because a routing protocol computes the forwarding table rather
+            # than forwarding packets -- the dispatch tier and the subpackage are
+            # deliberately decoupled, c.f.
+            # :doc:`/contributing/conventions/protocol-layer-placement`.
+            Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf', 'OSPF'),
         },
     )
 

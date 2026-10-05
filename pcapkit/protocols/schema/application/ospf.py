@@ -30,7 +30,7 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Returns:
         * If :attr:`OSPF.auth_type` is 2, a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.link.ospf.CrytographicAuthentication` instance.
+          wrapped :class:`~pcapkit.protocols.schema.application.ospf.CrytographicAuthentication` instance.
         * Otherwise, a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
 
     """

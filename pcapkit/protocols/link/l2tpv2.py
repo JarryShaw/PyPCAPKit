@@ -103,12 +103,10 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         that the datagram is not its own. See
         :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.
 
-        As with :class:`~pcapkit.protocols.link.ospf.OSPF`, the class subclasses
-        :class:`~pcapkit.protocols.link.link.Link` and so reports
-        ``layer == 'Link'`` even though it is carried inside UDP. That is a
-        pre-existing classification, kept because moving the module would change
-        its public import path.
-
+        The class subclasses :class:`~pcapkit.protocols.link.link.Link` and so
+        reports ``layer == 'Link'`` even though it is carried inside UDP: a
+        tunnelling protocol is placed by what it carries. See
+        :doc:`/contributing/conventions/protocol-layer-placement`.
     """
 
     ##########################################################################

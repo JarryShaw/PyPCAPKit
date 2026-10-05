@@ -105,13 +105,17 @@ INDEX = CONVENTIONS_DIR / 'index.rst'
 #: page. ``documentation`` came after it, carrying the rulings GitHub issue #719
 #: settled about the prose itself -- heading case, when a Mermaid graph beats a
 #: paragraph, and what a sentence on these pages may claim -- which had until then
-#: lived only in that thread. Every anchor is the bare file stem, which is what
-#: :data:`PAGES` below depends on.
+#: lived only in that thread. ``protocol-layer-placement`` carries the other ruling
+#: that thread settled -- which subpackage a dissector belongs in, decided by designed
+#: function rather than by encapsulation -- and sits beside the other class-hierarchy
+#: page. Every anchor is the bare file stem, which is what :data:`PAGES` below depends
+#: on.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
+    'protocol-layer-placement',
     'process',
     'documentation',
 )

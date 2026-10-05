@@ -61,8 +61,8 @@ Two distinct EtherTypes also means two distinct
 project's rule for when protocols get separate modules: siblings that *share* an
 index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
 :mod:`~pcapkit.protocols.link.arp` and
-:class:`~pcapkit.protocols.link.rarp.DRARP` shares
-:mod:`~pcapkit.protocols.link.rarp`. This base declares no index of its own --
+:class:`~pcapkit.protocols.application.rarp.DRARP` shares
+:mod:`~pcapkit.protocols.application.rarp`. This base declares no index of its own --
 it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
 
 .. autoclass:: pcapkit.protocols.link.vlan.VLAN

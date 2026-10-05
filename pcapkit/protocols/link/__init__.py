@@ -17,8 +17,6 @@ from pcapkit.protocols.link.link import Link
 # Utility Classes for Protocols
 from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
-from pcapkit.protocols.link.ospf import OSPF
-from pcapkit.protocols.link.rarp import RARP, DRARP
 
 # VLAN Tag Family
 from pcapkit.protocols.link.vlan import VLAN
@@ -37,6 +35,5 @@ __all__ = [
     'LINKTYPE',
 
     # Link Layer Protocols
-    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2',
-    'OSPF', 'RARP', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'S_Tag', 'VLAN',
 ]

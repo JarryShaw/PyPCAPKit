@@ -9,11 +9,6 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
-# Open Shortest Path First
-from pcapkit.protocols.data.link.ospf import OSPF
-from pcapkit.protocols.data.link.ospf import \
-    CrytographicAuthentication as OSPF_CrytographicAuthentication
-
 # 802.1Q Customer VLAN Tag Type
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
 from pcapkit.protocols.data.link.vlan import VLAN
@@ -24,9 +19,6 @@ __all__ = [
 
     # Ethernet Protocol
     'Ethernet',
-
-    # Open Shortest Path First
-    'OSPF', 'OSPF_CrytographicAuthentication',
 
     # 802.1Q Customer VLAN Tag Type
     'VLAN', 'VLAN_TCI',

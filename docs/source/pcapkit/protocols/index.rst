@@ -29,14 +29,10 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        A{{ProtocolMeta}} -.->|metaclass| B(ProtocolBase)
 
        subgraph link [Link Layer]
-           Link --> Ethernet & L2TP & OSPF & VLAN & ARP
+           Link --> Ethernet & L2TP & VLAN & ARP
 
            subgraph arp [ARP Family]
-               ARP --> InARP & RARP
-
-               subgraph rarp [RARP Family]
-                   RARP --> DRARP
-               end
+               ARP --> InARP
            end
 
            subgraph vlan [VLAN Family]
@@ -69,7 +65,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph application [Application Layer]
-           Application --> HTTP & FTP
+           Application --> HTTP & FTP & OSPF & RARP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -77,6 +73,10 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
 
            subgraph ftp [FTP Family]
                FTP & FTP_DATA
+           end
+
+           subgraph rarp [RARP Family]
+               RARP --> DRARP
            end
        end
 
@@ -96,6 +96,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
 
        B --> Header & Frame & PCAPNG & Raw & NoPayload
        Raw --> FTP_DATA
+       ARP --> RARP
 
        B --> C(Protocol)
        C --> D([user customisation ...])
@@ -109,14 +110,14 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        click Ethernet "/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
        click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click L2TPv2 "/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
-       click OSPF "/pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF"
+       click OSPF "/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
        click VLAN "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
        click C_Tag "/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
        click ARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP"
        click InARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP"
-       click RARP "/pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP"
-       click DRARP "/pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.DRARP"
+       click RARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP"
+       click DRARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
 
        click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.Internet"
        click AH "/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH"
