@@ -180,7 +180,7 @@ class Extractor(Generic[_P]):
         #: Extraction engine name.
         _exnam: 'Engines'
         #: Extraction engine instance.
-        _exeng: 'Engine[_P]'
+        _exeng: 'EngineBase[_P]'
 
         #: Input file object.
         _ifile: 'BufferedReader'
@@ -351,7 +351,7 @@ class Extractor(Generic[_P]):
         raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
 
     @property
-    def engine(self) -> 'Engine':
+    def engine(self) -> 'EngineBase[_P]':
         """PCAP extraction engine."""
         return self._exeng
 
@@ -606,10 +606,10 @@ class Extractor(Generic[_P]):
 
         if self._magic in PCAP_Engine.MAGIC_NUMBER:
             logger.debug('magic number %r identifies a PCAP file', self._magic)
-            self._exeng = cast('Engine[_P]', PCAP_Engine(self))
+            self._exeng = cast('EngineBase[_P]', PCAP_Engine(self))
         elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
             logger.debug('magic number %r identifies a PCAP-NG file', self._magic)
-            self._exeng = cast('Engine[_P]', PCAPNG_Engine(self))
+            self._exeng = cast('EngineBase[_P]', PCAPNG_Engine(self))
         else:
             raise FormatError(f'unknown file format: {self._magic!r}')
 
@@ -735,14 +735,13 @@ class Extractor(Generic[_P]):
 
         return ifnm, ofnm, fmt, ext, files
 
-    def record_header(self) -> 'Engine':
+    def record_header(self) -> 'EngineBase[_P]':
         """Read global header.
 
         The method will parse the PCAP global header and save the parsed result
         to its extraction context. Information such as PCAP version, data link
-        layer protocol type, nanosecond flag and byteorder will also be save
-        the current :class:`~pcapkit.foundation.engines.engine.Engine` instance
-        as well.
+        layer protocol type, nanosecond flag and byteorder are also saved on the
+        returned engine instance.
 
         If TCP flow tracing is enabled, the nanosecond flag and byteorder will
         be used for the output PCAP file of the traced TCP flows.

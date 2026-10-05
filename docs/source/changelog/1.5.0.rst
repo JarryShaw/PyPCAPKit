@@ -835,6 +835,18 @@ Changed
   dumper handed each record to a ``Frame`` constructor that re-dissected the whole
   stack to return the bytes it had just been given; options are no longer parsed twice
   either (:pr:`427`).
+* **a breaking change to** ``Extractor.engine`` and ``Extractor.record_header``: both
+  are now declared to return ``EngineBase[_P]`` rather than ``Engine``, and the private
+  ``_exeng`` attribute follows. Both built-in engines subclass ``EngineBase`` directly,
+  so neither was ever an ``Engine``; the declaration now names the class the object
+  has, and the ``cast`` calls that hid the gap now launder only the frame type
+  parameter. Nothing is lost: ``Engine`` adds only the ``__init_subclass__``
+  registration hook, and the frame type parameter is preserved. Two things are
+  visible to a type checker. Code passing the result to an ``Engine``-typed
+  parameter must now accept ``EngineBase``; and because the old declarations were
+  *unparameterised*, ``engine.read_frame()`` and ``record_header().read_frame()``
+  used to be ``Any`` and are now the extractor's own frame type, so an assignment
+  that relied on ``Any`` there no longer type-checks (:issue:`1022`).
 
 Fixed
 ~~~~~
