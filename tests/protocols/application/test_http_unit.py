@@ -1093,9 +1093,9 @@ class HTTPUnitTests(unittest.TestCase):
         constructing ``HTTPv1(method='GET', uri='/', http_version='1.1')`` raised
         from its own ``read``. The response is also round-tripped through
         ``_make_data``, so an empty parsed header dict is shown to rebuild the
-        same bytes; the request is not, because ``_make_data`` hands an empty
-        body back as :obj:`None`, which ``make`` cannot concatenate -- with or
-        without header fields, so a separate defect from this one.
+        same bytes. The empty-bodied request's ``from_data`` round trip is
+        :meth:`test_httpv1_from_data_round_trips_a_message_with_an_empty_body`
+        (#1050).
 
         """
         import io
@@ -1117,6 +1117,35 @@ class HTTPUnitTests(unittest.TestCase):
 
         parsed = HTTPv1(io.BytesIO(wire), len(wire))
         self.assertEqual(HTTPv1(**HTTPv1._make_data(parsed.info)).data, wire)
+
+    def test_httpv1_from_data_round_trips_a_message_with_an_empty_body(self) -> None:
+        """``from_data(info)`` rebuilds a message whose body is empty (#1050).
+
+        ``read`` records an empty body as :obj:`None`, and that stays the public
+        ``info.body`` value; ``_make_data`` used to pass it straight to ``make``,
+        which concatenated it onto the header bytes and raised ``TypeError``.
+        The response with a body is a regression guard: it round-tripped before
+        the fix and must keep doing so.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        cases = {
+            'request with headers': (b'GET / HTTP/1.1\r\nHost: a\r\n\r\n', True),
+            'headerless request': (b'GET / HTTP/1.1\r\n\r\n', True),
+            'response with headers': (b'HTTP/1.1 204 No Content\r\nServer: x\r\n\r\n', True),
+            'response with a body': (b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nhi', False),
+        }
+        for name, (raw, empty) in cases.items():
+            with self.subTest(name):
+                parsed = HTTPv1(io.BytesIO(raw), len(raw))
+                if empty:
+                    self.assertIsNone(parsed.info.body)
+                rebuilt = HTTPv1.from_data(parsed.info)
+                self.assertEqual(rebuilt.data, raw)
+                self.assertEqual(rebuilt.info.body, parsed.info.body)
 
     def test_httpv1_still_refuses_the_http2_connection_preface(self) -> None:
         """Accepting zero fields must not let the HTTP/2 preface parse as HTTP/1 (#1041).

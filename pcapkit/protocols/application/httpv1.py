@@ -345,6 +345,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: ``read`` records an empty body as :obj:`None`, which is the
+        # public ``info.body`` value; ``make`` takes ``bytes`` and concatenates
+        # it, so the read-side ``None`` is translated back here (#1050).
         return {
             'http_version': data.receipt.version,  # type: ignore[attr-defined]
             'method': getattr(data.receipt, 'method', None),
@@ -352,7 +355,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             'status': getattr(data.receipt, 'status', None),
             'message': getattr(data.receipt, 'message', None),
             'headers': data.header,
-            'body': data.body,
+            'body': b'' if data.body is None else data.body,
         }
 
     def _read_http_header(self, header: 'bytes') -> 'tuple[Data_Header, OrderedMultiDict[str, str]]':
