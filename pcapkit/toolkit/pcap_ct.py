@@ -4,10 +4,7 @@
 
 .. module:: pcapkit.toolkit.pcap_ct
 
-:mod:`pcapkit.toolkit.pcap_ct` contains all you need for
-:mod:`pcapkit` handy usage with `pcap-ct`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.pcap_ct` contains the adapters for the `pcap-ct`_ engine.
 
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
 

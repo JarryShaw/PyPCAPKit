@@ -4,10 +4,10 @@
 
 .. module:: pcapkit.toolkit.pcap
 
-:mod:`pcapkit.toolkit.pcap` contains all you need for
-:mod:`pcapkit` handy usage of PCAP file format. All
-functions returns with a flag to indicate if usable
-for its caller.
+:mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 """
 from typing import TYPE_CHECKING, cast
