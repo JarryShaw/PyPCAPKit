@@ -28,7 +28,17 @@ __all__ = ['Application']
 
 
 class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
-    """Abstract base class for transport layer protocol family."""
+    """Abstract base class for application layer protocol family.
+
+    An application layer protocol has no further *protocol* layer above it, so
+    :meth:`_decode_next_layer` and :meth:`_import_next_layer` refuse to dispatch
+    on a protocol number. What they do permit is the ``-1`` sentinel, which asks
+    for the rest of the packet undissected and resolves to
+    :class:`~pcapkit.protocols.misc.raw.Raw` -- trailing bytes are not a further
+    protocol layer -- or to :class:`~pcapkit.protocols.misc.null.NoPayload` when
+    nothing remains.
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -73,10 +83,14 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # call super post-init
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
-        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
-        self._next = NoPayload()
-        #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
-        self._protos = ProtoChain(self.__class__, self.alias)
+        # ``read`` may have dispatched the undissected remainder through
+        # ``_decode_next_layer``, which already set the payload and the chain
+        # (basis included); only a protocol that did not gets the empty default
+        if getattr(self, '_next', None) is None:
+            #: pcapkit.protocols.null.NoPayload: Payload of current instance.
+            self._next = NoPayload()
+            #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
+            self._protos = ProtoChain(self.__class__, self.alias)
 
     @classmethod
     def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
@@ -93,21 +107,49 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
     ##########################################################################
 
     def _decode_next_layer(self, dict_: '_PT', proto: 'Optional[int]' = None, length: 'Optional[int]' = None, *,
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'NoReturn':
-        """Decode next layer protocol.
+                           packet: 'Optional[dict[str, Any]]' = None) -> '_PT':
+        r"""Decode next layer protocol.
+
+        Arguments:
+            dict\_: info buffer
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest, undissected) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+
+        Returns:
+            Current protocol with the undissected remainder as payload.
 
         Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_decode_next_layer`.
+            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real
+                protocol dispatch, which this protocol doesn't support.
 
         """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
+        if proto != -1:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object cannot dispatch protocol {proto!r}; "
+                                  "only the undissected remainder (-1) is supported")
+        return super()._decode_next_layer(dict_, -1, length, packet=packet)
 
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'NoReturn':
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
         """Import next layer extractor.
 
+        Arguments:
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest, undissected) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+
+        Returns:
+            Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of
+            :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
+
         Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_import_next_layer`.
+            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real
+                protocol dispatch, which this protocol doesn't support.
 
         """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")
+        if proto != -1:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object cannot dispatch protocol {proto!r}; "
+                                  "only the undissected remainder (-1) is supported")
+        return super()._import_next_layer(-1, length, packet=packet)  # type: ignore[call-arg,misc]

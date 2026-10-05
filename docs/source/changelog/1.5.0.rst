@@ -1208,6 +1208,15 @@ Changed
   converge rather than inside each of the 30 ``make`` implementations;
   ``object.__new__(cls).make(**kwargs)``, the idiom ``HTTP.make`` uses, reaches it
   (:issue:`617`).
+* **a breaking change to** ``Application``: it no longer forbids payload dispatch
+  outright. It encodes "no further protocol layer above this one", which undissected
+  trailer bytes are not, so ``_decode_next_layer`` and ``_import_next_layer`` accept
+  the ``-1`` sentinel -- the rest of the packet, resolving to ``Raw``, or to
+  ``NoPayload`` when nothing remains -- and ``__post_init__`` keeps a payload that
+  ``read`` set instead of overwriting it with ``NoPayload``. A real protocol number
+  (any ``proto`` other than ``-1``) is still refused with ``UnsupportedCall``. A
+  subclass that calls either method with ``-1`` changes from raising to succeeding;
+  no subclass in the package does (:issue:`719`).
 
 Fixed
 ~~~~~
