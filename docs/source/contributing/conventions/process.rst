@@ -18,7 +18,7 @@ The ``all`` Extra
 ``all`` means **core addons only** -- the things that let the library itself run at
 full functionality -- rather than everything a user might conceivably want. The owner
 settled that on :issue:`910` and named
-the three that qualify to date: the CLI addon, the crypto addon, and ``pycrate``.
+the three that qualify: the CLI addon, the crypto addon, and ``pycrate``.
 
 On the tree, in :file:`pyproject.toml`:
 
@@ -226,9 +226,9 @@ these, so that its status is readable without opening it:
 
 Two things the board shows rather than the rule: ``wip`` and ``needs: decision``
 legitimately **co-occur**, when the bulk of an issue is being worked and one
-sub-question is held for the owner -- :issue:`918` itself was labelled that way while this
-page was being written. And an open issue with no state label at all is a gap rather
-than a category, which is worth checking for rather than assuming away:
+sub-question is held for the owner -- :issue:`918` itself was labelled that way. And
+an open issue with no state label at all is a gap rather than a category, which is
+worth checking for rather than assuming away:
 
 .. code-block:: shell
 

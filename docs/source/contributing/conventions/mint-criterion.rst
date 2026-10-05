@@ -143,6 +143,6 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
    Calling ``Cls(value)`` on a registry whose ``_missing_`` mints **mutates the
    class**. A probe is not a read: it installs a member that every later lookup then
    finds. :class:`~pcapkit.const.mh.cga_type.CGAType` is the one registry this applies
-   to today, but snapshot ``{member.value for member in Cls}`` before any lookup
+   to, but snapshot ``{member.value for member in Cls}`` before any lookup
    regardless, and use a throwaway process per registry when comparing behaviour across
    revisions.

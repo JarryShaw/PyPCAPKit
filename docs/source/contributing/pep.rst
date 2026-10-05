@@ -611,7 +611,7 @@ Writing the reassembler is the smaller half of the job. It would go at
 methods,
 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly` and
 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit`. Registering
-it, though, is currently inert:
+it, though, is inert:
 :meth:`~pcapkit.foundation.extraction.Extractor.register_reassembly` accepts any
 protocol name, while
 :class:`~pcapkit.foundation.extraction.Extractor` only ever instantiates the
@@ -996,7 +996,7 @@ dissectors later. The third format, the :rfc:`6088` traffic selectors of
 nobody has claimed it.
 
 **Wave 2 or 3 — per-entry coverage of the option and parameter registries.** The
-option, parameter, block and frame registries are *enumerated* today but not
+option, parameter, block and frame registries are *enumerated* but not
 *implemented* throughout: a code can be registered, and named, and still have no
 working per-entry read/make pair behind it. The goal of this item is to close
 that gap to zero for every code whose format is actually specified.

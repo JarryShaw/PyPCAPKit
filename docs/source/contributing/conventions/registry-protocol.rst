@@ -30,9 +30,9 @@ bespoke ``__new__`` exempts a registry from the template, not from the protocol.
 The Two-Tier Hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~
 
-:class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base any more. Since
-phase 1 of :issue:`877` it has a
-parent, and the line between them is whether the enumeration may *grow*:
+:class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base: per phase 1 of
+:issue:`877` it has a parent, and the line between them is whether the enumeration
+may *grow*:
 
 =================================================== ==============================================================
 :class:`~pcapkit.corekit.enum.EnumLookup`           ``get``, ``get_all``, ``_validate_value``
@@ -65,7 +65,7 @@ itself and broken ``int``, ``str`` and flag registries at once.
 *instead* of ``register``, and it answers the owner's other requirement: the base has
 to offer range-validation logic for its inheriting classes to hook into. The
 base implementation accepts everything; an override states a range, in the shape the
-generated registries currently spell by hand in ``_missing_``:
+generated registries spell by hand in ``_missing_``:
 
 .. code-block:: python
 
@@ -104,10 +104,9 @@ Three things about it are easy to get wrong:
 
    Re-parenting every non-registry enumeration onto
    :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
-   :issue:`877`, and it is now
-   **complete**: the phase landed for 24 of the 24 non-registry enumerations.
-   **Zero enumerations remain outside the hierarchy**, measured by the same runtime
-   walk over both the :mod:`enum` and ``aenum`` flavours that once found seven.
+   :issue:`877`, and it is **complete**: the phase landed for 24 of the 24
+   non-registry enumerations. **Zero enumerations remain outside the hierarchy**,
+   measured by a runtime walk over both the :mod:`enum` and ``aenum`` flavours.
 
 Failed-Lookup Exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -273,7 +272,7 @@ in **zero** of them, and neither class carried an alias (``__members__`` 6 and 4
 docstrings to refer to. Offered the choice between merging the widened copies and
 deleting them in a follow-up, the owner ruled for deleting them outright. Both
 ``get`` methods and both suppressions went with it, and
-:mod:`pcapkit.protocols.internet.mh` now defines no ``get`` at all.
+:mod:`pcapkit.protocols.internet.mh` defines no ``get`` at all.
 
 The one input where the copies **did** differ is why this matters beyond line count,
 and it is the trap for whoever writes the next override: the base branches on
@@ -476,7 +475,7 @@ That leaves the classes with something to decide:
        exactly as for the :class:`int` tier above; ``PDUKind``'s are :class:`str` ASN.1
        identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
        construction, so it lands the same way for a different reason.
-       **None** of the six defines a ``get`` of its own any more. Two did when this
+       **None** of the six defines a ``get`` of its own. Two did when this
        audit was taken --
        ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
        signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
@@ -519,7 +518,7 @@ wider than a case fix:
 * ``CommandType`` **and** ``ConformanceRequirement``. By parity with
   ``TransportProtocol`` -- an :class:`int`-valued enumeration whose *names* are the
   specification's own tokens -- the measured spelling disagreement above would make
-  these two case-insensitive. Nothing looks them up by string today, though: the
+  these two case-insensitive. Nothing looks them up by string, though: the
   crawler translates the CSV's lower-case letters to the upper-case member names at
   generation time. Both classes inherit
   :class:`~pcapkit.corekit.enum.EnumLookup`, since
@@ -540,11 +539,9 @@ rather than changing it.
 
 .. note::
 
-   The obstacle this page used to record -- that the base's string-key path does not
-   fall through to a value lookup, so an ``aenum.StrEnum`` registry would stop
-   resolving a valid value that is not also a name -- **no longer applies.**
-   :meth:`~pcapkit.corekit.enum.EnumLookup.get` now checks ``_value2member_map_``
-   when the name lookup misses, so such a value resolves:
+   :meth:`~pcapkit.corekit.enum.EnumLookup.get` checks ``_value2member_map_`` when
+   the name lookup misses, so an ``aenum.StrEnum`` registry still resolves a valid
+   value that is not also a name:
 
    .. code-block:: pycon
 
