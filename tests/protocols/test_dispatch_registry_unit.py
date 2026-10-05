@@ -10,7 +10,7 @@ table entry *resolves* to the right class object, and
 :file:`test_dispatch_bindings_unit.py` checks that eleven hand-picked codes
 actually parse a packet into the class the table names -- the property that
 matters, since a resolvable entry whose target cannot parse a packet is
-exactly what shipped once: :class:`~pcapkit.protocols.link.ospf.OSPF` was
+exactly what shipped once: :class:`~pcapkit.protocols.application.ospf.OSPF` was
 reachable from no table at all, per that module's own docstring.
 
 This module closes the gap the same way

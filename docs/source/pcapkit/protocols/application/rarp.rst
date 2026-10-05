@@ -1,10 +1,10 @@
 RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol
 ==========================================================
 
-.. module:: pcapkit.protocols.link.rarp
+.. module:: pcapkit.protocols.application.rarp
 
-:mod:`pcapkit.protocols.link.rarp` contains
-:class:`~pcapkit.protocols.link.rarp.RARP` only,
+:mod:`pcapkit.protocols.application.rarp` contains
+:class:`~pcapkit.protocols.application.rarp.RARP` only,
 which implements extractor for (Dynamic) Reverse
 Address Resolution Protocol (RARP/DRARP) [*]_,
 whose structure is described as below:
@@ -23,7 +23,7 @@ Octets      Bits        Name                    Description
   24        192   ``rarp.tpa``              Target Protocol Address
 ====== ========= ========================= =========================
 
-.. autoclass:: pcapkit.protocols.link.rarp.RARP
+.. autoclass:: pcapkit.protocols.application.rarp.RARP
    :no-members:
    :show-inheritance:
 
@@ -31,7 +31,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.link.rarp.DRARP
+.. autoclass:: pcapkit.protocols.application.rarp.DRARP
    :no-members:
    :show-inheritance:
 

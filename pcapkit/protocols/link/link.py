@@ -11,8 +11,7 @@ which is a base class for link layer protocols, e.g.
 :class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.arp.InARP`,
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`,
 :class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.ospf.OSPF`,
-:class:`~pcapkit.protocols.link.rarp.RARP`/:class:`~pcapkit.protocols.link.rarp.DRARP`
+:class:`~pcapkit.protocols.link.vlan.VLAN`
 and etc.
 
 """
@@ -48,7 +47,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol`
          - :class:`pcapkit.protocols.link.arp.ARP`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`
-         - :class:`pcapkit.protocols.link.rarp.RARP`
+         - :class:`pcapkit.protocols.application.rarp.RARP`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`
          - :class:`pcapkit.protocols.link.c_tag.C_Tag`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier`
@@ -76,7 +75,8 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp',      'ARP'),
-            Enum_EtherType.Reverse_Address_Resolution_Protocol: ModuleDescriptor('pcapkit.protocols.link.rarp',     'RARP'),
+            Enum_EtherType.Reverse_Address_Resolution_Protocol:
+                ModuleDescriptor('pcapkit.protocols.application.rarp', 'RARP'),
             # The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks
             # them -- the service tag's own next-EtherType is what selects the
             # customer tag -- so the two coexist in one frame rather than

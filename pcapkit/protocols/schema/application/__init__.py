@@ -27,6 +27,11 @@ from pcapkit.protocols.schema.application.httpv2 import \
 # NG Application Protocol
 from pcapkit.protocols.schema.application.ngap import NGAP
 
+# Open Shortest Path First
+from pcapkit.protocols.schema.application.ospf import OSPF
+from pcapkit.protocols.schema.application.ospf import \
+    CrytographicAuthentication as OSPF_CrytographicAuthentication
+
 __all__ = [
     # File Transfer Protocol
     'FTP',
@@ -43,4 +48,7 @@ __all__ = [
 
     # NG Application Protocol
     'NGAP',
+
+    # Open Shortest Path First
+    'OSPF', 'OSPF_CrytographicAuthentication',
 ]

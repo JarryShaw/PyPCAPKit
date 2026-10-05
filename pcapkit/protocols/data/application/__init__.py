@@ -43,6 +43,11 @@ from pcapkit.protocols.data.application.ngap import BitString as NGAP_BitString
 from pcapkit.protocols.data.application.ngap import Choice as NGAP_Choice
 from pcapkit.protocols.data.application.ngap import Sequence as NGAP_Sequence
 
+# Open Shortest Path First
+from pcapkit.protocols.data.application.ospf import OSPF
+from pcapkit.protocols.data.application.ospf import \
+    CrytographicAuthentication as OSPF_CrytographicAuthentication
+
 __all__ = [
     # File Transfer Protocol
     'FTP',
@@ -65,4 +70,7 @@ __all__ = [
     # NG Application Protocol
     'NGAP',
     'NGAP_IE', 'NGAP_Choice', 'NGAP_BitString', 'NGAP_Sequence',
+
+    # Open Shortest Path First
+    'OSPF', 'OSPF_CrytographicAuthentication',
 ]

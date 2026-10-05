@@ -112,8 +112,8 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
 
-    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP',   # Link Layer
-    'L2TPv2', 'OSPF', 'RARP', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP',            # Link Layer
+    'L2TPv2', 'S_Tag', 'VLAN',
 
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext', 'IPv6_Opts', 'IPv6_Route', 'MH',
@@ -122,7 +122,8 @@ __all__ = [
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
 
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP',
+    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF',
+    'RARP', 'DRARP',
 
     'Data',                                                 # Protocol Data
     'Schema',                                               # Protocol Schema

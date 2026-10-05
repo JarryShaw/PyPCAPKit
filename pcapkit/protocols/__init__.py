@@ -50,8 +50,7 @@ __all__ = [
     'Raw',
 
     # Link Layer
-    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2',
-    'OSPF', 'RARP', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'S_Tag', 'VLAN',
 
     # Internet Layer
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
@@ -67,6 +66,8 @@ __all__ = [
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
     'NGAP',
+    'OSPF',
+    'RARP', 'DRARP',
 ]
 
 #: dict[str, ~typing.Type[Protocol]]: Protocol registry.

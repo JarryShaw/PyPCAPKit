@@ -2,10 +2,10 @@
 """OSPF - Open Shortest Path First
 =====================================
 
-.. module:: pcapkit.protocols.link.ospf
+.. module:: pcapkit.protocols.application.ospf
 
-:mod:`pcapkit.protocols.link.ospf` contains
-:class:`~pcapkit.protocols.link.ospf.OSPF` only,
+:mod:`pcapkit.protocols.application.ospf` contains
+:class:`~pcapkit.protocols.application.ospf.OSPF` only,
 which implements extractor for Open Shortest Path
 First (OSPF) [*]_, whose structure is described
 as below:
@@ -43,12 +43,13 @@ from pcapkit.const.ospf.authentication import Authentication as Enum_Authenticat
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
-from pcapkit.protocols.data.link.ospf import \
+from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.data.application.ospf import OSPF as Data_OSPF
+from pcapkit.protocols.data.application.ospf import \
     CrytographicAuthentication as Data_CrytographicAuthentication
-from pcapkit.protocols.link.link import Link
-from pcapkit.protocols.schema.link.ospf import OSPF as Schema_OSPF
-from pcapkit.protocols.schema.link.ospf import \
+from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.schema.application.ospf import OSPF as Schema_OSPF
+from pcapkit.protocols.schema.application.ospf import \
     CrytographicAuthentication as Schema_CrytographicAuthentication
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -60,7 +61,6 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['OSPF']
@@ -69,24 +69,25 @@ __all__ = ['OSPF']
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
-class OSPF(Link[Data_OSPF, Schema_OSPF],
+class OSPF(Application[Data_OSPF, Schema_OSPF],
            schema=Schema_OSPF, data=Data_OSPF):
     """This class implements Open Shortest Path First.
 
-    The protocol is dispatched from :attr:`Internet.__proto__
-    <pcapkit.protocols.internet.internet.Internet.__proto__>` at
-    :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol number
-    89), since OSPF rides directly on IP rather than on a link-layer frame.
+    A routing protocol computes the forwarding table rather than forwarding
+    packets, so it is a *user* of the stack rather than part of its forwarding
+    path. :rfc:`1812#section-7` places it accordingly, titling that chapter
+    "APPLICATION LAYER - ROUTING PROTOCOLS" with OSPF at §7.2.2, while
+    :rfc:`1812#section-4.1` confines the internet layer to IP, ICMP and IGMP.
+    Hence :class:`~pcapkit.protocols.application.application.Application` as the
+    base, and ``layer == 'Application'``. See
+    :doc:`/contributing/conventions/protocol-layer-placement`.
 
     Note:
-        It nonetheless subclasses :class:`~pcapkit.protocols.link.link.Link` and
-        so reports ``layer == 'Link'``, which is not where a protocol carried
-        inside IP belongs. That is a pre-existing classification, kept because
-        moving the module would change its public import path. It is inert for
-        layer-limited extraction -- IPv4 and IPv6 terminate an ``internet``
-        extraction before OSPF is reached, and a ``link`` extraction stops at
-        Ethernet -- but :attr:`self.layer <pcapkit.protocols.link.link.Link.layer>`
-        does read ``'Link'`` on a parsed OSPF packet.
+        The subpackage does not track the dispatch tier. OSPF is still dispatched
+        from :attr:`Internet.__proto__
+        <pcapkit.protocols.internet.internet.Internet.__proto__>` at
+        :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol
+        number 89), since IP is what carries it.
 
     """
     #: Version number of corresponding protocol, as read off the header. Held on

@@ -6,7 +6,7 @@ tier and reads none of the generated captures under :file:`examples/captures/`.
 
 What it pins is that a *registered* code actually reaches a working dissector.
 The tables and the dissectors were previously able to disagree without anything
-noticing -- :class:`~pcapkit.protocols.link.ospf.OSPF` was reachable from no
+noticing -- :class:`~pcapkit.protocols.application.ospf.OSPF` was reachable from no
 table at all and could not have parsed a packet if it had been -- so each case
 asserts on the parsed protocol chain rather than on the table entry alone.
 

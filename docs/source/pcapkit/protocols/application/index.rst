@@ -6,7 +6,9 @@ Application Layer
 .. module:: pcapkit.protocols.schema.application
 
 :mod:`pcapkit.protocols.application` is collection of all protocols in
-application layer, with detailed implementation and methods.
+application layer, with detailed implementation and methods. Layer is decided by
+function rather than encapsulation, see
+:doc:`/contributing/conventions/protocol-layer-placement`.
 
 .. toctree::
    :maxdepth: 1
@@ -17,6 +19,8 @@ application layer, with detailed implementation and methods.
    httpv2
    ftp
    ngap
+   ospf
+   rarp
 
 .. todo::
 

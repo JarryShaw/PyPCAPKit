@@ -284,7 +284,7 @@ than trusted to stay current:
 Most of those want a dissector written and are covered by the stub list above.
 A handful wanted only a table entry, because the dissector was already there:
 
-* **Done.** :class:`~pcapkit.protocols.link.ospf.OSPF` is bound at
+* **Done.** :class:`~pcapkit.protocols.application.ospf.OSPF` is bound at
   ``TransType`` 89 (``OSPFIGP``) and
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
   ``__index__`` raises on both, which is correct: neither is reached through a
@@ -321,13 +321,12 @@ Three follow-ups the above deliberately left alone:
   being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and
   what ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F
   [:rfc:`2341`], a separate protocol, not an earlier L2TP.
-* :class:`~pcapkit.protocols.link.ospf.OSPF` and the
-  :class:`~pcapkit.protocols.link.l2tp.L2TP` family both live under
-  :mod:`pcapkit.protocols.link` and so report ``layer == 'Link'``, although one
-  is carried inside IP and the other inside UDP. Moving them would change their
-  public import paths, so the misclassification is documented rather than
-  fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
-  an ``internet`` extraction before either is reached.
+* The :class:`~pcapkit.protocols.link.l2tp.L2TP` family lives under
+  :mod:`pcapkit.protocols.link` and so reports ``layer == 'Link'``, although it
+  is carried inside UDP. That is deliberate: a tunnelling protocol is placed by what
+  it carries (:ref:`protocol-layer-placement`). It is inert for layer-limited
+  extraction, since IPv4 and IPv6 terminate an ``internet`` extraction before it
+  is reached.
 * **Done.** :attr:`TCP.__proto__
   <pcapkit.protocols.transport.tcp.TCP.__proto__>` and :attr:`UDP.__proto__
   <pcapkit.protocols.transport.udp.UDP.__proto__>` both point their HTTP ports at
@@ -748,7 +747,7 @@ Ten protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
 :class:`~pcapkit.protocols.internet.ipx.IPX`,
 :class:`~pcapkit.protocols.internet.mh.MH`,
-:class:`~pcapkit.protocols.link.ospf.OSPF`,
+:class:`~pcapkit.protocols.application.ospf.OSPF`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
 :class:`~pcapkit.protocols.transport.udp.UDP` — and exactly one of them checks

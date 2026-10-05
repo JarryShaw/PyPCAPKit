@@ -5,7 +5,7 @@
 .. module:: pcapkit.const.arp
 
 This module contains all constant enumerations of :class:`~pcapkit.protocols.link.arp.ARP`
-and :class:`~pcapkit.protocols.link.rarp.RARP` implementations. Available
+and :class:`~pcapkit.protocols.application.rarp.RARP` implementations. Available
 enumerations include:
 
 .. list-table::

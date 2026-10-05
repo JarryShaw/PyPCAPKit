@@ -12,6 +12,7 @@ House Conventions
    :mod:`pcapkit.const`, which is where the settled questions have mostly
    arisen. :ref:`sentinel-convention` governs :mod:`pcapkit.corekit`,
    :ref:`extension-header-subclassing` a protocol class hierarchy,
+   :ref:`protocol-layer-placement` which subpackage a dissector belongs in,
    :ref:`process` the repository rather than any of its code, and
    :ref:`documentation` the prose itself -- on these pages and in the API
    reference -- rather than any code at all.
@@ -31,5 +32,6 @@ House Conventions
    sentinel-convention
    registry-protocol
    extension-header-subclassing
+   protocol-layer-placement
    process
    documentation
