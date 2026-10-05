@@ -1322,6 +1322,18 @@ Flow tracing over the same capture went from 1416.6 ms to 744.0 ms, because the 
 dumper handed each record to a <code class="docutils literal notranslate"><span class="pre">Frame</span></code> constructor that re-dissected the whole
 stack to return the bytes it had just been given; options are no longer parsed twice
 either (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/427">#427</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">Extractor.engine</span></code> and <code class="docutils literal notranslate"><span class="pre">Extractor.record_header</span></code>: both
+are now declared to return <code class="docutils literal notranslate"><span class="pre">EngineBase[_P]</span></code> rather than <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, and the private
+<code class="docutils literal notranslate"><span class="pre">_exeng</span></code> attribute follows. Both built-in engines subclass <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code> directly,
+so neither was ever an <code class="docutils literal notranslate"><span class="pre">Engine</span></code>; the declaration now names the class the object
+has, and the <code class="docutils literal notranslate"><span class="pre">cast</span></code> calls that hid the gap now launder only the frame type
+parameter. Nothing is lost: <code class="docutils literal notranslate"><span class="pre">Engine</span></code> adds only the <code class="docutils literal notranslate"><span class="pre">__init_subclass__</span></code>
+registration hook, and the frame type parameter is preserved. Two things are
+visible to a type checker. Code passing the result to an <code class="docutils literal notranslate"><span class="pre">Engine</span></code>-typed
+parameter must now accept <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code>; and because the old declarations were
+<em>unparameterised</em>, <code class="docutils literal notranslate"><span class="pre">engine.read_frame()</span></code> and <code class="docutils literal notranslate"><span class="pre">record_header().read_frame()</span></code>
+used to be <code class="docutils literal notranslate"><span class="pre">Any</span></code> and are now the extractor’s own frame type, so an assignment
+that relied on <code class="docutils literal notranslate"><span class="pre">Any</span></code> there no longer type-checks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1022">#1022</a>).</p></li>
 </ul>
 </section>
 <section id="id6">

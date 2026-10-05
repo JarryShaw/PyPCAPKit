@@ -650,7 +650,7 @@
         <span class="c1">#: Extraction engine name.</span>
         <span class="n">_exnam</span><span class="p">:</span> <span class="s1">'Engines'</span>
         <span class="c1">#: Extraction engine instance.</span>
-        <span class="n">_exeng</span><span class="p">:</span> <span class="s1">'Engine[_P]'</span>
+        <span class="n">_exeng</span><span class="p">:</span> <span class="s1">'EngineBase[_P]'</span>
 
         <span class="c1">#: Input file object.</span>
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">'BufferedReader'</span>
@@ -821,7 +821,7 @@
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(trace=False)' object has no attribute 'trace'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Engine'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'EngineBase[_P]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""PCAP extraction engine."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span>
 
@@ -1090,10 +1090,10 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engine[_P]'</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP-NG file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engine[_P]'</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -1228,14 +1228,13 @@
 
 <div class="viewcode-block" id="Extractor.record_header">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_header">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Engine'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'EngineBase[_P]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read global header.</span>
 
 <span class="sd">        The method will parse the PCAP global header and save the parsed result</span>
 <span class="sd">        to its extraction context. Information such as PCAP version, data link</span>
-<span class="sd">        layer protocol type, nanosecond flag and byteorder will also be save</span>
-<span class="sd">        the current :class:`~pcapkit.foundation.engines.engine.Engine` instance</span>
-<span class="sd">        as well.</span>
+<span class="sd">        layer protocol type, nanosecond flag and byteorder are also saved on the</span>
+<span class="sd">        returned engine instance.</span>
 
 <span class="sd">        If TCP flow tracing is enabled, the nanosecond flag and byteorder will</span>
 <span class="sd">        be used for the output PCAP file of the traced TCP flows.</span>

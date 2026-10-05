@@ -572,7 +572,7 @@ gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>
 <p>The grouping scheme was settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level module, with</strong>
 <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
 per-file and not per-subpackage. The file carries <strong>9</strong> module-level sections holding
-155 entries, and no entry carries an inline kind label:</p>
+156 entries, and no entry carries an inline kind label:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
 0
 </pre></div>
@@ -634,7 +634,7 @@ has GitHub’s own defaults, of which <code class="docutils literal notranslate"
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
-29
+31
 </pre></div>
 </div>
 <p>One of those defaults carries a local ruling worth knowing: an issue closed as
@@ -698,12 +698,21 @@ were filed under it – though not all, several having been settled on a <code c
 <p><strong>State – what is happening to it now.</strong> An open issue is meant to carry one of
 these, so that its status is readable without opening it:</p>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pending</span></code> – accepted and unstarted: nobody is on it and nothing blocks it.
+The default for a freshly filed issue, and what <code class="docutils literal notranslate"><span class="pre">wip</span></code> reverts to if the work
+is abandoned without the issue being closed.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">wip</span></code> – in flight: a covering pull request is open, or an agent is on it.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">blocked</span></code> – deferred behind other work or a decision, with the last comment
 saying what unblocks it. The condition is meant to be <em>checkable</em> rather than
 remembered – a command someone else can run and get an answer from.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">decision</span></code> – waiting on the owner, and on nothing else.</p></li>
 </ul>
+<p>The four are <strong>mutually exclusive</strong>, so moving between them is a swap rather than an
+addition: dispatching work on a <code class="docutils literal notranslate"><span class="pre">pending</span></code> issue removes that label as it adds
+<code class="docutils literal notranslate"><span class="pre">wip</span></code>. <code class="docutils literal notranslate"><span class="pre">pending</span></code> exists because the alternative was an unlabelled issue, and
+nothing then distinguished <em>accepted but untouched</em> from <em>nobody has looked at the
+labels</em> – the two want different responses, and the second is a gap to close rather
+than a state to leave alone.</p>
 <p>Two things the board shows rather than the rule: <code class="docutils literal notranslate"><span class="pre">wip</span></code> and <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">decision</span></code>
 legitimately <strong>co-occur</strong>, when the bulk of an issue is being worked and one
 sub-question is held for the owner – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> itself was labelled that way. And
@@ -714,11 +723,18 @@ worth checking for rather than assuming away:</p>
 </pre></div>
 </div>
 <p><strong>Review – the cross-review verdict, at the current head.</strong> Separate from CI, which
-has a status of its own: <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> means no verdict for this head,
-either never reviewed or the head moved since; <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> and
-<code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">needs-changes</span></code> are the two verdicts. Because they are keyed on the head
-rather than on the pull request, a new push invalidates the label – a verdict that
-outlives the commit it was given on is worse than none.</p>
+has a status of its own. <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> means no verdict <strong>and nobody producing
+one</strong> – never reviewed, or the head moved since the last verdict; <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">running</span></code>
+means a cross-review is in flight against this head, so a verdict is coming;
+<code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> and <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">needs-changes</span></code> are the two verdicts. Because all
+four are keyed on the head rather than on the pull request, a new push invalidates the
+label – a verdict that outlives the commit it was given on is worse than none, and so
+is a <code class="docutils literal notranslate"><span class="pre">running</span></code> label pointing at a review of a commit that is no longer the head.</p>
+<p><code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">running</span></code> exists because the alternative was reading <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">pending</span></code> two
+ways. A sweep that treats pending as “needs a reviewer dispatched” will dispatch one on
+top of a review already in progress, and the second verdict then arrives against a head
+the first was never given. Separating the two makes <em>which pull requests still need a
+reviewer</em> answerable from the board rather than from memory of what was dispatched.</p>
 <p><strong>Scope.</strong> <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> are dependabot’s, per above.
 <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> is the same kind of label – it scopes a change to the workflows –
 but nothing applies it automatically, because dependabot is not configured for that
