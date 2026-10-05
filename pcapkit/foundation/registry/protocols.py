@@ -302,9 +302,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
     r"""Register ``protocol`` into the next-layer dispatch registry (or
     registries) named by ``code``.
 
-    This is what backs the ``code`` keyword of
-    :meth:`ProtocolBase.__init_subclass__
-    <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`; it can also
+    This is what backs the ``code`` class keyword of
+    :class:`~pcapkit.protocols.protocol.ProtocolBase` subclasses; it can also
     be called directly to register a class that declined at class-definition
     time.
 

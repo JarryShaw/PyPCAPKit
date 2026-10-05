@@ -4,10 +4,7 @@
 
 .. module:: pcapkit.toolkit.pypcap
 
-:mod:`pcapkit.toolkit.pypcap` contains all you need for
-:mod:`pcapkit` handy usage with `PyPCAP`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.pypcap` contains the adapters for the `PyPCAP`_ engine.
 
 .. _PyPCAP: https://github.com/pynetwork/pypcap
 

@@ -96,7 +96,7 @@ formatter = logging.Formatter(fmt=DEFAULT_FORMAT, datefmt=DEFAULT_DATE_FORMAT)
 #: logging.StreamHandler: The historical :obj:`sys.stderr` handler. It is only
 #: *attached* under :envvar:`PCAPKIT_DEVMODE`; it is constructed unconditionally
 #: so that ``logger.addHandler(handler)`` remains a one-line way back to the
-#: pre-1.4 default output.
+#: pre-1.5 default output.
 handler = logging.StreamHandler(sys.stderr)
 handler.setFormatter(formatter)
 
@@ -287,7 +287,7 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
             one is meant to receive ``fmt`` would be ambiguous.
 
     Example:
-        Restore the pre-1.4 default of :obj:`sys.stderr` at
+        Restore the pre-1.5 default of :obj:`sys.stderr` at
         :data:`logging.INFO`::
 
            configure(logging.INFO, stream=sys.stderr)

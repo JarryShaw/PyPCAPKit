@@ -4,10 +4,10 @@
 
 .. module:: pcapkit.toolkit.scapy
 
-:mod:`pcapkit.toolkit.scapy` contains all you need for
-:mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.scapy` contains the adapters for the `Scapy`_ engine.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. _Scapy: https://scapy.net
 
