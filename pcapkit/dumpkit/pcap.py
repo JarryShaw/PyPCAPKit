@@ -41,7 +41,7 @@ _RECORD_HEADER = {
 }
 
 #: Truncation mask for those four fields. :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,
-#: which used to pack them, masks to the field width in
+#: the field class that would otherwise pack them, masks to the field width in
 #: :meth:`~pcapkit.corekit.fields.numbers.NumberField.pre_process` rather than
 #: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` was written as
 #: ``5``. :func:`struct.pack` raises instead, so the mask is applied here to keep
@@ -94,7 +94,7 @@ class PCAPIO(DumperBase):
         """
         #: int: Frame counter.
         self._fnum = 1
-        # NOTE: Both of these now only record how the dumper was configured -- the
+        # NOTE: Both of these only record how the dumper was configured -- the
         # values that shape the output reach it through :meth:`self._dump_header
         # <_dump_header>`'s own arguments, and are readable afterwards from
         # :attr:`self._ghdr <_ghdr>`. They are kept because they are part of the

@@ -327,7 +327,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         # protocol class, so neither is an honest stand-in for "unknown link
         # type" and this must not paper over the miss with either. An
         # IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is
-        # not a LinkType member name, and now raises. Note the asymmetry, which
+        # not a LinkType member name, and raises. Note the asymmetry, which
         # is not a choice made here: an IPv6-rooted packet's name uppercases to
         # ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it
         # resolves silently -- to a DLT the caller never chose. Only the v4 name

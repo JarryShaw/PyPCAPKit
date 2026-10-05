@@ -9,7 +9,7 @@
    This module requires ``emoji`` package to be installed.
 
 :mod:`pcapkit.__main__` was originally the module file of
-|jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
+|jspcapy|_, which is deprecated and merged with :mod:`pcapkit`.
 
 .. |jspcapy| replace:: ``jspcapy``
 .. _jspcapy: https://github.com/JarryShaw/jspcapy
@@ -87,10 +87,10 @@ def get_parser() -> 'ArgumentParser':
     # ``-L Internet`` working, as it did before the choices were declared, since
     # ``Extractor.__init__`` lowercases the value anyway.
     #
-    # The defaults are :data:`None` and not the ``'None'``/``'null'`` strings they
-    # used to be: ``Extractor.__init__`` substitutes its own sentinels for an
-    # omitted value, so passing the strings only worked because it happened to
-    # lowercase ``'None'`` into the sentinel it wanted.
+    # The defaults are :data:`None` and not the ``'None'``/``'null'`` strings:
+    # ``Extractor.__init__`` substitutes its own sentinels for an
+    # omitted value, so passing the strings would only work because it happens to
+    # lowercase ``'None'`` into the sentinel it wants.
     parser.add_argument('-L', '--layer', action='store', dest='layer', default=None, metavar='LAYER',
                         type=str.lower, choices=['link', 'internet', 'transport', 'application', 'none'],
                         help='Indicate extract frames until which layer.')

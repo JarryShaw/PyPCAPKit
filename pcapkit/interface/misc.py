@@ -41,9 +41,9 @@ if TYPE_CHECKING:
     #: <pcapkit.foundation.extraction.Extractor.__output__>` and in
     #: :attr:`TraceFlowBase.__output__
     #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
-    #: registries expose the same eight keys. This used to name only four of them,
-    #: which made ``'cap'`` and the ``'txt'``/``'xml'`` aliases unspellable for a
-    #: type checker even though every one of them is accepted at runtime.
+    #: registries expose the same eight keys, which resolve to four dumpers (``'cap'`` to
+    #: ``'pcap'``, ``'xml'`` to ``'plist'``, ``'text'`` and ``'txt'`` to ``'tree'``), so the
+    #: ``Literal`` lists all eight for a type checker to accept every spelling the runtime does.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
     # both copies need updating when a new engine lands.
@@ -122,8 +122,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     # ``'pcap'``, so following a stream through either engine would crash *during
     # extraction*, before the reassembly below ever runs.
     #
-    # :class:`Extractor <pcapkit.foundation.extraction.Extractor>` now guards both
-    # engines itself, so this is no longer what keeps the extraction alive -- it is
+    # :class:`Extractor <pcapkit.foundation.extraction.Extractor>` guards both
+    # engines itself, so this is not what keeps the extraction alive -- it is
     # what keeps it *quiet*. The two guards choose the same replacement format and so
     # produce byte-identical traces; they differ only in when they complain. The
     # Extractor warns for every substitution it makes, including the one nobody asked

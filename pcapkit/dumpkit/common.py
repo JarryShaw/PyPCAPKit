@@ -121,12 +121,11 @@ class Dumper(DumperBase):
         has guarded on its own ``code`` keyword all along.
 
         Note:
-            The previous behaviour inferred ``fmt`` from the subclass'
-            :attr:`~dictdumper.dumper.Dumper.kind` property, which it could
-            only read off an *instance* -- so it constructed one against a
-            :func:`tempfile.NamedTemporaryFile` while the ``class`` statement
-            was still executing. Guarding on ``fmt`` removes that: a class
-            definition no longer touches the filesystem.
+            Inferring ``fmt`` from the subclass'
+            :attr:`~dictdumper.dumper.Dumper.kind` property would need an
+            *instance*, hence a :func:`tempfile.NamedTemporaryFile` created while
+            the ``class`` statement is still executing. Guarding on ``fmt``
+            avoids that: a class definition does not touch the filesystem.
 
         See Also:
             - :func:`pcapkit.foundation.registry.foundation.register_dumper`
@@ -244,7 +243,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # double-escape those three. :class:`~dictdumper.xml.XML` itself defines
     # no ``_append_string`` of its own -- its own module docstring says not to
     # use it directly -- so :class:`~dictdumper.plist.PLIST` is the only
-    # concrete writer this applies to today.
+    # concrete writer this applies to.
     escape_strings = issubclass(output, dictdumper.plist.PLIST)
 
     def escape_key(key: 'Any') -> 'Any':

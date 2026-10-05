@@ -149,7 +149,7 @@ def beholder(
             # ProtocolUnbound('unknown field: payload') *from the recovery path*,
             # turning a next-layer parse failure that should have degraded to
             # Raw into a crash. Unreachable until something was registered on an
-            # SCTP payload protocol identifier, which NGAP now is.
+            # SCTP payload protocol identifier, which NGAP is.
             file_ = self._get_payload()
 
             # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
@@ -209,7 +209,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         nonetheless promised implementors a trailing ``*args, **kwargs``, which
         the wrapper below never populated. A caller relying on that promise
         got extras silently discarded instead of forwarded -- see :issue:`454` -- so the
-        wrapper now raises :exc:`TypeError` for a fifth positional argument or
+        wrapper raises :exc:`TypeError` for a fifth positional argument or
         an unconsumed keyword, the same as an ordinary call with too many
         arguments would.
 
