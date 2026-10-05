@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import ast
 import importlib.util
+import inspect
 import io
 import pathlib
 import sys
 import tempfile
 import types
+import typing
 import unittest
 import warnings
 from unittest import mock
@@ -157,6 +160,52 @@ class ExtractorTests(unittest.TestCase):
             _ = unsupported.reassembly
         with self.assertRaises(UnsupportedCall):
             _ = unsupported.trace
+
+    def test_declared_engine_type_is_satisfied_by_the_built_in_engines(self) -> None:
+        """``_exeng``, ``engine`` and ``record_header`` must name a type the engine holds.
+
+        Both built-in engines subclass :class:`~pcapkit.foundation.engines.engine.EngineBase`
+        directly (so that they are not auto-registered), hence neither is an
+        :class:`~pcapkit.foundation.engines.engine.Engine`. The three declarations
+        used to say ``Engine`` and two ``cast`` calls hid the gap (#1022).
+        """
+        import pcapkit.foundation.extraction as module
+        from pcapkit.foundation.engines.pcap import PCAP
+        from pcapkit.foundation.engines.pcapng import PCAPNG
+        from pcapkit.foundation.extraction import Extractor
+
+        # ``_exeng`` is annotated under ``TYPE_CHECKING`` only, so it is not visible
+        # to ``get_type_hints``: read the annotation out of the module source.
+        tree = ast.parse(inspect.getsource(module))
+        klass = next(node for node in tree.body
+                     if isinstance(node, ast.ClassDef) and node.name == 'Extractor')
+        found = [node for node in ast.walk(klass)
+                 if isinstance(node, ast.AnnAssign)
+                 and isinstance(node.target, ast.Name) and node.target.id == '_exeng']
+        self.assertEqual(len(found), 1)
+        node = found[0].annotation
+        # quoted (``'EngineBase[_P]'``) or bare (``EngineBase[_P]``) spelling
+        source = node.value if isinstance(node, ast.Constant) else ast.unparse(node)
+        attribute = eval(source, vars(module))  # pylint: disable=eval-used
+
+        declared = {
+            '_exeng': attribute,
+            'engine': typing.get_type_hints(Extractor.engine.fget, vars(module))['return'],
+            'record_header': typing.get_type_hints(Extractor.record_header, vars(module))['return'],
+        }
+        # The frame type parameter is what lets mypy check ``read_frame()`` against
+        # ``Extractor.__next__``'s ``_P``; a bare class would silently make it ``Any``.
+        for name, hint in declared.items():
+            with self.subTest(declaration=name, check='parameterised'):
+                self.assertTrue(typing.get_args(hint),
+                                f'{name} is declared {hint!r}, which drops the frame type parameter')
+        for name, hint in declared.items():
+            origin = typing.get_origin(hint) or hint
+            for engine in (PCAP, PCAPNG):
+                with self.subTest(declaration=name, engine=engine.__name__):
+                    self.assertTrue(issubclass(engine, origin),
+                                    f'{name} is declared {hint!r}, which {engine.__name__} '
+                                    'does not subclass')
 
     def test_register_helpers_validate_descriptors_and_overwrite_warnings(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
