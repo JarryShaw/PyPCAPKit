@@ -7,16 +7,16 @@ Scapy Tools
 
 .. module:: pcapkit.toolkit.scapy
 
-:mod:`pcapkit.toolkit.scapy` contains all you need for
-:mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.scapy` contains the adapters for the `Scapy`_ engine.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. _Scapy: https://scapy.net
 
 .. warning::
 
-   This module requires installed `Scapy`_ engine.
+   This module requires `Scapy`_ to be installed.
 
 .. autofunction:: pcapkit.toolkit.scapy.ipv4_reassembly
 
@@ -38,10 +38,10 @@ DPKT Tools
 
 .. module:: pcapkit.toolkit.dpkt
 
-:mod:`pcapkit.toolkit.dpkt` contains all you need for
-:mod:`pcapkit` handy usage with `DPKT`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.dpkt` contains the adapters for the `DPKT`_ engine.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. _DPKT: https://dpkt.readthedocs.io
 
@@ -67,18 +67,17 @@ PyShark Tools
 
 .. module:: pcapkit.toolkit.pyshark
 
-:mod:`pcapkit.toolkit.pyshark` contains all you need for
-:mod:`pcapkit` handy usage with `PyShark`_ engine. All
-reforming functions returns with a flag to indicate if
-usable for its caller.
+:mod:`pcapkit.toolkit.pyshark` contains the adapters for the `PyShark`_ engine.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 .. note::
 
-   Due to the lack of functionality of `PyShark`_, some
-   functions of :mod:`pcapkit` may not be available with
-   the `PyShark`_ engine.
+   Some :mod:`pcapkit` functions may not be available with the `PyShark`_ engine,
+   for lack of the corresponding `PyShark`_ functionality.
 
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
@@ -96,18 +95,15 @@ PyPCAP Tools
 
 .. module:: pcapkit.toolkit.pypcap
 
-:mod:`pcapkit.toolkit.pypcap` contains all you need for
-:mod:`pcapkit` handy usage with `PyPCAP`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.pypcap` contains the adapters for the `PyPCAP`_ engine.
 
 .. _PyPCAP: https://github.com/pynetwork/pypcap
 
 .. note::
 
    `PyPCAP`_ performs no protocol dissection, so the reassembly and flow tracing
-   adapters below cannot be implemented. They are defined all the same, so that
-   reaching for one fails with an explanatory
+   adapters below cannot be implemented. They are defined anyway, so that
+   calling one fails with an explanatory
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
    :exc:`ImportError`.
 
@@ -131,10 +127,7 @@ pcap-ct Tools
 
 .. module:: pcapkit.toolkit.pcap_ct
 
-:mod:`pcapkit.toolkit.pcap_ct` contains all you need for
-:mod:`pcapkit` handy usage with `pcap-ct`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.pcap_ct` contains the adapters for the `pcap-ct`_ engine.
 
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
@@ -146,8 +139,8 @@ its caller.
    one cannot quietly alter the other.
 
    Like `PyPCAP`_ it performs no protocol dissection, so the reassembly and flow
-   tracing adapters below cannot be implemented. They are defined all the same,
-   so that reaching for one fails with an explanatory
+   tracing adapters below cannot be implemented. They are defined anyway, so
+   that calling one fails with an explanatory
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
    :exc:`ImportError`.
 
@@ -171,10 +164,10 @@ PyPCAPFile Tools
 
 .. module:: pcapkit.toolkit.pypcapfile
 
-:mod:`pcapkit.toolkit.pypcapfile` contains all you need for
-:mod:`pcapkit` handy usage with `PyPCAPFile`_ engine. All reforming
-functions returns with a flag to indicate if usable for
-its caller.
+:mod:`pcapkit.toolkit.pypcapfile` contains the adapters for the `PyPCAPFile`_ engine.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 

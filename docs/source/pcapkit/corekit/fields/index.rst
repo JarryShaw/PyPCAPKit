@@ -3,8 +3,8 @@ Protocol Fields
 
 .. module:: pcapkit.corekit.fields
 
-:mod:`pcapkit.corekit.fields` is collection of protocol fields,
-descriptive of the structure of protocol headers.
+:mod:`pcapkit.corekit.fields` is the collection of protocol fields that
+describe the structure of protocol headers.
 
 .. toctree::
    :maxdepth: 2
@@ -16,10 +16,9 @@ descriptive of the structure of protocol headers.
    collections
    misc
 
-All field classes are implemented as :class:`~pcapkit.corekit.fields.field.FieldBase`
-subclasses, which are responsible for parsing and/or formatting the field value
-following the pre-defined mechanisms. Below is a brief diagram of the class
-hierarchy of :mod:`pcapkit.corekit.fields`:
+Every field class is a :class:`~pcapkit.corekit.fields.field.FieldBase`
+subclass, responsible for parsing and/or formatting the field value. The class
+hierarchy:
 
 .. mermaid::
 

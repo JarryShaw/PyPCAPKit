@@ -7,8 +7,8 @@ PCAP Support
 
 .. module:: pcapkit.foundation.engines.pcap
 
-This module contains the implementation for PCAP file extraction
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+:mod:`pcapkit.foundation.engines.pcap` is the PCAP extraction engine used by
+:class:`pcapkit.foundation.extraction.Extractor`.
 
 .. autoclass:: pcapkit.foundation.engines.pcap.PCAP
    :no-members:
@@ -35,8 +35,8 @@ PCAP-NG Support
 
 .. module:: pcapkit.foundation.engines.pcapng
 
-This module contains the implementation for PCAP-NG file extraction
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+:mod:`pcapkit.foundation.engines.pcapng` is the PCAP-NG extraction engine used
+by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. autoclass:: pcapkit.foundation.engines.pcapng.PCAPNG
    :no-members:
@@ -60,12 +60,12 @@ Internal Definitions
 
    .. important::
 
-      We do not store any packet blocks, e.g.,
+      Packet blocks --
       :class:`~pcapkit.protocols.data.misc.pcapng.PacketBlock`,
-      :class:`~pcapkit.protocols.data.misc.pcapng.SimplePacketBlock`,
-      and :class:`~pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock`,
-      in the :class:`Context` object, as they will be directly
-      stored in the :class:`~pcapkit.foundation.extraction.Extractor`.
+      :class:`~pcapkit.protocols.data.misc.pcapng.SimplePacketBlock` and
+      :class:`~pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock` -- are
+      not stored in :class:`Context`, since the
+      :class:`~pcapkit.foundation.extraction.Extractor` stores them directly.
 
    .. autoattribute:: section
    .. autoattribute:: interfaces
