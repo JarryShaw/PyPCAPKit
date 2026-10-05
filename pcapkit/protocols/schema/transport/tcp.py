@@ -255,41 +255,17 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
     Note:
         This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector
         rather than a :class:`~pcapkit.corekit.fields.misc.ConditionalField`
-        wrapping ``NumberField(length=lambda pkt: ...)``, which is what it was
-        until :issue:`576`.
+        wrapping ``NumberField(length=lambda pkt: ...)``. An unextended Data ACK
+        is 4 octets, so a width lambda returning ``0`` for it would leave the
+        ``length`` octet counting 4 octets that were never packed.
 
-        The width lambda read ``8 if pkt['flags']['a'] else 0`` -- **0**, not 4 --
-        so an unextended Data ACK packed no octets at all while the ``length``
-        octet still counted 4 for it. That is the defect :issue:`576` records: the option
-        went onto the wire 4 (or 8, with ``dsn`` too) octets shorter than it
-        declared, and the ``ack`` value the caller supplied was simply not
-        present.
-
-        Correcting the lambda to ``8 if ... else 4`` would not have worked *at the
-        time*, because :class:`~pcapkit.corekit.fields.numbers.NumberField` could
-        not pack a callable length at all: it called ``build_template`` once at
-        ``__init__`` with the placeholder length ``-1``, which latched
-        ``_need_process = True``, and nothing cleared that flag when ``__call__``
-        later resolved the real length and rebuilt the template as ``>I``/``>Q``.
-        ``pre_process`` then handed :func:`struct.pack` bytes for an integer
-        template and it raised ``struct.error: required argument is not an
-        integer``. Measured on the 8-octet form, which the old lambda did reach:
-        ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that.
-
-        That half is now history: :issue:`591` **fixed it**, in
-        :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix
-        belonged, by recomputing ``_need_process`` from the width actually in
-        force instead of once from the placeholder. A callable-length
-        ``NumberField`` packs and unpacks both the 4- and the 8-octet form today,
-        so ``ConditionalField(NumberField(length=...), lambda pkt:
-        pkt['flags']['A'])`` would express this field correctly. Nor was wire
-        *absence* ever the obstacle: :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len`
-        and :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the
-        sibling ``M`` flag, so this very class already leans on that wrapper to
-        keep a field off the wire.
-
-        The ``SwitchField`` form is kept anyway, for a narrower reason about
-        composition rather than about absence. A
+        The ``ConditionalField`` form could express this field correctly, since a
+        callable-length ``NumberField`` packs and unpacks both the 4- and the
+        8-octet form, and wire *absence* is no obstacle:
+        :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len` and
+        :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the sibling
+        ``M`` flag. The ``SwitchField`` form is kept for a narrower reason about
+        composition. A
         :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``
         forwards to the wrapped field unconditionally, never consulting the
         condition, so reading it while the condition is false -- the wrapped field
@@ -302,7 +278,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         special case: its selector always hands back an already-concrete field,
         :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its
         ``length`` is safe wherever it is read. Swapping the two would be a
-        behaviour change, not a tidy-up, and :issue:`603` does not make it.
+        behaviour change, not a tidy-up.
 
     """
     if not pkt['flags']['A']:
@@ -330,12 +306,9 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
           :class:`~pcapkit.corekit.fields.numbers.UInt32Field` instance.
 
     Note:
-        Identical in shape to :func:`mptcp_dss_ack_selector`, and it replaces the
-        identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']
-        else 0, ...)``. See that function's note for why the ``0`` was wrong, why a
-        corrected lambda would not have packed either *at the time*, and why the
-        ``SwitchField`` form is kept now that :issue:`591` has made a callable length work.
-        C.f. :issue:`576`, :issue:`591`.
+        Identical in shape to :func:`mptcp_dss_ack_selector`; see that function's
+        note for why a ``SwitchField`` is used in place of a
+        ``ConditionalField`` around a callable-length ``NumberField``.
 
     """
     if not pkt['flags']['M']:
@@ -389,16 +362,15 @@ class PortEnumField(EnumField):
         Returns:
             Processed field value -- the registry member declared for the
             port, or an unregistered member of the same registry, carrying
-            the port itself, when the registry declares none. See GitHub
-            issue :issue:`575`.
+            the port itself, when the registry declares none.
 
         Notes:
             :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
             member -- via :func:`aenum.extend_enum` -- for any port neither an
             existing row nor one of :meth:`_missing_`'s documented IANA spans
             accounts for, which in practice means the ephemeral/dynamic range.
-            Calling it unconditionally on every parsed port therefore grew the
-            registry without bound. This peeks at the registry
+            Calling it on every parsed port would therefore grow the registry
+            without bound. This peeks at the registry
             :meth:`~pcapkit.const.reg.apptype.AppType.get` itself would
             consult -- its per-port rows via ``__registry__.getlist``, then
             its documented spans via ``_missing_`` -- and only calls
@@ -409,30 +381,24 @@ class PortEnumField(EnumField):
             A port outside this field's own width is rejected *before* any of
             that, rather than being let through to :meth:`_missing_` and
             caught alongside a genuine miss. Both are a bare :exc:`ValueError`
-            with nothing to tell them apart by type, and GitHub issue :issue:`758`
-            gave the out-of-range case a deliberate, ``breaking``-tagged
-            rejection specifically so it would stop being minted over -- a
+            with nothing to tell them apart by type, and
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` rejects the
+            out-of-range case deliberately, so that it is never minted over -- a
             catch keyed on exception type alone cannot see the difference
             between that and :mod:`aenum`'s own "no member has this value",
-            so it would absorb both and quietly revert :issue:`758` for these four
-            fields. Checking the width first needs no exception-based
-            distinction at all: it asks the same question :meth:`_missing_`
-            would eventually ask, and asks it in a way that never manufactures
-            the bare :exc:`ValueError` this method would otherwise have to
-            tell apart from a foreign one. ``self.length`` is the field's own
-            declared byte width (``2`` for every caller of this class, hence
-            ``0``-``65535``) rather than a hard-coded ``65535`` borrowed from
+            so it would absorb both and quietly turn the rejection into a
+            miss. Checking the width first needs no exception-based
+            distinction at all. ``self.length`` is the field's own declared byte
+            width (``2`` for every caller of this class, hence ``0``-``65535``)
+            rather than a hard-coded ``65535`` borrowed from
             :meth:`~pcapkit.const.reg.apptype.AppType._missing_`'s own guard,
-            so the two stay in lockstep by construction: whatever width this
-            field is ever given, the range checked here is exactly the range a
-            value of that width can hold, no more permissive and no more
-            restrictive.
+            so the two stay in lockstep by construction.
 
         """
         value = super(EnumField, self).post_process(value, packet)
         proto = Enum_TransportProtocol.tcp
         if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
-            # NOTE: lets AppType.get() -- unmodified -- raise #758's rejection
+            # NOTE: lets AppType.get() -- unmodified -- raise its rejection
             # for a port this field's own width cannot represent, rather than
             # risking it being absorbed below as a foreign miss.
             return self._namespace.get(value, proto=proto)
@@ -444,21 +410,20 @@ class PortEnumField(EnumField):
                 # NOTE: value is already known to be in-width here, so this
                 # ValueError is aenum's own "no member has this value" for an
                 # in-range but unassigned port -- a foreign miss, absorbed --
-                # never #758's out-of-range rejection, which never reaches
+                # never the out-of-range rejection, which never reaches
                 # this branch. A pcapkit.utilities.exceptions error is still a
                 # deliberate registry decision and propagates unchanged.
                 if isinstance(error, BaseError):
                     raise
                 declared = None
             if declared is None:
-                # NOTE: an unregistered member of ``owner`` itself, per GitHub
-                # issue #575's owner ruling -- see EnumField._unregistered_member
-                # -- rather than a foreign pseudo-enum. ``.port``, ``.svc`` and
-                # ``.proto`` are what a real AppType member carries -- read
-                # unconditionally by e.g. Transport._decode_next_layer's
-                # ``srcport.port`` -- and ``svc='unknown'`` matches what the
-                # mint this replaces used to name it. They are passed in the
-                # order AppType.__new__ sets them, because
+                # NOTE: an unregistered member of ``owner`` itself, per the
+                # ruling in EnumField._unregistered_member, rather than a foreign
+                # pseudo-enum. ``.port``, ``.svc`` and ``.proto`` are what a real
+                # AppType member carries -- read unconditionally by e.g.
+                # Transport._decode_next_layer's ``srcport.port`` -- and
+                # ``svc='unknown'`` marks a port with no declared service. They
+                # are passed in the order AppType.__new__ sets them, because
                 # DictDumper.object_hook renders a member's addon keys straight
                 # out of its ``__dict__`` in insertion order -- so any other
                 # order here would make an unassigned port dump ``port`` before
@@ -766,9 +731,7 @@ class _MPTCP(Schema):
     #: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,
     #: ``length`` in bits 8-15, and the subtype in bits 16-19 of this 3-octet
     #: window -- which is why ``subtype`` reads from bit 16 and ``length`` has
-    #: to read from bit 8. It read from bit 1 until :issue:`553`, straddling the low
-    #: seven bits of ``kind`` and the high bit of ``length``, so a 12-octet
-    #: MP_CAPABLE (``1e 0c 01``) decoded its length as 60.
+    #: to read from bit 8.
     test: 'MPTCPSubtypeTest' = ForwardMatchField(BitField(length=3, namespace={
         'length': (8, 8),
         'subtype': (16, 4),
@@ -819,12 +782,12 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
     # octet as a result, which is where its ``test`` (subtype/flags) field
     # expects to read from.
     #
-    # Before this, both directions were broken: packing rejected ``kind=``/
-    # ``length=`` from the ``_make_mptcp_*`` makers with ``UnknownFieldWarning``
-    # and then ``KeyError: 'length'`` the moment a sibling field's condition
-    # (e.g. ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read
-    # ``pkt['length']``; unpacking silently misread the ``kind`` octet as the
-    # subtype/flags octet, since nothing had consumed it first. C.f. #541.
+    # Without them, packing would reject ``kind=``/``length=`` from the
+    # ``_make_mptcp_*`` makers with ``UnknownFieldWarning`` and then
+    # ``KeyError: 'length'`` the moment a sibling field's condition (e.g.
+    # ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read ``pkt['length']``;
+    # unpacking would misread the ``kind`` octet as the subtype/flags octet,
+    # since nothing had consumed it first.
     #: Option kind.
     kind: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
     #: MPTCP length.
@@ -844,9 +807,7 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
     # have. So this attribute is populated by the *construction* path instead
     # -- :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp` sets it
     # right after building the subtype-specific schema, mirroring exactly what
-    # :meth:`_MPTCP.post_process` already does for real unpacking. C.f. #566,
-    # the third and last ``TYPE_CHECKING``-only attribute this class had; the
-    # other two (``kind``, ``length``) were fixed in #541.
+    # :meth:`_MPTCP.post_process` already does for real unpacking.
     if TYPE_CHECKING:
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
@@ -888,9 +849,7 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
     #: Option receiver's key.
     #:
     #: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key
-    #: and 20 octets with it, so the field is present only for the latter --
-    #: not, as it read until :issue:`567`, for every length *except* 32, which is not
-    #: an MP_CAPABLE length either RFC form uses.
+    #: and 20 octets with it, so the field is present only for the latter.
     rkey: 'int' = ConditionalField(
         UInt64Field(),
         lambda pkt: pkt['length'] == 20,
@@ -981,8 +940,8 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     #:
     #: 4 octets when ``A`` is set, 8 when ``a`` is set as well, absent otherwise --
     #: :rfc:`8684` section 3.3 figure 9. Both the presence test and the width live
-    #: in :func:`mptcp_dss_ack_selector`, whose note records what this field
-    #: declared until :issue:`576` and why the switch form is kept.
+    #: in :func:`mptcp_dss_ack_selector`, whose note explains why the switch form
+    #: is used.
     ack: 'int' = SwitchField(
         selector=mptcp_dss_ack_selector,
     )
@@ -1103,12 +1062,10 @@ class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
     #: :rfc:`8684` section 3.5 figure 14 spends a whole 32-bit row on
     #: ``Kind``/``Length``/``Subtype``/``(reserved)``, i.e. the subtype's 4 bits
     #: are followed by **12** reserved bits, not 4 -- so the subtype-and-reserved
-    #: part is 2 octets and the option is 12 octets in total. Until :issue:`576` this
-    #: field did not exist and ``test`` was the only octet between ``length`` and
-    #: ``key``, so the schema packed **11** octets against a ``length`` of 12.
-    #: Declared the same way :class:`MPTCPJoinACK` declares its own reserved
-    #: octet, for the same reason: a wider ``test`` would make the reserved bits
-    #: look like part of the subtype namespace.
+    #: part is 2 octets and the option is 12 octets in total. Declared the same
+    #: way :class:`MPTCPJoinACK` declares its own reserved octet, for the same
+    #: reason: a wider ``test`` would make the reserved bits look like part of
+    #: the subtype namespace.
     reserved: 'bytes' = PaddingField(length=1)
     #: Option receiver's key.
     key: 'int' = UInt64Field()
