@@ -124,6 +124,118 @@ class PCAPNGUnitTests(unittest.TestCase):
             record_map[RecordType.nrb_record_end] = originals[2]
             secrets_map[SecretsType.TLS_Key_Log] = originals[3]
 
+    def test_pcapng_record_registry_warning_names_the_name_resolution_record(self) -> None:
+        # #1038: the warning used to call an ``nrb_record_*`` entry a
+        # "systemd(1) journal export record", with a literal reST role.
+        from pcapkit.const.pcapng.record_type import RecordType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        record_map = PCAPNG.__dict__['__record__']
+        original = record_map[RecordType.nrb_record_end]
+        try:
+            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+                PCAPNG.register_record(RecordType.nrb_record_end, 'end')
+        finally:
+            record_map[RecordType.nrb_record_end] = original
+
+        message = warn.call_args.args[0]
+        self.assertIn('name resolution record already registered', message)
+        self.assertNotIn('journal export', message)
+        self.assertNotIn(':manpage:', message)
+
+    def test_pcapng_name_resolution_option_guards_name_the_name_resolution_block(self) -> None:
+        # #1038: the ``ns_dns*`` scope guards check ``Name_Resolution_Block``
+        # but used to tell the caller the option belongs in the systemd(1)
+        # Journal Export Block, and two make-side sites spelled the option
+        # ``ns_dnsip4addr``/``ns_dnsip6addr``.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import (NS_DNSIP4AddrOption, NS_DNSIP6AddrOption,
+                                                          NS_DNSNameOption)
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        pcapng = object.__new__(PCAPNG)
+        pcapng._type = BlockType.Enhanced_Packet_Block
+        pcapng._opt = collections.Counter()
+
+        cases = [
+            ('ns_dnsname', lambda: pcapng._read_option_ns_dnsname(
+                NS_DNSNameOption(type=OptionType.ns_dnsname, length=3, name='dns'),
+                options=OrderedMultiDict())),
+            ('ns_dnsIP4addr', lambda: pcapng._read_option_ns_dnsipv4(
+                NS_DNSIP4AddrOption(type=OptionType.ns_dnsIP4addr, length=4,
+                                    ip=ip_address('8.8.8.8')),
+                options=OrderedMultiDict())),
+            ('ns_dnsIP6addr', lambda: pcapng._read_option_ns_dnsipv6(
+                NS_DNSIP6AddrOption(type=OptionType.ns_dnsIP6addr, length=16,
+                                    ip=ip_address('2001:4860::8888')),
+                options=OrderedMultiDict())),
+            ('ns_dnsname', lambda: pcapng._make_option_ns_dnsname(
+                OptionType.ns_dnsname, name='dns')),
+            ('ns_dnsIP4addr', lambda: pcapng._make_option_ns_dnsipv4(
+                OptionType.ns_dnsIP4addr, ip='8.8.8.8')),
+            ('ns_dnsIP6addr', lambda: pcapng._make_option_ns_dnsipv6(
+                OptionType.ns_dnsIP6addr, ip='2001:4860::8888')),
+        ]
+        for index, (option, call) in enumerate(cases):
+            with self.subTest(side='read' if index < 3 else 'make', option=option):
+                with self.assertRaises(ProtocolError) as ctx:
+                    call()
+                message = str(ctx.exception)
+                self.assertIn(f'[{option}] option must be in Name Resolution Block', message)
+                self.assertNotIn('Journal Export', message)
+                self.assertNotIn(':manpage:', message)
+
+        # The make-side duplicate guards share the corrected spelling.
+        pcapng._type = BlockType.Name_Resolution_Block
+        for option, type_, ip in (('ns_dnsIP4addr', OptionType.ns_dnsIP4addr, '8.8.8.8'),
+                                  ('ns_dnsIP6addr', OptionType.ns_dnsIP6addr, '2001:4860::8888')):
+            with self.subTest(side='make-duplicate', option=option):
+                pcapng._opt = collections.Counter({type_: 1})
+                method = (pcapng._make_option_ns_dnsipv4 if type_ is OptionType.ns_dnsIP4addr
+                          else pcapng._make_option_ns_dnsipv6)
+                with self.assertRaises(ProtocolError) as ctx:
+                    method(type_, ip=ip)
+                self.assertIn(f'[{option}] option must be only one', str(ctx.exception))
+
+    def test_pcapng_guard_messages_name_their_own_option(self) -> None:
+        # #1038: ``_make_option_if_rxspeed``'s guards said ``[if_txspeed]``, and
+        # ``_read_option_epb_queue``'s length guard said ``[epb_packetid]``.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.schema.misc.pcapng import EPB_QueueOption
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        pcapng = object.__new__(PCAPNG)
+
+        def message(block_type: BlockType, opt: collections.Counter, call: object) -> str:
+            pcapng._type = block_type
+            pcapng._opt = opt
+            with self.assertRaises(ProtocolError) as ctx:
+                call()  # type: ignore[operator]
+            return str(ctx.exception)
+
+        make_rxspeed = lambda: pcapng._make_option_if_rxspeed(OptionType.if_rxspeed, speed=1)
+        with self.subTest(guard='if_rxspeed scope'):
+            self.assertIn('[if_rxspeed] option must be in Interface Description Block',
+                          message(BlockType.Enhanced_Packet_Block, collections.Counter(),
+                                  make_rxspeed))
+        with self.subTest(guard='if_rxspeed duplicate'):
+            self.assertIn('[if_rxspeed] option must be only one',
+                          message(BlockType.Interface_Description_Block,
+                                  collections.Counter({OptionType.if_rxspeed: 1}), make_rxspeed))
+        with self.subTest(guard='epb_queue length'):
+            schema = EPB_QueueOption(type=OptionType.epb_queue, length=4, queue_id=5)
+            object.__setattr__(schema, 'length', 3)
+            self.assertIn('[epb_queue] invalid length (expected 4, got 3)',
+                          message(BlockType.Enhanced_Packet_Block, collections.Counter(),
+                                  lambda: pcapng._read_option_epb_queue(
+                                      schema, options=OrderedMultiDict())))
+
     def test_pcapng_option_registry_preserves_duplicate_numeric_codes(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
