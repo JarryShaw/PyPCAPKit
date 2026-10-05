@@ -2073,6 +2073,28 @@ Fixed
   already stops the minting that used to be the reason), since neither of
   ``OptionType``'s two paths gets both pickling and correct rendering right at once
   (:pr:`869`).
+* ``register`` on ``ProtocolBase``, ``Frame``, ``PCAPNG``, ``SCTP``, ``Link``,
+  ``Internet`` and the concrete ``Transport`` subclasses (``TCP``, ``UDP``) now raises
+  ``RegistryError`` for a non-class argument, where it raised a bare ``TypeError``
+  ("issubclass() arg 1 must be a class") from inside ``abc``. Each guard gains an
+  explicit ``isinstance(protocol, type)`` test ahead of its ``issubclass``, after the
+  ``ModuleDescriptor`` is unwrapped, so a descriptor naming a non-class attribute is
+  rejected too. All seven ``Raises:`` clauses already promised ``RegistryError`` if
+  ``protocol`` "is not a ... subclass", which a non-class satisfied in spirit but not
+  in fact; they now read "is not a class, or not a ... subclass". No guard's target
+  class changes, and a wrong class still raises ``RegistryError`` as before.
+  ``Transport.register`` on ``Transport`` itself still raises ``UnsupportedCall``
+  first; only its subclasses reach the guard. Not breaking for exception handling:
+  ``RegistryError`` subclasses ``TypeError`` through ``BaseError``, so
+  ``except TypeError`` still catches it, and the type and message text are the only
+  things a handler can key on that change. Two observable side effects do come with
+  it, because ``BaseError`` is loud by default: the non-class path now emits
+  pcapkit's one ``CRITICAL`` log record, and outside devmode it installs
+  ``sys.excepthook`` and ``threading.excepthook``, neither of which the bare
+  ``TypeError`` from ``abc`` did. That is the wrong-class path's existing behaviour,
+  so the fix makes the two consistent rather than introducing something new.
+  Follows the same fix for the foundation registrars (:issue:`1021`)
+  (:issue:`1026`).
 
 pcapkit.toolkit
 ---------------

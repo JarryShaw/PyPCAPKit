@@ -611,7 +611,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this PPID is already
@@ -625,6 +625,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
+        if not isinstance(protocol, type):
+            raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)

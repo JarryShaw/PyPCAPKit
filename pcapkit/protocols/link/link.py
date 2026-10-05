@@ -126,7 +126,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this EtherType is
@@ -140,6 +140,8 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
+        if not isinstance(protocol, type):
+            raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
