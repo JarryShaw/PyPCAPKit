@@ -2163,6 +2163,17 @@ Fixed
   ``_read_option_epb_queue``'s length guard says ``[epb_queue]`` rather than
   ``[epb_packetid]``. Only message text changes; the exception and warning types are unchanged
   (:issue:`1038`).
+* ``httpv1.HTTP`` refused every HTTP/1 message with no header fields, which
+  [:rfc:`9112#section-2.1`] allows (``*( field-line CRLF )``):
+  ``b'GET / HTTP/1.0\r\n\r\n'`` raised ``ProtocolError: HTTP: invalid format``,
+  because ``_read_http_header`` treated a header with no CRLF as malformed. So
+  ``HTTPv1(method='GET', uri='/', http_version='1.1')`` failed to read back the bytes
+  its own ``make`` built, and ``HTTP._guess_version`` answered
+  ``unknown HTTP version``, since ``_test_start_line`` mirrored the same check. A
+  CRLF-less header is now a start line with zero fields, in the parser and the
+  predicate alike. That check was also what refused the HTTP/2 connection preface,
+  whose header is exactly ``PRI * HTTP/2.0``; it is now refused by name instead, to
+  the same message (:issue:`1041`).
 
 pcapkit.toolkit
 ---------------

@@ -234,20 +234,16 @@ class HTTPUnitTests(unittest.TestCase):
         recognise, so #787 makes one message of two rather than introducing a
         new one.
 
-        Worth recording, since the docstring above used to claim otherwise: the
-        rejection is not ``HTTPv1.make`` refusing these keywords. ``make``
-        accepts them and builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``; it is the
-        read-back of that packet which fails, because ``_read_http_header``
-        requires a header field section and a field-less request has none. That
-        a valid minimal HTTP/1 request cannot be re-read is a defect in its own
-        right, and not one #787 set out to fix.
+        Since #1041 the read-back succeeds, so the callee is proven reached by
+        its output instead: ``make`` builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
+        a field-less request, and ``_read_http_header`` now accepts zero field
+        lines (:rfc:`9112#section-2.1`) where it used to reject them.
         """
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.utilities.exceptions import ProtocolError
 
-        with self.assertRaises(ProtocolError) as ctx:
-            HTTP(version=1, http_version='1.1', method='GET', uri='/')
-        self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+        proto = HTTP(version=1, http_version='1.1', method='GET', uri='/')
+        self.assertEqual(proto.data, b'GET / HTTP/1.1\r\n\r\n')
+        self.assertEqual(proto.version, '1.1')
 
     def test_http_read_explicit_version_uses_same_buffer_as_guess(self) -> None:
         """Regression test for GH-447.
@@ -771,13 +767,16 @@ class HTTPUnitTests(unittest.TestCase):
             ('response', b'HTTP/1.1 200 OK\r\nServer: example\r\n\r\nbody'),
             ('response, no message', b'HTTP/1.0 404 -\r\nServer: example\r\n\r\n'),
             ('hyphenated method', b'M-SEARCH * HTTP/1.1\r\nHost: example.com\r\n\r\n'),
+            # Zero field lines (#1041).
+            ('field-less request', b'GET / HTTP/1.0\r\n\r\n'),
+            ('field-less response', b'HTTP/1.0 200 OK\r\n\r\nbody'),
         )
         refused = (
             # Rejected by the anchored patterns themselves.
             ('lowercase method', b'Get / HTTP/1.1\r\nHost: example.com\r\n\r\n'),
             ('four-digit status', b'HTTP/1.1 2000 OK\r\nServer: example\r\n\r\n'),
             ('no version token', b'GET / FTP/1.1\r\nHost: example.com\r\n\r\n'),
-            # Rejected by the unpackings ``_read_http_header`` performs first.
+            # Rejected by the checks ``read`` and ``_read_http_header`` perform first.
             ('two-token start line', b'GET /\r\nHost: example.com\r\n\r\n'),
             ('no CRLF at all', b'GET / HTTP/1.1'),
             ('the HTTP/2 preface', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
@@ -1021,9 +1020,8 @@ class HTTPUnitTests(unittest.TestCase):
         cases = (
             # No header/body separator at all -- ``read``'s own unpacking.
             ('no separator', b'not http at all'),
-            # A header with no CRLF in it -- the HTTP/2 preface is exactly this
-            # once the separator has been split off.
-            ('preface start line', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
+            # The HTTP/2 preface is no longer refused by an unpacking (#1041) --
+            # ``test_httpv1_still_refuses_the_http2_connection_preface`` covers it.
             # A start line of fewer than three whitespace-separated tokens.
             ('two-token start line', b'GET /\r\nHost: example.com\r\n\r\n'),
             ('one-token start line', b'PRI\r\nHost: example.com\r\n\r\n'),
@@ -1036,6 +1034,125 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
                 self.assertIsInstance(ctx.exception.__cause__, ValueError)
                 self.assertNotIsInstance(ctx.exception.__cause__, ProtocolError)
+
+    def test_httpv1_reads_a_request_with_no_header_fields(self) -> None:
+        """A request line followed straight by the empty line parses (#1041).
+
+        :rfc:`9112#section-2.1` gives ``*( field-line CRLF )``, so zero fields is
+        legal. The header block is then the start line alone, with no CRLF in
+        it, which ``_read_http_header`` used to refuse as malformed. Asserted
+        through the dispatcher too: ``_test_start_line`` mirrored that refusal,
+        so ``HTTP`` answered ``unknown HTTP version`` for the same bytes.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import Type, _test_start_line
+
+        raw = b'GET / HTTP/1.0\r\n\r\n'
+        proto = HTTPv1(io.BytesIO(raw), len(raw))
+
+        self.assertEqual(proto.info.receipt.type, Type.REQUEST)
+        self.assertEqual(proto.info.receipt.method, 'GET')
+        self.assertEqual(proto.info.receipt.uri, '/')
+        self.assertEqual(proto.version, '1.0')
+        self.assertEqual(len(proto.info.header), 0)
+        self.assertIsNone(proto.info.body)
+        self.assertEqual(proto.length, len(b'GET / HTTP/1.0'))
+
+        self.assertTrue(_test_start_line(raw))
+        self.assertEqual(HTTP(io.BytesIO(raw), len(raw)).version, '1.0')
+
+    def test_httpv1_reads_a_response_with_no_header_fields_and_a_body(self) -> None:
+        """A status line, the empty line, then a body parses (#1041)."""
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import Type, _test_start_line
+
+        raw = b'HTTP/1.0 200 OK\r\n\r\nbody'
+        proto = HTTPv1(io.BytesIO(raw), len(raw))
+
+        self.assertEqual(proto.info.receipt.type, Type.RESPONSE)
+        self.assertEqual(proto.info.receipt.status, 200)
+        self.assertEqual(proto.info.receipt.message, 'OK')
+        self.assertEqual(proto.version, '1.0')
+        self.assertEqual(len(proto.info.header), 0)
+        self.assertEqual(proto.info.body, b'body')
+
+        self.assertTrue(_test_start_line(raw))
+        self.assertEqual(HTTP(io.BytesIO(raw), len(raw)).version, '1.0')
+
+    def test_httpv1_make_read_round_trips_a_message_with_no_header_fields(self) -> None:
+        """``make`` emits zero fields as ``start-line CRLF CRLF``; ``read`` takes it back (#1041).
+
+        ``make`` already produced those bytes when given no ``headers``, so
+        constructing ``HTTPv1(method='GET', uri='/', http_version='1.1')`` raised
+        from its own ``read``. The response is also round-tripped through
+        ``_make_data``, so an empty parsed header dict is shown to rebuild the
+        same bytes; the request is not, because ``_make_data`` hands an empty
+        body back as :obj:`None`, which ``make`` cannot concatenate -- with or
+        without header fields, so a separate defect from this one.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        request = HTTPv1(method='GET', uri='/', http_version='1.1')
+        self.assertEqual(request.data, b'GET / HTTP/1.1\r\n\r\n')
+        self.assertEqual(request.info.receipt.method, 'GET')
+        self.assertEqual(request.info.receipt.uri, '/')
+        self.assertEqual(request.version, '1.1')
+        self.assertEqual(len(request.info.header), 0)
+
+        wire = b'HTTP/1.0 200 OK\r\n\r\nbody'
+        response = HTTPv1(status=200, message='OK', http_version='1.0', body=b'body')
+        self.assertEqual(response.data, wire)
+        self.assertEqual(response.info.receipt.status, 200)
+        self.assertEqual(len(response.info.header), 0)
+
+        parsed = HTTPv1(io.BytesIO(wire), len(wire))
+        self.assertEqual(HTTPv1(**HTTPv1._make_data(parsed.info)).data, wire)
+
+    def test_httpv1_still_refuses_the_http2_connection_preface(self) -> None:
+        """Accepting zero fields must not let the HTTP/2 preface parse as HTTP/1 (#1041).
+
+        The preface's header block, once split at the first CRLFCRLF, is
+        ``PRI * HTTP/2.0`` -- a start line with zero fields, which ``_RE_METHOD``
+        and ``_RE_VERSION`` both accept. Refusing every CRLF-less header used to
+        be what turned it away; it is now refused by name. A regression guard:
+        this held before the fix and must hold after it, to the same message, in
+        the parser and the predicate alike, and the dispatcher's answers for a
+        complete and a truncated preface are unchanged.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        cases = (
+            ('preface', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n', 'HTTP/2: connection preface with no frame'),
+            ('truncated preface', b'PRI * HTTP/2.0\r\n\r\n', 'unknown HTTP version'),
+            ('preface, corrupt tail', b'PRI * HTTP/2.0\r\n\r\nXX\r\n\r\n', 'unknown HTTP version'),
+        )
+
+        for label, raw, dispatched in cases:
+            with self.subTest(case=label):
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTPv1(io.BytesIO(raw), len(raw))
+                self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+                self.assertFalse(_test_start_line(raw))
+
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTP(io.BytesIO(raw), len(raw))
+                self.assertEqual(str(ctx.exception), dispatched)
 
     def test_httpv1_refuses_a_field_line_with_no_colon(self) -> None:
         """A colon-less field line must raise ``ProtocolError``, not :exc:`IndexError`.
@@ -1225,8 +1342,6 @@ class HTTPUnitTests(unittest.TestCase):
             ('read: no CRLFCRLF', b'not http at all'),
             ('read: no CRLFCRLF, long', b'abcdefghijklmnopqrstuvwxyz0123456789'),
             ('header: no CRLF (preface)', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
-            ('header: no CRLF (field-less request)', b'GET / HTTP/1.0\r\n\r\n'),
-            ('header: no CRLF (field-less response)', b'HTTP/1.1 200 OK\r\n\r\n'),
             ('start line: two tokens', b'GET /\r\nHost: e\r\n\r\n'),
             ('start line: one token', b'PRI\r\nHost: e\r\n\r\n'),
             ('field line: no colon', b'GET / HTTP/1.1\r\nNoColonHere\r\n\r\n'),
@@ -1245,6 +1360,9 @@ class HTTPUnitTests(unittest.TestCase):
             ('valid request', b'GET / HTTP/1.1\r\nHost: e\r\n\r\n'),
             ('valid response', b'HTTP/1.1 200 OK\r\nServer: s\r\n\r\n'),
             ('valid folded request', b'GET / HTTP/1.1\r\nX: a\r\n b\r\nHost: e\r\n\r\n'),
+            # Field-less, refused as a CRLF-less header until #1041.
+            ('valid field-less request', b'GET / HTTP/1.0\r\n\r\n'),
+            ('valid field-less response', b'HTTP/1.1 200 OK\r\n\r\n'),
         )
 
         for label, raw in payloads:
