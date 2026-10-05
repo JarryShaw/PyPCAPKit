@@ -49,8 +49,10 @@ machine this was diagnosed on. This script instead runs one :file:`tests/`
 subdirectory per invocation (its ``directory`` argument), which is what
 :file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
 once per entry of its own matrix -- the leg list lives in that workflow, not
-as a module-level constant here. :mod:`tests.protocols` is the largest leg,
-measured in that workflow's own comment at 847s serially. At the other end sit
+as a module-level constant here. :mod:`tests.protocols` is the largest leg;
+its timings, on three different bases (a local serial run, and CI before and
+after it was sharded), are tabulated in that workflow's own comment rather than
+restated here. At the other end sit
 two legs of two unit-tier modules each, with no clean ordering between them --
 :mod:`tests.dumpkit` (199 tests, ~39s) and :mod:`tests.interface` (201 tests,
 ~37s), dumpkit carrying two fewer tests but running two seconds slower.
@@ -79,6 +81,14 @@ assumes its own import is current -- matching the reproduction exactly for
 directory this script is pointed at, most of which have never been tried in
 that configuration before.
 
+GitHub issue #1029 -- sharding a leg: ``directory`` may be a deeper path such as
+``protocols/internet``, and ``--exclude SUBDIR`` (repeatable) drops a
+subdirectory, so ``protocols --exclude protocols/internet`` is "the rest". The
+workflow uses that pair to split :mod:`tests.protocols` into two cells. Every
+leg invoked without ``--exclude`` behaves exactly as before. The price is that
+modules in different shards no longer share a process, so pollution between
+them is invisible; the workflow comment records the measured pair counts.
+
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
 directories neither of which is bundled with the other in the same leg, and
@@ -98,6 +108,7 @@ import pathlib
 import sys
 import time
 import unittest
+from typing import Sequence
 
 #: Repository root -- resolved from this file's own location, not from the
 #: working directory or ``PYTHONPATH``, so this script runs the same way
@@ -140,30 +151,53 @@ def root_modules() -> 'tuple[str, ...]':
     ))
 
 
-def leg_modules(directory: 'str') -> 'tuple[str, ...]':
+def _resolve(spec: 'str', what: 'str') -> 'pathlib.Path':
+    """``spec`` as an existing directory strictly inside :data:`TESTS_ROOT`.
+
+    Raises:
+        SystemExit: ``spec`` does not name a directory under ``tests/``.
+
+    """
+    path = (TESTS_ROOT / spec).resolve()
+    if path == TESTS_ROOT or TESTS_ROOT not in path.parents or not path.is_dir():
+        raise SystemExit(f'no such tests/ subdirectory: tests/{spec}' if what == 'leg'
+                         else f'--exclude is not a subdirectory of the leg: tests/{spec}')
+    return path
+
+
+def leg_modules(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'tuple[str, ...]':
     """Every unit-tier ``test_*.py`` module under ``tests/<directory>``.
 
     Args:
-        directory: name of a direct subdirectory of :data:`TESTS_ROOT`.
+        directory: a subdirectory of :data:`TESTS_ROOT` -- a direct child
+            (``'protocols'``) or, to shard a leg that is too slow for one job,
+            a deeper path (``'protocols/internet'``).
+        exclude: subdirectories of ``directory`` (also relative to
+            :data:`TESTS_ROOT`) whose modules are left out, so that one shard
+            can be "everything in ``directory`` except its sibling shards".
+            Empty by default, which is every leg but one.
 
     Returns:
         Dotted module names, in path-sorted order.
 
     Raises:
-        SystemExit: ``directory`` is not a subdirectory of :data:`TESTS_ROOT`.
+        SystemExit: ``directory`` is not a subdirectory of :data:`TESTS_ROOT`,
+            or an ``exclude`` entry is not a subdirectory of ``directory``.
 
     """
-    leg_root = TESTS_ROOT / directory
-    if not leg_root.is_dir():
-        raise SystemExit(f'no such tests/ subdirectory: tests/{directory}')
+    leg_root = _resolve(directory, 'leg')
+    skipped = [_resolve(spec, 'exclude') for spec in exclude]
+    for path in skipped:
+        if leg_root not in path.parents:
+            raise SystemExit(f'--exclude is not a subdirectory of the leg: {path.relative_to(ROOT)}')
 
     return tuple(
         _dotted(path) for path in sorted(leg_root.rglob('test_*.py'))
-        if is_unit_tier(path)
+        if is_unit_tier(path) and not any(skip in path.parents for skip in skipped)
     )
 
 
-def build_suite(directory: 'str') -> 'unittest.TestSuite':
+def build_suite(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'unittest.TestSuite':
     """The combined suite for one leg: ``directory``'s own tests, then root's.
 
     See the module docstring for why that order, not the reverse.
@@ -171,7 +205,7 @@ def build_suite(directory: 'str') -> 'unittest.TestSuite':
     """
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    for name in leg_modules(directory):
+    for name in leg_modules(directory, exclude):
         suite.addTests(loader.loadTestsFromName(name))
     for name in root_modules():
         suite.addTests(loader.loadTestsFromName(name))
@@ -182,8 +216,13 @@ def main(argv: 'list[str] | None' = None) -> 'int':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         'directory',
-        help="a direct subdirectory of tests/ to run alongside the root-level "
-             "modules, e.g. 'protocols'",
+        help="a subdirectory of tests/ to run alongside the root-level "
+             "modules, e.g. 'protocols' or 'protocols/internet'",
+    )
+    parser.add_argument(
+        '--exclude', action='append', default=[], metavar='SUBDIR',
+        help="a subdirectory of DIRECTORY (relative to tests/) to leave out; "
+             "repeatable. Used to run the remainder of a sharded leg.",
     )
     parser.add_argument(
         '-v', '--verbose', action='store_true',
@@ -192,7 +231,7 @@ def main(argv: 'list[str] | None' = None) -> 'int':
     args = parser.parse_args(argv)
 
     start = time.monotonic()
-    suite = build_suite(args.directory)
+    suite = build_suite(args.directory, args.exclude)
     runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1)
     result: 'unittest.TestResult | None' = None
     try:
@@ -208,7 +247,8 @@ def main(argv: 'list[str] | None' = None) -> 'int':
         tally = ('interrupted before a result was available' if result is None else
                  f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
                  f'{len(result.errors)} error(s)')
-        print(f'tests/{args.directory} + {len(root_modules())} root module(s): '
+        left_out = ''.join(f' (without tests/{spec})' for spec in args.exclude)
+        print(f'tests/{args.directory}{left_out} + {len(root_modules())} root module(s): '
               f'{tally}, {elapsed:.1f}s elapsed')
 
 

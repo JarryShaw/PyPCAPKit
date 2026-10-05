@@ -776,21 +776,65 @@ jobs:
   # this and the paragraph above.
   #
   # util/run_unittest_leg.py (its own docstring has the full reasoning) runs
-  # one tests/ subdirectory per matrix cell, paired with every root-level
+  # one tests/ subdirectory per matrix cell (for protocols, one shard of it,
+  # see #1029 below), paired with every root-level
   # tests/test_*.py module, directory first and root second -- the order
   # #981's own reproduction needs, since the defect is an earlier module
   # polluting a later one. Running the whole suite in one process is not an
   # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
-  # of one leg per top-level directory is the affordable approximation, and it
+  # of one leg per top-level directory (protocols, since #1029, being two
+  # cells) is the affordable approximation, and it
   # is sized for wall time rather than for memory. Peak RSS was measured for
   # the three cheapest legs only -- cli 152 MiB, dumpkit 237 MiB, interface
   # 305 MiB (resource.getrusage on RUSAGE_CHILDREN, this venv) -- leaving the
   # largest of the three some 90x short of 29 GB; no figure was taken for
   # tests/protocols, the largest leg. Measured wall times (this venv, serial):
   # cli 18s, const 268s, dumpkit 39s, foundation 272s, interface 38s, project
-  # 70s, protocols 847s, toolkit 97s, utilities 42s, vendor 104s, one leg per
+  # 70s, protocols 847s (before the #1029 split), toolkit 97s, utilities 42s,
+  # vendor 104s, one leg per
   # matrix cell -- see `timeout-minutes` below for why the job-level budget is
   # no longer 20.
+  #
+  # GitHub issue #1029: the protocols cell measured 30.4 minutes on a CI
+  # runner against this job's 45-minute cap (#1029 measured the next slowest
+  # leg at 6.2 minutes on CI), so it is now two cells: `protocols/internet` and the rest of
+  # tests/protocols (its other five subdirectories and the modules sitting
+  # directly in it), the latter expressed as `protocols` with
+  # `--exclude protocols/internet`. run_unittest_leg.py takes a sub-path and
+  # repeatable --exclude for this; every other cell is untouched.
+  #
+  # Measured on CI (GitHub Actions wall time per cell, one unit throughout):
+  #
+  #   leg                  run 37334173854     run 37341197811
+  #                        (#1031, unsharded)  (#1032, sharded)
+  #   protocols            27.8m               -
+  #   protocols/internet   -                   8.2m
+  #   protocols (rest)     -                   7.6m
+  #   foundation (control) 6.2m                6.4m
+  #   const (control)      6.0m                6.1m
+  #
+  # The baseline is 27.8m from a same-hour run, deliberately not #1029's
+  # headline 30.4m (its quiet-runner re-run, taken after a window of
+  # cancelled runs). The controls moved by 0.1-0.2m between the two runs, so
+  # the runners compare. Two cells rather than three because these already
+  # balance (8.2m against 7.6m) and the next slowest unsharded leg is
+  # foundation at 6.4m: a third cell could save under two minutes of wall time
+  # and would cost more co-running module pairs. No local per-module timings
+  # are recorded here; the figure above is the one that matters, and the
+  # pre-#1029 local serial table above is left as it was measured.
+  #
+  # What sharding costs: modules in different cells no longer share a process,
+  # so pollution from one to the other is invisible again. Counts below were
+  # derived with leg_modules() on main at 30714cd51 plus this change: 51
+  # modules in tests/protocols (12 under internet, 39 in the rest, of which 10
+  # sit directly in tests/protocols). "Pairs" are unordered, C(n,2), since a
+  # single serial run realises each pair in one order. Before: 1275 pairs
+  # co-ran in one process. After: 807 (internet x internet 66, rest x rest
+  # 741); 468 do not. The 255 pairs of a protocols module followed by a
+  # root-level module (51 x 5 roots) all survive, since every cell still runs
+  # the root modules after its own. The 10 modules sitting directly in
+  # tests/protocols stay in the rest cell: moving them into internet would keep
+  # 637 pairs instead of 807 and lengthen internet, the slower cell already.
   #
   # tests/vendor was first left out of ``leg`` because running it this way
   # surfaced an instance of the very defect this job exists to catch (issue
@@ -827,7 +871,7 @@ jobs:
   # the required set once its own track record justifies it, which is the
   # maintainer's call to make separately from landing it.
   unittest-ordering:
-    name: Plain unittest ordering (${{ matrix.leg }})
+    name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     # 45, not 20: `timeout-minutes` is job-level, so it has to cover
@@ -839,8 +883,17 @@ jobs:
     # contended run of it hit 1275s outright -- over the old 20-minute cap.
     # 45 matches the `test`/`integration`/`pypcap-parity` jobs' own cap
     # rather than inventing a new number (`engine-tests` is 30, but runs
-    # under xdist, which this job deliberately does not); splitting
-    # `protocols` into sub-legs is the alternative if 45 ever stops fitting.
+    # under xdist, which this job deliberately does not). 45 did stop fitting
+    # comfortably (#1029: protocols at 30.4 minutes on CI), so `protocols` is
+    # now split into sub-legs, as foreseen -- see the matrix comment above. The
+    # cap is left at 45: CI measured the slowest cell, protocols/internet, at
+    # 8.2m (run 37341197811), so even a slowdown like #1029's window leaves it
+    # far inside the cap: that window's runs were cancelled at 45.3m or more,
+    # so it ran at least 45.3/27.8, about 1.6x (a lower bound, the runs were
+    # cut off), which would put the 8.2m cell near 13m. Lowering the cap
+    # would only trade headroom for a tighter timeout. Raising it to 60
+    # instead was the one-line alternative; it would have kept every
+    # cross-module pair co-running but left the slowest cell at 28 minutes.
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -852,10 +905,15 @@ jobs:
           - foundation
           - interface
           - project
-          - protocols
+          - protocols/internet
           - toolkit
           - utilities
           - vendor
+        include:
+          # The remainder of tests/protocols -- see the #1029 note above.
+          - leg: protocols
+            exclude: --exclude protocols/internet
+            label: protocols (rest)
 
     steps:
       - uses: actions/checkout@v7
@@ -880,7 +938,7 @@ jobs:
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
-        run: python util/run_unittest_leg.py ${{ matrix.leg }}
+        run: python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }}
 
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
