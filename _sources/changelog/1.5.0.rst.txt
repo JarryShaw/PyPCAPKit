@@ -827,6 +827,24 @@ Changed
   four are the whole collision surface (measured on 3.10.21, 3.11.15 and 3.14.7), and
   ``engine=``, ``protocol=`` and ``fmt=`` are outside it. There is no ``name=`` alias:
   a keyword that works on some interpreters and not others is the trap being removed.
+* **a breaking change to** ``Extractor.register_engine``, ``register_reassembly`` and
+  ``register_traceflow``, and the ``register_extractor_*`` wrappers over them: each
+  now accepts only a subclass of the public ``Engine``, ``Reassembly`` or
+  ``TraceFlow`` (:issue:`1016`). They had accepted a subclass of the matching
+  ``*Base`` class since :issue:`513`, which was a tolerance for pcapkit's own
+  built-ins (all 13 derive from the base, none from the public class) rather than
+  a contract: ``*Base`` is documented as internal, and the public class is the one
+  carrying the registration hook. Third-party code that subclasses ``EngineBase``,
+  ``ReassemblyBase`` or ``TraceFlowBase`` directly and registers through these
+  functions now gets ``RegistryError`` naming the public class; subclass the public
+  class instead. The error messages are unchanged. The built-ins are unaffected
+  because they are declared directly in ``Extractor``'s class-body mappings as
+  ``ModuleDescriptor`` literals and never pass through a registrar at all; a new
+  internal path, ``Extractor._register_internal_engine`` and its two siblings,
+  checks the base for programmatic internal registration and is what the
+  :issue:`513` regression test now exercises. ``register_protocol`` is
+  untouched: every in-house protocol derives from ``ProtocolBase`` and none from
+  ``Protocol``.
 * extraction is around 46% faster on a 1,117-frame HTTP capture, with byte-identical
   output (:pr:`420`). A reassembled datagram's payload is analysed on first read
   rather than eagerly, cutting IP reassembly's own cost by 90.7% and TCP's by 23.7%
@@ -847,6 +865,18 @@ Changed
   *unparameterised*, ``engine.read_frame()`` and ``record_header().read_frame()``
   used to be ``Any`` and are now the extractor's own frame type, so an assignment
   that relied on ``Any`` there no longer type-checks (:issue:`1022`).
+* the documentation of the engine base classes: the member stubs (``name``,
+  ``module``, ``registry``, ``extractor``, ``unsupported_reason``, ``run``,
+  ``read_frame``, ``close`` and the rest) moved from ``Engine`` to ``EngineBase``,
+  where they are defined, and ``Engine`` now documents only the
+  ``__init_subclass__`` registration hook it adds. ``Extractor.engine`` declares
+  ``EngineBase[_P]`` as its return type, but that class was documented
+  ``:no-members:`` under *Internal Definitions*, so the type a reader followed
+  led to no API. Cross-references to ``Engine.run``, ``Engine.read_frame``,
+  ``Engine.close`` and ``Engine.unsupported_reason`` now point at ``EngineBase``,
+  and the ``PCAP`` engine's ``run`` docstring lost the verbless sentence
+  "will also be save the current ``PCAP`` engine instance". ``EngineBase`` is
+  still not exported in ``__all__``; that is left to :issue:`1016` (:issue:`1024`).
 
 Fixed
 ~~~~~
@@ -978,6 +1008,27 @@ Fixed
   rather than comparing the full ``(dumper, ext)`` pair. Non-breaking: a correct
   caller sees strictly fewer warnings and no change to return value or exception. Five
   new tests pin the silent/warns-anyway split (:issue:`739`).
+* **six registrars** now raise ``RegistryError`` for a non-class argument, where a bare
+  ``TypeError`` ("issubclass() arg 1 must be a class") used to escape -- from the guard
+  itself for the two ``register_dumper`` methods, and from inside ``abc`` for the other
+  four. They are ``register_dumper``, ``register_engine``, ``register_reassembly`` and
+  ``register_traceflow`` on ``Extractor``, ``TraceFlow.register_dumper`` (reached
+  through ``register_traceflow_dumper``), and
+  ``pcapkit.foundation.registry.protocols.register_protocol``. Each guard gains an
+  explicit ``isinstance(x, type)`` test ahead of its ``issubclass``; in the five that
+  accept a ``ModuleDescriptor`` it runs after the descriptor is unwrapped, so a descriptor
+  naming a non-class attribute is rejected too, while ``register_protocol`` takes no
+  descriptor. No guard's target class changes, and a wrong class still raises
+  ``RegistryError`` as before. ``RegistryError`` subclasses ``TypeError``, so
+  ``except TypeError`` still catches it; a caller matching the exact type, or the old
+  message, does not. **Not every site is covered**: six of the thirteen bare
+  ``issubclass`` guards in the package are fixed here, and the same guard remains in
+  the ``register`` classmethods of ``ProtocolBase``, ``Frame``, ``PCAPNG``, ``SCTP``,
+  ``Link``, ``Internet`` and ``Transport``, all of which still leak ``TypeError`` for a
+  non-class. ``Transport.register`` is reachable despite its ``UnsupportedCall``, which
+  is gated on ``cls is Transport`` and so fires only for the abstract class -- the guard
+  below it leaks through ``TCP.register`` and ``UDP.register``, which is the only way it
+  is ever called. :issue:`1026` tracks all seven (:issue:`1021`).
 
 pcapkit.protocols
 -----------------
@@ -1157,6 +1208,15 @@ Changed
   converge rather than inside each of the 30 ``make`` implementations;
   ``object.__new__(cls).make(**kwargs)``, the idiom ``HTTP.make`` uses, reaches it
   (:issue:`617`).
+* **a breaking change to** ``Application``: it no longer forbids payload dispatch
+  outright. It encodes "no further protocol layer above this one", which undissected
+  trailer bytes are not, so ``_decode_next_layer`` and ``_import_next_layer`` accept
+  the ``-1`` sentinel -- the rest of the packet, resolving to ``Raw``, or to
+  ``NoPayload`` when nothing remains -- and ``__post_init__`` keeps a payload that
+  ``read`` set instead of overwriting it with ``NoPayload``. A real protocol number
+  (any ``proto`` other than ``-1``) is still refused with ``UnsupportedCall``. A
+  subclass that calls either method with ``-1`` changes from raising to succeeding;
+  no subclass in the package does (:issue:`719`).
 
 Fixed
 ~~~~~
@@ -2022,6 +2082,28 @@ Fixed
   already stops the minting that used to be the reason), since neither of
   ``OptionType``'s two paths gets both pickling and correct rendering right at once
   (:pr:`869`).
+* ``register`` on ``ProtocolBase``, ``Frame``, ``PCAPNG``, ``SCTP``, ``Link``,
+  ``Internet`` and the concrete ``Transport`` subclasses (``TCP``, ``UDP``) now raises
+  ``RegistryError`` for a non-class argument, where it raised a bare ``TypeError``
+  ("issubclass() arg 1 must be a class") from inside ``abc``. Each guard gains an
+  explicit ``isinstance(protocol, type)`` test ahead of its ``issubclass``, after the
+  ``ModuleDescriptor`` is unwrapped, so a descriptor naming a non-class attribute is
+  rejected too. All seven ``Raises:`` clauses already promised ``RegistryError`` if
+  ``protocol`` "is not a ... subclass", which a non-class satisfied in spirit but not
+  in fact; they now read "is not a class, or not a ... subclass". No guard's target
+  class changes, and a wrong class still raises ``RegistryError`` as before.
+  ``Transport.register`` on ``Transport`` itself still raises ``UnsupportedCall``
+  first; only its subclasses reach the guard. Not breaking for exception handling:
+  ``RegistryError`` subclasses ``TypeError`` through ``BaseError``, so
+  ``except TypeError`` still catches it, and the type and message text are the only
+  things a handler can key on that change. Two observable side effects do come with
+  it, because ``BaseError`` is loud by default: the non-class path now emits
+  pcapkit's one ``CRITICAL`` log record, and outside devmode it installs
+  ``sys.excepthook`` and ``threading.excepthook``, neither of which the bare
+  ``TypeError`` from ``abc`` did. That is the wrong-class path's existing behaviour,
+  so the fix makes the two consistent rather than introducing something new.
+  Follows the same fix for the foundation registrars (:issue:`1021`)
+  (:issue:`1026`).
 
 pcapkit.toolkit
 ---------------

@@ -523,7 +523,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[Engine] | Type[Engine]]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Mapping of engine names to engine classes.</span>
 
 <span class="sd">        Note:</span>
@@ -607,6 +607,8 @@
     <span class="c1"># Availability.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="EngineBase.unsupported_reason">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Why this engine cannot run in this environment, if it cannot.</span>
@@ -632,7 +634,8 @@
 <span class="sd">            raises :exc:`ModuleNotFoundError` on first use.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -641,6 +644,8 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span> <span class="o">=</span> <span class="n">extractor</span>
 
+<div class="viewcode-block" id="EngineBase.__call__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.__call__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Start extraction.</span>
 
@@ -648,12 +653,15 @@
 <span class="sd">        extraction process.</span>
 
 <span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="EngineBase.run">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.run">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Start extraction.</span>
@@ -662,8 +670,11 @@
 <span class="sd">        for preparing the extraction process, such as parsing the file header</span>
 <span class="sd">        and setting up the extraction engines.</span>
 
-<span class="sd">        """</span>
+<span class="sd">        """</span></div>
 
+
+<div class="viewcode-block" id="EngineBase.read_frame">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.read_frame">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_T'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read frame.</span>
@@ -672,8 +683,11 @@
 <span class="sd">        read a frame from the file using the prepared engine instance and</span>
 <span class="sd">        return the parsed frame.</span>
 
-<span class="sd">        """</span>
+<span class="sd">        """</span></div>
 
+
+<div class="viewcode-block" id="EngineBase.close">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.close">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Close engine.</span>
 
@@ -681,6 +695,7 @@
 <span class="sd">        close the engine instance after the extraction process is finished.</span>
 
 <span class="sd">        """</span></div>
+</div>
 
 
 
@@ -743,7 +758,9 @@
 <span class="sd">        has guarded on its own ``code`` keyword all along.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            :attr:`__engine_name__` is *not* an opt-in. It supplies the</span>
+<span class="sd">            :attr:`__engine_name__</span>
+<span class="sd">            &lt;pcapkit.foundation.engines.engine.EngineBase.__engine_name__&gt;` is</span>
+<span class="sd">            *not* an opt-in. It supplies the</span>
 <span class="sd">            :attr:`name &lt;pcapkit.foundation.engines.engine.EngineMeta.name&gt;`</span>
 <span class="sd">            the engine reports, which it does whether or not the engine is</span>
 <span class="sd">            registered; only the keyword decides registration.</span>

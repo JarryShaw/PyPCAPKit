@@ -551,7 +551,7 @@
         <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Mapping of protocol names to reassembly classes.</span>
 
 <span class="sd">        Note:</span>

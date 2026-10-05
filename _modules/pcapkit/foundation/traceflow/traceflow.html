@@ -552,7 +552,7 @@
         <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Mapping of protocol names to flow tracing classes.</span>
 
 <span class="sd">        Note:</span>
@@ -707,6 +707,8 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a class, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a Dumper subclass, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">incumbent_entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>

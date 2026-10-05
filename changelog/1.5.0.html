@@ -1314,6 +1314,24 @@ collide with <code class="docutils literal notranslate"><span class="pre">abc.AB
 four are the whole collision surface (measured on 3.10.21, 3.11.15 and 3.14.7), and
 <code class="docutils literal notranslate"><span class="pre">engine=</span></code>, <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> and <code class="docutils literal notranslate"><span class="pre">fmt=</span></code> are outside it. There is no <code class="docutils literal notranslate"><span class="pre">name=</span></code> alias:
 a keyword that works on some interpreters and not others is the trap being removed.</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">Extractor.register_engine</span></code>, <code class="docutils literal notranslate"><span class="pre">register_reassembly</span></code> and
+<code class="docutils literal notranslate"><span class="pre">register_traceflow</span></code>, and the <code class="docutils literal notranslate"><span class="pre">register_extractor_*</span></code> wrappers over them: each
+now accepts only a subclass of the public <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, <code class="docutils literal notranslate"><span class="pre">Reassembly</span></code> or
+<code class="docutils literal notranslate"><span class="pre">TraceFlow</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>). They had accepted a subclass of the matching
+<code class="docutils literal notranslate"><span class="pre">*Base</span></code> class since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/513">#513</a>, which was a tolerance for pcapkit’s own
+built-ins (all 13 derive from the base, none from the public class) rather than
+a contract: <code class="docutils literal notranslate"><span class="pre">*Base</span></code> is documented as internal, and the public class is the one
+carrying the registration hook. Third-party code that subclasses <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ReassemblyBase</span></code> or <code class="docutils literal notranslate"><span class="pre">TraceFlowBase</span></code> directly and registers through these
+functions now gets <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> naming the public class; subclass the public
+class instead. The error messages are unchanged. The built-ins are unaffected
+because they are declared directly in <code class="docutils literal notranslate"><span class="pre">Extractor</span></code>’s class-body mappings as
+<code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> literals and never pass through a registrar at all; a new
+internal path, <code class="docutils literal notranslate"><span class="pre">Extractor._register_internal_engine</span></code> and its two siblings,
+checks the base for programmatic internal registration and is what the
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/513">#513</a> regression test now exercises. <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> is
+untouched: every in-house protocol derives from <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> and none from
+<code class="docutils literal notranslate"><span class="pre">Protocol</span></code>.</p></li>
 <li><p>extraction is around 46% faster on a 1,117-frame HTTP capture, with byte-identical
 output (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/420">#420</a>). A reassembled datagram’s payload is analysed on first read
 rather than eagerly, cutting IP reassembly’s own cost by 90.7% and TCP’s by 23.7%
@@ -1334,6 +1352,18 @@ parameter must now accept <code class="docutils literal notranslate"><span class
 <em>unparameterised</em>, <code class="docutils literal notranslate"><span class="pre">engine.read_frame()</span></code> and <code class="docutils literal notranslate"><span class="pre">record_header().read_frame()</span></code>
 used to be <code class="docutils literal notranslate"><span class="pre">Any</span></code> and are now the extractor’s own frame type, so an assignment
 that relied on <code class="docutils literal notranslate"><span class="pre">Any</span></code> there no longer type-checks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1022">#1022</a>).</p></li>
+<li><p>the documentation of the engine base classes: the member stubs (<code class="docutils literal notranslate"><span class="pre">name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">registry</span></code>, <code class="docutils literal notranslate"><span class="pre">extractor</span></code>, <code class="docutils literal notranslate"><span class="pre">unsupported_reason</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>,
+<code class="docutils literal notranslate"><span class="pre">read_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">close</span></code> and the rest) moved from <code class="docutils literal notranslate"><span class="pre">Engine</span></code> to <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code>,
+where they are defined, and <code class="docutils literal notranslate"><span class="pre">Engine</span></code> now documents only the
+<code class="docutils literal notranslate"><span class="pre">__init_subclass__</span></code> registration hook it adds. <code class="docutils literal notranslate"><span class="pre">Extractor.engine</span></code> declares
+<code class="docutils literal notranslate"><span class="pre">EngineBase[_P]</span></code> as its return type, but that class was documented
+<code class="docutils literal notranslate"><span class="pre">:no-members:</span></code> under <em>Internal Definitions</em>, so the type a reader followed
+led to no API. Cross-references to <code class="docutils literal notranslate"><span class="pre">Engine.run</span></code>, <code class="docutils literal notranslate"><span class="pre">Engine.read_frame</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Engine.close</span></code> and <code class="docutils literal notranslate"><span class="pre">Engine.unsupported_reason</span></code> now point at <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code>,
+and the <code class="docutils literal notranslate"><span class="pre">PCAP</span></code> engine’s <code class="docutils literal notranslate"><span class="pre">run</span></code> docstring lost the verbless sentence
+“will also be save the current <code class="docutils literal notranslate"><span class="pre">PCAP</span></code> engine instance”. <code class="docutils literal notranslate"><span class="pre">EngineBase</span></code> is
+still not exported in <code class="docutils literal notranslate"><span class="pre">__all__</span></code>; that is left to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1024">#1024</a>).</p></li>
 </ul>
 </section>
 <section id="id6">
@@ -1466,6 +1496,27 @@ re-registering with just a new file extension stays silent too, judged defensibl
 rather than comparing the full <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair. Non-breaking: a correct
 caller sees strictly fewer warnings and no change to return value or exception. Five
 new tests pin the silent/warns-anyway split (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>).</p></li>
+<li><p><strong>six registrars</strong> now raise <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> for a non-class argument, where a bare
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code> (“issubclass() arg 1 must be a class”) used to escape – from the guard
+itself for the two <code class="docutils literal notranslate"><span class="pre">register_dumper</span></code> methods, and from inside <code class="docutils literal notranslate"><span class="pre">abc</span></code> for the other
+four. They are <code class="docutils literal notranslate"><span class="pre">register_dumper</span></code>, <code class="docutils literal notranslate"><span class="pre">register_engine</span></code>, <code class="docutils literal notranslate"><span class="pre">register_reassembly</span></code> and
+<code class="docutils literal notranslate"><span class="pre">register_traceflow</span></code> on <code class="docutils literal notranslate"><span class="pre">Extractor</span></code>, <code class="docutils literal notranslate"><span class="pre">TraceFlow.register_dumper</span></code> (reached
+through <code class="docutils literal notranslate"><span class="pre">register_traceflow_dumper</span></code>), and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_protocol</span></code>. Each guard gains an
+explicit <code class="docutils literal notranslate"><span class="pre">isinstance(x,</span> <span class="pre">type)</span></code> test ahead of its <code class="docutils literal notranslate"><span class="pre">issubclass</span></code>; in the five that
+accept a <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> it runs after the descriptor is unwrapped, so a descriptor
+naming a non-class attribute is rejected too, while <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> takes no
+descriptor. No guard’s target class changes, and a wrong class still raises
+<code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> as before. <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> subclasses <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">TypeError</span></code> still catches it; a caller matching the exact type, or the old
+message, does not. <strong>Not every site is covered</strong>: six of the thirteen bare
+<code class="docutils literal notranslate"><span class="pre">issubclass</span></code> guards in the package are fixed here, and the same guard remains in
+the <code class="docutils literal notranslate"><span class="pre">register</span></code> classmethods of <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame</span></code>, <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Link</span></code>, <code class="docutils literal notranslate"><span class="pre">Internet</span></code> and <code class="docutils literal notranslate"><span class="pre">Transport</span></code>, all of which still leak <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> for a
+non-class. <code class="docutils literal notranslate"><span class="pre">Transport.register</span></code> is reachable despite its <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>, which
+is gated on <code class="docutils literal notranslate"><span class="pre">cls</span> <span class="pre">is</span> <span class="pre">Transport</span></code> and so fires only for the abstract class – the guard
+below it leaks through <code class="docutils literal notranslate"><span class="pre">TCP.register</span></code> and <code class="docutils literal notranslate"><span class="pre">UDP.register</span></code>, which is the only way it
+is ever called. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1026">#1026</a> tracks all seven (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1021">#1021</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1647,6 +1698,15 @@ and still discards silently, since the check sits where every producer’s keywo
 converge rather than inside each of the 30 <code class="docutils literal notranslate"><span class="pre">make</span></code> implementations;
 <code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(**kwargs)</span></code>, the idiom <code class="docutils literal notranslate"><span class="pre">HTTP.make</span></code> uses, reaches it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">Application</span></code>: it no longer forbids payload dispatch
+outright. It encodes “no further protocol layer above this one”, which undissected
+trailer bytes are not, so <code class="docutils literal notranslate"><span class="pre">_decode_next_layer</span></code> and <code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code> accept
+the <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinel – the rest of the packet, resolving to <code class="docutils literal notranslate"><span class="pre">Raw</span></code>, or to
+<code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> when nothing remains – and <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> keeps a payload that
+<code class="docutils literal notranslate"><span class="pre">read</span></code> set instead of overwriting it with <code class="docutils literal notranslate"><span class="pre">NoPayload</span></code>. A real protocol number
+(any <code class="docutils literal notranslate"><span class="pre">proto</span></code> other than <code class="docutils literal notranslate"><span class="pre">-1</span></code>) is still refused with <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>. A
+subclass that calls either method with <code class="docutils literal notranslate"><span class="pre">-1</span></code> changes from raising to succeeding;
+no subclass in the package does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>).</p></li>
 </ul>
 </section>
 <section id="id9">
@@ -2513,6 +2573,28 @@ the generated data), and <code class="docutils literal notranslate"><span class=
 already stops the minting that used to be the reason), since neither of
 <code class="docutils literal notranslate"><span class="pre">OptionType</span></code>’s two paths gets both pickling and correct rendering right at once
 (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/869">#869</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">register</span></code> on <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame</span></code>, <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, <code class="docutils literal notranslate"><span class="pre">Link</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Internet</span></code> and the concrete <code class="docutils literal notranslate"><span class="pre">Transport</span></code> subclasses (<code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code>) now raises
+<code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> for a non-class argument, where it raised a bare <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>
+(“issubclass() arg 1 must be a class”) from inside <code class="docutils literal notranslate"><span class="pre">abc</span></code>. Each guard gains an
+explicit <code class="docutils literal notranslate"><span class="pre">isinstance(protocol,</span> <span class="pre">type)</span></code> test ahead of its <code class="docutils literal notranslate"><span class="pre">issubclass</span></code>, after the
+<code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> is unwrapped, so a descriptor naming a non-class attribute is
+rejected too. All seven <code class="docutils literal notranslate"><span class="pre">Raises:</span></code> clauses already promised <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> if
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> “is not a … subclass”, which a non-class satisfied in spirit but not
+in fact; they now read “is not a class, or not a … subclass”. No guard’s target
+class changes, and a wrong class still raises <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> as before.
+<code class="docutils literal notranslate"><span class="pre">Transport.register</span></code> on <code class="docutils literal notranslate"><span class="pre">Transport</span></code> itself still raises <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>
+first; only its subclasses reach the guard. Not breaking for exception handling:
+<code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> subclasses <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> through <code class="docutils literal notranslate"><span class="pre">BaseError</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">TypeError</span></code> still catches it, and the type and message text are the only
+things a handler can key on that change. Two observable side effects do come with
+it, because <code class="docutils literal notranslate"><span class="pre">BaseError</span></code> is loud by default: the non-class path now emits
+pcapkit’s one <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> log record, and outside devmode it installs
+<code class="docutils literal notranslate"><span class="pre">sys.excepthook</span></code> and <code class="docutils literal notranslate"><span class="pre">threading.excepthook</span></code>, neither of which the bare
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code> from <code class="docutils literal notranslate"><span class="pre">abc</span></code> did. That is the wrong-class path’s existing behaviour,
+so the fix makes the two consistent rather than introducing something new.
+Follows the same fix for the foundation registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1021">#1021</a>)
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1026">#1026</a>).</p></li>
 </ul>
 </section>
 </section>

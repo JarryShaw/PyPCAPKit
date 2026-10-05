@@ -498,7 +498,17 @@
 <div class="viewcode-block" id="Application">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Application</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">"""Abstract base class for transport layer protocol family."""</span>
+<span class="w">    </span><span class="sd">"""Abstract base class for application layer protocol family.</span>
+
+<span class="sd">    An application layer protocol has no further *protocol* layer above it, so</span>
+<span class="sd">    :meth:`_decode_next_layer` and :meth:`_import_next_layer` refuse to dispatch</span>
+<span class="sd">    on a protocol number. What they do permit is the ``-1`` sentinel, which asks</span>
+<span class="sd">    for the rest of the packet undissected and resolves to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` -- trailing bytes are not a further</span>
+<span class="sd">    protocol layer -- or to :class:`~pcapkit.protocols.misc.null.NoPayload` when</span>
+<span class="sd">    nothing remains.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -545,10 +555,14 @@
         <span class="c1"># call super post-init</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
-        <span class="c1">#: pcapkit.protocols.null.NoPayload: Payload of current instance.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>
-        <span class="c1">#: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span></div>
+        <span class="c1"># ``read`` may have dispatched the undissected remainder through</span>
+        <span class="c1"># ``_decode_next_layer``, which already set the payload and the chain</span>
+        <span class="c1"># (basis included); only a protocol that did not gets the empty default</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#: pcapkit.protocols.null.NoPayload: Payload of current instance.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>
+            <span class="c1">#: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Application.__index__">
@@ -571,27 +585,55 @@
 <div class="viewcode-block" id="Application._decode_next_layer">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application._decode_next_layer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Decode next layer protocol.</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Decode next layer protocol.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            dict\_: info buffer</span>
+<span class="sd">            proto: next layer protocol index; only the ``-1`` sentinel</span>
+<span class="sd">                (the rest, undissected) is accepted</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+<span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;Protocol.unpack&gt;`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Current protocol with the undissected remainder as payload.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn't support :meth:`_decode_next_layer`.</span>
+<span class="sd">            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real</span>
+<span class="sd">                protocol dispatch, which this protocol doesn't support.</span>
 
 <span class="sd">        """</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_decode_next_layer'"</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">proto</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object cannot dispatch protocol </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s2">; "</span>
+                                  <span class="s2">"only the undissected remainder (-1) is supported"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Application._import_next_layer">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application._import_next_layer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
-                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+                           <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Import next layer extractor.</span>
 
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto: next layer protocol index; only the ``-1`` sentinel</span>
+<span class="sd">                (the rest, undissected) is accepted</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+<span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;Protocol.unpack&gt;`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.</span>
+
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn't support :meth:`_import_next_layer`.</span>
+<span class="sd">            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real</span>
+<span class="sd">                protocol dispatch, which this protocol doesn't support.</span>
 
 <span class="sd">        """</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_import_next_layer'"</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">proto</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object cannot dispatch protocol </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s2">; "</span>
+                                  <span class="s2">"only the undissected remainder (-1) is supported"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc]</span></div>
 </div>
 
 </pre></div>

@@ -542,10 +542,9 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: engine name</span>
 <span class="sd">        module: module name or module descriptor or an</span>
-<span class="sd">            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass</span>
-<span class="sd">            (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass</span>
-<span class="sd">            is one too, but no built-in engine is: they all derive from the</span>
-<span class="sd">            base directly)</span>
+<span class="sd">            :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class</span>
+<span class="sd">            deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`</span>
+<span class="sd">            is refused: that is the base for pcapkit's own engines)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -784,10 +783,9 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass</span>
-<span class="sd">            (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`</span>
-<span class="sd">            subclass is one too, but no built-in reassembly class is: they all</span>
-<span class="sd">            derive from the base directly)</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class</span>
+<span class="sd">            deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`</span>
+<span class="sd">            is refused: that is the base for pcapkit's own classes)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -822,10 +820,9 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
 <span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass</span>
-<span class="sd">            (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`</span>
-<span class="sd">            subclass is one too, but no built-in flow tracing class is: they all</span>
-<span class="sd">            derive from the base directly)</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class</span>
+<span class="sd">            deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`</span>
+<span class="sd">            is refused: that is the base for pcapkit's own classes)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>

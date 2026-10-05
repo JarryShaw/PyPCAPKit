@@ -580,7 +580,7 @@ so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
 exception rather than silently returning nothing;
 <a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
 <p>Every engine also answers a preflight check –
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, which
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>, which
 <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> consults
 before anything is imported – so asking for one that cannot run in the current
 environment gives a single warning naming the actual cause (a Python version, a
@@ -902,7 +902,7 @@ and which one won, but it cannot undo it.</p>
 <h3>Engine prerequisites<a class="headerlink" href="#engine-prerequisites" title="Link to this heading">¶</a></h3>
 <p>Four of the engines need something beyond a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>. Each constraint
 below is also enforced in code, by the
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>
 preflight described under <a class="reference internal" href="#engine-comparison">Engine Comparison</a>.</p>
 <dl>
 <dt><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></dt><dd><p>Two requirements, and neither is visible to an import: the package imports

@@ -138,7 +138,7 @@ so it is worth knowing in advance.
 
 Every one of these constraints is also enforced in code rather than only
 documented: each engine overrides
-:meth:`~pcapkit.foundation.engines.engine.Engine.unsupported_reason`, which
+:meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 *before* the import test, so asking for an engine that cannot run here produces
 one warning naming the actual cause and a clean fall back to the built-in parser.
