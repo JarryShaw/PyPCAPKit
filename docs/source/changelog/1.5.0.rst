@@ -1383,6 +1383,19 @@ Fixed
   MP_CAPABLE's packed output**: a 20-octet key-present option built or parsed under
   the old code becomes 12 octets with no key, or 20 octets with the key present,
   depending on which the caller meant (:issue:`567`).
+* TCP's MP_CAPABLE now parses and builds all five lengths of :rfc:`8684` section 3.1
+  -- 4 (SYN, no key), 12, 20, 22 (adds the Data-Level Length) and 24 (adds the
+  Checksum) -- where ``_read_mptcp_capable`` raised
+  ``ProtocolError: TCP: [OptNo 30] invalid format`` for anything but 12 and 20. In the schema ``skey`` is now present
+  only for ``length > 4`` and ``rkey`` for ``length > 12``, and two fields are new:
+  ``dl_len`` (16 bits, ``length > 20``) and ``checksum`` (2 octets, ``length > 22``).
+  ``_make_mptcp_capable`` takes ``dl_len`` and ``checksum`` too, where it used to
+  drop them silently through ``**kwargs``, and picks the length from how many of
+  ``skey``, ``rkey``, ``dl_len`` and ``checksum`` are not ``None``. A field given
+  without the one before it raises ``ProtocolError``. The data model
+  ``MPTCPCapable`` gains ``dl_len`` and ``checksum``, and ``skey`` becomes
+  ``Optional[int]``: code that constructs it directly must now pass both new fields,
+  and ``to_dict()`` carries two more keys (:issue:`1042`).
 * IPv6-Route's RPL routing data was five octets wide at the front where :rfc:`6554`
   section 3 gives four, with three further defects behind it. ``CmprI``, ``CmprE`` and
   ``Pad`` are each 4 bits sharing a 32-bit word with a 20-bit ``Reserved``, but the
