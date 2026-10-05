@@ -582,6 +582,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             flags=tcp_data.MPTCPCapableFlag(req=True, ext=False, hsa=True),
             skey=1,
             rkey=2,
+            dl_len=None,
+            checksum=None,
         )
         self.assertEqual(proto._make_mode_mp(Option.Multipath_TCP, capable).rkey, 2)
         self.assertEqual(proto._make_mptcp_unknown(

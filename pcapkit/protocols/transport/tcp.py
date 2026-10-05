@@ -1500,7 +1500,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_capable(self, schema: 'Schema_MPTCPCapable', *, options: 'Option') -> 'Data_MPTCPCapable':  # pylint: disable=unused-argument
         """Read Multipath Capable option.
 
-        Structure of ``MP_CAPABLE`` [:rfc:`6824`]:
+        Structure of ``MP_CAPABLE`` [:rfc:`8684`]:
 
         .. code-block:: text
 
@@ -1510,13 +1510,15 @@ class TCP(Transport[Data_TCP, Schema_TCP],
            |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
            +---------------+---------------+-------+-------+---------------+
            |                   Option Sender's Key (64 bits)               |
-           |                                                               |
+           |                      (if option Length > 4)                   |
            |                                                               |
            +---------------------------------------------------------------+
            |                  Option Receiver's Key (64 bits)              |
-           |                     (if option Length == 20)                  |
+           |                      (if option Length > 12)                  |
            |                                                               |
-           +---------------------------------------------------------------+
+           +-------------------------------+-------------------------------+
+           |  Data-Level Length (16 bits)  |  Checksum (16 bits, optional) |
+           +-------------------------------+-------------------------------+
 
         Arguments:
             schema: parsed option schema
@@ -1526,13 +1528,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If length is **NOT** ``12`` or ``20``.
+            ProtocolError: If length is **NOT** ``4``, ``12``, ``20``, ``22``
+                or ``24``.
 
         """
-        # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without
-        # the receiver's key and 20 octets with it, hence this guard and the
-        # ``rkey=`` test below.
-        if schema.length not in (12, 20):
+        # NOTE: :rfc:`8684` section 3.1 defines exactly these five lengths;
+        # the schema's field conditions follow from them.
+        if schema.length not in (4, 12, 20, 22, 24):
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
         data = Data_MPTCPCapable(
@@ -1545,8 +1547,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 ext=bool(schema.flags['ext']),
                 hsa=bool(schema.flags['hsa']),
             ),
-            skey=schema.skey,
-            rkey=schema.rkey if schema.length == 20 else None,
+            skey=schema.skey if schema.length > 4 else None,
+            rkey=schema.rkey if schema.length > 12 else None,
+            dl_len=schema.dl_len if schema.length > 20 else None,
+            checksum=schema.checksum if schema.length > 22 else None,
         )
         return data
 
@@ -2735,10 +2739,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                             flag_req: 'bool' = False,
                             flag_ext: 'bool' = False,
                             flag_hsa: 'bool' = False,
-                            skey: 'int' = 0,
+                            skey: 'Optional[int]' = 0,
                             rkey: 'Optional[int]' = 0,
+                            dl_len: 'Optional[int]' = None,
+                            checksum: 'Optional[bytes]' = None,
                             **kwargs: 'Any') -> 'Schema_MPTCPCapable':
         """Make multipath TCP capable option.
+
+        Each field is present only if every field before it is, which selects
+        one of the five :rfc:`8684` section 3.1 lengths: 4 (``skey=None``), 12
+        (``rkey=None``), 20 (``dl_len=None``), 22 (``checksum=None``) or 24.
 
         Args:
             subtype: MPTCP subtype
@@ -2749,10 +2759,15 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flag_hsa: use of HMAC-SHA1 flag
             skey: option sender's key
             rkey: option receiver's key
+            dl_len: data-level length
+            checksum: checksum
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If a field is given without the field before it.
 
         """
         if opt is not None:
@@ -2762,12 +2777,19 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flag_hsa = opt.flags.hsa
             skey = opt.skey
             rkey = opt.rkey
+            dl_len = opt.dl_len
+            checksum = opt.checksum
+
+        fields = (skey, rkey, dl_len, checksum)
+        present = fields.index(None) if None in fields else len(fields)
+        if any(field is not None for field in fields[present:]):
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid format')
 
         return Schema_MPTCPCapable(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets
-            # without the receiver's key and 20 octets with it.
-            length=12 if rkey is None else 20,
+            # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 4, 12, 20, 22
+            # or 24 octets, by how many of the fields above are present.
+            length=(4, 12, 20, 22, 24)[present],
             test={
                 'subtype': subtype.value,
                 'version': version,
@@ -2779,6 +2801,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             },
             skey=skey,
             rkey=rkey,
+            dl_len=dl_len,
+            checksum=checksum,
         )
 
     def _make_mptcp_join(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoin]' = None, **kwargs: 'Any') -> 'Schema_MPTCPJoin':

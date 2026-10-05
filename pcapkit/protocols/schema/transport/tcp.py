@@ -844,19 +844,33 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
         'ext': (1, 1),
         'hsa': (7, 1),
     })
-    #: Option sender's key.
-    skey: 'int' = UInt64Field()
-    #: Option receiver's key.
-    #:
-    #: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key
-    #: and 20 octets with it, so the field is present only for the latter.
+    # NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --
+    # 4 (SYN, header only), 12 (sender's key), 20 (both keys), 22 (both keys
+    # and Data-Level Length) and 24 (that plus the Checksum) -- so each field
+    # below is present from the length that first carries it.
+    #: Option sender's key (if option length > 4).
+    skey: 'int' = ConditionalField(
+        UInt64Field(),
+        lambda pkt: pkt['length'] > 4,
+    )
+    #: Option receiver's key (if option length > 12).
     rkey: 'int' = ConditionalField(
         UInt64Field(),
-        lambda pkt: pkt['length'] == 20,
+        lambda pkt: pkt['length'] > 12,
+    )
+    #: Data-level length (if option length > 20).
+    dl_len: 'int' = ConditionalField(
+        UInt16Field(),
+        lambda pkt: pkt['length'] > 20,
+    )
+    #: Checksum (if option length > 22).
+    checksum: 'bytes' = ConditionalField(
+        BytesField(length=2),
+        lambda pkt: pkt['length'] > 22,
     )
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeCapable', flags: 'MPTCPCapableFlags', skey: 'int', rkey: 'Optional[int]') -> 'None': ...
+        def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeCapable', flags: 'MPTCPCapableFlags', skey: 'Optional[int]', rkey: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...
 
 
 class MPTCPJoin(MPTCP, code=Enum_MPTCPOption.MP_JOIN):  # register as a placeholder

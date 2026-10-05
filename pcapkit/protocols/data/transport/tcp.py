@@ -411,12 +411,16 @@ class MPTCPCapable(MPTCP):
     #: Flags.
     flags: 'MPTCPCapableFlag'
     #: Option sender's key.
-    skey: 'int'
+    skey: 'Optional[int]'
     #: Option receiver's key.
     rkey: 'Optional[int]'
+    #: Data-level length.
+    dl_len: 'Optional[int]'
+    #: Checksum.
+    checksum: 'Optional[bytes]'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', version: 'int', flags: 'MPTCPCapableFlag', skey: 'int', rkey: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', version: 'int', flags: 'MPTCPCapableFlag', skey: 'Optional[int]', rkey: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoin(MPTCP):

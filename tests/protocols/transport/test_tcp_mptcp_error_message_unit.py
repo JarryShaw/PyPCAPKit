@@ -231,8 +231,8 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         # four lines are deleted outright -- so when you legitimately change the
         # number of such messages, update the number here rather than loosening
         # the assertion. The one above it, on the doubled form, is the one that
-        # must stay at 0 forever.
-        self.assertEqual(source.count("f'{self.alias}: [OptNo"), 32)
+        # must stay at 0 forever. 33 since #1042 added the MP_CAPABLE maker's.
+        self.assertEqual(source.count("f'{self.alias}: [OptNo"), 33)
 
 
 if __name__ == '__main__':
