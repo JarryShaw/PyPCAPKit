@@ -310,12 +310,13 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
     the resolved object and carries its full dotted path. Nothing is suppressed:
     the references are qualified rather than silenced.
 
-    ``sphinx-autodoc-typehints`` already does this per module, lazily, for the
-    objects it processes -- but it skips classes outright, since it keys off
-    ``__globals__`` which a class does not have, so class attributes never
-    benefited. Its implementation is reused rather than rewritten because it
-    executes the block one statement at a time, so an unimportable optional
-    dependency (``pcap``, ``pcapfile``) cannot strand the names declared after it.
+    ``sphinx-autodoc-typehints`` already does this per module, but lazily, only
+    for the objects it happens to process. Walking every module here binds the
+    names up front, so :func:`typing.get_type_hints` succeeds for anything autodoc
+    renders, whether or not the library reaches it. Its implementation is reused
+    rather than rewritten because it executes the block one statement at a time,
+    so an unimportable optional dependency (``pcap``, ``pcapfile``) cannot strand
+    the names declared after it.
 
     One consequence is worth knowing before it is met as a mystery: making the
     annotations resolvable also makes a malformed one **fatal**. A quoted
