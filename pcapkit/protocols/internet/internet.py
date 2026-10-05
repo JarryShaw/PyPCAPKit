@@ -33,8 +33,8 @@ __all__ = ['Internet']
 class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
-    This class currently supports parsing of the following protocols, which are
-    registered in the :attr:`self.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+    This class parses the following protocols, which are registered in the
+    :attr:`self.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
     attribute:
 
     .. list-table::
@@ -136,8 +136,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         r"""Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name should be
+            ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
@@ -149,11 +149,10 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
 
         Warns:
-            pcapkit.utilities.warnings.RegistryWarning: If this transport-layer
-                protocol number is already registered, naming the displaced
-                entry and its replacement so a caller can tell *what* was lost.
-                Fires only when the incumbent differs from the replacement --
-                see :meth:`ProtocolBase.register
+            pcapkit.utilities.warnings.RegistryWarning: If this protocol number
+                is already registered, naming the displaced entry and its
+                replacement so a caller can tell *what* was lost. Fires only
+                when the incumbent differs from the replacement; see :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
                 guard this shares with ``register_protocol``.
 
@@ -208,10 +207,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Current protocol with next layer extracted.
 
         Notes:
-            We added a new key ``__next_type__`` to ``dict_`` to store the
-            next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These two keys will **NOT**
-            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+            ``dict_`` gains the key ``__next_type__`` (next layer protocol
+            type) and ``__next_name__`` (next layer protocol name). Neither
+            is included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
         """
         next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]

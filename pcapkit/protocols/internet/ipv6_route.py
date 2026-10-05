@@ -71,8 +71,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                  schema=Schema_IPv6_Route, data=Data_IPv6_Route):
     """This class implements Routing Header for IPv6.
 
-    This class currently supports parsing of the following Routing Header for IPv6
-    routing data types, which are registered in the
+    This class parses the following Routing Header for IPv6 routing data types,
+    which are registered in the
     :attr:`self.__routing__ <pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__>`
     attribute:
 
@@ -220,25 +220,20 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
     def _make_hdr_ext_len(data_length: 'int') -> 'int':
         """Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.
 
-        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is *"the length of the
-        Routing header in 8-octet units, not including the first 8
-        octets"*. The routing header's fixed part (``next``/``length``/
-        ``type``/``seg_left``) is 4 octets, so the total on-the-wire header
-        is ``4 + data_length`` octets; equating that to ``8 + 8 *
-        hdr_ext_len`` and solving gives ``hdr_ext_len = (data_length - 4) /
-        8``. ``ipv6_route_data_length`` in
-        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is this
-        expression's inverse, used on the read side.
+        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is the length of the
+        Routing header in 8-octet units, not including the first 8 octets. The
+        fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so
+        the on-the-wire header is ``4 + data_length`` octets; equating that to
+        ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.
+        ``ipv6_route_data_length`` in
+        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is the inverse,
+        used on the read side.
 
-        This is the *only* place ``Hdr Ext Len`` is computed on the write
-        side: :meth:`make` used to compute it twice, once per branch, in two
-        different (and both wrong) units -- that duplication, not either
-        expression individually, is what let the two drift and is why there
-        is one helper now rather than two call sites. Do NOT "simplify" the
-        ``- 4`` / ``/ 8`` away: the units either side of it differ (octets
-        vs. 8-octet units), and dropping the offset silently reinterprets
-        the field, which is exactly the defect :issue:`487` fixed (compare the
-        ``* 8`` unit bug behind :issue:`483` in the scapy adapter).
+        This is the *only* place ``Hdr Ext Len`` is computed on the write side.
+        Computing it separately per branch in :meth:`make` let the copies
+        drift apart, so keep one helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
+        away: the units either side differ (octets vs. 8-octet units), and
+        dropping the offset silently reinterprets the field.
 
         Args:
             data_length: packed length, in octets, of the type-specific data
@@ -300,10 +295,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         if isinstance(data, bytes):
             # ``data`` here *is* the type-specific data (no per-type
-            # constructor involved), so pad it out to the next octet count
-            # ``_make_hdr_ext_len`` can express exactly, then use that same
-            # helper -- rather than a third, separate expression -- to derive
-            # ``Hdr Ext Len`` from the now-aligned length.
+            # constructor involved), so pad it to the next octet count
+            # ``_make_hdr_ext_len`` can express exactly, then derive
+            # ``Hdr Ext Len`` from the aligned length with that same helper.
             length = self._make_hdr_ext_len(len(data))
             data_val = data.ljust(ipv6_route_data_length(length), b'\x00')  # type: bytes | Schema_RoutingType
         elif isinstance(data, (dict, Data_IPv6_Route)):
@@ -316,10 +310,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 meth = name[1]
 
             # NOTE: Through ``parse_ip_address`` rather than
-            # ``ipaddress.ip_address`` directly, because ``bool`` is an
-            # ``int`` subclass the latter accepts without complaint. Before
-            # this, ``dst=True`` converted to ``::1`` with no exception at
-            # all (c.f. #508, #540).
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``
+            # subclass the latter accepts silently: ``dst=True`` would become
+            # ``::1``.
             dst_val = cast('IPv6Address', parse_ip_address(
                 dst, f'{self.alias}: invalid destination address', version=6)) if dst is not None else None
             if isinstance(data, dict):
@@ -378,6 +371,13 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             src_ip: source IP address
             dst_ip: destination IP address
             **kwargs: Arbitrary keyword arguments.
+
+        Note:
+            ``src_ip`` and ``dst_ip`` are declared only in the ``@overload``
+            stub above, which types them as optional keyword parameters. The
+            runtime accepts them through ``**kwargs`` without defaulting them.
+            The discrepancy with the implementation signature is deliberate
+            (GitHub issue :issue:`505`).
 
         See Also:
             For construction argument, please refer to :meth:`self.make <IPv6_Route.make>`.
@@ -512,11 +512,10 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         """
         # ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200
-        # #section-4.4`), not octets -- each 16-octet address costs 2 of
-        # those units, so a well-formed Source Route header always carries
-        # an even ``Hdr Ext Len``. The previous ``(header.length - 8) % 16``
-        # check assumed ``header.length`` was already a total octet count,
-        # which is never true of this field; see #487.
+        # #section-4.4`), not octets. Each 16-octet address costs 2 of those
+        # units, so a well-formed Source Route header always carries an even
+        # ``Hdr Ext Len``; a check that assumes it is a total octet count
+        # rejects most well-formed headers.
         if header.length % 2 != 0:
             raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
@@ -561,10 +560,10 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             ProtocolError: If ``Hdr Ext Len`` is **NOT** ``2``.
 
         """
-        # A Type 2 Routing header is fixed at 24 octets total (4 fixed + 4
-        # reserved + 16-octet home address), so its ``Hdr Ext Len`` -- in
-        # 8-octet units, not octets (:rfc:`8200#section-4.4`) -- is always
-        # ``2``; a literal ``24`` here could never match. See #487.
+        # A Type 2 Routing header is fixed at 24 octets (4 fixed + 4 reserved
+        # + 16-octet home address), so its ``Hdr Ext Len``, in 8-octet units
+        # rather than octets (:rfc:`8200#section-4.4`), is always ``2``; a
+        # literal ``24`` could never match.
         if header.length != 2:
             raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
@@ -606,31 +605,24 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         """
-        # NOTE: the ``% 16`` bound that stood here had the same surface shape
-        # as the Source Route and Type 2 unit confusion #487 fixed above --
-        # ``header.length`` is ``Hdr Ext Len``, in the 8-octet units
-        # :rfc:`6554#section-3` specifies, not octets -- and it additionally
-        # assumed 16-octet addresses, which an SRH only carries when ``CmprI``
-        # and ``CmprE`` are both 0. #487 called it out but deliberately left
-        # it alone, because ``RPL.post_process`` raised on every pack back
-        # then so there was no round trip to validate a replacement against.
-        # #556 removed that blocker and #564 the mis-sized fixed area behind
-        # it, so the replacement is written here rather than guessed at.
+        # NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units
+        # :rfc:`6554#section-3` specifies, not octets, and the addresses are
+        # not always 16 octets: an SRH carries full addresses only when
+        # ``CmprI`` and ``CmprE`` are both 0. A plain ``% 16`` bound on the
+        # length is therefore wrong on both counts.
         #
-        # :rfc:`6554#section-4.2` derives the address count from the same
-        # fields this reader has to hand:
+        # :rfc:`6554#section-4.2` derives the address count from the fields
+        # this reader has to hand:
         #
         #     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1
         #
-        # so the invariant actually available is that the division closes --
-        # non-negative, and whole. ``16 - cmpr_i`` cannot be zero: ``CmprI``
-        # is a *"4-bit unsigned integer"* per :rfc:`6554#section-3`, hence at
-        # most 15. Note this is a well-formedness check the library needs in
-        # order to walk ``Addresses[1..n]`` at all; :rfc:`6554#section-4.2`
-        # itself specifies no malformed-header drop condition, only
-        # ``Segments Left > n``, so nothing stricter is imposed here. Still
-        # not checked against a real RPL capture, which is the caveat the
-        # ``% 16`` bound carried too.
+        # so the invariant available is that the division closes: non-negative
+        # and whole. ``16 - cmpr_i`` cannot be zero, since ``CmprI`` is a
+        # 4-bit unsigned integer (:rfc:`6554#section-3`), at most 15. This is
+        # the well-formedness check the library needs to walk
+        # ``Addresses[1..n]`` at all; the RFC specifies no malformed-header
+        # drop condition beyond ``Segments Left > n``, so nothing stricter is
+        # imposed. Not checked against a real RPL capture.
         cmpr_i = schema.cmpr['cmpr_i']
         cmpr_e = schema.cmpr['cmpr_e']
         pad_len = schema.pad['pad_len']
@@ -761,13 +753,11 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             ip = [] if ip is None else ip
 
             # NOTE: Through ``parse_ip_address`` rather than
-            # ``ipaddress.ip_address`` directly, because ``bool`` is an
-            # ``int`` subclass the latter accepts without complaint -- and
-            # here the laundered value would not just pack wrong, it would
-            # feed ``cmpr_i``/``cmpr_e`` below, corrupting the compression
-            # metadata alongside the address list. Before this,
-            # ``ip=[True]`` packed with ``cmpr_e=0`` and an address of
-            # ``00000001`` instead of raising (c.f. #508, #540).
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``
+            # subclass the latter accepts silently. Here the value would not
+            # just pack wrong but also feed ``cmpr_i``/``cmpr_e`` below,
+            # corrupting the compression metadata: ``ip=[True]`` would pack an
+            # address of ``00000001`` with ``cmpr_e=0``.
             descr = f'{self.alias}: invalid RPL source address'
 
             if dst is None:
@@ -795,15 +785,13 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 prefix_e = os_path.commonprefix(test_list)
                 cmpr_e = len(prefix_e)
 
-                # NOTE: the outer ``% 8`` is what keeps a vector that is
-                # already 8-octet aligned from being handed a *full* 8 octets
-                # of padding -- ``8 - 0`` is 8, not 0. That is reachable
-                # whenever ``dst`` shares no prefix with the addresses, which
-                # makes ``cmpr_i`` and ``cmpr_e`` both 0 and the vector a
-                # multiple of 16, and it contradicts :rfc:`6554#section-3`:
-                # *"Note that when CmprI and CmprE are both 0, Pad MUST carry
-                # a value of 0."* ``_make_data_type_none`` above already
-                # spells the idiom this way; this branch did not.
+                # NOTE: the outer ``% 8`` keeps an already 8-octet-aligned
+                # vector from being handed a *full* 8 octets of padding
+                # (``8 - 0`` is 8, not 0). That is reachable whenever ``dst``
+                # shares no prefix with the addresses, making ``cmpr_i`` and
+                # ``cmpr_e`` both 0 and the vector a multiple of 16, and it
+                # contradicts :rfc:`6554#section-3`: when CmprI and CmprE are
+                # both 0, Pad MUST be 0. Same idiom as ``_make_data_type_none``.
                 pad = (8 - ((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e)) % 8) % 8
 
                 ip_val = []
