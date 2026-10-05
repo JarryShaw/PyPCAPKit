@@ -5,8 +5,7 @@ Protocol Family
 .. module:: pcapkit.protocols.data
 .. module:: pcapkit.protocols.schema
 
-:mod:`pcapkit.protocols` is collection of all protocol families,
-with detailed implementation and methods.
+:mod:`pcapkit.protocols` is the collection of all protocol families.
 
 .. toctree::
    :maxdepth: 2
@@ -18,10 +17,9 @@ with detailed implementation and methods.
    application/index
    misc/index
 
-All protocol classes are implemented as :class:`~pcapkit.protocols.protocol.ProtocolBase`
-subclasses, which are responsible for processing extracted binary packet data
-and/or construct protocol packet from given information. Below is a brief
-diagram of the class hierarchy of :mod:`pcapkit.protocols`:
+All protocol classes are :class:`~pcapkit.protocols.protocol.ProtocolBase`
+subclasses, which parse extracted binary packet data and/or construct a packet
+from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
 .. mermaid::
 
@@ -106,7 +104,7 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        click C "/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol"
        click D "/ext.html#what-s-in-for-protocols"
 
-       click Link "/pcapkit/protocols/link/link.html#pcapkit.protocols.link.Link"
+       click Link "/pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link"
        click Ethernet "/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
        click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click L2TPv2 "/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
@@ -119,27 +117,27 @@ diagram of the class hierarchy of :mod:`pcapkit.protocols`:
        click RARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP"
        click DRARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
 
-       click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.Internet"
+       click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet"
        click AH "/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH"
        click ESP "/pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP"
        click HIP "/pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP"
        click HOPOPT "/pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
        click IP "/pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP"
        click IPsec "/pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
-       click IPv4 "/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ip.ipv4.IPv4"
-       click IPv6 "/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ip.ipv6.IPv6"
+       click IPv4 "/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
+       click IPv6 "/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6"
        click IPv6-Frag "/pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
        click IPv6-Opts "/pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
        click IPv6-Route "/pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
        click IPX "/pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX"
        click MH "/pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH"
 
-       click Transport "/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.Transport"
-       click TCP "/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.internet.tcp.TCP"
-       click UDP "/pcapkit/protocols/transport/udp.html#pcapkit.protocols.internet.udp.UDP"
+       click Transport "/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport"
+       click TCP "/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP"
+       click UDP "/pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP"
        click SCTP "/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
 
-       click Application "/pcapkit/protocols/application/application.html#pcapkit.protocols.application.Application"
+       click Application "/pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application"
        click HTTP "/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP"
        click h1 "/pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP"
        click h2 "/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
