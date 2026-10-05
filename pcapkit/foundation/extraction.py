@@ -690,8 +690,8 @@ class Extractor(Generic[_P]):
                 self.record_frames()
                 return
             else:
-                warn(f'engine {eng.name} (`{eng.module}`) is not installed; '
-                     'using default engine instead', EngineWarning, stacklevel=stacklevel())
+                # ``import_test`` has already warned that the package is absent;
+                # warning again here would report one problem twice.
                 self._exnam = 'default'  # using default/pcapkit engine
 
         if self._exnam not in ('default', 'pcapkit'):
@@ -734,7 +734,8 @@ class Extractor(Generic[_P]):
         except ImportError:
             module = None
             logger.debug('engine module %r is not importable', engine)
-            warn(f"extraction engine '{name or engine}' not available; "
+            label = f'{name} (`{engine}`)' if name else engine
+            warn(f'engine {label} is not installed; '
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
         return module
 

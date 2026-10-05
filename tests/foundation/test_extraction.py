@@ -772,6 +772,57 @@ class ExtractorTests(unittest.TestCase):
                 with mock.patch('pcapkit.foundation.extraction.PCAPNG_Engine', types.SimpleNamespace(MAGIC_NUMBER=(b'ng!!',))):
                     bad.run()
 
+    def _run_fallback(self, engine: 'type') -> 'tuple[list[str], typing.Any, typing.Any]':
+        """Run an extractor requesting ``engine``; return its EngineWarnings and state."""
+        from pcapkit.utilities.warnings import EngineWarning
+
+        extractor = self._bare_extractor()
+        extractor._exnam = 'fake'
+        extractor.__engine__ = {'fake': engine}
+        extractor._magic = b'pcap'
+        extractor.record_frames = mock.Mock()
+        fake_pcap = type('FakePCAP', (FakeEngine,), {'MAGIC_NUMBER': (b'pcap',)})
+        with mock.patch('pcapkit.foundation.extraction.PCAP_Engine', fake_pcap):
+            with mock.patch('pcapkit.foundation.extraction.PCAPNG_Engine',
+                            types.SimpleNamespace(MAGIC_NUMBER=(b'ng!!',))):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    extractor.run()
+        messages = [str(w.message) for w in caught if issubclass(w.category, EngineWarning)]
+        return messages, extractor, fake_pcap
+
+    def test_missing_engine_package_warns_once_and_falls_back(self) -> None:
+        # The module does not exist, so the result is independent of what CI installs.
+        absent = type('AbsentEngine', (FakeEngine,), {
+            'name': 'Absent', 'module': 'missing_engine_module_for_unit_tests'})
+        messages, extractor, fake_pcap = self._run_fallback(absent)
+        self.assertEqual(messages, ['engine Absent (`missing_engine_module_for_unit_tests`) '
+                                    'is not installed; using default engine instead'])
+        self.assertEqual(extractor._exnam, 'default')
+        self.assertIsInstance(extractor._exeng, fake_pcap)
+
+    def test_import_test_without_display_name_names_module_once(self) -> None:
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.warnings import EngineWarning
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            self.assertIsNone(Extractor.import_test('definitely_missing_mod'))
+        messages = [str(w.message) for w in caught if issubclass(w.category, EngineWarning)]
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0].count('definitely_missing_mod'), 1)
+        self.assertNotIn('(`definitely_missing_mod`)', messages[0])
+
+    def test_unsupported_engine_warns_once_and_falls_back(self) -> None:
+        blocked = type('BlockedEngine', (FakeEngine,), {
+            'name': 'Blocked',
+            'unsupported_reason': classmethod(lambda cls: 'unit test says no')})
+        messages, extractor, fake_pcap = self._run_fallback(blocked)
+        self.assertEqual(messages, ['engine Blocked is not supported on this interpreter '
+                                    '(unit test says no); using default engine instead'])
+        self.assertEqual(extractor._exnam, 'default')
+        self.assertIsInstance(extractor._exeng, fake_pcap)
+
     def test_record_header_record_frames_iteration_call_and_cleanup(self) -> None:
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.utilities.exceptions import CallableError, FormatError, IterableError
