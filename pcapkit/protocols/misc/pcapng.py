@@ -952,7 +952,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if code in cls.__record__:
-            warn(f'PCAP-NG: [Type {code}] :manpage:`systemd(1)` journal export record already registered', RegistryWarning)
+            warn(f'PCAP-NG: [Type {code}] name resolution record already registered', RegistryWarning)
         cls.__record__[code] = meth
 
     @classmethod
@@ -3010,7 +3010,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
@@ -3036,7 +3036,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
@@ -3064,7 +3064,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
@@ -5119,7 +5119,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
@@ -5137,7 +5137,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def _make_option_ns_dnsipv4(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSIP4AddrOption]' = None, *,
                                 ip: 'str | bytes | IPv4Address | int' = '8.8.8.8',
                                 **kwargs: 'Any') -> 'Schema_NS_DNSIP4AddrOption':
-        """Make PCAP-NG ``ns_dnsip4addr`` option.
+        """Make PCAP-NG ``ns_dnsIP4addr`` option.
 
         Args:
             type: Option type.
@@ -5150,10 +5150,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be only one, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
 
         if option is not None:
@@ -5168,7 +5168,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def _make_option_ns_dnsipv6(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSIP6AddrOption]' = None, *,
                                 ip: 'str | bytes | IPv6Address | int' = '8.8.8.8',
                                 **kwargs: 'Any') -> 'Schema_NS_DNSIP6AddrOption':
-        """Make PCAP-NG ``ns_dnsip6addr`` option.
+        """Make PCAP-NG ``ns_dnsIP6addr`` option.
 
         Args:
             type: Option type.
@@ -5181,10 +5181,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be only one, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
 
         if option is not None:
