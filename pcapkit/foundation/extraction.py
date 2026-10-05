@@ -734,7 +734,8 @@ class Extractor(Generic[_P]):
         except ImportError:
             module = None
             logger.debug('engine module %r is not importable', engine)
-            warn(f'engine {name or engine} (`{engine}`) is not installed; '
+            label = f'{name} (`{engine}`)' if name else engine
+            warn(f'engine {label} is not installed; '
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
         return module
 

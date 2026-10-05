@@ -801,6 +801,18 @@ class ExtractorTests(unittest.TestCase):
         self.assertEqual(extractor._exnam, 'default')
         self.assertIsInstance(extractor._exeng, fake_pcap)
 
+    def test_import_test_without_display_name_names_module_once(self) -> None:
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.warnings import EngineWarning
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            self.assertIsNone(Extractor.import_test('definitely_missing_mod'))
+        messages = [str(w.message) for w in caught if issubclass(w.category, EngineWarning)]
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0].count('definitely_missing_mod'), 1)
+        self.assertNotIn('(`definitely_missing_mod`)', messages[0])
+
     def test_unsupported_engine_warns_once_and_falls_back(self) -> None:
         blocked = type('BlockedEngine', (FakeEngine,), {
             'name': 'Blocked',
