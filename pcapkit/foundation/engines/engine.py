@@ -53,7 +53,7 @@ class EngineMeta(abc.ABCMeta, Generic[_T]):
         return cls.__module__
 
     @property
-    def registry(cls) -> 'dict[str, ModuleDescriptor[Engine] | Type[Engine]]':
+    def registry(cls) -> 'dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]':
         """Mapping of engine names to engine classes.
 
         Note:

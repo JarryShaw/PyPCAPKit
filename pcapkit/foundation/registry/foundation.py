@@ -72,10 +72,9 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
     Arguments:
         name: engine name
         module: module name or module descriptor or an
-            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
-            (an :class:`~pcapkit.foundation.engines.engine.Engine` subclass
-            is one too, but no built-in engine is: they all derive from the
-            base directly)
+            :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class
+            deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`
+            is refused: that is the base for pcapkit's own engines)
         class\_: class name
 
     """
@@ -290,10 +289,9 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
     Arguments:
         protocol: protocol name
         module: module name or module descriptor or a
-            :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
-            (a :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
-            subclass is one too, but no built-in reassembly class is: they all
-            derive from the base directly)
+            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class
+            deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
+            is refused: that is the base for pcapkit's own classes)
         class\_: class name
 
     """
@@ -325,10 +323,9 @@ def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescripto
     Arguments:
         protocol: protocol name
         module: module name or module descriptor or a
-            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
-            (a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
-            subclass is one too, but no built-in flow tracing class is: they all
-            derive from the base directly)
+            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class
+            deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
+            is refused: that is the base for pcapkit's own classes)
         class\_: class name
 
     """

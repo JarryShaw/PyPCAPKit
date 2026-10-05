@@ -82,7 +82,7 @@ class TraceFlowMeta(abc.ABCMeta):
         return protocol_registry.get(cls.name.upper(), Raw)
 
     @property
-    def registry(cls) -> 'dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]':
+    def registry(cls) -> 'dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]':
         """Mapping of protocol names to flow tracing classes.
 
         Note:
