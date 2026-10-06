@@ -128,7 +128,7 @@ class IPv6UnitTests(unittest.TestCase):
             bytes.fromhex('6abcdef0'),
             ip_address('2001:db8::5').packed,
         ])
-        self.assertEqual(proto._read_ip_hextet(), (6, 0x6a, 0xbcdef0))
+        self.assertEqual(proto._read_ip_hextet(), (6, 0xab, 0xcdef0))
         self.assertEqual(proto._read_ip_addr(), ip_address('2001:db8::5'))
 
     def test_ipv6_decode_next_layer_handles_extension_headers_and_fragments(self) -> None:
