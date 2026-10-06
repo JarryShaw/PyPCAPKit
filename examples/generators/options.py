@@ -1120,15 +1120,28 @@ def _httpv2_overrides() -> 'dict[Any, dict[str, Any]]':
         # ``settings=None``, the default, matches none of the accepted forms.
         Enum_Frame.SETTINGS: {'settings': [(Enum_Setting.HEADER_TABLE_SIZE, 4096)]},
         Enum_Frame.GOAWAY: {'debug_data': b'\xde\xad'},
+        # A server-initiated stream is even and non-zero (RFC 9113 Section 5.1.1).
+        Enum_Frame.PUSH_PROMISE: {'promised_sid': 2},
     }
+
+
+#: HTTP/2 frame types that apply to the connection as a whole and so are sent
+#: on stream 0 (RFC 9113 Sections 6.5, 6.7 and 6.8). Every other frame type is
+#: sent on :data:`HTTPV2_STREAM`.
+HTTPV2_CONNECTION_FRAMES = (4, 6, 7)  # SETTINGS, PING, GOAWAY
+
+#: Stream identifier of every stream-level HTTP/2 frame: the first
+#: client-initiated stream (RFC 9113 Section 5.1.1). ``DATA``, ``HEADERS``,
+#: ``PRIORITY``, ``RST_STREAM``, ``PUSH_PROMISE`` and ``CONTINUATION`` are a
+#: connection error on stream 0, and ``WINDOW_UPDATE`` may use either.
+HTTPV2_STREAM = 1
 
 
 def _httpv2_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.application.httpv2 import HTTP
 
-    # SETTINGS and PING both reject a non-zero stream identifier, so every
-    # frame uses stream 0 rather than each one picking its own.
-    return HTTP(type=code, sid=0, frame=dict(kwargs))
+    sid = 0 if int(code) in HTTPV2_CONNECTION_FRAMES else HTTPV2_STREAM
+    return HTTP(type=code, sid=sid, frame=dict(kwargs))
 
 
 def _httpv2_parse(octets: 'bytes') -> 'Any':
