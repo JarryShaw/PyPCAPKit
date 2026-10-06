@@ -166,8 +166,8 @@ compete: a pull request normally carries one from the first group and as many of
 rest as apply. **The five groups are not the whole label set** -- the repository also
 has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` and
 ``duplicate`` are all in live use and ``good first issue`` is archived. GitHub cannot
-archive a label, so an archived one is greyed and its description starts
-``[archived]``; it is kept rather than deleted so the name stays reserved.
+archive a label, so an archived one keeps its name and description and is recoloured
+grey (``cccccc``); it is kept rather than deleted so the name stays reserved.
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added::
 
