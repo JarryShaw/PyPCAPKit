@@ -3,7 +3,6 @@
 """header schema for mobility header"""
 
 import datetime
-import math
 from typing import TYPE_CHECKING
 
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -782,9 +781,9 @@ class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
         # convert timestamp to datetime
         # c.f., http://tickelton.gitlab.io/articles/ntp-timestamps/
         ts_sec = self.seconds - 2_208_988_800  # 70 years
-        ts_usec = math.floor(self.fraction / 2**32)
+        ts_frac = self.fraction / 2**32  # fraction of a second
 
-        self.timestamp = datetime.datetime.fromtimestamp(ts_sec + ts_usec, tz=datetime.timezone.utc)
+        self.timestamp = datetime.datetime.fromtimestamp(ts_sec + ts_frac, tz=datetime.timezone.utc)
 
         return self
 

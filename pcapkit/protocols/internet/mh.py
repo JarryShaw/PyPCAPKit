@@ -8100,7 +8100,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
             int_ts = interval.timestamp()
             ts_sec = math.floor(int_ts)
-            ts_frc = math.ceil(((int_ts - ts_sec) * 1_000_000)) * 2**32
+            ts_frc = min(round((int_ts - ts_sec) * 2**32), 0xFFFF_FFFF)  # 1/2**32 seconds per unit
 
             timestamp = NTPTimestamp(seconds=ts_sec + 2_208_988_800,  # 70 years
                                      fraction=ts_frc)
