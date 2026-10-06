@@ -375,14 +375,9 @@ EXPECTED_FAILURES = {
     # cycle closes and the entry is deleted rather than kept as documentation of
     # a defect that is no longer there.
 
-    # Two parameters whose own packed length is not what the header arithmetic
-    # can represent, even at HIP_COPIES's old value of two -- see that
-    # constant's note in the generator for the measurement that dropped it to
-    # one without changing either of these.
-    'hip-parameter/HIP_TRANSFORM': Gap(
-        'CONSTRUCT', 'HIPv2: [ParamNo 577] invalid parameter',
-        'pcapkit/protocols/internet/hip.py:698 -- the len check; HIP_TRANSFORM '
-        'packs to a length the make-side arithmetic cannot express'),
+    # A parameter whose own packed length is not what the header arithmetic
+    # can represent, at one copy or two. The generator's HIP_COPIES note
+    # records it as the one HIP case that fails at either setting.
     'hip-parameter/HOST_ID': Gap(
         'CONSTRUCT', 'HIPv2: invalid format',
         'pcapkit/protocols/internet/hip.py:698 -- HOST_ID packs to 14 octets '
