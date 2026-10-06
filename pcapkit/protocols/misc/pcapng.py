@@ -1647,13 +1647,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             addr: MAC address.
 
         Returns:
-            MAC address.
+            MAC address packed as 6 octets.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
+                *hex* encoded MAC address.
 
         """
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-            return _addr.replace(b':', b'').replace(b'-', b'')
+            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
         raise ProtocolError(f'invalid MAC address: {addr!r}')
 
     def _make_eui_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
@@ -1663,13 +1667,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             addr: EUI address.
 
         Returns:
-            EUI address.
+            EUI address packed as 8 octets.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
+                *hex* encoded EUI-64 address.
 
         """
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_EUI_ADDR.fullmatch(_addr) is not None:
-            return _addr.replace(b':', b'').replace(b'-', b'')
+            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
         raise ProtocolError(f'invalid EUI address: {addr!r}')
 
     def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,

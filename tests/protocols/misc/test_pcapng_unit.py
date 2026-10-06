@@ -448,9 +448,10 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
         self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
                          '02:34:56:ff:fe:78:9a:bc')
-        self.assertEqual(pcapng._make_mac_addr('00:01:02:03:04:05'), b'000102030405')
-        self.assertEqual(pcapng._make_mac_addr(b'00-01-02-03-04-05'), b'000102030405')
-        self.assertEqual(pcapng._make_eui_addr('02:34:56:ff:fe:78:9a:bc'), b'023456fffe789abc')
+        self.assertEqual(pcapng._make_mac_addr('00:01:02:03:04:05'), b'\x00\x01\x02\x03\x04\x05')
+        self.assertEqual(pcapng._make_mac_addr(b'00-01-02-03-04-05'), b'\x00\x01\x02\x03\x04\x05')
+        self.assertEqual(pcapng._make_eui_addr('02:34:56:ff:fe:78:9a:bc'),
+                         bytes.fromhex('023456fffe789abc'))
         with self.assertRaises(ProtocolError):
             pcapng._make_mac_addr('bad')
         with self.assertRaises(ProtocolError):
@@ -814,10 +815,10 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                      interface='2001:db8::1/64').to_dict()['length'], 8)
         self.assertEqual(pcapng._make_option_if_mac(OptionType.if_MACaddr,
                                                     interface='00:01:02:03:04:05').to_dict()['interface'],
-                         b'000102030405')
+                         b'\x00\x01\x02\x03\x04\x05')
         self.assertEqual(pcapng._make_option_if_eui(OptionType.if_EUIaddr,
                                                     interface='02:34:56:ff:fe:78:9a:bc').to_dict()['interface'],
-                         b'023456fffe789abc')
+                         bytes.fromhex('023456fffe789abc'))
         self.assertEqual(pcapng._make_option_if_speed(OptionType.if_speed,
                                                       speed=1000).to_dict()['speed'], 1000)
         self.assertEqual(pcapng._make_option_if_tsresol(OptionType.if_tsresol,
@@ -2229,9 +2230,9 @@ class PCAPNGUnitTests(unittest.TestCase):
             ('_make_option_if_ipv6', OptionType.if_IPv6addr,
              DummyData(interface='2001:db8::9/64'), 'length', 8),
             ('_make_option_if_mac', OptionType.if_MACaddr,
-             DummyData(interface='00:01:02:03:04:06'), 'interface', b'000102030406'),
+             DummyData(interface='00:01:02:03:04:06'), 'interface', b'\x00\x01\x02\x03\x04\x06'),
             ('_make_option_if_eui', OptionType.if_EUIaddr,
-             DummyData(interface='02:34:56:ff:fe:78:9a:bd'), 'interface', b'023456fffe789abd'),
+             DummyData(interface='02:34:56:ff:fe:78:9a:bd'), 'interface', bytes.fromhex('023456fffe789abd')),
             ('_make_option_if_speed', OptionType.if_speed, DummyData(speed=2000), 'speed', 2000),
             ('_make_option_if_tsresol', OptionType.if_tsresol, DummyData(resolution=1000),
              'tsresol', {'flag': 0, 'resolution': 3}),
