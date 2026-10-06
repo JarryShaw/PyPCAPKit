@@ -145,10 +145,11 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
     ##########################################################################
 
     #: DefaultDict[Enum_Frame, str | tuple[FrameParser, FrameConstructor]]: Frame
-    #: code to method mapping. Method names are expected to be referred to
-    #: the class by ``_read_http_${name}`` and/or ``_make_http_${name}``, and if
-    #: such name not found, the value should then be a method that can parse the
-    #: frame by itself.
+    #: code to method mapping. A :obj:`str` value names the
+    #: ``_read_http_${name}`` and ``_make_http_${name}`` methods, which fall back
+    #: to ``_read_http_none`` and ``_make_http_none`` when not defined, as an
+    #: unregistered code does; any other value is a ``(parser, constructor)``
+    #: pair of callables.
     __frame__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -1009,6 +1010,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             end_stream: End of stream flag.
+            pad_len: Padding length.
             data: Frame data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1048,6 +1050,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             frame: Frame data model.
             end_stream: End of stream flag.
             end_headers: End of headers flag.
+            pad_len: Padding length.
             excl_dep: Exclusive dependency flag.
             sid_dep: Dependency stream identifier.
             weight: Priority weight value.
@@ -1134,6 +1137,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             error: Error code.
+            error_default: Default value of error code.
+            error_namespace: Namespace of error code.
+            error_reversed: Reversed namespace of error code.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

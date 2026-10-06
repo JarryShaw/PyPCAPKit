@@ -229,10 +229,11 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         Raises:
             ProtocolError: If no version in the family accepts the payload, or if
-                an identified version's own parser refuses it. This is the
-                *only* exception this method raises for an unparseable payload --
-                a candidate failing in any other way, on a version that was not
-                positively identified, is a fall-through and not an answer.
+                an identified version's own parser refuses it. Only a
+                ``ProtocolError`` from a trial parse falls through to the next
+                version, and the final HTTP/2 trial also absorbs
+                :exc:`struct.error`; any other exception from either HTTP/1
+                arm, or from that HTTP/2 trial, propagates unconverted.
 
         Note:
             Two things this deliberately does **not** decide, because one payload

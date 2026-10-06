@@ -5,8 +5,8 @@
 
 .. module:: pcapkit.protocols.application
 
-:mod:`pcapkit.protocols.application` is collection of all protocols in
-application layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.application` is a collection of all protocols in
+application layer.
 
 """
 # TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
@@ -17,7 +17,7 @@ application layer, with detailed implementation and methods.
 #     dependency, c.f. pcapkit.protocols.application.ngap. Importing the module
 #     is free -- ``pycrate`` is imported inside the parse path, not here.
 
-# Base Class for Internet Layer
+# Base Class for Application Layer
 from pcapkit.protocols.application.application import Application
 
 # Utility Classes for Protocols
@@ -31,7 +31,7 @@ from pcapkit.protocols.application.rarp import RARP, DRARP
 # Base Classes
 from pcapkit.protocols.application.http import HTTP
 
-# Transport Layer Protocol Numbers
+# Application Layer Protocol Numbers
 from pcapkit.const.reg.apptype import AppType as APPTYPE
 
 __all__ = [

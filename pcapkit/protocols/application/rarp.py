@@ -5,8 +5,9 @@
 .. module:: pcapkit.protocols.application.rarp
 
 :mod:`pcapkit.protocols.application.rarp` contains
-:class:`~pcapkit.protocols.application.rarp.RARP` only,
-which implements extractor for (Dynamic) Reverse
+:class:`~pcapkit.protocols.application.rarp.RARP` and
+:class:`~pcapkit.protocols.application.rarp.DRARP`,
+which implement extractors for (Dynamic) Reverse
 Address Resolution Protocol (RARP/DRARP) [*]_,
 whose structure is described as below:
 
