@@ -12,7 +12,7 @@ built-in PCAP and `PCAP-NG`_ file support, :mod:`Scapy <scapy>`,
 
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
-.. _PCAPNG: https://wiki.wireshark.org/Development/PcapNg
+.. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 
 """
 # Base class

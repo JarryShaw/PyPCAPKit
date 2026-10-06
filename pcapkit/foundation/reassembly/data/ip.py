@@ -29,7 +29,7 @@ BufferID: 'TypeAlias' = Tuple[_AT, _AT, int, 'TransType']
 @info_final
 class Packet(Info, Generic[_AT]):
     """Data model for :term:`IPv4 <reasm.ipv4.packet>` and/or
-    :term:`IPv6 <reasm.ipv6.packet>` packet representation.."""
+    :term:`IPv6 <reasm.ipv6.packet>` packet representation."""
 
     #: Buffer ID.
     bufid: 'BufferID'
@@ -48,7 +48,7 @@ class Packet(Info, Generic[_AT]):
     #: Raw :obj:`bytearray` type payload.
     payload: 'bytearray'
     #: Capture timestamp of the fragment, in seconds since the Unix epoch. This
-    #: is the *capture's* clock, not the host's: it is what drives the :rfc:`791`
+    #: is the *capture's* clock, not the host's: it is what drives the :rfc:`1122#section-3.3.2`
     #: and :rfc:`8200#section-4.5` reassembly timeout, since an offline parser
     #: replaying a file has no other notion of time passing.
     timestamp: 'float'
@@ -157,7 +157,7 @@ class Buffer(Info, Generic[_AT]):
     TDL: 'int'
     #: Fragment received bit table.
     RCVBT: 'bytearray'
-    #: List of reassembled packets.
+    #: Numbers of the packets merged into this buffer.
     index: 'list[int]'
     #: Header buffer.
     header: 'bytes'

@@ -178,8 +178,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that
     filter would then hide the ``HTTP`` collision this warning exists to
     surface. The sibling ``register`` methods across the package, each keyed on a
-    caller-supplied ``code``, apply the same identity criterion as of GitHub
-    issue :issue:`718`.
+    caller-supplied ``code``, apply the same identity criterion (:issue:`718`).
 
     Making the key itself unique would resolve the collision rather than
     merely reporting it, but it is a registry-format change that the bare-name
@@ -240,11 +239,11 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
 #: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
 #: <pcapkit.protocols.protocol.ProtocolBase.__proto__>` dispatch registry
 #: keyed by that enum type -- the "registry-of-registries" that lets
-#: ``code=`` infer a destination from a key's own type, per :issue:`514`. This is
-#: not an invention: it is exactly the targeting
+#: ``code=`` infer a destination from a key's own type, per :issue:`514`. It is
+#: the same targeting
 #: :func:`register_ethertype`, :func:`register_transtype`,
-#: :func:`register_linktype` and :func:`register_sctp` already hard-code by
-#: hand, moved into one table so :func:`register_protocol_code` can consult
+#: :func:`register_linktype` and :func:`register_sctp` hard-code by
+#: hand, in one table so :func:`register_protocol_code` can consult
 #: it. ``LinkType`` naming two classes is deliberate, not ambiguous --
 #: :func:`register_linktype` already fans out to both.
 _CODE_DESTINATIONS: 'dict[type, tuple[Type[ProtocolBase], ...]]' = {
@@ -892,9 +891,9 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     # anything unrecognised, composite-spelled or not, and ``__getitem__``
     # raises a bare :exc:`KeyError` on a miss instead of that -- both
     # ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,
-    # since GitHub issue #808 dropped the ``IntFlag`` base, which made the
-    # first of those two silently compose into the value ``3`` rather than
-    # miss at all. ``__members__.get(...)`` lets this function
+    # because ``TransportProtocol`` is not an ``IntFlag``, under which the
+    # first would silently compose into the value ``3`` (#808).
+    # ``__members__.get(...)`` lets this function
     # raise its own exception on a miss instead of letting ``__getitem__``'s
     # propagate, and lowercasing does not turn ``'tcp|udp'`` into a member
     # name either way. Anything that is neither a ``str`` nor a
@@ -1140,7 +1139,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
 # NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__
 def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]', *,
                         schema: 'Optional[Type[Schema_HTTP_FrameType]]' = None) -> 'None':
-    """Registered a frame parser.
+    """Register a frame parser.
 
     The function will register the given frame parser to the
     :data:`pcapkit.protocols.application.httpv2.HTTP.__frame__` registry.
@@ -1170,13 +1169,13 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__
 def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]', *,
                           schema: 'Optional[Type[Schema_PCAPNG_BlockType]]' = None) -> 'None':
-    """Registered a block parser.
+    """Register a block parser.
 
     The function will register the given block parser to the
     :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__block__` registry.
 
     Args:
-        code: :class:`HTTP/2 <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
             code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
         meth: Method name or callable to parse and/or construct the block.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
@@ -1195,7 +1194,7 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__
 def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]', *,
                            schema: 'Optional[Type[Schema_PCAPNG_Option]]' = None) -> 'None':
-    """Registered a option parser.
+    """Register an option parser.
 
     The function will register the given option parser to the
     :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__option__` registry.
@@ -1220,7 +1219,7 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__
 def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]', *,
                            schema: 'Optional[Type[Schema_PCAPNG_NameResolutionRecord]]' = None) -> 'None':
-    """Registered a name resolution record parser.
+    """Register a name resolution record parser.
 
     The function will register the given name resolution record parser to the
     :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__record__` registry.
@@ -1246,7 +1245,7 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__
 def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]', *,
                             schema: 'Optional[Type[Schema_PCAPNG_DSBSecrets]]' = None) -> 'None':
-    """Registered a decryption secrets parser.
+    """Register a decryption secrets parser.
 
     The function will register the given decryption secrets parser to the
     :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__` registry.

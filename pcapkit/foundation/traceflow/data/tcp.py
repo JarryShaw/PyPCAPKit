@@ -142,9 +142,7 @@ class Buffer(Info, Generic[_AT]):
         # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
         # ``unused-argument`` is reported against the ``def``, so wrapping the
         # signature leaves every parameter on a continuation line outside the
-        # disable's reach -- which is why the shorter form this replaces leaked
-        # three ``unused-argument`` messages of its own. Every other data model in
-        # :mod:`pcapkit` writes these stubs on one line for the same reason.
+        # disable's reach.
         def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool', reassembly: 'Optional[TCP_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
@@ -178,9 +176,9 @@ class Index(DeferredPacket, Info):
     #: Empty when tracing unidirectionally, in which case
     #: :attr:`forward` ``==`` :attr:`index`.
     reverse: 'tuple[int, ...]'
-    #: The conversation's **application layer**: one reassembled datagram per
-    #: direction, or :data:`None` when the tracer was not asked for it
-    #: (``analyse=False``, the default).
+    #: The conversation's **application layer**: its reassembled datagrams, one
+    #: per direction and acknowledgement number, or :data:`None` when the tracer
+    #: was not asked for it (``analyse=False``, the default).
     #:
     #: Reassembled on the first read, not when the flow is finalised, and each
     #: datagram's own

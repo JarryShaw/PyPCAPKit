@@ -29,7 +29,7 @@ class Completion(EnumLookup, StrEnum):
     :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`,
     which widens a plain :obj:`bool` rather than adding a second channel beside
     it: reassembly has *three* outcomes to report, not two, since a buffer
-    abandoned under the :rfc:`791` / :rfc:`8200` reassembly timeout is a different
+    abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is a different
     event from one that simply had not finished when the capture did. An expired
     datagram says "these fragments are gone", a partial one says "these fragments
     had not arrived yet".
@@ -49,8 +49,8 @@ class Completion(EnumLookup, StrEnum):
     field straight out -- and ``datagram.completed == 'timeout'`` works, so a
     state can be tested for without importing this class.
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
-    string enumeration, but GitHub issue :issue:`886` made it generated like its
-    :mod:`pcapkit.const.pcapng` siblings, so it derives from :class:`aenum`'s own
+    string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`
+    siblings (:issue:`886`), so it derives from :class:`aenum`'s own
     ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). Both
     properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
     subclass, but ``isinstance``/``issubclass`` against
@@ -60,7 +60,7 @@ class Completion(EnumLookup, StrEnum):
         Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
         **falsy** makes this a non-empty string that tests false, so ``bool(x)``
         and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above
-        is the property callers of a former :obj:`bool` field rely on -- but code
+        is what lets ``if datagram.completed:`` read as a boolean test -- but code
         that takes this for an ordinary string and tests it for truth will read it
         backwards.
 
@@ -113,10 +113,10 @@ class Deferred:
     *every* frame -- not only the fragmented ones, since a frame that is not
     fragmented in any sense still reaches
     :meth:`IP.reassembly <pcapkit.foundation.reassembly.ip.IP.reassembly>` and is
-    submitted there as a trivially complete datagram -- so the eager parse
-    re-parsed captures holding no fragments at all: :file:`http.pcap` has 1117
-    IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP
-    reassembly over it.
+    submitted there as a trivially complete datagram -- so an eager parse would
+    re-parse captures holding no fragments at all: :file:`http.pcap` has 1117
+    IPv4 frames, none of them fragmented, and the eager parse measured 86% of the
+    cost of IP reassembly over it.
 
     TCP reassembly defers its ``packet`` as well
     (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>`), at a far
@@ -125,8 +125,8 @@ class Deferred:
 
     Holding the call here defers it to the first read of
     :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets
-    exactly the object the eager call produced, and one that does not never pays
-    for it.
+    exactly the object an eager call would produce, and one that does not never
+    pays for it.
 
     Args:
         analyze: The analyser to call, i.e.
@@ -184,7 +184,8 @@ class DeferredPacket:
         """Resolve a deferred analysis, at most once.
 
         Returns:
-            Parsed IP payload, or :data:`None` for an incomplete datagram.
+            Parsed payload, or :data:`None` for a datagram reported as the tuple
+            of its received runs.
 
         """
         key = self.__map__.get('packet', 'packet')

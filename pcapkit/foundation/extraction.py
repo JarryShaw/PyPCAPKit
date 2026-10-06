@@ -68,8 +68,8 @@ if TYPE_CHECKING:
     #: aliases are spellable for a type checker as they are accepted at runtime.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
-    # copies need updating when a new engine lands. The duplication predates the
-    # engines added here and is left as-is on purpose.
+    # copies need updating when a new engine lands. The duplication is left
+    # as-is on purpose.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
                       'pypcapfile']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
@@ -191,7 +191,7 @@ class Extractor(Generic[_P]):
         #: :data:`None` before the first one. Comparing it against the position
         #: at the next end of stream is what tells a live capture that has paused
         #: -- retry, more may arrive -- from one that is finished, which is the
-        #: termination condition ``no_eof`` was missing (:issue:`620`).
+        #: termination condition for ``no_eof`` (:issue:`620`).
         _eof_mark: 'Optional[int]'
 
         #: Magic number.
@@ -381,16 +381,16 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
             a silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue :issue:`718` gave the code-keyed
-            registrars, extended here by GitHub issue :issue:`739`. ``__output__``
+            the identity guard of the code-keyed registrars (:issue:`718`,
+            :issue:`739`). ``__output__``
             maps each format to a ``(dumper, ext)`` pair, so the identity
             check compares the incumbent *dumper* (index ``0``), not the
             pair -- a re-registration that only changes ``ext`` is still
             identity-equal on the dumper and stays silent, since the dumper
             is what "the same object" means here, not the pair as a whole.
             ``__output__`` is also a :class:`collections.defaultdict`,
-            unlike the other three
-            registrars this issue touches; :meth:`dict.get` does not invoke
+            unlike the engine, reassembly and flow tracing registries;
+            :meth:`dict.get` does not invoke
             the default factory the way ``cls.__output__[format]`` would, so
             it stays non-inserting here as well.
 
@@ -430,8 +430,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue :issue:`718` gave the code-keyed
-            registrars, extended here by GitHub issue :issue:`739`.
+            the identity guard of the code-keyed registrars (:issue:`718`,
+            :issue:`739`).
 
         Arguments:
             name: engine name
@@ -457,7 +457,10 @@ class Extractor(Generic[_P]):
         # meant to extend and the one carrying the ``engine=`` registration hook. The
         # built-ins derive from ``EngineBase`` directly, so this door refuses them;
         # they go through :meth:`_register_internal_engine` instead, which checks the
-        # base. Checking the base here is what #513 did, and #1016 narrowed it back.
+        # base. The wider ``EngineBase`` is deliberately not accepted here: it is
+        # the internal base of the built-ins, and a class deriving only from it
+        # lacks the ``engine=`` hook, so the public door admits the public base
+        # alone (#513, #1016).
         if not issubclass(engine, Engine):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
         cls._register_internal_engine(name, engine)
@@ -503,8 +506,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue :issue:`718` gave the code-keyed
-            registrars, extended here by GitHub issue :issue:`739`.
+            the identity guard of the code-keyed registrars (:issue:`718`,
+            :issue:`739`).
 
         Arguments:
             protocol: protocol name
@@ -574,8 +577,8 @@ class Extractor(Generic[_P]):
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
             silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue :issue:`718` gave the code-keyed
-            registrars, extended here by GitHub issue :issue:`739`.
+            the identity guard of the code-keyed registrars (:issue:`718`,
+            :issue:`739`).
 
         Arguments:
             protocol: protocol name
@@ -637,7 +640,7 @@ class Extractor(Generic[_P]):
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
 
-        We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if
+        We use :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if
         a certain engine is available or not. For supported engines, each engine has
         different driver method:
 
@@ -655,8 +658,13 @@ class Extractor(Generic[_P]):
 
         Warns:
             pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
-                available. This is either due to dependency not installed, or supplied
-                engine unknown.
+                available: its dependency is not installed, its
+                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+                rules it out, or the supplied engine is unknown.
+
+        Raises:
+            FormatError: If the selected engine cannot read the input's format --
+                for the default engine, if it is neither PCAP nor PCAP-NG.
 
         :rtype: None
         """
@@ -716,7 +724,7 @@ class Extractor(Generic[_P]):
 
     @staticmethod
     def import_test(engine: 'str', *, name: 'Optional[str]' = None) -> 'Optional[ModuleType]':
-        """Test import for extractcion engine.
+        """Test import for extraction engine.
 
         Args:
             engine: Extraction engine module name.
@@ -749,15 +757,13 @@ class Extractor(Generic[_P]):
 
         1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and
            append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well
-           as test if the file exists;
+           as test if the file exists; for a binary IO object, use its ``name``;
         2. if ``nofile`` is :data:`True`, skips following processing;
-        3. if ``fmt`` provided, then it presumes corresponding output file extension;
-        4. if ``fout`` not provided, it presumes the output file name based on the presumptive
-           file extension; the stem of the output file name is set as ``out``; should the file
-           extension is not available, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
-        5. if ``fout`` provided, it presumes corresponding output format if needed; should the
-           presumption cannot be made, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
-        6. it will also append corresponding file extension to the output file name if needed
+        3. look up the output file extension registered for ``fmt``; should none be
+           registered, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
+        4. create the parent directory of ``fout``, and with ``files`` the ``fout``
+           directory itself;
+        5. it will also append corresponding file extension to the output file name if needed
            and ``extension`` is :data:`True`.
 
         And the method returns the generated input and output filenames as follows:
@@ -785,7 +791,7 @@ class Extractor(Generic[_P]):
 
         Raises:
             FileNotFound: If input file does not exists.
-            FormatError: If output format not provided and cannot be presumpted.
+            FormatError: If no file extension is registered for ``fmt``.
 
         """
         if isinstance(fin, str):
@@ -834,16 +840,18 @@ class Extractor(Generic[_P]):
     def record_header(self) -> 'EngineBase[_P]':
         """Read global header.
 
-        The method will parse the PCAP global header and save the parsed result
-        to its extraction context. Information such as PCAP version, data link
-        layer protocol type, nanosecond flag and byteorder are also saved on the
-        returned engine instance.
+        The method parses the global header with the matching built-in engine --
+        :class:`~pcapkit.foundation.engines.pcap.PCAP` for a PCAP file, or
+        :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` for the first section
+        header block of a PCAP-NG file -- rewinds the input to its start, and
+        returns that engine, which holds the parsed header.
 
-        If TCP flow tracing is enabled, the nanosecond flag and byteorder will
-        be used for the output PCAP file of the traced TCP flows.
+        Unless output is disabled, the engine also dumps the parsed header, under
+        the name of ``Global Header`` for PCAP and ``Section Header 1`` for
+        PCAP-NG.
 
-        For output, the method will dump the parsed PCAP global header under
-        the name of ``Global Header``.
+        Raises:
+            FormatError: If the input is neither a PCAP nor a PCAP-NG file.
 
         """
         # pylint: disable=attribute-defined-outside-init,protected-access
@@ -956,8 +964,8 @@ class Extractor(Generic[_P]):
             trace_byteorder: output file byte order
             trace_nanosecond: output nanosecond-resolution file flag
             trace_bidirectional: whether both halves of a conversation are
-                traced as one flow, which is the default; :data:`False` restores
-                the older behaviour of a flow per direction
+                traced as one flow, which is the default; :data:`False` traces
+                a flow per direction
             trace_analyse: whether each traced flow reassembles its application
                 layer, so that its ``packet`` can be read. Off by default,
                 because it buffers every traced payload -- a cost tracing does
@@ -995,8 +1003,12 @@ class Extractor(Generic[_P]):
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:
 
-                * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
+                * If using PCAP output for TCP flow tracing while the extraction engine is
+                  DPKT, Scapy, PyShark or PyPCAPFile.
                 * If output file format is not supported.
+
+            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
+                requested while the extraction engine is PyShark.
 
         """
         if fin is None:
@@ -1105,16 +1117,12 @@ class Extractor(Generic[_P]):
             # <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__>`
             # itself substitutes ``'pcap'`` for ``None``.
             #
-            # DPKT and Scapy belong on this list and were once left off it. Their
-            # adapters build the frame with ``packet2dict`` exactly as the other two
-            # do, so both crash the same way -- but only DPKT did so visibly. The
-            # Scapy engine imports just :mod:`scapy.sendrecv`, which leaves the L2
-            # link types unregistered, so every frame dissects as ``Raw``, no TCP
-            # layer is ever found, and the tracer is never fed at all (#406). That
-            # hides this defect rather than avoiding it: register the link types --
-            # as importing :mod:`scapy.all` does -- and the same ``AttributeError``
-            # appears. So the guard is written from what the adapters produce, not
-            # from which engines happen to crash.
+            # DPKT and Scapy belong on this list too: their adapters build the frame
+            # with ``packet2dict`` exactly as the other two do, so both crash the
+            # same way. The guard is written from what the adapters produce, not
+            # from which engines are seen to crash, because an engine that
+            # dissects nothing never feeds the tracer and so hides the defect
+            # rather than avoiding it (#406).
             if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcapfile')
                     and trace_format in ('pcap', 'cap', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
@@ -1161,8 +1169,7 @@ class Extractor(Generic[_P]):
             # closes the stream underneath it, so it follows *ownership*: only a
             # handle this class opened itself is ours to release. A non-seekable
             # stream always came from the caller, so the polarity here is the
-            # same one ``_cleanup`` uses, and it was inverted in both places --
-            # see #610.
+            # same one ``_cleanup`` uses (#610).
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
                                          stream_closing=self._flag_s)
 
@@ -1276,9 +1283,9 @@ class Extractor(Generic[_P]):
         with ``auto=False`` the caller drives :meth:`__next__` itself, and one that
         stops before end of file never reaches :meth:`_cleanup` at all, so the
         ownership rule there never gets to run. The handle then survives until the
-        interpreter collects it, and CPython announces that with the
-        ``ResourceWarning`` :issue:`606` was tripping over -- from an unrelated test, in an
-        unrelated file, which is what made that flake so hard to place.
+        interpreter collects it, and CPython announces that with a
+        ``ResourceWarning`` raised wherever collection happens to run, which can be
+        far from the code that abandoned the handle (:issue:`606`).
 
         This is a backstop and not the recommended route: collection is not
         deterministic, and :class:`Extractor` takes part in a reference cycle
@@ -1355,13 +1362,13 @@ class Extractor(Generic[_P]):
     def _note_eof_progress(self) -> 'bool':
         """Record this end of stream, and say whether the input advanced to reach it.
 
-        This is the termination condition ``no_eof`` was missing. The flag means
+        This is the termination condition for ``no_eof``. The flag means
         "end of stream is not necessarily the end of the capture" -- which is true
         of a live capture, and is why :mod:`pcapkit.__main__` sets it for
-        ``fin='-'`` -- so the extraction retries rather than stopping. What it had
-        no way to decide was when the stream is *genuinely* finished, and for an
-        exhausted one every retry raises end of stream again immediately, which is
-        the spin :issue:`620` reported.
+        ``fin='-'`` -- so the extraction retries rather than stopping. Without a
+        way to decide when the stream is *genuinely* finished, an exhausted one
+        raises end of stream again on every retry, which is the spin
+        :issue:`620` reported.
 
         The signal is the input's own position. End of stream is raised by
         :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in
@@ -1384,12 +1391,12 @@ class Extractor(Generic[_P]):
         immediately consecutive probes, because such a file does not block -- it
         reports end of stream at once. So an extraction over a file that is still
         being appended to ends at the data present when it got there, rather than
-        following the writer. That is a deliberate narrowing of what ``no_eof``
-        used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last
-        record 0.6s in yielded all six frames, and here it yields five. The
-        previous behaviour was unbounded by construction -- it is the defect :issue:`620`
-        reports -- so *some* stopping rule had to be chosen, and a timed grace
-        period would only make the cut-off intermittent rather than absent.
+        following the writer. That is a deliberate narrowing, and it is measured:
+        a file gaining its last record 0.6s in yields five of its six frames here,
+        where the unbounded retry of ``6c3d1b0d9`` yielded all six. Unbounded
+        retrying is the defect :issue:`620` reports, so *some* stopping rule had
+        to be chosen, and a timed grace period would only make the cut-off
+        intermittent rather than absent.
         Following a growing file wants a deliberate policy of its own; see the
         note in :file:`docs/source/changelog/1.5.0.rst`.
 
@@ -1432,9 +1439,10 @@ class Extractor(Generic[_P]):
         :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`.
         That is the point at which a traced flow nothing has superseded can be
         said to be over, so it is where such a flow is finalised and its callbacks
-        run. This method can be reached twice for one extraction -- the EOF path in
-        :meth:`_read_frame` and again from :meth:`run` -- so ``finish`` is required
-        to be idempotent rather than guarded here.
+        run. This method can run more than once for one extraction -- each call to
+        :meth:`__next__` or :meth:`__call__` that reaches the end of a
+        caller-supplied stream runs it again -- so ``finish`` is required to be
+        idempotent rather than guarded here.
 
         """
         # pylint: disable=attribute-defined-outside-init

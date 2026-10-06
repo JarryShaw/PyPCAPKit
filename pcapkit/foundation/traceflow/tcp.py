@@ -73,10 +73,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
           Finalising a flow is also when its callbacks run, so they run against
           the whole conversation rather than a truncated one.
 
-        Pass ``bidirectional=False`` for the older per-direction behaviour: a flow
-        is one direction, and closes on that direction's FIN. That mode reproduces
-        what flow tracing did before conversations became one flow, RST included --
-        which is to say it ignores RST, as it always did.
+        Pass ``bidirectional=False`` to trace each direction as a flow of its
+        own, finalised on that direction's FIN. That mode ignores RST.
 
     Note:
         With ``analyse=True`` a flow also carries its **application layer**:
@@ -147,9 +145,9 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
     # Defaults.
     ##########################################################################
 
-    #: Protocol name of current reassembly object.
+    #: Protocol name of current flow tracing object.
     __protocol_name__ = 'TCP'
-    #: Protocol of current reassembly object.
+    #: Protocol of current flow tracing object.
     __protocol_type__ = TCP_Protocol
 
     ##########################################################################
@@ -226,11 +224,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
             .. code-block:: python
 
-               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
+               f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
 
             It is built from the packet that **opened** the flow, not from the
-            canonical buffer ID, so the label still names the initiator first and
-            reads the way it always did. The reverse half of a bidirectional
+            canonical buffer ID, so the label names the initiator first. The
+            reverse half of a bidirectional
             conversation joins that flow rather than minting a label of its own.
 
         """
@@ -302,7 +300,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         label = buffer.label
 
         # A *unidirectional* flow is one direction, and a direction is over when
-        # its FIN goes out -- so that mode keeps closing on FIN exactly as it did.
+        # its FIN goes out -- so that mode closes on FIN.
         #
         # A bidirectional flow is a whole connection, and observing its teardown
         # is not the same as knowing nothing more will arrive. The four-way close
@@ -337,7 +335,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         shared instance would have to be asked for its datagrams by endpoint, and
         flushing it early would finalise flows that are still open.
 
-        It is constructed with ``strict=False`` so that each direction comes back
+        It is constructed with ``strict=False`` so that each datagram comes back
         as one contiguous payload, which is what an application-layer parse needs,
         and it inherits
         :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`

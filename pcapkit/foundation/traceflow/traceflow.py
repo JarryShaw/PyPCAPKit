@@ -128,12 +128,12 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
     """
     if TYPE_CHECKING:
-        #: Protocol name of current reassembly object.
+        #: Protocol name of current flow tracing object.
         __protocol_name__: 'str'
-        #: Protocol of current reassembly object.
+        #: Protocol of current flow tracing object.
         __protocol_type__: 'Type[ProtocolBase]'
 
-        #: List of callback functions upon reassembled datagram.
+        #: List of callback functions upon a finalised flow.
         __callback_fn__: 'list[CallbackFn]'
 
     # Internal data storage for cached properties.
@@ -193,7 +193,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
     @property
     def index(self) -> 'tuple[_IT, ...]':
-        """_IT table for traced flow."""
+        """Index table for traced flows."""
         if self._buffer:
             return self.submit()
         return tuple(self._stream)
@@ -213,16 +213,16 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
             a silent no-op rather than a warning about nothing displaced --
-            the identity guard GitHub issue :issue:`718` gave the code-keyed
-            registrars, extended here by GitHub issue :issue:`739`. ``__output__``
+            the identity guard of the code-keyed registrars (:issue:`718`,
+            :issue:`739`). ``__output__``
             maps each format to a ``(dumper, ext)`` pair, so the identity
             check compares the incumbent *dumper* (index ``0``), not the
             pair -- a re-registration that only changes ``ext`` is still
             identity-equal on the dumper and stays silent, since the dumper
             is what "the same object" means here, not the pair as a whole.
             ``__output__`` is also a :class:`collections.defaultdict`,
-            unlike the other three
-            registrars this issue touches; :meth:`dict.get` does not invoke
+            unlike the :class:`~pcapkit.foundation.extraction.Extractor` engine,
+            reassembly and flow tracing registries; :meth:`dict.get` does not invoke
             the default factory the way ``cls.__output__[format]`` would, so
             it stays non-inserting here as well.
 
@@ -250,9 +250,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         Arguments:
             callback: callback function, which will be called
-                when reassembled datagram is obtained, with the
-                list of reassembled datagrams as its only argument
-            index: index of datagram to be called
+                when a traced flow is finalised, with the flow's
+                index entry (:term:`trace.tcp.index`) as its only argument
+            index: index to be inserted in the callback list; by
+                default, the callback will be appended to the end
+                of the list
 
         """
         if index is not None:
@@ -273,10 +275,12 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         Warns:
             FormatWarning: If ``fmt`` is not supported.
-            FileWarning: If ``fout`` exists and ``fmt`` is :data:`None`.
+            FileWarning: If ``fout`` exists but is not a directory, and ``fmt``
+                is not supported.
 
         Raises:
-            FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.
+            FileExists: If ``fout`` exists but is not a directory, and ``fmt``
+                is supported.
 
         """
         output, ext = cls.__output__[fmt]
@@ -347,8 +351,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         superseded can be said to be over.
 
         The base implementation does nothing, so a tracer that has no such notion
-        -- or an existing third-party subclass that predates this method -- keeps
-        working unchanged. :meth:`submit` must remain able to report a flow that
+        need not override it. :meth:`submit` must remain able to report a flow that
         was never finalised, since nothing guarantees this is called: a tracer
         driven directly rather than through an
         :class:`~pcapkit.foundation.extraction.Extractor` never sees an end of
@@ -387,8 +390,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             bidirectional: whether the two halves of a conversation are one flow.
                 :data:`True` -- the default -- keys a flow on the *pair* of
                 endpoints rather than on (source, destination), so a connection
-                is traced as the one thing it is; pass :data:`False` for the
-                older per-direction behaviour.
+                is traced as the one thing it is; pass :data:`False` to trace
+                each direction as a flow of its own.
             analyse: whether to reassemble each flow's application layer, so that
                 its ``packet`` can be read. Off by default: it buffers every
                 traced payload, a cost tracing does not otherwise pay.
@@ -510,7 +513,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         rather than having to inherit :class:`TraceFlowBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
-        has guarded on its own ``code`` keyword all along.
+        guards on its own ``code`` keyword the same way.
 
         Note:
             :attr:`__protocol_name__` is *not* an opt-in. It supplies the
@@ -524,10 +527,10 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
 
         """
         # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
-        # idea ``name`` -- so guessing ``name=`` by analogy is the expected
-        # mistake, not a careless one. Left in ``**kwargs`` it would be
-        # dropped by the bare ``super().__init_subclass__()`` below, leaving the
-        # class registered under its own class name: no exception, no warning.
+        # idea ``engine`` -- so guessing the other base's keyword, or ``name=``,
+        # is the expected mistake, not a careless one. Left in ``**kwargs`` it
+        # would be dropped by the bare ``super().__init_subclass__()`` below,
+        # leaving the class silently unregistered: no exception, no warning.
         # See the sibling note in ``Engine.__init_subclass__``.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])

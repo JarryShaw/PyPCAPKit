@@ -19,7 +19,9 @@ class Deferred:
     """A postponed reassembly of a traced flow's application layer.
 
     A traced flow's ``packet`` is the application-layer payload of the
-    conversation, one datagram per direction. Producing it means reassembling the
+    conversation, as reassembled datagrams -- one per direction and
+    acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.TCP`.
+    Producing it means reassembling the
     stream, which is neither free nor wanted by most callers of a *tracer* -- so
     the flow keeps the reassembler it was fed and this holds it until somebody
     reads
@@ -31,7 +33,7 @@ class Deferred:
         with it. That one postpones a single ``analyze()`` call over bytes already
         in hand; this postpones a *submit* over a reassembler's buffers. The two
         subpackages are siblings and neither should depend on the other, so the
-        twenty lines are written twice rather than one importing the other -- the
+        few lines are written twice rather than one importing the other -- the
         same reason the two ``data/data.py`` modules mirror each other instead of
         merging.
 
@@ -51,8 +53,8 @@ class Deferred:
         """Run the postponed reassembly.
 
         Returns:
-            One reassembled datagram per direction of the conversation. Each
-            carries its *own* postponed analysis in
+            The conversation's reassembled datagrams, one per direction and
+            acknowledgement number. Each carries its *own* postponed analysis in
             :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>`,
             so parsing the payload as an application-layer protocol is still not
             paid for until that is read in turn.
