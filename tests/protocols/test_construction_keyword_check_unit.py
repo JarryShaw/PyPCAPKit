@@ -601,8 +601,7 @@ class ReconstructionTests(unittest.TestCase):
         ``__init__``, so nobody typed those keywords: a mismatch is a defect in the
         protocol's own pair of mappings, and the caller who meets it cannot fix it.
         Raising there would also convert a latent defect of that shape into a
-        broken ``from_data`` -- see
-        :meth:`test_the_known_make_data_mismatches_are_recorded`.
+        broken ``from_data``.
 
         ``L2TPv2`` is subclassed with a ``_make_data`` that returns one key no
         signature declares, so the case does not depend on a real mismatch that
@@ -630,35 +629,6 @@ class ReconstructionTests(unittest.TestCase):
         self.assertEqual(len(messages), 1, [str(item.message) for item in caught])
         self.assertIn("'prio'", str(messages[0].message))
         self.assertIn('_make_data', str(messages[0].message))
-
-    def test_the_known_make_data_mismatches_are_recorded(self) -> None:
-        """The latent defects this check made visible, named so they can be fixed.
-
-        Each of these has ``_make_data`` returning a key that no signature of the
-        same protocol declares, so :meth:`ProtocolBase.from_data
-        <pcapkit.protocols.protocol.ProtocolBase.from_data>` drops that field --
-        a capture's byte order. It is recorded rather than fixed here because it
-        is a defect in its own protocol rather than in this mechanism.
-
-        Written as an expected-failure table for the reason the round-trip module
-        writes its own that way: fixing one of these turns this red and the entry
-        gets deleted, where a silent skip would leave the defect recorded forever.
-
-        """
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.protocol import _declared_keywords
-
-        # protocol -> the ``_make_data`` key it returns that nothing declares
-        recorded = {Header: 'magic_number'}
-
-        for protocol, key in recorded.items():
-            with self.subTest(protocol=protocol.__name__):
-                accepted = _declared_keywords(protocol)
-                self.assertIsNotNone(accepted)
-                self.assertNotIn(key, accepted, (
-                    f'{protocol.__name__} now declares {key!r}, so its _make_data '
-                    f'mismatch is fixed -- delete this entry'
-                ))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

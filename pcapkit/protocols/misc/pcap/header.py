@@ -305,7 +305,8 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         """
         return {
-            'magic_number': data.magic_number.data,
+            'byteorder': data.magic_number.byteorder,
+            'nanosecond': data.magic_number.nanosecond,
             'version_major': data.version.major,
             'version_minor': data.version.minor,
             'thiszone': data.thiszone,
