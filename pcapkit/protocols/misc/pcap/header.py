@@ -324,7 +324,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             Link layer protocol enumeration.
 
         """
-        _byte = self._read_unpack(4, lilendian=True)
+        _byte = self._read_unpack(size, lilendian=True)
         _prot = Enum_LinkType.get(_byte)
         return _prot
 
@@ -347,9 +347,9 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             if lilendian == bigendian:
                 raise EndianError('unresolved byte order')
             if bigendian:
-                return _MAGIC_NUM[('big', False)], False
+                return _MAGIC_NUM[('big', nanosecond)], False
             if lilendian:
-                return _MAGIC_NUM[('little', True)], True
+                return _MAGIC_NUM[('little', nanosecond)], True
 
         if byteorder not in ('little', 'big'):
             raise EndianError(f"unknown byte order: {byteorder!r}")
