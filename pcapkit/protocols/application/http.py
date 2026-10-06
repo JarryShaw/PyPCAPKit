@@ -255,17 +255,27 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             data: protocol data
 
         Returns:
-            Key-value pairs for protocol construction.
+            Key-value pairs for protocol construction, including the ``version``
+            that :meth:`make` dispatches on.
+
+        Raises:
+            ProtocolError: If ``data`` is neither HTTP/1.* nor HTTP/2 data.
 
         """
-        version = data.get('version', 0)
-        if version == 1:
-            from pcapkit.protocols.application.httpv1 import HTTP as protocol
-        elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip
-        else:
-            raise ProtocolError(f"invalid HTTP version: {version}")
-        return protocol._make_data(data)  # type: ignore[arg-type]
+        # NOTE: Neither versioned data class carries a ``version`` field --
+        # HTTP/1.*'s lives in ``receipt`` as the start line's string, and HTTP/2
+        # has none -- so the version is the class of ``data`` that :meth:`read`
+        # returned from the versioned parser.
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+
+        if isinstance(data, Data_HTTPv1):
+            return {'version': 1, **HTTPv1._make_data(data)}
+        if isinstance(data, Data_HTTPv2):
+            return {'version': 2, **HTTPv2._make_data(data)}
+        raise ProtocolError(f"invalid HTTP data: {type(data).__name__}")
 
     def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'HTTP':
         """Identify the HTTP version of the payload, and parse it with that version.
