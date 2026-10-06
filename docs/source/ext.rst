@@ -9,9 +9,11 @@ What's in for Protocols?
 ------------------------
 
 :class:`~pcapkit.protocols.protocol.Protocol` is the most essential concept
-and class in :mod:`pcapkit`. Every protocol is represented by a
-:class:`~pcapkit.protocols.protocol.Protocol` subclass, which is responsible
-for parsing and/or constructing the protocol packets, as in the network stack.
+and class in :mod:`pcapkit`: the user-facing abstract base class for a
+protocol, which is responsible for parsing and/or constructing the protocol
+packets, as in the network stack. The built-in protocol classes derive from
+its internal base, :class:`~pcapkit.protocols.protocol.ProtocolBase`,
+rather than from :class:`~pcapkit.protocols.protocol.Protocol` itself.
 
 The protocol classes :mod:`pcapkit` ships:
 
@@ -98,9 +100,9 @@ The protocol classes :mod:`pcapkit` ships:
 New Protocol
 ------------
 
-To add a new protocol, you need to create a new class inherited from
-:class:`~pcapkit.protocols.protocol.Protocol`, or its subclasses, specifically,
-the :class:`~pcapkit.protocols.link.link.Link`,
+To add a new protocol to an existing layer, you need to create a new class
+inherited from that layer's base class, specifically, the
+:class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
 :class:`~pcapkit.protocols.transport.transport.Transport`, and
 :class:`~pcapkit.protocols.application.application.Application` classes, which
@@ -109,10 +111,13 @@ protocols, respectively.
 
 .. important::
 
-   The :class:`~pcapkit.protocols.protocol.Protocol` class is the base class
-   for all protocols, and it is not recommended to inherit from it directly,
-   unless you are going to create a new protocol stack, e.g., a new
-   miscellaneous protocol stack as in :mod:`pcapkit.protocols.misc` module.
+   The :class:`~pcapkit.protocols.protocol.Protocol` class is the user-facing
+   abstract base class for protocols, and it is not recommended to inherit from
+   it directly, unless you are going to create a new protocol stack, e.g., a new
+   miscellaneous protocol stack as in :mod:`pcapkit.protocols.misc` module. The
+   four layer base classes above, like the built-in miscellaneous protocols,
+   derive from :class:`~pcapkit.protocols.protocol.ProtocolBase` rather than
+   from :class:`~pcapkit.protocols.protocol.Protocol`.
 
 Besides, you need to implement the corresponding schema and data model for the
 new protocol. The schema is a :class:`~pcapkit.protocols.schema.schema.Schema`
