@@ -856,7 +856,7 @@ attribute:</p>
 <dd class="field-odd"><p>Extracted IPv4 options.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the threshold is <strong>NOT</strong> matching.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the parsed options total more than <code class="docutils literal notranslate"><span class="pre">length</span></code> octets.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1723,10 +1723,10 @@ a value written there would be dropped on the way back in. See <a class="extlink
 <span class="sig-name descname"><span class="pre">__option__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><span class="pre">Option</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv4.IPv4.__option__" title="Link to this definition">¶</a></dt>
 <dd><p>DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:
 Option code to method mapping, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options" title="pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ipv4_options()</span></code></a> and/or
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options" title="pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ipv4_options()</span></code></a>. Method names are expected to be referred
-to the class by <code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>, and
-if such name not found, the value should then be a method that can parse
-the option by itself.</p>
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options" title="pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ipv4_options()</span></code></a>. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> value names the methods
+<code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>, falling back to
+<code class="docutils literal notranslate"><span class="pre">_read_opt_unassigned</span></code> / <code class="docutils literal notranslate"><span class="pre">_make_opt_unassigned</span></code> when they do not
+exist; any other value is a <code class="docutils literal notranslate"><span class="pre">(parser,</span> <span class="pre">constructor)</span></code> pair of callables.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1934,7 +1934,7 @@ the option by itself.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.LSROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.LSROption.remainder" title="Link to this definition">¶</a></dt>
-<dd><p>Remaining data buffer0.</p>
+<dd><p>Remaining data buffer.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2049,7 +2049,7 @@ would otherwise pack as <code class="docutils literal notranslate"><span class="
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.RROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.RROption.remainder" title="Link to this definition">¶</a></dt>
-<dd><p>Remaining data buffer0.</p>
+<dd><p>Remaining data buffer.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2089,7 +2089,7 @@ stream identifier.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SSROption.remainder">
 <span class="sig-name descname"><span class="pre">remainder</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">remainder&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SSROption.remainder" title="Link to this definition">¶</a></dt>
-<dd><p>Remaining data buffer0.</p>
+<dd><p>Remaining data buffer.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2204,7 +2204,7 @@ stream identifier.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QSOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">QSOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#QSOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.qs_function.QSFunction" title="pcapkit.const.ipv4.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a>]</p>
-<p>Header schema for IPV4 quick start (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) options.</p>
+<p>Header schema for IPv4 quick start (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) options.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QSOption.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartFlags" title="pcapkit.protocols.schema.internet.ipv4.QuickStartFlags"><span class="pre">QuickStartFlags</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QSOption.flags" title="Link to this definition">¶</a></dt>
@@ -2217,7 +2217,7 @@ stream identifier.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">QuickStartRequestOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#QuickStartRequestOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a></p>
-<p>Header schema for IPV4 quick start request options.</p>
+<p>Header schema for IPv4 quick start request options.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption.ttl">
 <span class="sig-name descname"><span class="pre">ttl</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">ttl&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption.ttl" title="Link to this definition">¶</a></dt>
@@ -2236,7 +2236,7 @@ stream identifier.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">QuickStartReportOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#QuickStartReportOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a></p>
-<p>Header schema for IPV4 quick start report of approved rate options.</p>
+<p>Header schema for IPv4 quick start report of approved rate options.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.reserved">
 <span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.reserved" title="Link to this definition">¶</a></dt>
@@ -2388,7 +2388,7 @@ be setting it.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.quick_start_option_length">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">quick_start_option_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#quick_start_option_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_option_length" title="Link to this definition">¶</a></dt>
 <dd><p>On-the-wire length, in octets, of a resolved Quick-Start (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) suboption.</p>
-<p>The Quick-Start suboption schemas re-declare the option’s own <code class="docutils literal notranslate"><span class="pre">type</span></code> and
+<p>The Quick-Start suboption schemas carry the option’s own <code class="docutils literal notranslate"><span class="pre">type</span></code> and
 <code class="docutils literal notranslate"><span class="pre">length</span></code> octets – they inherit them from <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a> – so what
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector" title="pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">quick_start_data_selector()</span></code></a> has to hand the nested
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> is the length of the
@@ -2543,6 +2543,12 @@ leftover octets are read as a further, fabricated option.</p>
 <dd><p>Destination address.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.IPv4.options">
+<span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv4.Option" title="pcapkit.protocols.data.internet.ipv4.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.IPv4.options" title="Link to this definition">¶</a></dt>
+<dd><p>Options, present only when the header carries any.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -2552,7 +2558,7 @@ leftover octets are read as a further, fabricated option.</p>
 <p>Data model for IPv4 ToS fields.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Due to the preserved keyword conflict, please use <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code>
+<p>Due to the reserved keyword conflict, please use <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code>
 to create an instance of this data model.</p>
 </div>
 <dl class="py attribute">
@@ -2865,7 +2871,7 @@ directly use <a class="reference external" href="https://docs.python.org/3/built
 <p>Data model for IPv4 Traceroute (<code class="docutils literal notranslate"><span class="pre">TR</span></code>) option.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Due to the preserved keyword conflict, please use <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code>
+<p>Due to the reserved keyword conflict, please use <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code>
 to create an instance of this data model.</p>
 </div>
 <dl class="py attribute">
@@ -2889,6 +2895,12 @@ directly use <a class="reference external" href="https://docs.python.org/3/built
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.TROption.outbound">
 <span class="sig-name descname"><span class="pre">outbound</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TROption.outbound" title="Link to this definition">¶</a></dt>
 <dd><p>Outbound hop count.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.TROption.originator">
+<span class="sig-name descname"><span class="pre">originator</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.TROption.originator" title="Link to this definition">¶</a></dt>
+<dd><p>Originator IP address.</p>
 </dd></dl>
 
 </dd></dl>

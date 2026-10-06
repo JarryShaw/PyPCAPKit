@@ -9,9 +9,11 @@ What's in for Protocols?
 ------------------------
 
 :class:`~pcapkit.protocols.protocol.Protocol` is the most essential concept
-and class in :mod:`pcapkit`. Every protocol is represented by a
-:class:`~pcapkit.protocols.protocol.Protocol` subclass, which is responsible
-for parsing and/or constructing the protocol packets, as in the network stack.
+and class in :mod:`pcapkit`: the user-facing abstract base class for a
+protocol, which is responsible for parsing and/or constructing the protocol
+packets, as in the network stack. The built-in protocol classes derive from
+its internal base, :class:`~pcapkit.protocols.protocol.ProtocolBase`,
+rather than from :class:`~pcapkit.protocols.protocol.Protocol` itself.
 
 The protocol classes :mod:`pcapkit` ships:
 
@@ -98,9 +100,9 @@ The protocol classes :mod:`pcapkit` ships:
 New Protocol
 ------------
 
-To add a new protocol, you need to create a new class inherited from
-:class:`~pcapkit.protocols.protocol.Protocol`, or its subclasses, specifically,
-the :class:`~pcapkit.protocols.link.link.Link`,
+To add a new protocol to an existing layer, you need to create a new class
+inherited from that layer's base class, specifically, the
+:class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
 :class:`~pcapkit.protocols.transport.transport.Transport`, and
 :class:`~pcapkit.protocols.application.application.Application` classes, which
@@ -109,10 +111,13 @@ protocols, respectively.
 
 .. important::
 
-   The :class:`~pcapkit.protocols.protocol.Protocol` class is the base class
-   for all protocols, and it is not recommended to inherit from it directly,
-   unless you are going to create a new protocol stack, e.g., a new
-   miscellaneous protocol stack as in :mod:`pcapkit.protocols.misc` module.
+   The :class:`~pcapkit.protocols.protocol.Protocol` class is the user-facing
+   abstract base class for protocols, and it is not recommended to inherit from
+   it directly, unless you are going to create a new protocol stack, e.g., a new
+   miscellaneous protocol stack as in :mod:`pcapkit.protocols.misc` module. The
+   four layer base classes above, like the built-in miscellaneous protocols,
+   derive from :class:`~pcapkit.protocols.protocol.ProtocolBase` rather than
+   from :class:`~pcapkit.protocols.protocol.Protocol`.
 
 Besides, you need to implement the corresponding schema and data model for the
 new protocol. The schema is a :class:`~pcapkit.protocols.schema.schema.Schema`
@@ -648,9 +653,9 @@ The following code snippet shows how to create a new dumper class:
    # dumper registries, and use it to dump the extracted network packets.
    class MyDumper(Dumper, fmt='pcap', ext='.pcap'):
 
-       # NOTE: This property is to define the file format of the dumper.
-       # It is expected to be a string, which is used as the file extension
-       # of the output file.
+       # NOTE: This property names the file format of the dumper, as a string.
+       # It is not the file extension -- that is the ``ext`` given at class
+       # definition above.
        @property
        def kind(self) -> 'str':
            return 'pcap'
@@ -856,8 +861,8 @@ Callback Functions
 ~~~~~~~~~~~~~~~~~~
 
 Callback functions can be registered on the reassembly and flow tracing
-classes, and run at the end of the respective process -- to inspect the
-reassembled datagrams or flows, or to discard some of them.
+classes, to inspect the reassembled datagrams or traced flows as they are
+produced.
 
 .. seealso::
 
@@ -869,9 +874,13 @@ reassembled datagrams or flows, or to discard some of them.
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback`
 
-A callback takes one argument -- the list of reassembled datagrams or flows --
-and returns :obj:`None`; any return value is ignored.
+A reassembly callback runs on every submission and takes one argument, the list
+of datagrams that submission produced. A flow tracing callback runs as each flow
+is finalised and takes that flow's
+:class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Either returns
+:obj:`None`; any return value is ignored.
 
-That list can be modified in place, but prefer not to: if the reassembly or
-tracing result itself is wrong for your purpose, subclass the reassembly or
-flow tracing class and change its algorithm instead.
+A reassembly callback can modify its list in place, which discards datagrams,
+but prefer not to: if the reassembly or tracing result itself is wrong for your
+purpose, subclass the reassembly or flow tracing class and change its algorithm
+instead.

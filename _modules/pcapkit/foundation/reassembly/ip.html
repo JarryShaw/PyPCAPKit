@@ -478,7 +478,7 @@
 <span class="sd">only, which reconstructs fragmented IP packets back to</span>
 <span class="sd">origin. The following algorithm implement is based on IP</span>
 <span class="sd">reassembly procedure introduced in :rfc:`791`, using</span>
-<span class="sd">``RCVBT`` (fragment receivedbit table). Though another</span>
+<span class="sd">``RCVBT`` (fragment received bit table). Though another</span>
 <span class="sd">algorithm is explained in :rfc:`815`, replacing ``RCVBT``,</span>
 <span class="sd">however, this implement still used the elder one.</span>
 
@@ -505,8 +505,10 @@
 <span class="w">    </span><span class="sd">"""Reassembly for IP payload.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">            contiguous payload, its holes zero-filled -- or, while the total</span>
+<span class="sd">            length is unknown, only the prefix up to the first hole</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
@@ -620,7 +622,7 @@
         <span class="c1"># TCP's first-write-wins (:rfc:`9293#section-3.10`) -- so the arriving</span>
         <span class="c1"># payload always overwrites here; ``conflicts`` above is what records</span>
         <span class="c1"># that it *disagreed* with what it overwrote, which is the part RFC 791</span>
-        <span class="c1"># leaves unrecorded and this fix adds.</span>
+        <span class="c1"># leaves unrecorded.</span>
         <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
 
         <span class="c1"># set RCVBT bits (in 8 octets)</span>
@@ -794,8 +796,8 @@
             <span class="k">if</span> <span class="n">TDL</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># The length is known. Report it, holes and all: the gaps read as</span>
                 <span class="c1"># zeros, exactly as they do in the TCP reassembler's loose mode.</span>
-                <span class="c1"># This is unchanged behaviour, and the reason ``strict=False``</span>
-                <span class="c1"># exists -- a caller who wants the gaps *marked* rather than</span>
+                <span class="c1"># This is the reason ``strict=False`` exists -- a caller who</span>
+                <span class="c1"># wants the gaps *marked* rather than</span>
                 <span class="c1"># zero-filled uses ``strict=True`` and gets the runs.</span>
                 <span class="n">stop</span> <span class="o">=</span> <span class="n">TDL</span>
             <span class="k">else</span><span class="p">:</span>

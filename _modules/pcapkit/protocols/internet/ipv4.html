@@ -663,10 +663,10 @@
 
     <span class="c1">#: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:</span>
     <span class="c1">#: Option code to method mapping, c.f. :meth:`_read_ipv4_options` and/or</span>
-    <span class="c1">#: :meth:`_make_ipv4_options`. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and</span>
-    <span class="c1">#: if such name not found, the value should then be a method that can parse</span>
-    <span class="c1">#: the option by itself.</span>
+    <span class="c1">#: :meth:`_make_ipv4_options`. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_opt_unassigned`` / ``_make_opt_unassigned`` when they do not</span>
+    <span class="c1">#: exist; any other value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unassigned'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1080,7 +1080,7 @@
 <span class="sd">            Extracted IPv4 options.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the threshold is **NOT** matching.</span>
+<span class="sd">            ProtocolError: If the parsed options total more than ``length`` octets.</span>
 
 <span class="sd">        """</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>                   <span class="c1"># length of read option list</span>

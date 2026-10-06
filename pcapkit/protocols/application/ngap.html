@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/ngap.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.ngap contains NGAP only, which implements extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413. NGAP is the control plane between a 5G RAN..." />
-<meta name="description" content="pcapkit.protocols.application.ngap contains NGAP only, which implements extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413. NGAP is the control plane between a 5G RAN..." />
+<meta property="og:description" content="pcapkit.protocols.application.ngap contains NGAP, which implements extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the four enumerations its data models repor..." />
+<meta name="description" content="pcapkit.protocols.application.ngap contains NGAP, which implements extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the four enumerations its data models repor..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="OSPF - Open Shortest Path First" href="ospf.html"><link rel="prev" title="FTP - File Transfer Protocol" href="ftp.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -486,9 +486,14 @@
           <section id="module-pcapkit.protocols.application.ngap">
 <span id="ngap-ng-application-protocol"></span><h1>NGAP - NG Application Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.ngap" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> only,
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>,
 which implements extractor for the NG Application Protocol
-(NGAP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, as specified in 3GPP TS 38.413.</p>
+(NGAP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, as specified in 3GPP TS 38.413, and the four enumerations its
+data models report with:
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.PDUKind" title="pcapkit.protocols.application.ngap.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a>.</p>
 <p>NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk’s <em>payload protocol
 identifier</em> rather than by a port, so <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> is registered on

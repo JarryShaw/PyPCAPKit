@@ -616,9 +616,7 @@
         <span class="c1"># NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and</span>
         <span class="c1"># ``unused-argument`` is reported against the ``def``, so wrapping the</span>
         <span class="c1"># signature leaves every parameter on a continuation line outside the</span>
-        <span class="c1"># disable's reach -- which is why the shorter form this replaces leaked</span>
-        <span class="c1"># three ``unused-argument`` messages of its own. Every other data model in</span>
-        <span class="c1"># :mod:`pcapkit` writes these stubs on one line for the same reason.</span>
+        <span class="c1"># disable's reach.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">reverse</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'set[tuple[_AT, int]]'</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
@@ -655,9 +653,9 @@
     <span class="c1">#: Empty when tracing unidirectionally, in which case</span>
     <span class="c1">#: :attr:`forward` ``==`` :attr:`index`.</span>
     <span class="n">reverse</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: The conversation's **application layer**: one reassembled datagram per</span>
-    <span class="c1">#: direction, or :data:`None` when the tracer was not asked for it</span>
-    <span class="c1">#: (``analyse=False``, the default).</span>
+    <span class="c1">#: The conversation's **application layer**: its reassembled datagrams, one</span>
+    <span class="c1">#: per direction and acknowledgement number, or :data:`None` when the tracer</span>
+    <span class="c1">#: was not asked for it (``analyse=False``, the default).</span>
     <span class="c1">#:</span>
     <span class="c1">#: Reassembled on the first read, not when the flow is finalised, and each</span>
     <span class="c1">#: datagram's own</span>

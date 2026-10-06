@@ -546,8 +546,10 @@
 <span class="w">    </span><span class="sd">"""Reassembly for IPv6 payload.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">            contiguous payload, its holes zero-filled -- or, while the total</span>
+<span class="sd">            length is unknown, only the prefix up to the first hole</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>

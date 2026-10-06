@@ -4,9 +4,10 @@ FTP - File Transfer Protocol
 .. module:: pcapkit.protocols.application.ftp
 
 :mod:`pcapkit.protocols.application.ftp` contains
-:class:`~pcapkit.protocols.application.ftp.FTP` only,
+:class:`~pcapkit.protocols.application.ftp.FTP`,
 which implements extractor for File Transfer Protocol
-(FTP) [*]_.
+(FTP) [*]_, and :class:`~pcapkit.protocols.application.ftp.FTP_DATA`
+for its data channel.
 
 .. autoclass:: pcapkit.protocols.application.ftp.FTP
    :no-members:

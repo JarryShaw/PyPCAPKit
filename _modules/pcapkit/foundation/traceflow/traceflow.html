@@ -602,12 +602,12 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Protocol name of current reassembly object.</span>
+        <span class="c1">#: Protocol name of current flow tracing object.</span>
         <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">'str'</span>
-        <span class="c1">#: Protocol of current reassembly object.</span>
+        <span class="c1">#: Protocol of current flow tracing object.</span>
         <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
 
-        <span class="c1">#: List of callback functions upon reassembled datagram.</span>
+        <span class="c1">#: List of callback functions upon a finalised flow.</span>
         <span class="n">__callback_fn__</span><span class="p">:</span> <span class="s1">'list[CallbackFn]'</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
@@ -667,7 +667,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[_IT, ...]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""_IT table for traced flow."""</span>
+<span class="w">        </span><span class="sd">"""Index table for traced flows."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
@@ -687,16 +687,16 @@
 <span class="sd">            The overwrite guard fires only when the incumbent dumper differs</span>
 <span class="sd">            from the replacement, so re-registering the exact same object is</span>
 <span class="sd">            a silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue :issue:`739`. ``__output__``</span>
+<span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
+<span class="sd">            :issue:`739`). ``__output__``</span>
 <span class="sd">            maps each format to a ``(dumper, ext)`` pair, so the identity</span>
 <span class="sd">            check compares the incumbent *dumper* (index ``0``), not the</span>
 <span class="sd">            pair -- a re-registration that only changes ``ext`` is still</span>
 <span class="sd">            identity-equal on the dumper and stays silent, since the dumper</span>
 <span class="sd">            is what "the same object" means here, not the pair as a whole.</span>
 <span class="sd">            ``__output__`` is also a :class:`collections.defaultdict`,</span>
-<span class="sd">            unlike the other three</span>
-<span class="sd">            registrars this issue touches; :meth:`dict.get` does not invoke</span>
+<span class="sd">            unlike the :class:`~pcapkit.foundation.extraction.Extractor` engine,</span>
+<span class="sd">            reassembly and flow tracing registries; :meth:`dict.get` does not invoke</span>
 <span class="sd">            the default factory the way ``cls.__output__[format]`` would, so</span>
 <span class="sd">            it stays non-inserting here as well.</span>
 
@@ -724,9 +724,11 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            callback: callback function, which will be called</span>
-<span class="sd">                when reassembled datagram is obtained, with the</span>
-<span class="sd">                list of reassembled datagrams as its only argument</span>
-<span class="sd">            index: index of datagram to be called</span>
+<span class="sd">                when a traced flow is finalised, with the flow's</span>
+<span class="sd">                index entry (:term:`trace.tcp.index`) as its only argument</span>
+<span class="sd">            index: index to be inserted in the callback list; by</span>
+<span class="sd">                default, the callback will be appended to the end</span>
+<span class="sd">                of the list</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -747,10 +749,12 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            FormatWarning: If ``fmt`` is not supported.</span>
-<span class="sd">            FileWarning: If ``fout`` exists and ``fmt`` is :data:`None`.</span>
+<span class="sd">            FileWarning: If ``fout`` exists but is not a directory, and ``fmt``</span>
+<span class="sd">                is not supported.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.</span>
+<span class="sd">            FileExists: If ``fout`` exists but is not a directory, and ``fmt``</span>
+<span class="sd">                is supported.</span>
 
 <span class="sd">        """</span>
         <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
@@ -821,8 +825,7 @@
 <span class="sd">        superseded can be said to be over.</span>
 
 <span class="sd">        The base implementation does nothing, so a tracer that has no such notion</span>
-<span class="sd">        -- or an existing third-party subclass that predates this method -- keeps</span>
-<span class="sd">        working unchanged. :meth:`submit` must remain able to report a flow that</span>
+<span class="sd">        need not override it. :meth:`submit` must remain able to report a flow that</span>
 <span class="sd">        was never finalised, since nothing guarantees this is called: a tracer</span>
 <span class="sd">        driven directly rather than through an</span>
 <span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` never sees an end of</span>
@@ -861,8 +864,8 @@
 <span class="sd">            bidirectional: whether the two halves of a conversation are one flow.</span>
 <span class="sd">                :data:`True` -- the default -- keys a flow on the *pair* of</span>
 <span class="sd">                endpoints rather than on (source, destination), so a connection</span>
-<span class="sd">                is traced as the one thing it is; pass :data:`False` for the</span>
-<span class="sd">                older per-direction behaviour.</span>
+<span class="sd">                is traced as the one thing it is; pass :data:`False` to trace</span>
+<span class="sd">                each direction as a flow of its own.</span>
 <span class="sd">            analyse: whether to reassemble each flow's application layer, so that</span>
 <span class="sd">                its ``packet`` can be read. Off by default: it buffers every</span>
 <span class="sd">                traced payload, a cost tracing does not otherwise pay.</span>
@@ -989,7 +992,7 @@
 <span class="sd">        rather than having to inherit :class:`TraceFlowBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
-<span class="sd">        has guarded on its own ``code`` keyword all along.</span>
+<span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`__protocol_name__` is *not* an opt-in. It supplies the</span>
@@ -1003,10 +1006,10 @@
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same</span>
-        <span class="c1"># idea ``name`` -- so guessing ``name=`` by analogy is the expected</span>
-        <span class="c1"># mistake, not a careless one. Left in ``**kwargs`` it would be</span>
-        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, leaving the</span>
-        <span class="c1"># class registered under its own class name: no exception, no warning.</span>
+        <span class="c1"># idea ``engine`` -- so guessing the other base's keyword, or ``name=``,</span>
+        <span class="c1"># is the expected mistake, not a careless one. Left in ``**kwargs`` it</span>
+        <span class="c1"># would be dropped by the bare ``super().__init_subclass__()`` below,</span>
+        <span class="c1"># leaving the class silently unregistered: no exception, no warning.</span>
         <span class="c1"># See the sibling note in ``Engine.__init_subclass__``.</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>

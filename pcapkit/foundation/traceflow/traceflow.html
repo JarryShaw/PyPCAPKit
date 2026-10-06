@@ -569,7 +569,7 @@ separate output-dumper table this class also owns.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.index">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.index" title="Link to this definition">¶</a></dt>
-<dd><p>_IT table for traced flow.</p>
+<dd><p>Index table for traced flows.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -583,16 +583,16 @@ should be as <code class="docutils literal notranslate"><span class="pre">{dumpe
 <p>The overwrite guard fires only when the incumbent dumper differs
 from the replacement, so re-registering the exact same object is
 a silent no-op rather than a warning about nothing displaced –
-the identity guard GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a> gave the code-keyed
-registrars, extended here by GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
+the identity guard of the code-keyed registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>). <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
 maps each format to a <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair, so the identity
 check compares the incumbent <em>dumper</em> (index <code class="docutils literal notranslate"><span class="pre">0</span></code>), not the
 pair – a re-registration that only changes <code class="docutils literal notranslate"><span class="pre">ext</span></code> is still
 identity-equal on the dumper and stays silent, since the dumper
 is what “the same object” means here, not the pair as a whole.
 <code class="docutils literal notranslate"><span class="pre">__output__</span></code> is also a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>,
-unlike the other three
-registrars this issue touches; <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict.get" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.get()</span></code></a> does not invoke
+unlike the <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> engine,
+reassembly and flow tracing registries; <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict.get" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.get()</span></code></a> does not invoke
 the default factory the way <code class="docutils literal notranslate"><span class="pre">cls.__output__[format]</span></code> would, so
 it stays non-inserting here as well.</p>
 </div>
@@ -615,9 +615,11 @@ it stays non-inserting here as well.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_IT</span></code>, bound= Info)], <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – callback function, which will be called
-when reassembled datagram is obtained, with the
-list of reassembled datagrams as its only argument</p></li>
-<li><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – index of datagram to be called</p></li>
+when a traced flow is finalised, with the flow’s
+index entry (<a class="reference internal" href="tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>) as its only argument</p></li>
+<li><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – index to be inserted in the callback list; by
+default, the callback will be appended to the end
+of the list</p></li>
 </ul>
 </dd>
 </dl>
@@ -643,11 +645,13 @@ list of reassembled datagrams as its only argument</p></li>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>FormatWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is not supported.</p></li>
-<li><p><strong>FileWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">fout</span></code> exists and <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p><strong>FileWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">fout</span></code> exists but is not a directory, and <code class="docutils literal notranslate"><span class="pre">fmt</span></code>
+is not supported.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileExists" title="pcapkit.utilities.exceptions.FileExists"><strong>FileExists</strong></a> – If <code class="docutils literal notranslate"><span class="pre">fout</span></code> exists and <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is <strong>NOT</strong> <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileExists" title="pcapkit.utilities.exceptions.FileExists"><strong>FileExists</strong></a> – If <code class="docutils literal notranslate"><span class="pre">fout</span></code> exists but is not a directory, and <code class="docutils literal notranslate"><span class="pre">fmt</span></code>
+    is supported.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -697,8 +701,7 @@ flow label itself.</p>
 been read to its end, which is the point at which a flow that was never
 superseded can be said to be over.</p>
 <p>The base implementation does nothing, so a tracer that has no such notion
-– or an existing third-party subclass that predates this method – keeps
-working unchanged. <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.submit" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> must remain able to report a flow that
+need not override it. <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.submit" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> must remain able to report a flow that
 was never finalised, since nothing guarantees this is called: a tracer
 driven directly rather than through an
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> never sees an end of
@@ -733,7 +736,7 @@ tuple representing the module name and class name, or a
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__">
 <span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon reassembled datagram.</p>
+<dd><p>List of callback functions upon a finalised flow.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -874,7 +877,7 @@ read; otherwise no payload is buffered and <code class="docutils literal notrans
 <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is given. This is what lets a subclass decline registration
 rather than having to inherit <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a> to avoid it, and it
 matches <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
-has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+guards on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword the same way.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a> is <em>not</em> an opt-in. It supplies the
@@ -892,13 +895,13 @@ registered; only the keyword decides registration.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__">
 <span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current reassembly object.</p>
+<dd><p>Protocol name of current flow tracing object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__">
 <span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current reassembly object.</p>
+<dd><p>Protocol of current flow tracing object.</p>
 </dd></dl>
 
 </dd></dl>

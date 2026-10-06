@@ -618,10 +618,11 @@ all can be accepted the same way.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If no version in the family accepts the payload, or if
-    an identified version’s own parser refuses it. This is the
-    <em>only</em> exception this method raises for an unparseable payload –
-    a candidate failing in any other way, on a version that was not
-    positively identified, is a fall-through and not an answer.</p>
+    an identified version’s own parser refuses it. Only a
+    <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> from a trial parse falls through to the next
+    version, and the final HTTP/2 trial also absorbs
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>; any other exception from either HTTP/1
+    arm, or from that HTTP/2 trial, propagates unconverted.</p>
 </dd>
 </dl>
 <div class="admonition note">

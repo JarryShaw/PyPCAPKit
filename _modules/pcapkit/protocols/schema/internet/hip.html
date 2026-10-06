@@ -726,7 +726,7 @@
 <span class="sd">    two-octet ``reserved`` or ``port`` field with a list of items sized by</span>
 <span class="sd">    the remainder of the parameter.</span>
 
-<span class="sd">    :class:`TransportFormatListParameter` looked like a fourth call site --</span>
+<span class="sd">    :class:`TransportFormatListParameter` looks like a fourth call site --</span>
 <span class="sd">    same ``pkt['len'] - 2`` expression -- but is not: see</span>
 <span class="sd">    :func:`transport_format_list_len` for why it has no such prefix to</span>
 <span class="sd">    subtract.</span>
@@ -768,10 +768,9 @@
 <span class="sd">        |          TF type #1           |           TF type #2          /</span>
 
 <span class="sd">    -- so the list's byte length *is* ``Length``, with nothing to subtract.</span>
-<span class="sd">    Subtracting 2 anyway (as a since-corrected revision of this module once</span>
-<span class="sd">    did, mirroring the three genuine two-octet-prefix sites) silently</span>
-<span class="sd">    dropped the trailing two octets of *every* non-empty list on parse, and</span>
-<span class="sd">    rejected the parameter's own legitimate empty-list encoding</span>
+<span class="sd">    Subtracting 2 anyway, as the three genuine two-octet-prefix sites do,</span>
+<span class="sd">    would drop the trailing two octets of *every* non-empty list on parse,</span>
+<span class="sd">    and reject the parameter's own legitimate empty-list encoding</span>
 <span class="sd">    (``Length = 0``, ``formats = []``) as malformed.</span>
 
 <span class="sd">    "2x number of TF types" also fixes each ``TF type`` entry's own width at</span>
@@ -781,10 +780,9 @@
 <span class="sd">    ``EnumField(length=2, ...)``, matching :class:`HIPTransportModeParameter`'s</span>
 <span class="sd">    ``mode`` rather than the one-octet items of :func:`two_octet_prefix_list_len`'s</span>
 <span class="sd">    other two call sites. This function only answers how many *bytes* the</span>
-<span class="sd">    list occupies; getting that number right and the item width wrong (as a</span>
-<span class="sd">    still-earlier revision did, at one octet) still corrupts every non-empty</span>
-<span class="sd">    list, just by reading twice as many entries as the wire holds instead of</span>
-<span class="sd">    dropping octets.</span>
+<span class="sd">    list occupies; getting that number right and the item width wrong (one</span>
+<span class="sd">    octet) would still corrupt every non-empty list, just by reading twice as</span>
+<span class="sd">    many entries as the wire holds instead of dropping octets.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Parameter unpacked schema.</span>

@@ -978,11 +978,11 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_usrdeliv`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_flags`</span>
-<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags`</span>
-<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_flags`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_flags`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_hash`</span>
-<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`</span>
-<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_hash`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_hash`</span>
 
 <span class="sd">    The class currently supports parsing of the following name resolution</span>
 <span class="sd">    record types, which are registered in the :attr:`self.__record__ &lt;pcapkit.protocols.misc.pcapng.PCAPNG.__record__&gt;`</span>
@@ -1060,8 +1060,8 @@
     <span class="c1">#: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for</span>
     <span class="c1">#: decoding next layer, c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
-    <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
-    <span class="c1">#: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
+    <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
+    <span class="c1">#: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
@@ -1823,8 +1823,8 @@
 <span class="sd">        which has no catch point above it and would abort the whole extraction --</span>
 <span class="sd">        this costs no frame that was actually in the file. It is the same signal</span>
 <span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` raises for a *derived*</span>
-<span class="sd">        remainder of exactly zero; only one, two or three stray octets fell</span>
-<span class="sd">        through it.</span>
+<span class="sd">        remainder of exactly zero; a remainder of one, two or three octets</span>
+<span class="sd">        passes that check and is caught here instead.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            This runs on the parsing path only, since :meth:`unpack` reaches it</span>
@@ -4224,7 +4224,7 @@
 <span class="sd">           12 |                         Secrets Length                        |</span>
 <span class="sd">              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 <span class="sd">           16 |                            AES-128                            |</span>
-<span class="sd">              |                            NKW Key                            |</span>
+<span class="sd">              |                            NWK Key                            |</span>
 <span class="sd">              |                          (16 octets)                          |</span>
 <span class="sd">              |                           (128 bits)                          |</span>
 <span class="sd">              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
@@ -6242,7 +6242,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            packets: Number of dropped packets.</span>
+<span class="sd">            packets: Number of packets delivered to the user.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>

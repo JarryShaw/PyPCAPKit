@@ -498,9 +498,9 @@
     <span class="c1">#: The extension header this instance stands in for -- the numeric code</span>
     <span class="c1">#: the caller dispatched on, resolved to its</span>
     <span class="c1">#: :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member.</span>
-    <span class="c1">#: :data:`None` when ``alias`` named no such member (:meth:`read</span>
-    <span class="c1">#: &lt;pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read&gt;`</span>
-    <span class="c1">#: sets it so on a lookup miss, and the class property at</span>
+    <span class="c1">#: :data:`None` when ``alias`` was not given or named no such member</span>
+    <span class="c1">#: (:meth:`read &lt;pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read&gt;`</span>
+    <span class="c1">#: sets it so in both cases, and the class property at</span>
     <span class="c1">#: :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`</span>
     <span class="c1">#: is typed to match).</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[ExtensionHeader]'</span>

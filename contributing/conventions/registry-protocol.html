@@ -1040,10 +1040,9 @@ fall-through can be measured on a class that defines no <code class="docutils li
 <code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
 before matching, which makes it look as though the base were case-insensitive –
 deliberately, since <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> treats FTP command codes identically
-regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
-case-sensitive instead: <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
-case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
+regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> does not fold case, as ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>:
+<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is case-sensitive, so
+<code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> does not resolve to
 <code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the
 caller’s exact casing, the same way an unrecognised value always does.</p>
 </div>

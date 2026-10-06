@@ -541,7 +541,7 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.TraceFlowManager.tcp">
 <span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.TCP" title="pcapkit.foundation.traceflow.tcp.TCP"><span class="pre">TCP</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.TraceFlowManager.tcp" title="Link to this definition">¶</a></dt>
-<dd><p>TCP reassembly.</p>
+<dd><p>TCP flow tracing.</p>
 </dd></dl>
 
 </dd></dl>
@@ -565,7 +565,9 @@ diagram of the class hierarchy of <a class="reference internal" href="#module-pc
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A postponed reassembly of a traced flow’s application layer.</p>
 <p>A traced flow’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the application-layer payload of the
-conversation, one datagram per direction. Producing it means reassembling the
+conversation, as reassembled datagrams – one per direction and
+acknowledgement number, see <a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.TCP" title="pcapkit.foundation.traceflow.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>.
+Producing it means reassembling the
 stream, which is neither free nor wanted by most callers of a <em>tracer</em> – so
 the flow keeps the reassembler it was fed and this holds it until somebody
 reads
@@ -577,7 +579,7 @@ reads
 with it. That one postpones a single <code class="docutils literal notranslate"><span class="pre">analyze()</span></code> call over bytes already
 in hand; this postpones a <em>submit</em> over a reassembler’s buffers. The two
 subpackages are siblings and neither should depend on the other, so the
-twenty lines are written twice rather than one importing the other – the
+few lines are written twice rather than one importing the other – the
 same reason the two <code class="docutils literal notranslate"><span class="pre">data/data.py</span></code> modules mirror each other instead of
 merging.</p>
 </div>
@@ -597,8 +599,8 @@ segments of this conversation as they were traced.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>One reassembled datagram per direction of the conversation. Each
-carries its <em>own</em> postponed analysis in
+<dd class="field-even"><p>The conversation’s reassembled datagrams, one per direction and
+acknowledgement number. Each carries its <em>own</em> postponed analysis in
 <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>,
 so parsing the payload as an application-layer protocol is still not
 paid for until that is read in turn.</p>

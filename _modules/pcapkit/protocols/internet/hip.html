@@ -875,10 +875,10 @@
 
     <span class="c1">#: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:</span>
     <span class="c1">#: Parameter code to method mapping, c.f. :meth:`_read_hip_param` and/or</span>
-    <span class="c1">#: :meth:`_make_hip_param`. Method names are expected to be referred to the</span>
-    <span class="c1">#: class by ``_read_param_${name}`` and/or ``_make_param_${name}``, and if</span>
-    <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
-    <span class="c1">#: parameter by itself.</span>
+    <span class="c1">#: :meth:`_make_hip_param`. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_param_${name}`` and ``_make_param_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_param_unassigned`` / ``_make_param_unassigned`` when they do not</span>
+    <span class="c1">#: exist; any other value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__parameter__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unassigned'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1477,10 +1477,10 @@
 <span class="sd">                locator: locator data</span>
 
 <span class="sd">            Returns:</span>
-<span class="sd">                * If ``kind`` is ``0`` and ``size`` is ``16``,</span>
-<span class="sd">                  returns an :class:`~ipaddress.IPv4Address` object.</span>
-<span class="sd">                * If ``kind`` is ``1`` and ``size`` is ``20``,</span>
-<span class="sd">                  returns a :class:`~pcapkit.protocols.data.internet.hip.Locator` object.</span>
+<span class="sd">                * If ``kind`` is ``0`` and the locator is 16 octets,</span>
+<span class="sd">                  an :class:`~ipaddress.IPv6Address` object.</span>
+<span class="sd">                * If ``kind`` is ``1`` and the locator is 20 octets,</span>
+<span class="sd">                  a :class:`~pcapkit.protocols.data.internet.hip.LocatorData` object.</span>
 
 <span class="sd">            Raises:</span>
 <span class="sd">                ProtocolError: in other cases</span>
@@ -1561,7 +1561,8 @@
 <span class="sd">            Parsed parameter data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: The parameter is **ONLY** supported in HIPv1.</span>
+<span class="sd">            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**</span>
+<span class="sd">                ``12``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
@@ -1622,7 +1623,8 @@
 <span class="sd">            Parsed parameter data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: The parameter is **ONLY** supported in HIPv1.</span>
+<span class="sd">            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**</span>
+<span class="sd">                ``20``, or if ``schema.len - 4`` is odd.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">:</span>

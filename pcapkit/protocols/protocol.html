@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/protocol.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.protocol contains Protocol only, the abstract base class for all protocol families, with pre-defined utility arguments and methods. Data Models: Internal Definitions: Type Variables:" />
-<meta name="description" content="pcapkit.protocols.protocol contains Protocol only, the abstract base class for all protocol families, with pre-defined utility arguments and methods. Data Models: Internal Definitions: Type Variables:" />
+<meta property="og:description" content="pcapkit.protocols.protocol contains Protocol, an abstract base class with pre-defined utility arguments and methods. Inherit it directly only to create a new protocol stack; a new protocol in an ex..." />
+<meta name="description" content="pcapkit.protocols.protocol contains Protocol, an abstract base class with pre-defined utility arguments and methods. Inherit it directly only to create a new protocol stack; a new protocol in an ex..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Link Layer" href="link/index.html"><link rel="prev" title="Protocol Family" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -486,8 +486,17 @@
           <section id="module-pcapkit.protocols.protocol">
 <span id="root-protocol"></span><h1>Root Protocol<a class="headerlink" href="#module-pcapkit.protocols.protocol" title="Link to this heading">¶</a></h1>
 <p id="module-pcapkit.protocols.data.protocol"><a class="reference internal" href="#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> only, the abstract base class for
-all protocol families, with pre-defined utility arguments and methods.</p>
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, an abstract base class with
+pre-defined utility arguments and methods. Inherit it directly only to create a
+new protocol stack; a new protocol in an existing layer subclasses that layer’s
+base class – <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
+<a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
+<a class="reference internal" href="transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> or
+<a class="reference internal" href="application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> – instead, c.f.
+<a class="reference internal" href="../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>. The built-in protocol families, those layer classes included,
+derive from <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, whose metaclass
+is <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolMeta" title="pcapkit.protocols.protocol.ProtocolMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolMeta</span></code></a>; both are listed under
+Internal Definitions below.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">Protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#Protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol" title="Link to this definition">¶</a></dt>
@@ -822,7 +831,7 @@ the <a class="reference external" href="https://docs.python.org/3/builtins/stdty
 <li><p><strong>byte</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Source bytestring.</p></li>
 <li><p><strong>encoding</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – The encoding with which to decode the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.
 If not provided, <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> will first try detecting its encoding
-using <a class="reference external" href="https://chardet.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">chardet</span></code></a>. The fallback encoding would is <strong>UTF-8</strong>.</p></li>
+using <a class="reference external" href="https://chardet.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">chardet</span></code></a>. The fallback encoding is <strong>UTF-8</strong>.</p></li>
 <li><p><strong>errors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'strict'</span></code>, <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code>, <code class="docutils literal notranslate"><span class="pre">'replace'</span></code>]</span>) – The error handling scheme to use for the handling of decoding errors.
 The default is <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> meaning that decoding errors raise a
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>. Other possible values are <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code> and <code class="docutils literal notranslate"><span class="pre">'replace'</span></code>
@@ -852,8 +861,9 @@ decoding the <code class="docutils literal notranslate"><span class="pre">url</s
 <li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – URL string.</p></li>
 <li><p><strong>encoding</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The encoding with which to decode the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p></li>
 <li><p><strong>errors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'strict'</span></code>, <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code>, <code class="docutils literal notranslate"><span class="pre">'replace'</span></code>]</span>) – The error handling scheme to use for the handling of decoding errors.
-The default is <code class="docutils literal notranslate"><span class="pre">'strict'</span></code> meaning that decoding errors raise a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>. Other possible values are <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code> and <code class="docutils literal notranslate"><span class="pre">'replace'</span></code>
+The default is <code class="docutils literal notranslate"><span class="pre">'replace'</span></code>, which substitutes a replacement marker for
+each undecodable sequence. Other possible values are <code class="docutils literal notranslate"><span class="pre">'strict'</span></code>, under
+which decoding errors raise a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">'ignore'</span></code>,
 as well as any other name registered with <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.register_error" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.register_error()</span></code></a> that
 can handle <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>.</p></li>
 </ul>
@@ -908,8 +918,8 @@ certain protocols are not in any layer, such as
 <dd><p>Protocol index mapping for decoding next layer, c.f.
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
-The values should be a tuple representing the module name and class name,
-or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+Each value is a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the
+module and class, or a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1404,7 +1414,7 @@ registration is opt-in; see
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">protocol</span>
-<span class="go">&lt;Frame alias='...' frame=(..., packet=b'...', sethernet=..., protocols='Ethernet:IPv6:Raw')&gt;</span>
+<span class="go">&lt;Frame frame=&lt;Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'&gt;&gt;</span>
 </pre></div>
 </div>
 </div>
@@ -1422,7 +1432,7 @@ registration is opt-in; see
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">protocol</span>
-<span class="go">Frame(..., packet=b"...", sethernet=..., protocols='Ethernet:IPv6:Raw')</span>
+<span class="go">&lt;Frame frame=&lt;Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
 <span class="go">00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00     ..........'........</span>
 <span class="go">00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00     .....|w..F.........</span>

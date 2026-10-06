@@ -475,10 +475,9 @@
 
 <span class="sd">:mod:`pcapkit.protocols.application.application` contains only</span>
 <span class="sd">:class:`~pcapkit.protocols.application.application.Application`,</span>
-<span class="sd">which is a base class for application layer protocols, eg.</span>
-<span class="sd">:class:`HTTP/1.* &lt;pcapkit.protocols.application.httpv1.HTTP&gt;`,</span>
-<span class="sd">:class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.HTTP&gt;`</span>
-<span class="sd">and etc.</span>
+<span class="sd">which is a base class for application layer protocols, e.g.</span>
+<span class="sd">:class:`HTTP/1.* &lt;pcapkit.protocols.application.httpv1.HTTP&gt;` and</span>
+<span class="sd">:class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.HTTP&gt;`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">overload</span>
@@ -560,7 +559,7 @@
         <span class="c1"># ``_decode_next_layer``, which already set the payload and the chain</span>
         <span class="c1"># (basis included); only a protocol that did not gets the empty default</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1">#: pcapkit.protocols.null.NoPayload: Payload of current instance.</span>
+            <span class="c1">#: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>
             <span class="c1">#: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span></div>

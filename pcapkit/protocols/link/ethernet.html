@@ -702,14 +702,14 @@ header types.</p>
 <p>The lookup goes through <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code></a> rather than
 subscripting the registry. <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Ethernet.__proto__</span></code></a> <em>is</em>
 <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>, a
-class-level <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>, so reading a missing key
-inserted it – every unregistered EtherType a parse saw was recorded as
-though somebody had registered it, and
-<a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.register" title="pcapkit.protocols.link.link.Link.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Link.register</span></code></a>
-afterwards reported it as an overwrite. The helper reads the fallback
-without recording it, and memoises a
-<a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> for a code that really
-is registered, which this did not.</p>
+class-level <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>, so subscripting it with a
+missing key would insert that key – every unregistered EtherType a parse
+saw would be recorded as though somebody had registered it, and
+<a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.register" title="pcapkit.protocols.link.link.Link.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Link.register</span></code></a> would
+afterwards report it as an overwrite. The helper reads the fallback
+without recording it, and for a code that really is registered as a
+<a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> it writes the resolved
+class back, so the import happens once.</p>
 </div>
 </dd></dl>
 

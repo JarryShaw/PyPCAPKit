@@ -756,7 +756,7 @@
 <span class="sd">        rather than having to inherit :class:`EngineBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
-<span class="sd">        has guarded on its own ``code`` keyword all along.</span>
+<span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`__engine_name__</span>
@@ -789,11 +789,10 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then</span>
         <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, since</span>
-        <span class="c1"># ``object.__init_subclass__`` takes none. Silently swallowing it is how</span>
-        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` would register under its class</span>
-        <span class="c1"># name instead -- no exception, no warning. Since a missing keyword means</span>
-        <span class="c1"># "do not register", the same typo would silently skip registration</span>
-        <span class="c1"># altogether, which is quieter still. So reject it.</span>
+        <span class="c1"># ``object.__init_subclass__`` takes none. Since a missing keyword means</span>
+        <span class="c1"># "do not register", silently swallowing it would make</span>
+        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` skip registration altogether --</span>
+        <span class="c1"># no exception, no warning. So reject it.</span>
         <span class="c1">#</span>
         <span class="c1"># One typo this cannot catch is ``name=``, and only on Python 3.10: it is</span>
         <span class="c1"># one of the four names that collide with ``ABCMeta.__new__``, so it fails</span>

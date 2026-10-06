@@ -271,7 +271,7 @@ Or install the latest version from the git repository:
 .. code-block:: shell
 
    git clone https://github.com/JarryShaw/PyPCAPKit.git
-   cd pypcapkit
+   cd PyPCAPKit
    pip install -e .
    # and to update at any time
    git pull

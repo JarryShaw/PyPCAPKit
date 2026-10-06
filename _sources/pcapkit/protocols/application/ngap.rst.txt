@@ -4,9 +4,14 @@ NGAP - NG Application Protocol
 .. module:: pcapkit.protocols.application.ngap
 
 :mod:`pcapkit.protocols.application.ngap` contains
-:class:`~pcapkit.protocols.application.ngap.NGAP` only,
+:class:`~pcapkit.protocols.application.ngap.NGAP`,
 which implements extractor for the NG Application Protocol
-(NGAP) [*]_, as specified in 3GPP TS 38.413.
+(NGAP) [*]_, as specified in 3GPP TS 38.413, and the four enumerations its
+data models report with:
+:class:`~pcapkit.protocols.application.ngap.PDUKind`,
+:class:`~pcapkit.protocols.application.ngap.Criticality`,
+:class:`~pcapkit.protocols.application.ngap.ProcedureCode` and
+:class:`~pcapkit.protocols.application.ngap.ProtocolIE`.
 
 NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk's *payload protocol

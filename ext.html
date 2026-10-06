@@ -490,9 +490,11 @@ even new file formats can all be added from outside the library.</p>
 <section id="what-s-in-for-protocols">
 <h2>What’s in for Protocols?<a class="headerlink" href="#what-s-in-for-protocols" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is the most essential concept
-and class in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. Every protocol is represented by a
-<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass, which is responsible
-for parsing and/or constructing the protocol packets, as in the network stack.</p>
+and class in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>: the user-facing abstract base class for a
+protocol, which is responsible for parsing and/or constructing the protocol
+packets, as in the network stack. The built-in protocol classes derive from
+its internal base, <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>,
+rather than from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> itself.</p>
 <p>The protocol classes <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -606,9 +608,9 @@ subclasses)</p></td>
 </div>
 <section id="new-protocol">
 <h3>New Protocol<a class="headerlink" href="#new-protocol" title="Link to this heading">¶</a></h3>
-<p>To add a new protocol, you need to create a new class inherited from
-<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, or its subclasses, specifically,
-the <a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
+<p>To add a new protocol to an existing layer, you need to create a new class
+inherited from that layer’s base class, specifically, the
+<a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
 <a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
 <a class="reference internal" href="pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>, and
 <a class="reference internal" href="pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> classes, which
@@ -616,10 +618,13 @@ are the base classes for link, internet, transport, and application layer
 protocols, respectively.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> class is the base class
-for all protocols, and it is not recommended to inherit from it directly,
-unless you are going to create a new protocol stack, e.g., a new
-miscellaneous protocol stack as in <a class="reference internal" href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a> module.</p>
+<p>The <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> class is the user-facing
+abstract base class for protocols, and it is not recommended to inherit from
+it directly, unless you are going to create a new protocol stack, e.g., a new
+miscellaneous protocol stack as in <a class="reference internal" href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a> module. The
+four layer base classes above, like the built-in miscellaneous protocols,
+derive from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> rather than
+from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>.</p>
 </div>
 <p>Besides, you need to implement the corresponding schema and data model for the
 new protocol. The schema is a <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>
@@ -1221,9 +1226,9 @@ in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcap
 <span class="c1"># dumper registries, and use it to dump the extracted network packets.</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyDumper</span><span class="p">(</span><span class="n">Dumper</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">'.pcap'</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This property is to define the file format of the dumper.</span>
-    <span class="c1"># It is expected to be a string, which is used as the file extension</span>
-    <span class="c1"># of the output file.</span>
+    <span class="c1"># NOTE: This property names the file format of the dumper, as a string.</span>
+    <span class="c1"># It is not the file extension -- that is the ``ext`` given at class</span>
+    <span class="c1"># definition above.</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">'pcap'</span>
@@ -1440,8 +1445,8 @@ example, where the comprehensive implementation can be found in the
 <section id="callback-functions">
 <h4>Callback Functions<a class="headerlink" href="#callback-functions" title="Link to this heading">¶</a></h4>
 <p>Callback functions can be registered on the reassembly and flow tracing
-classes, and run at the end of the respective process – to inspect the
-reassembled datagrams or flows, or to discard some of them.</p>
+classes, to inspect the reassembled datagrams or traced flows as they are
+produced.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> holds the callback registry
@@ -1453,11 +1458,15 @@ functions:</p>
 <li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_tcp_callback()</span></code></a></p></li>
 </ul>
 </div>
-<p>A callback takes one argument – the list of reassembled datagrams or flows –
-and returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
-<p>That list can be modified in place, but prefer not to: if the reassembly or
-tracing result itself is wrong for your purpose, subclass the reassembly or
-flow tracing class and change its algorithm instead.</p>
+<p>A reassembly callback runs on every submission and takes one argument, the list
+of datagrams that submission produced. A flow tracing callback runs as each flow
+is finalised and takes that flow’s
+<a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>. Either returns
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
+<p>A reassembly callback can modify its list in place, which discards datagrams,
+but prefer not to: if the reassembly or tracing result itself is wrong for your
+purpose, subclass the reassembly or flow tracing class and change its algorithm
+instead.</p>
 </section>
 </section>
 </section>

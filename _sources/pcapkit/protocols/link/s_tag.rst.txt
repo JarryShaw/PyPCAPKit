@@ -11,7 +11,8 @@ Its structure, and all of its parsing and construction, come from
 :class:`~pcapkit.protocols.link.vlan.VLAN`; this class adds only the tag's own
 identity -- :attr:`~pcapkit.protocols.link.s_tag.S_Tag.name`,
 :attr:`~pcapkit.protocols.link.s_tag.S_Tag.alias`,
-:attr:`~pcapkit.protocols.link.s_tag.S_Tag.info_name` -- and its registry index.
+:attr:`~pcapkit.protocols.link.s_tag.S_Tag.info_name`,
+:meth:`~pcapkit.protocols.link.s_tag.S_Tag.id` -- and its registry index.
 
 It has a module of its own, apart from
 :class:`~pcapkit.protocols.link.c_tag.C_Tag`, because the two are reached through

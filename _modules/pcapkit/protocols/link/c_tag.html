@@ -551,9 +551,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol. ``VLAN`` is retained alongside the class's</span>
-<span class="sd">            own name so that selecting the protocol by that name -- as</span>
-<span class="sd">            ``pcapkit.extract(..., protocol='VLAN')`` did when this class *was*</span>
-<span class="sd">            ``VLAN`` -- keeps matching.</span>
+<span class="sd">            own name so that selecting VLAN tags by that name, e.g.</span>
+<span class="sd">            ``pcapkit.extract(..., protocol='VLAN')``, matches the customer</span>
+<span class="sd">            tag; :class:`~pcapkit.protocols.link.s_tag.S_Tag` carries the same</span>
+<span class="sd">            alias.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="p">(</span><span class="s1">'C_Tag'</span><span class="p">,</span> <span class="s1">'VLAN'</span><span class="p">)</span></div>

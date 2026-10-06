@@ -790,8 +790,8 @@
     <span class="c1">#: Protocol index mapping for decoding next layer, c.f.</span>
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
-    <span class="c1">#: The values should be a tuple representing the module name and class name,</span>
-    <span class="c1">#: or a :class:`Protocol` subclass.</span>
+    <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
+    <span class="c1">#: module and class, or a :class:`Protocol` subclass.</span>
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>
@@ -1077,7 +1077,7 @@
 <span class="sd">            byte: Source bytestring.</span>
 <span class="sd">            encoding: The encoding with which to decode the :obj:`bytes`.</span>
 <span class="sd">                If not provided, :mod:`pcapkit` will first try detecting its encoding</span>
-<span class="sd">                using |chardet|_. The fallback encoding would is **UTF-8**.</span>
+<span class="sd">                using |chardet|_. The fallback encoding is **UTF-8**.</span>
 <span class="sd">            errors: The error handling scheme to use for the handling of decoding errors.</span>
 <span class="sd">                The default is ``'strict'`` meaning that decoding errors raise a</span>
 <span class="sd">                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``</span>
@@ -1109,8 +1109,9 @@
 <span class="sd">            url: URL string.</span>
 <span class="sd">            encoding: The encoding with which to decode the :obj:`bytes`.</span>
 <span class="sd">            errors: The error handling scheme to use for the handling of decoding errors.</span>
-<span class="sd">                The default is ``'strict'`` meaning that decoding errors raise a</span>
-<span class="sd">                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``</span>
+<span class="sd">                The default is ``'replace'``, which substitutes a replacement marker for</span>
+<span class="sd">                each undecodable sequence. Other possible values are ``'strict'``, under</span>
+<span class="sd">                which decoding errors raise a :exc:`UnicodeDecodeError`, and ``'ignore'``,</span>
 <span class="sd">                as well as any other name registered with :func:`codecs.register_error` that</span>
 <span class="sd">                can handle :exc:`UnicodeDecodeError`.</span>
 
@@ -1601,7 +1602,7 @@
 
 <span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; protocol</span>
-<span class="sd">            &lt;Frame alias='...' frame=(..., packet=b'...', sethernet=..., protocols='Ethernet:IPv6:Raw')&gt;</span>
+<span class="sd">            &lt;Frame frame=&lt;Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'&gt;&gt;</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__repr__'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1618,7 +1619,7 @@
 
 <span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; protocol</span>
-<span class="sd">            Frame(..., packet=b"...", sethernet=..., protocols='Ethernet:IPv6:Raw')</span>
+<span class="sd">            &lt;Frame frame=&lt;Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'&gt;&gt;</span>
 <span class="sd">            &gt;&gt;&gt; print(protocol)</span>
 <span class="sd">            00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00     ..........'........</span>
 <span class="sd">            00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00     .....|w..F.........</span>
@@ -1751,7 +1752,7 @@
 <span class="w">        </span><span class="sd">"""Returns if ``other`` is of the same protocol as the current object.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            other: Comparision against the object.</span>
+<span class="sd">            other: Comparison against the object.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
@@ -1849,7 +1850,7 @@
 <span class="sd">            Unpacked data upon success</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            StructError: If unpack (:func:`struct.pack`) failed, and :exc:`struct.error` raised.</span>
+<span class="sd">            StructError: If unpack (:func:`struct.unpack`) failed, and :exc:`struct.error` raised.</span>
 
 <span class="sd">        """</span>
         <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
@@ -1861,7 +1862,7 @@
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'h'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'H'</span>
         <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>     <span class="c1"># unpack to 1-byte integer (char)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'b'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'B'</span>
-        <span class="k">else</span><span class="p">:</span>               <span class="c1"># do not unpack</span>
+        <span class="k">else</span><span class="p">:</span>               <span class="c1"># no struct format, see int.from_bytes below</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
@@ -1954,15 +1955,15 @@
 
 <span class="sd">        """</span>
         <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
-        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>                       <span class="c1"># unpack to 8-byte integer (long long)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>                       <span class="c1"># pack from 8-byte integer (long long)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'q'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'Q'</span>
-        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>                     <span class="c1"># unpack to 4-byte integer (int / long)</span>
+        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>                     <span class="c1"># pack from 4-byte integer (int / long)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'i'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'I'</span>
-        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>                     <span class="c1"># unpack to 2-byte integer (short)</span>
+        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>                     <span class="c1"># pack from 2-byte integer (short)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'h'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'H'</span>
-        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>                     <span class="c1"># unpack to 1-byte integer (char)</span>
+        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>                     <span class="c1"># pack from 1-byte integer (char)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="s1">'b'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'B'</span>
-        <span class="k">else</span><span class="p">:</span>                               <span class="c1"># do not unpack</span>
+        <span class="k">else</span><span class="p">:</span>                               <span class="c1"># no struct format, see int.to_bytes below</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

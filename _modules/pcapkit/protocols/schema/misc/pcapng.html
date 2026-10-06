@@ -555,7 +555,7 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">ResolutionData</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Data for resolution."""</span>
 
-        <span class="c1">#: Resolution type flag (0: 10-based, 1: 2-based).</span>
+        <span class="c1">#: Resolution type flag (``0`` for 10-based, ``1`` for 2-based).</span>
         <span class="n">flag</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Resolution value.</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -899,8 +899,8 @@
 <span class="sd">        The nominal span goes through :func:`nonnegative` first here too. That</span>
 <span class="sd">        closes a hole in this function's own arithmetic: a ``captured_len`` past</span>
 <span class="sd">        the end of the block makes the span negative, and ``nominal &lt;= available``</span>
-<span class="sd">        below is then *true*, so the negative was returned unclamped and reached</span>
-<span class="sd">        a :mod:`struct` template as ``f'{-N}s'``. Measured on 200 Enhanced Packet</span>
+<span class="sd">        below is then *true*, so the negative would be returned unclamped and</span>
+<span class="sd">        reach a :mod:`struct` template as ``f'{-N}s'``. Measured on 200 Enhanced Packet</span>
 <span class="sd">        Blocks declaring ``captured_len`` ``0xFFFFFF`` in 8,048 octets.</span>
 
 <span class="sd">    """</span>
@@ -1218,7 +1218,7 @@
 <span class="sd">                than ``namespace`` because :meth:`abc.ABCMeta.__new__` names its</span>
 <span class="sd">                own fourth parameter ``namespace``, and before Python 3.11 that</span>
 <span class="sd">                parameter is positional-or-keyword rather than positional-only --</span>
-<span class="sd">                so a class keyword literally called ``namespace`` bound it twice.</span>
+<span class="sd">                so a class keyword literally called ``namespace`` binds it twice.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1480,7 +1480,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SectionHeaderBlock'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
-<span class="sd">        This method calculate the byteorder value based on</span>
+<span class="sd">        This method calculates the byteorder value based on</span>
 <span class="sd">        the parsed schema.</span>
 
 <span class="sd">        Args:</span>

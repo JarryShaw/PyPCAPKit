@@ -566,7 +566,7 @@
     <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped;</span>
     <span class="c1">#: see :class:`~pcapkit.foundation.reassembly.data.data.Completion`. Only</span>
     <span class="c1">#: :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:`` reads</span>
-    <span class="c1">#: as it did while this was a :obj:`bool`.</span>
+    <span class="c1">#: as it would for a :obj:`bool`.</span>
     <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span>
     <span class="c1">#: Listing ``packet`` here is what makes it lazy -- see</span>
     <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.data.DeferredPacket`.</span>
@@ -640,7 +640,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Fragment</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` ACK list fragment item."""</span>
 
-    <span class="c1">#: List of reassembled packets.</span>
+    <span class="c1">#: Numbers of the packets merged into this fragment.</span>
     <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span>
     <span class="c1">#: Sequence number of the octet held in ``raw[0]``, i.e. the origin this</span>
     <span class="c1">#: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number</span>

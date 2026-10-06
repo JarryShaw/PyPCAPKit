@@ -474,8 +474,9 @@
 <span class="sd">.. module:: pcapkit.protocols.link.arp</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.arp` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.link.arp.ARP` only,</span>
-<span class="sd">which implements extractor for (Inverse) Address Resolution</span>
+<span class="sd">:class:`~pcapkit.protocols.link.arp.ARP` and</span>
+<span class="sd">:class:`~pcapkit.protocols.link.arp.InARP`,</span>
+<span class="sd">which implement extractors for (Inverse) Address Resolution</span>
 <span class="sd">Protocol (ARP/InARP) [*]_, whose structure is described as</span>
 <span class="sd">below:</span>
 
@@ -818,7 +819,7 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve headware address according to protocol.</span>
+<span class="w">        </span><span class="sd">"""Resolve hardware address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            addr: Hardware address.</span>
@@ -859,7 +860,7 @@
         <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str | bytes'</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve headware address according to protocol.</span>
+<span class="w">        </span><span class="sd">"""Resolve hardware address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            addr: Hardware address.</span>

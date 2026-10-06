@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/ftp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.ftp contains FTP only, which implements extractor for File Transfer Protocol (FTP)*. Auxiliary Data: Header Schemas: Data Models: Footnotes*, https://en.wikipedia.org/..." />
-<meta name="description" content="pcapkit.protocols.application.ftp contains FTP only, which implements extractor for File Transfer Protocol (FTP)*. Auxiliary Data: Header Schemas: Data Models: Footnotes*, https://en.wikipedia.org/..." />
+<meta property="og:description" content="pcapkit.protocols.application.ftp contains FTP, which implements extractor for File Transfer Protocol (FTP)*, and FTP_DATA for its data channel. Auxiliary Data: Header Schemas: Data Models: Footnot..." />
+<meta name="description" content="pcapkit.protocols.application.ftp contains FTP, which implements extractor for File Transfer Protocol (FTP)*, and FTP_DATA for its data channel. Auxiliary Data: Header Schemas: Data Models: Footnot..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="NGAP - NG Application Protocol" href="ngap.html"><link rel="prev" title="HTTP/2 - Hypertext Transfer Protocol" href="httpv2.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -486,9 +486,10 @@
           <section id="module-pcapkit.protocols.application.ftp">
 <span id="ftp-file-transfer-protocol"></span><h1>FTP - File Transfer Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.ftp" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.ftp" title="pcapkit.protocols.application.ftp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP" title="pcapkit.protocols.application.ftp.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> only,
+<a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP" title="pcapkit.protocols.application.ftp.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a>,
 which implements extractor for File Transfer Protocol
-(FTP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>.</p>
+(FTP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, and <a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP_DATA" title="pcapkit.protocols.application.ftp.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_DATA</span></code></a>
+for its data channel.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></span><span class="sig-name descname"><span class="pre">FTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ftp.html#FTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP" title="Link to this definition">¶</a></dt>

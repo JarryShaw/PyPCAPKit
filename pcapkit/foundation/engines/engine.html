@@ -543,7 +543,7 @@ that is not meant to be selectable by name declines:</p>
 <code class="docutils literal notranslate"><span class="pre">engine</span></code> is given. This is what lets a subclass decline registration
 rather than having to inherit <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> to avoid it, and it
 matches <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
-has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+guards on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword the same way.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="pcapkit.foundation.engines.engine.EngineBase.__engine_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_name__</span></code></a> is

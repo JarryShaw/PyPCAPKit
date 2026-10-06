@@ -483,7 +483,7 @@
 <span class="sd">Octets      Bits        Name                    Description</span>
 <span class="sd">======= ========= =================== =================================</span>
 <span class="sd">  0           0   ``hopopt.next``             Next Header</span>
-<span class="sd">  1           8   ``hopopt.length``           Header Extensive Length</span>
+<span class="sd">  1           8   ``hopopt.length``           Header Extension Length</span>
 <span class="sd">  2          16   ``hopopt.options``          Options</span>
 <span class="sd">======= ========= =================== =================================</span>
 
@@ -660,10 +660,10 @@
 
     <span class="c1">#: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option</span>
     <span class="c1">#: code to method mapping, c.f. :meth:`_read_hopopt_options` and/or</span>
-    <span class="c1">#: :meth:`_make_hopopt_options`. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and</span>
-    <span class="c1">#: if such name not found, the value should then be a method that can parse</span>
-    <span class="c1">#: the option by itself.</span>
+    <span class="c1">#: :meth:`_make_hopopt_options`. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other</span>
+    <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -966,7 +966,7 @@
 <span class="sd">        whole option, which is what every ``_read_opt_*`` below reports back</span>
 <span class="sd">        as the parsed option's own ``.length``, is two octets more. This is</span>
 <span class="sd">        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``</span>
-<span class="sd">        vs. ``Schema_PadOption.length`` below). The read-side half lives in this</span>
+<span class="sd">        vs. ``Schema_PadOption.len`` below). The read-side half lives in this</span>
 <span class="sd">        one helper so the arithmetic has a single home. Do NOT drop the</span>
 <span class="sd">        ``+ 2``.</span>
 
@@ -1007,7 +1007,8 @@
 <span class="sd">            Extracted HOPOPT options</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the threshold is **NOT** matching.</span>
+<span class="sd">            ProtocolError: If the parsed options do not total exactly ``length``</span>
+<span class="sd">                octets.</span>
 
 <span class="sd">        """</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>                   <span class="c1"># length of read options</span>
@@ -1157,7 +1158,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``1``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``1``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
@@ -1194,7 +1195,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``2``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``2``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -1380,7 +1381,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.pdm.length`` is **NOT** ``10``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``10``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
@@ -1508,7 +1509,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.rpl.length`` is **NOT** ``4``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``4``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
@@ -1698,7 +1699,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``4``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``4``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
@@ -1745,7 +1746,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``16``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``16``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
@@ -1786,7 +1787,7 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``hopopt.ip_dff.length`` is **NOT** ``2``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``2``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>

@@ -605,18 +605,18 @@ either protocol’s data module.</p>
 <em>every</em> frame – not only the fragmented ones, since a frame that is not
 fragmented in any sense still reaches
 <a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly" title="pcapkit.foundation.reassembly.ip.IP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.reassembly</span></code></a> and is
-submitted there as a trivially complete datagram – so the eager parse
-re-parsed captures holding no fragments at all: <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> has 1117
-IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP
-reassembly over it.</p>
+submitted there as a trivially complete datagram – so an eager parse would
+re-parse captures holding no fragments at all: <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> has 1117
+IPv4 frames, none of them fragmented, and the eager parse measured 86% of the
+cost of IP reassembly over it.</p>
 <p>TCP reassembly defers its <code class="docutils literal notranslate"><span class="pre">packet</span></code> as well
 (<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>), at a far
 smaller saving, being FIN/RST-driven rather than per-frame – 222 submits per
 <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> pass against 1117.</p>
 <p>Holding the call here defers it to the first read of
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code>, so a caller that wants the parsed payload still gets
-exactly the object the eager call produced, and one that does not never pays
-for it.</p>
+exactly the object an eager call would produce, and one that does not never
+pays for it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -669,7 +669,8 @@ field under its own name.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parsed IP payload, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for an incomplete datagram.</p>
+<dd class="field-even"><p>Parsed payload, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for a datagram reported as the tuple
+of its received runs.</p>
 </dd>
 </dl>
 </dd></dl>

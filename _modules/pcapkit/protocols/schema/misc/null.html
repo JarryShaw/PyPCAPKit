@@ -482,9 +482,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NoPayload</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Schema for empty payload."""</span>
 
-    <span class="c1"># NOTE: We add this method for both type annotation and to mark that this</span>
-    <span class="c1"># class accepts no arguments at runtime, since :class:`Schema` explicitly</span>
-    <span class="c1"># skipped those whose :attr:`__dict__` is empty :obj:`dict`.</span>
+    <span class="c1"># NOTE: Declared both for type annotation and to make this class accept no</span>
+    <span class="c1"># arguments at runtime: :func:`schema_final` generates an ``__init__`` only</span>
+    <span class="c1"># for a class that does not define one, so this one keeps the generated</span>
+    <span class="c1"># ``dict_``-taking constructor from displacing it.</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
         <span class="k">pass</span></div>
 

@@ -714,10 +714,11 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If no version in the family accepts the payload, or if</span>
-<span class="sd">                an identified version's own parser refuses it. This is the</span>
-<span class="sd">                *only* exception this method raises for an unparseable payload --</span>
-<span class="sd">                a candidate failing in any other way, on a version that was not</span>
-<span class="sd">                positively identified, is a fall-through and not an answer.</span>
+<span class="sd">                an identified version's own parser refuses it. Only a</span>
+<span class="sd">                ``ProtocolError`` from a trial parse falls through to the next</span>
+<span class="sd">                version, and the final HTTP/2 trial also absorbs</span>
+<span class="sd">                :exc:`struct.error`; any other exception from either HTTP/1</span>
+<span class="sd">                arm, or from that HTTP/2 trial, propagates unconverted.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Two things this deliberately does **not** decide, because one payload</span>

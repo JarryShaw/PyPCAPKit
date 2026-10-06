@@ -539,7 +539,8 @@ whose <em>layout</em> is identical – it holds the whole of the tag, and
 <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder. <strong>Those files are not a roadmap.</strong> They are
 scratch reminders, so a stub’s presence does not mean a protocol is planned or
 claimed, and its absence does not mean the protocol is unwanted:
-<code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code>, <code class="docutils literal notranslate"><span class="pre">QUIC</span></code> and <strong>DTLS</strong> have no stub and are on the list above,
+<code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code>, <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>, <code class="docutils literal notranslate"><span class="pre">QUIC</span></code> and <strong>DTLS</strong> have no stub and are on the
+list above,
 while <strong>NGAP</strong> has none either and is implemented. Take this page as the
 record and ignore the folder.</p>
 </div>
@@ -674,8 +675,8 @@ separate types for that reason:
 </section>
 <section id="dtls">
 <h3>DTLS<a class="headerlink" href="#dtls" title="Link to this heading">¶</a></h3>
-<p><strong>Not started</strong>, and unlike everything in the list above it has no stub in the
-tree at all – only TLS/SSL does. It earns its own entry because the registries
+<p><strong>Not started</strong>, and it has no stub in the tree – of the TLS/SSL and DTLS pair,
+only TLS/SSL does. It earns its own entry because the registries
 have moved ahead of it, and a growing part of SCTP’s surface now names a protocol
 that does not exist:</p>
 <ul class="simple">
@@ -1233,9 +1234,9 @@ from <em>wrong</em>, or it will cry wolf on the commonest capture there is —
 <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESPStatus" title="pcapkit.protocols.internet.esp.ESPStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESPStatus</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code> member is the
 model for how to spell “expected, not an error”.</p>
 <p>Sequenced for <strong>wave 2 or 3</strong>. The cryptographic half could be done sooner since
-ESP has already laid the groundwork, but the checksum half genuinely wants the
-parent-access question answered first, and that is worth doing deliberately
-rather than as a side effect of a checksum patch.</p>
+ESP has already laid the groundwork, but the checksum half needs the IP
+pseudo-header class defined first, and that is worth doing deliberately rather
+than as a side effect of a checksum patch.</p>
 </section>
 <section id="release-plan-1-5-0-in-two-steps">
 <h2>Release Plan — 1.5.0 in Two Steps<a class="headerlink" href="#release-plan-1-5-0-in-two-steps" title="Link to this heading">¶</a></h2>
@@ -1380,7 +1381,7 @@ dispatcher registers exactly three link types
 work above rather than a separate concern — all four are link types the library
 enumerates but cannot parse. It surfaced while deciding what an unresolvable
 link-layer name should do: neither value is an honest stand-in for “unknown link
-type”, which is why the toolkit now raises instead of defaulting to
+type”, which is why the toolkit raises instead of defaulting to
 <code class="docutils literal notranslate"><span class="pre">LinkType.NULL</span></code>.</p>
 <p><strong>Wave 3 — the remaining protocols</strong> from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a

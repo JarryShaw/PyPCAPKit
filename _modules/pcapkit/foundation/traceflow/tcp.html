@@ -544,10 +544,8 @@
 <span class="sd">          Finalising a flow is also when its callbacks run, so they run against</span>
 <span class="sd">          the whole conversation rather than a truncated one.</span>
 
-<span class="sd">        Pass ``bidirectional=False`` for the older per-direction behaviour: a flow</span>
-<span class="sd">        is one direction, and closes on that direction's FIN. That mode reproduces</span>
-<span class="sd">        what flow tracing did before conversations became one flow, RST included --</span>
-<span class="sd">        which is to say it ignores RST, as it always did.</span>
+<span class="sd">        Pass ``bidirectional=False`` to trace each direction as a flow of its</span>
+<span class="sd">        own, finalised on that direction's FIN. That mode ignores RST.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        With ``analyse=True`` a flow also carries its **application layer**:</span>
@@ -618,9 +616,9 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: Protocol name of current reassembly object.</span>
+    <span class="c1">#: Protocol name of current flow tracing object.</span>
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'TCP'</span>
-    <span class="c1">#: Protocol of current reassembly object.</span>
+    <span class="c1">#: Protocol of current flow tracing object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">TCP_Protocol</span>
 
     <span class="c1">##########################################################################</span>
@@ -705,11 +703,11 @@
 
 <span class="sd">            .. code-block:: python</span>
 
-<span class="sd">               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'</span>
+<span class="sd">               f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'</span>
 
 <span class="sd">            It is built from the packet that **opened** the flow, not from the</span>
-<span class="sd">            canonical buffer ID, so the label still names the initiator first and</span>
-<span class="sd">            reads the way it always did. The reverse half of a bidirectional</span>
+<span class="sd">            canonical buffer ID, so the label names the initiator first. The</span>
+<span class="sd">            reverse half of a bidirectional</span>
 <span class="sd">            conversation joins that flow rather than minting a label of its own.</span>
 
 <span class="sd">        """</span>
@@ -781,7 +779,7 @@
         <span class="n">label</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">label</span>
 
         <span class="c1"># A *unidirectional* flow is one direction, and a direction is over when</span>
-        <span class="c1"># its FIN goes out -- so that mode keeps closing on FIN exactly as it did.</span>
+        <span class="c1"># its FIN goes out -- so that mode closes on FIN.</span>
         <span class="c1">#</span>
         <span class="c1"># A bidirectional flow is a whole connection, and observing its teardown</span>
         <span class="c1"># is not the same as knowing nothing more will arrive. The four-way close</span>
@@ -817,7 +815,7 @@
 <span class="sd">        shared instance would have to be asked for its datagrams by endpoint, and</span>
 <span class="sd">        flushing it early would finalise flows that are still open.</span>
 
-<span class="sd">        It is constructed with ``strict=False`` so that each direction comes back</span>
+<span class="sd">        It is constructed with ``strict=False`` so that each datagram comes back</span>
 <span class="sd">        as one contiguous payload, which is what an application-layer parse needs,</span>
 <span class="sd">        and it inherits</span>
 <span class="sd">        :attr:`TCP.__timeout__ &lt;pcapkit.foundation.reassembly.tcp.TCP.__timeout__&gt;`</span>

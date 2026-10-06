@@ -584,8 +584,10 @@
 <span class="w">    </span><span class="sd">"""Base class for reassembly procedure.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">            contiguous payload, its holes zero-filled -- or, for IP while the</span>
+<span class="sd">            total length is unknown, only the prefix up to the first hole</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">            will be discarded after callback)</span>
@@ -875,7 +877,7 @@
 <span class="sd">            callback: callback function, which will be called</span>
 <span class="sd">                when reassembled datagram is obtained, with the</span>
 <span class="sd">                list of reassembled datagrams as its only argument</span>
-<span class="sd">            index: index to be inserted in the callback list,; by</span>
+<span class="sd">            index: index to be inserted in the callback list; by</span>
 <span class="sd">                default, the callback will be appended to the end</span>
 <span class="sd">                of the list</span>
 
@@ -903,8 +905,10 @@
 <span class="w">        </span><span class="sd">"""Initialise packet reassembly.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">            strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">                reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">                contiguous payload, its holes zero-filled -- or, for IP while the</span>
+<span class="sd">                total length is unknown, only the prefix up to the first hole</span>
 <span class="sd">            store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">                :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">                will be discarded after callback)</span>
@@ -917,10 +921,11 @@
 <span class="sd">            FieldValueError: If ``timeout`` is negative.</span>
 
 <span class="sd">        """</span>
-        <span class="c1">#: bool: Strict mode flag. If set to :data:`True`, all</span>
-        <span class="c1">#: data will be returned, including those not completely</span>
-        <span class="c1">#: reassembled; otherwise, only completely reassembled</span>
-        <span class="c1">#: data will be returned.</span>
+        <span class="c1">#: bool: Strict mode flag. If set to :data:`True`, a datagram</span>
+        <span class="c1">#: not completely reassembled is reported as the tuple of its</span>
+        <span class="c1">#: received runs; otherwise, as one contiguous payload, its</span>
+        <span class="c1">#: holes zero-filled -- or, for IP while the total length is</span>
+        <span class="c1">#: unknown, only the prefix up to the first hole.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="n">strict</span>
         <span class="c1">#: bool: Store mode flag. If set to :data:`True`, all</span>
         <span class="c1">#: reassembled datagram will be stored in memory, i.e.,</span>
@@ -1003,8 +1008,10 @@
 <span class="sd">           Extractor.register_reassembly('my_mixin', MyMixin)</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">            contiguous payload, its holes zero-filled -- or, for IP while the</span>
+<span class="sd">            total length is unknown, only the prefix up to the first hole</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">            will be discarded after callback)</span>
@@ -1035,7 +1042,7 @@
 <span class="sd">        rather than having to inherit :class:`ReassemblyBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
-<span class="sd">        has guarded on its own ``code`` keyword all along.</span>
+<span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`__protocol_name__` is *not* an opt-in. It supplies the</span>
@@ -1049,10 +1056,10 @@
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same</span>
-        <span class="c1"># idea ``name`` -- so guessing ``name=`` by analogy is the expected</span>
-        <span class="c1"># mistake, not a careless one. Left in ``**kwargs`` it would be</span>
-        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, leaving the</span>
-        <span class="c1"># class registered under its own class name: no exception, no warning.</span>
+        <span class="c1"># idea ``engine`` -- so guessing the other base's keyword, or ``name=``,</span>
+        <span class="c1"># is the expected mistake, not a careless one. Left in ``**kwargs`` it</span>
+        <span class="c1"># would be dropped by the bare ``super().__init_subclass__()`` below,</span>
+        <span class="c1"># leaving the class silently unregistered: no exception, no warning.</span>
         <span class="c1"># See the sibling note in ``Engine.__init_subclass__``.</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>

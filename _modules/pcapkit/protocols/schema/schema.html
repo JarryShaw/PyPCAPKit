@@ -1385,8 +1385,9 @@
 <span class="sd">            When this schema is nested -- unpacked through a</span>
 <span class="sd">            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than</span>
 <span class="sd">            directly -- ``packet`` is not the enclosing schema's own data, but</span>
-<span class="sd">            a context built by :func:`~pcapkit.corekit.fields.misc.</span>
-<span class="sd">            nested_packet_context`: a name this schema does not itself</span>
+<span class="sd">            a context built by</span>
+<span class="sd">            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name</span>
+<span class="sd">            this schema does not itself</span>
 <span class="sd">            declare falls through to the enclosing schema, and the enclosing</span>
 <span class="sd">            schema is also reachable unconditionally under a ``__packet__``</span>
 <span class="sd">            key. See that function for the exact lookup, write and iteration</span>
@@ -1556,8 +1557,8 @@
 <span class="sd">    The fallback itself is deliberate -- it is how an unknown option, chunk or</span>
 <span class="sd">    block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this</span>
 <span class="sd">    subclass keeps returning it and just stops recording it.</span>
-<span class="sd">    :meth:`ProtocolBase.\</span>
-<span class="sd">    _lookup_registry &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;`</span>
+<span class="sd">    :meth:`ProtocolBase._lookup_registry</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol._lookup_registry&gt;`</span>
 <span class="sd">    does the same for the protocol-layer ``__proto__`` family.</span>
 
 <span class="sd">    """</span>
@@ -1578,7 +1579,7 @@
 <span class="w">    </span><span class="sd">"""Meta class to add dynamic support for :class:`EnumSchema`.</span>
 
 <span class="sd">    This meta class is used to generate necessary attributes for the</span>
-<span class="sd">    :class:`SchemaMeta` class. It can be useful to reduce runtime generation</span>
+<span class="sd">    :class:`EnumSchema` class. It can be useful to reduce runtime generation</span>
 <span class="sd">    cost as well as caching already generated attributes.</span>
 
 <span class="sd">    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*</span>
@@ -1766,11 +1767,11 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.register">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'_ET'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Self]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register enumetaion to :attr:`__enum__` mapping.</span>
+<span class="w">        </span><span class="sd">"""Register enumeration to :attr:`__enum__` mapping.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            code: Enumetaion code.</span>
-<span class="sd">            schema: Enumetaion schema.</span>
+<span class="sd">            code: Enumeration code.</span>
+<span class="sd">            schema: Enumeration schema.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already</span>

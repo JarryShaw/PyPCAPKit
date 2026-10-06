@@ -474,7 +474,7 @@
 <span class="sd">.. module:: pcapkit.foundation.reassembly.tcp</span>
 
 <span class="sd">:mod:`pcapkit.foundation.reassembly.tcp` contains</span>
-<span class="sd">:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,</span>
+<span class="sd">:class:`~pcapkit.foundation.reassembly.tcp.TCP` only,</span>
 <span class="sd">which reconstructs fragmented TCP packets back to origin.</span>
 
 <span class="sd">"""</span>
@@ -500,8 +500,9 @@
 <span class="w">    </span><span class="sd">"""Reassembly for TCP payload.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if return all datagrams (including those not</span>
-<span class="sd">                implemented) when submit</span>
+<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
+<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
+<span class="sd">            contiguous payload, its holes zero-filled</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
@@ -867,7 +868,7 @@
 <span class="sd">            new: the arriving segment's bytes over the same range.</span>
 <span class="sd">            start: absolute sequence number of ``old[0]``/``new[0]``, which</span>
 <span class="sd">                cover the same range by construction -- see the two call</span>
-<span class="sd">                sites in :meth:`reassembly`.</span>
+<span class="sd">                sites, :meth:`_reassemble_append` and :meth:`_reassemble_prepend`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The bytes to keep for the range, and any ``(first, last)``</span>

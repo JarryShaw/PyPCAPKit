@@ -616,10 +616,11 @@
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: DefaultDict[Enum_Frame, str | tuple[FrameParser, FrameConstructor]]: Frame</span>
-    <span class="c1">#: code to method mapping. Method names are expected to be referred to</span>
-    <span class="c1">#: the class by ``_read_http_${name}`` and/or ``_make_http_${name}``, and if</span>
-    <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
-    <span class="c1">#: frame by itself.</span>
+    <span class="c1">#: code to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: ``_read_http_${name}`` and ``_make_http_${name}`` methods, which fall back</span>
+    <span class="c1">#: to ``_read_http_none`` and ``_make_http_none`` when not defined, as an</span>
+    <span class="c1">#: unregistered code does; any other value is a ``(parser, constructor)``</span>
+    <span class="c1">#: pair of callables.</span>
     <span class="n">__frame__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1533,6 +1534,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
 <span class="sd">            end_stream: End of stream flag.</span>
+<span class="sd">            pad_len: Padding length.</span>
 <span class="sd">            data: Frame data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1575,6 +1577,7 @@
 <span class="sd">            frame: Frame data model.</span>
 <span class="sd">            end_stream: End of stream flag.</span>
 <span class="sd">            end_headers: End of headers flag.</span>
+<span class="sd">            pad_len: Padding length.</span>
 <span class="sd">            excl_dep: Exclusive dependency flag.</span>
 <span class="sd">            sid_dep: Dependency stream identifier.</span>
 <span class="sd">            weight: Priority weight value.</span>
@@ -1667,6 +1670,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
 <span class="sd">            error: Error code.</span>
+<span class="sd">            error_default: Default value of error code.</span>
+<span class="sd">            error_namespace: Namespace of error code.</span>
+<span class="sd">            error_reversed: Reversed namespace of error code.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>

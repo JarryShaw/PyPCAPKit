@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/tcp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Ackn..." />
-<meta name="description" content="pcapkit.foundation.reassembly.tcp contains Reassembly only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Ackn..." />
+<meta property="og:description" content="pcapkit.foundation.reassembly.tcp contains TCP only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Acknowledge..." />
+<meta name="description" content="pcapkit.foundation.reassembly.tcp contains TCP only, which reconstructs fragmented TCP packets back to origin. Algorithm:,, Attribute, Definition,,, DSN, Data Sequence Number,, ACK, TCP Acknowledge..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Flow Tracing" href="../traceflow/index.html"><link rel="prev" title="IPv6 Datagram Reassembly" href="ip/ipv6.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -483,10 +483,10 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="tcp-datagram-reassembly">
-<h1>TCP Datagram Reassembly<a class="headerlink" href="#tcp-datagram-reassembly" title="Link to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp</span></code> contains
-<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> only,
+          <section id="module-pcapkit.foundation.reassembly.tcp">
+<span id="tcp-datagram-reassembly"></span><h1>TCP Datagram Reassembly<a class="headerlink" href="#module-pcapkit.foundation.reassembly.tcp" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.tcp" title="pcapkit.foundation.reassembly.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp</span></code></a> contains
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> only,
 which reconstructs fragmented TCP packets back to origin.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP">
@@ -496,8 +496,9 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>strict</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if return all datagrams (including those not
-implemented) when submit</p></li>
+<li><p><strong>strict</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, report a datagram that is not completely
+reassembled as the tuple of its received runs; otherwise as one
+contiguous payload, its holes zero-filled</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 (if not, datagram will be discarded after callback)</p></li>
@@ -746,27 +747,31 @@ for further handling. Otherwise, return.</p></li>
 <dt id="term-reasm.tcp.packet">reasm.tcp.packet<a class="headerlink" href="#term-reasm.tcp.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>TCP datagram reassembly</strong>
 (<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>)
 is as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span>
-  <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-      <span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                     <span class="c1"># source IP address</span>
-      <span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                <span class="c1"># source port</span>
-      <span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                     <span class="c1"># destination IP address</span>
-      <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                <span class="c1"># destination port</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
+<span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
+
+<span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+<span class="n">packet_dict</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span>
+  <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="n">ip_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                    <span class="c1"># source IP address</span>
+      <span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>          <span class="c1"># source port</span>
+      <span class="n">ip_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                    <span class="c1"># destination IP address</span>
+      <span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>          <span class="c1"># destination port</span>
   <span class="p">),</span>
-  <span class="n">dsn</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                  <span class="c1"># data sequence number</span>
-  <span class="n">ack</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                  <span class="c1"># acknowledgement number</span>
-  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>             <span class="c1"># original packet range number</span>
-  <span class="n">syn</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>            <span class="c1"># synchronise flag</span>
-  <span class="n">fin</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>            <span class="c1"># finish flag</span>
-  <span class="n">rst</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>            <span class="c1"># reset connection flag</span>
-  <span class="nb">len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">raw_len</span><span class="p">,</span>              <span class="c1"># payload length, header excludes</span>
-  <span class="n">first</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                <span class="c1"># first sequence number of payload</span>
-  <span class="n">last</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">tcp</span><span class="o">.</span><span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                                  <span class="c1"># last sequence number of payload</span>
-  <span class="n">header</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>     <span class="c1"># raw bytes type header</span>
-  <span class="n">payload</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span>              <span class="c1"># raw bytearray type payload</span>
+  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>            <span class="c1"># original packet range number</span>
+  <span class="n">ack</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                 <span class="c1"># acknowledgement</span>
+  <span class="n">dsn</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                 <span class="c1"># data sequence number</span>
+  <span class="n">syn</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>           <span class="c1"># synchronise flag</span>
+  <span class="n">fin</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>           <span class="c1"># finish flag</span>
+  <span class="n">rst</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>           <span class="c1"># reset connection flag</span>
+  <span class="n">header</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>         <span class="c1"># raw bytes type header</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
+      <span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>            <span class="c1"># raw bytearray type payload</span>
+  <span class="n">first</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>               <span class="c1"># first sequence number of payload</span>
+  <span class="n">last</span> <span class="o">=</span> <span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># last sequence number of payload</span>
+  <span class="nb">len</span> <span class="o">=</span> <span class="n">raw_len</span><span class="p">,</span>                      <span class="c1"># payload length, header excludes</span>
   <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
-      <span class="n">frame</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>          <span class="c1"># capture timestamp</span>
+      <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>         <span class="c1"># capture timestamp</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1048,7 +1053,7 @@ timeout, which for TCP is off by default – see
 <dd><p>How completely the datagram was reassembled, and why reassembly stopped;
 see <code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code>. Only
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.COMPLETE</span></code> is truthy, so <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">datagram.completed:</span></code> reads
-as it did while this was a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p>
+as it would for a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1135,7 +1140,7 @@ knows which buffer it is looking at – can convert one to the other.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment.ind">
 <span class="sig-name descname"><span class="pre">ind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.ind" title="Link to this definition">¶</a></dt>
-<dd><p>List of reassembled packets.</p>
+<dd><p>Numbers of the packets merged into this fragment.</p>
 </dd></dl>
 
 <dl class="py attribute">

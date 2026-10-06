@@ -534,8 +534,9 @@
 <span class="c1"># Regular expression to match HTTP status code. Anchored for the same reason as</span>
 <span class="c1"># ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and the</span>
 <span class="c1"># value is taken from ``int(para2)`` on the raw token, so an unanchored prefix</span>
-<span class="c1"># match let ``200x`` and ``2000`` past the guard and then out of ``int()`` as a</span>
-<span class="c1"># bare ``ValueError`` -- where ``_read_http_header`` documents ``ProtocolError``.</span>
+<span class="c1"># match would let ``200x`` and ``2000`` past the guard and then out of ``int()``</span>
+<span class="c1"># as a bare ``ValueError`` -- where ``_read_http_header`` documents</span>
+<span class="c1"># ``ProtocolError``.</span>
 <span class="c1"># :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the</span>
 <span class="c1"># grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``</span>
 <span class="c1"># production; :rfc:`9110#section-15` covers the code semantics and registry, not</span>
@@ -895,9 +896,7 @@
         <span class="c1"># unfolded here -- the RFC's own remedy -- rather than treated as a field</span>
         <span class="c1"># line of its own. Deprecated, but present in real captures. Treating a</span>
         <span class="c1"># continuation as a field line of its own goes wrong twice: one carrying</span>
-        <span class="c1"># no colon leaves the split below one element long, so ``item[1]`` raises</span>
-        <span class="c1"># :exc:`IndexError`, which is neither a :exc:`ValueError` nor a</span>
-        <span class="c1"># ``ProtocolError`` and escapes ``HTTP._guess_version``'s suppression;</span>
+        <span class="c1"># no colon fails the colon check below, so a valid message is refused;</span>
         <span class="c1"># one that happens to contain a colon parses silently into a spurious</span>
         <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).</span>
         <span class="c1"># Unfolded, a folded message parses to the field it actually carries.</span>
@@ -912,10 +911,10 @@
                 <span class="c1"># continuation, because the production is ``obs-fold = OWS CRLF</span>
                 <span class="c1"># RWS`` and it is the *whole* obs-fold that is replaced by a</span>
                 <span class="c1"># single space -- the OWS before the CRLF belongs to the fold,</span>
-                <span class="c1"># not to the value. Stripping only the continuation left that OWS</span>
-                <span class="c1"># in place, so ``X: a \t\r\n\tb`` unfolded to ``'a \t  b'``</span>
-                <span class="c1"># rather than ``'a b'``: four of five folded/literal pairs</span>
-                <span class="c1"># disagreed, and a HTAB survived where the RFC prescribes SP.</span>
+                <span class="c1"># not to the value. Stripping only the continuation would leave</span>
+                <span class="c1"># that OWS in place, so ``X: a \t\r\n\tb`` would unfold to</span>
+                <span class="c1"># ``'a \t  b'`` rather than ``'a b'``, keeping a HTAB where the</span>
+                <span class="c1"># RFC prescribes SP.</span>
                 <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">continue</span>
             <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>

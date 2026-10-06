@@ -520,7 +520,7 @@
 <span class="w">    </span><span class="sd">"""Data model for IPv4 ToS fields.</span>
 
 <span class="sd">    Important:</span>
-<span class="sd">        Due to the preserved keyword conflict, please use :meth:`from_dict`</span>
+<span class="sd">        Due to the reserved keyword conflict, please use :meth:`from_dict`</span>
 <span class="sd">        to create an instance of this data model.</span>
 
 <span class="sd">    """</span>
@@ -539,7 +539,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ToSField'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: We cannot define ``del`` due to preserved keyword conflict.</span>
+        <span class="c1"># NOTE: We cannot define ``del`` due to reserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
         <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'del'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToSDelay</span>
 
@@ -595,6 +595,7 @@
     <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Options, present only when the header carries any.</span>
         <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[OptionNumber, Option]'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4]'</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">tos</span><span class="p">:</span> <span class="s1">'ToSField'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -617,7 +618,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'OptionType'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: We cannot define ``class`` due to preserved keyword conflict.</span>
+        <span class="c1"># NOTE: We cannot define ``class`` due to reserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
         <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'class'</span><span class="p">]</span> <span class="o">=</span> <span class="n">OptionClass</span>
 
@@ -824,7 +825,7 @@
 <span class="w">    </span><span class="sd">"""Data model for IPv4 Traceroute (``TR``) option.</span>
 
 <span class="sd">    Important:</span>
-<span class="sd">        Due to the preserved keyword conflict, please use :meth:`from_dict`</span>
+<span class="sd">        Due to the reserved keyword conflict, please use :meth:`from_dict`</span>
 <span class="sd">        to create an instance of this data model.</span>
 
 <span class="sd">    """</span>
@@ -835,12 +836,13 @@
     <span class="n">outbound</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Return hop count.</span>
     <span class="c1">#return: 'int'</span>
+    <span class="c1">#: Originator IP address.</span>
     <span class="n">originator</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TROption'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: We cannot define ``return`` due to preserved keyword conflict.</span>
+        <span class="c1"># NOTE: We cannot define ``return`` due to reserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
         <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'return'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span>
 

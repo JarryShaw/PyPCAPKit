@@ -530,30 +530,34 @@ contains all things from <a class="reference internal" href="#module-pcapkit" ti
 </section>
 <section id="module-pcapkit.__main__">
 <span id="command-line-tool"></span><h2>Command Line Tool<a class="headerlink" href="#module-pcapkit.__main__" title="Link to this heading">¶</a></h2>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This module requires <code class="docutils literal notranslate"><span class="pre">emoji</span></code> package to be installed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">emoji</span></code> package (the <code class="docutils literal notranslate"><span class="pre">cli</span></code> extra) decorates the <code class="docutils literal notranslate"><span class="pre">-v</span></code> output.
+Without it, importing the module warns with
+<a class="reference internal" href="utilities/warnings.html#pcapkit.utilities.warnings.EmojiWarning" title="pcapkit.utilities.warnings.EmojiWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmojiWarning</span></code></a> and the CLI prints plain
+text instead.</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.__main__" title="pcapkit.__main__"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.__main__</span></code></a> provides the CLI, merged in from the deprecated
 <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> project.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
-                   [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
+                   [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER] [-B]
+                   [-O file-name]
                    input-file-name
 
 PCAP file extractor and formatted dumper
 
 positional arguments:
   input-file-name       The name of input pcap file. If ".pcap" omits, it will
-                        be automatically appended.
+                        be automatically appended. Use "-" to indicate reading
+                        from `stdin'.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
-  -o file-name, --output file-name
+  -o, --output file-name
                         The name of input pcap file. If format extension
                         omits, it will be automatically appended.
-  -f format, --format format
-                        Print a extraction report in the specified output
+  -f, --format format   Print a extraction report in the specified output
                         format. Available are all formats supported by
                         dictdumper, e.g.: json, plist, and tree.
   -j, --json            Display extraction report as json. This will yield
@@ -569,13 +573,17 @@ optional arguments:
   -a, --auto-extension  If output file extension omits, append automatically.
   -v, --verbose         Show more information.
   -F, --files           Split each frame into different files.
-  -E PKG, --engine PKG  Indicate extraction engine. Note that except default
+  -E, --engine PKG      Indicate extraction engine. Note that except default
                         or pcapkit engine, all other engines need support of
                         corresponding packages.
-  -P PROTOCOL, --protocol PROTOCOL
+  -P, --protocol PROTOCOL
                         Indicate extraction stops after which protocol.
-  -L LAYER, --layer LAYER
-                        Indicate extract frames until which layer.
+  -L, --layer LAYER     Indicate extract frames until which layer.
+  -B, --buffer-save     Indicate if store buffer to file when reading from
+                        stdin.
+  -O, --buffer-path file-name
+                        The name of buffer storage file. If `--buffer-save` is
+                        set and this omits, it will be automatically assigned.
 </pre></div>
 </div>
 </section>

@@ -807,11 +807,11 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read first four hextets of IPv6.</span>
+<span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed hextets data, including version number, traffic class and</span>
-<span class="sd">            flow label.</span>
+<span class="sd">            Parsed data of those four octets: version number, traffic class</span>
+<span class="sd">            and flow label.</span>
 
 <span class="sd">        """</span>
         <span class="n">_htet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
@@ -838,7 +838,7 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            ipv6: info buffer</span>
-<span class="sd">            proto: next layer protocol name</span>
+<span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            length: valid (*not padding*) length</span>
 <span class="sd">            packet: packet info (passed from :meth:`self.unpack &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`)</span>
 
@@ -853,7 +853,7 @@
         <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>      <span class="c1"># payload length</span>
         <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># ProtoChain buffer</span>
 
-        <span class="c1"># traverse if next header is an extensive header</span>
+        <span class="c1"># traverse if next header is an extension header</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -893,30 +893,25 @@
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">next_</span><span class="o">.</span><span class="n">length</span><span class="p">:]</span>
 
             <span class="c1"># A layer with no ``next`` field cannot safely continue the walk.</span>
-            <span class="c1"># This is a *structural* check -- does the parsed info even carry a</span>
-            <span class="c1"># ``next`` attribute? -- not a fixed set of codes, and deliberately</span>
-            <span class="c1"># so: HOPOPT, IPv6-Route, IPv6-Opts, MH, HIP, IPv6-Frag and AH all</span>
-            <span class="c1"># have dedicated parsers whose data carries ``next``, and Shim6 and</span>
-            <span class="c1"># any recognised header whose own parser raised are both handled by</span>
-            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, which also</span>
-            <span class="c1"># carries ``next`` (possibly :data:`None`, on an overrun -- see its</span>
-            <span class="c1"># module docstring). Every IANA extension header code without a</span>
-            <span class="c1"># dedicated parser -- ``253`` and ``254`` today, and whatever IANA</span>
-            <span class="c1"># assigns next -- has no generic fallback either (see</span>
-            <span class="c1"># :attr:`__generic_ext_codes__`'s docstring for why), so</span>
-            <span class="c1"># :meth:`_import_next_layer` returns a plain</span>
-            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw`, whose info carries no</span>
-            <span class="c1"># ``next`` at all. Reading ``info.next`` on that unconditionally</span>
-            <span class="c1"># would raise ``AttributeError`` and let a further-out</span>
-            <span class="c1"># :func:`~pcapkit.utilities.decorators.beholder` degrade the *whole*</span>
-            <span class="c1"># packet. Stopping here instead keeps this layer's own fields (still</span>
-            <span class="c1"># recorded above, in ``self._exthdr`` and in the packet dict) and</span>
-            <span class="c1"># reports no further next header, exactly like the overrun case.</span>
+            <span class="c1"># This is a *structural* check, not a fixed set of codes: every</span>
+            <span class="c1"># dedicated parser and</span>
+            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry</span>
+            <span class="c1"># ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no</span>
+            <span class="c1"># dedicated parser but is registered to ``IPv6_Ext`` directly --</span>
+            <span class="c1"># while every other code with no dedicated parser -- ``253``,</span>
+            <span class="c1"># ``254``, or whatever IANA assigns next -- resolves to plain</span>
+            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see</span>
+            <span class="c1"># :attr:`__generic_ext_codes__`). Reading</span>
+            <span class="c1"># ``info.next`` on that would raise ``AttributeError`` and let a</span>
+            <span class="c1"># further-out :func:`~pcapkit.utilities.decorators.beholder` degrade</span>
+            <span class="c1"># the *whole* packet. Stopping here instead keeps this layer's own</span>
+            <span class="c1"># fields (recorded above, in ``self._exthdr`` and in the packet</span>
+            <span class="c1"># dict) and reports no further next header, as on an overrun.</span>
             <span class="c1">#</span>
             <span class="c1"># This has to run -- and, on a hit, has to set ``proto`` --</span>
             <span class="c1"># *before* the fragment-header special case below: IPv6-Frag</span>
-            <span class="c1"># always carries a real ``next`` (the ``hasattr`` check above</span>
-            <span class="c1"># never actually fires for it), and that ``next`` is the real</span>
+            <span class="c1"># always carries a real ``next`` (this ``hasattr`` check never</span>
+            <span class="c1"># fires for it), and that ``next`` is the real</span>
             <span class="c1"># transport layer's code, which the fragment branch's own</span>
             <span class="c1"># ``break`` must leave in ``proto`` for the final</span>
             <span class="c1"># ``super()._decode_next_layer`` call below the loop to dispatch</span>

@@ -490,7 +490,9 @@
 <span class="w">    </span><span class="sd">"""A postponed reassembly of a traced flow's application layer.</span>
 
 <span class="sd">    A traced flow's ``packet`` is the application-layer payload of the</span>
-<span class="sd">    conversation, one datagram per direction. Producing it means reassembling the</span>
+<span class="sd">    conversation, as reassembled datagrams -- one per direction and</span>
+<span class="sd">    acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.TCP`.</span>
+<span class="sd">    Producing it means reassembling the</span>
 <span class="sd">    stream, which is neither free nor wanted by most callers of a *tracer* -- so</span>
 <span class="sd">    the flow keeps the reassembler it was fed and this holds it until somebody</span>
 <span class="sd">    reads</span>
@@ -502,7 +504,7 @@
 <span class="sd">        with it. That one postpones a single ``analyze()`` call over bytes already</span>
 <span class="sd">        in hand; this postpones a *submit* over a reassembler's buffers. The two</span>
 <span class="sd">        subpackages are siblings and neither should depend on the other, so the</span>
-<span class="sd">        twenty lines are written twice rather than one importing the other -- the</span>
+<span class="sd">        few lines are written twice rather than one importing the other -- the</span>
 <span class="sd">        same reason the two ``data/data.py`` modules mirror each other instead of</span>
 <span class="sd">        merging.</span>
 
@@ -524,8 +526,8 @@
 <span class="w">        </span><span class="sd">"""Run the postponed reassembly.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            One reassembled datagram per direction of the conversation. Each</span>
-<span class="sd">            carries its *own* postponed analysis in</span>
+<span class="sd">            The conversation's reassembled datagrams, one per direction and</span>
+<span class="sd">            acknowledgement number. Each carries its *own* postponed analysis in</span>
 <span class="sd">            :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.packet&gt;`,</span>
 <span class="sd">            so parsing the payload as an application-layer protocol is still not</span>
 <span class="sd">            paid for until that is read in turn.</span>

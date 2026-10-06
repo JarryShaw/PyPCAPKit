@@ -486,19 +486,19 @@
 <span class="sd">   ====== ===== ================== ===============================</span>
 <span class="sd">   0          0 ``ospf.version``   Version Number</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          0 ``ospf.type``      Type</span>
+<span class="sd">   1          8 ``ospf.type``      Type</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          1 ``ospf.len``       Packet Length (header included)</span>
+<span class="sd">   2         16 ``ospf.len``       Packet Length (header included)</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          2 ``ospf.router_id`` Router ID</span>
+<span class="sd">   4         32 ``ospf.router_id`` Router ID</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          4 ``ospf.area_id``   Area ID</span>
+<span class="sd">   8         64 ``ospf.area_id``   Area ID</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          6 ``ospf.chksum``    Checksum</span>
+<span class="sd">   12        96 ``ospf.chksum``    Checksum</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   0          7 ``ospf.autype``    Authentication Type</span>
+<span class="sd">   14       112 ``ospf.autype``    Authentication Type</span>
 <span class="sd">   ------ ----- ------------------ -------------------------------</span>
-<span class="sd">   1          8 ``ospf.auth``      Authentication</span>
+<span class="sd">   16       128 ``ospf.auth``      Authentication</span>
 <span class="sd">   ====== ===== ================== ===============================</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First</span>
@@ -660,10 +660,8 @@
             <span class="p">])</span>
         <span class="c1"># OSPF carries no next-protocol field -- the body is LSAs and packet-type</span>
         <span class="c1"># specific fields, which pcapkit does not dissect -- so dispatch on the</span>
-        <span class="c1"># -1 sentinel, as ARP does, rather than on a code read off the wire.</span>
-        <span class="c1"># Passing the remaining length here (as this did) dispatched on it as if</span>
-        <span class="c1"># it were an EtherType, which resolved to Raw only because a length</span>
-        <span class="c1"># rarely collides with a registered one.</span>
+        <span class="c1"># -1 sentinel, as ARP does, rather than on a code read off the wire;</span>
+        <span class="c1"># ``Application._decode_next_layer`` refuses any other value.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ospf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 

@@ -654,10 +654,10 @@ pushed, trading a clean skip for a checkout failure; the equality pair skips
 <code class="docutils literal notranslate"><span class="pre">needs.version_check.result</span> <span class="pre">==</span> <span class="pre">'success'</span></code> with no <code class="docutils literal notranslate"><span class="pre">||</span> <span class="pre">'skipped'</span></code>. It
 produces the evidence the gates read, so a skipped or cancelled
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> leaves them nothing to decide on. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> is held to
-the same bar for a different reason: it is the release test gate, and since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a> it skips when
-nothing is publishable, so accepting <code class="docutils literal notranslate"><span class="pre">skipped</span></code> there would publish
-untested. <code class="docutils literal notranslate"><span class="pre">github</span></code> names it in <code class="docutils literal notranslate"><span class="pre">needs:</span></code> instead and relies on the implicit
+the same bar for a different reason: it is the release test gate, and it skips
+when nothing is publishable
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a>), so accepting
+<code class="docutils literal notranslate"><span class="pre">skipped</span></code> there would publish untested. <code class="docutils literal notranslate"><span class="pre">github</span></code> names it in <code class="docutils literal notranslate"><span class="pre">needs:</span></code> instead and relies on the implicit
 <code class="docutils literal notranslate"><span class="pre">success()</span></code>. The gate’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code> is the union of the four publishers’
 conditions, with <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'true'</span></code> so unknown evidence runs it; should the two
 ever drift apart, the failure is a release that did not happen, which
@@ -719,7 +719,7 @@ not happen.</p>
 above is what prevents it: <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
 <em>their own</em> artefact is missing rather than whether the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, so an
 incomplete release runs the jobs that did not finish instead of skipping them.
-A half-finished release now self-heals on the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered
+A half-finished release self-heals on the next <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered
 attempt, or on re-running the workflow by hand – see <a class="reference internal" href="#recovery">Recovery</a> below.
 <code class="docutils literal notranslate"><span class="pre">release_status</span></code> is the other half: it runs unconditionally and reports,
 with a <code class="docutils literal notranslate"><span class="pre">::notice</span></code>, a <code class="docutils literal notranslate"><span class="pre">::warning</span></code> or a failing <code class="docutils literal notranslate"><span class="pre">::error</span></code>, why a run
@@ -737,7 +737,7 @@ here), so the push only fires again after the tag is deleted – which touches a
 ref the release automation owns, and lands the retry back on the tag-push path,
 where every job’s guard is bypassed regardless of what has already gone out.
 Neither is worth the risk of a double upload to an index that cannot take one
-back, and neither is needed, since a plain re-run now self-heals; see
+back, and neither is needed, since a plain re-run self-heals; see
 <a class="reference internal" href="#recovery">Recovery</a> below.</p>
 <p><strong>``environment: pypi`` stays even though its reviewer is gone.</strong> <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
 publishes through PyPI’s OIDC trusted publishing (<code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> at
@@ -764,8 +764,8 @@ actual fix rather than a best-effort suggestion: <a class="reference internal" h
 Shared Proxy</a> above means <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
 <em>their own</em> artefact is missing, so a re-run finishes whichever jobs did not
 complete last time instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere
-existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> was always safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>);
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> now is too, because each matrix leg checks Anaconda for its own
+existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> is safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>), and so is
+<code class="docutils literal notranslate"><span class="pre">conda</span></code>, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg’s
 upload if it is already there.</p>
 <p><strong>A re-run does not need to be verified by hand against the PyPI and Anaconda

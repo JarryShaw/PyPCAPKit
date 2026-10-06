@@ -1730,7 +1730,7 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is not given on a valid SYN/ACK packet.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the segment carries neither SYN nor ACK.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1785,7 +1785,7 @@ enumeration:</p>
 +---------------+---------------+-------+-------+---------------+
 |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
 +---------------+---------------+-------+-------+---------------+
-|          Address (TCP - 4 octets / IPv6 - 16 octets)         |
+|         Address (IPv4 - 4 octets / IPv6 - 16 octets)          |
 +-------------------------------+-------------------------------+
 |   Port (2 octets, optional)   |
 +-------------------------------+
@@ -2665,7 +2665,7 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable" title="pcapkit.protocols.data.transport.tcp.MPTCPCapable"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPCapable</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
 <li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – MPTCP version</p></li>
 <li><p><strong>flag_req</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – checksum required flag</p></li>
-<li><p><strong>flag_ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – extensability flag</p></li>
+<li><p><strong>flag_ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – extensibility flag</p></li>
 <li><p><strong>flag_hsa</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – use of HMAC-SHA1 flag</p></li>
 <li><p><strong>skey</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option sender’s key</p></li>
 <li><p><strong>rkey</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option receiver’s key</p></li>
@@ -4222,7 +4222,7 @@ condition, so reading it while the condition is false – the wrapped field
 then still unresolved, at its <code class="docutils literal notranslate"><span class="pre">-1</span></code> placeholder – raises
 <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">bad</span> <span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>. Nothing here meets that only
 because <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">pack</span></code> and <code class="docutils literal notranslate"><span class="pre">unpack</span></code>
-special-case <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> by name and skip the wrapped field
+special-case <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> by type and skip the wrapped field
 outright before any <code class="docutils literal notranslate"><span class="pre">length</span></code> is read. A <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> needs no such
 special case: its selector always hands back an already-concrete field,
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a> included, so its
@@ -4823,7 +4823,7 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.nonce">
 <span class="sig-name descname"><span class="pre">nonce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.nonce" title="Link to this definition">¶</a></dt>
-<dd><p>Sendder’s random number.</p>
+<dd><p>Sender’s random number.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4854,7 +4854,7 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.nonce">
 <span class="sig-name descname"><span class="pre">nonce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.nonce" title="Link to this definition">¶</a></dt>
-<dd><p>Sendder’s random number.</p>
+<dd><p>Sender’s random number.</p>
 </dd></dl>
 
 </dd></dl>

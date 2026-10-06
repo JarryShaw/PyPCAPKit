@@ -731,12 +731,12 @@ attribute:</p>
 <td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_isb_usrdeliv()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_flags" title="pcapkit.const.pcapng.option_type.OptionType.pack_flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_flags</span></code></a></p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_flags()</span></code></a></p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_flags()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_pack_flags()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_flags" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_flags"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_pack_flags()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.pack_hash" title="pcapkit.const.pcapng.option_type.OptionType.pack_hash"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pack_hash</span></code></a></p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_epb_hash()</span></code></a></p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_epb_hash()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_option_pack_hash()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_hash" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_hash"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_option_pack_hash()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -2596,7 +2596,7 @@ protocol chain of the current packet (frame).</p>
 12 |                         Secrets Length                        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 16 |                            AES-128                            |
-   |                            NKW Key                            |
+   |                            NWK Key                            |
    |                          (16 octets)                          |
    |                           (128 bits)                          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -3764,7 +3764,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></span>) – Option type.</p></li>
 <li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ISB_UsrDelivOption" title="pcapkit.protocols.data.misc.pcapng.ISB_UsrDelivOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">ISB_UsrDelivOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Option data model.</p></li>
-<li><p><strong>packets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of dropped packets.</p></li>
+<li><p><strong>packets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of packets delivered to the user.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -4066,8 +4066,8 @@ protocol chain of the current packet (frame).</p>
 <dd><p>Protocol index mapping for
 decoding next layer, c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
-The values should be a tuple representing the module name and class name,
-or a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+Each value is a <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the
+module and class, or a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DefaultDict[Enum_LinkType, <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor">ModuleDescriptor</a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><em>Type</em></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>]]</p>
@@ -4459,7 +4459,7 @@ asks for, and from the host byte order when it asks for none.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#SectionHeaderBlock.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.post_process" title="Link to this definition">¶</a></dt>
 <dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
-<p>This method calculate the byteorder value based on
+<p>This method calculates the byteorder value based on
 the parsed schema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -5101,7 +5101,7 @@ will be inferred from the option type code. Spelled <code class="docutils litera
 than <code class="docutils literal notranslate"><span class="pre">namespace</span></code> because <code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> names its
 own fourth parameter <code class="docutils literal notranslate"><span class="pre">namespace</span></code>, and before Python 3.11 that
 parameter is positional-or-keyword rather than positional-only –
-so a class keyword literally called <code class="docutils literal notranslate"><span class="pre">namespace</span></code> bound it twice.</p></li>
+so a class keyword literally called <code class="docutils literal notranslate"><span class="pre">namespace</span></code> binds it twice.</p></li>
 <li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -6341,15 +6341,7 @@ only the outer one is the miss-safe
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ResolutionData.flag">
 <span class="sig-name descname"><span class="pre">flag</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ResolutionData.flag" title="Link to this definition">¶</a></dt>
-<dd><p>2-based).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Resolution type flag (0</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>10-based, 1</p>
-</dd>
-</dl>
+<dd><p>Resolution type flag (<code class="docutils literal notranslate"><span class="pre">0</span></code> for 10-based, <code class="docutils literal notranslate"><span class="pre">1</span></code> for 2-based).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -7837,7 +7829,7 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeNWKKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/pcapng.html#ZigBeeNWKKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.DSBSecrets" title="pcapkit.protocols.data.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a></p>
-<p>Data model for ZigBEE NWK Key and ZigBee PANID secrets data.</p>
+<p>Data model for ZigBee NWK Key and ZigBee PANID secrets data.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.nwk_key">
 <span class="sig-name descname"><span class="pre">nwk_key</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.nwk_key" title="Link to this definition">¶</a></dt>
@@ -7856,7 +7848,7 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeAPSKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/pcapng.html#ZigBeeAPSKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.DSBSecrets" title="pcapkit.protocols.data.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a></p>
-<p>Data model for ZigBEE APS Key secrets data.</p>
+<p>Data model for ZigBee APS Key secrets data.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.aps_key">
 <span class="sig-name descname"><span class="pre">aps_key</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.aps_key" title="Link to this definition">¶</a></dt>

@@ -482,7 +482,7 @@
 <span class="sd">Octets      Bits        Name                    Description</span>
 <span class="sd">======= ========= ==================== ===============================</span>
 <span class="sd">  0           0   ``route.next``            Next Header</span>
-<span class="sd">  1           8   ``route.length``          Header Extensive Length</span>
+<span class="sd">  1           8   ``route.length``          Header Extension Length</span>
 <span class="sd">  2          16   ``route.type``            Routing Type</span>
 <span class="sd">  3          24   ``route.seg_left``        Segments Left</span>
 <span class="sd">  4          32   ``route.data``            Type-Specific Data</span>
@@ -570,10 +570,10 @@
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: DefaultDict[Enum_Routing, str | tuple[TypeParser, TypeConstructor]]: Type</span>
-    <span class="c1">#: code to method mapping. Method names are expected to be referred to</span>
-    <span class="c1">#: the class by ``_read_data_type_${name}`` and/or ``_make_data_type_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the routing type by itself.</span>
+    <span class="c1">#: code to method mapping. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_data_type_${name}`` and ``_make_data_type_${name}``, falling back</span>
+    <span class="c1">#: to ``_read_data_type_none`` / ``_make_data_type_none`` when they do not</span>
+    <span class="c1">#: exist; any other value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__routing__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -705,16 +705,16 @@
 <span class="sd">        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is the inverse,</span>
 <span class="sd">        used on the read side.</span>
 
-<span class="sd">        This is the *only* place ``Hdr Ext Len`` is computed on the write side.</span>
-<span class="sd">        Computing it separately per branch in :meth:`make` let the copies</span>
-<span class="sd">        drift apart, so keep one helper. Do NOT "simplify" the ``- 4`` / ``/ 8``</span>
+<span class="sd">        This is the *only* place ``Hdr Ext Len`` is computed on the write side:</span>
+<span class="sd">        separate per-branch copies in :meth:`make` drift apart, so keep one</span>
+<span class="sd">        helper. Do NOT "simplify" the ``- 4`` / ``/ 8``</span>
 <span class="sd">        away: the units either side differ (octets vs. 8-octet units), and</span>
 <span class="sd">        dropping the offset silently reinterprets the field.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data_length: packed length, in octets, of the type-specific data</span>
-<span class="sd">                (i.e. ``len(data_val.pack())`` for a :class:`~pcapkit.protocols.</span>
-<span class="sd">                schema.schema.Schema`-based payload, or the padded raw</span>
+<span class="sd">                (i.e. ``len(data_val.pack())`` for a</span>
+<span class="sd">                :class:`~pcapkit.protocols.schema.schema.Schema`-based payload, or the padded raw</span>
 <span class="sd">                :obj:`bytes` length for the unknown/raw-bytes case).</span>
 
 <span class="sd">        Returns:</span>
@@ -819,7 +819,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.register_routing">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">register_routing</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TypeParser, TypeConstructor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register an routing data parser.</span>
+<span class="w">        </span><span class="sd">"""Register a routing data parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: IPv6-Route data type code.</span>

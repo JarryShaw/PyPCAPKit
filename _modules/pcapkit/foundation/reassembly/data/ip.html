@@ -500,7 +500,7 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.packet&gt;` and/or</span>
-<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.packet&gt;` packet representation.."""</span>
+<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.packet&gt;` packet representation."""</span>
 
     <span class="c1">#: Buffer ID.</span>
     <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span>
@@ -519,7 +519,7 @@
     <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
     <span class="c1">#: Capture timestamp of the fragment, in seconds since the Unix epoch. This</span>
-    <span class="c1">#: is the *capture's* clock, not the host's: it is what drives the :rfc:`791`</span>
+    <span class="c1">#: is the *capture's* clock, not the host's: it is what drives the :rfc:`1122#section-3.3.2`</span>
     <span class="c1">#: and :rfc:`8200#section-4.5` reassembly timeout, since an offline parser</span>
     <span class="c1">#: replaying a file has no other notion of time passing.</span>
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
@@ -637,7 +637,7 @@
     <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Fragment received bit table.</span>
     <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span>
-    <span class="c1">#: List of reassembled packets.</span>
+    <span class="c1">#: Numbers of the packets merged into this buffer.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
     <span class="c1">#: Header buffer.</span>
     <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>

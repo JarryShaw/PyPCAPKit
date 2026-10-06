@@ -645,8 +645,7 @@ different class. c.f. <a class="reference internal" href="l2tp.html#pcapkit.prot
 datagram whose nibble is not <code class="docutils literal notranslate"><span class="pre">2</span></code>, so this hard-coded answer cannot
 disagree with
 <a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.L2TP.version" title="pcapkit.protocols.data.link.l2tp.L2TP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info.version</span></code></a>
-on the same octets. It did before that guard landed, reporting <code class="docutils literal notranslate"><span class="pre">2</span></code>
-here and <code class="docutils literal notranslate"><span class="pre">3</span></code> there.</p>
+on the same octets.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -777,7 +776,8 @@ does. Element zero is what callers treat as canonical, so both
 <code class="docutils literal notranslate"><span class="pre">__index__</span></code> value anywhere in this package – every non-raising
 <code class="docutils literal notranslate"><span class="pre">__index__</span></code> returns a <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a>,
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> or
-<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>, and
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>, bar the PCAP frame and
+PCAP-NG block instances that return their own index number, and
 <a class="reference internal" href="../application/application.html#pcapkit.protocols.application.application.Application.__index__" title="pcapkit.protocols.application.application.Application.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Application.__index__</span></code></a>
 raises for exactly this reason. So there is no index to return here.
 <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> will be the first class in this family with one, IANA

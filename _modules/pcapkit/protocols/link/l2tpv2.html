@@ -606,8 +606,7 @@
 <span class="sd">        datagram whose nibble is not ``2``, so this hard-coded answer cannot</span>
 <span class="sd">        disagree with</span>
 <span class="sd">        :attr:`info.version &lt;pcapkit.protocols.data.link.l2tp.L2TP.version&gt;`</span>
-<span class="sd">        on the same octets. It did before that guard landed, reporting ``2``</span>
-<span class="sd">        here and ``3`` there.</span>
+<span class="sd">        on the same octets.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="mi">2</span>
@@ -707,9 +706,9 @@
         <span class="c1"># L2TP carries no next-protocol field -- the payload is a PPP frame,</span>
         <span class="c1"># which pcapkit does not dissect -- so dispatch on the -1 sentinel, as</span>
         <span class="c1"># ARP does, rather than on a code read off the wire. Passing the</span>
-        <span class="c1"># remaining length here (as this did) dispatched on it as if it were an</span>
-        <span class="c1"># EtherType, which resolved to Raw only because a length rarely collides</span>
-        <span class="c1"># with a registered one.</span>
+        <span class="c1"># remaining length here would dispatch on it as if it were an EtherType,</span>
+        <span class="c1"># resolving to Raw only because a length rarely collides with a</span>
+        <span class="c1"># registered one.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">l2tp</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hdr_len</span><span class="p">)</span></div>
 
 
@@ -817,7 +816,8 @@
 <span class="sd">            ``__index__`` value anywhere in this package -- every non-raising</span>
 <span class="sd">            ``__index__`` returns a :class:`~pcapkit.const.reg.transtype.TransType`,</span>
 <span class="sd">            :class:`~pcapkit.const.reg.ethertype.EtherType` or</span>
-<span class="sd">            :class:`~pcapkit.const.reg.linktype.LinkType`, and</span>
+<span class="sd">            :class:`~pcapkit.const.reg.linktype.LinkType`, bar the PCAP frame and</span>
+<span class="sd">            PCAP-NG block instances that return their own index number, and</span>
 <span class="sd">            :meth:`Application.__index__</span>
 <span class="sd">            &lt;pcapkit.protocols.application.application.Application.__index__&gt;`</span>
 <span class="sd">            raises for exactly this reason. So there is no index to return here.</span>

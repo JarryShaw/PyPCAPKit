@@ -686,10 +686,8 @@ check the members one at a time.</strong> Several of <a class="extlink-issue ref
 shape:</p>
 <ul class="simple">
 <li><p>A sweep asserted that every <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span></code> target in the documentation resolved.
-One did not: <code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/link/rarp.rst</span></code> (its path at the
-time; now under <code class="file docutils literal notranslate"><span class="pre">application/</span></code>) declared
-<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.link.rarp</span></code>, which has never existed, because RARP and
-DRARP reuse ARP’s data class. Fixed in <code class="docutils literal notranslate"><span class="pre">68fbccd90</span></code>.</p></li>
+One did not: the RARP page declared <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.link.rarp</span></code>, which has
+never existed, because RARP and DRARP reuse ARP’s data class. Fixed in <code class="docutils literal notranslate"><span class="pre">68fbccd90</span></code>.</p></li>
 <li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s ruling – export the sentinel objects and leave their types out – was
 read as describing all three modules that then held a sentinel. One ran the other
 way: <a class="reference internal" href="../../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> exported neither, so applying the rule

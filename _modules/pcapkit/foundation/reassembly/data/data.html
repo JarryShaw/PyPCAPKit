@@ -498,7 +498,7 @@
 <span class="sd">    :attr:`Datagram.completed &lt;pcapkit.foundation.reassembly.data.ip.Datagram.completed&gt;`,</span>
 <span class="sd">    which widens a plain :obj:`bool` rather than adding a second channel beside</span>
 <span class="sd">    it: reassembly has *three* outcomes to report, not two, since a buffer</span>
-<span class="sd">    abandoned under the :rfc:`791` / :rfc:`8200` reassembly timeout is a different</span>
+<span class="sd">    abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is a different</span>
 <span class="sd">    event from one that simply had not finished when the capture did. An expired</span>
 <span class="sd">    datagram says "these fragments are gone", a partial one says "these fragments</span>
 <span class="sd">    had not arrived yet".</span>
@@ -518,8 +518,8 @@
 <span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so a</span>
 <span class="sd">    state can be tested for without importing this class.</span>
 <span class="sd">    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of</span>
-<span class="sd">    string enumeration, but GitHub issue :issue:`886` made it generated like its</span>
-<span class="sd">    :mod:`pcapkit.const.pcapng` siblings, so it derives from :class:`aenum`'s own</span>
+<span class="sd">    string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`</span>
+<span class="sd">    siblings (:issue:`886`), so it derives from :class:`aenum`'s own</span>
 <span class="sd">    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). Both</span>
 <span class="sd">    properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`</span>
 <span class="sd">    subclass, but ``isinstance``/``issubclass`` against</span>
@@ -529,7 +529,7 @@
 <span class="sd">        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are</span>
 <span class="sd">        **falsy** makes this a non-empty string that tests false, so ``bool(x)``</span>
 <span class="sd">        and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above</span>
-<span class="sd">        is the property callers of a former :obj:`bool` field rely on -- but code</span>
+<span class="sd">        is what lets ``if datagram.completed:`` read as a boolean test -- but code</span>
 <span class="sd">        that takes this for an ordinary string and tests it for truth will read it</span>
 <span class="sd">        backwards.</span>
 
@@ -584,10 +584,10 @@
 <span class="sd">    *every* frame -- not only the fragmented ones, since a frame that is not</span>
 <span class="sd">    fragmented in any sense still reaches</span>
 <span class="sd">    :meth:`IP.reassembly &lt;pcapkit.foundation.reassembly.ip.IP.reassembly&gt;` and is</span>
-<span class="sd">    submitted there as a trivially complete datagram -- so the eager parse</span>
-<span class="sd">    re-parsed captures holding no fragments at all: :file:`http.pcap` has 1117</span>
-<span class="sd">    IPv4 frames, none of them fragmented, and the parse was 86% of the cost of IP</span>
-<span class="sd">    reassembly over it.</span>
+<span class="sd">    submitted there as a trivially complete datagram -- so an eager parse would</span>
+<span class="sd">    re-parse captures holding no fragments at all: :file:`http.pcap` has 1117</span>
+<span class="sd">    IPv4 frames, none of them fragmented, and the eager parse measured 86% of the</span>
+<span class="sd">    cost of IP reassembly over it.</span>
 
 <span class="sd">    TCP reassembly defers its ``packet`` as well</span>
 <span class="sd">    (:meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`), at a far</span>
@@ -596,8 +596,8 @@
 
 <span class="sd">    Holding the call here defers it to the first read of</span>
 <span class="sd">    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets</span>
-<span class="sd">    exactly the object the eager call produced, and one that does not never pays</span>
-<span class="sd">    for it.</span>
+<span class="sd">    exactly the object an eager call would produce, and one that does not never</span>
+<span class="sd">    pays for it.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        analyze: The analyser to call, i.e.</span>
@@ -663,7 +663,8 @@
 <span class="w">        </span><span class="sd">"""Resolve a deferred analysis, at most once.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed IP payload, or :data:`None` for an incomplete datagram.</span>
+<span class="sd">            Parsed payload, or :data:`None` for a datagram reported as the tuple</span>
+<span class="sd">            of its received runs.</span>
 
 <span class="sd">        """</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">)</span>

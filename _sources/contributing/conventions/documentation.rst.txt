@@ -230,10 +230,8 @@ check the members one at a time.** Several of :issue:`719`'s findings were of ex
 shape:
 
 *  A sweep asserted that every ``.. module::`` target in the documentation resolved.
-   One did not: :file:`docs/source/pcapkit/protocols/link/rarp.rst` (its path at the
-   time; now under :file:`application/`) declared
-   ``pcapkit.protocols.data.link.rarp``, which has never existed, because RARP and
-   DRARP reuse ARP's data class. Fixed in ``68fbccd90``.
+   One did not: the RARP page declared ``pcapkit.protocols.data.link.rarp``, which has
+   never existed, because RARP and DRARP reuse ARP's data class. Fixed in ``68fbccd90``.
 *  :issue:`911`'s ruling -- export the sentinel objects and leave their types out -- was
    read as describing all three modules that then held a sentinel. One ran the other
    way: :mod:`pcapkit.corekit.fields.field` exported neither, so applying the rule

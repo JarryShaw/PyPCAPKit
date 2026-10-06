@@ -523,7 +523,7 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">StreamID</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stream identifier."""</span>
 
-        <span class="c1">#: Steam identifier.</span>
+        <span class="c1">#: Stream identifier.</span>
         <span class="n">sid</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
@@ -621,7 +621,7 @@
 <span class="sd">        Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract</span>
 <span class="sd">        shared by every non-registry enumeration. The six concrete per-frame</span>
 <span class="sd">        subclasses below each declare ``class Flags(FrameType.Flags):`` with no</span>
-<span class="sd">        base list of their own, so they inherit :class:`EnumLookup`</span>
+<span class="sd">        base list of their own, so they inherit :class:`~pcapkit.corekit.enum.EnumLookup`</span>
 <span class="sd">        transitively rather than needing it repeated.</span>
 
 <span class="sd">        """</span></div>

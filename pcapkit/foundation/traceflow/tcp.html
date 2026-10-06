@@ -534,10 +534,8 @@ that SYN is told from the peer’s SYN-ACK; see <code class="xref py py-meth doc
 the whole conversation rather than a truncated one.</p>
 </li>
 </ul>
-<p>Pass <code class="docutils literal notranslate"><span class="pre">bidirectional=False</span></code> for the older per-direction behaviour: a flow
-is one direction, and closes on that direction’s FIN. That mode reproduces
-what flow tracing did before conversations became one flow, RST included –
-which is to say it ignores RST, as it always did.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">bidirectional=False</span></code> to trace each direction as a flow of its
+own, finalised on that direction’s FIN. That mode ignores RST.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -662,12 +660,12 @@ flow label itself.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>The flow label is formatted as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
 </pre></div>
 </div>
 <p>It is built from the packet that <strong>opened</strong> the flow, not from the
-canonical buffer ID, so the label still names the initiator first and
-reads the way it always did. The reverse half of a bidirectional
+canonical buffer ID, so the label names the initiator first. The
+reverse half of a bidirectional
 conversation joins that flow rather than minting a label of its own.</p>
 </div>
 </dd></dl>
@@ -728,19 +726,19 @@ cannot catch up. For a result that is final, read after <a class="reference inte
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__">
 <span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current reassembly object.</p>
+<dd><p>Protocol name of current flow tracing object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__">
 <span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current reassembly object.</p>
+<dd><p>Protocol of current flow tracing object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__">
 <span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon reassembled datagram.</p>
+<dd><p>List of callback functions upon a finalised flow.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1131,9 +1129,9 @@ Empty when tracing unidirectionally, in which case
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.packet">
 <span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="Link to this definition">¶</a></dt>
-<dd><p>one reassembled datagram per
-direction, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the tracer was not asked for it
-(<code class="docutils literal notranslate"><span class="pre">analyse=False</span></code>, the default).</p>
+<dd><p>its reassembled datagrams, one
+per direction and acknowledgement number, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the tracer
+was not asked for it (<code class="docutils literal notranslate"><span class="pre">analyse=False</span></code>, the default).</p>
 <p>Reassembled on the first read, not when the flow is finalised, and each
 datagram’s own
 <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a> is parsed

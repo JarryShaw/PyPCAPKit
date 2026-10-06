@@ -537,8 +537,8 @@
     <span class="c1">#: aliases are spellable for a type checker as they are accepted at runtime.</span>
     <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
     <span class="c1"># NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both</span>
-    <span class="c1"># copies need updating when a new engine lands. The duplication predates the</span>
-    <span class="c1"># engines added here and is left as-is on purpose.</span>
+    <span class="c1"># copies need updating when a new engine lands. The duplication is left</span>
+    <span class="c1"># as-is on purpose.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
                       <span class="s1">'pypcapfile'</span><span class="p">]</span>
     <span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'link'</span><span class="p">,</span> <span class="s1">'internet'</span><span class="p">,</span> <span class="s1">'transport'</span><span class="p">,</span> <span class="s1">'application'</span><span class="p">,</span> <span class="s1">'none'</span><span class="p">]</span>
@@ -662,7 +662,7 @@
         <span class="c1">#: :data:`None` before the first one. Comparing it against the position</span>
         <span class="c1">#: at the next end of stream is what tells a live capture that has paused</span>
         <span class="c1">#: -- retry, more may arrive -- from one that is finished, which is the</span>
-        <span class="c1">#: termination condition ``no_eof`` was missing (:issue:`620`).</span>
+        <span class="c1">#: termination condition for ``no_eof`` (:issue:`620`).</span>
         <span class="n">_eof_mark</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
 
         <span class="c1">#: Magic number.</span>
@@ -854,16 +854,16 @@
 <span class="sd">            The overwrite guard fires only when the incumbent dumper differs</span>
 <span class="sd">            from the replacement, so re-registering the exact same object is</span>
 <span class="sd">            a silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue :issue:`739`. ``__output__``</span>
+<span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
+<span class="sd">            :issue:`739`). ``__output__``</span>
 <span class="sd">            maps each format to a ``(dumper, ext)`` pair, so the identity</span>
 <span class="sd">            check compares the incumbent *dumper* (index ``0``), not the</span>
 <span class="sd">            pair -- a re-registration that only changes ``ext`` is still</span>
 <span class="sd">            identity-equal on the dumper and stays silent, since the dumper</span>
 <span class="sd">            is what "the same object" means here, not the pair as a whole.</span>
 <span class="sd">            ``__output__`` is also a :class:`collections.defaultdict`,</span>
-<span class="sd">            unlike the other three</span>
-<span class="sd">            registrars this issue touches; :meth:`dict.get` does not invoke</span>
+<span class="sd">            unlike the engine, reassembly and flow tracing registries;</span>
+<span class="sd">            :meth:`dict.get` does not invoke</span>
 <span class="sd">            the default factory the way ``cls.__output__[format]`` would, so</span>
 <span class="sd">            it stays non-inserting here as well.</span>
 
@@ -906,8 +906,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
+<span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
+<span class="sd">            :issue:`739`).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            name: engine name</span>
@@ -933,7 +933,10 @@
         <span class="c1"># meant to extend and the one carrying the ``engine=`` registration hook. The</span>
         <span class="c1"># built-ins derive from ``EngineBase`` directly, so this door refuses them;</span>
         <span class="c1"># they go through :meth:`_register_internal_engine` instead, which checks the</span>
-        <span class="c1"># base. Checking the base here is what #513 did, and #1016 narrowed it back.</span>
+        <span class="c1"># base. The wider ``EngineBase`` is deliberately not accepted here: it is</span>
+        <span class="c1"># the internal base of the built-ins, and a class deriving only from it</span>
+        <span class="c1"># lacks the ``engine=`` hook, so the public door admits the public base</span>
+        <span class="c1"># alone (#513, #1016).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">Engine</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be an Engine subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span></div>
@@ -982,8 +985,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
+<span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
+<span class="sd">            :issue:`739`).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
@@ -1056,8 +1059,8 @@
 <span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
 <span class="sd">            the replacement, so re-registering the exact same object is a</span>
 <span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
-<span class="sd">            the identity guard GitHub issue :issue:`718` gave the code-keyed</span>
-<span class="sd">            registrars, extended here by GitHub issue :issue:`739`.</span>
+<span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
+<span class="sd">            :issue:`739`).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
@@ -1122,7 +1125,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=inconsistent-return-statements</span>
 <span class="w">        </span><span class="sd">"""Start extraction.</span>
 
-<span class="sd">        We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if</span>
+<span class="sd">        We use :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if</span>
 <span class="sd">        a certain engine is available or not. For supported engines, each engine has</span>
 <span class="sd">        different driver method:</span>
 
@@ -1140,8 +1143,13 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not</span>
-<span class="sd">                available. This is either due to dependency not installed, or supplied</span>
-<span class="sd">                engine unknown.</span>
+<span class="sd">                available: its dependency is not installed, its</span>
+<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">                rules it out, or the supplied engine is unknown.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If the selected engine cannot read the input's format --</span>
+<span class="sd">                for the default engine, if it is neither PCAP nor PCAP-NG.</span>
 
 <span class="sd">        :rtype: None</span>
 <span class="sd">        """</span>
@@ -1204,7 +1212,7 @@
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.import_test">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">import_test</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ModuleType]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Test import for extractcion engine.</span>
+<span class="w">        </span><span class="sd">"""Test import for extraction engine.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            engine: Extraction engine module name.</span>
@@ -1240,15 +1248,13 @@
 
 <span class="sd">        1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and</span>
 <span class="sd">           append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well</span>
-<span class="sd">           as test if the file exists;</span>
+<span class="sd">           as test if the file exists; for a binary IO object, use its ``name``;</span>
 <span class="sd">        2. if ``nofile`` is :data:`True`, skips following processing;</span>
-<span class="sd">        3. if ``fmt`` provided, then it presumes corresponding output file extension;</span>
-<span class="sd">        4. if ``fout`` not provided, it presumes the output file name based on the presumptive</span>
-<span class="sd">           file extension; the stem of the output file name is set as ``out``; should the file</span>
-<span class="sd">           extension is not available, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;</span>
-<span class="sd">        5. if ``fout`` provided, it presumes corresponding output format if needed; should the</span>
-<span class="sd">           presumption cannot be made, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;</span>
-<span class="sd">        6. it will also append corresponding file extension to the output file name if needed</span>
+<span class="sd">        3. look up the output file extension registered for ``fmt``; should none be</span>
+<span class="sd">           registered, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;</span>
+<span class="sd">        4. create the parent directory of ``fout``, and with ``files`` the ``fout``</span>
+<span class="sd">           directory itself;</span>
+<span class="sd">        5. it will also append corresponding file extension to the output file name if needed</span>
 <span class="sd">           and ``extension`` is :data:`True`.</span>
 
 <span class="sd">        And the method returns the generated input and output filenames as follows:</span>
@@ -1276,7 +1282,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FileNotFound: If input file does not exists.</span>
-<span class="sd">            FormatError: If output format not provided and cannot be presumpted.</span>
+<span class="sd">            FormatError: If no file extension is registered for ``fmt``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1328,16 +1334,18 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'EngineBase[_P]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read global header.</span>
 
-<span class="sd">        The method will parse the PCAP global header and save the parsed result</span>
-<span class="sd">        to its extraction context. Information such as PCAP version, data link</span>
-<span class="sd">        layer protocol type, nanosecond flag and byteorder are also saved on the</span>
-<span class="sd">        returned engine instance.</span>
+<span class="sd">        The method parses the global header with the matching built-in engine --</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.pcap.PCAP` for a PCAP file, or</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` for the first section</span>
+<span class="sd">        header block of a PCAP-NG file -- rewinds the input to its start, and</span>
+<span class="sd">        returns that engine, which holds the parsed header.</span>
 
-<span class="sd">        If TCP flow tracing is enabled, the nanosecond flag and byteorder will</span>
-<span class="sd">        be used for the output PCAP file of the traced TCP flows.</span>
+<span class="sd">        Unless output is disabled, the engine also dumps the parsed header, under</span>
+<span class="sd">        the name of ``Global Header`` for PCAP and ``Section Header 1`` for</span>
+<span class="sd">        PCAP-NG.</span>
 
-<span class="sd">        For output, the method will dump the parsed PCAP global header under</span>
-<span class="sd">        the name of ``Global Header``.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If the input is neither a PCAP nor a PCAP-NG file.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init,protected-access</span>
@@ -1456,8 +1464,8 @@
 <span class="sd">            trace_byteorder: output file byte order</span>
 <span class="sd">            trace_nanosecond: output nanosecond-resolution file flag</span>
 <span class="sd">            trace_bidirectional: whether both halves of a conversation are</span>
-<span class="sd">                traced as one flow, which is the default; :data:`False` restores</span>
-<span class="sd">                the older behaviour of a flow per direction</span>
+<span class="sd">                traced as one flow, which is the default; :data:`False` traces</span>
+<span class="sd">                a flow per direction</span>
 <span class="sd">            trace_analyse: whether each traced flow reassembles its application</span>
 <span class="sd">                layer, so that its ``packet`` can be read. Off by default,</span>
 <span class="sd">                because it buffers every traced payload -- a cost tracing does</span>
@@ -1495,8 +1503,12 @@
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:</span>
 
-<span class="sd">                * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.</span>
+<span class="sd">                * If using PCAP output for TCP flow tracing while the extraction engine is</span>
+<span class="sd">                  DPKT, Scapy, PyShark or PyPCAPFile.</span>
 <span class="sd">                * If output file format is not supported.</span>
+
+<span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
+<span class="sd">                requested while the extraction engine is PyShark.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">fin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1605,16 +1617,12 @@
             <span class="c1"># &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__&gt;`</span>
             <span class="c1"># itself substitutes ``'pcap'`` for ``None``.</span>
             <span class="c1">#</span>
-            <span class="c1"># DPKT and Scapy belong on this list and were once left off it. Their</span>
-            <span class="c1"># adapters build the frame with ``packet2dict`` exactly as the other two</span>
-            <span class="c1"># do, so both crash the same way -- but only DPKT did so visibly. The</span>
-            <span class="c1"># Scapy engine imports just :mod:`scapy.sendrecv`, which leaves the L2</span>
-            <span class="c1"># link types unregistered, so every frame dissects as ``Raw``, no TCP</span>
-            <span class="c1"># layer is ever found, and the tracer is never fed at all (#406). That</span>
-            <span class="c1"># hides this defect rather than avoiding it: register the link types --</span>
-            <span class="c1"># as importing :mod:`scapy.all` does -- and the same ``AttributeError``</span>
-            <span class="c1"># appears. So the guard is written from what the adapters produce, not</span>
-            <span class="c1"># from which engines happen to crash.</span>
+            <span class="c1"># DPKT and Scapy belong on this list too: their adapters build the frame</span>
+            <span class="c1"># with ``packet2dict`` exactly as the other two do, so both crash the</span>
+            <span class="c1"># same way. The guard is written from what the adapters produce, not</span>
+            <span class="c1"># from which engines are seen to crash, because an engine that</span>
+            <span class="c1"># dissects nothing never feeds the tracer and so hides the defect</span>
+            <span class="c1"># rather than avoiding it (#406).</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
@@ -1661,8 +1669,7 @@
             <span class="c1"># closes the stream underneath it, so it follows *ownership*: only a</span>
             <span class="c1"># handle this class opened itself is ours to release. A non-seekable</span>
             <span class="c1"># stream always came from the caller, so the polarity here is the</span>
-            <span class="c1"># same one ``_cleanup`` uses, and it was inverted in both places --</span>
-            <span class="c1"># see #610.</span>
+            <span class="c1"># same one ``_cleanup`` uses (#610).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">,</span>
                                          <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
 
@@ -1786,9 +1793,9 @@
 <span class="sd">        with ``auto=False`` the caller drives :meth:`__next__` itself, and one that</span>
 <span class="sd">        stops before end of file never reaches :meth:`_cleanup` at all, so the</span>
 <span class="sd">        ownership rule there never gets to run. The handle then survives until the</span>
-<span class="sd">        interpreter collects it, and CPython announces that with the</span>
-<span class="sd">        ``ResourceWarning`` :issue:`606` was tripping over -- from an unrelated test, in an</span>
-<span class="sd">        unrelated file, which is what made that flake so hard to place.</span>
+<span class="sd">        interpreter collects it, and CPython announces that with a</span>
+<span class="sd">        ``ResourceWarning`` raised wherever collection happens to run, which can be</span>
+<span class="sd">        far from the code that abandoned the handle (:issue:`606`).</span>
 
 <span class="sd">        This is a backstop and not the recommended route: collection is not</span>
 <span class="sd">        deterministic, and :class:`Extractor` takes part in a reference cycle</span>
@@ -1865,13 +1872,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_note_eof_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Record this end of stream, and say whether the input advanced to reach it.</span>
 
-<span class="sd">        This is the termination condition ``no_eof`` was missing. The flag means</span>
+<span class="sd">        This is the termination condition for ``no_eof``. The flag means</span>
 <span class="sd">        "end of stream is not necessarily the end of the capture" -- which is true</span>
 <span class="sd">        of a live capture, and is why :mod:`pcapkit.__main__` sets it for</span>
-<span class="sd">        ``fin='-'`` -- so the extraction retries rather than stopping. What it had</span>
-<span class="sd">        no way to decide was when the stream is *genuinely* finished, and for an</span>
-<span class="sd">        exhausted one every retry raises end of stream again immediately, which is</span>
-<span class="sd">        the spin :issue:`620` reported.</span>
+<span class="sd">        ``fin='-'`` -- so the extraction retries rather than stopping. Without a</span>
+<span class="sd">        way to decide when the stream is *genuinely* finished, an exhausted one</span>
+<span class="sd">        raises end of stream again on every retry, which is the spin</span>
+<span class="sd">        :issue:`620` reported.</span>
 
 <span class="sd">        The signal is the input's own position. End of stream is raised by</span>
 <span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in</span>
@@ -1894,12 +1901,12 @@
 <span class="sd">        immediately consecutive probes, because such a file does not block -- it</span>
 <span class="sd">        reports end of stream at once. So an extraction over a file that is still</span>
 <span class="sd">        being appended to ends at the data present when it got there, rather than</span>
-<span class="sd">        following the writer. That is a deliberate narrowing of what ``no_eof``</span>
-<span class="sd">        used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last</span>
-<span class="sd">        record 0.6s in yielded all six frames, and here it yields five. The</span>
-<span class="sd">        previous behaviour was unbounded by construction -- it is the defect :issue:`620`</span>
-<span class="sd">        reports -- so *some* stopping rule had to be chosen, and a timed grace</span>
-<span class="sd">        period would only make the cut-off intermittent rather than absent.</span>
+<span class="sd">        following the writer. That is a deliberate narrowing, and it is measured:</span>
+<span class="sd">        a file gaining its last record 0.6s in yields five of its six frames here,</span>
+<span class="sd">        where the unbounded retry of ``6c3d1b0d9`` yielded all six. Unbounded</span>
+<span class="sd">        retrying is the defect :issue:`620` reports, so *some* stopping rule had</span>
+<span class="sd">        to be chosen, and a timed grace period would only make the cut-off</span>
+<span class="sd">        intermittent rather than absent.</span>
 <span class="sd">        Following a growing file wants a deliberate policy of its own; see the</span>
 <span class="sd">        note in :file:`docs/source/changelog/1.5.0.rst`.</span>
 
@@ -1944,9 +1951,10 @@
 <span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish&gt;`.</span>
 <span class="sd">        That is the point at which a traced flow nothing has superseded can be</span>
 <span class="sd">        said to be over, so it is where such a flow is finalised and its callbacks</span>
-<span class="sd">        run. This method can be reached twice for one extraction -- the EOF path in</span>
-<span class="sd">        :meth:`_read_frame` and again from :meth:`run` -- so ``finish`` is required</span>
-<span class="sd">        to be idempotent rather than guarded here.</span>
+<span class="sd">        run. This method can run more than once for one extraction -- each call to</span>
+<span class="sd">        :meth:`__next__` or :meth:`__call__` that reaches the end of a</span>
+<span class="sd">        caller-supplied stream runs it again -- so ``finish`` is required to be</span>
+<span class="sd">        idempotent rather than guarded here.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init</span>

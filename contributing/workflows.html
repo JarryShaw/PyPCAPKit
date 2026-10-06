@@ -751,8 +751,7 @@ existed then – <code class="docutils literal notranslate"><span class="pre">Py
 <h2>The Skip Cascade (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
 <p>The two relationships above compose into a failure mode worth seeing on its
 own graph. Create Release’s first job, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> – ahead of the
-<code class="docutils literal notranslate"><span class="pre">uses:</span></code> call above since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a> – carries:</p>
+<code class="docutils literal notranslate"><span class="pre">uses:</span></code> call above – carries:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}</span>
 </pre></div>
 </div>

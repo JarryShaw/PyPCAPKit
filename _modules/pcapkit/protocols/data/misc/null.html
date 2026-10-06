@@ -483,8 +483,9 @@
 <span class="w">    </span><span class="sd">"""No-payload packet is an empty packet."""</span>
 
     <span class="c1"># NOTE: We add this method for both type annotation and to mark that this</span>
-    <span class="c1"># class accepts no arguments at runtime, since :class:`Info` explicitly</span>
-    <span class="c1"># skipped those whose :attr:`__annotations__` is empty :obj:`dict`.</span>
+    <span class="c1"># class accepts no arguments at runtime, since for a class with no</span>
+    <span class="c1"># annotations :class:`Info` generates an ``__init__`` taking any mapping</span>
+    <span class="c1"># and keywords.</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
         <span class="k">pass</span></div>
 

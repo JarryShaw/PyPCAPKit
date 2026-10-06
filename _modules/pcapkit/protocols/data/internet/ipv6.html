@@ -496,7 +496,7 @@
 <span class="w">    </span><span class="sd">"""Data model for Internet Protocol version 6.</span>
 
 <span class="sd">    Important:</span>
-<span class="sd">        Due to the preserved keyword conflict, please use :meth:`from_dict`</span>
+<span class="sd">        Due to the reserved keyword conflict, please use :meth:`from_dict`</span>
 <span class="sd">        to create an instance of this data model.</span>
 
 <span class="sd">    """</span>
@@ -531,7 +531,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6'</span><span class="p">:</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: We cannot define ``class`` due to preserved keyword conflict.</span>
+        <span class="c1"># NOTE: We cannot define ``class`` due to reserved keyword conflict.</span>
         <span class="c1"># Thus, we directly inject the information into the annotations.</span>
         <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'class'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span>
 

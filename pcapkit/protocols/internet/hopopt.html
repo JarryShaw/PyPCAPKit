@@ -752,7 +752,8 @@ attribute:</p>
 <dd class="field-even"><p>Extracted HOPOPT options</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the threshold is <strong>NOT</strong> matching.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the parsed options do not total exactly <code class="docutils literal notranslate"><span class="pre">length</span></code>
+    octets.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -861,7 +862,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.tun.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -890,7 +891,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.tun.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1010,7 +1011,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.pdm.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1095,7 +1096,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.rpl.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1219,7 +1220,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.jumbo.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1258,7 +1259,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.jumbo.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1291,7 +1292,7 @@ hand.</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hopopt.ip_dff.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1697,10 +1698,10 @@ option keeps its size instead of collapsing to a single <code class="docutils li
 <span class="sig-name descname"><span class="pre">__option__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.14)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><span class="pre">Option</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option" title="pcapkit.protocols.schema.internet.hopopt.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option" title="pcapkit.protocols.data.internet.hopopt.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option" title="pcapkit.protocols.data.internet.hopopt.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option" title="pcapkit.protocols.data.internet.hopopt.Option"><span class="pre">Option</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option" title="pcapkit.protocols.schema.internet.hopopt.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.hopopt.HOPOPT.__option__" title="Link to this definition">¶</a></dt>
 <dd><p>Option
 code to method mapping, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options" title="pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_hopopt_options()</span></code></a> and/or
-<a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options" title="pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hopopt_options()</span></code></a>. Method names are expected to be referred
-to the class by <code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>, and
-if such name not found, the value should then be a method that can parse
-the option by itself.</p>
+<a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options" title="pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hopopt_options()</span></code></a>. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> value names the methods
+<code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>, falling back to
+<code class="docutils literal notranslate"><span class="pre">_read_opt_none</span></code> / <code class="docutils literal notranslate"><span class="pre">_make_opt_none</span></code> when they do not exist; any other
+value is a <code class="docutils literal notranslate"><span class="pre">(parser,</span> <span class="pre">constructor)</span></code> pair of callables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DefaultDict[Enum_Option, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[OptionParser, OptionConstructor]]</p>

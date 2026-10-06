@@ -1661,10 +1661,10 @@
     <span class="c1">##########################################################################</span>
 
     <span class="c1">#: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:</span>
-    <span class="c1">#: Message type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_msg_${name}`` and/or ``_make_msg_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the message type by itself.</span>
+    <span class="c1">#: Message type to method mapping. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_msg_${name}`` and ``_make_msg_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_msg_unknown`` / ``_make_msg_unknown`` when they do not exist; any</span>
+    <span class="c1">#: other value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__message__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1696,10 +1696,10 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]</span>
 
     <span class="c1">#: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:</span>
-    <span class="c1">#: Option type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the option by itself.</span>
+    <span class="c1">#: Option type to method mapping. A :obj:`str` value names the methods</span>
+    <span class="c1">#: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other</span>
+    <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1778,10 +1778,10 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]</span>
 
     <span class="c1">#: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:</span>
-    <span class="c1">#: CGA extension type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_ext_${name}`` and/or ``_make_ext_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the CGA extension by itself.</span>
+    <span class="c1">#: CGA extension type to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: methods ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to</span>
+    <span class="c1">#: ``_read_ext_none`` / ``_make_ext_none`` when they do not exist; any other</span>
+    <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__extension__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -9036,7 +9036,9 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            timestamp: NTP timestamp, c.f., :rfc:`1305`.</span>
-<span class="sd">            interval: Timestamp interval (since UNIX-epoch).</span>
+<span class="sd">            interval: Moment to encode when neither ``option`` nor</span>
+<span class="sd">                ``timestamp`` is given (``option`` supplies its own</span>
+<span class="sd">                ``ntp_timestamp``); defaults to the current time.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9090,7 +9092,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_CGAParametersOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CGAParametersOption'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make MH CGA paramters option.</span>
+<span class="w">        </span><span class="sd">"""Make MH CGA parameters option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
@@ -10356,12 +10358,12 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The data model parameter is named ``option`` rather than ``data`` to</span>
 <span class="sd">            match :meth:`_make_opt_fid` and the rest of this module -- and because</span>
-<span class="sd">            naming it ``data`` made it **shadow a field**. The traffic selector and</span>
-<span class="sd">            unassigned sub-options both carry a field of their own called ``data``,</span>
-<span class="sd">            so a caller's ``data=`` bound to the model parameter instead of landing</span>
-<span class="sd">            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below could</span>
-<span class="sd">            never see it: the payload was silently dropped and the length written as</span>
-<span class="sd">            though it were empty. No exception, just a lost field.</span>
+<span class="sd">            ``data`` would **shadow a field**. The traffic selector and unassigned</span>
+<span class="sd">            sub-options both carry a field of their own called ``data``, so a</span>
+<span class="sd">            caller's ``data=`` would bind to the model parameter instead of landing</span>
+<span class="sd">            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below would</span>
+<span class="sd">            never see it: the payload would be silently dropped and the length</span>
+<span class="sd">            written as though it were empty, with no exception.</span>
 
 <span class="sd">            Dispatch is on ``code`` rather than on ``isinstance`` of the schema or</span>
 <span class="sd">            data class, for the reason given in :meth:`_read_fid_suboptions`.</span>
@@ -10741,7 +10743,7 @@
 
 <span class="sd">            The data model parameter is named ``option`` rather than ``data`` so</span>
 <span class="sd">            that it cannot shadow a sub-option field of that name -- see</span>
-<span class="sd">            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``</span>
+<span class="sd">            :meth:`_make_fid_suboption`. Dispatch is on ``code``</span>
 <span class="sd">            rather than on ``isinstance``, for the reason given in</span>
 <span class="sd">            :meth:`_read_fid_suboptions`.</span>
 
@@ -11421,7 +11423,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The data model parameter is named ``option`` rather than ``data`` so</span>
 <span class="sd">            that it cannot shadow a sub-option field of that name -- see</span>
-<span class="sd">            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``</span>
+<span class="sd">            :meth:`_make_fid_suboption`. Dispatch is on ``code``</span>
 <span class="sd">            rather than on ``isinstance``, for the reason given in</span>
 <span class="sd">            :meth:`_read_fid_suboptions`.</span>
 

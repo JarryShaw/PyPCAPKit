@@ -598,7 +598,7 @@ from given information. The class hierarchy of <a class="reference internal" hre
     end
 
     subgraph application [Application Layer]
-        Application --&gt; HTTP &amp; FTP &amp; OSPF &amp; RARP
+        Application --&gt; HTTP &amp; FTP &amp; NGAP &amp; OSPF &amp; RARP
 
         subgraph http [HTTP Family]
             HTTP --&gt; h1[&quot;HTTP/1.*&quot;] &amp; h2[&quot;HTTP/2&quot;]
@@ -643,14 +643,11 @@ from given information. The class hierarchy of <a class="reference internal" hre
     click Ethernet &quot;/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet&quot;
     click L2TP &quot;/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP&quot;
     click L2TPv2 &quot;/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2&quot;
-    click OSPF &quot;/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF&quot;
     click VLAN &quot;/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN&quot;
     click C_Tag &quot;/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag&quot;
     click S_Tag &quot;/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag&quot;
     click ARP &quot;/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP&quot;
     click InARP &quot;/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP&quot;
-    click RARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP&quot;
-    click DRARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP&quot;
 
     click Internet &quot;/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet&quot;
     click AH &quot;/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH&quot;
@@ -678,6 +675,10 @@ from given information. The class hierarchy of <a class="reference internal" hre
     click h2 &quot;/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP&quot;
     click FTP &quot;/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP&quot;
     click FTP_DATA &quot;/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA&quot;
+    click NGAP &quot;/pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP&quot;
+    click OSPF &quot;/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF&quot;
+    click RARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP&quot;
+    click DRARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP&quot;
 
     click Raw &quot;/pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw&quot;
     click NoPayload &quot;/pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload&quot;
@@ -859,8 +860,9 @@ the payload field.</p>
 <p>When this schema is nested – unpacked through a
 <a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> rather than
 directly – <code class="docutils literal notranslate"><span class="pre">packet</span></code> is not the enclosing schema’s own data, but
-a context built by <code class="xref py py-func docutils literal notranslate">
-<span class="pre">nested_packet_context()</span></code>: a name this schema does not itself
+a context built by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nested_packet_context()</span></code>: a name
+this schema does not itself
 declare falls through to the enclosing schema, and the enclosing
 schema is also reachable unconditionally under a <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>
 key. See that function for the exact lookup, write and iteration
@@ -1064,12 +1066,12 @@ had been registered.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.EnumSchema.register">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#EnumSchema.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="Link to this definition">¶</a></dt>
-<dd><p>Register enumetaion to <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping.</p>
+<dd><p>Register enumeration to <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_ET</span></code>, bound= Enum)</span>) – Enumetaion code.</p></li>
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span>) – Enumetaion schema.</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_ET</span></code>, bound= Enum)</span>) – Enumeration code.</p></li>
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span>) – Enumeration schema.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
@@ -1261,7 +1263,7 @@ from the subclass attributes.</p>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.schema.SchemaMeta" title="pcapkit.protocols.schema.schema.SchemaMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._ET" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._ET"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ET</span></code></a>]</p>
 <p>Meta class to add dynamic support for <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>.</p>
 <p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.protocols.schema.schema.SchemaMeta" title="pcapkit.protocols.schema.schema.SchemaMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaMeta</span></code></a> class. It can be useful to reduce runtime generation
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a> class. It can be useful to reduce runtime generation
 cost as well as caching already generated attributes.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.registry" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> is added to subclasses as an <em>immutable</em>
@@ -1289,7 +1291,7 @@ report an overwrite that never happened.</p>
 <p>The fallback itself is deliberate – it is how an unknown option, chunk or
 block falls back to its <code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this
 subclass keeps returning it and just stops recording it.
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_registry</span></code></a>
 does the same for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema._EnumRegistry.__missing__">

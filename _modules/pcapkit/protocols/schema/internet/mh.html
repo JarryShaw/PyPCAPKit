@@ -1199,7 +1199,7 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># for Pad1 option, length is always 1</span>
+        <span class="c1"># for Pad1 option, length is always 0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -2770,7 +2770,8 @@
 <span class="sd">        :rfc:`3376#section-4.2` IGMP structures, which belong to those protocols</span>
 <span class="sd">        rather than to the Mobility Header, so they are carried opaquely here.</span>
 <span class="sd">        :attr:`protocol` says which of the two they are in -- ``143`` for MLDv2</span>
-<span class="sd">        and ``131`` for MLDv1.</span>
+<span class="sd">        and ``131`` for MLDv1 [:rfc:`7028#section-5.1.2`], or ``0x12``, ``0x16``</span>
+<span class="sd">        and ``0x22`` for IGMPv1 to IGMPv3 [:rfc:`7028#section-8`].</span>
 
 <span class="sd">    """</span>
 
@@ -2827,7 +2828,7 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: IGMP message type identifying the context format: ``0x12`` for IGMPv1,</span>
+    <span class="c1">#: IGMP message type identifying the context format -- ``0x12`` for IGMPv1,</span>
     <span class="c1">#: ``0x16`` for IGMPv2 and ``0x22`` for IGMPv3.</span>
     <span class="n">igmp_type</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Multicast membership context.</span>
@@ -2854,7 +2855,7 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: MLD message type identifying the context format: ``143`` for MLDv2 and</span>
+    <span class="c1">#: MLD message type identifying the context format -- ``143`` for MLDv2 and</span>
     <span class="c1">#: ``131`` for MLDv1.</span>
     <span class="n">mld_type</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Multicast membership context.</span>
@@ -3086,7 +3087,7 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Option code: ``1`` for IGMPv3, ``2`` for MLDv2, ``3`` for IGMPv3 in</span>
+    <span class="c1">#: Option code -- ``1`` for IGMPv3, ``2`` for MLDv2, ``3`` for IGMPv3 in</span>
     <span class="c1">#: IGMPv2 compatibility mode and ``4`` for MLDv2 in MLDv1 compatibility mode.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Reserved.</span>
@@ -3115,7 +3116,7 @@
 
     <span class="c1">#: Option code; always ``0``.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Status: ``1`` report payload type unsupported, ``2`` requested group</span>
+    <span class="c1">#: Status -- ``1`` report payload type unsupported, ``2`` requested group</span>
     <span class="c1">#: service unsupported, ``3`` requested group service administratively</span>
     <span class="c1">#: prohibited.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>

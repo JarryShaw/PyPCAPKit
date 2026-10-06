@@ -795,7 +795,7 @@
 <span class="sd">        ``struct.error: bad char in struct format``. Nothing here meets that only</span>
 <span class="sd">        because :class:`Schema</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;`'s ``pack`` and ``unpack``</span>
-<span class="sd">        special-case ``ConditionalField`` by name and skip the wrapped field</span>
+<span class="sd">        special-case ``ConditionalField`` by type and skip the wrapped field</span>
 <span class="sd">        outright before any ``length`` is read. A ``SwitchField`` needs no such</span>
 <span class="sd">        special case: its selector always hands back an already-concrete field,</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its</span>
