@@ -161,6 +161,7 @@ behaviour rather than expression semantics:
 
 from __future__ import annotations
 
+import itertools
 import json
 import pathlib
 import re
@@ -298,8 +299,9 @@ def declared_environment(block: 'str') -> 'Optional[str]':
 def declared_needs(block: 'str') -> 'list[str]':
     """The job names in this job's ``needs: [ ... ]`` list, empty if it has none.
 
-    ``unit-tests`` has no ``needs:`` at all and correctly returns ``[]`` rather
-    than raising, since it is the root of the graph this module walks.
+    ``version_check`` has no ``needs:`` at all and correctly returns ``[]``
+    rather than raising, since it is the root of the graph this module walks --
+    since #1052, when it moved ahead of ``unit-tests``.
 
     """
     for line in block.splitlines():
@@ -912,8 +914,17 @@ PUBLISHING_PREDECESSORS = {
     'conda': ('github', 'tag'),
 }
 
+#: The direct dependencies every downstream gate holds to ``== 'success'``
+#: alone, with no ``|| 'skipped'``: ``version_check`` because it produces the
+#: evidence they read, and -- #1052 -- ``unit-tests`` because it is the
+#: release test gate, which since that issue skips whenever nothing is
+#: publishable and so no longer gates by sitting first in the chain. A
+#: skipped gate admitted here would publish untested.
+STRICT_PREDECESSORS = ('version_check', 'unit-tests')
+
 
 def release_context(version_check: 'str' = 'success',
+                    unit_tests: 'str' = 'success',
                     github: 'str' = 'success',
                     tag: 'str' = 'success',
                     ref_name: 'str' = 'main',
@@ -965,7 +976,7 @@ def release_context(version_check: 'str' = 'success',
 
     return {
         'needs': {
-            'unit-tests': {'result': 'success'},
+            'unit-tests': {'result': unit_tests},
             'version_check': {'result': version_check, 'outputs': outputs},
             'github': {'result': github},
             'tag': {'result': tag},
@@ -995,6 +1006,10 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
     * **The same four, with its outputs gone**, which is what a *skipped*
       ``version_check`` actually leaves. Weaker as a guard, and kept because
       it is the shape the retry case takes.
+    * **``unit-tests`` over all four results**, #1052's axis. Only
+      ``success`` runs: since that issue the release test gate skips whenever
+      nothing is publishable, so a ``skipped`` gate is a normal result, and a
+      publisher that admitted one would publish untested.
     * **Each publishing predecessor over all four results.** ``success`` and a
       legitimate ``skipped`` both run -- that is #888's escape hatch, and the
       ``skipped`` row is what stops it being quietly removed again -- while
@@ -1045,6 +1060,11 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
             rows.append((f'version_check={result}, its outputs never published',
                          release_context(version_check=result, outputs_present=False),
                          False))
+
+    for result in JOB_RESULTS:
+        rows.append((f'unit-tests={result}',
+                     release_context(unit_tests=result),
+                     result == 'success'))
 
     for predecessor in PUBLISHING_PREDECESSORS[job]:
         for result in JOB_RESULTS:
@@ -1130,11 +1150,12 @@ def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
             violations.append(f"checks {predecessor} with != 'failure', which admits cancelled")
 
     compact = re.sub(r'\s+', '', condition)
-    if "&&needs.version_check.result=='success'&&" not in compact:
-        violations.append('does not require version_check to have succeeded as a '
-                          'top-level && conjunct')
-    if compact.count('version_check.result') != 1:
-        violations.append('refers to version_check.result more than once')
+    for strict in STRICT_PREDECESSORS:
+        if f"&&needs.{strict}.result=='success'&&" not in compact:
+            violations.append(f'does not require {strict} to have succeeded as a '
+                              'top-level && conjunct')
+        if compact.count(f'.{strict}.result') != 1:
+            violations.append(f'refers to {strict}.result more than once')
 
     return violations
 
@@ -1268,6 +1289,152 @@ class TestGatedJobsDependOnGithub(WorkflowMixin, unittest.TestCase):
                     f'its own required reviewer (#887) would let it run before '
                     f'the one approval left to gate it',
                 )
+
+
+#: The disjunct of the release test gate's ``if:`` that is not about evidence.
+#: Named so that :meth:`TestNothingPublishesWithoutTheGate.test_dropping_any_gate_clause_is_caught`
+#: can drop it, alongside each evidence clause, from a scratch copy.
+_GATE_REF_CLAUSE = "startsWith(github.ref_name, 'v') ||"
+
+
+def gate_coverage_violations(gate: 'str', jobs: 'dict[str, str]') -> 'list[str]':
+    """Every evidence state in which a publisher would run and the gate would not.
+
+    Walks both refs, every ``'true'``/``'false'``/``null`` assignment of the four
+    evidence outputs, and ``github``/``tag`` at ``success`` and at ``skipped`` --
+    648 contexts -- with ``version_check`` and ``unit-tests`` themselves at
+    ``success``, since the question is what the gate's own ``if:`` decides.
+    ``github``'s condition is evaluated as declared; its implicit ``success()``
+    only ever makes it run *less*, so this over-approximates when it runs,
+    which is the safe direction for a coverage check.
+
+    """
+    names = tuple(GATE_EVIDENCE.values())
+    gate_tree = parse_condition(gate)
+    publishers = {name: parse_condition(declared_if(jobs[name])) for name in GATE_EVIDENCE}
+    violations = []  # type: list[str]
+    for ref_name in ('main', 'v1.5.0'):
+        for states in itertools.product(('true', 'false', 'null'), repeat=len(names)):
+            for github, tag in itertools.product(('success', 'skipped'), repeat=2):
+                context = release_context(
+                    ref_name=ref_name, github=github, tag=tag,
+                    complete=tuple(n for n, v in zip(names, states) if v == 'true'),
+                    unknown=tuple(n for n, v in zip(names, states) if v == 'null'),
+                )
+                running = sorted(name for name, tree in publishers.items()
+                                 if _truthy(_evaluate(tree, context)))
+                if running and not _truthy(_evaluate(gate_tree, context)):
+                    violations.append(
+                        f'ref_name={ref_name}, github={github}, tag={tag}, '
+                        f'{dict(zip(names, states))}: {running} would run, the gate would not'
+                    )
+    return violations
+
+
+class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
+    """#1052: the release test gate now skips when nothing is publishable, and
+    no release may skip it.
+
+    Until #1052 ``unit-tests`` was the root of the graph, so every job reached
+    it through ``version_check``'s implicit ``success()`` and no publisher had
+    to name it. It now runs *after* ``version_check`` and only when a release
+    will happen, so a ``skipped`` gate is routine and position no longer gates
+    anything. Two independent halves keep "nothing publishes without a passing
+    gate" true, and each is asserted here on its own, so that losing either is
+    a failure even while the other still holds:
+
+    * **Every publisher requires the gate's success.** Directly, by name --
+      either an explicit ``needs.unit-tests.result == 'success'`` conjunct, or
+      for ``github``, whose ``if:`` keeps the implicit ``success()``, a direct
+      ``needs:`` on it. This is the half that makes a drifted predicate fail
+      *closed*.
+    * **The gate runs whenever any publisher would.** Checked exhaustively over
+      the evidence states rather than by row, so a release can never be
+      blocked by a gate that wrongly skipped.
+
+    """
+
+    def test_every_gated_job_depends_on_the_gate(self) -> None:
+        for name, block in sorted(self.jobs.items()):
+            if declared_environment(block) is None:
+                continue
+            with self.subTest(job=name):
+                self.assertIn('unit-tests', needs_closure(self.jobs, name))
+
+    def test_every_gated_job_requires_the_gate_to_have_succeeded(self) -> None:
+        """Transitive ``needs:`` is not enough on its own.
+
+        ``tag``, ``pypi`` and ``conda`` accept a ``skipped`` ``github``, so a
+        gate reached only through ``github`` would be waved through exactly
+        when it skipped. A job that opts out of the implicit ``success()`` must
+        name the gate in its condition; a job that keeps it must list the gate
+        in its own ``needs:``, which is what that implicit check reads.
+
+        """
+        for name, block in sorted(self.jobs.items()):
+            if declared_environment(block) is None:
+                continue
+            with self.subTest(job=name):
+                condition = declared_if(block)
+                compact = re.sub(r'\s+', '', condition)
+                if 'cancelled()' in condition or 'always()' in condition:
+                    self.assertIn(
+                        "&&needs.unit-tests.result=='success'&&", compact,
+                        f'`{name}` opts out of the implicit `success()` but does '
+                        f'not require the release test gate to have succeeded',
+                    )
+                else:
+                    self.assertIn(
+                        'unit-tests', declared_needs(block),
+                        f'`{name}` relies on the implicit `success()`, which reads '
+                        f'only its direct `needs:`, and the gate is not among them',
+                    )
+
+    def test_a_gate_that_did_not_pass_stops_every_downstream_publisher(self) -> None:
+        """On the one ref and evidence state where they would otherwise run."""
+        for job in ('tag', 'pypi', 'conda'):
+            condition = declared_if(self.jobs[job])
+            self.assertTrue(evaluate_condition(condition, release_context(ref_name='v1.5.0')))
+            for result in ('failure', 'cancelled', 'skipped'):
+                with self.subTest(job=job, gate=result):
+                    self.assertFalse(evaluate_condition(
+                        condition, release_context(ref_name='v1.5.0', unit_tests=result)))
+
+    def test_the_gate_runs_whenever_any_publisher_would(self) -> None:
+        violations = gate_coverage_violations(declared_if(self.jobs['unit-tests']), self.jobs)
+        self.assertEqual(
+            violations, [],
+            f'the release test gate skips in {len(violations)} state(s) where a '
+            f'publisher would run -- which then skips behind it, losing the '
+            f'release: ' + '; '.join(violations[:5]),
+        )
+
+    def test_the_gate_skips_when_everything_is_already_published(self) -> None:
+        """The point of #1052, and only safe because no publisher runs there."""
+        context = release_context(complete=tuple(GATE_EVIDENCE.values()))
+        self.assertFalse(evaluate_condition(declared_if(self.jobs['unit-tests']), context))
+        for job in GATE_EVIDENCE:
+            with self.subTest(job=job):
+                self.assertFalse(evaluate_condition(declared_if(self.jobs[job]), context))
+
+    def test_dropping_any_gate_clause_is_caught(self) -> None:
+        """The coverage check above has to be able to fail.
+
+        Each of the gate's five disjuncts is removed in turn from a scratch
+        copy; every removal must leave some state in which a publisher runs
+        and the gate does not.
+
+        """
+        gate = declared_if(self.jobs['unit-tests'])
+        clauses = [_GATE_REF_CLAUSE] + [
+            f"needs.version_check.outputs.{name} != 'true' ||" for name in
+            list(GATE_EVIDENCE.values())[:-1]
+        ] + [f"|| needs.version_check.outputs.{list(GATE_EVIDENCE.values())[-1]} != 'true'"]
+        for clause in clauses:
+            with self.subTest(dropped=clause):
+                self.assertIn(clause, gate)
+                mutant = gate.replace(clause, '')
+                self.assertTrue(gate_coverage_violations(mutant, self.jobs))
 
 
 class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
@@ -1432,6 +1599,30 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
                     f'second reference can only weaken it',
                 )
 
+    def test_the_release_test_gate_must_strictly_succeed(self) -> None:
+        """#1052: the same bar, for ``unit-tests``.
+
+        Before #1052 the gate sat first in the chain and ``version_check``'s
+        implicit ``success()`` carried it to every publisher, so no publisher
+        named it. Now ``version_check`` runs first and the gate skips whenever
+        nothing is publishable, so a ``skipped`` gate is routine -- and these
+        three open with ``!cancelled()``, which opts them out of the implicit
+        check that would otherwise have stopped them. Hence an explicit
+        top-level ``needs.unit-tests.result == 'success'`` conjunct, referenced
+        exactly once, for the reasons the test above gives.
+
+        """
+        for name in ('tag', 'pypi', 'conda'):
+            with self.subTest(job=name):
+                compact = re.sub(r'\s+', '', declared_if(self.jobs[name]))
+                self.assertIn(
+                    "&&needs.unit-tests.result=='success'&&", compact,
+                    f'`{name}` does not require the release test gate to have '
+                    f'succeeded as a top-level `&&` conjunct, so a skipped or '
+                    f'cancelled gate would let it publish untested',
+                )
+                self.assertEqual(compact.count('unit-tests.result'), 1)
+
     def test_conda_checks_its_own_leg_before_uploading(self) -> None:
         """The correctness half for ``conda``: ``anaconda/actions/upload-package``
         has no ``skip-existing``, so the job-level evidence above is only a cost
@@ -1541,12 +1732,12 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
          release_context(outputs_present=False), False),
     ]
 
-    #: ``(row name, context, whether the release test gate must run)``. Its
-    #: ``if:`` is the workflow's outermost gate: a ``workflow_run`` trigger
-    #: only proceeds when the Vendor Update run that triggered it concluded
-    #: ``success``, and every other trigger proceeds unconditionally. The only
-    #: ``!=`` in the file, and otherwise unevaluated.
-    UNIT_TESTS_ROWS = [
+    #: ``(row name, context, whether version_check must run)``. Its ``if:``
+    #: is the workflow's outermost gate -- held by ``unit-tests`` until #1052
+    #: moved ``version_check`` ahead of it: a ``workflow_run`` trigger only
+    #: proceeds when the Vendor Update run that triggered it concluded
+    #: ``success``, and every other trigger proceeds unconditionally.
+    VERSION_CHECK_ROWS = [
         ('a v* tag push', release_context(event_name='push'), True),
         ('Vendor Update succeeded', release_context(), True),
         ('Vendor Update found nothing to update',
@@ -1555,6 +1746,30 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
          release_context(workflow_run_conclusion='failure'), False),
         ('Vendor Update was cancelled',
          release_context(workflow_run_conclusion='cancelled'), False),
+    ]
+
+    #: ``(row name, context, whether the release test gate must run)``. #1052:
+    #: the gate runs only when a release will -- on a ``v*`` ref, or when any
+    #: target's own evidence is not ``'true'``. The ``null`` row is the
+    #: deliberate ``!= 'true'``: evidence nobody set runs the gate.
+    #: :class:`TestNothingPublishesWithoutTheGate` checks the stronger claim
+    #: exhaustively; these rows are the readable spot checks.
+    UNIT_TESTS_ROWS = [
+        ('a v* tag push, everything already published',
+         release_context(ref_name='v1.5.0', complete=tuple(GATE_EVIDENCE.values())), True),
+        ('nothing published yet', release_context(), True),
+        ('everything already published -- the 2026-10-05 case',
+         release_context(complete=tuple(GATE_EVIDENCE.values())), False),
+        ('only PyPI incomplete',
+         release_context(complete=('PCAPKIT_TAG_EXISTS', 'PCAPKIT_CONDA_TAG_EXISTS',
+                                   'PCAPKIT_CONDA_COMPLETE')), True),
+        ('only the PyPI evidence unknown',
+         release_context(complete=tuple(GATE_EVIDENCE.values()),
+                         unknown=('PCAPKIT_PYPI_COMPLETE',)), True),
+        ('version_check failed',
+         release_context(version_check='failure'), False),
+        ('version_check skipped, no outputs',
+         release_context(version_check='skipped', outputs_present=False), False),
     ]
 
     def _assert_rows(self, job: 'str',
@@ -1579,7 +1794,7 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         runs, which is #888 rather than a fix for it.
 
         """
-        for job, expected in (('tag', 18), ('pypi', 18), ('conda', 22)):
+        for job, expected in (('tag', 22), ('pypi', 22), ('conda', 26)):
             with self.subTest(job=job):
                 rows = gate_rows(job)
                 self.assertEqual(
@@ -1597,16 +1812,17 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         :data:`PUBLISHING_PREDECESSORS` is hand-written, so a ``needs:`` added
         to one of these jobs would otherwise be absent from every row --
         held at a running default and never varied, which is a gate the table
-        silently stops checking. ``version_check`` is added back here because
-        it is deliberately *not* in that mapping: it is held to the stricter
-        ``== 'success'`` alone, with no ``|| 'skipped'``.
+        silently stops checking. :data:`STRICT_PREDECESSORS` --
+        ``version_check`` and, since #1052, ``unit-tests`` -- are added back
+        here because they are deliberately *not* in that mapping: they are held
+        to the stricter ``== 'success'`` alone, with no ``|| 'skipped'``.
 
         """
         for job in ('tag', 'pypi', 'conda'):
             with self.subTest(job=job):
                 self.assertEqual(
                     set(declared_needs(self.jobs[job])),
-                    set(PUBLISHING_PREDECESSORS[job]) | {'version_check'},
+                    set(PUBLISHING_PREDECESSORS[job]) | set(STRICT_PREDECESSORS),
                     f'`{job}`\'s `needs:` and the scenario table disagree about its '
                     f'predecessors, so at least one of them is not being varied',
                 )
@@ -1633,8 +1849,12 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         """``github``'s gate, whose evidence is the ``v*`` tag it creates itself."""
         self._assert_rows('github', self.GITHUB_ROWS)
 
-    def test_the_release_test_gate_requires_a_successful_vendor_update(self) -> None:
-        """``unit-tests``'s gate, the outermost one in the file."""
+    def test_version_check_requires_a_successful_vendor_update(self) -> None:
+        """``version_check``'s gate, the outermost one in the file."""
+        self._assert_rows('version_check', self.VERSION_CHECK_ROWS)
+
+    def test_the_release_test_gate_runs_only_when_something_is_publishable(self) -> None:
+        """``unit-tests``'s gate, #1052."""
         self._assert_rows('unit-tests', self.UNIT_TESTS_ROWS)
 
     def test_release_status_runs_unless_the_run_was_cancelled(self) -> None:
@@ -1711,10 +1931,12 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: The first eight are the mutations #962 names; the next five are this
     #: module's own, covering the clauses the issue only points at -- the
     #: publishing predecessors' equality pair, the ``startsWith``
-    #: short-circuit, and reading somebody else's evidence. The last is #967's,
-    #: and is the only row here that the table as #962 left it did not catch at
-    #: all: it is rejected by exactly one scenario -- the ``null`` evidence row
-    #: :func:`gate_rows` grew for it -- and by no text assertion.
+    #: short-circuit, and reading somebody else's evidence. The ``!= 'true'``
+    #: row is #967's, and is the only row here that the table as #962 left it
+    #: did not catch at all: it is rejected by exactly one scenario -- the
+    #: ``null`` evidence row :func:`gate_rows` grew for it -- and by no text
+    #: assertion. The last three are #1052's, for the release test gate
+    #: conjunct that issue added.
     MUTATIONS = [
         ('the && before the version_check clause becomes ||',
          "!cancelled() && needs.version_check.result",
@@ -1769,6 +1991,17 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
         ("the evidence check becomes != 'true', so unknown evidence publishes",
          "<evidence> == 'false'", "<evidence> != 'true'",
          ('evaluator',)),
+        ('the release test gate conjunct is dropped entirely',
+         "needs.unit-tests.result == 'success' && ", '',
+         ('evaluator', 'text')),
+        ("the release test gate's == 'success' becomes != 'failure'",
+         "needs.unit-tests.result == 'success'",
+         "needs.unit-tests.result != 'failure'",
+         ('evaluator', 'text')),
+        ("the release test gate's == 'success' also admits 'skipped'",
+         "needs.unit-tests.result == 'success'",
+         "(needs.unit-tests.result == 'success' || needs.unit-tests.result == 'skipped')",
+         ('evaluator', 'text')),
     ]
 
     def _mutate(self, condition: 'str', job: 'str', old: 'str', new: 'str') -> 'str':
@@ -2183,25 +2416,67 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
     VECTORS = [
         (
             'vendor_update_had_nothing_to_do',
-            {'PCAPKIT_UNIT_TESTS': 'skipped', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'skipped'},
+            {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
+             'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'skipped'},
             '::notice title=Nothing to release',
             0,
         ),
         (
             'vendor_update_itself_broke',
-            {'PCAPKIT_UNIT_TESTS': 'skipped', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'failure'},
-            '::warning title=Release test gate skipped',
+            {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
+             'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'failure'},
+            '::warning title=Release skipped',
             0,
         ),
         (
             'version_check_failed',
             {
-                'PCAPKIT_VERSION_CHECK': 'failure',
+                'PCAPKIT_VERSION_CHECK': 'failure', 'PCAPKIT_UNIT_TESTS': 'skipped',
                 'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
                 'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
             },
             '::warning title=Release blocked before it could start',
             0,
+        ),
+        (
+            # #1052: the gate now runs after version_check, so its failure
+            # is reported with the evidence already in hand.
+            'release_test_gate_failed',
+            {
+                'PCAPKIT_UNIT_TESTS': 'failure',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::warning title=Release blocked by the test gate',
+            0,
+        ),
+        (
+            # #1052: the 2026-10-05 shape -- a successful Vendor Update with
+            # nothing publishable. The gate skips, and that is quiet.
+            'release_test_gate_skipped_nothing_publishable',
+            {
+                'PCAPKIT_UNIT_TESTS': 'skipped',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+                'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_CONDA_TAG_EXISTS': 'true',
+                'PCAPKIT_PYPI_COMPLETE': 'true', 'PCAPKIT_CONDA_COMPLETE': 'true',
+            },
+            '::notice title=Nothing to release',
+            0,
+        ),
+        (
+            # #1052: a gate predicate that drifted and skipped with PyPI still
+            # incomplete. Every publisher skips behind it, and it must be loud.
+            'release_test_gate_skipped_with_work_outstanding',
+            {
+                'PCAPKIT_UNIT_TESTS': 'skipped',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+                'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_CONDA_TAG_EXISTS': 'true',
+                'PCAPKIT_CONDA_COMPLETE': 'true',
+            },
+            '::error title=Stranded partial release (#888)',
+            1,
         ),
         (
             'steady_state_already_fully_released',
