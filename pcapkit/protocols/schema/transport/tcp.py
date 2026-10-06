@@ -273,7 +273,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         ``struct.error: bad char in struct format``. Nothing here meets that only
         because :class:`Schema
         <pcapkit.protocols.schema.schema.Schema>`'s ``pack`` and ``unpack``
-        special-case ``ConditionalField`` by name and skip the wrapped field
+        special-case ``ConditionalField`` by type and skip the wrapped field
         outright before any ``length`` is read. A ``SwitchField`` needs no such
         special case: its selector always hands back an already-concrete field,
         :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its

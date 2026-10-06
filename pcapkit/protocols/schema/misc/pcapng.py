@@ -81,7 +81,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class ResolutionData(TypedDict):
         """Data for resolution."""
 
-        #: Resolution type flag (0: 10-based, 1: 2-based).
+        #: Resolution type flag (``0`` for 10-based, ``1`` for 2-based).
         flag: int
         #: Resolution value.
         resolution: int
@@ -412,8 +412,8 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
         The nominal span goes through :func:`nonnegative` first here too. That
         closes a hole in this function's own arithmetic: a ``captured_len`` past
         the end of the block makes the span negative, and ``nominal <= available``
-        below is then *true*, so the negative was returned unclamped and reached
-        a :mod:`struct` template as ``f'{-N}s'``. Measured on 200 Enhanced Packet
+        below is then *true*, so the negative would be returned unclamped and
+        reach a :mod:`struct` template as ``f'{-N}s'``. Measured on 200 Enhanced Packet
         Blocks declaring ``captured_len`` ``0xFFFFFF`` in 8,048 octets.
 
     """
@@ -709,7 +709,7 @@ class Option(EnumSchema[Enum_OptionType]):
                 than ``namespace`` because :meth:`abc.ABCMeta.__new__` names its
                 own fourth parameter ``namespace``, and before Python 3.11 that
                 parameter is positional-or-keyword rather than positional-only --
-                so a class keyword literally called ``namespace`` bound it twice.
+                so a class keyword literally called ``namespace`` binds it twice.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
@@ -944,7 +944,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     def post_process(self, packet: 'dict[str, Any]') -> 'SectionHeaderBlock':
         """Revise ``schema`` data after unpacking process.
 
-        This method calculate the byteorder value based on
+        This method calculates the byteorder value based on
         the parsed schema.
 
         Args:

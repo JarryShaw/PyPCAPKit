@@ -49,7 +49,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class StreamID(TypedDict):
         """Stream identifier."""
 
-        #: Steam identifier.
+        #: Stream identifier.
         sid: int
 
     class StreamDependency(TypedDict):
@@ -130,7 +130,7 @@ class FrameType(EnumSchema[Enum_Frame]):
         Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract
         shared by every non-registry enumeration. The six concrete per-frame
         subclasses below each declare ``class Flags(FrameType.Flags):`` with no
-        base list of their own, so they inherit :class:`EnumLookup`
+        base list of their own, so they inherit :class:`~pcapkit.corekit.enum.EnumLookup`
         transitively rather than needing it repeated.
 
         """

@@ -225,7 +225,7 @@ def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
     two-octet ``reserved`` or ``port`` field with a list of items sized by
     the remainder of the parameter.
 
-    :class:`TransportFormatListParameter` looked like a fourth call site --
+    :class:`TransportFormatListParameter` looks like a fourth call site --
     same ``pkt['len'] - 2`` expression -- but is not: see
     :func:`transport_format_list_len` for why it has no such prefix to
     subtract.
@@ -264,10 +264,9 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
         |          TF type #1           |           TF type #2          /
 
     -- so the list's byte length *is* ``Length``, with nothing to subtract.
-    Subtracting 2 anyway (as a since-corrected revision of this module once
-    did, mirroring the three genuine two-octet-prefix sites) silently
-    dropped the trailing two octets of *every* non-empty list on parse, and
-    rejected the parameter's own legitimate empty-list encoding
+    Subtracting 2 anyway, as the three genuine two-octet-prefix sites do,
+    would drop the trailing two octets of *every* non-empty list on parse,
+    and reject the parameter's own legitimate empty-list encoding
     (``Length = 0``, ``formats = []``) as malformed.
 
     "2x number of TF types" also fixes each ``TF type`` entry's own width at
@@ -277,10 +276,9 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     ``EnumField(length=2, ...)``, matching :class:`HIPTransportModeParameter`'s
     ``mode`` rather than the one-octet items of :func:`two_octet_prefix_list_len`'s
     other two call sites. This function only answers how many *bytes* the
-    list occupies; getting that number right and the item width wrong (as a
-    still-earlier revision did, at one octet) still corrupts every non-empty
-    list, just by reading twice as many entries as the wire holds instead of
-    dropping octets.
+    list occupies; getting that number right and the item width wrong (one
+    octet) would still corrupt every non-empty list, just by reading twice as
+    many entries as the wire holds instead of dropping octets.
 
     Args:
         pkt: Parameter unpacked schema.

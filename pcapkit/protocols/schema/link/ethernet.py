@@ -34,14 +34,14 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
         subscripting the registry. :attr:`Ethernet.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>` *is*
         :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, a
-        class-level :class:`collections.defaultdict`, so reading a missing key
-        inserted it -- every unregistered EtherType a parse saw was recorded as
-        though somebody had registered it, and
-        :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`
-        afterwards reported it as an overwrite. The helper reads the fallback
-        without recording it, and memoises a
-        :class:`~pcapkit.corekit.module.ModuleDescriptor` for a code that really
-        is registered, which this did not.
+        class-level :class:`collections.defaultdict`, so subscripting it with a
+        missing key would insert that key -- every unregistered EtherType a parse
+        saw would be recorded as though somebody had registered it, and
+        :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` would
+        afterwards report it as an overwrite. The helper reads the fallback
+        without recording it, and for a code that really is registered as a
+        :class:`~pcapkit.corekit.module.ModuleDescriptor` it writes the resolved
+        class back, so the import happens once.
 
     """
     from pcapkit.protocols.link.ethernet import Ethernet  # pylint: disable=import-outside-toplevel
