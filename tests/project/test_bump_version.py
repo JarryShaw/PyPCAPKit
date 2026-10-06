@@ -226,7 +226,7 @@ class CitationDateTests(CitationTreeMixin, unittest.TestCase):
         try:
             import yaml
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML is not in the test extra; the textual form is '
+            self.skipTest('PyYAML, from the test extra, is not installed; the textual form is '
                           'asserted by test_the_release_date_moves_with_the_version')
 
         rewritten = bump_version.plan_citation(FIXTURE, '1.5.0b5', '2026-09-22')

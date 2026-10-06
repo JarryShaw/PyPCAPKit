@@ -333,6 +333,13 @@ test = [
     # failure: it names the file and prints the diff, where the skip it replaced
     # said nothing at all.
     "isort",
+    # The second opinion on the hand-rolled YAML scanners: the ``yaml.safe_load``
+    # cross-checks in ``tests/project/test_project_status.py``,
+    # ``test_release_gates.py``, ``test_bump_version.py`` and
+    # ``test_workflow_apt_timeouts.py`` skip without it.
+    # Test-only, as ``pcapkit`` never imports ``yaml``. Unpinned, since
+    # ``safe_load`` is all they use.
+    "PyYAML",
 ]
 
 # setuptools specific
