@@ -1,8 +1,8 @@
 # Coverage configuration for the one coverage-measured leg of unit-tests.yml
 # (`test`, Python 3.14), passed with `--rcfile`. Coverage reads a single config
 # file, so this repeats pyproject.toml's [tool.coverage.*] settings and adds the
-# two the CI run needs on top. tests/project/test_coverage_rcfile.py asserts
-# every pyproject setting is repeated here unchanged.
+# three below on top. tests/project/test_coverage_rcfile.py asserts every
+# pyproject setting is repeated here unchanged.
 #
 #   parallel  -- each process writes its own .coverage.* file, merged afterwards
 #                by `coverage combine`.
@@ -10,12 +10,12 @@
 #                child Python process. pytest-xdist's workers are such children
 #                (execnet popen), so without it only the controller is measured
 #                and the -n auto run reports next to nothing.
-#   core      -- "ctrace", not the sys.monitoring default on 3.12+. Thousands of
-#                tests purge and re-import pcapkit in setUp, and sysmon keeps
-#                state for every generation's code objects: measured on
-#                test_http_unit.py alone, peak RSS 0.40 GiB without coverage,
-#                4.17 GiB under sysmon and 0.41 GiB under ctrace. Under
-#                -n auto that growth killed the runner (#1064).
+#   core      -- "ctrace", not the sys.monitoring default on 3.12+. Tests
+#                purge and re-import pcapkit, and sysmon keeps state for every
+#                generation's code objects: measured on test_http_unit.py
+#                alone, re-importing per test, peak RSS 0.40 GiB without
+#                coverage, 4.17 GiB under sysmon and 0.41 GiB under ctrace.
+#                Under -n auto that growth killed the runner.
 
 [tool.coverage.run]
 source = [

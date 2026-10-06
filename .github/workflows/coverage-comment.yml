@@ -1,6 +1,6 @@
 name: Coverage Comment
 
-# #1063: posts the coverage the `test` job's Python 3.14 leg measured in
+# Posts the coverage the `test` job's Python 3.14 leg measured in
 # unit-tests.yml as a pull-request comment. It runs no tests. The comment cannot
 # be posted from unit-tests.yml itself: that file is also a reusable workflow,
 # and a called workflow can only narrow the token its caller passes, never widen

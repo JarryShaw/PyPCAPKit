@@ -100,25 +100,24 @@ both because it needs generated captures this script does not build and
 because it is already run whole, under :program:`pytest`, by the
 ``integration`` job.
 
-GitHub issue #1052 -- a stalled leg: ``--stall-dump SECONDS`` (or
-``PCAPKIT_UNITTEST_STALL_DUMP``) arms :func:`faulthandler.dump_traceback_later`
-so that a leg still running after that long writes every thread's stack to
-stderr once, then carries on. The default, 1080s, is just under a 20-minute step
-cap, so a leg that is about to be killed says where it was first; ``0`` disables
-it.
+A stalled leg: ``--stall-dump SECONDS`` (or ``PCAPKIT_UNITTEST_STALL_DUMP``)
+arms :func:`faulthandler.dump_traceback_later`, so a leg still running after
+that long writes every thread's stack to stderr once, then carries on. The
+default, 1080s, is just under the 20-minute step cap, so a leg about to be
+killed says where it was first; ``0`` disables it.
 
-#1052 also found the memory growth behind the slow ``test_mh_unit`` tail. Every
-purge-then-import leaves the previous generation as cyclic garbage, and the
-interpreter's own collector intermittently falls behind: three plain runs of
-``protocols/internet`` peaked at 1008, 781 and 1650 MiB, the last with ``test_mh_unit``
-tests at up to 7.3s rather than 1.2-1.8s. ``--gc-every N`` (default 10) therefore
-runs :func:`gc.collect` after every N tests: 491 MiB peak at the same 420s wall.
-Every test cost 80s more for 320 MiB.
+Memory: every purge-then-import leaves the previous generation as cyclic
+garbage, and the interpreter's own collector intermittently falls behind --
+three plain runs of ``protocols/internet`` peaked at 1008, 781 and 1650 MiB, the
+last with ``test_mh_unit`` tests at up to 7.3s rather than 1.2-1.8s. So
+``--gc-every N`` (default 10) runs :func:`gc.collect` after every N tests:
+491 MiB peak at the same 420s wall. Collecting after every test cost 80s more
+for 320 MiB.
 
-It is a collect, deliberately *not* the :data:`sys.modules` restore #1052 first
-proposed. The loader imports every module before any test runs, so a module's
-import-time bindings belong to the generation live at load; restoring that
-snapshot hands it back, which is the very skew this leg exists to expose. On
+It is a collect, deliberately *not* a :data:`sys.modules` restore. The loader
+imports every module before any test runs, so a module's import-time bindings
+belong to the generation live at load; restoring that snapshot hands it back,
+which is the very skew this leg exists to expose. On
 #981's own reproduction (``32bcfba15^``, ``test_http_unit`` then
 ``test_base_class_contract``) no restore gives 1 failure and 3 errors; restoring
 after each module, or around each test, gives 0 and 0; a collect after each test
@@ -164,14 +163,14 @@ from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-impor
 #: this script exists to catch.
 _EXCLUDED_ROOT_MODULES = frozenset({'tests.test_tier_guard_xdist'})
 
-#: Seconds before a still-running leg dumps every thread's stack (#1052): just
+#: Seconds before a still-running leg dumps every thread's stack: just
 #: under the 20-minute step cap, so the dump lands before the kill.
 DEFAULT_STALL_DUMP = 1080
 
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
-#: Run a full :func:`gc.collect` after every this many tests (#1052); see the
+#: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.
 DEFAULT_GC_EVERY = 10
 

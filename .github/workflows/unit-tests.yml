@@ -65,9 +65,9 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
-        # #1063: exactly one leg runs under coverage, so measuring it adds no
-        # leg to the queue #1052 is cutting. 3.14 because it had the most
-        # headroom under the 45-minute cap on main (15.6, 15.8 and 16.8 minutes
+        # Exactly one leg runs under coverage, so measuring it adds no leg to
+        # the queue. 3.14 because it had the most headroom under the 45-minute
+        # cap on main (15.6, 15.8 and 16.8 minutes
         # in runs 37393532176, 37392964804 and 37391296686, against 12.8-22.0
         # for the other four), and because coverage's sys.monitoring core,
         # which measures branches only from 3.14 on, is its cheapest tracer.
@@ -364,21 +364,21 @@ jobs:
   #                        green and never red for the wrong reason. If it
   #                        ever starts building, the cell fails loudly.
   #
-  # #1052 folded the 36 one-cell jobs (6 Pythons x 6 engines) into one job per
-  # engine that loops over the six interpreters, each in a fresh venv. The
-  # queue, not the runners, was the bottleneck: 36 jobs each paid checkout,
-  # setup and apt for a minute of work. One job per *engine* rather than per
-  # Python because the engine is what varies the environment: the apt packages
+  # One job per engine loops over the six interpreters, each in a fresh venv,
+  # rather than one job per cell (6 Pythons x 6 engines): the queue, not the
+  # runners, is the bottleneck, and 36 jobs would each pay checkout, setup and
+  # apt for a minute of work. One job per *engine* rather than per Python
+  # because the engine is what varies the environment: the apt packages
   # are per engine (installed once per job instead of six times), and pcap-ct
   # and pypcap both install a top-level `pcap` module, so a per-Python job
   # looping over engines would need a fresh venv per engine anyway while also
   # carrying every engine's system packages. It also keeps `matrix.engine` as
   # the one matrix axis, which is what tests/_dependency_gates.py's
-  # _engine_matrix_variants() reads this job as. No cell is dropped: the cell
-  # script below is the old per-cell install-and-test logic unchanged, run once
-  # per interpreter as its own process (so `set -e` holds inside it), under a
-  # `::group::` named for the cell, with every annotation titled by engine and
-  # Python version and a per-cell row in the job summary.
+  # _engine_matrix_variants() reads this job as. The cell script below is one
+  # cell's install-and-test logic, run once per interpreter as its own process
+  # (so `set -e` holds inside it), under a `::group::` named for the cell, with
+  # every annotation titled by engine and Python version and a per-cell row in
+  # the job summary.
   #
   # 3.15 is experimental-prerelease per #845's ruling: present so a regression
   # is visible, but never blocking. It runs as its own step with step-level
@@ -387,7 +387,7 @@ jobs:
   # job's result -- stays green. The 3.10-3.14 cells share one step, and any
   # one of them failing fails the job.
   #
-  # Scoped deliberately out (#845, unchanged by #1052): per-engine integration
+  # Scoped deliberately out (#845): per-engine integration
   # coverage (needs regenerated captures, so it stays in aggregate in
   # `integration` and `pypcap-parity`), and the multi-engine HAS_RUNTIME gate
   # plus the incidental crypto/NGAP/vendor coverage the pre-#845 shared venv
@@ -450,16 +450,14 @@ jobs:
       # eat the whole job: per #974, a PCAP_CT cell fetched its InRelease
       # metadata and then went silent for 29m52s until the job's own 30-minute
       # cap killed it, which reports `cancelled` and so fails `Required checks
-      # passed` -- an unrelated mirror turning a green PR red. The 2026-10-01
-      # stalls (#1052) had the same all-or-nothing shape, in `apt-get update`.
+      # passed` -- an unrelated mirror turning a green PR red. Stalls in
+      # `apt-get update` have had the same all-or-nothing shape.
       #
-      # 5 minutes, with one retry inside it, rather than the 20 this step used
-      # to carry. #974 sized 20 against a healthy tail of up to 646s, but that
-      # tail is gone: across 6 runs (120 non-zero observations of this step and
-      # `pypcap-parity`'s) on 2026-10-04/05 the slowest was 34s, p99 33s, all
-      # on PyShark cells, and #1052 measured p99 0.47 minutes. A stall is
-      # therefore distinguishable from a slow mirror well inside a short
-      # per-attempt bound, which makes retrying worth it -- 45s for
+      # 5 minutes, with one retry inside it. Across 6 runs (120 non-zero
+      # observations of this step and `pypcap-parity`'s) the slowest was 34s,
+      # p99 33s, all on PyShark cells. A stall is therefore distinguishable
+      # from a slow mirror well inside a short per-attempt bound, which makes
+      # retrying worth it -- 45s for
       # `apt-get update` and 90s for `apt-get install`, two attempts, 270s in
       # the worst case, under the 5-minute step cap that still holds however
       # the hang is caused. The step cap stays well under the 30-minute job
@@ -672,7 +670,7 @@ jobs:
   # instruction was "try to build and if the CI is not a good suit, then we
   # ripe it". This job is that attempt: a C toolchain plus libpcap headers, on
   # the two Python versions its own marker allows
-  # ("pypcap; python_version < '3.12'", pyproject.toml:151). If a clean run of
+  # ("pypcap; python_version < '3.12'", pyproject.toml:157). If a clean run of
   # this job's install step goes red -- not a flake -- the fix is deleting this
   # job and returning HAS_PYPCAP to
   # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked as
@@ -736,9 +734,9 @@ jobs:
       # postinst otherwise blocks on the "allow non-superusers to capture
       # packets" prompt.
       #
-      # `timeout-minutes` and the retry for the reason #974 and #1052 give about
-      # `engine-tests`'s own install step -- see the note there, which this
-      # step shares wholesale, including the 5-minute cap and per-attempt
+      # `timeout-minutes` and the retry for the reason given on `engine-tests`'s
+      # own install step -- see the note there, which this step shares
+      # wholesale, including the 5-minute cap and per-attempt
       # bounds. It was never the leg that stalled, but it installs the union of
       # the packages that one does from the same mirrors, so the hazard is
       # identical; its observations are in the 120-sample figure quoted there.
@@ -927,8 +925,8 @@ jobs:
   # maintainer's call to make separately from landing it.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    # Not on pull requests (#1052): it is not a required check, and its 11
-    # cells were a sixth of every PR push's jobs. It still runs on every push
+    # Not on pull requests: it is not a required check, and its 11 cells
+    # would be a sixth of every PR push's jobs. It still runs on every push
     # to main, which is the run that tests what actually lands.
     if: ${{ inputs.gate-only != true && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
@@ -995,7 +993,7 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # `--verbose` (#1052) names every test as it runs, so a slow or hung cell
+      # `--verbose` names every test as it runs, so a slow or hung cell
       # shows where it was. The step cap of 20 is about twice the slowest
       # cell's measured maximum (9.8 minutes; the other shard 8.9), and sits
       # under the job's 45 so a hang reports as this step timing out.
@@ -1045,7 +1043,7 @@ jobs:
             exit 1
           fi
 
-  # #1052: which of a pull request's changed files are code. This decides
+  # Which of a pull request's changed files are code. This decides
   # whether the expensive legs run at all (see `required-checks` for how their
   # skips are then judged), so it fails safe: anything it cannot classify is
   # code.
@@ -1117,7 +1115,7 @@ jobs:
               print(f'code={code}', file=file)
           PY
 
-  # #1052: the docs-only replacement for `test`, running every test that reads
+  # The docs-only replacement for `test`, running every test that reads
   # docs/ or a Markdown file, since a docs-only diff can still break those:
   # tests/project and the root-level modules, plus the modules elsewhere under
   # tests/ named in the second run step. tests/project/test_unit_tests_queue.py
@@ -1233,27 +1231,16 @@ jobs:
       - name: Run full test suite
         run: python -m pytest -q -n auto --dist load
 
-  # Ruleset 23497679's required_status_checks names 22 exact contexts: five
-  # each for `test` and `integration`, five for `Compat Python 3.10`-`3.14`
-  # (live -- emitted by the `compatibility` job in
-  # `.github/workflows/python-compatibility.yml`, on the same push/
-  # pull_request triggers as this file, confirmed by reading that file --
-  # NOT stale, and NOT something a `needs:` in this file could ever cover,
-  # since a job cannot depend on a job in a different workflow file), five
-  # for the old single-cell `Engines Python <version>` name that
-  # `engine-tests` stopped producing once it became a Python x engine matrix
-  # (the only five of the 22 that are genuinely dead), and two for
-  # `pypcap-parity`. GitHub rulesets match check names literally and support
-  # no wildcard, so the required list has to be hand-edited regardless -- to
-  # drop the five dead `Engines Python <version>` names and to either
-  # re-list every gating (3.10-3.14) `engine-tests` matrix cell name (30 of
-  # them, growing or shrinking with the matrix) or replace that slot with
-  # something that does not change shape when the matrix does. The
-  # maintainer's ruling was the latter: one aggregate job that `needs:`
-  # every gating job in *this* file, so the ruleset requires only this one
-  # context in place of the `test`, `integration`, `Engines`, and
-  # `pypcap-parity` slots (17 of the 22) -- the five live `Compat` names
-  # stay required exactly as they are, since nothing here can stand in for
+  # Ruleset 23497679's required_status_checks requires six contexts: this
+  # job's `Required checks passed`, and five for `Compat Python 3.10`-`3.14`
+  # from the `compatibility` job in `.github/workflows/python-compatibility.yml`.
+  # This job aggregates the gating jobs of *this* file, the ones its `needs:`
+  # lists, because rulesets match check names literally and support no
+  # wildcard: requiring each matrix cell by name would mean hand-editing the
+  # ruleset every time a matrix changes. On a docs-only pull request it
+  # accepts `skipped` for the four code legs (see below). The `Compat` legs
+  # are required on their own because a job cannot `needs:` a job in another
+  # workflow file, so nothing here can stand in for
   # them.
   #
   # `if: ${{ always() && inputs.gate-only != true }}` and the explicit
@@ -1297,31 +1284,26 @@ jobs:
   # is called with `gate-only: true` and is otherwise skipped by its own
   # `if:`, so depending on it would leave this job permanently skipped on
   # every ordinary PR -- the one case this job has to actually gate.
-  # `changelog` is deliberately left out too: it is a drift check, not one of
-  # the 22 contexts this job replaces, and folding it in here would silently
-  # widen what merging requires beyond what this job exists to cover -- the
-  # maintainer's call to make separately, not something to sneak in.
-  # `test`, `integration`, `engine-tests` and `pypcap-parity` are the four
-  # jobs in this file whose names the 17 live/dead contexts above (all but
-  # `Compat`) stand in for; `changes` and `project-tests` are needed only for
-  # the docs-only path below. #1052 renamed the engine jobs to
-  # `Engines (<engine>)`; no ruleset context names an engine job, so nothing
-  # required was orphaned (checked against the ruleset on 2026-10-05).
+  # `changelog` is deliberately left out too: it is a drift check, not a
+  # gating leg, and folding it in would widen what merging requires -- a
+  # change for the maintainer to decide, not one to slip in here.
+  # `test`, `integration`, `engine-tests` and `pypcap-parity` are the gating
+  # legs; `changes` and `project-tests` are needed only for the docs-only
+  # path below.
   #
   # `engine-tests`'s `unsupported` and `not-installable` cells are not a gap
   # here: the cell script exits 0 for a cell that declined exactly as
   # expected, so they contribute to that job's `success` like any other cell.
   #
-  # Nor is its 3.15 cell, since #1052. It used to be a separate matrix job
-  # with job-level `continue-on-error`, and GitHub does not document whether
-  # `needs.<job>.result` sees such a job's failure as `failure` or `success`
-  # -- an open risk that a 3.15-only regression could block every merge. The
-  # 3.15 cell is now a step with step-level `continue-on-error: true` inside
-  # each engine's job, whose effect on the job's result *is* documented (a
-  # step's `conclusion` is its result after `continue-on-error` is applied), so
-  # the job, and this gate, read `success` while the failed step stays visible.
+  # Nor is its 3.15 cell. It is a step with step-level `continue-on-error:
+  # true` inside each engine's job, whose effect on the job's result *is*
+  # documented (a step's `conclusion` is its result after `continue-on-error`
+  # is applied), so the job, and this gate, read `success` while the failed
+  # step stays visible. Not a job-level `continue-on-error`: GitHub does not
+  # document whether `needs.<job>.result` sees such a job's failure as
+  # `failure` or `success`, so a 3.15-only regression could block every merge.
   #
-  # #1052's docs-only path. On a pull request whose diff touches nothing but
+  # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories (the `changes`
   # job's classifier), `test`, `integration`, `engine-tests` and
   # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs

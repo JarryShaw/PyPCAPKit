@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for #1052's queue cuts in :file:`.github/workflows/unit-tests.yml`.
 
-Three things there fail silently if they drift, so they are pinned here:
+These fail silently if they drift, so they are pinned here:
 
 * ``required-checks`` may accept a ``skipped`` leg **only** when ``changes``
   classified the diff as docs-only. Its shell step is executed below against
