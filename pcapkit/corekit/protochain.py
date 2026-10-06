@@ -9,7 +9,6 @@ collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
 
 """
 import collections.abc
-import copy
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.utilities.compat import cached_property
@@ -260,6 +259,8 @@ class ProtoChain(collections.abc.Sequence):
             Merged protocol chain.
 
         """
-        new = copy.copy(self)
-        new.__data__ += other.__data__
+        # build a fresh instance, so the cached ``protocols`` and
+        # ``aliases`` of ``self`` are not carried over
+        new = self.__class__.__new__(self.__class__)
+        new.__data__ = self.__data__ + other.__data__
         return new
