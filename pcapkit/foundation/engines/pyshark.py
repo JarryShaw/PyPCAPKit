@@ -176,6 +176,9 @@ class PyShark(EngineBase['PySharkPacket']):
         as :mod:`pyshark` and :attr:`self._extmp <PyShark._extmp>`
         as an iterator from :class:`pyshark.FileCapture`.
 
+        The global header is parsed and dumped first, by
+        :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
+
         Warns:
             AttributeWarning: Warns under following circumstances:
 
@@ -217,6 +220,9 @@ class PyShark(EngineBase['PySharkPacket']):
                 f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
             )
 
+        # extract global header
+        ext.record_header()
+
         # extract & analyse file
         logger.debug('pyshark: opening %s', ext._ifnm)
         self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
@@ -251,8 +257,6 @@ class PyShark(EngineBase['PySharkPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
-                ofile = ext._ofile
-            ext._offmt = ofile.kind
 
         # trace flows
         if ext._flag_t:

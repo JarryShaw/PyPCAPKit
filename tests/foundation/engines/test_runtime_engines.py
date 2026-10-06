@@ -64,6 +64,8 @@ def make_extractor(**overrides):
         '_exctx': ContextRegistry(),
         '_vfunc': mock.Mock(),
         'magic_number': b'\xa1\xb2\xc3\xd4',
+        # the third-party engines call this at setup for the global header
+        'record_header': mock.Mock(),
     }
     values.update(overrides)
     return types.SimpleNamespace(**values), sink
@@ -224,6 +226,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
             engine.run()
         self.assertIs(engine._extmp, pcap_reader)
         self.assertTrue(callable(extractor._vfunc))
+        extractor.record_header.assert_called_once_with()
 
         pcapng_reader = FakeReader()
         extractor.magic_number = PCAPNG.MAGIC_NUMBER[0]
@@ -259,7 +262,8 @@ class ThirdPartyEngineTests(unittest.TestCase):
                                 packet = engine.read_frame()
 
         self.assertIsInstance(packet, ParsedPacket)
-        self.assertEqual(extractor._offmt, 'unit')
+        # the output format is set by ``record_header``, not per frame
+        self.assertIsNone(extractor._offmt)
         extractor._reasm.ipv4.assert_called_once_with('ipv4')
         extractor._reasm.ipv6.assert_called_once_with('ipv6')
         extractor._reasm.tcp.assert_called_once_with('tcp')
@@ -341,6 +345,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
             engine.run()
         sniff.assert_called_once_with(offline='capture.pcap')
         self.assertTrue(callable(extractor._vfunc))
+        extractor.record_header.assert_called_once_with()
 
         clean_extractor, _ = make_extractor(_flag_v=False)
         clean_engine = Scapy(clean_extractor)
@@ -421,6 +426,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         with mock.patch.object(engine._expkg, 'FileCapture', return_value=capture) as file_capture:
             engine.run()
         file_capture.assert_called_once_with('capture.pcap', keep_packets=False)
+        extractor.record_header.assert_called_once_with()
         self.assertFalse(extractor._flag_r)
         self.assertIsNone(extractor._reasm.ipv4)
         self.assertTrue(callable(extractor._vfunc))

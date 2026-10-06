@@ -852,7 +852,16 @@ class Extractor(Generic[_P]):
 
         Unless output is disabled, the engine also dumps the parsed header, under
         the name of ``Global Header`` for PCAP and ``Section Header 1`` for
-        PCAP-NG.
+        PCAP-NG, and sets :attr:`self._offmt <Extractor._offmt>` to the output
+        format.
+
+        This is the shared global-header step of the third-party engines --
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT`,
+        :class:`~pcapkit.foundation.engines.scapy.Scapy` and
+        :class:`~pcapkit.foundation.engines.pyshark.PyShark` -- which call it at
+        setup, so their output opens with the same header record as the
+        built-in engines' and :attr:`format` is set even for a capture with no
+        frames.
 
         Raises:
             FormatError: If the input is neither a PCAP nor a PCAP-NG file.

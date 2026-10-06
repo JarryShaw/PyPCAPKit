@@ -84,6 +84,9 @@ class DPKT(EngineBase['DPKTPacket']):
         as :mod:`dpkt` and :attr:`self._extmp <DPKT._extmp>`
         as an iterator from :class:`dpkt.pcap.Reader`.
 
+        The global header is parsed and dumped first, by
+        :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
+
         Warns:
             AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                 and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
@@ -120,6 +123,9 @@ class DPKT(EngineBase['DPKTPacket']):
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )
+
+        # extract global header
+        ext.record_header()
 
         if ext.magic_number in PCAP.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP', ext._ifnm)
@@ -175,8 +181,6 @@ class DPKT(EngineBase['DPKTPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
-                ofile = ext._ofile
-            ext._offmt = ofile.kind
 
         # record fragments
         if ext._flag_r:
