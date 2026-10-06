@@ -1410,8 +1410,8 @@ class ProcessConventionTests(unittest.TestCase):
 
         :file:`.github/PULL_REQUEST_TEMPLATE.md` is where a contributor actually meets
         the list, so it is the ground truth rather than a list retyped into this file.
-        Note the label set is a **superset**: ``release`` and ``const`` are type-ish
-        labels with no tickbox, so this is a one-way check by design.
+        Note the label set is a **superset**: ``const`` is a type-ish label with no
+        tickbox, so this is a one-way check by design.
 
         """
         types = re.findall(r'^- \[ \] `([a-z]+)` ', self.TEMPLATE.read_text(encoding='utf-8'),
