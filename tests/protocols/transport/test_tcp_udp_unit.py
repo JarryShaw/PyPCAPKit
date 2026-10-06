@@ -396,7 +396,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         ])
         self.assertEqual(tuple_length, 4)
         self.assertEqual([type(item).__name__ for item in tuple_options],
-                         ['WindowScale', 'EndOfOptionList'])
+                         ['WindowScale', 'NoOperation'])
 
         with self.assertRaises(ProtocolError):
             proto._make_mode_timeout(Option.User_Timeout_Option, timeout=1 << 30)
@@ -515,9 +515,11 @@ class TCPUDPUnitTests(unittest.TestCase):
             proto._make_mode_nop(Option.No_Operation),
             proto._make_mode_mss(Option.Maximum_Segment_Size, mss=1460),
         ])
-        self.assertEqual(schema_total, 4)
-        self.assertEqual(len(schema_options), 1)
-        self.assertEqual(schema_options[0].mss, 1460)
+        self.assertEqual(schema_total, 8)
+        self.assertEqual(schema_options[0], b'\x01')
+        self.assertEqual([type(item).__name__ for item in schema_options[1:]],
+                         ['NoOperation', 'MaximumSegmentSize', 'NoOperation', 'EndOfOptionList'])
+        self.assertEqual(schema_options[2].mss, 1460)
 
         option_map = OrderedMultiDict([
             (Option.No_Operation,
@@ -532,7 +534,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         ])
         mapped_options, mapped_total = proto._make_tcp_options(option_map)
         self.assertEqual(mapped_total, 12)
-        self.assertEqual(mapped_options[0].mss, 1300)
+        self.assertEqual(type(mapped_options[0]).__name__, 'NoOperation')
+        self.assertEqual(mapped_options[1].mss, 1300)
         self.assertEqual(type(mapped_options[-1]).__name__, 'EndOfOptionList')
 
         # NOTE: the MP_JOIN forms reach ``_make_mode_mp`` through :func:`mptcp_option`,

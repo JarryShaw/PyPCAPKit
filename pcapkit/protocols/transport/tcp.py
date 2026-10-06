@@ -2034,30 +2034,29 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Tuple of options and total length of options.
 
+        Note:
+            The options are emitted in the given order, ``NOP`` and ``EOOL``
+            included, so that a parsed option list re-emits the same octets.
+            Padding is added only once, after the last option, when the list
+            does not end on a 32-bit boundary: zero octets if the list already
+            ends with ``EOOL``, otherwise ``NOP`` options followed by an ``EOOL``.
+
         """
         total_length = 0
+        options_list = []  # type: list[Schema_Option | bytes]
+        code = None  # type: Optional[Enum_Option]
         if isinstance(options, list):
-            options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
                     code = Enum_Option.get(schema[0])
-                    if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):  # ignore padding options by default
-                        continue
-
                     data = schema  # type: Schema_Option | bytes
                     data_len = len(data)
                 elif isinstance(schema, Schema):
                     code = schema.kind
-                    if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):  # ignore padding options by default
-                        continue
-
                     data = schema
                     data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
-                    if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):  # ignore padding options by default
-                        continue
-
                     name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_mode_{name}'
@@ -2071,44 +2070,31 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
                 options_list.append(data)
                 total_length += data_len
+        else:
+            for code, option in options.items(multi=True):
+                name = self._lookup_registry(self.__option__, code)
+                if isinstance(name, str):
+                    meth_name = f'_make_mode_{name}'
+                    meth = cast('OptionConstructor',
+                                getattr(self, meth_name, self._make_mode_donone))
+                else:
+                    meth = name[1]
 
-                # force alignment to 32-bit boundary
-                if data_len % 4:
-                    pad_len = 4 - (data_len % 4)
-                    pad_opt = self._make_mode_nop(Enum_Option.No_Operation)  # type: ignore[arg-type]
-                    total_length += pad_len
+                data = meth(code, option)
+                data_len = len(data.pack())
 
-                    for _ in range(pad_len - 1):
-                        options_list.append(pad_opt)
-                    options_list.append(self._make_mode_eool(Enum_Option.End_of_Option_List))  # type: ignore[arg-type]
-            return options_list, total_length
+                options_list.append(data)
+                total_length += data_len
 
-        options_list = []
-        for code, option in options.items(multi=True):
-            # ignore padding options by default
-            if code in (Enum_Option.No_Operation, Enum_Option.End_of_Option_List):
-                continue
+        # force alignment to 32-bit boundary
+        if total_length % 4:
+            pad_len = 4 - (total_length % 4)
+            total_length += pad_len
 
-            name = self._lookup_registry(self.__option__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_mode_{name}'
-                meth = cast('OptionConstructor',
-                            getattr(self, meth_name, self._make_mode_donone))
+            if code == Enum_Option.End_of_Option_List:
+                options_list.append(bytes(pad_len))
             else:
-                meth = name[1]
-
-            data = meth(code, option)
-            data_len = len(data.pack())
-
-            options_list.append(data)
-            total_length += data_len
-
-            # force alignment to 32-bit boundary
-            if data_len % 4:
-                pad_len = 4 - (data_len % 4)
                 pad_opt = self._make_mode_nop(Enum_Option.No_Operation)  # type: ignore[arg-type]
-                total_length += pad_len
-
                 for _ in range(pad_len - 1):
                     options_list.append(pad_opt)
                 options_list.append(self._make_mode_eool(Enum_Option.End_of_Option_List))  # type: ignore[arg-type]
