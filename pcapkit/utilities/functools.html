@@ -533,11 +533,11 @@ the decorated function.</p>
 <p class="admonition-title">Important</p>
 <p>This decorator function is designed for decorating <em>class methods</em>.</p>
 </div>
-<p>This decorator first keep the current offset of
-<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>, then
-try to call the decorated function. Should any exception raised, it will
-re-parse the <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>
-as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> protocol.</p>
+<p>This decorator calls the decorated function. Should any exception be
+raised, it logs the error and re-parses the current layer’s payload as
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – or as
+<a class="reference internal" href="../protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, if the error is an
+end-of-file <a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have following signature:</p>
@@ -567,7 +567,7 @@ as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protoc
 <dd><p>Prepare schema packet data before unpacking.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>This decorate function is designed for decorating the
+<p>This decorator function is designed for decorating the
 <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
 <em>class method</em>.</p>
 </div>
@@ -588,12 +588,9 @@ the revised version of parameter list to the original method.</p>
 forwarded to – the decorated function. <a class="reference internal" href="#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> is applied to
 exactly one function in this tree,
 <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>,
-whose real signature has never had more than these four parameters,
-and nothing calls it with more; an earlier revision of this note
-nonetheless promised implementors a trailing <code class="docutils literal notranslate"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code>, which
-the wrapper below never populated. A caller relying on that promise
-got extras silently discarded instead of forwarded – see <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/454">#454</a> – so the
-wrapper raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> for a fifth positional argument or
+whose real signature has exactly these four parameters, and nothing
+calls it with more. Rather than discard extras silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/454">#454</a>),
+the wrapper raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> for a fifth positional argument or
 an unconsumed keyword, the same as an ordinary call with too many
 arguments would.</p>
 </div>
@@ -660,12 +657,11 @@ level ``outermost`` the interpreter entry point
 </pre></div>
 </div>
 <p>The frame to name is the first one <em>past</em> the boundary, hence
-<code class="docutils literal notranslate"><span class="pre">boundary</span> <span class="pre">+</span> <span class="pre">1</span></code>. What makes this a fix rather than a rewrite is that
-<code class="docutils literal notranslate"><span class="pre">boundary</span></code> is measured from the <em>inside</em> out: it depends only on how deep the
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> frames run, never on how deep the caller’s own stack is.
-Numbering from the outside in, as this function once did, grew with the outer
-stack, so the frame it named drifted one further out for every extra frame
-above the boundary – under <strong class="program">pytest</strong>, dozens of them.</p>
+<code class="docutils literal notranslate"><span class="pre">boundary</span> <span class="pre">+</span> <span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">boundary</span></code> is measured from the <em>inside</em> out: it depends
+only on how deep the <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> frames run, never on how deep the caller’s
+own stack is. Numbering from the outside in would grow with the outer stack,
+so the frame named would drift one further out for every extra frame above the
+boundary – under <strong class="program">pytest</strong>, dozens of them.</p>
 <p>Both bounds are enforced, as neither consumer copes with a level outside them:</p>
 <ul class="simple">
 <li><p>Never below <code class="docutils literal notranslate"><span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">0</span></code> and negative values mean “do not walk out at all”

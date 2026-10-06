@@ -512,7 +512,7 @@
 <span class="c1">#: Truncation mask for those four fields. :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,</span>
 <span class="c1">#: the field class that would otherwise pack them, masks to the field width in</span>
 <span class="c1">#: :meth:`~pcapkit.corekit.fields.numbers.NumberField.pre_process` rather than</span>
-<span class="c1">#: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` was written as</span>
+<span class="c1">#: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` is written as</span>
 <span class="c1">#: ``5``. :func:`struct.pack` raises instead, so the mask is applied here to keep</span>
 <span class="c1">#: the two spellings writing the same octets for every input.</span>
 <span class="n">_UINT32_MASK</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF</span>
@@ -640,22 +640,22 @@
 <span class="sd">            this writes them directly, rather than handing them to</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor</span>
 <span class="sd">            packs the record and then **dissects it again** through the whole</span>
-<span class="sd">            protocol stack to arrive at bytes it was given. That round trip was</span>
-<span class="sd">            about 82% of the cost of a flow-traced extraction -- ``http.pcap``,</span>
+<span class="sd">            protocol stack to arrive at bytes it was given. That round trip</span>
+<span class="sd">            measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,</span>
 <span class="sd">            1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms</span>
 <span class="sd">            without, over a 1030 ms untraced baseline.</span>
 
-<span class="sd">            Dropping it is not only cheaper. The re-dissection re-emitted every</span>
-<span class="sd">            parse warning the frame had already produced once, and warned about</span>
-<span class="sd">            payloads it had no business parsing at all -- writing a 3-octet</span>
-<span class="sd">            payload raised ``SchemaWarning: packet length &lt; 0: -3`` from a dumper</span>
-<span class="sd">            that only had to copy it.</span>
+<span class="sd">            Skipping it is not only cheaper. The re-dissection would re-emit</span>
+<span class="sd">            every parse warning the frame had already produced once, and warn</span>
+<span class="sd">            about payloads it has no business parsing at all -- writing a</span>
+<span class="sd">            3-octet payload would raise ``SchemaWarning: packet length &lt; 0: -3``</span>
+<span class="sd">            from a dumper that only has to copy it.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
         <span class="c1"># mapping rather than a dissected frame -- which the flow-tracing adapters</span>
-        <span class="c1"># of several engines do -- still fails naming ``packet``, as the ``Frame``</span>
-        <span class="c1"># construction did. :mod:`pcapkit.foundation.extraction` substitutes a</span>
+        <span class="c1"># of several engines do -- still fails naming ``packet``.</span>
+        <span class="c1"># :mod:`pcapkit.foundation.extraction` substitutes a</span>
         <span class="c1"># dict-capable trace format on the strength of that error.</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">packet</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">frame_info</span>

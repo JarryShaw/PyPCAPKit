@@ -694,19 +694,14 @@
 <span class="c1">#: that vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never</span>
 <span class="c1">#: ``ETHERNET``.</span>
 <span class="c1">#:</span>
-<span class="c1">#: Both entries were checked two ways: against Wireshark's dissector registrations</span>
-<span class="c1">#: (``packet-eth.c`` against ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` against</span>
-<span class="c1">#: ``WTAP_ENCAP_TOKEN_RING``), and live with ``editcap -T`` to confirm which PDML root each</span>
-<span class="c1">#: encapsulation produces.</span>
-<span class="c1">#:</span>
 <span class="c1">#: Every entry comes from the same sweep as ``ENCAP_TYPE_TO_LINKTYPE`` above: the root ``&lt;proto</span>
 <span class="c1">#: name=...&gt;`` of ``tshark -r out.pcap -c 1 -T pdml`` against the DLT in ``out.pcap``'s own file</span>
 <span class="c1">#: header. The trailing comment on each line names the ``editcap -T`` encapsulation that produced</span>
 <span class="c1">#: it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one</span>
 <span class="c1">#: rewrite. Names are listed even where they already spell their :class:`LinkType` member</span>
 <span class="c1">#: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named</span>
-<span class="c1">#: member, because upper-casing the name is exactly what answered 101 for a ``rawip6`` capture and</span>
-<span class="c1">#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).</span>
+<span class="c1">#: member, because upper-casing the name is exactly what would answer 101 for a ``rawip6`` capture</span>
+<span class="c1">#: and 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).</span>
 <span class="c1">#:</span>
 <span class="c1">#: Three classes of name are absent, all three measured rather than assumed:</span>
 <span class="c1">#:</span>
@@ -797,7 +792,7 @@
 <span class="w">    </span><span class="sd">"""Convert PyShark packet into :obj:`dict`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        packet: PyShark packet.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A :obj:`dict` mapping of packet data.</span>
@@ -825,10 +820,10 @@
 <span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        packet: PyShark packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.</span>
+<span class="sd">        Data for TCP flow tracing.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer.</span>
@@ -854,7 +849,7 @@
         <span class="c1"># ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the</span>
         <span class="c1"># PDML root layer's *filter* name when the frame layer has no such</span>
         <span class="c1"># field. That name cannot do the job on its own: one filter name</span>
-        <span class="c1"># serves several DLTs, so keying on it answered ``RAW`` (101) for a</span>
+        <span class="c1"># serves several DLTs, so keying on it would answer ``RAW`` (101) for a</span>
         <span class="c1"># ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid</span>
         <span class="c1"># DLTs, wrong ones, and silent (#843). ``frame.encap_type``</span>
         <span class="c1"># distinguishes them; see that table's comment for the measurements.</span>
@@ -865,8 +860,8 @@
         <span class="c1"># of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is</span>
         <span class="c1"># what the ``getattr`` default absorbs here.</span>
         <span class="c1">#</span>
-        <span class="c1"># Neither path substitutes a DLT on a miss. Since #775 tier 1 a</span>
-        <span class="c1"># lookup raises on an unresolvable key instead of minting one, and</span>
+        <span class="c1"># Neither path substitutes a DLT on a miss. A lookup raises on an</span>
+        <span class="c1"># unresolvable key rather than minting one (#775), and</span>
         <span class="c1"># NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,</span>
         <span class="c1"># respectively -- each meant to go with its own handler protocol</span>
         <span class="c1"># class, so neither is an honest stand-in for "unknown link type".</span>

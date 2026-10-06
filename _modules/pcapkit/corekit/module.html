@@ -540,8 +540,8 @@
 <span class="sd">            extraction of :file:`many_interfaces.pcapng` performs.</span>
 <span class="sd">            :func:`~importlib.import_module` keeps real per-call work for an</span>
 <span class="sd">            already-imported module (locks, :class:`~importlib.machinery.ModuleSpec`</span>
-<span class="sd">            checks, the ``fromlist`` walk), so each repeat cost ~436 ns where</span>
-<span class="sd">            this property now costs ~117 ns.</span>
+<span class="sd">            checks, the ``fromlist`` walk), so each repeat costs ~436 ns</span>
+<span class="sd">            through it against ~117 ns through this property.</span>
 
 <span class="sd">            The class is still read off the module with :func:`getattr` on</span>
 <span class="sd">            every access, and nothing is memoised here. That is the point:</span>
@@ -558,9 +558,8 @@
             <span class="c1"># ``module`` is a ``str`` and the caller never named a class --</span>
             <span class="c1"># GitHub issue #832. Reporting that plainly, before ``getattr``</span>
             <span class="c1"># ever sees it, is more useful than letting the sentinel reach</span>
-            <span class="c1"># ``getattr`` and be reported as an absent attribute named</span>
-            <span class="c1"># ``'(null)'``, which is what happened before #833 gave the</span>
-            <span class="c1"># sentinel a type no caller-supplied string can collide with.</span>
+            <span class="c1"># ``getattr``, which rejects a non-``str`` name with a bare</span>
+            <span class="c1"># ``TypeError``.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'missing class name for module </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="si">!r}</span><span class="s1">: pass an '</span>
                                 <span class="s1">'explicit class_ argument'</span><span class="p">)</span>
 
@@ -583,12 +582,12 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="c1"># GitHub issue #832: every ``register_*`` helper that builds a</span>
-            <span class="c1"># descriptor from a bad class name used to fail with this bare</span>
-            <span class="c1"># stdlib :exc:`AttributeError` -- a caller cannot catch that as a</span>
-            <span class="c1"># :mod:`pcapkit` error. Re-raised as :exc:`ProtocolError` naming</span>
-            <span class="c1"># both the module and the class that turned out missing; the</span>
-            <span class="c1"># message text itself is unchanged; only the type is not.</span>
+            <span class="c1"># GitHub issue #832: a ``register_*`` helper that builds a</span>
+            <span class="c1"># descriptor from a bad class name fails here with a bare stdlib</span>
+            <span class="c1"># :exc:`AttributeError`, which a caller cannot catch as a</span>
+            <span class="c1"># :mod:`pcapkit` error. Re-raised as :exc:`ProtocolError`, whose</span>
+            <span class="c1"># message still names both the module and the missing class; only</span>
+            <span class="c1"># the type changes.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span></div>
 
 </pre></div>

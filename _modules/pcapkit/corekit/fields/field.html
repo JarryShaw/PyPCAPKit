@@ -523,7 +523,7 @@
 <span class="c1">#: else a parse has already padded.</span>
 <span class="c1">#:</span>
 <span class="c1">#: :data:`_MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds</span>
-<span class="c1">#: many fields, so the *sum* was unbounded: a declared length just under the</span>
+<span class="c1">#: many fields, so it leaves the *sum* unbounded: a declared length just under the</span>
 <span class="c1">#: ceiling is honoured however often it is declared. Measured on this tree, 200</span>
 <span class="c1">#: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block</span>
 <span class="c1">#: declaring ``secrets_length`` of 262,142 against two supplied octets through</span>
@@ -545,7 +545,7 @@
 <span class="c1">#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and</span>
 <span class="c1">#: a PCAP-NG option all declare their size -- so no shortfall that one of those</span>
 <span class="c1">#: can produce is subject to the budget at all, and every one of them is padded</span>
-<span class="c1">#: unconditionally, exactly as before. Measured: the largest legitimate single</span>
+<span class="c1">#: unconditionally. Measured: the largest legitimate single</span>
 <span class="c1">#: shortfall found anywhere was 65,495 octets, from a snapshot-truncated</span>
 <span class="c1">#: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total</span>
 <span class="c1">#: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a</span>
@@ -639,7 +639,7 @@
 <span class="sd">    ``Extractor`` run, per file, per frame -- for a caller that wants it that</span>
 <span class="sd">    way, and what makes it reproducible for a test.</span>
 
-<span class="sd">    Note that nothing in this package calls it yet: the layer that knows where</span>
+<span class="sd">    Note that nothing in this package calls it: the layer that knows where</span>
 <span class="sd">    one parse ends is the layer that should, and that is not this one.</span>
 
 <span class="sd">    Yields:</span>
@@ -721,8 +721,8 @@
     <span class="c1"># replace :meth:`__init__` without chaining to this one -- as</span>
     <span class="c1"># :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of</span>
     <span class="c1"># fields takes no default value of its own -- and reading :attr:`default` off</span>
-    <span class="c1"># one of those raised :exc:`AttributeError` for a private attribute rather</span>
-    <span class="c1"># than reporting that the field declares no default. See #422.</span>
+    <span class="c1"># one of those would otherwise raise :exc:`AttributeError` for a private</span>
+    <span class="c1"># attribute rather than report that the field declares no default. See #422.</span>
     <span class="n">_default</span><span class="p">:</span> <span class="s1">'_T | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
@@ -835,10 +835,10 @@
 <span class="w">        </span><span class="sd">"""Return a shallow copy of the field.</span>
 
 <span class="sd">        Every field of every protocol is copied once per packet by</span>
-<span class="sd">        :meth:`__call__`, which made the generic :func:`copy.copy` path -- via</span>
+<span class="sd">        :meth:`__call__`, which makes the generic :func:`copy.copy` path -- via</span>
 <span class="sd">        :meth:`object.__reduce_ex__` and :func:`copy._reconstruct` -- one of the</span>
-<span class="sd">        costlier things an extraction did. This does what that path would have</span>
-<span class="sd">        done, and only that: a new instance of the same class, its</span>
+<span class="sd">        costlier things an extraction would do. This does what that path would</span>
+<span class="sd">        do, and only that: a new instance of the same class, its</span>
 <span class="sd">        :attr:`~object.__dict__` shallow-updated from this one.</span>
 
 <span class="sd">        Note:</span>
@@ -964,9 +964,8 @@
 <span class="sd">                raises.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``length`` recomputes struct.calcsize() on every read, so the</span>
-        <span class="c1"># three reads this method used to make were three calcsize() calls for</span>
-        <span class="c1"># one value.</span>
+        <span class="c1"># NOTE: ``length`` recomputes struct.calcsize() on every read, so it is</span>
+        <span class="c1"># read once here.</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -992,9 +991,9 @@
 
         <span class="c1"># NOTE: The ceiling above bounds one field; this bounds their sum. A</span>
         <span class="c1"># declared length just under :data:`_MAX_ZERO_PAD_LENGTH` passes it every</span>
-        <span class="c1"># time it is declared, so 200 of them amplified 4,800 wire octets into</span>
+        <span class="c1"># time it is declared, so 200 of them amplify 4,800 wire octets into</span>
         <span class="c1"># 50.0 MiB of retained zeros with the ceiling doing exactly what it was</span>
-        <span class="c1"># written to do -- the sum was never bounded at all. C.f. #573.</span>
+        <span class="c1"># written to do. C.f. #573.</span>
         <span class="c1">#</span>
         <span class="c1"># ``max(length, 0)`` is defensive rather than a case anything is known to</span>
         <span class="c1"># reach. :attr:`length` here resolves through :func:`struct.calcsize`, so</span>
@@ -1061,20 +1060,19 @@
         <span class="c1"># NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*</span>
         <span class="c1"># octets of the field -- the buffer ran out, so what is missing is</span>
         <span class="c1"># whatever came after what was read -- so the zeros belong at the end,</span>
-        <span class="c1"># where the unread octets were. ``rjust()`` instead put them at the</span>
+        <span class="c1"># where the unread octets were. ``rjust()`` would put them at the</span>
         <span class="c1"># front, which asserts that the octets never read were the *leading*</span>
         <span class="c1"># ones, and that is wrong for every byte order rather than only for</span>
-        <span class="c1"># little-endian ones. Measured on the tree that padded with ``rjust()``:</span>
-        <span class="c1"># one octet of a four-octet little-endian 120 (``0x78``) read as</span>
-        <span class="c1"># 2,013,265,920, and three octets of a four-octet big-endian</span>
-        <span class="c1"># ``0x01020304`` read as ``0x10203``. ``ljust()`` answers 120 and</span>
-        <span class="c1"># ``0x1020300``. The big-endian error is the more dangerous of the two --</span>
-        <span class="c1"># it scales the value *down*, so it passes a sanity check far more easily</span>
-        <span class="c1"># than the inflated little-endian one, which is why the defect went</span>
-        <span class="c1"># unnoticed there. See #604.</span>
+        <span class="c1"># little-endian ones. Under ``rjust()``, one octet of a four-octet</span>
+        <span class="c1"># little-endian 120 (``0x78``) reads as 2,013,265,920, and three octets</span>
+        <span class="c1"># of a four-octet big-endian ``0x01020304`` read as ``0x10203``.</span>
+        <span class="c1"># ``ljust()`` answers 120 and ``0x1020300``. The big-endian error is the</span>
+        <span class="c1"># more dangerous of the two -- it scales the value *down*, so it passes a</span>
+        <span class="c1"># sanity check far more easily than the inflated little-endian one. See</span>
+        <span class="c1"># #604.</span>
         <span class="c1">#</span>
-        <span class="c1"># This changes what a truncated field *reports*, which is the point, and</span>
-        <span class="c1"># not *whether* a truncated capture parses, which must not change: the</span>
+        <span class="c1"># The choice decides what a truncated field *reports*, not *whether* a</span>
+        <span class="c1"># truncated capture parses, which must not change: the</span>
         <span class="c1"># accommodation itself is deliberate (#431) and the budget above is built</span>
         <span class="c1"># around preserving it. An entirely empty buffer pads to all zeros either</span>
         <span class="c1"># way, so the end-of-option-list and ``Pad1`` reads the option and list</span>

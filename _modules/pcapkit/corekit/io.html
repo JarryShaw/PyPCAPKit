@@ -627,11 +627,10 @@
 <span class="sd">        read path needs both of them:</span>
 
 <span class="sd">        * The buffer's own cursor is a **derived** quantity, ``_tell - _buffer_set``, rather</span>
-<span class="sd">          than a fourth piece of state to be maintained. Nothing was maintaining it: a read</span>
+<span class="sd">          than a fourth piece of state to be maintained. Nothing keeps it in step: a read</span>
 <span class="sd">          served from the stream writes through :attr:`_buffer_view` and leaves the cursor</span>
-<span class="sd">          untouched, :meth:`_write_buffer` rewinds it to the start of the appended octets</span>
-<span class="sd">          when the window slides, and :meth:`peek` used to advance it while leaving ``_tell``</span>
-<span class="sd">          alone. Deriving it here, at each point of use, is what makes the drift</span>
+<span class="sd">          untouched, and :meth:`_write_buffer` rewinds it to the start of the appended</span>
+<span class="sd">          octets when the window slides. Deriving it here, at each point of use, is what makes the drift</span>
 <span class="sd">          unrepresentable instead of merely repaired afterwards by the next :meth:`seek`.</span>
 <span class="sd">        * What is available is the run from the position to the end of the content,</span>
 <span class="sd">          ``_buffer_set + _buffer_cur - _tell`` -- not ``_buffer_cur``, which is measured</span>
@@ -744,7 +743,7 @@
                 <span class="c1"># NOTE: a request for no octets is answered without consulting the window,</span>
                 <span class="c1"># which has nothing to say about it. Asking anyway refuses a zero-length</span>
                 <span class="c1"># read from a position :meth:`_truncate_buffer` has left behind the window -- a</span>
-                <span class="c1"># refusal over data that was never wanted, and not what this used to do.</span>
+                <span class="c1"># refusal over data that was never wanted.</span>
                 <span class="c1">#</span>
                 <span class="c1"># Truthiness rather than ``size == 0`` on purpose. It is the same test for</span>
                 <span class="c1"># every value this method can be reached with -- ``size`` is an ``int`` by</span>
@@ -752,7 +751,7 @@
                 <span class="c1"># not normalise a ``None`` its signature does not permit, and there the two</span>
                 <span class="c1"># spellings diverge: ``size == 0`` would send ``None`` on to the window and</span>
                 <span class="c1"># report a type error as a position error. Keeping it falsy keeps that call</span>
-                <span class="c1"># failing as the :exc:`TypeError` it always was.</span>
+                <span class="c1"># failing as a :exc:`TypeError`.</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
@@ -820,20 +819,21 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            The target is computed, then validated, and only then written to ``_tell``. A</span>
-<span class="sd">            branch that assigned the position before deciding whether to accept it left a</span>
-<span class="sd">            refused seek having moved it anyway, with the resync below -- the one thing that</span>
-<span class="sd">            puts the buffer's cursor back in step -- skipped on the way out. A caller that</span>
-<span class="sd">            catches the error and reasonably takes the position to be unchanged then read</span>
-<span class="sd">            from the rejected offset instead, silently and without a second error.</span>
+<span class="sd">            branch that assigned the position before deciding whether to accept it would</span>
+<span class="sd">            leave a refused seek having moved it anyway, with the resync below -- the one</span>
+<span class="sd">            thing that puts the buffer's cursor back in step -- skipped on the way out. A</span>
+<span class="sd">            caller that catches the error and reasonably takes the position to be unchanged</span>
+<span class="sd">            would then read from the rejected offset instead, silently and without a second</span>
+<span class="sd">            error.</span>
 
 <span class="sd">            The negative check applies to every ``whence``, rather than only</span>
 <span class="sd">            :data:`~io.SEEK_SET` looking at its offset. An absolute position below zero</span>
 <span class="sd">            cannot exist under any of them, and it is not the same failure as a position</span>
 <span class="sd">            that has merely slid out of the window -- which is ordinary, and recoverable</span>
 <span class="sd">            with ``buffer_save=True``. Reporting the first as ``negative seek value`` keeps</span>
-<span class="sd">            the two distinguishable, and being a property of the position rather than of the</span>
-<span class="sd">            window it holds with a saved buffer as well, where the old refusal did not</span>
-<span class="sd">            apply at all and the seek returned a negative position as if it had worked.</span>
+<span class="sd">            the two distinguishable, and, being a property of the position rather than of</span>
+<span class="sd">            the window, it holds with a saved buffer as well, which is exempt from the window</span>
+<span class="sd">            check and would otherwise return a negative position as if the seek had worked.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: we mark the end of buffer content to the end of buffer</span>
@@ -880,8 +880,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: only a saved buffer reaches here -- the refusal above has already</span>
             <span class="c1"># turned away a position before the window when there is no file to serve it</span>
-            <span class="c1"># from, which is what the refusal used to do at this point instead, after</span>
-            <span class="c1"># ``_tell`` had been moved.</span>
+            <span class="c1"># from.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span></div>
 
@@ -919,10 +918,9 @@
 <span class="sd">            ``_pyio.BufferedReader`` raise :exc:`io.UnsupportedOperation`, the latter from</span>
 <span class="sd">            ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (:issue:`645`).</span>
 
-<span class="sd">            The resizing this used to perform is still reachable internally, as</span>
-<span class="sd">            :meth:`_truncate_buffer`. It never touched the underlying stream in the first place</span>
-<span class="sd">            -- it resizes a private lookback window -- which is why it survives under a private</span>
-<span class="sd">            name rather than being removed with the public method's behaviour.</span>
+<span class="sd">            Resizing the lookback buffer is reachable internally, as :meth:`_truncate_buffer`.</span>
+<span class="sd">            It never touches the underlying stream -- it resizes a private lookback window --</span>
+<span class="sd">            which is why it stays, under a private name.</span>
 
 <span class="sd">        """</span>
         <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">'truncate'</span><span class="p">)</span></div>
@@ -935,8 +933,7 @@
 <span class="sd">        zero-filled. The new buffer size is returned.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This is the internal half of what :meth:`truncate` used to do, which is all of it:</span>
-<span class="sd">            nothing here writes to the underlying stream -- :meth:`write` raises -- so what</span>
+<span class="sd">            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what</span>
 <span class="sd">            this resizes is the buffer, not the stream behind it. That is why :meth:`truncate`</span>
 <span class="sd">            refuses (:issue:`645`) while this remains: the operation is a private-window one,</span>
 <span class="sd">            not an :class:`io.IOBase` write. The buffer is a sliding window over a stream that</span>
@@ -963,7 +960,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: an unspecified size means the current position, following the</span>
-            <span class="c1"># :meth:`io.IOBase.truncate` convention this used to implement. The buffer</span>
+            <span class="c1"># :meth:`io.IOBase.truncate` convention. The buffer</span>
             <span class="c1"># is indexed relative to ``_buffer_set``, and the position may sit before it</span>
             <span class="c1"># once a saved buffer has been rewound, in which case nothing is kept.</span>
             <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -997,15 +994,7 @@
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.writable">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">writable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and</span>
-<span class="sd">        :meth:`truncate` will raise :exc:`OSError`.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This was spelled ``writeable`` until :issue:`645`, which is not how the :mod:`io`</span>
-<span class="sd">            protocol spells it, so it overrode nothing and :mod:`io` never consulted it -- the</span>
-<span class="sd">            inherited :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`,</span>
-<span class="sd">            so there was no observable divergence to notice; the coincidence is what hid it.</span>
-
-<span class="sd">        """</span>
+<span class="sd">        :meth:`truncate` will raise :exc:`OSError`."""</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
@@ -1198,7 +1187,7 @@
                 <span class="c1"># NOTE: read through the view rather than through ``self._buffer``, whose</span>
                 <span class="c1"># cursor an ordinary read would advance. A preview must leave the position</span>
                 <span class="c1"># alone, and the buffer's cursor is part of the position: advancing it here</span>
-                <span class="c1"># while leaving ``_tell`` untouched is what made the *next* buffered read</span>
+                <span class="c1"># while leaving ``_tell`` untouched would make the *next* buffered read</span>
                 <span class="c1"># start from the wrong octet, with ``tell()`` reporting the right one.</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
                 <span class="n">buf_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>

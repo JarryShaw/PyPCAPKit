@@ -619,7 +619,7 @@
 <span class="w">    </span><span class="sd">"""Convert DPKT packet into :obj:`dict`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        packet: DPKT packet.</span>
 <span class="sd">        timestamp: Timestamp of packet.</span>
 <span class="sd">        data_link: Data link type.</span>
 
@@ -655,7 +655,7 @@
 <span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
 <span class="sd">            timeout. `DPKT`_'s reader yields it beside the record's octets rather</span>
 <span class="sd">            than on the packet, so it is passed in -- as :func:`tcp_traceflow`</span>
-<span class="sd">            already does. A caller holding only a frame can read it back with</span>
+<span class="sd">            does. A caller holding only a frame can read it back with</span>
 <span class="sd">            :func:`packet2timestamp`, which is where</span>
 <span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
@@ -749,8 +749,8 @@
                 <span class="c1"># (:rfc:`8200#section-4.5`), not the IPv6 header's Flow Label. The</span>
                 <span class="c1"># label is optional and routinely zero, so keying on it collapses</span>
                 <span class="c1"># every datagram between one address pair into a single buffer and</span>
-                <span class="c1"># interleaves their fragments; it also disagreed with ``bufid[2]``</span>
-                <span class="c1"># in every other engine, which feeds</span>
+                <span class="c1"># interleaves their fragments; it would also disagree with</span>
+                <span class="c1"># ``bufid[2]`` in every other engine, which feeds</span>
                 <span class="c1"># :attr:`pcapkit.foundation.reassembly.data.ip.DatagramID.id`.</span>
                 <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                    <span class="c1"># identification</span>
                 <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nxt</span><span class="p">),</span>               <span class="c1"># next header field in IPv6 Fragment Header</span>

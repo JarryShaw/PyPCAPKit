@@ -564,11 +564,11 @@
 <span class="sd">    Important:</span>
 <span class="sd">        This decorator function is designed for decorating *class methods*.</span>
 
-<span class="sd">    This decorator first keep the current offset of</span>
-<span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`, then</span>
-<span class="sd">    try to call the decorated function. Should any exception raised, it will</span>
-<span class="sd">    re-parse the :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`</span>
-<span class="sd">    as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.</span>
+<span class="sd">    This decorator calls the decorated function. Should any exception be</span>
+<span class="sd">    raised, it logs the error and re-parses the current layer's payload as</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` -- or as</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an</span>
+<span class="sd">    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
@@ -596,7 +596,6 @@
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># record file pointer</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># call method</span>
             <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -622,7 +621,7 @@
             <span class="c1"># ``payload`` field at all. Going through the schema there raises</span>
             <span class="c1"># ProtocolUnbound('unknown field: payload') *from the recovery path*,</span>
             <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
-            <span class="c1"># Raw into a crash. Unreachable until something was registered on an</span>
+            <span class="c1"># Raw into a crash. Reachable once something is registered on an</span>
             <span class="c1"># SCTP payload protocol identifier, which NGAP is.</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
 
@@ -636,7 +635,7 @@
             <span class="c1"># Measured, because the layers differ and it is easy to state this too</span>
             <span class="c1"># broadly: SCTP's unregistered path keeps its enumeration -- an unknown</span>
             <span class="c1"># PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so</span>
-            <span class="c1"># without this line, *registering* NGAP on PPID 60 would have made a</span>
+            <span class="c1"># without this line, *registering* NGAP on PPID 60 would make a</span>
             <span class="c1"># failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less</span>
             <span class="c1"># than the same bytes gave while unregistered. TCP's unregistered</span>
             <span class="c1"># path keeps its code too, but as a plain integer: an unknown port</span>
@@ -646,8 +645,8 @@
             <span class="c1"># whether or not it is registered. So both *unknown* paths preserve</span>
             <span class="c1"># the code that arrived; what differs is only that SCTP's is an</span>
             <span class="c1"># enumeration the protochain can name, while TCP's is an ``int`` and</span>
-            <span class="c1"># renders as ``Raw``. That was #418; this line is</span>
-            <span class="c1"># about the *failure* path, which it makes uniform.</span>
+            <span class="c1"># renders as ``Raw`` (#418). This line is about the *failure* path,</span>
+            <span class="c1"># which it makes uniform.</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">behold</span></div>
@@ -660,7 +659,7 @@
 <span class="w">    </span><span class="sd">"""Prepare schema packet data before unpacking.</span>
 
 <span class="sd">    Important:</span>
-<span class="sd">        This decorate function is designed for decorating the</span>
+<span class="sd">        This decorator function is designed for decorating the</span>
 <span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
 <span class="sd">        *class method*.</span>
 
@@ -681,12 +680,9 @@
 <span class="sd">        forwarded to -- the decorated function. :func:`prepare` is applied to</span>
 <span class="sd">        exactly one function in this tree,</span>
 <span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`,</span>
-<span class="sd">        whose real signature has never had more than these four parameters,</span>
-<span class="sd">        and nothing calls it with more; an earlier revision of this note</span>
-<span class="sd">        nonetheless promised implementors a trailing ``*args, **kwargs``, which</span>
-<span class="sd">        the wrapper below never populated. A caller relying on that promise</span>
-<span class="sd">        got extras silently discarded instead of forwarded -- see :issue:`454` -- so the</span>
-<span class="sd">        wrapper raises :exc:`TypeError` for a fifth positional argument or</span>
+<span class="sd">        whose real signature has exactly these four parameters, and nothing</span>
+<span class="sd">        calls it with more. Rather than discard extras silently (:issue:`454`),</span>
+<span class="sd">        the wrapper raises :exc:`TypeError` for a fifth positional argument or</span>
 <span class="sd">        an unconsumed keyword, the same as an ordinary call with too many</span>
 <span class="sd">        arguments would.</span>
 
@@ -772,10 +768,10 @@
         <span class="c1"># ``post_process`` a *second* time, with a packet context rebuilt from</span>
         <span class="c1"># the schema's own fields and therefore holding none of the enclosing</span>
         <span class="c1"># layer's, so it overwrites exactly the values ``post_process`` derived</span>
-        <span class="c1"># from that context. It is what discarded the IPv6 source address that</span>
-        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``</span>
-        <span class="c1"># had just resolved: ``OptionField.unpack`` measures each parsed option</span>
-        <span class="c1"># with ``len(data)``, which triggered the re-pack one option later.</span>
+        <span class="c1"># from that context. It would discard, for one, the IPv6 source address</span>
+        <span class="c1"># that ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``</span>
+        <span class="c1"># has just resolved: ``OptionField.unpack`` measures each parsed option</span>
+        <span class="c1"># with ``len(data)``, which triggers the re-pack one option later.</span>
         <span class="c1">#</span>
         <span class="c1"># ``Schema.pack`` already orders the two the other way round -- clear the</span>
         <span class="c1"># flag *after* ``post_process``, not before -- so match it here and the</span>

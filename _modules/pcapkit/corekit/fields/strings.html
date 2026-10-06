@@ -586,13 +586,13 @@
 <span class="sd">        default: Field default value, if any.</span>
 <span class="sd">        encoding: The encoding with which to decode the :obj:`bytes`.</span>
 <span class="sd">            If not provided, :mod:`pcapkit` will first try detecting its encoding</span>
-<span class="sd">            using |chardet|_. The fallback encoding would is **UTF-8**.</span>
+<span class="sd">            using |chardet|_. The fallback encoding is **UTF-8**.</span>
 <span class="sd">        errors: The error handling scheme to use for the handling of decoding errors.</span>
 <span class="sd">            The default is ``'strict'`` meaning that decoding errors raise a</span>
 <span class="sd">            :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``</span>
 <span class="sd">            as well as any other name registered with :func:`codecs.register_error` that</span>
 <span class="sd">            can handle :exc:`UnicodeDecodeError`.</span>
-<span class="sd">        unquote: Whether to unquote the decoded string as a URL. Should decoding failed ,</span>
+<span class="sd">        unquote: Whether to unquote the decoded string as a URL. Should decoding fail,</span>
 <span class="sd">            the method will try again replacing ``'%'`` with ``'\x'`` then decoding the</span>
 <span class="sd">            ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
@@ -690,9 +690,9 @@
 
         <span class="c1"># NOTE: A subfield reaching past the end of the field is a mistake in the</span>
         <span class="c1"># schema that declares it, not something a packet can cause, so it is</span>
-        <span class="c1"># rejected here rather than at packing time -- where it used to grow the</span>
-        <span class="c1"># buffer instead, and surface much later as an opaque ``OverflowError``</span>
-        <span class="c1"># from :meth:`int.to_bytes`.</span>
+        <span class="c1"># rejected here rather than at packing time -- where it would instead grow</span>
+        <span class="c1"># the buffer, and surface much later as an opaque ``OverflowError`` from</span>
+        <span class="c1"># :meth:`int.to_bytes`.</span>
         <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">+</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">:</span>

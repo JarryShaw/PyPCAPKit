@@ -685,7 +685,7 @@ cannot be used for it.</p>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Capture timestamp of the packet, which drives the reassembly
 timeout. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s reader yields it beside the record’s octets rather
 than on the packet, so it is passed in – as <a class="reference internal" href="#pcapkit.toolkit.dpkt.tcp_traceflow" title="pcapkit.toolkit.dpkt.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>
-already does. A caller holding only a frame can read it back with
+does. A caller holding only a frame can read it back with
 <code class="xref py py-func docutils literal notranslate"><span class="pre">packet2timestamp()</span></code>, which is where
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> leaves it.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
@@ -860,7 +860,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type.</p></li>
 </ul>
@@ -893,10 +893,13 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – PyShark packet.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>A tuple of data for TCP reassembly.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>Data for TCP flow tracing.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be reassembled
 if it contains TCP layer.</p></li>
@@ -904,9 +907,6 @@ if it contains TCP layer.</p></li>
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
 </p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -959,18 +959,14 @@ the PDML
 argument to <code class="docutils literal notranslate"><span class="pre">proto_register_protocol()</span></code> in the relevant <code class="docutils literal notranslate"><span class="pre">epan/dissectors/packet-*.c</span></code> – and
 that vocabulary is not <code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code>’s: Ethernet’s filter name is <code class="docutils literal notranslate"><span class="pre">eth</span></code>, never
 <code class="docutils literal notranslate"><span class="pre">ETHERNET</span></code>.</p>
-<p>Both entries were checked two ways: against Wireshark’s dissector registrations
-(<code class="docutils literal notranslate"><span class="pre">packet-eth.c</span></code> against <code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_ETHERNET</span></code>, <code class="docutils literal notranslate"><span class="pre">packet-tr.c</span></code> against
-<code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_TOKEN_RING</span></code>), and live with <code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span></code> to confirm which PDML root each
-encapsulation produces.</p>
 <p>Every entry comes from the same sweep as <code class="docutils literal notranslate"><span class="pre">ENCAP_TYPE_TO_LINKTYPE</span></code> above: the root <code class="docutils literal notranslate"><span class="pre">&lt;proto</span>
 <span class="pre">name=...&gt;</span></code> of <code class="docutils literal notranslate"><span class="pre">tshark</span> <span class="pre">-r</span> <span class="pre">out.pcap</span> <span class="pre">-c</span> <span class="pre">1</span> <span class="pre">-T</span> <span class="pre">pdml</span></code> against the DLT in <code class="docutils literal notranslate"><span class="pre">out.pcap</span></code>’s own file
 header. The trailing comment on each line names the <code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span></code> encapsulation that produced
 it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one
 rewrite. Names are listed even where they already spell their <code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code> member
 (<code class="docutils literal notranslate"><span class="pre">docsis</span></code>, <code class="docutils literal notranslate"><span class="pre">fddi</span></code>, <code class="docutils literal notranslate"><span class="pre">pflog</span></code>, …): there is deliberately <strong>no</strong> fallback onto a like-named
-member, because upper-casing the name is exactly what answered 101 for a <code class="docutils literal notranslate"><span class="pre">rawip6</span></code> capture and
-0 for a <code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> one – valid DLTs, wrong ones, and silent (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/843">#843</a>).</p>
+member, because upper-casing the name is exactly what would answer 101 for a <code class="docutils literal notranslate"><span class="pre">rawip6</span></code> capture
+and 0 for a <code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> one – valid DLTs, wrong ones, and silent (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/843">#843</a>).</p>
 <p>Three classes of name are absent, all three measured rather than assumed:</p>
 <ul class="simple">
 <li><p><strong>Ambiguous</strong> – one name, several DLTs, and the PDML node does not say which arrived. These
@@ -1002,7 +998,7 @@ Wireshark’s own registrations (<code class="docutils literal notranslate"><spa
 <dd><p>Convert PyShark packet into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – PyShark packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>

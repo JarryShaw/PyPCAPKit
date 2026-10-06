@@ -474,7 +474,7 @@
 <span class="sd">.. module:: pcapkit.utilities.exceptions</span>
 
 <span class="sd">:mod:`pcapkit.utilities.exceptions` refined built-in exceptions.</span>
-<span class="sd">Make it possible to show only user error stack infomation [*]_,</span>
+<span class="sd">Make it possible to show only user error stack information [*]_,</span>
 <span class="sd">when exception raised on user's operation.</span>
 
 <span class="sd">.. [*] See |tbtrim|_ project for Pythonic implementation.</span>
@@ -557,12 +557,11 @@
 <span class="sd">        level ``outermost`` the interpreter entry point</span>
 
 <span class="sd">    The frame to name is the first one *past* the boundary, hence</span>
-<span class="sd">    ``boundary + 1``. What makes this a fix rather than a rewrite is that</span>
-<span class="sd">    ``boundary`` is measured from the *inside* out: it depends only on how deep the</span>
-<span class="sd">    :mod:`pcapkit` frames run, never on how deep the caller's own stack is.</span>
-<span class="sd">    Numbering from the outside in, as this function once did, grew with the outer</span>
-<span class="sd">    stack, so the frame it named drifted one further out for every extra frame</span>
-<span class="sd">    above the boundary -- under :program:`pytest`, dozens of them.</span>
+<span class="sd">    ``boundary + 1``. ``boundary`` is measured from the *inside* out: it depends</span>
+<span class="sd">    only on how deep the :mod:`pcapkit` frames run, never on how deep the caller's</span>
+<span class="sd">    own stack is. Numbering from the outside in would grow with the outer stack,</span>
+<span class="sd">    so the frame named would drift one further out for every extra frame above the</span>
+<span class="sd">    boundary -- under :program:`pytest`, dozens of them.</span>
 
 <span class="sd">    Both bounds are enforced, as neither consumer copes with a level outside them:</span>
 
@@ -813,7 +812,7 @@
 <span class="sd">    as closely as the default thread hook's own output allows: a loud</span>
 <span class="sd">    :class:`BaseError` prints the ``"Exception in thread ...:"`` header the</span>
 <span class="sd">    default hook always prints first -- the one piece of that output</span>
-<span class="sd">    :data:`sys.tracebacklimit` never touched, since it only ever bounded the</span>
+<span class="sd">    :data:`sys.tracebacklimit` does not touch, since it only bounds the</span>
 <span class="sd">    traceback -- then its own message tersely, with ``limit=0`` against the real</span>
 <span class="sd">    traceback so a chained exception still comes out right. Anything else is</span>
 <span class="sd">    handed to ``_previous_threading_excepthook`` -- or</span>
@@ -1322,11 +1321,11 @@
 <span class="sd">    circumstances, and raise it from this module rather than as a builtin.</span>
 
 <span class="sd">    Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:</span>
-<span class="sd">    :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin</span>
-<span class="sd">    :exc:`KeyError` on a name miss until :issue:`923`, and six in-library call sites</span>
-<span class="sd">    catch it -- :meth:`~pcapkit.const.http.method.Method.get` catches it in</span>
-<span class="sd">    order to *mint*, so for that one a failed name lookup is part of a</span>
-<span class="sd">    successful call. Every one of them keeps catching, unchanged.</span>
+<span class="sd">    six in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s</span>
+<span class="sd">    name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`</span>
+<span class="sd">    catches it in order to build an unregistered member, so for that one a</span>
+<span class="sd">    failed name lookup is part of a successful call -- and every one of them</span>
+<span class="sd">    keeps catching.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Distinct from :exc:`~pcapkit.utilities.exceptions.MissingKeyError`,</span>

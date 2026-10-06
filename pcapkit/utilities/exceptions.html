@@ -973,11 +973,11 @@ phase-2 re-parenting, carried out by GitHub issue <a class="extlink-issue refere
 whichever of the two stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> would raise in the same
 circumstances, and raise it from this module rather than as a builtin.</p>
 <p>Deriving from <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> is what makes that ruling cheap to carry out:
-<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> raised a bare builtin
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> on a name miss until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>, and six in-library call sites
-catch it – <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> catches it in
-order to <em>mint</em>, so for that one a failed name lookup is part of a
-successful call. Every one of them keeps catching, unchanged.</p>
+six in-library call sites catch <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s
+name miss as <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> – <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>
+catches it in order to build an unregistered member, so for that one a
+failed name lookup is part of a successful call – and every one of them
+keeps catching.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Distinct from <a class="reference internal" href="#pcapkit.utilities.exceptions.MissingKeyError" title="pcapkit.utilities.exceptions.MissingKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a>,

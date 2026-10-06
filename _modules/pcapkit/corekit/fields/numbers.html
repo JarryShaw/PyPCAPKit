@@ -533,12 +533,12 @@
 
 <span class="sd">    Notes:</span>
 <span class="sd">        A subclass such as :class:`UInt32Field` fixes the sign through</span>
-<span class="sd">        ``__signed__``, so ``signed`` there is at best redundant. It used to be</span>
-<span class="sd">        discarded outright, in both directions, which meant</span>
-<span class="sd">        ``UInt32Field(signed=True)`` handed back an unsigned field whose values</span>
-<span class="sd">        only looked wrong once the high bit was set -- see GitHub issue</span>
-<span class="sd">        :issue:`545`. A contradicting value is now rejected instead; omitting</span>
-<span class="sd">        it, or passing the sign the class already fixes, stays legal.</span>
+<span class="sd">        ``__signed__``, so ``signed`` there is at best redundant. A</span>
+<span class="sd">        contradicting value is rejected rather than discarded, since</span>
+<span class="sd">        discarding it would make ``UInt32Field(signed=True)`` hand back an</span>
+<span class="sd">        unsigned field whose values only look wrong once the high bit is set</span>
+<span class="sd">        -- see GitHub issue :issue:`545`. Omitting it, or passing the sign the</span>
+<span class="sd">        class already fixes, stays legal.</span>
 
 <span class="sd">    """</span>
 
@@ -574,10 +574,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="c1"># NOTE: ``__signed__`` fixes the sign for a subclass such as</span>
-        <span class="c1"># :class:`UInt32Field`, and used to *discard* the ``signed`` argument to</span>
-        <span class="c1"># do it -- in both directions, so ``UInt32Field(signed=True)`` returned</span>
-        <span class="c1"># an unsigned field and ``Int8Field(signed=False)`` a signed one, both</span>
-        <span class="c1"># without a word. ``None`` is what "not given" looks like, which is what</span>
+        <span class="c1"># :class:`UInt32Field`; discarding a contradicting ``signed`` would make</span>
+        <span class="c1"># ``UInt32Field(signed=True)`` return an unsigned field and</span>
+        <span class="c1"># ``Int8Field(signed=False)`` a signed one, both without a word.</span>
+        <span class="c1"># ``None`` is what "not given" looks like, which is what</span>
         <span class="c1"># lets a contradicting value be told apart from the default and rejected</span>
         <span class="c1"># while leaving an agreeing one alone. See #545.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -646,7 +646,7 @@
 <span class="sd">            Rebuilding the template here is what applies a callable ``length``,</span>
 <span class="sd">            and :meth:`build_template` recomputes ``self._need_process`` as it</span>
 <span class="sd">            goes, so the flag and the template always describe the same width.</span>
-<span class="sd">            They did not always: see GitHub issue :issue:`591`.</span>
+<span class="sd">            See GitHub issue :issue:`591`.</span>
 
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
@@ -683,15 +683,14 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            ``self._need_process`` is **assigned** here rather than only ever</span>
 <span class="sd">            raised, so that it always describes the ``length`` this template</span>
-<span class="sd">            was built for. It used to be</span>
-<span class="sd">            set :data:`True` in the fall-through branch and never put back,</span>
-<span class="sd">            which made it a latch: a callable ``length`` is a placeholder of</span>
-<span class="sd">            ``-1`` at construction, ``-1`` takes the fall-through branch, and</span>
-<span class="sd">            the flag then survived the rebuild in :meth:`__call__` that</span>
-<span class="sd">            resolved the real width. :meth:`pre_process` consequently handed</span>
-<span class="sd">            :obj:`bytes` to a template that had become ``&gt;Q`` -- or ``&gt;I``,</span>
-<span class="sd">            ``&gt;H``, ``&gt;B`` -- and :func:`struct.pack` refused it. See GitHub</span>
-<span class="sd">            issue :issue:`591`.</span>
+<span class="sd">            was built for. Only ever setting it :data:`True` in the</span>
+<span class="sd">            fall-through branch would make it a latch: a callable ``length`` is</span>
+<span class="sd">            a placeholder of ``-1`` at construction, ``-1`` takes the</span>
+<span class="sd">            fall-through branch, and the flag would then survive the rebuild in</span>
+<span class="sd">            :meth:`__call__` that resolves the real width. :meth:`pre_process`</span>
+<span class="sd">            would consequently hand :obj:`bytes` to a template that had become</span>
+<span class="sd">            ``&gt;Q`` -- or ``&gt;I``, ``&gt;H``, ``&gt;B`` -- and :func:`struct.pack` would</span>
+<span class="sd">            refuse it. See GitHub issue :issue:`591`.</span>
 
 <span class="sd">            Assigning it is what tells a placeholder apart from a width that</span>
 <span class="sd">            genuinely needs byte packing, without having to remember that a</span>
@@ -743,17 +742,16 @@
 <span class="sd">            that rebuild can land on a width :func:`struct` has a native</span>
 <span class="sd">            integer code for. The flag is therefore consulted **after** the</span>
 <span class="sd">            rebuild rather than before it, since deciding first and rebuilding</span>
-<span class="sd">            second is how the template and the value being returned came to</span>
-<span class="sd">            disagree in the first place. C.f. :issue:`591`.</span>
+<span class="sd">            second would let the template and the value being returned</span>
+<span class="sd">            disagree. C.f. :issue:`591`.</span>
 
 <span class="sd">            That width is a **ceiling** of the bit length over eight, and it is</span>
-<span class="sd">            written as one. It used to read</span>
-<span class="sd">            ``math.ceil(value.bit_length() // 8)``, which is not a ceiling at</span>
-<span class="sd">            all: :func:`math.ceil` of an :obj:`int` is that :obj:`int`, so the</span>
-<span class="sd">            ``//`` had already floored the quotient and the outer call did</span>
-<span class="sd">            nothing. Every value whose bit length is not an exact multiple of</span>
-<span class="sd">            eight was therefore sized one octet short -- ``256`` at one octet,</span>
-<span class="sd">            ``65536`` at two, and ``1`` itself at *zero* -- which</span>
+<span class="sd">            written as one. ``math.ceil(value.bit_length() // 8)`` is not a</span>
+<span class="sd">            ceiling at all: :func:`math.ceil` of an :obj:`int` is that</span>
+<span class="sd">            :obj:`int`, so the ``//`` has already floored the quotient and the</span>
+<span class="sd">            outer call does nothing. Every value whose bit length is not an</span>
+<span class="sd">            exact multiple of eight would be sized one octet short -- ``256`` at</span>
+<span class="sd">            one octet, ``65536`` at two, and ``1`` itself at *zero* -- which</span>
 <span class="sd">            :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub</span>
 <span class="sd">            issue :issue:`599`.</span>
 
@@ -1073,29 +1071,29 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            The registry is consulted through its constructor, which raises for</span>
 <span class="sd">            a value no member and no ``_missing_`` rule accounts for. That raise</span>
-<span class="sd">            used to propagate, and it is :mod:`aenum`'s own bare</span>
-<span class="sd">            :exc:`ValueError`: not one of :mod:`pcapkit.utilities.exceptions`,</span>
-<span class="sd">            so a caller cannot tell it from a bug of its own, and not an</span>
-<span class="sd">            :exc:`EOFError`, so :meth:`Extractor.record_frames</span>
+<span class="sd">            is :mod:`aenum`'s own bare :exc:`ValueError`: not one of</span>
+<span class="sd">            :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell it from</span>
+<span class="sd">            a bug of its own, and not an :exc:`EOFError`, so</span>
+<span class="sd">            :meth:`Extractor.record_frames</span>
 <span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` does not</span>
-<span class="sd">            catch it. One unassigned code therefore cost the whole extraction.</span>
+<span class="sd">            catch it. Left to propagate, one unassigned code would cost the</span>
+<span class="sd">            whole extraction.</span>
 
-<span class="sd">            It also made the "unknown" reader the formats require unreachable</span>
-<span class="sd">            for any genuinely unassigned code -- PCAP-NG's</span>
+<span class="sd">            It would also make the "unknown" reader the formats require</span>
+<span class="sd">            unreachable for any genuinely unassigned code -- PCAP-NG's</span>
 <span class="sd">            :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the</span>
 <span class="sd">            ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --</span>
-<span class="sd">            because the lookup failed several frames before the dispatch that</span>
-<span class="sd">            would have selected it. PCAP-NG repeats a block's total length at</span>
-<span class="sd">            both ends precisely so that a reader can skip a block type it does</span>
-<span class="sd">            not recognise; that skip is what this fallback restores. See GitHub</span>
-<span class="sd">            issue :issue:`701`.</span>
+<span class="sd">            because the lookup would fail before the dispatch that selects it.</span>
+<span class="sd">            PCAP-NG repeats a block's total length at both ends precisely so</span>
+<span class="sd">            that a reader can skip a block type it does not recognise; that skip</span>
+<span class="sd">            is what this fallback keeps working. See GitHub issue :issue:`701`.</span>
 
 <span class="sd">            The fallback is the same nameless pseudo-member this method already</span>
 <span class="sd">            builds for a field carrying no registry at all, so it is a value</span>
 <span class="sd">            shape the package already produces and the dump layer already</span>
 <span class="sd">            renders -- as ``&lt;unknown&gt;::&lt;unassigned&gt; [28]``, through</span>
-<span class="sd">            :func:`~pcapkit.dumpkit.common.render_enum`, not through the</span>
-<span class="sd">            ``name is None`` branch :issue:`648` added, which a member named</span>
+<span class="sd">            :func:`~pcapkit.dumpkit.common.render_enum`, not through its</span>
+<span class="sd">            ``name is None`` branch (:issue:`648`), which a member named</span>
 <span class="sd">            ``&lt;unassigned&gt;`` never takes -- and one an :class:`int`-keyed</span>
 <span class="sd">            dispatch registry looks up by value like any declared member. It is</span>
 <span class="sd">            built per value rather than grafted onto</span>
@@ -1177,7 +1175,7 @@
 <span class="sd">        names -- ``isinstance`` against it and every ancestor holds, and it</span>
 <span class="sd">        renders and dispatches exactly like a declared one -- provided</span>
 <span class="sd">        building it never grows the registry, which is the whole reason the</span>
-<span class="sd">        field stopped calling ``get()`` unconditionally in the first place.</span>
+<span class="sd">        field does not call ``get()`` unconditionally.</span>
 <span class="sd">        This is what gets there: it calls ``namespace``'s own storage base's</span>
 <span class="sd">        ``__new__`` directly -- :class:`str` or :class:`int`, whichever</span>
 <span class="sd">        ``namespace`` derives from -- which skips ``namespace``'s *own*</span>
@@ -1201,12 +1199,12 @@
 
 <span class="sd">            The member this returns is absent from ``_value2member_map_``, so</span>
 <span class="sd">            a *value*-keyed lookup on it -- ``self._namespace(value)`` --</span>
-<span class="sd">            still raises exactly as it did before this existed. Nothing on the</span>
+<span class="sd">            still raises. Nothing on the</span>
 <span class="sd">            parse or reconstruction path does that to a value it just resolved</span>
 <span class="sd">            this way, which is what keeps this safe to return from</span>
 <span class="sd">            ``post_process``. A direct call to</span>
 <span class="sd">            :meth:`~pcapkit.const.reg.apptype.AppType.get` for the same port</span>
-<span class="sd">            is a different matter and deliberately unchanged: asking the</span>
+<span class="sd">            is a different matter and deliberately so: asking the</span>
 <span class="sd">            registry for a name is an explicit request for a named member, so</span>
 <span class="sd">            it still mints one -- measured on this tree,</span>
 <span class="sd">            ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and</span>
@@ -1225,17 +1223,15 @@
 <span class="sd">            :mod:`pickle` and :func:`copy.copy`/:func:`copy.deepcopy` all</span>
 <span class="sd">            reduce an :class:`~enum.Enum` member through</span>
 <span class="sd">            ``Enum.__reduce_ex__``, which returns ``(cls, (value,))`` -- the</span>
-<span class="sd">            one lookup this member is deliberately absent from. Left alone</span>
-<span class="sd">            that is a genuine regression rather than a pre-existing</span>
-<span class="sd">            limitation, because the call sites used to *mint*, so the member</span>
-<span class="sd">            was registered and a round-trip worked. Measured on CPython</span>
-<span class="sd">            3.14.7, resolving port 53406 through</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`:</span>
-<span class="sd">            on ``83b58ebda`` ``pickle.loads(pickle.dumps(member))`` returned</span>
-<span class="sd">            the member, and with the mint removed and nothing in its place it</span>
-<span class="sd">            raised ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP``</span>
-<span class="sd">            -- while ``pickle.dumps`` still succeeded, so the failure</span>
-<span class="sd">            surfaced only on read-back rather than where it was caused.</span>
+<span class="sd">            one lookup this member is deliberately absent from. A minted</span>
+<span class="sd">            member is registered and so round-trips; left alone, this one</span>
+<span class="sd">            would not. Measured on CPython 3.14.7, resolving port 53406</span>
+<span class="sd">            through :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`</span>
+<span class="sd">            with nothing in place of the override,</span>
+<span class="sd">            ``pickle.loads(pickle.dumps(member))`` raised</span>
+<span class="sd">            ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP`` -- while</span>
+<span class="sd">            ``pickle.dumps`` still succeeded, so the failure surfaced only on</span>
+<span class="sd">            read-back rather than where it was caused.</span>
 
 <span class="sd">            So ``__reduce_ex__`` is set on the member itself, reducing it to</span>
 <span class="sd">            :func:`_rebuild_unregistered_member` instead of to a value lookup.</span>

@@ -531,8 +531,7 @@ is something every enumeration has an opinion on, whereas who may <em>add</em>
 one is only an open registry’s concern.</p>
 <p>The base implementation accepts everything, because a base cannot know
 any subclass’s range. Overriding it is how a subclass states one – the
-shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries
-today:</p>
+shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
@@ -608,8 +607,7 @@ is something every enumeration has an opinion on, whereas who may <em>add</em>
 one is only an open registry’s concern.</p>
 <p>The base implementation accepts everything, because a base cannot know
 any subclass’s range. Overriding it is how a subclass states one – the
-shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries
-today:</p>
+shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
@@ -686,10 +684,7 @@ separate object – so two names for one assignment resolve to one
 enum.</p>
 <p>It never mints while resolving <code class="docutils literal notranslate"><span class="pre">default</span></code>; <code class="docutils literal notranslate"><span class="pre">key</span></code> may still mint
 through a <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> that GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>’s ruling
-deliberately kept minting, on one registry (<code class="docutils literal notranslate"><span class="pre">CGAType</span></code>) – the
-ruling’s final round converted the other two it originally held out,
-<code class="docutils literal notranslate"><span class="pre">EtherType</span></code> and <code class="docutils literal notranslate"><span class="pre">Socket</span></code>, so they no longer mint on any path
-either. Registering a member any other way is <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>’s job
+deliberately kept minting, on one registry (<code class="docutils literal notranslate"><span class="pre">CGAType</span></code>). Registering a member any other way is <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>’s job
 and nobody else’s, which is the ruling <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> exists to carry
 out: an unrecognised or unregistered value does not become a registered
 member unless a user or caller explicitly creates one. A value inside a
@@ -706,48 +701,36 @@ not resolve, and the lookup error <code class="docutils literal notranslate"><sp
 propagates instead.</p>
 <p>For a <code class="docutils literal notranslate"><span class="pre">str</span></code> key, a name match wins over a value match – the two are
 checked in that order, so a string that happens to be both a member’s
-name and a <em>different</em> member’s value resolves to the name’s member,
-matching what already happened for a name that resolves today. The
-value side of that check is a plain <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> lookup, not
-<code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>: on a registry whose own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> mints for an
+name and a <em>different</em> member’s value resolves to the name’s member.
+The value side of that check is a plain <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> lookup,
+not <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>: on a registry whose own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> mints for an
 unrecognised value, routing a failed <em>name</em> lookup through the
 constructor would let a mere <code class="docutils literal notranslate"><span class="pre">get()</span></code> call mint a permanent member
-where it previously just raised. Defensive rather than observed: of
-the 127 classes that reach this method – 125 until GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>’s own PR added <code class="docutils literal notranslate"><span class="pre">pcapkit/const/ngap/procedure_code.py</span></code>
-and <code class="docutils literal notranslate"><span class="pre">pcapkit/const/ngap/protocol_ie.py</span></code>, remeasured while auditing
-GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> – the <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued ones
+where it should just raise. Defensive rather than observed: none of
+the <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registries that reach this method
 (<a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code>, <a class="reference internal" href="../const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and its four
 transport subclasses <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.sctp.SCTP" title="pcapkit.const.reg.apptype.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> and
-<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a> – completing that set as
-of GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>’s own PR 2 – and, newest of them,
-<a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>, which GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s own thread reclassified from a hand-written helper
-to a generated registry once RFC 9850 §4.2 turned its member list into
-a live IANA registry) no longer mint on any path, so no live witness
-exists in this tree today. The one registry that still mints directly
-via <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>,
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>, and
+<a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>) mints on
+any path, so no live witness exists in this tree. The one registry
+that still mints directly via <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>,
 <a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, is <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued, so
 a <code class="docutils literal notranslate"><span class="pre">str</span></code> name could not reach its mint branch even if this restriction
 did not exist; it is not an exception to it, just not reachable by it.
-GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>’s final round converted the other two that
-used to share this footnote, <a class="reference internal" href="../const/ipx.html#pcapkit.const.ipx.socket.Socket" title="pcapkit.const.ipx.socket.Socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">Socket</span></code></a>
-and <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a>, so <code class="docutils literal notranslate"><span class="pre">CGAType</span></code> is
-now the only one left. This is about a future <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry
-(or a present one whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> someday changes) reaching this
-base with a minting <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own, which the restriction
-below is written to stay correct for regardless. Restricting the value
-side of <code class="docutils literal notranslate"><span class="pre">key</span></code> to an already-registered value keeps <em>that side</em>
-non-minting on every <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry, not only the ones without
-a minting <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>. Since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>, that is no longer merely a
-claim about the value side alone: <code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through the same
-kind of <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> lookup rather than <code class="docutils literal notranslate"><span class="pre">cls(default)</span></code>, so
-for a <code class="docutils literal notranslate"><span class="pre">str</span></code> key every path through this method – name, value and
-<code class="docutils literal notranslate"><span class="pre">default</span></code> alike – is non-minting.</p>
+This is about a future <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry (or a present one whose
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> someday changes) reaching this base with a minting
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own, which the restriction below is written to
+stay correct for regardless. Restricting the value side of <code class="docutils literal notranslate"><span class="pre">key</span></code> to
+an already-registered value keeps <em>that side</em> non-minting on every
+<code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry, not only the ones without a minting
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code>; and <code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through the same kind of
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> lookup rather than <code class="docutils literal notranslate"><span class="pre">cls(default)</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>), so for a <code class="docutils literal notranslate"><span class="pre">str</span></code> key every path through this method –
+name, value and <code class="docutils literal notranslate"><span class="pre">default</span></code> alike – is non-minting.</p>
 <p>That restriction has a cost the paragraph above glosses over: a
 <em>declared-but-unassigned</em> value – the case resolved there through
 <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> without either lookup
@@ -774,16 +757,13 @@ given on <a class="reference internal" href="#id0" title="pcapkit.corekit.enum.E
 rather than a builtin, per the ruling recorded on GitHub issue
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>: in-library code raises from <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code>
 rather than a builtin, and whether <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> or <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> applies
-follows what stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code> raises in the same circumstance. The <em>shape</em>
-is unchanged by that ruling and deliberately so – a name miss stays
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived and a value miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived,
+follows what stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code> raises in the same circumstance: a name
+miss is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived and a value miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived,
 matching <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> on a stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>,
-and matching the 119 of this tree’s 127 concrete subclasses that already
-answered a name miss that way. Only the provenance changed, so every
-<code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">KeyError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> around a call to this method
-keeps catching.</p>
-<p>Two details of that conversion are worth stating, since neither is
-visible from the exception type alone:</p>
+so every <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">KeyError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> around a call to
+this method catches.</p>
+<p>Two details are worth stating, since neither is visible from the
+exception type alone:</p>
 <ul class="simple">
 <li><p><strong>The name miss is raised quietly</strong> –
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> with <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>,
@@ -791,7 +771,8 @@ so nothing is logged and <a class="reference external" href="https://docs.python
 That is not a cosmetic choice: this method’s name miss is in-library
 control flow at six call sites, and at
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> it is part of a
-<em>successful</em> call – that override catches it in order to mint. A loud
+<em>successful</em> call – that override catches it in order to build an
+unregistered member. A loud
 error there would put a <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.CRITICAL" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.CRITICAL</span></code></a> record on every such
 call and set <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> to <code class="docutils literal notranslate"><span class="pre">0</span></code> process-wide, which
 is exactly the GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/362">#362</a> defect
@@ -901,7 +882,7 @@ still resolves past them to the enumeration base.</p>
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._extend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.enum.EnumRegistry._extend" title="Link to this definition">¶</a></dt>
 <dd><p>The raw <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call, shared by <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>
 and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>.</p>
-<p>Neither public method calls the other: <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> now refuses an
+<p>Neither public method calls the other: <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses an
 already-registered <code class="docutils literal notranslate"><span class="pre">value</span></code> before it would ever reach here, and
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> depends on the opposite of that – it verifies
 <code class="docutils literal notranslate"><span class="pre">value</span></code> <em>is</em> already registered and then relies on exactly the
@@ -935,9 +916,9 @@ this shared, ungated call is what keeps that behaviour available to
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="Link to this definition">¶</a></dt>
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
 <p>Used by a registry’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> for a declared-but-unassigned value
-it resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
+it resolves without anyone asking for a name, so that such a lookup does
+not grow the registry – contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit path
+that does.</p>
 <p>The member is constructed through <code class="docutils literal notranslate"><span class="pre">cls._member_type_</span></code>, which
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> sets from the enumeration base, so this serves <code class="docutils literal notranslate"><span class="pre">int</span></code>- and
 <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registries alike without either having to say which it
@@ -1022,7 +1003,7 @@ is the whole point – a generated name is a guess.</p></li>
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._extend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
 <dd><p>The raw <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call, shared by <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>
 and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>.</p>
-<p>Neither public method calls the other: <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> now refuses an
+<p>Neither public method calls the other: <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses an
 already-registered <code class="docutils literal notranslate"><span class="pre">value</span></code> before it would ever reach here, and
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> depends on the opposite of that – it verifies
 <code class="docutils literal notranslate"><span class="pre">value</span></code> <em>is</em> already registered and then relies on exactly the
@@ -1074,9 +1055,9 @@ whether a member exists.</p>
 <p>On this base, an alias adds a <em>name</em>, not a member: <code class="docutils literal notranslate"><span class="pre">__members__</span></code> grows
 by one while <code class="docutils literal notranslate"><span class="pre">_member_names_</span></code>, iteration and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> are
 untouched. Calls <a class="reference internal" href="#id1" title="pcapkit.corekit.enum.EnumRegistry._extend"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_extend()</span></code></a> directly rather than <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, which
-would now refuse this call outright – <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
+would refuse this call outright – <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> test <code class="docutils literal notranslate"><span class="pre">value</span></code>’s membership for opposite
-outcomes, so neither can be the other’s implementation any more.
+outcomes, so neither can be the other’s implementation.
 <code class="docutils literal notranslate"><span class="pre">AppType</span></code>’s override differs: it mints a real member through
 <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>, so its iteration grows too.</p>
 <dl class="field-list simple">
@@ -1130,9 +1111,9 @@ outcomes, so neither can be the other’s implementation any more.
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
 <p>Used by a registry’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> for a declared-but-unassigned value
-it resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
+it resolves without anyone asking for a name, so that such a lookup does
+not grow the registry – contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit path
+that does.</p>
 <p>The member is constructed through <code class="docutils literal notranslate"><span class="pre">cls._member_type_</span></code>, which
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> sets from the enumeration base, so this serves <code class="docutils literal notranslate"><span class="pre">int</span></code>- and
 <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registries alike without either having to say which it
@@ -1163,34 +1144,16 @@ is.</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
-<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
-review of the work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a>, which asked for a dedicated class that
-follows the house convention. A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
-<code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
-own does – identity comparison was never the problem an earlier
-revision’s docstring here overstated it to be. What a bare
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a readable representation: it prints
-as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in
-a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
-– via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
-<p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
-convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
-use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
-similarly settled – a follow-up given in review of the work for
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and
-<code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and that the choice should follow
-what each sentinel is needed for rather than a settled rule. The need here
-was continuity: <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> –
-referenced in
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
-its docstring, and both comparison sites – and that change was to <em>what
-the sentinel is</em>, not to <em>what it is called</em>, so it kept that name rather
-than being renamed to match either precedent’s instance casing for its own
-sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s <code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> was the closer match regardless, since
-<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> was already spelled that way – and GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> later settled the question this paragraph left open:
-<code class="docutils literal notranslate"><span class="pre">NoValue</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code>,
-so every instance name now agrees on SCREAMING_SNAKE.</p>
+<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, as review of the
+work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> asked, following the house convention. A bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated
+class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its own does; what it lacks is a readable
+representation: it prints as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature,
+in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> – via
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>. The names follow
+the convention every sentinel here shares, settled by GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>: <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code> for the class and SCREAMING_SNAKE for the
+instance.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
 already exists, rather than building a new one. That guards against a
@@ -1240,74 +1203,52 @@ neither is a field any object here gets pickled <em>as</em>, and both still
 survive <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> with identity intact regardless, because
 deep-copying either still reduces the sentinel itself through the same,
 guarded protocol-2 path measured above.</p>
-<p>A caveat that turns out to be dormant rather than live, on the current
-tree – worth stating precisely rather than either repeating the older,
-inaccurate claim or dropping the topic. <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> on this
-module re-executes both <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NoDefaultType:</span></code> and <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span> <span class="pre">=</span>
-<span class="pre">NoDefaultType()</span></code> below, producing a fresh, distinct object; any consumer
-that had already captured the pre-reload one – as a bound parameter
-default, say – goes on holding the stale one, and a bare
+<p>A reload caveat that is dormant rather than live. <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a>
+on this module re-executes both <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NoDefaultType:</span></code> and
+<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span> <span class="pre">=</span> <span class="pre">NoDefaultType()</span></code> below, producing a fresh, distinct
+object; any consumer that had already captured the pre-reload one – as a
+bound parameter default, say – goes on holding the stale one, and a bare
 <code class="docutils literal notranslate"><span class="pre">held_default</span> <span class="pre">is</span> <span class="pre">NO_DEFAULT</span></code> comparison against the post-reload global
 then reads <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a> where it once read <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>.
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a> looked
-exactly like such a consumer before GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>: an
-unrecognised, non-<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> value used to fall through to
-<code class="docutils literal notranslate"><span class="pre">cls(default)</span></code>, so a stale sentinel handed to that call could raise a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> a caller had no reason to expect from an <em>omitted</em>
-argument. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> closed a different hole – <code class="docutils literal notranslate"><span class="pre">default</span></code> could mint
-a new member – by replacing that call with a
-<code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">cls._value2member_map_</span></code> guard, and the guard happens to
-close this one too: a <a class="reference internal" href="#pcapkit.corekit.enum.NoDefaultType" title="pcapkit.corekit.enum.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> instance, stale or fresh, is
-never a registered enum value, so the guard’s <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">in</span></code> half reads
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it either way and <code class="docutils literal notranslate"><span class="pre">get</span></code> re-raises the original lookup
-error correctly regardless of which <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> a caller’s stale
-default is stale <em>against</em>. Measured on the current tree, guard
-included:</p>
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a> is such a
+consumer but is not affected: its fallback is guarded by
+<code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">cls._value2member_map_</span></code> (added by GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> to stop <code class="docutils literal notranslate"><span class="pre">default</span></code> minting a new member), and a
+<a class="reference internal" href="#pcapkit.corekit.enum.NoDefaultType" title="pcapkit.corekit.enum.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> instance, stale or fresh, is never a registered
+enum value, so the guard reads <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it either way and <code class="docutils literal notranslate"><span class="pre">get</span></code>
+re-raises the original lookup error regardless of which
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> a caller’s default is stale <em>against</em>. Measured:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'Definitely-Not-A-Member'</span><span class="p">)</span>              <span class="c1"># before reload</span>
-<span class="go">KeyError: 'Definitely-Not-A-Member'</span>
+<span class="go">EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">importlib</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">pcapkit</span><span class="o">.</span><span class="n">corekit</span><span class="o">.</span><span class="n">sentinels</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'Definitely-Not-A-Member'</span><span class="p">)</span>               <span class="c1"># after reload</span>
-<span class="go">KeyError: 'Definitely-Not-A-Member'</span>
+<span class="go">EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 </pre></div>
 </div>
-<p>So the docstring this class carried before GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s
-move – which claimed the second call above raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> –
-was already wrong on <code class="docutils literal notranslate"><span class="pre">main</span></code> at <code class="docutils literal notranslate"><span class="pre">d31c0aaf6</span></code>, independently of the
-move: it described the pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> <code class="docutils literal notranslate"><span class="pre">cls(default)</span></code> call, and
-nobody had re-verified it against the guard <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> added
-afterwards. Fixed here as a drive-by correction, not a consequence of
-the housing change itself.</p>
-<p>None of that makes the underlying hazard theoretical elsewhere in this
-package: <code class="docutils literal notranslate"><span class="pre">-1</span></code> never had this failure mode at all, since <code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">==</span> <span class="pre">-1</span></code>
-compares by value rather than identity, and reload staleness is a
-<em>tracked</em> defect class here for other constructs – see
+<p>The hazard is not theoretical elsewhere: reload staleness is a <em>tracked</em>
+defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
 docstring note on why it declines to memoise a resolved class, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
-deliberately to pin the fix for exactly that class of bug elsewhere. A
-<em>future</em> comparison site written the vulnerable way – a bare <code class="docutils literal notranslate"><span class="pre">is</span>
-<span class="pre">NO_DEFAULT</span></code> with no independent guard behind it, the way <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>’s
-fix itself was not – would still reproduce it. “Nothing in this package
-reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import” remains true
-today, but it is a caveat to keep honest rather than a guarantee this
-class enforces.</p>
+deliberately to pin the fix for exactly that class of bug. A <em>future</em>
+comparison site written the vulnerable way – a bare <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">NO_DEFAULT</span></code>
+with no independent guard behind it – would reproduce it. Nothing in
+this package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import, but
+that is a caveat to keep honest rather than a guarantee this class
+enforces.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a> also changes <em>which</em> reload is the one that
-matters, independently of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> finding above.
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> no longer defines <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code>
-itself; it only reads <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> off this module once, at its
-own import time, into its own module global. Reloading
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> alone therefore now just re-runs that
-read, which – so long as this module has not <em>also</em> been reloaded –
-fetches back the identical object and changes nothing. Producing a
-fresh <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> at all now takes reloading <em>this</em> module,
-where the class statement lives; reloading only
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> is not enough on its own, because <code class="docutils literal notranslate"><span class="pre">from</span>
-<span class="pre">...</span> <span class="pre">import</span></code> binds a copy rather than a live alias, and that module’s
-own global stays pointed at whatever it read until something re-runs
-that import.</p>
+<p>Reloading <a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> alone does not produce a fresh
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>. That module does not define <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code>; it
+reads <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> off this module once, at its own import time,
+into its own module global, and a reload just re-runs that read,
+which – so long as this module has not <em>also</em> been reloaded –
+fetches back the identical object. Producing a fresh one takes
+reloading <em>this</em> module, where the class statement lives; and since
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span></code> binds a copy rather than a live alias,
+<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a>’s own global stays pointed at whatever it
+read until something re-runs that import.</p>
 </div>
 <p>Also unlike both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>, this
 deliberately does <em>not</em> define <code class="docutils literal notranslate"><span class="pre">__bool__</span></code>. Both of those model an
@@ -1320,9 +1261,9 @@ it <code class="docutils literal notranslate"><span class="pre">__bool__</span> 
 exactly the conflation this sentinel exists to rule out: code that writes
 <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">default:</span></code> instead of <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">default</span> <span class="pre">is</span> <span class="pre">NO_DEFAULT:</span></code> would then
 read <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> the same way it reads a caller’s genuine falsy
-default – <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> – which is the exact
-collision <code class="docutils literal notranslate"><span class="pre">-1</span></code> used to cause under <code class="docutils literal notranslate"><span class="pre">==</span></code> and the reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a>
-exists. Leaving <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> undefined makes <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> truthy
+default – <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> – which is the
+collision with a genuine default that <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> exists to rule out.
+Leaving <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> undefined makes <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> truthy
 (the default for any object defining neither <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> nor
 <code class="docutils literal notranslate"><span class="pre">__len__</span></code>), which at least does not <em>look</em> like one of the falsy values
 it must never be mistaken for.</p>
@@ -1333,34 +1274,16 @@ it must never be mistaken for.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.enum.</span></span><span class="sig-name descname"><span class="pre">NO_DEFAULT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NO_DEFAULT&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.enum.NO_DEFAULT" title="Link to this definition">¶</a></dt>
 <dd><p>Type of <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
-<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, per a ruling given in
-review of the work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a>, which asked for a dedicated class that
-follows the house convention. A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under
-<code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its
-own does – identity comparison was never the problem an earlier
-revision’s docstring here overstated it to be. What a bare
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> actually lacks is a readable representation: it prints
-as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature, in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in
-a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code>
-– via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
-<p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
-convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
-use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
-similarly settled – a follow-up given in review of the work for
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> was explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and
-<code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and that the choice should follow
-what each sentinel is needed for rather than a settled rule. The need here
-was continuity: <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> –
-referenced in
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
-its docstring, and both comparison sites – and that change was to <em>what
-the sentinel is</em>, not to <em>what it is called</em>, so it kept that name rather
-than being renamed to match either precedent’s instance casing for its own
-sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s <code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> was the closer match regardless, since
-<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> was already spelled that way – and GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> later settled the question this paragraph left open:
-<code class="docutils literal notranslate"><span class="pre">NoValue</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code>,
-so every instance name now agrees on SCREAMING_SNAKE.</p>
+<p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, as review of the
+work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> asked, following the house convention. A bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated
+class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its own does; what it lacks is a readable
+representation: it prints as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature,
+in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> – via
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>. The names follow
+the convention every sentinel here shares, settled by GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>: <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code> for the class and SCREAMING_SNAKE for the
+instance.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
 already exists, rather than building a new one. That guards against a
@@ -1410,74 +1333,52 @@ neither is a field any object here gets pickled <em>as</em>, and both still
 survive <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> with identity intact regardless, because
 deep-copying either still reduces the sentinel itself through the same,
 guarded protocol-2 path measured above.</p>
-<p>A caveat that turns out to be dormant rather than live, on the current
-tree – worth stating precisely rather than either repeating the older,
-inaccurate claim or dropping the topic. <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> on this
-module re-executes both <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NoDefaultType:</span></code> and <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span> <span class="pre">=</span>
-<span class="pre">NoDefaultType()</span></code> below, producing a fresh, distinct object; any consumer
-that had already captured the pre-reload one – as a bound parameter
-default, say – goes on holding the stale one, and a bare
+<p>A reload caveat that is dormant rather than live. <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a>
+on this module re-executes both <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NoDefaultType:</span></code> and
+<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span> <span class="pre">=</span> <span class="pre">NoDefaultType()</span></code> below, producing a fresh, distinct
+object; any consumer that had already captured the pre-reload one – as a
+bound parameter default, say – goes on holding the stale one, and a bare
 <code class="docutils literal notranslate"><span class="pre">held_default</span> <span class="pre">is</span> <span class="pre">NO_DEFAULT</span></code> comparison against the post-reload global
 then reads <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a> where it once read <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>.
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a> looked
-exactly like such a consumer before GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>: an
-unrecognised, non-<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> value used to fall through to
-<code class="docutils literal notranslate"><span class="pre">cls(default)</span></code>, so a stale sentinel handed to that call could raise a
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> a caller had no reason to expect from an <em>omitted</em>
-argument. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> closed a different hole – <code class="docutils literal notranslate"><span class="pre">default</span></code> could mint
-a new member – by replacing that call with a
-<code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">cls._value2member_map_</span></code> guard, and the guard happens to
-close this one too: a <a class="reference internal" href="#pcapkit.corekit.enum.NoDefaultType" title="pcapkit.corekit.enum.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> instance, stale or fresh, is
-never a registered enum value, so the guard’s <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">in</span></code> half reads
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it either way and <code class="docutils literal notranslate"><span class="pre">get</span></code> re-raises the original lookup
-error correctly regardless of which <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> a caller’s stale
-default is stale <em>against</em>. Measured on the current tree, guard
-included:</p>
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a> is such a
+consumer but is not affected: its fallback is guarded by
+<code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">cls._value2member_map_</span></code> (added by GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> to stop <code class="docutils literal notranslate"><span class="pre">default</span></code> minting a new member), and a
+<a class="reference internal" href="#pcapkit.corekit.enum.NoDefaultType" title="pcapkit.corekit.enum.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> instance, stale or fresh, is never a registered
+enum value, so the guard reads <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it either way and <code class="docutils literal notranslate"><span class="pre">get</span></code>
+re-raises the original lookup error regardless of which
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> a caller’s default is stale <em>against</em>. Measured:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'Definitely-Not-A-Member'</span><span class="p">)</span>              <span class="c1"># before reload</span>
-<span class="go">KeyError: 'Definitely-Not-A-Member'</span>
+<span class="go">EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">importlib</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">pcapkit</span><span class="o">.</span><span class="n">corekit</span><span class="o">.</span><span class="n">sentinels</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'Definitely-Not-A-Member'</span><span class="p">)</span>               <span class="c1"># after reload</span>
-<span class="go">KeyError: 'Definitely-Not-A-Member'</span>
+<span class="go">EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 </pre></div>
 </div>
-<p>So the docstring this class carried before GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s
-move – which claimed the second call above raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> –
-was already wrong on <code class="docutils literal notranslate"><span class="pre">main</span></code> at <code class="docutils literal notranslate"><span class="pre">d31c0aaf6</span></code>, independently of the
-move: it described the pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> <code class="docutils literal notranslate"><span class="pre">cls(default)</span></code> call, and
-nobody had re-verified it against the guard <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> added
-afterwards. Fixed here as a drive-by correction, not a consequence of
-the housing change itself.</p>
-<p>None of that makes the underlying hazard theoretical elsewhere in this
-package: <code class="docutils literal notranslate"><span class="pre">-1</span></code> never had this failure mode at all, since <code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">==</span> <span class="pre">-1</span></code>
-compares by value rather than identity, and reload staleness is a
-<em>tracked</em> defect class here for other constructs – see
+<p>The hazard is not theoretical elsewhere: reload staleness is a <em>tracked</em>
+defect class here for other constructs – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer()</span></code>’s own
 docstring note on why it declines to memoise a resolved class, and
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">tests.protocols.test_dispatch_default_resolution_unit</span></code>’s own
 <code class="docutils literal notranslate"><span class="pre">test_no_stale_class_survives_a_module_reload</span></code>, which reloads a module
-deliberately to pin the fix for exactly that class of bug elsewhere. A
-<em>future</em> comparison site written the vulnerable way – a bare <code class="docutils literal notranslate"><span class="pre">is</span>
-<span class="pre">NO_DEFAULT</span></code> with no independent guard behind it, the way <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a>’s
-fix itself was not – would still reproduce it. “Nothing in this package
-reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import” remains true
-today, but it is a caveat to keep honest rather than a guarantee this
-class enforces.</p>
+deliberately to pin the fix for exactly that class of bug. A <em>future</em>
+comparison site written the vulnerable way – a bare <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">NO_DEFAULT</span></code>
+with no independent guard behind it – would reproduce it. Nothing in
+this package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import, but
+that is a caveat to keep honest rather than a guarantee this class
+enforces.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a> also changes <em>which</em> reload is the one that
-matters, independently of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> finding above.
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> no longer defines <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code>
-itself; it only reads <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> off this module once, at its
-own import time, into its own module global. Reloading
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> alone therefore now just re-runs that
-read, which – so long as this module has not <em>also</em> been reloaded –
-fetches back the identical object and changes nothing. Producing a
-fresh <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> at all now takes reloading <em>this</em> module,
-where the class statement lives; reloading only
-<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> is not enough on its own, because <code class="docutils literal notranslate"><span class="pre">from</span>
-<span class="pre">...</span> <span class="pre">import</span></code> binds a copy rather than a live alias, and that module’s
-own global stays pointed at whatever it read until something re-runs
-that import.</p>
+<p>Reloading <a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> alone does not produce a fresh
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>. That module does not define <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code>; it
+reads <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> off this module once, at its own import time,
+into its own module global, and a reload just re-runs that read,
+which – so long as this module has not <em>also</em> been reloaded –
+fetches back the identical object. Producing a fresh one takes
+reloading <em>this</em> module, where the class statement lives; and since
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span></code> binds a copy rather than a live alias,
+<a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a>’s own global stays pointed at whatever it
+read until something re-runs that import.</p>
 </div>
 <p>Also unlike both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>, this
 deliberately does <em>not</em> define <code class="docutils literal notranslate"><span class="pre">__bool__</span></code>. Both of those model an
@@ -1490,9 +1391,9 @@ it <code class="docutils literal notranslate"><span class="pre">__bool__</span> 
 exactly the conflation this sentinel exists to rule out: code that writes
 <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">default:</span></code> instead of <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">default</span> <span class="pre">is</span> <span class="pre">NO_DEFAULT:</span></code> would then
 read <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> the same way it reads a caller’s genuine falsy
-default – <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> – which is the exact
-collision <code class="docutils literal notranslate"><span class="pre">-1</span></code> used to cause under <code class="docutils literal notranslate"><span class="pre">==</span></code> and the reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a>
-exists. Leaving <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> undefined makes <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> truthy
+default – <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> – which is the
+collision with a genuine default that <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/857">#857</a> exists to rule out.
+Leaving <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> undefined makes <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> truthy
 (the default for any object defining neither <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> nor
 <code class="docutils literal notranslate"><span class="pre">__len__</span></code>), which at least does not <em>look</em> like one of the falsy values
 it must never be mistaken for.</p>

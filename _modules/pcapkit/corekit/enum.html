@@ -510,17 +510,6 @@
 <span class="sd">:class:`EnumRegistry` subclasses outside :mod:`pcapkit.const`. The mutating half</span>
 <span class="sd">therefore had no users to serve among the classes being re-parented.</span>
 
-<span class="sd">.. note::</span>
-
-<span class="sd">   Re-parenting every non-registry enumeration onto :class:`EnumLookup` was</span>
-<span class="sd">   **phase 2** of GitHub issue :issue:`877`, and it is now **complete**:</span>
-<span class="sd">   introducing the base above was deliberately behaviour-preserving on its</span>
-<span class="sd">   own, so that it could land while other work was still in flight on the</span>
-<span class="sd">   files the re-parent touches, and the phase itself landed in two pull</span>
-<span class="sd">   requests for exactly that reason -- the first for the 17 enumerations that</span>
-<span class="sd">   were free to move at once, and the second, :issue:`930`, for the remaining</span>
-<span class="sd">   seven once the files holding them freed up.</span>
-
 <span class="sd">The registry tier's own shape is the earlier design settled in GitHub issue</span>
 <span class="sd">:issue:`842`: ``get``, ``get_all``, ``register`` and ``register_alias`` are to</span>
 <span class="sd">exist on every const registry, so the abstraction is finished by moving them to</span>
@@ -539,9 +528,9 @@
 <span class="sd">   overrides below and a few hand-written ``get`` overrides.</span>
 <span class="sd">2. ``AppType``'s sub-base -- overrides all four, routing the two lookups</span>
 <span class="sd">   through its ``_dispatch``, because a port lookup needs a transport protocol</span>
-<span class="sd">   to be answerable at all. Landed as of GitHub issue :issue:`860`: not in this</span>
-<span class="sd">   module, but in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself,</span>
-<span class="sd">   which mixes in :class:`EnumRegistry` directly. ``register`` and</span>
+<span class="sd">   to be answerable at all. Defined not in this module but in</span>
+<span class="sd">   :class:`pcapkit.const.reg.apptype.apptype.AppType` itself (GitHub issue</span>
+<span class="sd">   :issue:`860`), which mixes in :class:`EnumRegistry` directly. ``register`` and</span>
 <span class="sd">   ``register_alias`` are overridden without that dispatch, staying on the</span>
 <span class="sd">   registry they are called on, so that a write never leaks onto a transport</span>
 <span class="sd">   IANA never assigned the service to -- a minted member for the first, an</span>
@@ -549,17 +538,15 @@
 <span class="sd">   attributes (``svc``, ``port``, ``proto``) that the generic one below does</span>
 <span class="sd">   not know to set.</span>
 <span class="sd">3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``</span>
-<span class="sd">   -- turned out to need no override of their own at all: ``_dispatch``</span>
+<span class="sd">   -- need no override of their own at all: ``_dispatch``</span>
 <span class="sd">   already returns ``cls`` unchanged the moment ``cls.__registry__`` is not</span>
 <span class="sd">   :obj:`None`, which is true for exactly these four, so tier 2's lookups</span>
 <span class="sd">   already answer correctly on each of them without a further layer.</span>
 
-<span class="sd">Before this, the four methods lived as generated *text*: written out longhand in</span>
-<span class="sd">:data:`pcapkit.vendor.default.LINE` and copied verbatim into each of the eleven</span>
-<span class="sd">crawlers that replace that template wholesale, none of which carried</span>
-<span class="sd">``register``, ``register_alias`` or ``get_all`` at all. Adding one method meant</span>
-<span class="sd">editing every bespoke template by hand, which is the cost :issue:`775` asks to</span>
-<span class="sd">remove.</span>
+<span class="sd">Defining the four methods here, rather than as generated *text* written out</span>
+<span class="sd">longhand in :data:`pcapkit.vendor.default.LINE` and copied into each crawler</span>
+<span class="sd">that replaces that template wholesale, is what :issue:`775` asks for: as text,</span>
+<span class="sd">adding one method means editing every bespoke template by hand.</span>
 
 <span class="sd">The contracts are those set out on GitHub issue :issue:`842`: ``get`` is a</span>
 <span class="sd">shortcut for the ``[]`` operation and returns the canonical enumeration member;</span>
@@ -650,8 +637,7 @@
 
 <span class="sd">        The base implementation accepts everything, because a base cannot know</span>
 <span class="sd">        any subclass's range. Overriding it is how a subclass states one -- the</span>
-<span class="sd">        shape ``_missing_`` spells by hand across the generated registries</span>
-<span class="sd">        today::</span>
+<span class="sd">        shape ``_missing_`` spells by hand across the generated registries::</span>
 
 <span class="sd">            @classmethod</span>
 <span class="sd">            def _validate_value(cls, value: 'Any') -&gt; 'None':</span>
@@ -734,10 +720,7 @@
 
 <span class="sd">        It never mints while resolving ``default``; ``key`` may still mint</span>
 <span class="sd">        through a ``_missing_`` that GitHub issue :issue:`775`'s ruling</span>
-<span class="sd">        deliberately kept minting, on one registry (``CGAType``) -- the</span>
-<span class="sd">        ruling's final round converted the other two it originally held out,</span>
-<span class="sd">        ``EtherType`` and ``Socket``, so they no longer mint on any path</span>
-<span class="sd">        either. Registering a member any other way is :meth:`register`'s job</span>
+<span class="sd">        deliberately kept minting, on one registry (``CGAType``). Registering a member any other way is :meth:`register`'s job</span>
 <span class="sd">        and nobody else's, which is the ruling :issue:`775` exists to carry</span>
 <span class="sd">        out: an unrecognised or unregistered value does not become a registered</span>
 <span class="sd">        member unless a user or caller explicitly creates one. A value inside a</span>
@@ -755,17 +738,13 @@
 
 <span class="sd">        For a ``str`` key, a name match wins over a value match -- the two are</span>
 <span class="sd">        checked in that order, so a string that happens to be both a member's</span>
-<span class="sd">        name and a *different* member's value resolves to the name's member,</span>
-<span class="sd">        matching what already happened for a name that resolves today. The</span>
-<span class="sd">        value side of that check is a plain ``_value2member_map_`` lookup, not</span>
-<span class="sd">        ``cls(key)``: on a registry whose own ``_missing_`` mints for an</span>
+<span class="sd">        name and a *different* member's value resolves to the name's member.</span>
+<span class="sd">        The value side of that check is a plain ``_value2member_map_`` lookup,</span>
+<span class="sd">        not ``cls(key)``: on a registry whose own ``_missing_`` mints for an</span>
 <span class="sd">        unrecognised value, routing a failed *name* lookup through the</span>
 <span class="sd">        constructor would let a mere ``get()`` call mint a permanent member</span>
-<span class="sd">        where it previously just raised. Defensive rather than observed: of</span>
-<span class="sd">        the 127 classes that reach this method -- 125 until GitHub issue</span>
-<span class="sd">        :issue:`880`'s own PR added ``pcapkit/const/ngap/procedure_code.py``</span>
-<span class="sd">        and ``pcapkit/const/ngap/protocol_ie.py``, remeasured while auditing</span>
-<span class="sd">        GitHub issue :issue:`903` -- the ``str``-valued ones</span>
+<span class="sd">        where it should just raise. Defensive rather than observed: none of</span>
+<span class="sd">        the ``str``-valued registries that reach this method</span>
 <span class="sd">        (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.</span>
 <span class="sd">        ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,</span>
 <span class="sd">        :class:`~pcapkit.const.pcapng.option_type.OptionType`,</span>
@@ -773,31 +752,23 @@
 <span class="sd">        transport subclasses :class:`~pcapkit.const.reg.apptype.tcp.TCP`,</span>
 <span class="sd">        :class:`~pcapkit.const.reg.apptype.udp.UDP`,</span>
 <span class="sd">        :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and</span>
-<span class="sd">        :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- completing that set as</span>
-<span class="sd">        of GitHub issue :issue:`860`'s own PR 2 -- and, newest of them,</span>
-<span class="sd">        :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, which GitHub</span>
-<span class="sd">        issue :issue:`877`'s own thread reclassified from a hand-written helper</span>
-<span class="sd">        to a generated registry once RFC 9850 §4.2 turned its member list into</span>
-<span class="sd">        a live IANA registry) no longer mint on any path, so no live witness</span>
-<span class="sd">        exists in this tree today. The one registry that still mints directly</span>
-<span class="sd">        via :func:`~aenum.extend_enum`,</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.dccp.DCCP`, and</span>
+<span class="sd">        :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`) mints on</span>
+<span class="sd">        any path, so no live witness exists in this tree. The one registry</span>
+<span class="sd">        that still mints directly via :func:`~aenum.extend_enum`,</span>
 <span class="sd">        :class:`~pcapkit.const.mh.cga_type.CGAType`, is :class:`int`-valued, so</span>
 <span class="sd">        a ``str`` name could not reach its mint branch even if this restriction</span>
 <span class="sd">        did not exist; it is not an exception to it, just not reachable by it.</span>
-<span class="sd">        GitHub issue :issue:`775`'s final round converted the other two that</span>
-<span class="sd">        used to share this footnote, :class:`~pcapkit.const.ipx.socket.Socket`</span>
-<span class="sd">        and :class:`~pcapkit.const.reg.ethertype.EtherType`, so ``CGAType`` is</span>
-<span class="sd">        now the only one left. This is about a future ``str``-valued registry</span>
-<span class="sd">        (or a present one whose ``_missing_`` someday changes) reaching this</span>
-<span class="sd">        base with a minting ``_missing_`` of its own, which the restriction</span>
-<span class="sd">        below is written to stay correct for regardless. Restricting the value</span>
-<span class="sd">        side of ``key`` to an already-registered value keeps *that side*</span>
-<span class="sd">        non-minting on every ``str``-valued registry, not only the ones without</span>
-<span class="sd">        a minting ``_missing_``. Since :issue:`864`, that is no longer merely a</span>
-<span class="sd">        claim about the value side alone: ``default`` resolves through the same</span>
-<span class="sd">        kind of ``_value2member_map_`` lookup rather than ``cls(default)``, so</span>
-<span class="sd">        for a ``str`` key every path through this method -- name, value and</span>
-<span class="sd">        ``default`` alike -- is non-minting.</span>
+<span class="sd">        This is about a future ``str``-valued registry (or a present one whose</span>
+<span class="sd">        ``_missing_`` someday changes) reaching this base with a minting</span>
+<span class="sd">        ``_missing_`` of its own, which the restriction below is written to</span>
+<span class="sd">        stay correct for regardless. Restricting the value side of ``key`` to</span>
+<span class="sd">        an already-registered value keeps *that side* non-minting on every</span>
+<span class="sd">        ``str``-valued registry, not only the ones without a minting</span>
+<span class="sd">        ``_missing_``; and ``default`` resolves through the same kind of</span>
+<span class="sd">        ``_value2member_map_`` lookup rather than ``cls(default)``</span>
+<span class="sd">        (:issue:`864`), so for a ``str`` key every path through this method --</span>
+<span class="sd">        name, value and ``default`` alike -- is non-minting.</span>
 
 <span class="sd">        That restriction has a cost the paragraph above glosses over: a</span>
 <span class="sd">        *declared-but-unassigned* value -- the case resolved there through</span>
@@ -827,17 +798,14 @@
 <span class="sd">        rather than a builtin, per the ruling recorded on GitHub issue</span>
 <span class="sd">        :issue:`923`: in-library code raises from ``pcapkit.utilities.exceptions``</span>
 <span class="sd">        rather than a builtin, and whether ``ValueError`` or ``KeyError`` applies</span>
-<span class="sd">        follows what stdlib's ``Enum`` raises in the same circumstance. The *shape*</span>
-<span class="sd">        is unchanged by that ruling and deliberately so -- a name miss stays</span>
-<span class="sd">        :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,</span>
+<span class="sd">        follows what stdlib's ``Enum`` raises in the same circumstance: a name</span>
+<span class="sd">        miss is :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,</span>
 <span class="sd">        matching ``E['nosuch']`` and ``E(999)`` on a stdlib :class:`~enum.Enum`,</span>
-<span class="sd">        and matching the 119 of this tree's 127 concrete subclasses that already</span>
-<span class="sd">        answered a name miss that way. Only the provenance changed, so every</span>
-<span class="sd">        ``except KeyError`` and ``except ValueError`` around a call to this method</span>
-<span class="sd">        keeps catching.</span>
+<span class="sd">        so every ``except KeyError`` and ``except ValueError`` around a call to</span>
+<span class="sd">        this method catches.</span>
 
-<span class="sd">        Two details of that conversion are worth stating, since neither is</span>
-<span class="sd">        visible from the exception type alone:</span>
+<span class="sd">        Two details are worth stating, since neither is visible from the</span>
+<span class="sd">        exception type alone:</span>
 
 <span class="sd">        * **The name miss is raised quietly** --</span>
 <span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with ``quiet=True``,</span>
@@ -845,7 +813,8 @@
 <span class="sd">          That is not a cosmetic choice: this method's name miss is in-library</span>
 <span class="sd">          control flow at six call sites, and at</span>
 <span class="sd">          :meth:`~pcapkit.const.http.method.Method.get` it is part of a</span>
-<span class="sd">          *successful* call -- that override catches it in order to mint. A loud</span>
+<span class="sd">          *successful* call -- that override catches it in order to build an</span>
+<span class="sd">          unregistered member. A loud</span>
 <span class="sd">          error there would put a :data:`logging.CRITICAL` record on every such</span>
 <span class="sd">          call and set :data:`sys.tracebacklimit` to ``0`` process-wide, which</span>
 <span class="sd">          is exactly the GitHub issue :issue:`362` defect</span>
@@ -1039,7 +1008,7 @@
 <span class="w">        </span><span class="sd">"""The raw :func:`~aenum.extend_enum` call, shared by :meth:`register`</span>
 <span class="sd">        and :meth:`register_alias`.</span>
 
-<span class="sd">        Neither public method calls the other: :meth:`register` now refuses an</span>
+<span class="sd">        Neither public method calls the other: :meth:`register` refuses an</span>
 <span class="sd">        already-registered ``value`` before it would ever reach here, and</span>
 <span class="sd">        :meth:`register_alias` depends on the opposite of that -- it verifies</span>
 <span class="sd">        ``value`` *is* already registered and then relies on exactly the</span>
@@ -1094,9 +1063,9 @@
 <span class="sd">        On this base, an alias adds a *name*, not a member: ``__members__`` grows</span>
 <span class="sd">        by one while ``_member_names_``, iteration and ``_value2member_map_`` are</span>
 <span class="sd">        untouched. Calls :meth:`_extend` directly rather than :meth:`register`, which</span>
-<span class="sd">        would now refuse this call outright -- :meth:`register` and</span>
+<span class="sd">        would refuse this call outright -- :meth:`register` and</span>
 <span class="sd">        :meth:`register_alias` test ``value``'s membership for opposite</span>
-<span class="sd">        outcomes, so neither can be the other's implementation any more.</span>
+<span class="sd">        outcomes, so neither can be the other's implementation.</span>
 <span class="sd">        ``AppType``'s override differs: it mints a real member through</span>
 <span class="sd">        :func:`~aenum.extend_enum`, so its iteration grows too.</span>
 
@@ -1148,9 +1117,9 @@
 <span class="w">        </span><span class="sd">"""Build a member absent from this registry's own lookup tables.</span>
 
 <span class="sd">        Used by a registry's ``_missing_`` for a declared-but-unassigned value</span>
-<span class="sd">        it resolves without anyone asking for a name, so that such a lookup no</span>
-<span class="sd">        longer grows the registry -- contrast :meth:`register`, the explicit</span>
-<span class="sd">        path that still does.</span>
+<span class="sd">        it resolves without anyone asking for a name, so that such a lookup does</span>
+<span class="sd">        not grow the registry -- contrast :meth:`register`, the explicit path</span>
+<span class="sd">        that does.</span>
 
 <span class="sd">        The member is constructed through ``cls._member_type_``, which</span>
 <span class="sd">        :mod:`aenum` sets from the enumeration base, so this serves ``int``- and</span>

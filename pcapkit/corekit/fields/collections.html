@@ -627,9 +627,8 @@ does not depend on packet data the shortcut has not read.</p></li>
 <p>All of that is true of every <code class="docutils literal notranslate"><span class="pre">OptionField</span></code> declared in this package. A
 base schema registered from outside it – c.f.
 <a class="reference internal" href="../../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> – need not satisfy it, and is <strong>not</strong>
-rejected: such a base schema is unpacked in full, exactly as it was before
-the shortcut existed. It parses correctly and pays the cost of the second
-parse. Only the shortcut is withheld, so a base schema whose type field
+rejected: such a base schema is unpacked in full. It parses correctly and
+pays the cost of the second parse. Only the shortcut is withheld, so a base schema whose type field
 comes second cannot be silently misread.</p>
 </div>
 <dl class="py property">

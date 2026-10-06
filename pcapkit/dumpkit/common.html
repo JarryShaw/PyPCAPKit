@@ -566,7 +566,7 @@ Only meaningful alongside <code class="docutils literal notranslate"><span class
 <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is given. This is what lets a subclass decline registration
 rather than having to inherit <a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a> to avoid it, and it
 matches <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
-has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+guards on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword the same way.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Inferring <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the subclass’
@@ -616,8 +616,8 @@ one function rather than being spelled out at each of the three places
 <p class="admonition-title">Note</p>
 <p>A <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Flag" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></a> value composed <strong>entirely of undeclared bits</strong> has
 no name at all – <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum.name" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, not a string –
-so interpolating it unguarded put the literal four characters <code class="docutils literal notranslate"><span class="pre">None</span></code>
-into the name half and rendered
+so interpolating it unguarded would put the literal four characters
+<code class="docutils literal notranslate"><span class="pre">None</span></code> into the name half and render
 <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> <code class="docutils literal notranslate"><span class="pre">(0)</span></code> as <code class="docutils literal notranslate"><span class="pre">'Flags::None</span> <span class="pre">[0]'</span></code>
 (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a>).</p>
 <p>Two things make that worth a guard rather than a shrug. <code class="docutils literal notranslate"><span class="pre">'None'</span></code> is a
@@ -634,8 +634,7 @@ the leftovers as one number. A wholly-undeclared value is that same
 rendering with no declared bit to precede it, so <code class="docutils literal notranslate"><span class="pre">Flags(9)</span></code> becomes
 <code class="docutils literal notranslate"><span class="pre">'Flags::9</span> <span class="pre">[9]'</span></code> and <code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. It also
 cannot be mistaken for a member name, since a Python identifier may not
-begin with a digit – none of the 1867 identifiers declared under
-<a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> is a bare decimal, and none ever can be.</p>
+begin with a digit.</p>
 <p>This is <em>not</em> an <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> quirk. A stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntFlag</span></code></a> built
 from the same members answers <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> identically on CPython
 3.14.7, so the guard belongs here rather than in a choice of enumeration

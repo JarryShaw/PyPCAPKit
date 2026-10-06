@@ -641,13 +641,6 @@ without calling <a class="reference internal" href="#pcapkit.corekit.io.Seekable
 <span class="sig-name descname"><span class="pre">writable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.writable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.writable" title="Link to this definition">¶</a></dt>
 <dd><p>Return <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports writing. If <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and
 <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This was spelled <code class="docutils literal notranslate"><span class="pre">writeable</span></code> until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/645">#645</a>, which is not how the <a class="reference external" href="https://docs.python.org/3/library/io.html#module-io" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a>
-protocol spells it, so it overrode nothing and <a class="reference external" href="https://docs.python.org/3/library/io.html#module-io" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> never consulted it – the
-inherited <a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase.writable" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.IOBase.writable()</span></code></a> answered instead. Both returned <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>,
-so there was no observable divergence to notice; the coincidence is what hid it.</p>
-</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
@@ -701,19 +694,20 @@ be zero or positive</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The target is computed, then validated, and only then written to <code class="docutils literal notranslate"><span class="pre">_tell</span></code>. A
-branch that assigned the position before deciding whether to accept it left a
-refused seek having moved it anyway, with the resync below – the one thing that
-puts the buffer’s cursor back in step – skipped on the way out. A caller that
-catches the error and reasonably takes the position to be unchanged then read
-from the rejected offset instead, silently and without a second error.</p>
+branch that assigned the position before deciding whether to accept it would
+leave a refused seek having moved it anyway, with the resync below – the one
+thing that puts the buffer’s cursor back in step – skipped on the way out. A
+caller that catches the error and reasonably takes the position to be unchanged
+would then read from the rejected offset instead, silently and without a second
+error.</p>
 <p>The negative check applies to every <code class="docutils literal notranslate"><span class="pre">whence</span></code>, rather than only
 <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> looking at its offset. An absolute position below zero
 cannot exist under any of them, and it is not the same failure as a position
 that has merely slid out of the window – which is ordinary, and recoverable
 with <code class="docutils literal notranslate"><span class="pre">buffer_save=True</span></code>. Reporting the first as <code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">seek</span> <span class="pre">value</span></code> keeps
-the two distinguishable, and being a property of the position rather than of the
-window it holds with a saved buffer as well, where the old refusal did not
-apply at all and the seek returned a negative position as if it had worked.</p>
+the two distinguishable, and, being a property of the position rather than of
+the window, it holds with a saved buffer as well, which is exempt from the window
+check and would otherwise return a negative position as if the seek had worked.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -752,10 +746,9 @@ for. It is also what CPython’s own read-only buffered readers do: both the
 accelerated <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a> and the pure-Python
 <code class="docutils literal notranslate"><span class="pre">_pyio.BufferedReader</span></code> raise <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code></a>, the latter from
 <code class="docutils literal notranslate"><span class="pre">_BufferedIOMixin.truncate</span></code>’s <code class="docutils literal notranslate"><span class="pre">_checkWritable()</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/645">#645</a>).</p>
-<p>The resizing this used to perform is still reachable internally, as
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_truncate_buffer()</span></code>. It never touched the underlying stream in the first place
-– it resizes a private lookback window – which is why it survives under a private
-name rather than being removed with the public method’s behaviour.</p>
+<p>Resizing the lookback buffer is reachable internally, as <code class="xref py py-meth docutils literal notranslate"><span class="pre">_truncate_buffer()</span></code>.
+It never touches the underlying stream – it resizes a private lookback window –
+which is why it stays, under a private name.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

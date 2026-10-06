@@ -777,13 +777,13 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
 
             <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, both</span>
-            <span class="c1"># when it is seeded (``pcapkit/protocols/__init__.py:75``) and when</span>
+            <span class="c1"># when it is seeded (``pcapkit/protocols/__init__.py:76``) and when</span>
             <span class="c1"># ``pcapkit.foundation.registry.protocols.register_protocol`` adds to</span>
-            <span class="c1"># it, so a name given in any other case missed every time -- and a</span>
-            <span class="c1"># miss leaves ``_protocol`` as :obj:`None`, which the property above</span>
-            <span class="c1"># resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So</span>
-            <span class="c1"># ``PayloadField(protocol='http')`` yielded a raw payload instead of</span>
-            <span class="c1"># HTTP, with nothing to say so (#787).</span>
+            <span class="c1"># it, so a name looked up in any other case would miss every time --</span>
+            <span class="c1"># and a miss leaves ``_protocol`` as :obj:`None`, which the property</span>
+            <span class="c1"># above resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So</span>
+            <span class="c1"># ``PayloadField(protocol='http')`` would yield a raw payload instead</span>
+            <span class="c1"># of HTTP, with nothing to say so (#787).</span>
             <span class="n">resolved</span> <span class="o">=</span> <span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
             <span class="c1"># NOTE: Warned rather than left silent, and warned rather than</span>
@@ -812,12 +812,12 @@
 
         <span class="c1"># NOTE: Through the property rather than straight to ``_protocol``, so a</span>
         <span class="c1"># name given here is resolved exactly as one assigned later is. Writing</span>
-        <span class="c1"># the attribute directly stored the :obj:`str` verbatim and the getter</span>
-        <span class="c1"># handed that same string back, so ``PayloadField(protocol='http')``</span>
-        <span class="c1"># yielded neither the protocol nor</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` but ``'http'`` itself -- and</span>
-        <span class="c1"># ``protocol='HTTP'`` was no better, since the case was never what this</span>
-        <span class="c1"># path went wrong on (#787). The lookup the setter performs stays inside</span>
+        <span class="c1"># the attribute directly would store the :obj:`str` verbatim and the</span>
+        <span class="c1"># getter would hand that same string back, so</span>
+        <span class="c1"># ``PayloadField(protocol='http')`` -- or ``protocol='HTTP'`` -- would</span>
+        <span class="c1"># yield neither the protocol nor</span>
+        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` but the string itself (#787).</span>
+        <span class="c1"># The lookup the setter performs stays inside</span>
         <span class="c1"># its ``isinstance(protocol, str)`` branch, so a field declared in a</span>
         <span class="c1"># schema class body -- every in-library use, none of which names a</span>
         <span class="c1"># protocol -- still does not import :mod:`pcapkit.protocols` while that</span>
@@ -1118,39 +1118,29 @@
 <span class="sd">        observed through it -- ``__packet__`` remains bound to the live</span>
 <span class="sd">        enclosing mapping for any callback that needs the current value.</span>
 
-<span class="sd">        No dedicated class and no :class:`~collections.ChainMap`. Earlier</span>
-<span class="sd">        versions of this function returned each in turn: a</span>
-<span class="sd">        :class:`~collections.ChainMap` first, then a hand-written</span>
-<span class="sd">        :class:`dict` subclass adopted when the ``ChainMap`` was suspected of</span>
-<span class="sd">        corrupting the shared :class:`~abc.ABCMeta` cache every</span>
-<span class="sd">        :class:`Schema &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclass used</span>
-<span class="sd">        to share on CPython &lt;= 3.10 (issue :issue:`439`), and then a</span>
-<span class="sd">        :class:`~collections.ChainMap` again once that suspicion was doubted.</span>
-<span class="sd">        A plain :class:`dict` ends the question: it satisfies every</span>
-<span class="sd">        ``packet: 'dict[str, Any]'`` annotation on the rest of the field</span>
-<span class="sd">        classes natively, so no :func:`~typing.cast` is needed at the call</span>
-<span class="sd">        site, and it cannot interact with :class:`~abc.ABCMeta` at all because</span>
-<span class="sd">        :class:`dict` is not an :class:`~abc.ABCMeta`-based class.</span>
-
-<span class="sd">        On the :issue:`439` suspicion itself, for the record, since it drove</span>
-<span class="sd">        two rewrites: it is *probably* wrong and no longer decidable. What is</span>
-<span class="sd">        directly measured is that the cache keys on the **exact type</span>
-<span class="sd">        queried**, so asking about a :class:`~collections.ChainMap` instance</span>
-<span class="sd">        caches lookups for :class:`~collections.ChainMap` and not for</span>
-<span class="sd">        :class:`dict`, and that the poisoning observed in :issue:`439` came</span>
-<span class="sd">        from ordinary code asking :func:`isinstance` about a plain</span>
-<span class="sd">        :class:`dict` -- :func:`~pcapkit.corekit.infoclass.Info.__update__`</span>
-<span class="sd">        does exactly that. Against that, swapping the ``ChainMap`` for a plain</span>
-<span class="sd">        literal was, at the time and on a real CPython 3.10 venv, enough to</span>
-<span class="sd">        move ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
-<span class="sd">        between passing and failing, toggled both ways. The likeliest</span>
-<span class="sd">        reconciliation -- that the ``ChainMap`` was never causal but changed</span>
-<span class="sd">        which concrete types flowed through unrelated :func:`isinstance` calls</span>
-<span class="sd">        in the same run, and so changed *when* the pre-existing corruption</span>
-<span class="sd">        fired -- is plausible rather than demonstrated, and cannot now be</span>
-<span class="sd">        tested: :issue:`439` has been fixed directly, every :class:`Schema`</span>
-<span class="sd">        subclass gets its own ``_abc_impl``, and the original conditions no</span>
-<span class="sd">        longer exist. It does not affect correctness either way.</span>
+<span class="sd">        No dedicated class and no :class:`~collections.ChainMap`. A plain</span>
+<span class="sd">        :class:`dict` satisfies every ``packet: 'dict[str, Any]'`` annotation</span>
+<span class="sd">        on the rest of the field classes natively, so no :func:`~typing.cast`</span>
+<span class="sd">        is needed at the call site, and it cannot interact with</span>
+<span class="sd">        :class:`~abc.ABCMeta` at all because :class:`dict` is not an</span>
+<span class="sd">        :class:`~abc.ABCMeta`-based class. That also settles a suspicion,</span>
+<span class="sd">        raised on :issue:`439`, that a :class:`~collections.ChainMap` here</span>
+<span class="sd">        corrupted the :class:`~abc.ABCMeta` cache :class:`Schema</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclasses shared on CPython</span>
+<span class="sd">        &lt;= 3.10. The suspicion is *probably* wrong and can no longer be</span>
+<span class="sd">        tested: the cache keys on the **exact type queried**, so asking about a</span>
+<span class="sd">        :class:`~collections.ChainMap` instance caches lookups for</span>
+<span class="sd">        :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning</span>
+<span class="sd">        observed in :issue:`439` came from ordinary code asking</span>
+<span class="sd">        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` has</span>
+<span class="sd">        been fixed directly -- every :class:`Schema` subclass gets its own</span>
+<span class="sd">        ``_abc_impl``. Against that, swapping the ``ChainMap`` for a plain</span>
+<span class="sd">        literal on CPython 3.10 once moved</span>
+<span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
+<span class="sd">        between passing and failing, both ways; the likeliest reading is that</span>
+<span class="sd">        it changed which types flowed through unrelated :func:`isinstance`</span>
+<span class="sd">        calls rather than causing the corruption. It does not affect</span>
+<span class="sd">        correctness either way.</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">}</span>

@@ -623,10 +623,10 @@
 
     <span class="c1"># NOTE: ``Extractor.engine`` returns the running engine *instance* (see</span>
     <span class="c1"># :meth:`Extractor.engine &lt;pcapkit.foundation.extraction.Extractor.engine&gt;`),</span>
-    <span class="c1"># never its name -- so the historical ``extraction.engine == 'dpkt'`` compared an</span>
-    <span class="c1"># object against a string and was *always* :data:`False`. Every capture then fell</span>
-    <span class="c1"># through to the pcapkit adapter, which crashed on DPKT frames and silently</span>
-    <span class="c1"># returned no streams on Scapy frames (#399). Dispatch on the engine *type*</span>
+    <span class="c1"># never its name -- so ``extraction.engine == 'dpkt'`` would compare an object</span>
+    <span class="c1"># against a string and be *always* :data:`False`, and every capture would fall</span>
+    <span class="c1"># through to the pcapkit adapter, which crashes on DPKT frames and silently</span>
+    <span class="c1"># returns no streams on Scapy frames (#399). Dispatch on the engine *type*</span>
     <span class="c1"># instead, and via :func:`isinstance` so that a third-party engine subclassing a</span>
     <span class="c1"># built-in still reaches the adapter that matches its frames.</span>
     <span class="c1">#</span>

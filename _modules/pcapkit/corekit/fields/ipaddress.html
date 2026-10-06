@@ -566,8 +566,7 @@
 
 <span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
 <span class="sd">        for the same placement reason :issue:`469` gives: a correct check</span>
-<span class="sd">        in the wrong position does not fire, and that placement mistake</span>
-<span class="sd">        has already been made twice in this repository's history.</span>
+<span class="sd">        in the wrong position does not fire.</span>
 
 <span class="sd">        Guarding the field classes is necessary but not sufficient, because a</span>
 <span class="sd">        ``_make_*`` that must know the address family before it can build the</span>
@@ -613,21 +612,17 @@
 <span class="sd">    Notes:</span>
 <span class="sd">        This is the sanctioned way for a ``_make_*`` method to turn a</span>
 <span class="sd">        caller-supplied address into an :mod:`ipaddress` object, and it exists</span>
-<span class="sd">        because doing it with :func:`ipaddress.ip_address` directly is what</span>
-<span class="sd">        :issue:`508` turned out to be: a ``_make_*`` that has to know the</span>
-<span class="sd">        address *family* before it can build the schema -- to size an option</span>
-<span class="sd">        whose length is the only thing on the wire that carries the family --</span>
-<span class="sd">        must convert the argument itself, and that conversion happens</span>
-<span class="sd">        **before** the schema, so it launders a :obj:`bool` into an</span>
+<span class="sd">        because doing it with :func:`ipaddress.ip_address` directly is the</span>
+<span class="sd">        defect :issue:`508` found: a ``_make_*`` that has to know the address</span>
+<span class="sd">        *family* before it can build the schema -- to size an option whose</span>
+<span class="sd">        length is the only thing on the wire that carries the family -- must</span>
+<span class="sd">        convert the argument itself, and that conversion happens **before**</span>
+<span class="sd">        the schema, so it launders a :obj:`bool` into an</span>
 <span class="sd">        :class:`~ipaddress.IPv4Address` that the guard added for :issue:`491`</span>
 <span class="sd">        in :meth:`_IPAddressField.pre_process` can then only see as a</span>
-<span class="sd">        legitimate address. Seven such call sites took ``True`` / ``False``</span>
-<span class="sd">        without complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::``</span>
-<span class="sd">        where the wire format fixes the family as IPv6 -- and six of them went</span>
-<span class="sd">        on to pack those octets. The seventh, :meth:`TCP._make_mptcp_addaddr</span>
-<span class="sd">        &lt;pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr&gt;`, built an</span>
-<span class="sd">        equally corrupt schema and is only stopped from packing it by an</span>
-<span class="sd">        unrelated defect of its own.</span>
+<span class="sd">        legitimate address: ``True`` / ``False`` become ``0.0.0.1`` /</span>
+<span class="sd">        ``0.0.0.0`` -- or ``::1`` / ``::`` where the wire format fixes the</span>
+<span class="sd">        family as IPv6 -- without complaint.</span>
 
 <span class="sd">        Routing every one of them through here rather than giving each its own</span>
 <span class="sd">        :func:`isinstance` check is the whole point: :issue:`469` added</span>

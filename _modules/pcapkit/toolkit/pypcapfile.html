@@ -582,13 +582,10 @@
 <span class="sd">        (it raises :exc:`~ipaddress.AddressValueError` otherwise). This helper</span>
 <span class="sd">        also accepts a packed 4-byte :obj:`bytes` value directly, so a</span>
 <span class="sd">        differently-represented `PyPCAPFile`_ fork or release still works.</span>
-<span class="sd">        Anything that is not :obj:`bytes` is rejected outright: an earlier</span>
-<span class="sd">        revision also accepted a plain :obj:`int`, kept only because this</span>
-<span class="sd">        module's own unit test stand-ins modelled the field that way --</span>
-<span class="sd">        which meant production had been widened specifically to keep a</span>
-<span class="sd">        fixture passing that was hiding this very defect, so the stand-ins</span>
-<span class="sd">        were changed to use dotted-decimal :obj:`bytes` instead and the</span>
-<span class="sd">        ``int`` case was dropped.</span>
+<span class="sd">        Anything that is not :obj:`bytes`, a plain :obj:`int` included, is</span>
+<span class="sd">        rejected outright. The unit-test stand-ins model the field as</span>
+<span class="sd">        dotted-decimal :obj:`bytes`, as the released library does, rather than</span>
+<span class="sd">        this helper being widened to fit a fixture.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If ``value`` cannot be parsed as an IPv4 address.</span>

@@ -481,20 +481,19 @@
 <span class="sd">:file:`docs/source/contributing/conventions/sentinel-convention.rst` for the</span>
 <span class="sd">house rule the four below follow.</span>
 
-<span class="sd">Before this module existed, each of the four lived beside the one class that</span>
-<span class="sd">used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,</span>
-<span class="sd">:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,</span>
-<span class="sd">:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and</span>
-<span class="sd">:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
-<span class="sd">on GitHub issue :issue:`911`, choosing one shared module over one module per</span>
-<span class="sd">sentinel, moves the four *definitions* here; each original module keeps a three-line</span>
-<span class="sd">re-export so that no existing ``from &lt;module&gt; import &lt;name&gt;`` breaks,</span>
-<span class="sd">including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
+<span class="sd">The owner's ruling on GitHub issue :issue:`911` chose one shared module over</span>
+<span class="sd">one module per sentinel. Each sentinel is also re-exported, in a single</span>
+<span class="sd">import line, from the module of the one class that uses it --</span>
+<span class="sd">:class:`NullType` from :mod:`pcapkit.corekit.module`, :class:`NoValueType`</span>
+<span class="sd">from :mod:`pcapkit.corekit.fields.field`, :class:`NoDefaultType` from</span>
+<span class="sd">:mod:`pcapkit.corekit.enum` and :class:`AbsentType` from</span>
+<span class="sd">:mod:`pcapkit.protocols.protocol` -- so that no ``from &lt;module&gt; import &lt;name&gt;``</span>
+<span class="sd">breaks, including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
 <span class="sd">:mod:`pcapkit.foundation.registry.foundation`,</span>
 <span class="sd">:mod:`pcapkit.foundation.registry.protocols` and</span>
 <span class="sd">:mod:`pcapkit.corekit.fields.ipaddress`, :mod:`~pcapkit.corekit.fields.misc`,</span>
 <span class="sd">:mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`</span>
-<span class="sd">already carry.</span>
+<span class="sd">carry.</span>
 
 <span class="sd">``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``</span>
 <span class="sd">is documented as the value of</span>
@@ -504,12 +503,9 @@
 <span class="sd">package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --</span>
 <span class="sd">nothing outside that module ever imports it, from here or from there -- so</span>
 <span class="sd">its re-export exists only so that module's own code keeps reading</span>
-<span class="sd">``ABSENT`` rather than a fully-qualified name; see :class:`AbsentType`'s</span>
-<span class="sd">own docstring below for why it stays private after the move. GitHub issue</span>
-<span class="sd">:issue:`937` later dropped the leading underscore both used to carry</span>
-<span class="sd">(``_Absent``, ``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like</span>
-<span class="sd">their two siblings; the privacy this paragraph describes did not move with the</span>
-<span class="sd">name -- see :class:`AbsentType`'s docstring for what carries it now.</span>
+<span class="sd">``ABSENT`` rather than a fully-qualified name. It carries no leading</span>
+<span class="sd">underscore; :class:`AbsentType`'s docstring says what marks it private</span>
+<span class="sd">instead.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -530,13 +526,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NullType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.</span>
 
-<span class="sd">    A distinct class rather than a plain :class:`str` -- which is what the</span>
-<span class="sd">    registry helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
-<span class="sd">    :mod:`pcapkit.foundation.registry.foundation` used to define,</span>
-<span class="sd">    independently of each other -- so that ``is`` comparisons against it mean</span>
-<span class="sd">    what they say: no :class:`str` a caller passes, including one that</span>
-<span class="sd">    happens to spell ``'(null)'`` itself, can compare equal to this sentinel</span>
-<span class="sd">    by identity. See GitHub issue :issue:`833`.</span>
+<span class="sd">    A distinct class rather than a plain :class:`str` such as ``'(null)'``,</span>
+<span class="sd">    so that ``is`` comparisons against it mean what they say: no</span>
+<span class="sd">    :class:`str` a caller passes, including one that happens to spell</span>
+<span class="sd">    ``'(null)'`` itself, can be this sentinel. See GitHub issue :issue:`833`.</span>
 
 <span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
 <span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance</span>
@@ -545,37 +538,25 @@
 <span class="sd">    the scenes -- can end up holding a second object that fails an ``is</span>
 <span class="sd">    NULL`` check downstream. :meth:`ModuleDescriptor.klass</span>
 <span class="sd">    &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` makes exactly that</span>
-<span class="sd">    check, and a stricter guard that raises on a second call would be truer</span>
-<span class="sd">    to "singleton" in the abstract, but it would also mean the module's own</span>
-<span class="sd">    ``NULL = NullType()`` below is the only call that is ever allowed to</span>
+<span class="sd">    check; a second instance would slip past it to :func:`getattr` and</span>
+<span class="sd">    downgrade a clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into</span>
+<span class="sd">    a bare :exc:`TypeError` (``attribute name must be string, not</span>
+<span class="sd">    'NullType'``). A stricter guard that raises on a second call would be</span>
+<span class="sd">    truer to "singleton" in the abstract, but it would also mean the module's</span>
+<span class="sd">    own ``NULL = NullType()`` below is the only call that is ever allowed to</span>
 <span class="sd">    succeed -- fragile for no real benefit, since nothing here needs</span>
 <span class="sd">    *rejecting* a second construction, only preventing it from producing a</span>
 <span class="sd">    distinct object.</span>
 
-<span class="sd">    That still leaves :func:`copy.deepcopy`, :func:`copy.copy` and</span>
-<span class="sd">    :mod:`pickle` unhandled: none of them constructs a new instance by</span>
-<span class="sd">    calling ``NullType()`` themselves, so the guard above never runs for</span>
-<span class="sd">    them. Each is therefore given its own override below, rather than left</span>
-<span class="sd">    to fall back to the default behaviour for a plain object:</span>
-
-<span class="sd">    * :func:`copy.copy` and :func:`copy.deepcopy` check for</span>
-<span class="sd">      :meth:`__copy__`/:meth:`__deepcopy__` before ever falling back to</span>
-<span class="sd">      reduction, so :meth:`__deepcopy__` in particular has to be defined --</span>
-<span class="sd">      its absence is the actual defect this class used to have: deepcopying</span>
-<span class="sd">      a :class:`~pcapkit.corekit.module.ModuleDescriptor` recursed into this</span>
-<span class="sd">      sentinel, reduced it, and rebuilt a second, non-identical</span>
-<span class="sd">      :class:`NullType` that then read as an ordinary attribute name to</span>
-<span class="sd">      :func:`getattr`, downgrading a clean</span>
-<span class="sd">      :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare</span>
-<span class="sd">      :exc:`TypeError` (``attribute name must be string, not 'NullType'``).</span>
-<span class="sd">    * :mod:`pickle` protocols 2 and up reconstruct through</span>
-<span class="sd">      ``cls.__new__(cls)``, which the guarded :meth:`__new__` already keeps</span>
-<span class="sd">      to one instance -- but protocols 0 and 1 reconstruct through</span>
-<span class="sd">      :func:`copyreg._reconstructor`, which calls :func:`object.__new__`</span>
-<span class="sd">      *directly*, bypassing :meth:`__new__` entirely. :meth:`__reduce__` is</span>
-<span class="sd">      defined so that every protocol, not only the ones that happen to go</span>
-<span class="sd">      through this class's own :meth:`__new__`, is routed through the same</span>
-<span class="sd">      module-level getter instead of through reconstruction at all.</span>
+<span class="sd">    :func:`copy.copy`, :func:`copy.deepcopy` and :mod:`pickle` protocols 2</span>
+<span class="sd">    and up reconstruct through ``cls.__new__(cls)``, which the guard above</span>
+<span class="sd">    already keeps to one instance. Pickle protocols 0 and 1 do not: they</span>
+<span class="sd">    reconstruct through :func:`copyreg._reconstructor`, which calls</span>
+<span class="sd">    :func:`object.__new__` *directly*, bypassing :meth:`__new__` entirely.</span>
+<span class="sd">    :meth:`__reduce__` is defined so that every protocol is routed through</span>
+<span class="sd">    the same module-level getter instead of through reconstruction at all,</span>
+<span class="sd">    and :meth:`__copy__`/:meth:`__deepcopy__` return ``self`` without</span>
+<span class="sd">    reducing anything.</span>
 
 <span class="sd">    A caveat rather than a defect: :func:`importlib.reload` on this module</span>
 <span class="sd">    re-executes ``NULL = NullType()`` below, producing a *second* singleton</span>
@@ -587,21 +568,17 @@
 <span class="sd">    of problem for the *class* it resolves, which is why it re-reads</span>
 <span class="sd">    :data:`sys.modules` on every call rather than memoising; nothing</span>
 <span class="sd">    equivalent is possible here, because unlike a resolved class there is no</span>
-<span class="sd">    live registry this sentinel could be re-read from. The pre-:issue:`833`</span>
-<span class="sd">    ``str`` sentinel had the same fragility for the same reason -- it is a</span>
-<span class="sd">    property of sharing one module-level binding across a reload, not</span>
-<span class="sd">    something this class's singleton guarantees claim to solve -- and nothing</span>
-<span class="sd">    in this package reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
+<span class="sd">    live registry this sentinel could be re-read from. It is a property of</span>
+<span class="sd">    sharing one module-level binding across a reload, not something this</span>
+<span class="sd">    class's singleton guarantees claim to solve, and nothing in this package</span>
+<span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
 
-<span class="sd">    A second caveat, specific to this class now living apart from its one</span>
-<span class="sd">    caller-visible re-export: reloading :mod:`pcapkit.corekit.module`</span>
-<span class="sd">    itself -- rather than this module -- no longer has any effect on the</span>
-<span class="sd">    singleton at all. That module now only re-imports :data:`NULL` and</span>
+<span class="sd">    Reloading :mod:`pcapkit.corekit.module` instead has no effect on the</span>
+<span class="sd">    singleton at all. That module only re-imports :data:`NULL` and</span>
 <span class="sd">    :class:`NullType` from here, and re-running an already-satisfied</span>
 <span class="sd">    ``from ... import`` reads the current binding in :mod:`sys.modules`</span>
 <span class="sd">    rather than re-executing anything, so it neither mints a new instance</span>
-<span class="sd">    nor loses the old one. The reload hazard this docstring describes moved</span>
-<span class="sd">    with the class definition; it did not double.</span>
+<span class="sd">    nor loses the old one.</span>
 
 <span class="sd">    """</span>
 
@@ -660,11 +637,9 @@
 
 <span class="c1">#: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``</span>
 <span class="c1">#: helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
-<span class="c1">#: :mod:`pcapkit.foundation.registry.foundation`. Housed here, alongside the</span>
-<span class="c1">#: package's other sentinels, rather than in :mod:`pcapkit.corekit.module`</span>
-<span class="c1">#: where it used to live -- per the owner's ruling on GitHub issue</span>
-<span class="c1">#: :issue:`911`, see the module docstring above. :mod:`pcapkit.corekit.module`</span>
-<span class="c1">#: keeps a re-export so every existing</span>
+<span class="c1">#: :mod:`pcapkit.foundation.registry.foundation`. Housed here with the</span>
+<span class="c1">#: package's other sentinels, per the module docstring above;</span>
+<span class="c1">#: :mod:`pcapkit.corekit.module` keeps a re-export so every</span>
 <span class="c1">#: ``from pcapkit.corekit.module import NULL`` keeps working.</span>
 <span class="n">NULL</span> <span class="o">=</span> <span class="n">NullType</span><span class="p">()</span>
 
@@ -686,10 +661,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
-<span class="sd">    Housed here per GitHub issue :issue:`911` rather than in</span>
-<span class="sd">    :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where</span>
+<span class="sd">    Housed here per GitHub issue :issue:`911`, and re-exported from</span>
+<span class="sd">    :mod:`pcapkit.corekit.fields.field`, where</span>
 <span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
-<span class="sd">    still documents it as the field-default sentinel.</span>
+<span class="sd">    documents it as the field-default sentinel.</span>
 
 <span class="sd">    """</span>
 
@@ -703,8 +678,6 @@
 <span class="c1">#: :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`.</span>
 <span class="c1">#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that</span>
 <span class="c1">#: attribute's own documentation is a published contract naming this object.</span>
-<span class="c1">#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue :issue:`937`,</span>
-<span class="c1">#: which normalised all four sentinel *objects* to SCREAMING_SNAKE.</span>
 <span class="n">NO_VALUE</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
 
 
@@ -715,35 +688,16 @@
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
-<span class="sd">    A dedicated class rather than a bare :class:`object`, per a ruling given in</span>
-<span class="sd">    review of the work for :issue:`857`, which asked for a dedicated class that</span>
-<span class="sd">    follows the house convention. A bare :class:`object` compares under</span>
-<span class="sd">    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its</span>
-<span class="sd">    own does -- identity comparison was never the problem an earlier</span>
-<span class="sd">    revision's docstring here overstated it to be. What a bare</span>
-<span class="sd">    :class:`object` actually lacks is a readable representation: it prints</span>
-<span class="sd">    as ``&lt;object object at 0x...&gt;`` in a signature, in :func:`help`, and in</span>
-<span class="sd">    a traceback, where ``NoDefaultType()``</span>
-<span class="sd">    -- via :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``.</span>
-
-<span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
-<span class="sd">    convention is settled: both :class:`NullType` and :class:`NoValueType`</span>
-<span class="sd">    use ``&lt;Name&gt;Type``. At the time, the *instance*'s own name was not</span>
-<span class="sd">    similarly settled -- a follow-up given in review of the work for</span>
-<span class="sd">    :issue:`857` was explicit that ``NULL`` (``SCREAMING_CASE``) and</span>
-<span class="sd">    ``NoValue`` (``CapWords``) disagreed, and that the choice should follow</span>
-<span class="sd">    what each sentinel is needed for rather than a settled rule. The need here</span>
-<span class="sd">    was continuity: ``NO_DEFAULT`` was already the name on ``main`` --</span>
-<span class="sd">    referenced in</span>
-<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature,</span>
-<span class="sd">    its docstring, and both comparison sites -- and that change was to *what</span>
-<span class="sd">    the sentinel is*, not to *what it is called*, so it kept that name rather</span>
-<span class="sd">    than being renamed to match either precedent's instance casing for its own</span>
-<span class="sd">    sake. ``NULL``'s ``SCREAMING_CASE`` was the closer match regardless, since</span>
-<span class="sd">    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue</span>
-<span class="sd">    :issue:`937` later settled the question this paragraph left open:</span>
-<span class="sd">    ``NoValue`` became :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`,</span>
-<span class="sd">    so every instance name now agrees on SCREAMING_SNAKE.</span>
+<span class="sd">    A dedicated class rather than a bare :class:`object`, as review of the</span>
+<span class="sd">    work for :issue:`857` asked, following the house convention. A bare</span>
+<span class="sd">    :class:`object` compares under ``is`` exactly as safely as a dedicated</span>
+<span class="sd">    class with no ``__eq__`` of its own does; what it lacks is a readable</span>
+<span class="sd">    representation: it prints as ``&lt;object object at 0x...&gt;`` in a signature,</span>
+<span class="sd">    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via</span>
+<span class="sd">    :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``. The names follow</span>
+<span class="sd">    the convention every sentinel here shares, settled by GitHub issue</span>
+<span class="sd">    :issue:`937`: ``&lt;Name&gt;Type`` for the class and SCREAMING_SNAKE for the</span>
+<span class="sd">    instance.</span>
 
 <span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
 <span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
@@ -797,76 +751,53 @@
 <span class="sd">    deep-copying either still reduces the sentinel itself through the same,</span>
 <span class="sd">    guarded protocol-2 path measured above.</span>
 
-<span class="sd">    A caveat that turns out to be dormant rather than live, on the current</span>
-<span class="sd">    tree -- worth stating precisely rather than either repeating the older,</span>
-<span class="sd">    inaccurate claim or dropping the topic. :func:`importlib.reload` on this</span>
-<span class="sd">    module re-executes both ``class NoDefaultType:`` and ``NO_DEFAULT =</span>
-<span class="sd">    NoDefaultType()`` below, producing a fresh, distinct object; any consumer</span>
-<span class="sd">    that had already captured the pre-reload one -- as a bound parameter</span>
-<span class="sd">    default, say -- goes on holding the stale one, and a bare</span>
+<span class="sd">    A reload caveat that is dormant rather than live. :func:`importlib.reload`</span>
+<span class="sd">    on this module re-executes both ``class NoDefaultType:`` and</span>
+<span class="sd">    ``NO_DEFAULT = NoDefaultType()`` below, producing a fresh, distinct</span>
+<span class="sd">    object; any consumer that had already captured the pre-reload one -- as a</span>
+<span class="sd">    bound parameter default, say -- goes on holding the stale one, and a bare</span>
 <span class="sd">    ``held_default is NO_DEFAULT`` comparison against the post-reload global</span>
 <span class="sd">    then reads :data:`False` where it once read :data:`True`.</span>
-<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` looked</span>
-<span class="sd">    exactly like such a consumer before GitHub issue :issue:`864`: an</span>
-<span class="sd">    unrecognised, non-``NO_DEFAULT`` value used to fall through to</span>
-<span class="sd">    ``cls(default)``, so a stale sentinel handed to that call could raise a</span>
-<span class="sd">    :exc:`ValueError` a caller had no reason to expect from an *omitted*</span>
-<span class="sd">    argument. :issue:`864` closed a different hole -- ``default`` could mint</span>
-<span class="sd">    a new member -- by replacing that call with a</span>
-<span class="sd">    ``default not in cls._value2member_map_`` guard, and the guard happens to</span>
-<span class="sd">    close this one too: a :class:`NoDefaultType` instance, stale or fresh, is</span>
-<span class="sd">    never a registered enum value, so the guard's ``not in`` half reads</span>
-<span class="sd">    :data:`True` for it either way and ``get`` re-raises the original lookup</span>
-<span class="sd">    error correctly regardless of which :data:`NO_DEFAULT` a caller's stale</span>
-<span class="sd">    default is stale *against*. Measured on the current tree, guard</span>
-<span class="sd">    included::</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` is such a</span>
+<span class="sd">    consumer but is not affected: its fallback is guarded by</span>
+<span class="sd">    ``default not in cls._value2member_map_`` (added by GitHub issue</span>
+<span class="sd">    :issue:`864` to stop ``default`` minting a new member), and a</span>
+<span class="sd">    :class:`NoDefaultType` instance, stale or fresh, is never a registered</span>
+<span class="sd">    enum value, so the guard reads :data:`True` for it either way and ``get``</span>
+<span class="sd">    re-raises the original lookup error regardless of which</span>
+<span class="sd">    :data:`NO_DEFAULT` a caller's default is stale *against*. Measured::</span>
 
 <span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')              # before reload</span>
-<span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
+<span class="sd">        EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 <span class="sd">        &gt;&gt;&gt; importlib.reload(pcapkit.corekit.sentinels)</span>
 <span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')               # after reload</span>
-<span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
+<span class="sd">        EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"</span>
 
-<span class="sd">    So the docstring this class carried before GitHub issue :issue:`911`'s</span>
-<span class="sd">    move -- which claimed the second call above raises :exc:`ValueError` --</span>
-<span class="sd">    was already wrong on ``main`` at ``d31c0aaf6``, independently of the</span>
-<span class="sd">    move: it described the pre-:issue:`864` ``cls(default)`` call, and</span>
-<span class="sd">    nobody had re-verified it against the guard :issue:`864` added</span>
-<span class="sd">    afterwards. Fixed here as a drive-by correction, not a consequence of</span>
-<span class="sd">    the housing change itself.</span>
-
-<span class="sd">    None of that makes the underlying hazard theoretical elsewhere in this</span>
-<span class="sd">    package: ``-1`` never had this failure mode at all, since ``-1 == -1``</span>
-<span class="sd">    compares by value rather than identity, and reload staleness is a</span>
-<span class="sd">    *tracked* defect class here for other constructs -- see</span>
+<span class="sd">    The hazard is not theoretical elsewhere: reload staleness is a *tracked*</span>
+<span class="sd">    defect class here for other constructs -- see</span>
 <span class="sd">    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own</span>
 <span class="sd">    docstring note on why it declines to memoise a resolved class, and</span>
 <span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
 <span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
-<span class="sd">    deliberately to pin the fix for exactly that class of bug elsewhere. A</span>
-<span class="sd">    *future* comparison site written the vulnerable way -- a bare ``is</span>
-<span class="sd">    NO_DEFAULT`` with no independent guard behind it, the way :issue:`864`'s</span>
-<span class="sd">    fix itself was not -- would still reproduce it. "Nothing in this package</span>
-<span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import" remains true</span>
-<span class="sd">    today, but it is a caveat to keep honest rather than a guarantee this</span>
-<span class="sd">    class enforces.</span>
+<span class="sd">    deliberately to pin the fix for exactly that class of bug. A *future*</span>
+<span class="sd">    comparison site written the vulnerable way -- a bare ``is NO_DEFAULT``</span>
+<span class="sd">    with no independent guard behind it -- would reproduce it. Nothing in</span>
+<span class="sd">    this package reloads :mod:`pcapkit.corekit.sentinels` after import, but</span>
+<span class="sd">    that is a caveat to keep honest rather than a guarantee this class</span>
+<span class="sd">    enforces.</span>
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">       GitHub issue :issue:`911` also changes *which* reload is the one that</span>
-<span class="sd">       matters, independently of the :issue:`864` finding above.</span>
-<span class="sd">       :mod:`pcapkit.corekit.enum` no longer defines ``NoDefaultType``</span>
-<span class="sd">       itself; it only reads :data:`NO_DEFAULT` off this module once, at its</span>
-<span class="sd">       own import time, into its own module global. Reloading</span>
-<span class="sd">       :mod:`pcapkit.corekit.enum` alone therefore now just re-runs that</span>
-<span class="sd">       read, which -- so long as this module has not *also* been reloaded --</span>
-<span class="sd">       fetches back the identical object and changes nothing. Producing a</span>
-<span class="sd">       fresh :data:`NO_DEFAULT` at all now takes reloading *this* module,</span>
-<span class="sd">       where the class statement lives; reloading only</span>
-<span class="sd">       :mod:`pcapkit.corekit.enum` is not enough on its own, because ``from</span>
-<span class="sd">       ... import`` binds a copy rather than a live alias, and that module's</span>
-<span class="sd">       own global stays pointed at whatever it read until something re-runs</span>
-<span class="sd">       that import.</span>
+<span class="sd">       Reloading :mod:`pcapkit.corekit.enum` alone does not produce a fresh</span>
+<span class="sd">       :data:`NO_DEFAULT`. That module does not define ``NoDefaultType``; it</span>
+<span class="sd">       reads :data:`NO_DEFAULT` off this module once, at its own import time,</span>
+<span class="sd">       into its own module global, and a reload just re-runs that read,</span>
+<span class="sd">       which -- so long as this module has not *also* been reloaded --</span>
+<span class="sd">       fetches back the identical object. Producing a fresh one takes</span>
+<span class="sd">       reloading *this* module, where the class statement lives; and since</span>
+<span class="sd">       ``from ... import`` binds a copy rather than a live alias,</span>
+<span class="sd">       :mod:`pcapkit.corekit.enum`'s own global stays pointed at whatever it</span>
+<span class="sd">       read until something re-runs that import.</span>
 
 <span class="sd">    Also unlike both :class:`NullType` and :class:`NoValueType`, this</span>
 <span class="sd">    deliberately does *not* define ``__bool__``. Both of those model an</span>
@@ -879,9 +810,9 @@
 <span class="sd">    exactly the conflation this sentinel exists to rule out: code that writes</span>
 <span class="sd">    ``if not default:`` instead of ``if default is NO_DEFAULT:`` would then</span>
 <span class="sd">    read :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy</span>
-<span class="sd">    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the exact</span>
-<span class="sd">    collision ``-1`` used to cause under ``==`` and the reason :issue:`857`</span>
-<span class="sd">    exists. Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy</span>
+<span class="sd">    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the</span>
+<span class="sd">    collision with a genuine default that :issue:`857` exists to rule out.</span>
+<span class="sd">    Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy</span>
 <span class="sd">    (the default for any object defining neither ``__bool__`` nor</span>
 <span class="sd">    ``__len__``), which at least does not *look* like one of the falsy values</span>
 <span class="sd">    it must never be mistaken for.</span>
@@ -934,21 +865,17 @@
 <span class="sd">    and means "no value was given", not "this key is not here".</span>
 
 <span class="sd">    Defined here, alongside the package's other sentinels, per the owner's</span>
-<span class="sd">    ruling on GitHub issue :issue:`911`. Originally named</span>
-<span class="sd">    ``_AbsentType``/``_Absent``, with the leading underscore standing in for</span>
-<span class="sd">    "private" -- GitHub issue :issue:`937` normalised every sentinel *object*</span>
-<span class="sd">    to SCREAMING_SNAKE and dropped it, so this pair now reads as</span>
-<span class="sd">    CamelCase/SCREAMING_SNAKE like their two siblings and privacy is no longer</span>
-<span class="sd">    signalled by the name at all. The owner's ruling on GitHub issue</span>
-<span class="sd">    :issue:`719` accepted that rename, and held that documenting ``ABSENT`` as</span>
-<span class="sd">    a private type and class, not for public use, is enough to replace the</span>
-<span class="sd">    underscore. So this class and :data:`ABSENT` stay exactly as private as</span>
-<span class="sd">    they were: nothing outside :mod:`pcapkit.protocols.protocol` reads</span>
-<span class="sd">    :data:`ABSENT`, from here or from there, and neither this module's nor</span>
-<span class="sd">    that module's :attr:`__all__` names either one. This docstring, and the</span>
-<span class="sd">    "Naming a Sentinel" section of</span>
+<span class="sd">    ruling on GitHub issue :issue:`911`. **Private**, although the names</span>
+<span class="sd">    carry no leading underscore: GitHub issue :issue:`937` put every sentinel</span>
+<span class="sd">    on the CamelCase/SCREAMING_SNAKE convention, and the owner's ruling on</span>
+<span class="sd">    GitHub issue :issue:`719` held that documenting ``ABSENT`` as a private</span>
+<span class="sd">    type and class, not for public use, is enough to replace the underscore.</span>
+<span class="sd">    Nothing outside :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`,</span>
+<span class="sd">    from here or from there, and neither this module's nor that module's</span>
+<span class="sd">    :attr:`__all__` names either one. This docstring, and the "Naming a</span>
+<span class="sd">    Sentinel" section of</span>
 <span class="sd">    :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are</span>
-<span class="sd">    what now records that fact in place of the leading underscore.</span>
+<span class="sd">    what record that.</span>
 
 <span class="sd">    """</span>
 
@@ -970,9 +897,8 @@
 <span class="c1">#: :attr:`ProtocolBase.__keywords__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
 <span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
-<span class="c1">#: for exactly that one read. Private by convention and documentation only,</span>
-<span class="c1">#: not by a leading underscore, which GitHub issue :issue:`937` dropped --</span>
-<span class="c1">#: see :class:`AbsentType`'s own docstring for why.</span>
+<span class="c1">#: for exactly that one read. Private by documentation rather than by a</span>
+<span class="c1">#: leading underscore -- see :class:`AbsentType`'s own docstring.</span>
 <span class="n">ABSENT</span> <span class="o">=</span> <span class="n">AbsentType</span><span class="p">()</span>
 </pre></div>
         </article>
