@@ -106,7 +106,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
     """On-the-wire length, in octets, of a resolved Quick-Start (``QS``) suboption.
 
-    The Quick-Start suboption schemas re-declare the option's own ``type`` and
+    The Quick-Start suboption schemas carry the option's own ``type`` and
     ``length`` octets -- they inherit them from :class:`Option` -- so what
     :func:`quick_start_data_selector` has to hand the nested
     :class:`~pcapkit.corekit.fields.misc.SchemaField` is the length of the
@@ -295,7 +295,7 @@ class LSROption(Option, code=Enum_OptionNumber.LSR):
         length=lambda pkt: pkt['pointer'] - 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer0.
+    #: Remaining data buffer.
     remainder: 'bytes' = PaddingField(
         length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
         default=bytes(36),  # a reasonable default
@@ -481,7 +481,7 @@ class RROption(Option, code=Enum_OptionNumber.RR):
         length=lambda pkt: pkt['pointer'] - 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer0.
+    #: Remaining data buffer.
     remainder: 'bytes' = PaddingField(
         length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
         default=bytes(36),  # a reasonable default
@@ -515,7 +515,7 @@ class SSROption(Option, code=Enum_OptionNumber.SSR):
         length=lambda pkt: pkt['pointer'] - 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer0.
+    #: Remaining data buffer.
     remainder: 'bytes' = PaddingField(
         length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
         default=bytes(36),  # a reasonable default
@@ -608,7 +608,7 @@ Option.register(Enum_OptionNumber.QS, _QSOption)
 
 
 class QSOption(Option, EnumSchema[Enum_QSFunction]):
-    """Header schema for IPV4 quick start (``QS``) options."""
+    """Header schema for IPv4 quick start (``QS``) options."""
 
     __enum__: 'DefaultDict[Enum_QSFunction, Type[QSOption]]' = collections.defaultdict(lambda: None)  # type: ignore[return-value,arg-type]
 
@@ -624,7 +624,7 @@ class QSOption(Option, EnumSchema[Enum_QSFunction]):
 
 @schema_final
 class QuickStartRequestOption(QSOption, code=Enum_QSFunction.Quick_Start_Request):
-    """Header schema for IPV4 quick start request options."""
+    """Header schema for IPv4 quick start request options."""
 
     #: QS time-to-live (TTL).
     ttl: 'int' = UInt8Field()
@@ -640,7 +640,7 @@ class QuickStartRequestOption(QSOption, code=Enum_QSFunction.Quick_Start_Request
 
 @schema_final
 class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_Rate):
-    """Header schema for IPV4 quick start report of approved rate options."""
+    """Header schema for IPv4 quick start report of approved rate options."""
 
     #: Not used. One octet, holding the place a Quick-Start Request fills with
     #: ``QS TTL``: :rfc:`4782#section-3.1` says in as many words that *"for a

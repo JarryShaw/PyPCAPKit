@@ -882,8 +882,9 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             When this schema is nested -- unpacked through a
             :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
             directly -- ``packet`` is not the enclosing schema's own data, but
-            a context built by :func:`~pcapkit.corekit.fields.misc.
-            nested_packet_context`: a name this schema does not itself
+            a context built by
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name
+            this schema does not itself
             declare falls through to the enclosing schema, and the enclosing
             schema is also reachable unconditionally under a ``__packet__``
             key. See that function for the exact lookup, write and iteration
@@ -1043,8 +1044,8 @@ class _EnumRegistry(collections.defaultdict):
     The fallback itself is deliberate -- it is how an unknown option, chunk or
     block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this
     subclass keeps returning it and just stops recording it.
-    :meth:`ProtocolBase.\
-    _lookup_registry <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`
+    :meth:`ProtocolBase._lookup_registry
+    <pcapkit.protocols.protocol.Protocol._lookup_registry>`
     does the same for the protocol-layer ``__proto__`` family.
 
     """
@@ -1059,7 +1060,7 @@ class EnumMeta(SchemaMeta, Generic[_ET]):
     """Meta class to add dynamic support for :class:`EnumSchema`.
 
     This meta class is used to generate necessary attributes for the
-    :class:`SchemaMeta` class. It can be useful to reduce runtime generation
+    :class:`EnumSchema` class. It can be useful to reduce runtime generation
     cost as well as caching already generated attributes.
 
     * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
@@ -1239,11 +1240,11 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
 
     @classmethod
     def register(cls, code: '_ET', schema: 'Type[Self]') -> 'None':
-        """Register enumetaion to :attr:`__enum__` mapping.
+        """Register enumeration to :attr:`__enum__` mapping.
 
         Args:
-            code: Enumetaion code.
-            schema: Enumetaion schema.
+            code: Enumeration code.
+            schema: Enumeration schema.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already

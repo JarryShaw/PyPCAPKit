@@ -600,7 +600,7 @@ class Option(EnumSchema[Enum_Option]):
             Revised schema.
 
         """
-        # for Pad1 option, length is always 1
+        # for Pad1 option, length is always 0
         if self.type == Enum_Option.Pad1:
             self.length = 0
         return self
@@ -1939,7 +1939,8 @@ class DynamicIPMulticastSelectorOption(Option, code=Enum_Option.Dynamic_IP_Multi
         :rfc:`3376#section-4.2` IGMP structures, which belong to those protocols
         rather than to the Mobility Header, so they are carried opaquely here.
         :attr:`protocol` says which of the two they are in -- ``143`` for MLDv2
-        and ``131`` for MLDv1.
+        and ``131`` for MLDv1 [:rfc:`7028#section-5.1.2`], or ``0x12``, ``0x16``
+        and ``0x22`` for IGMPv1 to IGMPv3 [:rfc:`7028#section-8`].
 
     """
 
@@ -1990,7 +1991,7 @@ class ActiveMulticastSubscriptionIPv4Option(
 
     """
 
-    #: IGMP message type identifying the context format: ``0x12`` for IGMPv1,
+    #: IGMP message type identifying the context format -- ``0x12`` for IGMPv1,
     #: ``0x16`` for IGMPv2 and ``0x22`` for IGMPv3.
     igmp_type: 'int' = UInt8Field()
     #: Multicast membership context.
@@ -2014,7 +2015,7 @@ class ActiveMulticastSubscriptionIPv6Option(
 
     """
 
-    #: MLD message type identifying the context format: ``143`` for MLDv2 and
+    #: MLD message type identifying the context format -- ``143`` for MLDv2 and
     #: ``131`` for MLDv1.
     mld_type: 'int' = UInt8Field()
     #: Multicast membership context.
@@ -2216,7 +2217,7 @@ class MulticastMobilityOption(Option, code=Enum_Option.Multicast_Mobility_Option
 
     """
 
-    #: Option code: ``1`` for IGMPv3, ``2`` for MLDv2, ``3`` for IGMPv3 in
+    #: Option code -- ``1`` for IGMPv3, ``2`` for MLDv2, ``3`` for IGMPv3 in
     #: IGMPv2 compatibility mode and ``4`` for MLDv2 in MLDv1 compatibility mode.
     code: 'int' = UInt8Field()
     #: Reserved.
@@ -2242,7 +2243,7 @@ class MulticastAcknowledgementOption(Option, code=Enum_Option.Multicast_Acknowle
 
     #: Option code; always ``0``.
     code: 'int' = UInt8Field()
-    #: Status: ``1`` report payload type unsupported, ``2`` requested group
+    #: Status -- ``1`` report payload type unsupported, ``2`` requested group
     #: service unsupported, ``3`` requested group service administratively
     #: prohibited.
     status: 'int' = UInt8Field()

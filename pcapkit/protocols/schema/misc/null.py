@@ -11,8 +11,9 @@ __all__ = ['NoPayload']
 class NoPayload(Schema):
     """Schema for empty payload."""
 
-    # NOTE: We add this method for both type annotation and to mark that this
-    # class accepts no arguments at runtime, since :class:`Schema` explicitly
-    # skipped those whose :attr:`__dict__` is empty :obj:`dict`.
+    # NOTE: Declared both for type annotation and to make this class accept no
+    # arguments at runtime: :func:`schema_final` generates an ``__init__`` only
+    # for a class that does not define one, so this one keeps the generated
+    # ``dict_``-taking constructor from displacing it.
     def __init__(self) -> 'None':  # pylint: disable=super-init-not-called
         pass
