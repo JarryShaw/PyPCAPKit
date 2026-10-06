@@ -183,7 +183,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         self.assertEqual(explicit_schema.incl_len, 2)
         self.assertEqual(explicit_schema.orig_len, 3)
         values = Frame._make_data(data)
-        self.assertEqual(values['ts_src'], 1)
+        self.assertEqual(values['ts_sec'], 1)
         self.assertEqual(values['ts_usec'], 250000)
         self.assertEqual(values['incl_len'], 4)
         self.assertEqual(values['orig_len'], 6)
