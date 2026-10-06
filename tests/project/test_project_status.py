@@ -12,7 +12,7 @@ tree, and each has its own class:
   restated here, so a row reordered or reworded on either side fails.
 * :class:`TestWorkflowSafety` -- the workflow runs on ``pull_request_target`` with
   a secret in scope, so it must never check out code, never splice an expression
-  into a ``run:`` script, and never read the event payload outside ``env:`` beyond
+  into a ``run:`` script or a ``shell:`` command, and never read the event payload outside ``env:`` beyond
   the item number. Asserted over the file, because nothing at run time would
   announce the mistake. :class:`TestScannerFailsClosed` holds the line scan those
   assertions read to refusing any YAML it cannot read with certainty.
@@ -187,6 +187,11 @@ def strip_comments(text: 'str') -> 'str':
 #: The one event-payload expression allowed outside an ``env:`` block: the item
 #: number, which keys the concurrency group. A number cannot carry a script.
 ITEM_NUMBER = 'github.event.issue.number || github.event.pull_request.number'
+
+#: Keys whose value the runner hands to a shell, so an expression spliced into one
+#: becomes code: ``run:`` is the script, and ``shell:`` the command line that runs
+#: it (#1068).
+SHELL_EVALUATED = frozenset({'run', 'shell'})
 
 _KEY_RE = re.compile(r'''(?P<key>[\w-]+|'[^']*'|"[^"\\]*"):(?:[ ]+(?P<rest>.*))?$''')
 _BLOCK_INDICATORS = {'|', '|-', '|+', '>', '>-', '>+'}
@@ -365,10 +370,11 @@ class TestWorkflowSafety(unittest.TestCase):
     def test_no_expression_inside_a_run_script(self) -> None:
         # An expression is substituted into the script text before the shell sees
         # it, so a PR title containing `'; curl … | sh #` becomes code. Values
-        # reach the script through `env:` only.
-        runs = [(path, value) for path, value in self.pairs if path[-1] == 'run']
-        self.assertTrue(runs, 'the scanner found no run: block to check')
-        for path, value in runs:
+        # reach the script through `env:` only. `shell:` is spliced the same way.
+        self.assertTrue([path for path, _ in self.pairs if path[-1] == 'run'],
+                        'the scanner found no run: block to check')
+        guarded = [(path, value) for path, value in self.pairs if path[-1] in SHELL_EVALUATED]
+        for path, value in guarded:
             with self.subTest(path='.'.join(path)):
                 self.assertNotIn('${{', value)
 
@@ -442,6 +448,18 @@ BYPASSES = {
 #: The safe shape of the same step: the title reaches the script through ``env:``.
 SAFE = f'      - name: x\n        env:\n          T: {_TITLE}\n        run: |\n          echo "$T"\n'
 
+_INPUT = '${{ inputs.x }}'
+
+#: An expression in ``shell:``, which the runner evaluates as it does ``run:``
+#: (#1068). It is in the subset :func:`scan` reads, so it must trip the guard
+#: rather than be refused; ``inputs.*`` is not the event payload, so
+#: :func:`payload_outside_env` does not catch it either.
+SHELL_BYPASS = f'      - name: x\n        shell: bash {_INPUT} {{0}}\n        run: echo\n'
+
+#: The safe shape of that step: a literal ``shell:``, the value through ``env:``.
+SHELL_SAFE = (f'      - name: x\n        shell: bash -e {{0}}\n'
+              f'        env:\n          X: {_INPUT}\n        run: echo "$X"\n')
+
 
 def guard_trips(text: 'str') -> 'bool':
     """Whether :meth:`TestWorkflowSafety.test_no_expression_inside_a_run_script` fails on ``text``."""
@@ -449,7 +467,7 @@ def guard_trips(text: 'str') -> 'bool':
         pairs = scan(text)
     except UnsupportedYAML:
         return True
-    return any(path and path[-1] == 'run' and '${{' in value for path, value in pairs)
+    return any(path and path[-1] in SHELL_EVALUATED and '${{' in value for path, value in pairs)
 
 
 class TestScannerFailsClosed(unittest.TestCase):
@@ -471,6 +489,18 @@ class TestScannerFailsClosed(unittest.TestCase):
         self.assertFalse(guard_trips(_STEPS + SAFE))
         self.assertIn((('jobs', 'j', 'steps', 'env', 'T'), _TITLE), pairs)
         self.assertIn((('jobs', 'j', 'steps', 'run'), 'echo "$T"'), pairs)
+
+    def test_an_expression_in_shell_trips_the_guard(self) -> None:
+        pairs = scan(_STEPS + SHELL_BYPASS)
+        self.assertIn((('jobs', 'j', 'steps', 'shell'), f'bash {_INPUT} {{0}}'), pairs)
+        self.assertEqual(payload_outside_env(pairs), [])
+        self.assertTrue(guard_trips(_STEPS + SHELL_BYPASS), 'the expression in shell: went unseen')
+
+    def test_the_safe_shell_form_is_read(self) -> None:
+        pairs = scan(_STEPS + SHELL_SAFE)
+        self.assertIn((('jobs', 'j', 'steps', 'shell'), 'bash -e {0}'), pairs)
+        self.assertIn((('jobs', 'j', 'steps', 'env', 'X'), _INPUT), pairs)
+        self.assertFalse(guard_trips(_STEPS + SHELL_SAFE))
 
     def test_the_workflow_is_inside_the_subset(self) -> None:
         self.assertTrue(scan(WORKFLOW.read_text(encoding='utf-8')))
@@ -519,6 +549,13 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
                 runs = [value for path, value in yaml_pairs(yaml.safe_load(_STEPS + step))
                         if path[-1] == 'run']
                 self.assertTrue(any('${{' in value for value in runs), runs)
+
+    def test_the_shell_fixtures_are_real(self) -> None:
+        import yaml
+        for step, want in ((SHELL_BYPASS, f'bash {_INPUT} {{0}}'), (SHELL_SAFE, 'bash -e {0}')):
+            with self.subTest(step=step):
+                self.assertIn((('jobs', 'j', 'steps', 'shell'), want),
+                              list(yaml_pairs(yaml.safe_load(_STEPS + step))))
 
     def test_no_step_uses_an_action(self) -> None:
         self.assertIn('pull_request_target', self.doc.get('on', self.doc.get(True)))
