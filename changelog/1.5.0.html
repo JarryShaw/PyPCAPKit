@@ -2677,6 +2677,13 @@ CRLF-less header is now a start line with zero fields, in the parser and the
 predicate alike. That check was also what refused the HTTP/2 connection preface,
 whose header is exactly <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0</span></code>; it is now refused by name instead, to
 the same message (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1041">#1041</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">httpv1.HTTP.from_data</span></code> could not rebuild an HTTP/1 message whose body is
+empty: <code class="docutils literal notranslate"><span class="pre">HTTP.from_data(info)</span></code> for <code class="docutils literal notranslate"><span class="pre">b'GET</span> <span class="pre">/</span> <span class="pre">HTTP/1.1\r\nHost:</span> <span class="pre">a\r\n\r\n'</span></code>
+raised <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">can't</span> <span class="pre">concat</span> <span class="pre">NoneType</span> <span class="pre">to</span> <span class="pre">bytes</span></code>. <code class="docutils literal notranslate"><span class="pre">read</span></code> records an empty
+body as <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> passed it through, and <code class="docutils literal notranslate"><span class="pre">make</span></code> concatenated it.
+<code class="docutils literal notranslate"><span class="pre">_make_data</span></code> now hands <code class="docutils literal notranslate"><span class="pre">make</span></code> <code class="docutils literal notranslate"><span class="pre">b''</span></code> for a <code class="docutils literal notranslate"><span class="pre">None</span></code> body; <code class="docutils literal notranslate"><span class="pre">info.body</span></code> is
+still <code class="docutils literal notranslate"><span class="pre">None</span></code>, so readers see no change. <code class="docutils literal notranslate"><span class="pre">httpv2</span></code> is unaffected: its
+empty-payload frames already round-trip (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1050">#1050</a>).</p></li>
 </ul>
 </section>
 </section>

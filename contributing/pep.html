@@ -1291,8 +1291,10 @@ tag that output answers for is the one <code class="docutils literal notranslate
 <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each gate on their own target instead – whether the
 matching Conda tag exists, whether PyPI’s file count for the version has
 reached the expected total, whether Anaconda’s upload is complete. Each of
-those three additionally requires <code class="docutils literal notranslate"><span class="pre">version_check</span></code> to have succeeded, and
-<code class="docutils literal notranslate"><span class="pre">github</span></code> – and, for <code class="docutils literal notranslate"><span class="pre">conda</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code> – to have succeeded <em>or skipped</em>.
+those three additionally requires <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and the release test gate
+(<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code>) to have succeeded, and <code class="docutils literal notranslate"><span class="pre">github</span></code> – and, for <code class="docutils literal notranslate"><span class="pre">conda</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tag</span></code> – to have succeeded <em>or skipped</em>. <code class="docutils literal notranslate"><span class="pre">github</span></code> itself needs the gate
+directly, and the gate runs only when one of the four would.
 Those conditions open with <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, which suppresses the <code class="docutils literal notranslate"><span class="pre">success()</span></code>
 Actions would otherwise prepend; accepting <code class="docutils literal notranslate"><span class="pre">skipped</span></code> is then what stops an
 upstream job’s legitimate skip cascading into skipping a job whose own evidence
@@ -1302,7 +1304,7 @@ cleanly, instead of letting it run against an artefact that was never
 produced.</p>
 <p>That is why an ordinary commit does not publish: the version string has not
 moved, so each job’s own check finds its target already there and all four
-skip. Changing the version string is what flips every one of those checks, and
+skip, as does the full-suite release test gate ahead of them. Changing the version string is what flips every one of those checks, and
 the next push then tags and publishes. So:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">

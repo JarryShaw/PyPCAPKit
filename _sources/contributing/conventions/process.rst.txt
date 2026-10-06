@@ -101,7 +101,7 @@ commands down instead of a figure that will be stale by the next merge:
 The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
 per-file and not per-subpackage. The file carries **9** module-level sections holding
-166 entries, and no entry carries an inline kind label::
+167 entries, and no entry carries an inline kind label::
 
    $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
    0

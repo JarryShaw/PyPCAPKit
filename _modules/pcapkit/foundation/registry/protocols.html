@@ -770,13 +770,14 @@
                         <span class="sa">f</span><span class="s1">'explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">TCP: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="register_protocol_code">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_protocol_code</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register ``protocol`` into the next-layer dispatch registry (or</span>
 <span class="sd">    registries) named by ``code``.</span>
 
-<span class="sd">    This is what backs the ``code`` keyword of</span>
-<span class="sd">    :meth:`ProtocolBase.__init_subclass__</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__init_subclass__&gt;`; it can also</span>
+<span class="sd">    This is what backs the ``code`` class keyword of</span>
+<span class="sd">    :class:`~pcapkit.protocols.protocol.ProtocolBase` subclasses; it can also</span>
 <span class="sd">    be called directly to register a class that declined at class-definition</span>
 <span class="sd">    time.</span>
 
@@ -838,7 +839,8 @@
     <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> into </span><span class="si">%s</span><span class="s1">.__proto__: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-                     <span class="n">destination</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                     <span class="n">destination</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span></div>
+
 
 
 <span class="c1">###############################################################################</span>

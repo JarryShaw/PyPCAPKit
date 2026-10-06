@@ -830,6 +830,73 @@ same class under the same name is silent.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.protocols.register_protocol_code">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.protocols.</span></span><span class="sig-name descname"><span class="pre">register_protocol_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry/protocols.html#register_protocol_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.protocols.register_protocol_code" title="Link to this definition">¶</a></dt>
+<dd><p>Register <code class="docutils literal notranslate"><span class="pre">protocol</span></code> into the next-layer dispatch registry (or
+registries) named by <code class="docutils literal notranslate"><span class="pre">code</span></code>.</p>
+<p>This is what backs the <code class="docutils literal notranslate"><span class="pre">code</span></code> class keyword of
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclasses; it can also
+be called directly to register a class that declined at class-definition
+time.</p>
+<p><code class="docutils literal notranslate"><span class="pre">code</span></code> is normalised into a flat sequence of targets, where each item
+is either:</p>
+<ul class="simple">
+<li><p>an enum member, whose <em>type</em> is looked up in a small table mapping
+enum type to the class(es) owning the matching <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> –
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> to
+<a class="reference internal" href="../protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> to
+<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
+<a class="reference internal" href="../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
+to <a class="reference internal" href="../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>, and
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> to <em>both</em>
+<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> <strong>and</strong>
+<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>; or</p></li>
+<li><p>a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> mapping an explicit destination class to a key – the
+only form accepted for a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, since e.g. a port number
+does not say by itself whether it means
+<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> or
+<a class="reference internal" href="../protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>;</p></li>
+</ul>
+<p>or an iterable of either, to register <code class="docutils literal notranslate"><span class="pre">protocol</span></code> into several
+registries from one call – e.g. a
+<a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> subclass reachable both by its
+IP protocol number and by a UDP port:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">register_protocol_code</span><span class="p">(</span><span class="n">L2TPv3</span><span class="p">,</span> <span class="p">[</span><span class="n">TransType</span><span class="o">.</span><span class="n">L2TP</span><span class="p">,</span> <span class="p">{</span><span class="n">UDP</span><span class="p">:</span> <span class="mi">1701</span><span class="p">}])</span>
+</pre></div>
+</div>
+<p>The explicit mapping form is accepted for any key, even one whose type
+could be inferred – being more explicit than required is never an
+error.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>That example names <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code>, which this package does not implement,
+rather than <a class="reference internal" href="../protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>. It is
+v3 that is genuinely reachable both ways: <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.1 puts it
+directly over IP on protocol 115 and §4.1.2 puts it over UDP on port
+1701. <a class="reference internal" href="../protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> answers on
+port 1701 only, and registering <em>it</em> at <code class="docutils literal notranslate"><span class="pre">TransType.L2TP</span></code> would point
+the <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> parser at a v3-over-IP header – see
+<a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> and GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a> for
+what that produced when measured.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – Protocol class to register.</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Registration key(s); see above.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> (or any other non-enum, non-
+    mapping value) is given without an explicit destination, or if
+    an enum member’s type names no known destination registry –
+    inference refuses rather than guesses.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <section id="top-level-registries">
 <h3>Top-Level Registries<a class="headerlink" href="#top-level-registries" title="Link to this heading">¶</a></h3>
 <dl class="py function">
@@ -1390,7 +1457,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <p>Unlike <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_tcp" title="pcapkit.foundation.registry.protocols.register_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_tcp()</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_udp" title="pcapkit.foundation.registry.protocols.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_udp()</span></code></a>, <code class="docutils literal notranslate"><span class="pre">code</span></code> is a
 <em>payload protocol identifier</em> taken from the DATA chunk, <strong>not</strong> a port
 number: SCTP names its upper layer per DATA chunk rather than per
-association. See <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.1"><strong>RFC 9260 Section 3.3.1</strong></a>.</p>
+association. See <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.1"><strong>RFC 9260 Section 3.3.1</strong></a>.</p>
 </div>
 </dd></dl>
 

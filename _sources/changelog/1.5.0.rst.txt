@@ -2187,6 +2187,13 @@ Fixed
   predicate alike. That check was also what refused the HTTP/2 connection preface,
   whose header is exactly ``PRI * HTTP/2.0``; it is now refused by name instead, to
   the same message (:issue:`1041`).
+* ``httpv1.HTTP.from_data`` could not rebuild an HTTP/1 message whose body is
+  empty: ``HTTP.from_data(info)`` for ``b'GET / HTTP/1.1\r\nHost: a\r\n\r\n'``
+  raised ``TypeError: can't concat NoneType to bytes``. ``read`` records an empty
+  body as ``None``, ``_make_data`` passed it through, and ``make`` concatenated it.
+  ``_make_data`` now hands ``make`` ``b''`` for a ``None`` body; ``info.body`` is
+  still ``None``, so readers see no change. ``httpv2`` is unaffected: its
+  empty-payload frames already round-trip (:issue:`1050`).
 
 pcapkit.toolkit
 ---------------

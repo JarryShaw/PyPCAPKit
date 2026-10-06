@@ -833,6 +833,9 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: ``read`` records an empty body as :obj:`None`, which is the</span>
+        <span class="c1"># public ``info.body`` value; ``make`` takes ``bytes`` and concatenates</span>
+        <span class="c1"># it, so the read-side ``None`` is translated back here (#1050).</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'http_version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined]</span>
             <span class="s1">'method'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'method'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
@@ -840,7 +843,7 @@
             <span class="s1">'status'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'message'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'headers'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
-            <span class="s1">'body'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="s1">'body'</span><span class="p">:</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 

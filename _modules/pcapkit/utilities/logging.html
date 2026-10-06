@@ -565,7 +565,7 @@
 <span class="c1">#: logging.StreamHandler: The historical :obj:`sys.stderr` handler. It is only</span>
 <span class="c1">#: *attached* under :envvar:`PCAPKIT_DEVMODE`; it is constructed unconditionally</span>
 <span class="c1">#: so that ``logger.addHandler(handler)`` remains a one-line way back to the</span>
-<span class="c1">#: pre-1.4 default output.</span>
+<span class="c1">#: pre-1.5 default output.</span>
 <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 
@@ -767,7 +767,7 @@
 <span class="sd">            one is meant to receive ``fmt`` would be ambiguous.</span>
 
 <span class="sd">    Example:</span>
-<span class="sd">        Restore the pre-1.4 default of :obj:`sys.stderr` at</span>
+<span class="sd">        Restore the pre-1.5 default of :obj:`sys.stderr` at</span>
 <span class="sd">        :data:`logging.INFO`::</span>
 
 <span class="sd">           configure(logging.INFO, stream=sys.stderr)</span>

@@ -55,6 +55,8 @@ Protocol Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_protocol
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_protocol_code
+
 Top-Level Registries
 ~~~~~~~~~~~~~~~~~~~~
 
