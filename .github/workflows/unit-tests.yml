@@ -48,7 +48,8 @@ jobs:
     # and skipped the gate everywhere. An input is the only reliable way for a
     # reusable workflow to know how it was invoked.
     name: Python ${{ matrix.python-version }}
-    if: ${{ inputs.gate-only != true }}
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -218,7 +219,8 @@ jobs:
 
   integration:
     name: Integration Python ${{ matrix.python-version }}
-    if: ${{ inputs.gate-only != true }}
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -329,32 +331,12 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           python -m pytest -q -n auto --dist load $selection
 
-  # Per-engine coverage for the third-party capture engines -- rebuilt in #845
-  # as a genuine two-dimension matrix (Python version x engine), replacing the
-  # single "install everything, run the unit tier once per Python version" job
-  # #751 landed. That shape had a real gap #845 measured on current `main`:
-  # PyPCAPFile's own "python_version < '3.12'" marker (pyproject.toml) meant
-  # editable-installing the old job's combined extras line silently resolved
-  # PyPCAPFile to nothing for that extra on 3.12/3.13/3.14 (deliberately not
-  # spelled out as the literal `pip install` form: tests/_dependency_gates.py's
-  # job_sections() slices on `^  ([\w-]+):`, so a comment sitting between two
-  # jobs is textually part of the one above it, and that guard's pytest_jobs()
-  # requires exactly one such literal per job section -- a second one here,
-  # even in a comment, makes it think this job has two install lines and
-  # cannot tell which extras the run would have. See #845's cross-review.),
-  # so "Engines Python 3.12/3.13/3.14" reported
-  # green while never exercising PyPCAPFile at all on three of five legs --
-  # yet all three were promoted to ruleset 23497679's required checks anyway
-  # (finding 3), on the reasoning that the matrix rebuild would close finding
-  # 2 rather than leaving it hidden behind a passing gate.
-  #
-  # The maintainer's own ruling (issue #845) is what sets this job's shape:
-  # one leg per (Python version, engine) pair rather than one per Python
-  # version installing every engine together, so a failure -- or a correctly
-  # asserted decline -- names the one engine responsible instead of an
-  # ambiguous "Engines Python 3.12". Each cell resolves to one of three
-  # outcomes, tracked via the matrix's own `expect` field (defaulting to
-  # `supported` for any (python, engine) pair not listed in `include` below):
+  # Per-engine coverage for the third-party capture engines (#845): every
+  # (Python version, engine) pair is checked, and a failure -- or a correctly
+  # asserted decline -- names the one engine and interpreter responsible. Each
+  # pair ("cell") resolves to one of three expected outcomes, decided by the
+  # cell script's `expect` case below (anything not listed there is
+  # `supported`):
   #
   #   * `supported`    -- the engine installs via its normal pyproject.toml
   #                        extra and its dedicated unit-tier tests must
@@ -363,7 +345,7 @@ jobs:
   #                        its own PYTHON_CEILING means it declines at run
   #                        time (PyShark on 3.14+; PyPCAPFile on 3.12+, whose
   #                        pip marker would otherwise stop it ever installing
-  #                        here -- so this job installs the raw distribution
+  #                        here -- so the cell installs the raw distribution
   #                        past that marker, deliberately, rather than via the
   #                        extra). The same test files run; their own
   #                        version-aware assertions (e.g.
@@ -374,61 +356,53 @@ jobs:
   #                        a runtime refusal (no wheel; pcap.c does not
   #                        compile against the 3.12+ C API -- PyPCAP carries
   #                        no PYTHON_CEILING at all, so there is no decline to
-  #                        assert). This job still installs the raw
+  #                        assert). The cell still installs the raw
   #                        distribution past pyproject.toml's marker to prove
   #                        the failure is real rather than assumed, and treats
-  #                        that failure as the expected, passing outcome for
-  #                        the cell -- distinctly logged via `::notice`, never
-  #                        silently green and never red for the wrong reason.
-  #                        If it ever starts building, the job fails loudly
-  #                        (see the install step) rather than reporting a
-  #                        vacuous pass.
+  #                        that failure as the expected, passing outcome --
+  #                        distinctly logged via `::notice`, never silently
+  #                        green and never red for the wrong reason. If it
+  #                        ever starts building, the cell fails loudly.
   #
-  # Scoped deliberately out of this rebuild: the "and integ, if any" half of
-  # the ruling. DPKT and PyShark also have integration-tier coverage
-  # (tests/integration/test_engine_parity.py, test_engine_runtime.py) and
-  # PyPCAP has tests/foundation/engines/test_new_engine_parity_runtime.py, but
-  # all three need example captures regenerated first (examples/generators/),
-  # which itself needs Scapy and DPKT together -- awkward to do per single-
-  # engine cell without installing engines this job is deliberately keeping
-  # apart. That tier stays covered in aggregate by the `integration` and
-  # `pypcap-parity` jobs above rather than being duplicated per engine here;
-  # worth the maintainer's separate call if per-engine integration coverage is
-  # wanted too.
+  # #1052 folded the 36 one-cell jobs (6 Pythons x 6 engines) into one job per
+  # engine that loops over the six interpreters, each in a fresh venv. The
+  # queue, not the runners, was the bottleneck: 36 jobs each paid checkout,
+  # setup and apt for a minute of work. One job per *engine* rather than per
+  # Python because the engine is what varies the environment: the apt packages
+  # are per engine (installed once per job instead of six times), and pcap-ct
+  # and pypcap both install a top-level `pcap` module, so a per-Python job
+  # looping over engines would need a fresh venv per engine anyway while also
+  # carrying every engine's system packages. It also keeps `matrix.engine` as
+  # the one matrix axis, which is what tests/_dependency_gates.py's
+  # _engine_matrix_variants() reads this job as. No cell is dropped: the cell
+  # script below is the old per-cell install-and-test logic unchanged, run once
+  # per interpreter as its own process (so `set -e` holds inside it), under a
+  # `::group::` named for the cell, with every annotation titled by engine and
+  # Python version and a per-cell row in the job summary.
   #
-  # Also scoped out: the multi-engine HAS_RUNTIME gate
-  # (tests/foundation/engines/test_runtime_engines.py) that the old job
-  # exercised as a side effect of installing DPKT+Scapy+PyShark together, and
-  # the incidental crypto/NGAP/vendor coverage (#738) the old job carried on
-  # this leg because it happened to be the one non-required-check job touching
-  # every Python version. Splitting by engine removes the "everything
-  # installed at once" venv those relied on; both are pre-existing coverage
-  # this rebuild does not restore, and are unaffected by anything already
-  # required, but are worth the maintainer's attention -- not silently
-  # dropped, but not solved here either.
+  # 3.15 is experimental-prerelease per #845's ruling: present so a regression
+  # is visible, but never blocking. It runs as its own step with step-level
+  # `continue-on-error: true`, so a 3.15 failure shows as a failed step and an
+  # error annotation while the job -- and `required-checks`, which reads this
+  # job's result -- stays green. The 3.10-3.14 cells share one step, and any
+  # one of them failing fails the job.
   #
-  # `include` only needs to name the cells that are NOT `supported`; every
-  # other (python-version, engine) pair defaults to it, per the install step's
-  # `${EXPECT:-supported}`.
+  # Scoped deliberately out (#845, unchanged by #1052): per-engine integration
+  # coverage (needs regenerated captures, so it stays in aggregate in
+  # `integration` and `pypcap-parity`), and the multi-engine HAS_RUNTIME gate
+  # plus the incidental crypto/NGAP/vendor coverage the pre-#845 shared venv
+  # carried.
   engine-tests:
-    name: Engines Python ${{ matrix.python-version }} (${{ matrix.engine }})
-    if: ${{ inputs.gate-only != true }}
+    name: Engines (${{ matrix.engine }})
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes]
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # 3.15 is experimental-prerelease per #845's ruling: present so a
-    # regression is visible, but never blocking -- a failure on this leg
-    # reports without failing the run or the required-check set.
-    continue-on-error: ${{ matrix.python-version == '3.15' }}
+    env:
+      ENGINE: ${{ matrix.engine }}
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
         engine:
           - DPKT
           - Scapy
@@ -436,164 +410,146 @@ jobs:
           - PyPCAPFile
           - PyPCAP
           - PCAP_CT
-        include:
-          # PyShark's PYTHON_CEILING (pcapkit/foundation/engines/pyshark.py)
-          # is (3, 14): no pip marker stops it installing here, it just
-          # declines once constructed.
-          - { python-version: "3.14", engine: PyShark, expect: unsupported }
-          - { python-version: "3.15", engine: PyShark, expect: unsupported }
-          # PyPCAPFile's PYTHON_CEILING is (3, 12) -- see
-          # pcapkit/foundation/engines/pypcapfile.py. Its own pyproject.toml
-          # marker ("python_version < '3.12'") is exactly what #845 finding 2
-          # is about: it stops the extra installing here at all, which is why
-          # the install step below reaches for the raw distribution on these
-          # four legs instead.
-          - { python-version: "3.12", engine: PyPCAPFile, expect: unsupported }
-          - { python-version: "3.13", engine: PyPCAPFile, expect: unsupported }
-          - { python-version: "3.14", engine: PyPCAPFile, expect: unsupported }
-          - { python-version: "3.15", engine: PyPCAPFile, expect: unsupported }
-          # PyPCAP carries no PYTHON_CEILING -- pyproject.toml's own
-          # "python_version < '3.12'" marker is the only thing that keeps pip
-          # from attempting the build here, because the build itself fails
-          # (no wheel; pcap.c does not compile against the 3.12+ C API).
-          - { python-version: "3.12", engine: PyPCAP, expect: not-installable }
-          - { python-version: "3.13", engine: PyPCAP, expect: not-installable }
-          - { python-version: "3.14", engine: PyPCAP, expect: not-installable }
-          - { python-version: "3.15", engine: PyPCAP, expect: not-installable }
 
     steps:
       - uses: actions/checkout@v7
 
+      # All six interpreters in one step; each is then reachable as
+      # `python3.X`. setup-python does not ship 3.15 as a release build yet, so
+      # `allow-prereleases` is needed for it to resolve at all (as in
+      # python-compatibility.yml's compatibility-nightly job); for 3.10-3.14 a
+      # GA release exists and wins.
       - uses: actions/setup-python@v7
         with:
-          python-version: ${{ matrix.python-version }}
-          # setup-python does not ship a 3.15 interpreter as a release build
-          # yet; python-compatibility.yml's compatibility-nightly job already
-          # established that 3.15 needs this flag to resolve at all.
-          allow-prereleases: ${{ matrix.python-version == '3.15' }}
-          cache: pip
+          python-version: |
+            3.10
+            3.11
+            3.12
+            3.13
+            3.14
+            3.15
+          allow-prereleases: true
 
-      # Only the engines that need a system package get one, rather than
-      # installing tshark/libpcap/a C toolchain on every cell regardless of
-      # which engine it is testing.
+      # Only the engines that need a system package get one:
       #
-      # tshark: PyShark is a wrapper around it and does no parsing of its
-      # own -- see the debconf pre-seed note below for why the two apt lines
-      # are shaped the way they are.
+      # tshark: PyShark is a wrapper around it and does no parsing of its own.
+      # The debconf pre-seed stops tshark's postinst blocking on the "allow
+      # non-superusers to capture packets" prompt.
       #
       # libpcap0.8: PCAP_CT's ctypes loader calls find_library("pcap") at run
       # time; without it, PCAP_CT.unsupported_reason() degrades the engine to
       # the default parser instead of running it.
       #
       # build-essential + libpcap-dev: PyPCAP is the one engine that compiles
-      # (pcap.c against libpcap's headers), on every leg -- including the
+      # (pcap.c against libpcap's headers), on every cell -- including the
       # `not-installable` ones, deliberately, so that failure is a genuine
       # compile failure against the 3.12+ C API rather than merely "no
       # compiler was present to try".
       #
       # `timeout-minutes` bounds this step because an apt stall in it used to
-      # eat the whole job. Per #974, on two docs-only PRs within forty minutes
-      # a PCAP_CT cell fetched its InRelease metadata and then went silent for
-      # 29m52s, until this job's own `timeout-minutes: 30` killed it -- which
-      # surfaces as `cancelled`, and `cancelled` correctly fails the
-      # `Required checks passed` gate, so an unrelated mirror turned a green
-      # docs PR red. The other five PCAP_CT cells of that same run finished,
-      # job and all, in 39-81 seconds.
+      # eat the whole job: per #974, a PCAP_CT cell fetched its InRelease
+      # metadata and then went silent for 29m52s until the job's own 30-minute
+      # cap killed it, which reports `cancelled` and so fails `Required checks
+      # passed` -- an unrelated mirror turning a green PR red. The 2026-10-01
+      # stalls (#1052) had the same all-or-nothing shape, in `apt-get update`.
       #
-      # 20 minutes rather than the couple of minutes that bounding a stalled
-      # mirror tightly would suggest, because the healthy tail here is
-      # genuinely long. Across 12 runs (230 non-zero observations of this
-      # step) p95 was 338s and the slowest *successful* run 508s, both on
-      # PyShark cells; this change's own CI then produced a healthy 646s
-      # PyShark run, so treat those figures as a floor on the tail rather
-      # than its ceiling -- tshark plus wireshark-common is a large download
-      # and archive.ubuntu.com's throughput varies enormously. A 5-minute cap
-      # would have failed ~4% of healthy legs, which is a worse defect than
-      # the one it fixes. 20 is ~1.9x the largest healthy run yet seen, and
-      # was raised from an initial 15 on review: that 646s observation moved
-      # the known maximum 27% on a single sample, and a bound sized at ~1.4x
-      # a quantity still moving that much risks reproducing this very defect
-      # at smaller scale -- a healthy-but-slow run killed and reported as a
-      # step timeout, still blocking the pull request. 20 stays under both
-      # job budgets (30 here, 45 on `pypcap-parity`), so the headroom is
-      # free. A hang costs 20 minutes instead of 30 and
-      # -- the actual win -- reports as this named step exceeding its timeout
-      # rather than as an opaque job cancellation with no attributable cause.
+      # 5 minutes, with one retry inside it, rather than the 20 this step used
+      # to carry. #974 sized 20 against a healthy tail of up to 646s, but that
+      # tail is gone: across 6 runs (120 non-zero observations of this step and
+      # `pypcap-parity`'s) on 2026-10-04/05 the slowest was 34s, p99 33s, all
+      # on PyShark cells, and #1052 measured p99 0.47 minutes. A stall is
+      # therefore distinguishable from a slow mirror well inside a short
+      # per-attempt bound, which makes retrying worth it -- 45s for
+      # `apt-get update` and 90s for `apt-get install`, two attempts, 270s in
+      # the worst case, under the 5-minute step cap that still holds however
+      # the hang is caused. The step cap stays well under the 30-minute job
+      # budget, so a hang reports as this named step timing out rather than as
+      # an opaque job cancellation. `dpkg --configure -a` before the second
+      # attempt recovers an install killed mid-configure.
       #
-      # Deliberately *not* also passing `-o Acquire::Retries=3 -o
+      # Deliberately *not* passing `-o Acquire::Retries=3 -o
       # Acquire::http::Timeout=30`, which #974 proposed: both are already the
-      # defaults in the apt that noble ships (verified in 2.8.3, the current
-      # noble-updates version; 2.7.14's tarball is no longer in the pool --
-      # `Retries(_config->FindI("Acquire::Retries", 3))` in
-      # apt-pkg/acquire-item.cc, and `TimeOut(30)` in methods/basehttp.cc,
-      # read back by `ConfigFindI("Timeout", TimeOut)` in methods/http.cc), so
-      # passing them would change no behaviour while reading like protection
-      # this step had gained. Their already being in force is also why the
-      # stall ran to 29m52s instead of failing after 30s and three retries:
-      # whatever hung is not something apt's data timeout governs, since that
-      # value bounds each individual `select()` wait rather than the transfer
-      # as a whole. Wrapping these invocations in `timeout` and retrying is no
-      # safer at these numbers, because a legitimate 646s run cannot be told
-      # from a stall inside any per-attempt budget short enough to be worth
-      # retrying -- the step timeout below is the one guard that holds however
-      # the hang is caused.
+      # defaults in noble's apt (2.8.3: `Acquire::Retries` 3 in
+      # apt-pkg/acquire-item.cc, `TimeOut(30)` in methods/basehttp.cc), so they
+      # would change nothing while reading like protection. Their being in
+      # force is also why the #974 stall ran to 29m52s: whatever hung is not
+      # something apt's per-`select()` data timeout governs, which is why the
+      # bound here is `timeout(1)` around the whole command.
       - name: Install this engine's system packages
-        timeout-minutes: 20
+        timeout-minutes: 5
         run: |
           set -eu
-          ENGINE="${{ matrix.engine }}"
+          apt_install() {
+            for attempt in 1 2; do
+              if sudo timeout 45 apt-get update \
+                 && sudo DEBIAN_FRONTEND=noninteractive timeout 90 apt-get install -y --no-install-recommends "$@"; then
+                return 0
+              fi
+              echo "::warning title=apt attempt $attempt of 2 failed (${ENGINE})::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
+              sudo dpkg --configure -a || true
+            done
+            return 1
+          }
           if [ "$ENGINE" = "PyShark" ]; then
-            sudo apt-get update
             echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
-            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tshark
+            apt_install tshark
           elif [ "$ENGINE" = "PCAP_CT" ]; then
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends libpcap0.8
+            apt_install libpcap0.8
           elif [ "$ENGINE" = "PyPCAP" ]; then
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends build-essential libpcap-dev
+            apt_install build-essential libpcap-dev
           fi
 
+      # The per-cell script: one (Python version, engine) cell, start to
+      # finish, in a venv of its own. Written to a file so each cell runs as a
+      # separate `bash` process -- `set -e` is suspended inside a function
+      # called from an `if`, so an inline function would let a failed install
+      # carry on silently.
+      #
       # `expect` decides not just the assertion but *how* the engine gets
       # installed: `supported` uses the ordinary pyproject.toml extra, whose
       # own marker (if any) already resolves to "install" on this Python
       # version; `unsupported` and `not-installable` install the raw
       # distribution directly, deliberately bypassing whichever marker would
-      # otherwise have skipped it silently -- see this job's own comment
-      # above for why that bypass is the point of this rebuild.
+      # otherwise have skipped it silently (#845 finding 2).
       #
       # `set +e` is scoped to the one install command whose failure is
-      # sometimes expected, not to the baseline above it: upgrading pip
-      # itself and editable-installing this repo's own `test` extra failing
-      # is never expected on any cell (deliberately not spelled out as the
-      # literal `pip install` form below -- see this job's own comment
-      # earlier in this file, and tests/_dependency_gates.py's
-      # job_sections()/pytest_jobs(), for why a second such literal in a
-      # comment here would make that guard think this section holds two
-      # baseline install lines), and running them unchecked used to mean a
-      # broken base install on a `not-installable` cell read as "expected"
-      # while the job had installed and run nothing at all (#845's
-      # cross-review). They now run under this step's own explicit `set -eu`
-      # below -- not "the shell's default", since GitHub's default for a
-      # Linux `run:` step is plain `bash -e {0}` with no `pipefail`, and
-      # this step never sets `shell: bash` to change that -- so either
-      # failing aborts the step immediately and loudly.
-      - name: Install package and this engine's dependency
-        id: install
+      # sometimes expected. Upgrading pip and editable-installing this repo's
+      # `test` extra failing is never expected on any cell, so those run under
+      # the script's `set -eu` (#845's cross-review: running them unchecked
+      # once let a broken base install on a `not-installable` cell read as
+      # "expected").
+      #
+      # Runs the SAME test files whether `expect` is `supported` or
+      # `unsupported`: the difference is in what those files assert once they
+      # see this interpreter's version (PyPCAPFile's
+      # test_unsupported_reason_tracks_the_running_interpreter, PyShark's
+      # test_the_reason_tracks_the_running_interpreter), which is what proves
+      # the decline fired. `not-installable` cells run no tests.
+      - name: Write the per-cell script
         run: |
+          cat > "$RUNNER_TEMP/engine-cell.sh" <<'CELL'
           set -eu
+          PY="$1"
+          CELL_NAME="$ENGINE on Python $PY"
+
+          case "$ENGINE:$PY" in
+            PyShark:3.14|PyShark:3.15) EXPECT=unsupported ;;
+            PyPCAPFile:3.12|PyPCAPFile:3.13|PyPCAPFile:3.14|PyPCAPFile:3.15) EXPECT=unsupported ;;
+            PyPCAP:3.12|PyPCAP:3.13|PyPCAP:3.14|PyPCAP:3.15) EXPECT=not-installable ;;
+            *) EXPECT=supported ;;
+          esac
+          echo "Cell: $CELL_NAME, expecting '$EXPECT'"
+
+          "python$PY" -m venv "$RUNNER_TEMP/venv-$PY"
+          # shellcheck disable=SC1090
+          . "$RUNNER_TEMP/venv-$PY/bin/activate"
+          python --version
+
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test]'
 
-          ENGINE="${{ matrix.engine }}"
-          EXPECT="${{ matrix.expect }}"
-          EXPECT="${EXPECT:-supported}"
-
           # RAW_PKGS is an array, not a string, so PCAP_CT's two-package case
-          # ("pcap-ct libpcap") reaches pip as two argv entries rather than by
-          # relying on unquoted word-splitting (shellcheck SC2086) -- quoting
-          # the string form instead would hand pip one invalid "pcap-ct
-          # libpcap" argument and break exactly that case.
+          # ("pcap-ct libpcap") reaches pip as two argv entries.
           case "$ENGINE" in
             DPKT) EXTRA=DPKT; RAW_PKGS=(dpkt); IMPORT_NAME=dpkt ;;
             Scapy) EXTRA=Scapy; RAW_PKGS=(scapy); IMPORT_NAME=scapy ;;
@@ -614,89 +570,42 @@ jobs:
           set -e
           echo "$output"
 
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-
           if [ "$status" -ne 0 ] && [ "$EXPECT" != "not-installable" ]; then
-            echo "::error title=$ENGINE failed to install on Python ${{ matrix.python-version }}::This cell expects '$EXPECT', which requires a successful install. pip exited $status."
+            echo "::error title=$ENGINE failed to install on Python $PY::This cell expects '$EXPECT', which requires a successful install. pip exited $status."
             exit 1
           fi
           if [ "$status" -eq 0 ] && [ "$EXPECT" = "not-installable" ]; then
-            echo "::error title=$ENGINE now installs on Python ${{ matrix.python-version }}::This cell is recorded as not-installable in this workflow's include: list (and in pyproject.toml's marker for $ENGINE). It installed cleanly -- update both rather than leaving this green for the wrong reason."
+            echo "::error title=$ENGINE now installs on Python $PY::This cell is recorded as not-installable in this job's expect case (and in pyproject.toml's marker for $ENGINE). It installed cleanly -- update both rather than leaving this green for the wrong reason."
             exit 1
           fi
           if [ "$status" -ne 0 ]; then
-            # A not-installable cell's whole point is a genuine C-API compile
-            # failure (see this job's own comment above), not a flaky index
-            # or a dropped connection -- treating *any* nonzero exit as that
-            # expected failure would let a PyPI 503 pass as though the
-            # engine had been proven unbuildable. Grep the captured output
-            # for the shape of a transient failure instead of a compile one.
-            #
-            # The transient list is pip's own retry/network vocabulary, not a
-            # bare "5xx or 429" number scan: pip prints a "(NNN kB)" download
-            # size on essentially every sdist fetch, and a Cython-generated
-            # .c file runs to thousands of lines, so an unanchored bare-number
-            # match (#845's cross-review) fires on ordinary download-size
-            # lines and on compiler diagnostics quoting a line number in that
-            # range -- e.g. "Downloading pypcap-1.3.0.tar.gz (500 kB)" and
-            # "pcap.c:501:24: error: ..." both matched, while the actual
-            # compile-failure markers matched nothing. A cell that hits that
-            # false positive would exit 1 on a transcript no re-run can ever
-            # change, so this is a loud, permanent false red, not a silent
-            # one -- see this job's own comment on "fails loudly in both
-            # directions" above for why that distinction still matters: a
-            # loud false red still blocks every PR just as surely as a
-            # silent false green would. Requiring the *absence* of a compile
-            # marker alongside a transient one is the second half of the
-            # fix: a message that happens to carry both is treated as the
-            # compile failure it also is, not the transient one it merely
-            # resembles.
+            # A not-installable cell's point is a genuine C-API compile
+            # failure, not a flaky index: grep for pip's own retry/network
+            # vocabulary, and require the *absence* of a compile marker
+            # alongside it. A bare "5xx or 429" number scan is not used,
+            # because pip prints "(NNN kB)" download sizes and compiler
+            # diagnostics quote line numbers in that range (#845's
+            # cross-review), which would make a permanent false red.
             if echo "$output" | grep -qiE \
                  'read timed out|connection (reset|refused|aborted)|temporary failure in name resolution|max retries exceeded|could not fetch url|newconnectionerror|readtimeouterror|httpsconnectionpool|retrying \(retry\(|http error (5[0-9][0-9]|429)|status code 429|too many 429 error responses|no matching distribution found' \
                && ! echo "$output" | grep -qiE \
                  'failed building wheel|error: command .* failed with exit code|subprocess-exited-with-error'; then
-              echo "::error title=$ENGINE's install failure looks transient, not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
+              echo "::error title=$ENGINE's install failure on Python $PY looks transient, not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
               exit 1
             fi
-            echo "::notice title=$ENGINE is not installable on Python ${{ matrix.python-version }} (expected)::pip exited $status, matching this cell's recorded expectation ('not-installable'), and the output does not match a transient-failure pattern. No tests run for this cell -- this is a deliberate skip, not a pass."
+            echo "::notice title=$ENGINE is not installable on Python $PY (expected)::pip exited $status, matching this cell's recorded expectation ('not-installable'), and the output does not match a transient-failure pattern. No tests run for this cell -- this is a deliberate skip, not a pass."
+            echo "| $PY | $ENGINE | $EXPECT | not installable (expected) |" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
 
-          # #845 finding 2, reproduced structurally rather than left to be
-          # re-found by enumeration: a `supported` cell whose extra resolves
-          # to nothing (an unmet environment marker, a typo'd extra name)
-          # still exits 0, and every one of this cell's tests would then
-          # skip rather than fail, going green having proven nothing. This
-          # cell's own point is exercising $IMPORT_NAME, so require it.
-          if [ "$status" -eq 0 ]; then
-            if ! python -c "import $IMPORT_NAME" 2>/dev/null; then
-              echo "::error title=$ENGINE installed but $IMPORT_NAME does not import on Python ${{ matrix.python-version }}::pip exited 0 but the module this cell exists to exercise is not importable -- a green install that unlocked nothing."
-              exit 1
-            fi
+          # #845 finding 2: a `supported` cell whose extra resolves to nothing
+          # still exits 0 and every test would then skip, so require the
+          # module this cell exists to exercise.
+          if ! python -c "import $IMPORT_NAME" 2>/dev/null; then
+            echo "::error title=$ENGINE installed but $IMPORT_NAME does not import on Python $PY::pip exited 0 but the module this cell exists to exercise is not importable -- a green install that unlocked nothing."
+            exit 1
           fi
 
-      # See the `test` job above for why this step exists.
-      - name: Report available parallelism
-        if: ${{ steps.install.outputs.status == '0' }}
-        run: |
-          nproc
-          python -c "import os; print('cpu_count', os.cpu_count())"
-
-      # Runs the SAME test files whether `expect` is `supported` or
-      # `unsupported`: the difference is not in what runs here but in what
-      # those files themselves assert once they see this interpreter's
-      # version, e.g. PyPCAPFile's own
-      # test_unsupported_reason_tracks_the_running_interpreter and PyShark's
-      # test_the_reason_tracks_the_running_interpreter (added for PyShark's
-      # real-capture coverage) both branch on sys.version_info against the
-      # engine's own PYTHON_CEILING.
-      # That is what proves the decline actually fired and named the
-      # interpreter, rather than this job asserting it from the outside.
-      # Skipped entirely for `not-installable` cells -- see the install step.
-      - name: Run this engine's test suite
-        if: ${{ steps.install.outputs.status == '0' }}
-        run: |
-          set -eu
-          ENGINE="${{ matrix.engine }}"
           case "$ENGINE" in
             DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;
             Scapy) TEST_PATHS="tests/toolkit/test_scapy_unit.py tests/foundation/engines/test_scapy_engine.py tests/protocols/transport/test_sctp_unit.py" ;;
@@ -706,7 +615,58 @@ jobs:
             PCAP_CT) TEST_PATHS="tests/toolkit/test_pcap_ct_unit.py tests/foundation/engines/test_pcap_ct_engine.py tests/foundation/engines/test_pcap_backend.py" ;;
           esac
           echo "Running: $TEST_PATHS"
-          python -m pytest -q -n auto --dist load $TEST_PATHS
+          # shellcheck disable=SC2086
+          if ! python -m pytest -q -n auto --dist load $TEST_PATHS; then
+            echo "::error title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
+            exit 1
+          fi
+          echo "| $PY | $ENGINE | $EXPECT | passed |" >> "$GITHUB_STEP_SUMMARY"
+          CELL
+          {
+            echo "### Engine cells: $ENGINE"
+            echo
+            echo "| Python | Engine | Expect | Result |"
+            echo "| --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # Every cell runs even after one fails, so one red run reports all of
+      # them; the step fails at the end if any did.
+      - name: Run the 3.10-3.14 cells
+        shell: bash
+        run: |
+          failed=()
+          for py in 3.10 3.11 3.12 3.13 3.14; do
+            echo "::group::Python $py ($ENGINE)"
+            if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
+              failed+=("$py")
+              echo "| $py | $ENGINE | | FAILED |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::endgroup::"
+          done
+          if [ "${#failed[@]}" -ne 0 ]; then
+            echo "::error title=$ENGINE failed on Python ${failed[*]}::See each cell's group in this step's log and the job summary."
+            exit 1
+          fi
+
+      # Non-blocking by #845's ruling -- see this job's comment above.
+      - name: Run the 3.15 cell (experimental, non-blocking)
+        shell: bash
+        continue-on-error: true
+        run: |
+          echo "::group::Python 3.15 ($ENGINE)"
+          if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.15; then
+            echo "| 3.15 | $ENGINE | | FAILED (non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "::endgroup::"
+            echo "::error title=$ENGINE failed on Python 3.15 (non-blocking)::3.15 is experimental per #845; this does not fail the job."
+            exit 1
+          fi
+          echo "::endgroup::"
 
   # Whether upstream PyPCAP is worth building in CI at all -- #751's own
   # instruction was "try to build and if the CI is not a good suit, then we
@@ -739,7 +699,8 @@ jobs:
   # fixture-tier run for zero new coverage.
   pypcap-parity:
     name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}
-    if: ${{ inputs.gate-only != true }}
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -770,27 +731,31 @@ jobs:
       # declines the engine, the extractor silently falls back to the default
       # parser, and the test's assertions used to pass on that fallback's
       # output -- a vacuous pass, invisible in skip counts. The debconf
-      # pre-seed and DEBIAN_FRONTEND mirror `engine-tests`'s "Install system
-      # libpcap and tshark" step exactly, for the same reason: tshark's
+      # pre-seed and DEBIAN_FRONTEND mirror `engine-tests`'s "Install this
+      # engine's system packages" step exactly, for the same reason: tshark's
       # postinst otherwise blocks on the "allow non-superusers to capture
       # packets" prompt.
       #
-      # `timeout-minutes` for the reason #974 gives about `engine-tests`'s own
-      # install step -- see the long note there, which this step shares
-      # wholesale. It was never the leg that stalled, but it installs the
-      # union of the packages that one does (build-essential, libpcap-dev and
-      # tshark together) from the same mirrors with the same absence of any
-      # bound, so the hazard is identical and fixing only the leg that
-      # happened to bite would leave it here. The same 20 applies: this step's
-      # slowest *successful* observed run was 405s, over a smaller sample (22)
-      # than `engine-tests` gives, and its heavier package set should if
-      # anything tail longer than the 646s seen there.
+      # `timeout-minutes` and the retry for the reason #974 and #1052 give about
+      # `engine-tests`'s own install step -- see the note there, which this
+      # step shares wholesale, including the 5-minute cap and per-attempt
+      # bounds. It was never the leg that stalled, but it installs the union of
+      # the packages that one does from the same mirrors, so the hazard is
+      # identical; its observations are in the 120-sample figure quoted there.
       - name: Install libpcap headers, a C toolchain, and tshark
-        timeout-minutes: 20
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
+          set -eu
           echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libpcap-dev tshark
+          for attempt in 1 2; do
+            if sudo timeout 45 apt-get update \
+               && sudo DEBIAN_FRONTEND=noninteractive timeout 90 apt-get install -y --no-install-recommends build-essential libpcap-dev tshark; then
+              exit 0
+            fi
+            echo "::warning title=apt attempt $attempt of 2 failed::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
+            sudo dpkg --configure -a || true
+          done
+          exit 1
 
       - name: Install package, test and generator dependencies
         run: |
@@ -962,7 +927,10 @@ jobs:
   # maintainer's call to make separately from landing it.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    if: ${{ inputs.gate-only != true }}
+    # Not on pull requests (#1052): it is not a required check, and its 11
+    # cells were a sixth of every PR push's jobs. It still runs on every push
+    # to main, which is the run that tests what actually lands.
+    if: ${{ inputs.gate-only != true && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     # 45, not 20: `timeout-minutes` is job-level, so it has to cover
     # checkout/setup/install (~39s) as well as the leg itself, and this is
@@ -1027,8 +995,13 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
+      # `--verbose` (#1052) names every test as it runs, so a slow or hung cell
+      # shows where it was. The step cap of 20 is about twice the slowest
+      # cell's measured maximum (9.8 minutes; the other shard 8.9), and sits
+      # under the job's 45 so a hang reports as this step timing out.
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
-        run: python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }}
+        timeout-minutes: 20
+        run: python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} --verbose
 
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
@@ -1071,6 +1044,119 @@ jobs:
             echo "::error title=CHANGELOG.md has drifted::CHANGELOG.md is generated from the newest entry under docs/source/changelog/ and no longer matches it. Regenerate it with 'python util/changelog_md.py' and commit the result. The unified diff above shows what moved."
             exit 1
           fi
+
+  # #1052: which of a pull request's changed files are code. This decides
+  # whether the expensive legs run at all (see `required-checks` for how their
+  # skips are then judged), so it fails safe: anything it cannot classify is
+  # code.
+  #
+  # A file is docs iff it is under `docs/` or ends in `.md`, and is not under
+  # `.github/`, `pcapkit/`, `tests/`, `util/` or `examples/` -- so a Markdown
+  # file in one of those (a PR template, a test fixture) is code, and so is
+  # every other file (`pyproject.toml`, `setup.py`, ...). The diff is the PR
+  # merge commit against its first parent, which is exactly what merging would
+  # add; `--no-renames` lists both sides of a rename, so moving a code file
+  # under `docs/` is still a code change.
+  #
+  # Only this workflow's own `pull_request` run is classified. Every other
+  # event reports `code: true`, including a `workflow_call` from a caller
+  # triggered by a pull request: inside a called workflow `github.event_name`
+  # is the caller's, but `github.workflow` is the caller's name too (see the
+  # concurrency comment at the top), and no caller is named "Unit Tests".
+  changes:
+    name: Classify changed files
+    if: ${{ inputs.gate-only != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+
+    steps:
+      - uses: actions/checkout@v7
+        if: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}
+        with:
+          fetch-depth: 2
+
+      - name: Classify the diff
+        id: classify
+        env:
+          OWN_PR: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          CODE_DIRS = ('.github/', 'pcapkit/', 'tests/', 'util/', 'examples/')
+
+          def is_docs(path):
+              if path.startswith(CODE_DIRS):
+                  return False
+              return path.startswith('docs/') or path.endswith('.md')
+
+          code = 'true'
+          if os.environ['OWN_PR'] != 'true':
+              print("Not this workflow's own pull_request run: everything runs.")
+          else:
+              # -z: names are NUL-terminated, so a name holding whitespace
+              # (or one git would otherwise quote) stays one path.
+              diff = subprocess.run(['git', 'diff', '--name-only', '-z', '--no-renames', 'HEAD^1', 'HEAD'],
+                                    capture_output=True, text=True)
+              files = [path for path in diff.stdout.split('\0') if path]
+              if diff.returncode != 0 or not files:
+                  print(f'::warning title=Could not list the changed files::git diff exited {diff.returncode} '
+                        f'with {len(files)} files: {diff.stderr.strip()}. Treating the diff as code.')
+              else:
+                  code_files = [path for path in files if not is_docs(path)]
+                  print(f'{len(files)} changed files, {len(code_files)} of them code:')
+                  for path in files:
+                      print(f"  {'code' if path in code_files else 'docs'}  {path}")
+                  if not code_files:
+                      code = 'false'
+          print(f'code={code}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
+              print(f'code={code}', file=file)
+          PY
+
+  # #1052: the docs-only replacement for `test`, running every test that reads
+  # docs/ or a Markdown file, since a docs-only diff can still break those:
+  # tests/project and the root-level modules, plus the modules elsewhere under
+  # tests/ named in the second run step. tests/project/test_unit_tests_queue.py
+  # finds every module outside those two that names a docs/ or Markdown path
+  # and fails until it is listed there, so a new reader cannot go unrun. Runs
+  # only when `changes` says the diff is docs-only, so it never duplicates
+  # `test` on a code change. It uses
+  # util/run_unittest_leg.py's `project` leg -- tests/project plus the
+  # root-level modules, with the extras `unittest-ordering`'s `project` cell
+  # runs green on main -- rather than a pytest invocation of its own, which
+  # tests/_dependency_gates.py would then have to model as a new selection
+  # shape.
+  project-tests:
+    name: Project tests (docs-only)
+    needs: [changes]
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code == 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+
+      - name: Run tests/project and the root-level modules under plain unittest
+        timeout-minutes: 15
+        run: python util/run_unittest_leg.py project --verbose
+
+      - name: Run the other tests that read docs/ or Markdown
+        timeout-minutes: 5
+        run: python -m unittest -v tests.corekit.test_sentinel_exports_unit
 
   # The verdict a shipping workflow asks for: the full suite, fixtures and
   # all, on one interpreter. It is deliberately not the matrix -- the matrix
@@ -1187,7 +1273,7 @@ jobs:
   #     the silently-worse-than-no-gate failure this job exists to prevent.
   #     That page's own recommended fix is this job's shape: "Use always()
   #     with needs for required checks that depend on other jobs."
-  #   * `inputs.gate-only != true` mirrors the four jobs this needs: below.
+  #   * `inputs.gate-only != true` mirrors the jobs this needs: below.
   #     They are all skipped by their own `if:` whenever this workflow is
   #     called with `gate-only: true` (from create-release.yml), so without
   #     this guard every needs.*.result below would read `skipped` on that
@@ -1217,99 +1303,89 @@ jobs:
   # maintainer's call to make separately, not something to sneak in.
   # `test`, `integration`, `engine-tests` and `pypcap-parity` are the four
   # jobs in this file whose names the 17 live/dead contexts above (all but
-  # `Compat`) stand in for.
+  # `Compat`) stand in for; `changes` and `project-tests` are needed only for
+  # the docs-only path below. #1052 renamed the engine jobs to
+  # `Engines (<engine>)`; no ruleset context names an engine job, so nothing
+  # required was orphaned (checked against the ruleset on 2026-10-05).
   #
-  # `engine-tests`'s 6 `unsupported` and 4 `not-installable` cells are not a
-  # gap here, even though "some matrix cells succeed and others decline"
-  # sounds like it should risk a false red. It doesn't, because that job's
-  # own install step (see its comment) deliberately exits 0 for a cell that
-  # declined exactly as expected, and only skips that cell's own later
-  # *steps* via a step-level `if:` -- so every legitimately-declined cell
-  # still contributes `success` to `needs.engine-tests.result`, not
-  # `skipped`.
+  # `engine-tests`'s `unsupported` and `not-installable` cells are not a gap
+  # here: the cell script exits 0 for a cell that declined exactly as
+  # expected, so they contribute to that job's `success` like any other cell.
   #
-  # `engine-tests` also carries `continue-on-error: ${{ matrix.python-version
-  # == '3.15' }}` (its own comment above explains why: 3.15 is experimental
-  # per #845's ruling, and a failure there must report without failing the
-  # run or the required-check set -- `python-compatibility.yml` states the
-  # same policy for its own 3.15 job). Whether a genuine 3.15-cell failure
-  # still surfaces as `failure` in `needs.engine-tests.result` here, or is
-  # neutralised to `success` the same way `continue-on-error` neutralises the
-  # *workflow run's* own conclusion, is NOT stated by GitHub's docs for jobs.
-  # The `continue-on-error` reference has four sentences: one scoping the
-  # flag to a single job, one about a failing job letting its matrix
-  # siblings keep running, two about letting the *workflow run* pass
-  # despite this job failing -- none of the four say anything about what a
-  # sibling job's `needs.<job>.result` sees.
-  # Suggestive, not conclusive, but the asymmetry favours caution: the
-  # Contexts reference documents this exact neutralisation for *steps*
-  # (`steps.<step_id>.conclusion` is defined as the step's result "after
-  # `continue-on-error` is applied", explicitly distinct from `.outcome`,
-  # which stays `failure`) and says nothing of the kind for
-  # `needs.<job_id>.result`, which lists only
-  # `success`/`failure`/`cancelled`/`skipped` with no `outcome`/`conclusion`
-  # split at all -- documented where it applies to steps, silent where the
-  # same question would apply to jobs. One could still argue `result` is
-  # simply the job-level analogue of `conclusion` and behaves the same way;
-  # that argument is evidence for that reading, not proof of it. Requiring
-  # exactly `success` below therefore carries one open, unverified risk: if
-  # the undocumented case resolves to `failure`, a 3.15-only engine regression
-  # would turn this sole required context red and block every merge --
-  # worse than the gate it replaces, and directly against #845's ruling that
-  # 3.15 must never block.
+  # Nor is its 3.15 cell, since #1052. It used to be a separate matrix job
+  # with job-level `continue-on-error`, and GitHub does not document whether
+  # `needs.<job>.result` sees such a job's failure as `failure` or `success`
+  # -- an open risk that a 3.15-only regression could block every merge. The
+  # 3.15 cell is now a step with step-level `continue-on-error: true` inside
+  # each engine's job, whose effect on the job's result *is* documented (a
+  # step's `conclusion` is its result after `continue-on-error` is applied), so
+  # the job, and this gate, read `success` while the failed step stays visible.
   #
-  # Two ways to remove the dependence on that undocumented behaviour
-  # outright, both considered and neither taken here. Moving
-  # `continue-on-error` from the job level down to the individual steps
-  # inside `engine-tests` that can fail on a 3.15 leg would close the gap in
-  # about two lines, but it changes what "non-blocking" means: a step-level
-  # flag makes a failing 3.15 leg's *step* report `success` too, so the leg
-  # reads green instead of red -- hiding the regression rather than merely
-  # declining to block on it, which throws away the "a regression stays
-  # visible" half of #845's ruling that the current job-level flag
-  # preserves. Splitting the 3.15 legs into their own, non-`needs:`-ed job
-  # keeps that visibility, but means duplicating this job's system-package
-  # install, per-engine install logic, and test invocation -- measured at
-  # 182 raw lines across those three steps, and GitHub Actions has no YAML
-  # anchors to shrink that with -- into a second job immediately after #845
-  # rebuilt this one, to close a single unverified edge. Flagging the risk
-  # here instead: if a `required-checks` run ever goes red with only a 3.15
-  # `engine-tests` leg failing underneath it, that is this exact gap and not
-  # a genuine regression -- re-run to confirm, and revisit one of the two
-  # options above then.
-  #
-  # Excepting that one flagged case, there is no other path in this workflow
-  # where a real dependency legitimately reports anything other than
-  # `success` on a PR run, so requiring exactly `success` below is otherwise
-  # the accurate choice, not merely the cautious one. (GitHub's docs never
-  # spell out how one matrix job's several instances collapse into the
-  # single result a downstream `needs.<job>.result` sees; the reasoning
-  # above is from how `engine-tests` itself is built, not from a documented
-  # aggregation rule.)
+  # #1052's docs-only path. On a pull request whose diff touches nothing but
+  # `docs/**` and `*.md` files outside the code directories (the `changes`
+  # job's classifier), `test`, `integration`, `engine-tests` and
+  # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs
+  # instead. A job-level `if:` rather than workflow-level `paths-ignore`,
+  # because `paths-ignore` would not run this workflow at all and leave this
+  # required context pending forever. So `skipped` is accepted for those four
+  # legs **only** when `changes` succeeded and said `code == 'false'`, and then
+  # `project-tests` must have succeeded. Every other combination keeps the
+  # strict rule: `changes` failing, its output missing, or any leg skipped
+  # while `code` is `true` fails this gate. `changes` reports `code: true` for
+  # every event but this workflow's own `pull_request`, so `push` and
+  # `workflow_call` runs never take this path.
   required-checks:
     name: Required checks passed
-    needs: [test, integration, engine-tests, pypcap-parity]
+    needs: [changes, test, integration, engine-tests, pypcap-parity, project-tests]
     if: ${{ always() && inputs.gate-only != true }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
       - name: Check every required job succeeded
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          CODE: ${{ needs.changes.outputs.code }}
+          TEST: ${{ needs.test.result }}
+          INTEGRATION: ${{ needs.integration.result }}
+          ENGINE_TESTS: ${{ needs.engine-tests.result }}
+          PYPCAP_PARITY: ${{ needs.pypcap-parity.result }}
+          PROJECT_TESTS: ${{ needs.project-tests.result }}
         run: |
           set -eu
-          echo "test: ${{ needs.test.result }}"
-          echo "integration: ${{ needs.integration.result }}"
-          echo "engine-tests: ${{ needs.engine-tests.result }}"
-          echo "pypcap-parity: ${{ needs.pypcap-parity.result }}"
+          echo "changes: $CHANGES (code: '$CODE')"
+          echo "test: $TEST"
+          echo "integration: $INTEGRATION"
+          echo "engine-tests: $ENGINE_TESTS"
+          echo "pypcap-parity: $PYPCAP_PARITY"
+          echo "project-tests: $PROJECT_TESTS"
 
           failed=0
-          [ "${{ needs.test.result }}" = "success" ] || { echo "::error title=test did not succeed::result was '${{ needs.test.result }}', not 'success'."; failed=1; }
-          [ "${{ needs.integration.result }}" = "success" ] || { echo "::error title=integration did not succeed::result was '${{ needs.integration.result }}', not 'success'."; failed=1; }
-          [ "${{ needs.engine-tests.result }}" = "success" ] || { echo "::error title=engine-tests did not succeed::result was '${{ needs.engine-tests.result }}', not 'success'."; failed=1; }
-          [ "${{ needs.pypcap-parity.result }}" = "success" ] || { echo "::error title=pypcap-parity did not succeed::result was '${{ needs.pypcap-parity.result }}', not 'success'."; failed=1; }
+          if [ "$CHANGES" != "success" ] || { [ "$CODE" != "true" ] && [ "$CODE" != "false" ]; }; then
+            echo "::error title=changes did not classify the diff::result was '$CHANGES' and code was '$CODE'; without a classification nothing may be skipped."
+            CODE=true
+            failed=1
+          fi
+
+          # Docs-only (code == false): a leg may be skipped, and project-tests
+          # is what must have passed. Otherwise every leg must have succeeded.
+          if [ "$CODE" = "false" ]; then
+            allowed="success skipped"
+            [ "$PROJECT_TESTS" = "success" ] || { echo "::error title=project-tests did not succeed::result was '$PROJECT_TESTS'; on a docs-only diff it is the test that has to pass."; failed=1; }
+          else
+            allowed="success"
+          fi
+          for pair in "test=$TEST" "integration=$INTEGRATION" "engine-tests=$ENGINE_TESTS" "pypcap-parity=$PYPCAP_PARITY"; do
+            job="${pair%%=*}"
+            result="${pair#*=}"
+            case " $allowed " in
+              *" $result "*) ;;
+              *) echo "::error title=$job did not succeed::result was '$result'; accepted here: $allowed (code: '$CODE')."; failed=1 ;;
+            esac
+          done
 
           if [ "$failed" -ne 0 ]; then
-            echo "::error title=Required checks did not all succeed::One or more of test, integration, engine-tests, pypcap-parity did not report 'success' -- see the per-job lines above. A skipped or cancelled dependency is not a pass; see this job's own comment for why that distinction is the point of this job existing."
+            echo "::error title=Required checks did not all succeed::See the per-job lines above. A skipped or cancelled dependency is only a pass on a docs-only diff; see this job's own comment."
             exit 1
           fi
-          echo "All required jobs reported success."
+          echo "All required jobs reported an accepted result."
