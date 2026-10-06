@@ -884,8 +884,10 @@ tag that output answers for is the one ``github`` is about to create. ``tag``,
 ``pypi`` and ``conda`` each gate on their own target instead -- whether the
 matching Conda tag exists, whether PyPI's file count for the version has
 reached the expected total, whether Anaconda's upload is complete. Each of
-those three additionally requires ``version_check`` to have succeeded, and
-``github`` -- and, for ``conda``, ``tag`` -- to have succeeded *or skipped*.
+those three additionally requires ``version_check`` and the release test gate
+(``unit-tests``) to have succeeded, and ``github`` -- and, for ``conda``,
+``tag`` -- to have succeeded *or skipped*. ``github`` itself needs the gate
+directly, and the gate runs only when one of the four would.
 Those conditions open with ``!cancelled()``, which suppresses the ``success()``
 Actions would otherwise prepend; accepting ``skipped`` is then what stops an
 upstream job's legitimate skip cascading into skipping a job whose own evidence
@@ -896,7 +898,7 @@ produced.
 
 That is why an ordinary commit does not publish: the version string has not
 moved, so each job's own check finds its target already there and all four
-skip. Changing the version string is what flips every one of those checks, and
+skip, as does the full-suite release test gate ahead of them. Changing the version string is what flips every one of those checks, and
 the next push then tags and publishes. So:
 
 .. list-table::

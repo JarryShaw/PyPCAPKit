@@ -44,13 +44,14 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 ``tests/project/test_bump_version.py``'s
 ``RepositoryCitationTests.test_the_citation_file_names_the_packaged_version``
 (``:494-514``) asserts the two agree, and ``create-release.yml``'s
-``unit-tests`` job (``:148-155``) calls ``unit-tests.yml`` with
+``unit-tests`` job (``:362-376``) calls ``unit-tests.yml`` with
 ``gate-only: true``, which runs the **full** suite rather than the tiered
 subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:989-1058``).
-``version_check`` depends on that job (``needs: [ unit-tests ]``, ``:160``), so
-a citation left behind fails the gate before ``version_check`` runs, and well
-before any approval is requested. Either run the script, or move both fields by
-hand in the same commit.
+That gate runs whenever a release will -- a moved ``__version__`` is exactly
+what makes ``version_check``'s evidence read "not yet published" -- and every
+publishing job requires it to have succeeded (``:392,493,573,674``), so a
+citation left behind fails the gate well before any approval is requested.
+Either run the script, or move both fields by hand in the same commit.
 
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
@@ -59,7 +60,7 @@ process: the ``changelog`` job (``unit-tests.yml:962-983``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
-(``create-release.yml:402-403``). Both enforce what the changelog convention
+(``create-release.yml:446-447``). Both enforce what the changelog convention
 already asks for.
 
 Two Ways to Start a Release
@@ -72,11 +73,11 @@ neither is a workaround for the other:
 ``push: tags: ['v*']``
    Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
    release, not which version: ``version_check``'s checkout
-   (``:164-167``) carries no explicit ``ref:``, so it checks out whatever
+   (``:183-186``) carries no explicit ``ref:``, so it checks out whatever
    commit the pushed tag points at, and reads ``pcapkit.__version__`` out of
-   *that* tree (``:184``). Every downstream tag and release name is built
+   *that* tree (``:203``). Every downstream tag and release name is built
    from that output -- ``tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"``
-   appears at ``:425``, ``:603`` and ``:843``, always from
+   appears at ``:469``, ``:650`` and ``:892``, always from
    ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
    actually released is whatever ``__version__`` says on the tagged commit,
    not the name of the tag that was pushed. The two agree only if the tag
@@ -97,9 +98,13 @@ neither is a workaround for the other:
    behaviour, not measured here), so ``github.ref_name`` reads ``main``,
    never a tag.
 
-Both paths converge on the same job graph from ``unit-tests`` onward; only
+Both paths converge on the same job graph from ``version_check`` onward; only
 the trigger and ``github.ref_name`` differ, which is what the guards below
-read.
+read. A ``v*`` ref always runs the release test gate; on ``main`` it runs only
+when some target's evidence is not yet ``'true'``
+(`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so the
+common Vendor Update run that bumped nothing costs a minute, not a full-suite
+run.
 
 Per-Job Evidence, Not a Shared Proxy
 ------------------------------------
@@ -180,7 +185,15 @@ pushed, trading a clean skip for a checkout failure; the equality pair skips
 ``version_check`` is the exception, and deliberately so: all three require
 ``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
 produces the evidence the gates read, so a skipped or cancelled
-``version_check`` leaves them nothing to decide on.
+``version_check`` leaves them nothing to decide on. ``unit-tests`` is held to
+the same bar for a different reason: it is the release test gate, and since
+`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ it skips when
+nothing is publishable, so accepting ``skipped`` there would publish
+untested. ``github`` names it in ``needs:`` instead and relies on the implicit
+``success()``. The gate's own ``if:`` is the union of the four publishers'
+conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
+ever drift apart, the failure is a release that did not happen, which
+``release_status`` reports loudly, never one that went out untested.
 
 The Release Pipeline
 --------------------
@@ -188,11 +201,11 @@ The Release Pipeline
 .. mermaid::
 
    flowchart TD
-       T1["push: tags v*<br/>ref_name starts with v"] --> UT
-       T2["workflow_run: Vendor Update completed<br/>ref_name = main"] --> UT
-       UT["unit-tests -- Release test gate"] --> VC
+       T1["push: tags v*<br/>ref_name starts with v"] --> VC
+       T2["workflow_run: Vendor Update completed<br/>ref_name = main"] --> VC
        VC["version_check -- reads pcapkit.__version__<br/>computes each job's own evidence<br/>no gate, read-only"]
-       VC --> GH
+       VC --> UT
+       UT["unit-tests -- Release test gate<br/>skipped when nothing is publishable"] --> GH
        GH["github -- GitHub Release<br/>creates/attaches the v* tag<br/>THE ONLY APPROVAL"]
        GH --> TG["tag -- Conda Tag<br/>commit to main + conda-&lt;version&gt;+0 tag"]
        GH --> PY["pypi -- build + publish<br/>OIDC trusted publishing"]
@@ -208,10 +221,10 @@ The Release Pipeline
        classDef gate stroke-dasharray:6 3,stroke-width:2px
        class GH gate
 
-A transitive reduction: ``version_check`` is also a direct ``needs:`` of
-``tag``, ``pypi`` and ``conda`` in the file, but ``github`` already implies it
-(``github`` itself depends on ``version_check``), so drawing it would add three
-lines without changing which job can start before which. ``release_status``'s
+A transitive reduction: ``version_check`` and ``unit-tests`` are also direct
+``needs:`` of ``tag``, ``pypi`` and ``conda`` in the file, but ``github``
+already implies them (``github`` itself depends on both), so drawing them would
+add six lines without changing which job can start before which. ``release_status``'s
 edges are drawn in full, since it depends directly on *every* job precisely so
 that it can run regardless of which of them skipped.
 
@@ -220,8 +233,8 @@ Only ``github-release`` carries a required reviewer; ``conda-tag``,
 removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``
-(``.github/workflows/create-release.yml:449,527``), and ``conda`` depends on
-``tag`` and ``github`` (``:626``) -- so nothing downstream of ``github`` can
+(``.github/workflows/create-release.yml:493,573``), and ``conda`` depends on
+``tag`` and ``github`` (``:674``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
@@ -267,7 +280,7 @@ back, and neither is needed, since a plain re-run now self-heals; see
 
 **``environment: pypi`` stays even though its reviewer is gone.** ``pypi``
 publishes through PyPI's OIDC trusted publishing (``environment: pypi`` at
-``:522``, ``id-token: write`` at ``:526``), and PyPI's trusted-publisher
+``:568``, ``id-token: write`` at ``:572``), and PyPI's trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
 project's publisher on PyPI is scoped that way, removing the ``pypi`` name
 -- not just its reviewer -- would break the upload with a claim mismatch;
@@ -278,7 +291,7 @@ the name regardless, since there is no upside to removing it.
 **``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.** The ``tag`` job resets :file:`conda/build` to ``0``, commits that,
 and pushes straight to ``main``
-(``.github/workflows/create-release.yml:467-487``) before cutting the
+(``.github/workflows/create-release.yml:512-532``) before cutting the
 ``conda-<version>+0`` tag. Approving ``github-release`` therefore also
 approves a commit landing on the default branch, not only the artefacts that
 sound like they are the point.

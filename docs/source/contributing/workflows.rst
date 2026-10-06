@@ -193,7 +193,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:153`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:374`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:43`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -228,40 +228,42 @@ The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 -------------------------------------------------------------------------------
 
 The two relationships above compose into a failure mode worth seeing on its
-own graph. Create Release's ``unit-tests`` job -- the ``uses:`` call above --
-carries:
+own graph. Create Release's first job, ``version_check`` -- ahead of the
+``uses:`` call above since
+`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ -- carries:
 
 .. code-block:: yaml
 
    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
-(``create-release.yml:150``). On the ``workflow_run`` path, this evaluates
+(``create-release.yml:179``). On the ``workflow_run`` path, this evaluates
 **false**, and the job is skipped outright, whenever the upstream Vendor
 Update run's own conclusion was anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
-``vendor-update`` job). ``version_check`` then depends on that job with a
-plain ``needs: [ unit-tests ]`` (``create-release.yml:160``) and no
-``always()`` override, so a skipped dependency skips it too -- and every job
-past it is gated the same way: ``github`` needs ``[ version_check ]``
-(``:348``), ``tag`` needs ``[ github, version_check ]`` (``:449``), ``pypi``
-needs ``[ github, version_check ]`` (``:527``), and ``conda`` needs
-``[ tag, github, version_check ]`` (``:626``).
+``vendor-update`` job). ``unit-tests`` then depends on that job with
+``needs: [ version_check ]`` (``create-release.yml:364``) and an ``if:`` that
+calls no status-check function, so a skipped dependency skips it too -- and
+every job past it is gated the same way: ``github`` needs ``[ unit-tests,
+version_check ]`` (``:392``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:493``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:573``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:674``).
 
 .. mermaid::
 
    flowchart TD
        WR["Vendor Update completed<br/>conclusion != success"]
-       UTX["unit-tests (uses: unit-tests.yml)<br/>SKIPPED"]
        VC["version_check<br/>SKIPPED"]
+       UTX["unit-tests (uses: unit-tests.yml)<br/>SKIPPED"]
        GH["github (GitHub Release)<br/>SKIPPED"]
        TAGJ["tag (Conda Tag)<br/>SKIPPED"]
        PY["pypi (PyPI distribution)<br/>SKIPPED"]
        CD["conda<br/>SKIPPED"]
 
-       WR -->|if: false| UTX
-       UTX -->|needs| VC
-       VC -->|needs| GH
+       WR -->|if: false| VC
+       VC -->|needs| UTX
+       UTX -->|needs| GH
        GH -->|needs| TAGJ
        GH -->|needs| PY
        GH -->|needs| CD
@@ -270,12 +272,12 @@ needs ``[ github, version_check ]`` (``:527``), and ``conda`` needs
        classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
        class UTX,VC,GH,TAGJ,PY,CD skipped
 
-This is a transitive reduction, as in :doc:`releasing`: ``version_check`` is
-also a direct ``needs:`` of ``tag`` and ``pypi`` (``create-release.yml:449,527``)
-and of ``conda`` (``:626``), but ``github`` already implies those edges, since
-it depends on ``version_check`` itself. Drawing them would add lines without
-changing which job can start before which, or which job a skip in
-``version_check`` reaches.
+This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
+``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
+(``create-release.yml:493,573``) and of ``conda`` (``:674``), but ``github``
+already implies those edges, since it depends on both itself. Drawing them
+would add lines without changing which job can start before which, or which
+job a skip in ``version_check`` reaches.
 
 The whole run then reports **skipped**, not failed -- there is no red X to
 notice. Observed in production on runs `36511610205
@@ -370,10 +372,10 @@ Deployment ``environment:``
 Four jobs, all in ``create-release.yml``, declare a deployment
 ``environment:`` and can therefore pause for an approval:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:345``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:447``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:522``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:623``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:389``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:491``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:568``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:671``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
