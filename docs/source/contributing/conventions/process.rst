@@ -165,7 +165,9 @@ The ones that carry meaning here fall into five groups, which stack rather than
 compete: a pull request normally carries one from the first group and as many of the
 rest as apply. **The five groups are not the whole label set** -- the repository also
 has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` and
-``duplicate`` are all in live use and only ``good first issue`` has never been applied.
+``duplicate`` are all in live use and ``good first issue`` is archived. GitHub cannot
+archive a label, so an archived one is greyed and its description starts
+``[archived]``; it is kept rather than deleted so the name stays reserved.
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added::
 
@@ -325,3 +327,27 @@ carrying it are that kind:
           --json number -q '[.[].number]|sort|@json'
       gh issue list -R JarryShaw/PyPCAPKit --state all --label breaking --limit 100 \
           --json number -q '[.[].number]|sort|@json'
+
+Milestones and the Project Board
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Milestones are release lines**, titled by minor version (``1.4``, ``1.5``). An issue
+or pull request belongs to the line it ships in: the open milestone collects work
+targeting the next release, and it is closed when that release's final tag is cut,
+with ``due_on`` set to the tag date. Work closed without shipping -- an unmerged pull
+request, an issue closed as not planned -- takes no milestone. The closed milestones
+were backfilled from merge and close dates against the release tags, so an item that
+landed just before a tag may sit one line early.
+
+**The project board records state that the labels drop.** The state labels above are
+stripped when an item closes, so they say only what is live. The `PyPCAPKit project
+<https://github.com/users/JarryShaw/projects/2>`__ keeps a *Status* per item --
+*Pending*, *WIP*, *Blocked*, *Needs decision*, *In review*, *Done* -- that outlives the
+close. **The labels stay authoritative**: Status mirrors them, and where the two
+disagree the label wins and Status is corrected.
+
+Link neither from docstrings, code comments or Markdown files. Both are tracking
+metadata that changes as work moves, and a link to them goes stale the way a line
+number does; the changelog's ``:issue:`` and ``:pr:`` roles are the durable trail.
+The repository wiki is disabled -- contributor documentation lives on these pages.
+
