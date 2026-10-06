@@ -78,9 +78,10 @@ class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
 
         Returns:
             Index ID of the protocol. ``VLAN`` is retained alongside the class's
-            own name so that selecting the protocol by that name -- as
-            ``pcapkit.extract(..., protocol='VLAN')`` did when this class *was*
-            ``VLAN`` -- keeps matching.
+            own name so that selecting VLAN tags by that name, e.g.
+            ``pcapkit.extract(..., protocol='VLAN')``, matches the customer
+            tag; :class:`~pcapkit.protocols.link.s_tag.S_Tag` carries the same
+            alias.
 
         """
         return ('C_Tag', 'VLAN')

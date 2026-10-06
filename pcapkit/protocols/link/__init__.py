@@ -14,7 +14,7 @@ link layer, with detailed implementation and methods.
 # Base Class for Link Layer
 from pcapkit.protocols.link.link import Link
 
-# Utility Classes for Protocols
+# Link Layer Protocols
 from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
 

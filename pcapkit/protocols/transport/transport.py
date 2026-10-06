@@ -77,7 +77,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Arguments:
             code: port number
-            protocol: module name
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Important:
             This method must be called from a non-abstract class, as the

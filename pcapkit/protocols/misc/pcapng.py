@@ -498,11 +498,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_usrdeliv`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv`
        * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_flags`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_flags`
        * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_hash`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_hash`
 
     The class currently supports parsing of the following name resolution
     record types, which are registered in the :attr:`self.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`
@@ -580,8 +580,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name,
-    #: or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+    #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
+    #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -1307,8 +1307,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         which has no catch point above it and would abort the whole extraction --
         this costs no frame that was actually in the file. It is the same signal
         :func:`~pcapkit.utilities.decorators.prepare` raises for a *derived*
-        remainder of exactly zero; only one, two or three stray octets fell
-        through it.
+        remainder of exactly zero; a remainder of one, two or three octets
+        passes that check and is caught here instead.
 
         Note:
             This runs on the parsing path only, since :meth:`unpack` reaches it
@@ -3523,7 +3523,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
            12 |                         Secrets Length                        |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            16 |                            AES-128                            |
-              |                            NKW Key                            |
+              |                            NWK Key                            |
               |                          (16 octets)                          |
               |                           (128 bits)                          |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -5394,7 +5394,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            packets: Number of dropped packets.
+            packets: Number of packets delivered to the user.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

@@ -20,7 +20,7 @@ Octets      Bits        Name                    Description
   8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)
   12         96   ``tcp.hdr_len``           Data Offset
   12        100                             Reserved (must be ``\\x00``)
-  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)
+  12        103                             ECN Concealment Protection (NS), not parsed
   13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)
   13        105   ``tcp.flags.ece``         ECN-Echo (ECE)
   13        106   ``tcp.flags.urg``         Urgent (URG)
@@ -1565,7 +1565,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If the option is not given on a valid SYN/ACK packet.
+            ProtocolError: If the segment carries neither SYN nor ACK.
 
         """
         if Enum_Flags.SYN in self._flags and Enum_Flags.ACK not in self._flags:  # MP_JOIN-SYN
@@ -1771,7 +1771,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
            +---------------+---------------+-------+-------+---------------+
            |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
            +---------------+---------------+-------+-------+---------------+
-           |          Address (TCP - 4 octets / IPv6 - 16 octets)         |
+           |         Address (IPv4 - 4 octets / IPv6 - 16 octets)          |
            +-------------------------------+-------------------------------+
            |   Port (2 octets, optional)   |
            +-------------------------------+
@@ -2755,7 +2755,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             opt: option data
             version: MPTCP version
             flag_req: checksum required flag
-            flag_ext: extensability flag
+            flag_ext: extensibility flag
             flag_hsa: use of HMAC-SHA1 flag
             skey: option sender's key
             rkey: option receiver's key

@@ -5,8 +5,9 @@
 .. module:: pcapkit.protocols.link.arp
 
 :mod:`pcapkit.protocols.link.arp` contains
-:class:`~pcapkit.protocols.link.arp.ARP` only,
-which implements extractor for (Inverse) Address Resolution
+:class:`~pcapkit.protocols.link.arp.ARP` and
+:class:`~pcapkit.protocols.link.arp.InARP`,
+which implement extractors for (Inverse) Address Resolution
 Protocol (ARP/InARP) [*]_, whose structure is described as
 below:
 
@@ -323,7 +324,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
         }
 
     def _read_addr_resolve(self, addr: 'bytes', htype: 'int') -> 'str':
-        """Resolve headware address according to protocol.
+        """Resolve hardware address according to protocol.
 
         Arguments:
             addr: Hardware address.
@@ -364,7 +365,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
         return addr.hex()
 
     def _make_addr_resolve(self, addr: 'str | bytes', htype: 'int') -> 'bytes':
-        """Resolve headware address according to protocol.
+        """Resolve hardware address according to protocol.
 
         Arguments:
             addr: Hardware address.
