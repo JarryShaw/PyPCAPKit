@@ -643,11 +643,22 @@ rather than as bare <a class="reference external" href="https://docs.python.org/
 in the style of <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MH.__option__</span></code></a>,
 keyed on the field that already names the format –
 <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format" title="pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_format</span></code></a>
-for the traffic selectors, and the mode flag for MLD against IGMP on the
-multicast options. <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is already what an unregistered dispatch falls back
+for the traffic selectors, and on the multicast options the message-type octet
+each carries: <code class="docutils literal notranslate"><span class="pre">protocol</span></code> on option 54, <code class="docutils literal notranslate"><span class="pre">igmp_type</span></code> and <code class="docutils literal notranslate"><span class="pre">mld_type</span></code> on 56
+and 57, and <code class="docutils literal notranslate"><span class="pre">code</span></code> on 60. Not the <code class="docutils literal notranslate"><span class="pre">M</span></code> flag on option 54, which selects the
+routing mode rather than the record format [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7028.html#section-5.1.2"><strong>RFC 7028 Section 5.1.2</strong></a>].
+<code class="docutils literal notranslate"><span class="pre">Raw</span></code> is already what an unregistered dispatch falls back
 to everywhere else in the package, so this makes the mobility header consistent
 with the rest rather than inventing a convention; and once a dissector for one
 of these formats exists, registering it needs no change at the option site.</p>
+<p>None of those four keys is checked against the values its RFC allows, on
+either side. <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7028.html"><strong>RFC 7028</strong></a> says <code class="docutils literal notranslate"><span class="pre">protocol</span></code> MUST be 143 or 131 for MLD, or
+<code class="docutils literal notranslate"><span class="pre">0x12</span></code>, <code class="docutils literal notranslate"><span class="pre">0x16</span></code> or <code class="docutils literal notranslate"><span class="pre">0x22</span></code> for IGMP, yet
+<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mcast_sel" title="pcapkit.protocols.internet.mh.MH._make_opt_mcast_sel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mcast_sel()</span></code></a> builds and
+<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_mcast_sel" title="pcapkit.protocols.internet.mh.MH._read_opt_mcast_sel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mcast_sel()</span></code></a> parses any octet
+without a warning, and the other three keys behave the same. The registry is
+where an unknown key would first be noticed, so the check belongs there rather
+than in four separate makers.</p>
 <p>It wants a registry of its own rather than
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>, which is
 only ever called at a layer boundary and appends to the frame’s protocol chain.
@@ -660,11 +671,11 @@ changes what existing captures dump to, so it is its own change.</p>
 <p>Two wire-format traps are worth knowing before touching this code, since both
 look like ordinary fields and are not:</p>
 <ul class="simple">
-<li><p><span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7411.html"><strong>RFC 7411</strong></a>’s two multicast options measure their length field in <strong>32-bit
+<li><p><span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7411.html"><strong>RFC 7411</strong></a>’s two multicast options measure their length field in <strong>32-bit
 words</strong>, and exclude the option-code and status octets as well as the type and
 length ones – so the option occupies <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">4</span></code> octets, not
 <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">+</span> <span class="pre">2</span></code>.</p></li>
-<li><p><span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5213.html#section-8.8"><strong>RFC 5213 Section 8.8</strong></a>’s timestamp is <strong>not</strong> an <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a> NTP timestamp,
+<li><p><span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5213.html#section-8.8"><strong>RFC 5213 Section 8.8</strong></a>’s timestamp is <strong>not</strong> an <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a> NTP timestamp,
 though the mobility header carries both. It counts from the UNIX epoch in a
 48/16 fixed-point split, where NTP counts from 1900 in a 32/32 one, so reading
 one as the other is wrong in the epoch and in both field widths. They have
@@ -769,15 +780,15 @@ family word skipped first, and <code class="docutils literal notranslate"><span 
 <p>Three follow-ups the above deliberately left alone:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">TransType</span></code> 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) stays unbound, and the reason is structural: it
-references <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. L2TPv3 over IP, and
+references <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. L2TPv3 over IP, and
 <strong>there is no</strong> <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> <strong>class for it to point at</strong>. What exists is
-<a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
+<a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
 reached over UDP 1701. So the binding waits on a v3 dissector, which is also
 the first member of the family to carry an
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> of its own – 115
 being that index. <a class="reference internal" href="../pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> records what v3 needs, and
 what <code class="docutils literal notranslate"><span class="pre">L2F</span></code> needs alongside it: the version nibble reading <code class="docutils literal notranslate"><span class="pre">1</span></code> selects L2F
-[<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
+[<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
 <li><p>The <a class="reference internal" href="../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> family lives under
 <a class="reference internal" href="../pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link</span></code></a> and so reports <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code>, although it
 is carried inside UDP. That is deliberate: a tunnelling protocol is placed by what
@@ -867,7 +878,7 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
 <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
-verbosity to the application. <span class="target" id="index-25"></span><a class="reference internal" href="../pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> bootstraps a
+verbosity to the application. <span class="target" id="index-27"></span><a class="reference internal" href="../pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> bootstraps a
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="../pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
@@ -1016,7 +1027,7 @@ Anyone wanting to run the tests wants the repository, which is where they are.</
 <h2>Reassembly Beyond IP and TCP<a class="headerlink" href="#reassembly-beyond-ip-and-tcp" title="Link to this heading">¶</a></h2>
 <p><strong>Still open.</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html"><span class="doc">Packets Reassembly</span></a> covers three protocols and no more.
-IPv4 and IPv6 share the <span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
+IPv4 and IPv6 share the <span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
 back together, and <code class="docutils literal notranslate"><span class="pre">sctp</span></code> appears nowhere in
@@ -1029,7 +1040,7 @@ reassembler needs, on
 those two bits outside the construction path. So each fragment is dispatched on
 its own PPID as though it were a whole PDU, and a registered upper layer is
 handed half a message. Two related holes compound it: only the <em>first</em> DATA
-chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
+chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
 is not dissected – so the MID and FSN fields that exist precisely to make
 interleaved reassembly tractable are never parsed, and an I-DATA-only packet
 yields no payload whatsoever. FORWARD TSN (192) and I-FORWARD-TSN (194) are
@@ -1073,7 +1084,7 @@ flows instead.</p>
 <p>What ends a bidirectional flow is worth stating, because the obvious answer is
 wrong. A teardown – a FIN from each endpoint, or a RST from either – is
 <em>recorded</em> but does not finalise the flow: the four-way close of
-<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
+<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
 arrives after the second FIN, and finalising on that FIN drops the ACK from the
 flow and lets it open a fresh buffer under the same canonical buffer ID – which
 a later connection reusing those endpoints then merges into. Duplicates of that
@@ -1092,7 +1103,7 @@ of buffering a traced payload, the tracer <strong>delegates to</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
 per-direction payload buffer of its own. A buffer that concatenated payloads in
 capture order would be silently wrong on the first retransmission or reordered
-segment, where the <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
+segment, where the <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
 reassembler is not – so
 <a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the four segment
 fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
@@ -1132,18 +1143,18 @@ than
 the honest answer, since the capture never shows the deadline passing; feeding
 every frame’s timestamp to every enabled reassembler would close the gap and
 is worth doing on its own account.</p>
-<p>On the numbers: the 15 seconds <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
+<p>On the numbers: the 15 seconds <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
 setting, a lower bound which
 <code class="docutils literal notranslate"><span class="pre">TIMER</span> <span class="pre">&lt;-</span> <span class="pre">MAX(TIMER,TTL)</span></code> then raises toward the 4.25-minute TTL ceiling –
-not a deadline. <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
+not a deadline. <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
 (“The reassembly timeout value SHOULD be a fixed value, not set from the
 remaining TTL… between 60 seconds and 120 seconds”), so IPv4 uses 60
-seconds, agreeing with the 60 <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
+seconds, agreeing with the 60 <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
 <strong>TCP is left with no timeout at all</strong>, since no specification gives stream
 reassembly a deadline and an idle connection is ordinary rather than
 pathological; <code class="docutils literal notranslate"><span class="pre">timeout</span></code> enables one on request.</p>
-<p>Two related things are <em>not</em> done. <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
-<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
+<p>Two related things are <em>not</em> done. <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
+<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
 the offset-zero fragment has been received; a parser sends nothing, so the
 condition is only reported in the log record. And the memory motive is
 narrowed rather than removed – an in-flight IP datagram identifier still
@@ -1185,7 +1196,7 @@ which live in the <em>enclosing</em> layer. So verification needs a parsed proto
 reach back to its parent, which is a structural question about
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> rather than an arithmetic one.
 That is precisely why SCTP came first and is not evidence the rest are easy:
-<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the common header and chunks with
+<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the common header and chunks with
 the checksum field zeroed and <strong>no pseudo-header</strong>, so it can be verified from
 the SCTP packet alone. Note also that SCTP’s CRC32c is a hand-rolled lookup table
 in <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#module-pcapkit.protocols.transport.sctp" title="pcapkit.protocols.transport.sctp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp</span></code></a>, not a library call, so it is not
@@ -1357,7 +1368,7 @@ so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCA
 <p><strong>Wave 1 — done or in flight.</strong> The Mobility Header registry completion, the
 protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
 <a class="reference internal" href="../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> C-Tag/S-Tag split, the option
-round-trip coverage harness, and reassembly’s <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> timeout with
+round-trip coverage harness, and reassembly’s <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> timeout with
 bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> rather than
 here.</p>
@@ -1396,14 +1407,14 @@ above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>. It is
 sequenced <em>after</em> wave 2 rather than by preference: the multicast options embed
-<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a> MLD, which rides in <strong>ICMPv6</strong>, and <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMP</strong> records —
+<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a> MLD, which rides in <strong>ICMPv6</strong>, and <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMP</strong> records —
 both wave 2 deliverables. Landing the registry first would give a dispatch table
 with nothing but <code class="docutils literal notranslate"><span class="pre">Raw</span></code> to register. The counter-argument is real though, and
 worth weighing rather than dismissing: changing the parsed shape from
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is the disruptive half, since it changes what existing
 captures dump to, so there is a case for taking that churn early and registering
-dissectors later. The third format, the <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
-<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
+dissectors later. The third format, the <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
+<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
 nobody has claimed it.</p>
 <p><strong>Wave 2 or 3 — per-entry coverage of the option and parameter registries.</strong> The
 option, parameter, block and frame registries are <em>enumerated</em> but not
@@ -1470,11 +1481,11 @@ case that no longer fails. Several wave 1 defects were exactly this shape.</p></
 the one with the clearest evidence behind it: reading the RFC field-by-field
 against the schema is what produced
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/472">#472</a> — two HIP
-parameters sizing their list entries at one octet where <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> §5.4 and
-<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a> §5.1.2 specify sixteen bits — and the same method then <em>cleared</em>
+parameters sizing their list entries at one octet where <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> §5.4 and
+<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a> §5.1.2 specify sixteen bits — and the same method then <em>cleared</em>
 fourteen further
-<code class="docutils literal notranslate"><span class="pre">EnumField(length=1)</span></code> sites in the same file against <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
-<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8002.html"><strong>RFC 8002</strong></a>, <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html"><strong>RFC 8003</strong></a>, <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> and <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6078.html"><strong>RFC 6078</strong></a>. It both finds real
+<code class="docutils literal notranslate"><span class="pre">EnumField(length=1)</span></code> sites in the same file against <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
+<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8002.html"><strong>RFC 8002</strong></a>, <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html"><strong>RFC 8003</strong></a>, <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> and <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6078.html"><strong>RFC 6078</strong></a>. It both finds real
 defects and retires suspicion, which is why it is worth doing exhaustively
 rather than opportunistically.</p></li>
 <li><p><strong>Duplicated logic that wants a shared module.</strong> The same method or the same
@@ -1486,7 +1497,7 @@ already <em>caused</em> defects rather than merely offended tidiness:</p>
 <code class="docutils literal notranslate"><span class="pre">IPv6_Route.make()</span></code> computed <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> in <strong>two</strong> branches with two
 different wrong units, and the read side computed the inverse in a third
 place with a fourth. The fix was not new arithmetic but one helper per
-direction, each documenting the <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a> unit and saying what
+direction, each documenting the <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a> unit and saying what
 its counterpart is.</p></li>
 <li><p><a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/483">#483</a> was the scapy
 toolkit adapter passing a fragment offset unscaled where every sibling
@@ -1499,7 +1510,7 @@ unit, field-mapping tables restated per engine, and guards of the same shape
 repeated per registered type — and where extraction is not worth it, say so
 with the reason rather than leaving the duplication unexplained. Note also that
 two candidates may look alike and differ deliberately: TCP and IP reassembly
-resolve overlaps in <em>opposite</em> directions because <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> and <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>
+resolve overlaps in <em>opposite</em> directions because <span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> and <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>
 §3.10 specify opposite resolutions, so “these two functions are nearly
 identical” is a question to answer against the specification, not a defect on
 its face.</p>

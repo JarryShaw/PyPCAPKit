@@ -179,11 +179,23 @@ What is left, and why:
   in the style of :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`,
   keyed on the field that already names the format --
   :attr:`~pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format`
-  for the traffic selectors, and the mode flag for MLD against IGMP on the
-  multicast options. ``Raw`` is already what an unregistered dispatch falls back
+  for the traffic selectors, and on the multicast options the message-type octet
+  each carries: ``protocol`` on option 54, ``igmp_type`` and ``mld_type`` on 56
+  and 57, and ``code`` on 60. Not the ``M`` flag on option 54, which selects the
+  routing mode rather than the record format [:rfc:`7028#section-5.1.2`].
+  ``Raw`` is already what an unregistered dispatch falls back
   to everywhere else in the package, so this makes the mobility header consistent
   with the rest rather than inventing a convention; and once a dissector for one
   of these formats exists, registering it needs no change at the option site.
+
+  None of those four keys is checked against the values its RFC allows, on
+  either side. :rfc:`7028` says ``protocol`` MUST be 143 or 131 for MLD, or
+  ``0x12``, ``0x16`` or ``0x22`` for IGMP, yet
+  :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_mcast_sel` builds and
+  :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_mcast_sel` parses any octet
+  without a warning, and the other three keys behave the same. The registry is
+  where an unknown key would first be noticed, so the check belongs there rather
+  than in four separate makers.
 
   It wants a registry of its own rather than
   :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
