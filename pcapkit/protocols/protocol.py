@@ -246,10 +246,9 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     # NOTE: A warning rather than an error, because nobody typed these: they are
     # whatever ``_make_data`` returned, so the defect is a key of that mapping
     # disagreeing with the signature it is spread into, and the person who meets
-    # it cannot fix it. Raising would turn every such mismatch -- e.g. ``Frame``
-    # returns ``ts_src`` for ``ts_sec`` and ``L2TPv2`` ``prio`` for ``priority``
-    # -- into a broken ``from_data``, where the field is merely dropped; the
-    # warning makes that audible instead.
+    # it cannot fix it. Raising would turn every such mismatch into a broken
+    # ``from_data``, where the field is merely dropped; the warning makes that
+    # audible instead.
     #
     # No explicit ``stacklevel``: the default blames the innermost frame outside
     # :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be
@@ -796,24 +795,42 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return self
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
             data: Protocol data.
+            **kwargs: Construction keywords that ``data`` does not carry, such as
+                the ``num`` and ``header`` of
+                :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, or the
+                ``num``, ``sct`` and ``ctx`` of
+                :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`. They take
+                precedence over the keywords :meth:`_make_data` returns.
 
         Returns:
             Protocol instance.
+
+        Raises:
+            UnsupportedCall: If any of ``kwargs`` matches no parameter of the
+                protocol, as for a direct construction.
 
         """
         if not isinstance(data, Data):
             data = cast('_PT', cls.__data__.from_dict(data))
 
-        self = cls.__new__(cls)
-        kwargs = self._make_data(data)
+        # NOTE: The caller typed these, so they are checked strictly here, as a
+        # direct construction would check them. The out-of-band keywords
+        # ``__init__`` consumes are left out of it.
+        _check_construction_keywords(cls, {
+            key: val for key, val in kwargs.items()
+            if key not in ('_layer', '_protocol', '__context__')
+        })
 
-        # NOTE: These keywords came out of ``_make_data``, not out of a caller, so
-        # the construction keyword check of ``__init__`` warns here instead of
+        self = cls.__new__(cls)
+        kwargs = {**self._make_data(data), **kwargs}
+
+        # NOTE: The rest came out of ``_make_data``, not out of a caller, so the
+        # construction keyword check of ``__init__`` warns here instead of
         # raising: a key of that mapping which disagrees with the signature it is
         # spread into is a defect in this protocol, and the caller of
         # ``from_data`` can do nothing about it. Set for the duration of the call

@@ -22,7 +22,6 @@ import importlib.util
 import io
 import unittest
 import warnings
-from unittest import mock
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -62,18 +61,11 @@ class MakeDataKeysTests(unittest.TestCase):
         frame = Frame(num=1, header=header.info, ts_sec=1234, ts_usec=5,
                       packet=b'\x00' * 14)
 
-        # NOTE: ``Frame`` also needs ``num`` and ``header``, which are not part
-        # of its data, so wrap ``_make_data`` to supply them and still go
-        # through the real :meth:`from_data` and the real keys.
-        make_data = Frame._make_data
-
-        def with_context(cls: 'type', data: 'object') -> 'dict[str, object]':
-            return {**make_data(data), 'num': 1, 'header': header.info}
-
-        with mock.patch.object(Frame, '_make_data', classmethod(with_context)), \
-                warnings.catch_warnings(record=True) as caught:
+        # NOTE: The frame index and the global header are not part of the
+        # frame's data, so they are passed to :meth:`from_data` alongside it.
+        with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            rebuilt = Frame.from_data(frame.info)
+            rebuilt = Frame.from_data(frame.info, num=1, header=header.info)
 
         self.assertNoUnknownField(caught)
         self.assertEqual(rebuilt.info.frame_info.ts_sec, 1234)
