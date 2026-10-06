@@ -548,8 +548,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
             type=EtherType.Internet_Protocol_version_6,
             payload=b'payload',
         )
-        self.assertEqual(schema.dst, b'aabbccddeeff')
-        self.assertEqual(schema.src, b'112233445566')
+        self.assertEqual(schema.dst, b'\xaa\xbb\xcc\xdd\xee\xff')
+        self.assertEqual(schema.src, b'\x11\x22\x33\x44\x55\x66')
         self.assertEqual(schema.type, EtherType.Internet_Protocol_version_6)
 
         with mock.patch('pcapkit.protocols.link.ethernet.py38', False):
