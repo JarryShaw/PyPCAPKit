@@ -156,11 +156,10 @@ class SeekableReader(io.BufferedReader):
         read path needs both of them:
 
         * The buffer's own cursor is a **derived** quantity, ``_tell - _buffer_set``, rather
-          than a fourth piece of state to be maintained. Nothing was maintaining it: a read
+          than a fourth piece of state to be maintained. Nothing keeps it in step: a read
           served from the stream writes through :attr:`_buffer_view` and leaves the cursor
-          untouched, :meth:`_write_buffer` rewinds it to the start of the appended octets
-          when the window slides, and :meth:`peek` used to advance it while leaving ``_tell``
-          alone. Deriving it here, at each point of use, is what makes the drift
+          untouched, and :meth:`_write_buffer` rewinds it to the start of the appended
+          octets when the window slides. Deriving it here, at each point of use, is what makes the drift
           unrepresentable instead of merely repaired afterwards by the next :meth:`seek`.
         * What is available is the run from the position to the end of the content,
           ``_buffer_set + _buffer_cur - _tell`` -- not ``_buffer_cur``, which is measured
@@ -256,7 +255,7 @@ class SeekableReader(io.BufferedReader):
                 # NOTE: a request for no octets is answered without consulting the window,
                 # which has nothing to say about it. Asking anyway refuses a zero-length
                 # read from a position :meth:`_truncate_buffer` has left behind the window -- a
-                # refusal over data that was never wanted, and not what this used to do.
+                # refusal over data that was never wanted.
                 #
                 # Truthiness rather than ``size == 0`` on purpose. It is the same test for
                 # every value this method can be reached with -- ``size`` is an ``int`` by
@@ -264,7 +263,7 @@ class SeekableReader(io.BufferedReader):
                 # not normalise a ``None`` its signature does not permit, and there the two
                 # spellings diverge: ``size == 0`` would send ``None`` on to the window and
                 # report a type error as a position error. Keeping it falsy keeps that call
-                # failing as the :exc:`TypeError` it always was.
+                # failing as a :exc:`TypeError`.
                 buf = b''
             else:
                 buf_rem = self._seek_buffer()
@@ -326,20 +325,21 @@ class SeekableReader(io.BufferedReader):
 
         Note:
             The target is computed, then validated, and only then written to ``_tell``. A
-            branch that assigned the position before deciding whether to accept it left a
-            refused seek having moved it anyway, with the resync below -- the one thing that
-            puts the buffer's cursor back in step -- skipped on the way out. A caller that
-            catches the error and reasonably takes the position to be unchanged then read
-            from the rejected offset instead, silently and without a second error.
+            branch that assigned the position before deciding whether to accept it would
+            leave a refused seek having moved it anyway, with the resync below -- the one
+            thing that puts the buffer's cursor back in step -- skipped on the way out. A
+            caller that catches the error and reasonably takes the position to be unchanged
+            would then read from the rejected offset instead, silently and without a second
+            error.
 
             The negative check applies to every ``whence``, rather than only
             :data:`~io.SEEK_SET` looking at its offset. An absolute position below zero
             cannot exist under any of them, and it is not the same failure as a position
             that has merely slid out of the window -- which is ordinary, and recoverable
             with ``buffer_save=True``. Reporting the first as ``negative seek value`` keeps
-            the two distinguishable, and being a property of the position rather than of the
-            window it holds with a saved buffer as well, where the old refusal did not
-            apply at all and the seek returned a negative position as if it had worked.
+            the two distinguishable, and, being a property of the position rather than of
+            the window, it holds with a saved buffer as well, which is exempt from the window
+            check and would otherwise return a negative position as if the seek had worked.
 
         """
         # NOTE: we mark the end of buffer content to the end of buffer
@@ -386,8 +386,7 @@ class SeekableReader(io.BufferedReader):
         else:
             # NOTE: only a saved buffer reaches here -- the refusal above has already
             # turned away a position before the window when there is no file to serve it
-            # from, which is what the refusal used to do at this point instead, after
-            # ``_tell`` had been moved.
+            # from.
             self._buffer.seek(0, io.SEEK_SET)
         return self._tell
 
@@ -416,10 +415,9 @@ class SeekableReader(io.BufferedReader):
             ``_pyio.BufferedReader`` raise :exc:`io.UnsupportedOperation`, the latter from
             ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (:issue:`645`).
 
-            The resizing this used to perform is still reachable internally, as
-            :meth:`_truncate_buffer`. It never touched the underlying stream in the first place
-            -- it resizes a private lookback window -- which is why it survives under a private
-            name rather than being removed with the public method's behaviour.
+            Resizing the lookback buffer is reachable internally, as :meth:`_truncate_buffer`.
+            It never touches the underlying stream -- it resizes a private lookback window --
+            which is why it stays, under a private name.
 
         """
         raise UnsupportedOperation('truncate')
@@ -431,8 +429,7 @@ class SeekableReader(io.BufferedReader):
         zero-filled. The new buffer size is returned.
 
         Note:
-            This is the internal half of what :meth:`truncate` used to do, which is all of it:
-            nothing here writes to the underlying stream -- :meth:`write` raises -- so what
+            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what
             this resizes is the buffer, not the stream behind it. That is why :meth:`truncate`
             refuses (:issue:`645`) while this remains: the operation is a private-window one,
             not an :class:`io.IOBase` write. The buffer is a sliding window over a stream that
@@ -459,7 +456,7 @@ class SeekableReader(io.BufferedReader):
         """
         if size is None:
             # NOTE: an unspecified size means the current position, following the
-            # :meth:`io.IOBase.truncate` convention this used to implement. The buffer
+            # :meth:`io.IOBase.truncate` convention. The buffer
             # is indexed relative to ``_buffer_set``, and the position may sit before it
             # once a saved buffer has been rewound, in which case nothing is kept.
             size = max(self._tell - self._buffer_set, 0)
@@ -491,15 +488,7 @@ class SeekableReader(io.BufferedReader):
 
     def writable(self) -> 'bool':
         """Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and
-        :meth:`truncate` will raise :exc:`OSError`.
-
-        Note:
-            This was spelled ``writeable`` until :issue:`645`, which is not how the :mod:`io`
-            protocol spells it, so it overrode nothing and :mod:`io` never consulted it -- the
-            inherited :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`,
-            so there was no observable divergence to notice; the coincidence is what hid it.
-
-        """
+        :meth:`truncate` will raise :exc:`OSError`."""
         return False
 
     def writelines(self, lines: 'Iterable[Buffer]', /) -> 'None':
@@ -671,7 +660,7 @@ class SeekableReader(io.BufferedReader):
                 # NOTE: read through the view rather than through ``self._buffer``, whose
                 # cursor an ordinary read would advance. A preview must leave the position
                 # alone, and the buffer's cursor is part of the position: advancing it here
-                # while leaving ``_tell`` untouched is what made the *next* buffered read
+                # while leaving ``_tell`` untouched would make the *next* buffered read
                 # start from the wrong octet, with ``tell()`` reporting the right one.
                 buf_rem = self._seek_buffer()
                 buf_off = self._buffer.tell()

@@ -54,7 +54,7 @@ _MAX_ZERO_PAD_LENGTH = 0x40_000
 #: else a parse has already padded.
 #:
 #: :data:`_MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds
-#: many fields, so the *sum* was unbounded: a declared length just under the
+#: many fields, so it leaves the *sum* unbounded: a declared length just under the
 #: ceiling is honoured however often it is declared. Measured on this tree, 200
 #: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block
 #: declaring ``secrets_length`` of 262,142 against two supplied octets through
@@ -76,7 +76,7 @@ _MAX_ZERO_PAD_LENGTH = 0x40_000
 #: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and
 #: a PCAP-NG option all declare their size -- so no shortfall that one of those
 #: can produce is subject to the budget at all, and every one of them is padded
-#: unconditionally, exactly as before. Measured: the largest legitimate single
+#: unconditionally. Measured: the largest legitimate single
 #: shortfall found anywhere was 65,495 octets, from a snapshot-truncated
 #: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total
 #: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a
@@ -170,7 +170,7 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
     ``Extractor`` run, per file, per frame -- for a caller that wants it that
     way, and what makes it reproducible for a test.
 
-    Note that nothing in this package calls it yet: the layer that knows where
+    Note that nothing in this package calls it: the layer that knows where
     one parse ends is the layer that should, and that is not this one.
 
     Yields:
@@ -247,8 +247,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
     # replace :meth:`__init__` without chaining to this one -- as
     # :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of
     # fields takes no default value of its own -- and reading :attr:`default` off
-    # one of those raised :exc:`AttributeError` for a private attribute rather
-    # than reporting that the field declares no default. See #422.
+    # one of those would otherwise raise :exc:`AttributeError` for a private
+    # attribute rather than report that the field declares no default. See #422.
     _default: '_T | NoValueType' = NO_VALUE
 
     @property
@@ -356,10 +356,10 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         """Return a shallow copy of the field.
 
         Every field of every protocol is copied once per packet by
-        :meth:`__call__`, which made the generic :func:`copy.copy` path -- via
+        :meth:`__call__`, which makes the generic :func:`copy.copy` path -- via
         :meth:`object.__reduce_ex__` and :func:`copy._reconstruct` -- one of the
-        costlier things an extraction did. This does what that path would have
-        done, and only that: a new instance of the same class, its
+        costlier things an extraction would do. This does what that path would
+        do, and only that: a new instance of the same class, its
         :attr:`~object.__dict__` shallow-updated from this one.
 
         Note:
@@ -470,9 +470,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 raises.
 
         """
-        # NOTE: ``length`` recomputes struct.calcsize() on every read, so the
-        # three reads this method used to make were three calcsize() calls for
-        # one value.
+        # NOTE: ``length`` recomputes struct.calcsize() on every read, so it is
+        # read once here.
         length = self.length
 
         if not isinstance(buffer, bytes):
@@ -498,9 +497,9 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         # NOTE: The ceiling above bounds one field; this bounds their sum. A
         # declared length just under :data:`_MAX_ZERO_PAD_LENGTH` passes it every
-        # time it is declared, so 200 of them amplified 4,800 wire octets into
+        # time it is declared, so 200 of them amplify 4,800 wire octets into
         # 50.0 MiB of retained zeros with the ceiling doing exactly what it was
-        # written to do -- the sum was never bounded at all. C.f. #573.
+        # written to do. C.f. #573.
         #
         # ``max(length, 0)`` is defensive rather than a case anything is known to
         # reach. :attr:`length` here resolves through :func:`struct.calcsize`, so
@@ -567,20 +566,19 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*
         # octets of the field -- the buffer ran out, so what is missing is
         # whatever came after what was read -- so the zeros belong at the end,
-        # where the unread octets were. ``rjust()`` instead put them at the
+        # where the unread octets were. ``rjust()`` would put them at the
         # front, which asserts that the octets never read were the *leading*
         # ones, and that is wrong for every byte order rather than only for
-        # little-endian ones. Measured on the tree that padded with ``rjust()``:
-        # one octet of a four-octet little-endian 120 (``0x78``) read as
-        # 2,013,265,920, and three octets of a four-octet big-endian
-        # ``0x01020304`` read as ``0x10203``. ``ljust()`` answers 120 and
-        # ``0x1020300``. The big-endian error is the more dangerous of the two --
-        # it scales the value *down*, so it passes a sanity check far more easily
-        # than the inflated little-endian one, which is why the defect went
-        # unnoticed there. See #604.
+        # little-endian ones. Under ``rjust()``, one octet of a four-octet
+        # little-endian 120 (``0x78``) reads as 2,013,265,920, and three octets
+        # of a four-octet big-endian ``0x01020304`` read as ``0x10203``.
+        # ``ljust()`` answers 120 and ``0x1020300``. The big-endian error is the
+        # more dangerous of the two -- it scales the value *down*, so it passes a
+        # sanity check far more easily than the inflated little-endian one. See
+        # #604.
         #
-        # This changes what a truncated field *reports*, which is the point, and
-        # not *whether* a truncated capture parses, which must not change: the
+        # The choice decides what a truncated field *reports*, not *whether* a
+        # truncated capture parses, which must not change: the
         # accommodation itself is deliberate (#431) and the budget above is built
         # around preserving it. An entirely empty buffer pads to all zeros either
         # way, so the end-of-option-list and ``Pad1`` reads the option and list

@@ -225,19 +225,14 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #: that vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never
 #: ``ETHERNET``.
 #:
-#: Both entries were checked two ways: against Wireshark's dissector registrations
-#: (``packet-eth.c`` against ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` against
-#: ``WTAP_ENCAP_TOKEN_RING``), and live with ``editcap -T`` to confirm which PDML root each
-#: encapsulation produces.
-#:
 #: Every entry comes from the same sweep as ``ENCAP_TYPE_TO_LINKTYPE`` above: the root ``<proto
 #: name=...>`` of ``tshark -r out.pcap -c 1 -T pdml`` against the DLT in ``out.pcap``'s own file
 #: header. The trailing comment on each line names the ``editcap -T`` encapsulation that produced
 #: it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one
 #: rewrite. Names are listed even where they already spell their :class:`LinkType` member
 #: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named
-#: member, because upper-casing the name is exactly what answered 101 for a ``rawip6`` capture and
-#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).
+#: member, because upper-casing the name is exactly what would answer 101 for a ``rawip6`` capture
+#: and 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).
 #:
 #: Three classes of name are absent, all three measured rather than assumed:
 #:
@@ -326,7 +321,7 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     """Convert PyShark packet into :obj:`dict`.
 
     Args:
-        packet: Scapy packet.
+        packet: PyShark packet.
 
     Returns:
         A :obj:`dict` mapping of packet data.
@@ -351,10 +346,10 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
-        packet: Scapy packet.
+        packet: PyShark packet.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+        Data for TCP flow tracing.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer.
@@ -380,7 +375,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
         # ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the
         # PDML root layer's *filter* name when the frame layer has no such
         # field. That name cannot do the job on its own: one filter name
-        # serves several DLTs, so keying on it answered ``RAW`` (101) for a
+        # serves several DLTs, so keying on it would answer ``RAW`` (101) for a
         # ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid
         # DLTs, wrong ones, and silent (#843). ``frame.encap_type``
         # distinguishes them; see that table's comment for the measurements.
@@ -391,8 +386,8 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
         # of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is
         # what the ``getattr`` default absorbs here.
         #
-        # Neither path substitutes a DLT on a miss. Since #775 tier 1 a
-        # lookup raises on an unresolvable key instead of minting one, and
+        # Neither path substitutes a DLT on a miss. A lookup raises on an
+        # unresolvable key rather than minting one (#775), and
         # NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,
         # respectively -- each meant to go with its own handler protocol
         # class, so neither is an honest stand-in for "unknown link type".

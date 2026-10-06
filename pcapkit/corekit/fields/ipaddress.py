@@ -97,8 +97,7 @@ def _reject_bool(value: 'object', description: str) -> 'None':
 
         Every caller checks this *before* dispatching on the value's type,
         for the same placement reason :issue:`469` gives: a correct check
-        in the wrong position does not fire, and that placement mistake
-        has already been made twice in this repository's history.
+        in the wrong position does not fire.
 
         Guarding the field classes is necessary but not sufficient, because a
         ``_make_*`` that must know the address family before it can build the
@@ -142,21 +141,17 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
     Notes:
         This is the sanctioned way for a ``_make_*`` method to turn a
         caller-supplied address into an :mod:`ipaddress` object, and it exists
-        because doing it with :func:`ipaddress.ip_address` directly is what
-        :issue:`508` turned out to be: a ``_make_*`` that has to know the
-        address *family* before it can build the schema -- to size an option
-        whose length is the only thing on the wire that carries the family --
-        must convert the argument itself, and that conversion happens
-        **before** the schema, so it launders a :obj:`bool` into an
+        because doing it with :func:`ipaddress.ip_address` directly is the
+        defect :issue:`508` found: a ``_make_*`` that has to know the address
+        *family* before it can build the schema -- to size an option whose
+        length is the only thing on the wire that carries the family -- must
+        convert the argument itself, and that conversion happens **before**
+        the schema, so it launders a :obj:`bool` into an
         :class:`~ipaddress.IPv4Address` that the guard added for :issue:`491`
         in :meth:`_IPAddressField.pre_process` can then only see as a
-        legitimate address. Seven such call sites took ``True`` / ``False``
-        without complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::``
-        where the wire format fixes the family as IPv6 -- and six of them went
-        on to pack those octets. The seventh, :meth:`TCP._make_mptcp_addaddr
-        <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>`, built an
-        equally corrupt schema and is only stopped from packing it by an
-        unrelated defect of its own.
+        legitimate address: ``True`` / ``False`` become ``0.0.0.1`` /
+        ``0.0.0.0`` -- or ``::1`` / ``::`` where the wire format fixes the
+        family as IPv6 -- without complaint.
 
         Routing every one of them through here rather than giving each its own
         :func:`isinstance` check is the whole point: :issue:`469` added

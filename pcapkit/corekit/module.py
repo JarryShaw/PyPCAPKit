@@ -69,8 +69,8 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             extraction of :file:`many_interfaces.pcapng` performs.
             :func:`~importlib.import_module` keeps real per-call work for an
             already-imported module (locks, :class:`~importlib.machinery.ModuleSpec`
-            checks, the ``fromlist`` walk), so each repeat cost ~436 ns where
-            this property now costs ~117 ns.
+            checks, the ``fromlist`` walk), so each repeat costs ~436 ns
+            through it against ~117 ns through this property.
 
             The class is still read off the module with :func:`getattr` on
             every access, and nothing is memoised here. That is the point:
@@ -87,9 +87,8 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             # ``module`` is a ``str`` and the caller never named a class --
             # GitHub issue #832. Reporting that plainly, before ``getattr``
             # ever sees it, is more useful than letting the sentinel reach
-            # ``getattr`` and be reported as an absent attribute named
-            # ``'(null)'``, which is what happened before #833 gave the
-            # sentinel a type no caller-supplied string can collide with.
+            # ``getattr``, which rejects a non-``str`` name with a bare
+            # ``TypeError``.
             raise ProtocolError(f'missing class name for module {self.module!r}: pass an '
                                 'explicit class_ argument')
 
@@ -112,10 +111,10 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
         try:
             return getattr(importlib.import_module(self.module), name)
         except AttributeError as error:
-            # GitHub issue #832: every ``register_*`` helper that builds a
-            # descriptor from a bad class name used to fail with this bare
-            # stdlib :exc:`AttributeError` -- a caller cannot catch that as a
-            # :mod:`pcapkit` error. Re-raised as :exc:`ProtocolError` naming
-            # both the module and the class that turned out missing; the
-            # message text itself is unchanged; only the type is not.
+            # GitHub issue #832: a ``register_*`` helper that builds a
+            # descriptor from a bad class name fails here with a bare stdlib
+            # :exc:`AttributeError`, which a caller cannot catch as a
+            # :mod:`pcapkit` error. Re-raised as :exc:`ProtocolError`, whose
+            # message still names both the module and the missing class; only
+            # the type changes.
             raise ProtocolError(str(error)) from error

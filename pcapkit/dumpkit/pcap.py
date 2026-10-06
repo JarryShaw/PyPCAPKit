@@ -43,7 +43,7 @@ _RECORD_HEADER = {
 #: Truncation mask for those four fields. :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,
 #: the field class that would otherwise pack them, masks to the field width in
 #: :meth:`~pcapkit.corekit.fields.numbers.NumberField.pre_process` rather than
-#: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` was written as
+#: rejecting an out-of-range value -- a ``ts_sec`` of ``2**32 + 5`` is written as
 #: ``5``. :func:`struct.pack` raises instead, so the mask is applied here to keep
 #: the two spellings writing the same octets for every input.
 _UINT32_MASK = 0xFFFF_FFFF
@@ -169,22 +169,22 @@ class PCAPIO(DumperBase):
             this writes them directly, rather than handing them to
             :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor
             packs the record and then **dissects it again** through the whole
-            protocol stack to arrive at bytes it was given. That round trip was
-            about 82% of the cost of a flow-traced extraction -- ``http.pcap``,
+            protocol stack to arrive at bytes it was given. That round trip
+            measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,
             1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms
             without, over a 1030 ms untraced baseline.
 
-            Dropping it is not only cheaper. The re-dissection re-emitted every
-            parse warning the frame had already produced once, and warned about
-            payloads it had no business parsing at all -- writing a 3-octet
-            payload raised ``SchemaWarning: packet length < 0: -3`` from a dumper
-            that only had to copy it.
+            Skipping it is not only cheaper. The re-dissection would re-emit
+            every parse warning the frame had already produced once, and warn
+            about payloads it has no business parsing at all -- writing a
+            3-octet payload would raise ``SchemaWarning: packet length < 0: -3``
+            from a dumper that only has to copy it.
 
         """
         # NOTE: The payload is read before the metadata so that a caller passing a
         # mapping rather than a dissected frame -- which the flow-tracing adapters
-        # of several engines do -- still fails naming ``packet``, as the ``Frame``
-        # construction did. :mod:`pcapkit.foundation.extraction` substitutes a
+        # of several engines do -- still fails naming ``packet``.
+        # :mod:`pcapkit.foundation.extraction` substitutes a
         # dict-capable trace format on the strength of that error.
         packet = value.packet
         frame_info = value.frame_info

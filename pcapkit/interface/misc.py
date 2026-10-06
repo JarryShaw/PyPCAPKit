@@ -149,10 +149,10 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     # NOTE: ``Extractor.engine`` returns the running engine *instance* (see
     # :meth:`Extractor.engine <pcapkit.foundation.extraction.Extractor.engine>`),
-    # never its name -- so the historical ``extraction.engine == 'dpkt'`` compared an
-    # object against a string and was *always* :data:`False`. Every capture then fell
-    # through to the pcapkit adapter, which crashed on DPKT frames and silently
-    # returned no streams on Scapy frames (#399). Dispatch on the engine *type*
+    # never its name -- so ``extraction.engine == 'dpkt'`` would compare an object
+    # against a string and be *always* :data:`False`, and every capture would fall
+    # through to the pcapkit adapter, which crashes on DPKT frames and silently
+    # returns no streams on Scapy frames (#399). Dispatch on the engine *type*
     # instead, and via :func:`isinstance` so that a third-party engine subclassing a
     # built-in still reaches the adapter that matches its frames.
     #

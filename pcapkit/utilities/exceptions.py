@@ -5,7 +5,7 @@
 .. module:: pcapkit.utilities.exceptions
 
 :mod:`pcapkit.utilities.exceptions` refined built-in exceptions.
-Make it possible to show only user error stack infomation [*]_,
+Make it possible to show only user error stack information [*]_,
 when exception raised on user's operation.
 
 .. [*] See |tbtrim|_ project for Pythonic implementation.
@@ -86,12 +86,11 @@ def stacklevel() -> 'int':
         level ``outermost`` the interpreter entry point
 
     The frame to name is the first one *past* the boundary, hence
-    ``boundary + 1``. What makes this a fix rather than a rewrite is that
-    ``boundary`` is measured from the *inside* out: it depends only on how deep the
-    :mod:`pcapkit` frames run, never on how deep the caller's own stack is.
-    Numbering from the outside in, as this function once did, grew with the outer
-    stack, so the frame it named drifted one further out for every extra frame
-    above the boundary -- under :program:`pytest`, dozens of them.
+    ``boundary + 1``. ``boundary`` is measured from the *inside* out: it depends
+    only on how deep the :mod:`pcapkit` frames run, never on how deep the caller's
+    own stack is. Numbering from the outside in would grow with the outer stack,
+    so the frame named would drift one further out for every extra frame above the
+    boundary -- under :program:`pytest`, dozens of them.
 
     Both bounds are enforced, as neither consumer copes with a level outside them:
 
@@ -338,7 +337,7 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     as closely as the default thread hook's own output allows: a loud
     :class:`BaseError` prints the ``"Exception in thread ...:"`` header the
     default hook always prints first -- the one piece of that output
-    :data:`sys.tracebacklimit` never touched, since it only ever bounded the
+    :data:`sys.tracebacklimit` does not touch, since it only bounds the
     traceback -- then its own message tersely, with ``limit=0`` against the real
     traceback so a chained exception still comes out right. Anything else is
     handed to ``_previous_threading_excepthook`` -- or
@@ -707,11 +706,11 @@ class EnumKeyError(BaseError, KeyError):
     circumstances, and raise it from this module rather than as a builtin.
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
-    :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin
-    :exc:`KeyError` on a name miss until :issue:`923`, and six in-library call sites
-    catch it -- :meth:`~pcapkit.const.http.method.Method.get` catches it in
-    order to *mint*, so for that one a failed name lookup is part of a
-    successful call. Every one of them keeps catching, unchanged.
+    six in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s
+    name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
+    catches it in order to build an unregistered member, so for that one a
+    failed name lookup is part of a successful call -- and every one of them
+    keeps catching.
 
     Note:
         Distinct from :exc:`~pcapkit.utilities.exceptions.MissingKeyError`,

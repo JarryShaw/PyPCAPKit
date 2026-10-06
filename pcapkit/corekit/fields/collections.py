@@ -140,24 +140,23 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         if self._item_type is None:
             return file.read(length)
 
-        # NOTE: ``SchemaField`` used to be imported here, inside the method body,
-        # rather than at module level -- there is no cyclic import to dodge by
-        # doing so; :mod:`pcapkit.corekit.fields.misc` does not import this
-        # module. A local ``from ... import`` re-resolves against
-        # :data:`sys.modules` on *every* call, and normally that is a cheap
-        # dict lookup returning the same cached module -- except when something
-        # has popped :mod:`pcapkit.corekit.fields.misc` out of
-        # :data:`sys.modules` since this ``ListField`` was built (the ``#439``
-        # regression tests do exactly that, to get a clean ABC-cache state
-        # between cases). The next call re-executes the module from scratch and
-        # mints a *second*, distinct ``SchemaField`` class, while
-        # ``self._item_type`` -- built long before, from the first one -- is
-        # still an instance of the original. ``isinstance`` against the new
-        # class then reports :data:`False` for an item that plainly is a
-        # ``SchemaField``, ``is_schema`` goes the wrong way, and this method's
-        # other branch bills each item by its *declared* length unconditionally
-        # instead of by what it actually consumed -- which is what let a
-        # malformed TCP SACK option's length check raise
+        # NOTE: ``SchemaField`` is imported at module level rather than inside
+        # this method body -- there is no cyclic import to dodge by doing so;
+        # :mod:`pcapkit.corekit.fields.misc` does not import this module. A local
+        # ``from ... import`` re-resolves against :data:`sys.modules` on *every*
+        # call, and normally that is a cheap dict lookup returning the same
+        # cached module -- except when something has popped
+        # :mod:`pcapkit.corekit.fields.misc` out of :data:`sys.modules` since
+        # this ``ListField`` was built (the ``#439`` regression tests do exactly
+        # that, to get a clean ABC-cache state between cases). The next call
+        # would then re-execute the module from scratch and mint a *second*,
+        # distinct ``SchemaField`` class, while ``self._item_type`` -- built long
+        # before, from the first one -- is still an instance of the original.
+        # ``isinstance`` against the new class would report :data:`False` for an
+        # item that plainly is a ``SchemaField``, ``is_schema`` would go the
+        # wrong way, and this method's other branch would bill each item by its
+        # *declared* length instead of by what it actually consumed -- so a
+        # malformed TCP SACK option's length check could raise
         # :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead
         # of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
         # :meth:`TCP._read_mode_sack
@@ -262,9 +261,8 @@ class OptionField(ListField, Generic[_TS]):
         All of that is true of every ``OptionField`` declared in this package. A
         base schema registered from outside it -- c.f.
         :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**
-        rejected: such a base schema is unpacked in full, exactly as it was before
-        the shortcut existed. It parses correctly and pays the cost of the second
-        parse. Only the shortcut is withheld, so a base schema whose type field
+        rejected: such a base schema is unpacked in full. It parses correctly and
+        pays the cost of the second parse. Only the shortcut is withheld, so a base schema whose type field
         comes second cannot be silently misread.
 
     """
@@ -331,8 +329,8 @@ class OptionField(ListField, Generic[_TS]):
         # established first.
         #
         # Every test is written so that an unexpected base schema selects the full
-        # unpack instead of raising, so this cannot turn a registration that works
-        # today into an import-time failure.
+        # unpack instead of raising, so this cannot turn a working registration
+        # into an import-time failure.
         fields = getattr(self._base_schema, '__fields__', {})
         type_field = fields.get(type_name)
 
@@ -404,7 +402,7 @@ class OptionField(ListField, Generic[_TS]):
         # NOTE: Where it can, this reads the base schema's type field alone rather
         # than the whole base schema. The option schema below re-reads the same
         # octets from the rewound stream, and the base schema's result is used for
-        # nothing but the type code, so unpacking it in full parsed every option
+        # nothing but the type code, so unpacking it in full parses every option
         # twice -- 2274 schema unpacks for 1137 options of
         # ``examples/captures/profile.pcapng``.
         #
@@ -460,13 +458,12 @@ class OptionField(ListField, Generic[_TS]):
             # octets behind it -- an over-long ``ihl``, or a capture cut short by
             # the snapshot length -- exhausts ``file`` early, and the exhausted
             # read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG
-            # registries 0 *is* the end-of-option-list code, so the break above has
-            # always absorbed that case and reported the rest of the area as
-            # padding. Checking progress first turned all of those into errors:
-            # measured on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,
+            # registries 0 *is* the end-of-option-list code, so the break above
+            # absorbs that case and reports the rest of the area as padding.
+            # Checking progress first would turn all of those into errors: measured
+            # on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,
             # 20 octets of options declared with none present, and on a TCP segment
-            # with a data offset of 10 and four option octets, both of which parse
-            # on ``main``.
+            # with a data offset of 10 and four option octets, both of which parse.
             #
             # The registries that spin are the ones where 0 is *not* the
             # end-of-option-list code, so they never reach the break: HOPOPT,

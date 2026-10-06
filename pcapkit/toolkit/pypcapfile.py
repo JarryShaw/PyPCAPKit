@@ -110,13 +110,10 @@ def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
         (it raises :exc:`~ipaddress.AddressValueError` otherwise). This helper
         also accepts a packed 4-byte :obj:`bytes` value directly, so a
         differently-represented `PyPCAPFile`_ fork or release still works.
-        Anything that is not :obj:`bytes` is rejected outright: an earlier
-        revision also accepted a plain :obj:`int`, kept only because this
-        module's own unit test stand-ins modelled the field that way --
-        which meant production had been widened specifically to keep a
-        fixture passing that was hiding this very defect, so the stand-ins
-        were changed to use dotted-decimal :obj:`bytes` instead and the
-        ``int`` case was dropped.
+        Anything that is not :obj:`bytes`, a plain :obj:`int` included, is
+        rejected outright. The unit-test stand-ins model the field as
+        dotted-decimal :obj:`bytes`, as the released library does, rather than
+        this helper being widened to fit a fixture.
 
     Raises:
         ProtocolError: If ``value`` cannot be parsed as an IPv4 address.
