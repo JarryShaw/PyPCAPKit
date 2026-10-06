@@ -170,10 +170,8 @@ WEIGHT = 15
 def http2_frame_bytes(type_: 'int', flags: 'int', sid: 'int', payload: 'bytes') -> 'bytes':
     """Build the wire octets of one HTTP/2 frame.
 
-    The length field counts the *whole* frame, header included -- this library's
-    convention rather than :rfc:`9113#section-4.1`'s, which counts the payload
-    alone. ``HTTP.make`` writes ``payload + 9`` and the readers recover the
-    payload as ``length - 9``.
+    The length field counts the frame payload only, the 9-octet header
+    excluded [:rfc:`9113#section-4.1`].
 
     Duplicated from
     :func:`tests.protocols.application.test_http_unit.http2_frame_bytes` rather
@@ -193,7 +191,7 @@ def http2_frame_bytes(type_: 'int', flags: 'int', sid: 'int', payload: 'bytes') 
 
     """
     return (
-        (len(payload) + 9).to_bytes(3, 'big')
+        len(payload).to_bytes(3, 'big')
         + bytes([type_, flags])
         + sid.to_bytes(4, 'big')
         + payload
@@ -728,9 +726,9 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
 
         """
         self.assertEqual(
-            int.from_bytes(raw[:3], 'big'), len(raw),
-            'the declared length must match the octets actually written -- this '
-            'library counts the whole frame, header included'
+            int.from_bytes(raw[:3], 'big'), len(raw) - 9,
+            'the declared length must match the payload octets actually written '
+            '-- the 9-octet header excluded, per RFC 9113 section 4.1'
         )
         self.assertIn(payload, raw, 'the payload octets must reach the wire')
 
@@ -762,9 +760,9 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
         """``CONTINUATION`` packed its fragment correctly pre-fix as well.
 
         The plain-form control for the construct path, matching
-        :class:`HTTPv2PlainLengthFormControlUnitTests` on the parse path: it
-        declared 29 and wrote 29 throughout, which is what shows the construct
-        machinery was never the problem either.
+        :class:`HTTPv2PlainLengthFormControlUnitTests` on the parse path: its
+        length field matched what it wrote throughout, which is what shows the
+        construct machinery was never the problem either.
 
         """
         raw = self.build(type=0x09, sid=1, frame={'fragment': FRAGMENT})

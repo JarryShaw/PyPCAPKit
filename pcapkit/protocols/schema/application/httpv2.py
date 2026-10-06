@@ -88,7 +88,7 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
 class HTTP(Schema):
     """Header schema for HTTP/2 packet."""
 
-    #: Length.
+    #: Length of the frame payload, the 9-octet header excluded.
     length: 'int' = NumberField(length=3, signed=False)
     #: Frame type.
     type: 'Enum_Frame' = EnumField(length=1, namespace=Enum_Frame)

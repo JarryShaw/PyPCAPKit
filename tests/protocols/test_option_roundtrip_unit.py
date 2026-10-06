@@ -446,15 +446,10 @@ EXPECTED_FAILURES = {
     #   ``item_type=SettingPair`` (the raw schema class) instead of
     #   ``SchemaField(schema=SettingPair)``. Filed as #459, fixed and merged
     #   as #462.
-
-    # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
-    # octets, so the constructed header always says 14 -- while the reader
-    # demands exactly 9. Its siblings all check payload+9 (RST_STREAM 13,
-    # WINDOW_UPDATE 13, PING 17), so 9 looks like the outlier.
-    'httpv2-frame/PRIORITY': Gap(
-        'CONSTRUCT', 'HTTP/2: [Type 2] invalid format',
-        'pcapkit/protocols/application/httpv2.py:572 -- reads length != 9 for a '
-        'frame make() always builds with length 14'),
+    #
+    # PRIORITY needs no entry either: ``make`` declared payload + 9 while the
+    # reader demanded 9, until #1121 moved both to RFC 9113's payload-only
+    # Length.
 
     # -- PCAP-NG --------------------------------------------------------------
 
