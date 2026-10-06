@@ -734,11 +734,9 @@
 <div class="viewcode-block" id="ProtocolMeta">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ProtocolMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Meta class to add dynamic support to :class:`Protocol`.</span>
+<span class="w">    </span><span class="sd">"""Metaclass of :class:`ProtocolBase`, and so of every protocol class.</span>
 
-<span class="sd">    This meta class is used to generate necessary attributes for the</span>
-<span class="sd">    :class:`Protocol` class. It can be useful to reduce unnecessary</span>
-<span class="sd">    registry calls and simplify the customisation process.</span>
+<span class="sd">    It adds no behaviour of its own over :class:`abc.ABCMeta`.</span>
 
 <span class="sd">    """</span></div>
 
@@ -747,11 +745,21 @@
 <div class="viewcode-block" id="ProtocolBase">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ProtocolBase</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ProtocolMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Abstract base class for all protocol family.</span>
+<span class="w">    </span><span class="sd">"""Abstract base class for all protocol families.</span>
+
+<span class="sd">    The built-in protocol families -- the layer base classes</span>
+<span class="sd">    :class:`~pcapkit.protocols.link.link.Link`,</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
+<span class="sd">    :class:`~pcapkit.protocols.transport.transport.Transport` and</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.application.Application`, and the</span>
+<span class="sd">    miscellaneous protocols in :mod:`pcapkit.protocols.misc`, PCAP and PCAP-NG</span>
+<span class="sd">    included -- derive from this class directly. Its metaclass is</span>
+<span class="sd">    :class:`ProtocolMeta`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        This class is for internal use only. For customisation, please use</span>
-<span class="sd">        :class:`Protocol` instead.</span>
+<span class="sd">        This class is for internal use only. For customisation, subclass</span>
+<span class="sd">        :class:`Protocol` to create a new protocol stack, or the matching</span>
+<span class="sd">        layer base class above for a new protocol in an existing layer.</span>
 
 <span class="sd">    """</span>
 
@@ -2305,7 +2313,14 @@
 <div class="viewcode-block" id="Protocol">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Protocol</span><span class="p">(</span><span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Abstract base class for all protocol family."""</span>
+<span class="w">    </span><span class="sd">"""User-facing abstract base class for third-party protocols.</span>
+
+<span class="sd">    Inherit it directly only to create a new protocol stack; a new protocol in</span>
+<span class="sd">    an existing layer subclasses that layer's base class instead, c.f.</span>
+<span class="sd">    :doc:`/ext`. The built-in protocol families do not derive from this class</span>
+<span class="sd">    but from :class:`ProtocolBase`, whose metaclass is :class:`ProtocolMeta`.</span>
+
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Protocol.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__">[docs]</a>
