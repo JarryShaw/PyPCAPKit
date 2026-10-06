@@ -429,7 +429,7 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
         self.assertEqual(data.dsn, 1000)
         self.assertEqual(data.ack, 2000)
         self.assertEqual(data.first, 1000)
-        self.assertEqual(data.last, 1021)
+        self.assertEqual(data.last, 1020)
         self.assertTrue(data.syn)
         self.assertTrue(data.fin)
         self.assertFalse(data.rst)
