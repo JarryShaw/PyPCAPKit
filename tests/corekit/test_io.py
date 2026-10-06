@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from tests._support import bootstrap_core_modules, load_module, purge_modules
+from tests._support import bootstrap_core_modules, load_module, reimport_once_per_class
 
 
 class SeekableReaderTests(unittest.TestCase):
@@ -16,7 +16,8 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertTrue(reader.closed)
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         modules = bootstrap_core_modules()
         self.exceptions = modules['exceptions']
         self.io_module = load_module('pcapkit.corekit.io', 'pcapkit/corekit/io.py')

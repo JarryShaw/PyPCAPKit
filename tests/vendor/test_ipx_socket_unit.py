@@ -29,7 +29,7 @@ import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -181,7 +181,7 @@ class IPXSocketVendorTests(unittest.TestCase):
         const_module: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import pcapkit.const.ipx.socket as const_module
         import pcapkit.vendor.ipx.socket as vendor_module

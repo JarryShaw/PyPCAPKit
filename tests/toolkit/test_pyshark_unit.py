@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -88,7 +88,7 @@ class FakePySharkPacket:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PySharkToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_packet2dict_nests_frame_and_layers(self) -> None:
         from pcapkit.toolkit import pyshark as toolkit

@@ -4,7 +4,7 @@ import importlib.util
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -13,7 +13,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class FoundationRegistryTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_engine_and_dumper_registration_wrappers(self) -> None:
         import pcapkit.foundation.registry as registry_pkg
@@ -179,7 +179,7 @@ class FoundationRegistryTests(unittest.TestCase):
         # path instead of the public wrappers. The subject classes and the read-back
         # are unchanged.
         #
-        # NOTE: imported inside the test because ``setUp`` purges ``pcapkit`` from
+        # NOTE: imported inside the test because ``setUp`` swaps in a fresh ``pcapkit`` in
         # ``sys.modules``, which is why every sibling test imports locally too.
         # ``Extractor`` is needed by name here so the registries can be read back.
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine

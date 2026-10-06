@@ -32,7 +32,7 @@ import sys
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -43,7 +43,7 @@ class ProtocolCodeOptInTests(unittest.TestCase):
     """The opt-in gate itself: ``register_protocol_code`` runs iff ``code`` is given."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_code_omitted_leaves_next_layer_dispatch_unregistered(self) -> None:
         """No ``code=`` -> :func:`register_protocol_code` is never called."""
@@ -146,7 +146,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_bare_ethertype_member_infers_link(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
@@ -338,7 +338,7 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_end_to_end_class_statement_registers_the_real_table(self) -> None:
         from pcapkit.const.reg.transtype import TransType

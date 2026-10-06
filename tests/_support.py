@@ -929,6 +929,74 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     _reset_abc_caches()
 
 
+#: Class attribute :func:`reimport_once_per_class` keeps a class's own import in.
+_CLASS_IMPORT = '_pcapkit_class_import'
+
+
+def reimport_once_per_class(test: 'unittest.TestCase', restore: bool = False) -> None:
+    """Give ``test``'s class one fresh :mod:`pcapkit` import, shared by its tests.
+
+    GitHub issue #1065. Calling :func:`purge_modules` from ``setUp`` re-imports
+    the package before every test -- about 0.67s and 329 modules each, which was
+    some 85% of the suite's serial time. Call this from ``setUp`` instead. The
+    first test of the class purges, and the class keeps what that test imports.
+    Every later test of the class has that same import put back in
+    :data:`sys.modules`. So a class gets a private import, which its own tests
+    may mutate, and the import is dropped when the class finishes. Nothing is
+    imported here: a class that only loads modules by path, or that never
+    imports :mod:`pcapkit` at all, keeps an empty region, as it did before.
+
+    A purge in ``setUpClass`` would not do this under :program:`pytest`.
+    :func:`tests.conftest.restore_module_table` swaps the region back to its
+    session-wide pin before every test, so such a class would run on the shared
+    import that every other class mutates as well. That is exactly the
+    cross-class leakage a per-test purge used to hide.
+
+    Under plain :mod:`unittest`, the import is also left in place after the class
+    finishes, as a per-test purge left one. ``util/run_unittest_leg.py`` relies
+    on that to catch a module still holding an earlier import (GitHub issue
+    #981).
+
+    Args:
+        test: The test being set up.
+        restore: Also put back, once the class finishes, whatever the region held
+            before its first test. This is the per-class form of a ``setUp`` that
+            snapshots, purges and restores around each test.
+
+    """
+    cls = type(test)
+    held = cls.__dict__.get(_CLASS_IMPORT)
+    if held is not None:
+        restore_modules(held, ISOLATED_PREFIXES)
+    else:
+        if restore:
+            cls.addClassCleanup(restore_modules, snapshot_modules(ISOLATED_PREFIXES), ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        held = {}
+        setattr(cls, _CLASS_IMPORT, held)
+        cls.addClassCleanup(delattr, cls, _CLASS_IMPORT)
+    # Registered first, so it runs after the test's own cleanups.
+    test.addCleanup(_keep_lazy_imports, held)
+
+
+def _keep_lazy_imports(held: 'dict[str, types.ModuleType]') -> None:
+    """Add to ``held`` the real :mod:`pcapkit` modules the test imported.
+
+    This is how the class's import is built up. Without it, the conftest restore
+    drops a submodule imported during the test, and the next test of the class
+    imports it again as a second module object. The parent package still holds the first one as an attribute, and
+    :func:`unittest.mock.patch` resolves through that attribute before Python
+    3.12 -- so a patch landed on a module the code under test no longer used.
+    Only modules loaded from a file are kept; a stand-in a test bound, and its
+    own cleanup has not removed, is not.
+
+    """
+    for name, module in snapshot_modules(ISOLATED_PREFIXES).items():
+        spec = getattr(module, '__spec__', None)
+        if name not in held and spec is not None and spec.origin and getattr(module, '__name__', None) == name:
+            held[name] = module
+
+
 def _close_quietly(target: object) -> None:
     """Call ``target.close()``, swallowing any :exc:`Exception` it raises.
 

@@ -54,7 +54,7 @@ from __future__ import annotations
 
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 #: CSV fixture reproducing IANA's own rows for the #862 pair plus one
 #: unrelated, non-overlapping range, byte-for-byte (captured from a live fetch
@@ -75,7 +75,7 @@ class EtherType862ConstResolutionTests(unittest.TestCase):
     """Against the generated, committed :class:`~pcapkit.const.reg.ethertype.EtherType`."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_value_0x0101_resolves_to_old_xerox_name(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
@@ -119,7 +119,7 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
     """Against the generator's own ``process()``, root cause rather than symptom."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _process_fixture() -> 'tuple[list[str], list[str]]':
@@ -202,7 +202,7 @@ class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_nested_ranges_are_ordered_narrowest_first(self) -> None:
         """Regression pin against two specific wrong implementations of

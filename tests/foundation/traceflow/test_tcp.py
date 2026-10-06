@@ -6,7 +6,7 @@ import pathlib
 import tempfile
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -15,7 +15,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPTraceFlowTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, index: int, src: str = '192.0.2.1', dst: str = '198.51.100.2',
                 srcport: int = 12345, dstport: int = 443, syn: bool = False,

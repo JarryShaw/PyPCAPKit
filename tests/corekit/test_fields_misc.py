@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 #: Every address-typed branch of every address-typed
 #: :class:`~pcapkit.corekit.fields.misc.SwitchField` in the schema tree, as
@@ -137,7 +137,7 @@ class SchemaFieldDefaultTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
@@ -187,7 +187,7 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _resolve(module: 'str', name: 'str', attr: 'str') -> 'tuple[object, object]':
@@ -418,7 +418,7 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_protocol_name_resolves_whatever_its_case(self) -> None:
         from pcapkit.corekit.fields.misc import PayloadField

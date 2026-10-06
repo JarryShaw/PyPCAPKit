@@ -40,7 +40,7 @@ import struct
 import tempfile
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -101,7 +101,7 @@ class L2TPVersionTests(unittest.TestCase):
     """:class:`L2TPv2` parses version 2 and refuses everything else."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def parse(self, data: bytes):
         """Parse ``data`` as :class:`L2TPv2` directly, with no dispatch."""

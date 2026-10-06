@@ -73,7 +73,7 @@ import io
 import re
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 
 def _reconstruct_fixture_csv() -> 'str':
@@ -156,7 +156,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
     """The direct repro and fix for GitHub issue #896."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_get_exact_case_resolves_the_standardised_member(self) -> None:
         """The unaffected half: the registered, all-uppercase casing every
@@ -217,6 +217,10 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
         :meth:`~pcapkit.const.ftp.command.Command.get` keeps folding case --
         pinned here so a future edit to the sibling ``Method`` fix cannot
         silently carry the case-sensitive change over to ``Command`` too.
+        It is also the only pin of GitHub issue #582 (``Command.get('abor')``
+        must resolve), which
+        :class:`tests.const.test_const_enum_no_mint.BespokeGetUnchangedTests`
+        relies on rather than repeating.
         """
         from pcapkit.const.ftp.command import Command
 

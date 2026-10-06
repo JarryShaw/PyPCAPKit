@@ -5,7 +5,7 @@ from ipaddress import ip_address
 import types
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -39,7 +39,7 @@ def port(value: int) -> types.SimpleNamespace:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make_ipv4(self, *, df: bool = False):
         from pcapkit.const.reg.transtype import TransType

@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING
 
 import aenum
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -89,7 +89,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
     """TCP, UDP and SCTP's port fields."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _fields(self) -> 'list[tuple[str, Any, Any]]':
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
@@ -305,7 +305,7 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
     """PCAP-NG's option-type field."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_an_undeclared_option_code_resolves_without_growing_the_registry(self) -> None:
         """An interface-block option code no ``if`` or ``opt`` row covers.
@@ -445,7 +445,7 @@ class UnregisteredMemberRoundTripTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _resolved(self) -> 'Any':
         """An unassigned TCP port, resolved through the real field."""

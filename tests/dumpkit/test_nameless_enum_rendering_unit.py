@@ -7,7 +7,7 @@ import pkgutil
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     import aenum
@@ -114,7 +114,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_scalar_return_renders_a_nameless_member_as_its_value(self) -> None:
         """The plain ``return`` at the end of the enumeration branch.

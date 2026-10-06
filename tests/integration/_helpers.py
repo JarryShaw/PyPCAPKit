@@ -64,7 +64,8 @@ class EndToEndTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         """Drop the imported library so the class starts from a clean state.
 
-        The surrounding tiers purge in :meth:`setUp`, i.e. once per test. A
+        The surrounding tiers used to purge in :meth:`setUp`, i.e. once per
+        test, and since GitHub issue #1065 mostly purge once per class too. A
         fresh :mod:`pcapkit` import measures at roughly 0.7s on this machine,
         which across this tier would cost more than the extractions themselves,
         so the purge happens once per class instead. That is equivalent here:

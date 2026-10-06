@@ -5,7 +5,7 @@ from ipaddress import ip_address
 import struct
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -72,7 +72,7 @@ class NextHeaderOffsetTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_bare_ipv6_header_answers_with_its_own_field(self) -> None:
         from pcapkit.foundation.reassembly.ipv6 import _next_header_offset
@@ -127,7 +127,7 @@ class RectifyHeaderTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def rectify(self, header: bytes) -> bytes:
         from pcapkit.const.reg.transtype import TransType
@@ -183,7 +183,7 @@ class IPv6ReassemblyHeaderTests(unittest.TestCase):
     """The rewrite reaching the datagram, through the reassembly machinery."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, header: bytes):
         from pcapkit.const.reg.transtype import TransType

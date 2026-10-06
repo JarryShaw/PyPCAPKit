@@ -20,7 +20,7 @@ import struct
 import types
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -138,7 +138,7 @@ def make_packet(layer, *, timestamp: int = 1511106545, timestamp_us: int = 47171
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PyPCAPFileToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     ##########################################################################
     # Auxiliary functions.
@@ -388,7 +388,7 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
     """Tests that need :mod:`pcapfile`'s own decoders to be meaningful."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_ipv4_header_reconstruction_is_byte_exact(self) -> None:
         from pcapfile.protocols.network.ip import IP

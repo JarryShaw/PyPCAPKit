@@ -8,7 +8,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import purge_modules, time_limit
+from tests._support import reimport_once_per_class, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,7 +17,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SchemaUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make_schema_classes(self):
         from pcapkit.corekit.fields.collections import ListField

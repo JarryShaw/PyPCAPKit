@@ -4,7 +4,7 @@ import importlib.util
 from ipaddress import ip_address
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -13,7 +13,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPReassemblyTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
                 header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
@@ -125,7 +125,7 @@ class IPOverlapConflictTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
                 header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
@@ -361,7 +361,7 @@ class DeferredAnalysisTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _reassemble(self, *, calls: 'list'):
         """One complete, unfragmented datagram, and the analyser's call log."""

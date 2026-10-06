@@ -34,7 +34,7 @@ import importlib.util
 import unittest
 from unittest import mock
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -87,7 +87,7 @@ def mac(raw) -> str:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class NewEngineParityTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def extract(self, engine: str, capture: str, **kwargs):
         """Extract a capture, asserting that the requested engine really ran.

@@ -3,12 +3,13 @@ from __future__ import annotations
 import copy
 import unittest
 
-from tests._support import bootstrap_core_modules, purge_modules
+from tests._support import bootstrap_core_modules, reimport_once_per_class
 
 
 class MultiDictTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         modules = bootstrap_core_modules()
         self.multidict = modules['multidict']
         self.exceptions = modules['exceptions']

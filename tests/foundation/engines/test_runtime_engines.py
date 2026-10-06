@@ -7,7 +7,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper', 'dpkt', 'scapy', 'pyshark')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -29,7 +29,7 @@ class OutputSink:
 
 
 def make_extractor(**overrides):
-    # imported lazily: setUp purges ``pcapkit`` from sys.modules, so the class
+    # imported lazily: setUp re-imports ``pcapkit`` for each test class, so the class
     # has to be fetched from the freshly imported package rather than bound at
     # module import time
     from pcapkit.corekit.context import ContextRegistry
@@ -80,7 +80,7 @@ class FakeInfo:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPEngineTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_pcap_run_writes_global_header_for_file_and_stream_modes(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
@@ -196,7 +196,7 @@ class PCAPEngineTests(unittest.TestCase):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ThirdPartyEngineTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_dpkt_run_magic_selection_get_protocol_and_read_frame(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

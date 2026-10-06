@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 from tests.foundation.engines.test_runtime_engines import FakeInfo, make_extractor
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
@@ -15,7 +15,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: Link layer type 1, i.e. ``LinkType.ETHERNET``. Spelled as a literal because the
 #: captures below are assembled without importing :mod:`pcapkit`, which
-#: :meth:`setUp` purges from :data:`sys.modules` before every test.
+#: :meth:`setUp` re-imports for each class.
 LINKTYPE_ETHERNET = 1
 #: Link layer type 101, i.e. ``LinkType.RAW``. Only used as a *second* interface,
 #: to tell which interface a Simple Packet Block was decoded against.
@@ -103,7 +103,7 @@ class PCAPNGWriter:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPNGEngineTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _info(self, block_type, **kwargs) -> FakeInfo:
         return FakeInfo(type=block_type, **kwargs)
@@ -339,7 +339,7 @@ class PCAPNGSectionRuleTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _extract(self, capture: PCAPNGWriter):
         from pcapkit.interface import extract

@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -12,7 +12,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class LinkProtocolRuntimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _extract(self, sample: str):
         from pcapkit.interface import extract

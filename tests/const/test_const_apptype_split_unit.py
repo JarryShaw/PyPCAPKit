@@ -32,6 +32,29 @@ import unittest
 
 __all__ = ['AppTypeSplitTests']
 
+#: Stride of :func:`_dunder_sample`: about 48 evenly spaced members of each
+#: registry, plus the ones it always keeps.
+_DUNDER_SAMPLE_SIZE = 48
+
+
+def _dunder_sample(registry: 'type') -> 'list':
+    """The members of ``registry`` the byte-identity sweep formats, in row order.
+
+    GitHub issue #1062. Sweeping every member ran 37,173 subtests, and per-test
+    coverage contexts found only **4** distinct arc sets among them: ``repr``
+    and ``str``, each with and without an ``(aliases: ...)`` suffix -- the
+    registry, the port and the service name never change which code runs. So
+    the sample keeps every member that carries an alias (the suffix branch),
+    the first and last row, and an evenly spaced stride through the rest, which
+    covers all four sets in every registry and is the same list on every run.
+
+    """
+    members = list(registry)
+    step = max(1, len(members) // _DUNDER_SAMPLE_SIZE)
+    keep = set(range(0, len(members), step)) | {len(members) - 1}
+    return [member for index, member in enumerate(members)
+            if index in keep or member.aliases]
+
 
 class AppTypeSplitTests(unittest.TestCase):
     """The shape of the split registry."""
@@ -1185,13 +1208,16 @@ class AppTypeSplitTests(unittest.TestCase):
         """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` moved
         from ``%`` formatting to f-strings, and ``__new__``'s format sets every
         real member's underlying :class:`~aenum.StrEnum` value -- a far larger
-        blast radius than an error path, so this is checked member by member
-        rather than spot-checked.
+        blast radius than an error path. This was once checked member by
+        member; it is now a deterministic sample, because one f-string formats
+        every member and the sweep only ever reached four distinct code paths
+        (see :func:`_dunder_sample`).
 
-        Swept over all 12,391 real members (TCP 6147, UDP 6143, SCTP 91,
-        DCCP 10, matching the population PR #783 measured), each
-        compared against what the pre-#798 ``%``-style formula would have
-        produced for that same member's own ``svc``/``port``/``proto``. This
+        The population is still counted over all 12,391 real members (TCP 6147,
+        UDP 6143, SCTP 91, DCCP 10, matching the population PR #783 measured),
+        but only :func:`_dunder_sample` is formatted, each member compared
+        against what the pre-#798 ``%``-style formula would have produced for
+        that same member's own ``svc``/``port``/``proto``. This
         is an invariance check -- it is true either side of #798's fix by
         construction, since both formulas render the same text for the same
         inputs -- rather than a regression test that fails on stock ``main``.
@@ -1224,12 +1250,14 @@ class AppTypeSplitTests(unittest.TestCase):
         registries = {'TCP': TCP, 'UDP': UDP, 'SCTP': SCTP, 'DCCP': DCCP}
         expected_counts = {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10}
         total = 0
+        aliased = 0  # the suffix branch of both dunders; only TCP and UDP have any
 
         for name, cls in registries.items():
-            count = 0
-            for member in cls:
-                count += 1
-                total += 1
+            count = len(list(cls))
+            total += count
+            sample = _dunder_sample(cls)
+            aliased += sum(1 for member in sample if member.aliases)
+            for member in sample:
                 svc, port, proto = member.svc, member.port, member.proto
 
                 with self.subTest(registry=name, member=member.name, check='value'):
@@ -1252,6 +1280,7 @@ class AppTypeSplitTests(unittest.TestCase):
             self.assertEqual(count, expected_counts[name], f'{name} population changed')
 
         self.assertEqual(total, 12391)
+        self.assertGreater(aliased, 0, 'the sample lost the aliased branch')
 
     def test_every_member_renders_its_own_registrys_transport_protocol(self) -> None:
         """GitHub issue #806, member by member over all 12,391.

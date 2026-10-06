@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -15,7 +15,7 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 @unittest.skipUnless(HAS_RUNTIME and HAS_SCAPY, 'runtime or scapy dependencies not installed')
 class GeneratedPcapRuntimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_scapy_generated_pcap_decodes_ipv4_udp_and_ipv6_tcp(self) -> None:
         from scapy.all import Ether, IP, IPv6, Raw, TCP, UDP, wrpcap

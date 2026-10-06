@@ -4,7 +4,7 @@ import struct
 import threading
 import unittest
 
-from tests._support import purge_modules, time_limit
+from tests._support import reimport_once_per_class, time_limit
 
 
 class FieldBaseUnpackBoundsTests(unittest.TestCase):
@@ -42,7 +42,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields import field as field_module
         from pcapkit.corekit.fields.strings import BytesField
@@ -225,7 +225,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields import field as field_module
         from pcapkit.corekit.fields.strings import BytesField
@@ -235,6 +235,14 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         self.BytesField = BytesField
         self.FieldValueError = FieldValueError
         self.ceiling = field_module._MAX_ZERO_PAD_LENGTH
+
+        # The ledger is cumulative per context, so whatever ran earlier in this
+        # process -- a sibling class, another module -- has already earned
+        # allowance against it. Start every test from the unset default, as a
+        # freshly imported module would, rather than relying on a re-import per
+        # test to do it (GitHub issue #1065).
+        token = field_module._zero_pad_ledger.set(None)
+        self.addCleanup(field_module._zero_pad_ledger.reset, token)
 
         # NOTE: deliberately *not* read off the module. The behavioural tests
         # below have to fail on their assertions when the budget is absent, not
@@ -596,7 +604,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.numbers import (Int32Field, UInt16Field, UInt32Field,
                                                     UInt64Field)
@@ -877,7 +885,7 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.numbers import NumberField
         from pcapkit.corekit.fields.strings import BytesField

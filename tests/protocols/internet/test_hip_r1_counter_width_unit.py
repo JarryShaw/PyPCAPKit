@@ -60,7 +60,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -98,7 +98,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
     """``R1_COUNTER``'s counter width, against :rfc:`7401#section-5.2.3`."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_r1_counter_record_is_the_rfc_total_at_both_codes(self) -> None:
         """Both codes pack the 16 octets ``Length = 12`` requires.

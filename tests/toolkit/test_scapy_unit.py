@@ -7,7 +7,7 @@ import importlib
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import purge_modules, reimport_once_per_class
 
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
@@ -17,7 +17,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME and HAS_SCAPY, 'runtime dependencies not installed')
 class ScapyToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _ether_kwargs(self) -> dict[str, str]:
         return {
@@ -103,6 +103,12 @@ class ScapyToolkitTests(unittest.TestCase):
         return IP(bytes(packet))
 
     def test_import_without_scapy_sets_none_and_warns(self) -> None:
+        # Put a real import back afterwards, for the tests that share this
+        # class's import (GitHub issue #1065). Cleanups run last-in first-out:
+        # purge the scapy-less copy, then re-import, which also rebinds the
+        # ``pcapkit.toolkit.scapy`` attribute a ``from`` import reads first.
+        self.addCleanup(importlib.import_module, 'pcapkit.toolkit.scapy')
+        self.addCleanup(purge_modules, ['pcapkit.toolkit.scapy'])
         purge_modules(['pcapkit.toolkit.scapy'])
         real_import = builtins.__import__
 

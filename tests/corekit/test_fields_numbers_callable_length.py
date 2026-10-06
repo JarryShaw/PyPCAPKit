@@ -22,7 +22,7 @@ import importlib.util
 import struct
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -51,7 +51,7 @@ class CallableLengthTests(unittest.TestCase):
     """The reported defect, and the widths either side of it."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_reported_case_a_callable_resolving_to_eight_packs(self) -> None:
         """``NumberField(length=lambda pkt: 8)`` could not pack at all.
@@ -229,7 +229,7 @@ class SubclassCallableLengthTests(unittest.TestCase):
     """The same field classes as they are actually used in the schemas."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_an_enum_field_with_a_callable_length_packs(self) -> None:
         """:class:`~pcapkit.corekit.fields.numbers.EnumField` leaves ``__template__`` unset.

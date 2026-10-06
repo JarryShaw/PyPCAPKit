@@ -34,7 +34,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -53,7 +53,7 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.field import FieldBase
 

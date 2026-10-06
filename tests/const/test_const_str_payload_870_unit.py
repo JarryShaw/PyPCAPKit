@@ -60,14 +60,14 @@ from __future__ import annotations
 
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 
 class MethodStrPayload870RegressionTests(unittest.TestCase):
     """The exact repro from GitHub issue #870, and the full sweep of Method's own 40 members."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_reported_case(self) -> None:
         """``Method.GET``, byte for byte, as the issue measured it.
@@ -141,7 +141,7 @@ class StrValuedRegistryPayloadTests(unittest.TestCase):
     SWEPT_REGISTRIES = ('Command', 'FEATCode', 'Method')
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_every_member_of_every_swept_registry_matches_its_value(self) -> None:
         from pcapkit.const.ftp.command import Command, FEATCode

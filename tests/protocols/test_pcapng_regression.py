@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import warnings
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -34,7 +34,7 @@ DHCP_EPB0_TAIL = bytes.fromhex('000037040103062aff00000000000000')
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PcapngRegressionTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_dhcp_pcapng_extracts_successfully(self) -> None:
         from pcapkit.interface import extract
@@ -209,7 +209,7 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _extract(self, path: str) -> 'object':
         from pcapkit.interface import extract

@@ -6,7 +6,7 @@ import logging
 import os
 import unittest
 
-from tests._support import load_module, purge_modules
+from tests._support import load_module, purge_modules, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -34,7 +34,8 @@ class LoggingEnvironmentTests(unittest.TestCase):
     """The environment-variable flags, which are read at import time."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         self._saved = {key: os.environ.get(key) for key in ('PCAPKIT_DEVMODE', 'PCAPKIT_VERBOSE', 'PCAPKIT_SPHINX')}
 
     def tearDown(self) -> None:
@@ -88,7 +89,8 @@ class LoggingImportTimeTests(unittest.TestCase):
     """Importing a library must not configure the application's logging."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         self._saved = os.environ.get('PCAPKIT_DEVMODE')
         os.environ.pop('PCAPKIT_DEVMODE', None)
         pristine()
@@ -181,7 +183,8 @@ class LoggerHierarchyTests(unittest.TestCase):
     """Per-module loggers, so a consumer can address one subtree at a time."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         pristine()
 
     def tearDown(self) -> None:
@@ -237,7 +240,8 @@ class LoggingConfigureTests(unittest.TestCase):
     """The public configuration API, at runtime rather than at import."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         pristine()
 
     def tearDown(self) -> None:
@@ -391,7 +395,8 @@ class RegistryLogLevelTests(unittest.TestCase):
     """Registration bookkeeping is the library's own business, so ``debug``."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         pristine()
 
     def tearDown(self) -> None:
@@ -452,7 +457,8 @@ class ExtractorLoggingTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         pristine()
 
     def tearDown(self) -> None:

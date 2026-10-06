@@ -5,7 +5,7 @@ import sys
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -58,7 +58,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make_schema_classes(self):
         """Outer/Inner pair mirroring ``CGAParametersOption``/``CGAParameter``.
@@ -247,7 +247,7 @@ class CGAParametersRegressionTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_cga_parameters_option_now_parses_end_to_end(self) -> None:
         from pcapkit.const.mh.option import Option as Enum_Option

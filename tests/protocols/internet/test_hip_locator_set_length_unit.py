@@ -76,7 +76,7 @@ import importlib.util
 import unittest
 import warnings
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -140,7 +140,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     """``LOCATOR_SET``'s ``Length`` unit and padding source, over seven shapes."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make(self, locators: 'list[dict]') -> 'tuple':
         """Build one ``LOCATOR_SET`` schema and pack it.

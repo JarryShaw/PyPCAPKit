@@ -7,7 +7,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import isolate_modules, load_module, purge_modules, sample_path
+from tests._support import isolate_modules, load_module, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -220,7 +220,7 @@ class EngineConstantTests(unittest.TestCase):
     }
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_every_shipped_engine_has_a_constant(self) -> None:
         # The guard against the next engine landing without one. ``'default'`` is the

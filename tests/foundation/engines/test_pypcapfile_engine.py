@@ -21,7 +21,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -91,7 +91,7 @@ class FakeDecoded:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PyPCAPFileEngineTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def make_extractor(self, **overrides):
         sink = OutputSink()

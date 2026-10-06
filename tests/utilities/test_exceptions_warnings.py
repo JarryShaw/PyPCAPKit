@@ -5,12 +5,13 @@ import unittest
 import warnings as pywarnings
 from unittest import mock
 
-from tests._support import bootstrap_core_modules, purge_modules
+from tests._support import bootstrap_core_modules, reimport_once_per_class
 
 
 class ExceptionsWarningsTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         modules = bootstrap_core_modules()
         self.exceptions = modules['exceptions']
         self.warnings = modules['warnings']
