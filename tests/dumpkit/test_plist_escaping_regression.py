@@ -23,6 +23,7 @@ generated rather than committed, so a unit-tier module may not read it (see
 from __future__ import annotations
 
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -109,17 +110,17 @@ class PlistKeyEscapingTests(unittest.TestCase):
 
         ``json``, ``tree`` and ``text`` accept ``&``, ``<`` and ``>`` as
         themselves, so escaping them there would corrupt every report in those
-        formats. The ``json`` report of this fixture is separately unparseable --
-        ``dictdumper`` writes a key as ``'"{item}": '`` and this one's repr holds
-        a quote -- and that is deliberately still true here: it is
-        JarryShaw/DictDumper#125's half, not this one's.
+        formats. ``json`` does escape the key's ``"`` and ``\\`` as a JSON
+        string must (GitHub issue #1152), so it is checked against the key's JSON
+        spelling rather than its raw text.
 
         """
         for fmt in ('json', 'tree', 'text'):
             with self.subTest(format=fmt):
                 text = self.report('test.pcapng', fmt).read_text(encoding='utf-8')
 
-                self.assertIn(RAW_BYTES_KEY, text)
+                expected = json.dumps(RAW_BYTES_KEY) if fmt == 'json' else RAW_BYTES_KEY
+                self.assertIn(expected, text)
                 self.assertNotIn('&amp;', text)
                 self.assertNotIn('&lt;', text)
 

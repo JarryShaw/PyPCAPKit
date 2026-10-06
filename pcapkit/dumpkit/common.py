@@ -15,11 +15,13 @@ import datetime
 import decimal
 import enum
 import ipaddress
+import json
 import xml.sax.saxutils
 from typing import TYPE_CHECKING
 
 import aenum
 import dictdumper.dumper
+import dictdumper.json
 import dictdumper.plist
 
 from pcapkit.corekit.infoclass import Info
@@ -244,6 +246,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # use it directly -- so :class:`~dictdumper.plist.PLIST` is the only
     # concrete writer this applies to.
     escape_strings = issubclass(output, dictdumper.plist.PLIST)
+    # NOTE: :class:`~dictdumper.json.JSON` escapes every string *value* it
+    # writes, but interpolates a mapping key into ``'"{item}": '`` raw, so a key
+    # carrying a ``"`` or a ``\`` closes the JSON string early (GitHub issue
+    # #1152). The defect is :mod:`dictdumper`'s, so it is worked around here.
+    escape_json_keys = issubclass(output, dictdumper.json.JSON)
+    escape_keys = escape_strings or escape_json_keys
 
     def escape_key(key: 'Any') -> 'Any':
         """Escape a mapping key on its way to the writer.
@@ -257,33 +265,39 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
         Note:
             :meth:`~dictdumper.plist.PLIST._append_dict` writes a key straight
-            into ``'<key>{item}</key>'`` and calls
-            :meth:`~dictdumper.dumper.Dumper._encode_value` on the *value* two
-            lines later, never on the key -- so :meth:`DictDumper.object_hook`
-            is handed every value the writer will interpolate but no key at all,
-            and cannot escape one on the way out the way it does a value. Each
-            branch below that builds a mapping therefore escapes its own keys
-            through here.
+            into ``'<key>{item}</key>'``, and
+            :meth:`~dictdumper.json.JSON._append_object` into ``'"{item}": '``;
+            both call :meth:`~dictdumper.dumper.Dumper._encode_value` on the
+            *value* two lines later, never on the key -- so
+            :meth:`DictDumper.object_hook` is handed every value the writer will
+            interpolate but no key at all, and cannot escape one on the way out
+            the way it does a value. Each branch below that builds a mapping
+            therefore escapes its own keys through here.
 
             A non-:class:`str` key is rendered with :func:`format`, which is the
             very conversion ``'{item}'.format(item=key)`` already applies to it,
-            so the ``<key>`` text is unchanged apart from the escaping.
+            so the key text is unchanged apart from the escaping.
             Rendering such a key rather than passing it over is deliberate:
             :file:`examples/captures/test.pcapng` keys the TLS key log entries
             of its decryption secrets block by a raw :class:`bytes` client
             random (:meth:`TLSKeyLog.post_process
             <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`), and
-            the ``bytes`` repr of that one carries ``&``, ``<`` *and* ``>``.
-            Unescaped, that makes the fixture's ``plist`` report unparseable:
-            :func:`xml.etree.ElementTree.parse` stops at the key's ``&``. The
-            same key also breaks the fixture's ``json`` report, but on the quotes
-            in that repr rather than on these three characters, so that half is
-            :mod:`dictdumper`'s to fix and is left alone.
+            the ``bytes`` repr of that one carries ``&``, ``<``, ``>``, ``"``
+            *and* ``\\``. Unescaped, that makes the fixture's ``plist`` report
+            unparseable at the key's ``&``, and its ``json`` report at the
+            key's ``"``.
+
+            For ``json`` the key is escaped by :func:`json.dumps` with the
+            surrounding quotes stripped, since the writer supplies its own. Like
+            :meth:`~dictdumper.json.JSON._append_string`, that spells every
+            non-ASCII character as a ``\\uXXXX`` escape.
 
         """
-        if not escape_strings:
-            return key
-        return xml.sax.saxutils.escape(format(key, ''))
+        if escape_strings:
+            return xml.sax.saxutils.escape(format(key, ''))
+        if escape_json_keys:
+            return json.dumps(format(key, ''))[1:-1]
+        return key
 
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
@@ -332,7 +346,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 # NOTE: rebuilt only where the keys need escaping, so every other
                 # output is still handed the caller's own mapping rather than a
                 # copy of it.
-                if escape_strings:
+                if escape_keys:
                     result = {escape_key(key): val for key, val in o.items()}
                 else:
                     result = o
