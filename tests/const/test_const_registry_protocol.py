@@ -260,7 +260,7 @@ class TCPFlagsConversionTests(unittest.TestCase):
 
         Resolves ``EnumRegistry`` freshly from the just-reimported
         ``pcapkit.corekit.enum`` rather than the module-scope import above --
-        ``setUp`` re-imported ``pcapkit`` for this class, so ``Flags`` now
+        ``setUp`` gave this class its own ``pcapkit`` import, so ``Flags`` now
         inherits a *new* ``EnumRegistry`` class object, and identity against
         the stale outer one would fail for a reason that says nothing about
         the product (see ``ProtocolIsInheritedTests.setUpClass`` above, which
@@ -1403,14 +1403,12 @@ class NoDefaultSentinelTests(unittest.TestCase):
         """``-1`` and ``-1.0`` are honoured as defaults by
         :meth:`~pcapkit.corekit.enum.EnumRegistry.get` itself.
 
-        This used to probe :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
-        and its docstring conceded that it no longer discriminated #857: no
-        shipped registry's domain reaches ``-1``, so since #864 the name
+        A throwaway registry holding ``-1`` is what discriminates #857. No
+        shipped registry's domain reaches ``-1``, so on one of those the name
         lookup's :exc:`KeyError` propagates whether ``-1`` is read as a default
-        or as the old marker. A throwaway registry holding ``-1`` tells the two
-        apart again: it resolves to that member now, while the pre-#857
-        ``default == -1`` check read the caller's ``-1`` (and ``-1.0``, which
-        compares equal) as *no default* and raised (GitHub issue #1062).
+        or as the old marker. Here it resolves to that member, while the
+        pre-#857 ``default == -1`` check read the caller's ``-1`` (and ``-1.0``,
+        which compares equal) as *no default* and raised.
         """
         from aenum import IntEnum
 
@@ -1433,12 +1431,11 @@ class NoDefaultSentinelTests(unittest.TestCase):
         Neither is a registered value of any shipped registry, whose domains
         all start at ``0``, so ``default`` does not resolve: there is no
         ``cls(default)`` fallback left to attempt, and the name lookup's own
-        :exc:`KeyError` propagates, as with no default at all. Pinned from the
-        pre-#864 tree, which raised :exc:`ValueError` from ``cls(-1)``. This
-        does *not* discriminate #857, which raised the same :exc:`KeyError`;
+        :exc:`KeyError` propagates, as with no default at all; the pre-#864
+        tree raised :exc:`ValueError` from ``cls(-1)`` instead. This does *not*
+        discriminate #857, which raised the same :exc:`KeyError`;
         :meth:`test_missing_name_with_default_negative_one_is_now_a_real_default`
-        does. Merged from separate ``-1`` and ``-1.0`` tests (GitHub issue
-        #1062).
+        does.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 

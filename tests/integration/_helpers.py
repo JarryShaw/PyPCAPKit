@@ -64,30 +64,25 @@ class EndToEndTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         """Drop the imported library so the class starts from a clean state.
 
-        The surrounding tiers used to purge in :meth:`setUp`, i.e. once per
-        test, and since GitHub issue #1065 mostly purge once per class too. A
-        fresh :mod:`pcapkit` import measures at roughly 0.7s on this machine,
-        which across this tier would cost more than the extractions themselves,
-        so the purge happens once per class instead. That is equivalent here:
-        every test below imports :mod:`pcapkit` inside the test method, so none
-        of them depends on what an earlier test left in :data:`sys.modules`.
+        Under plain :mod:`unittest` this gives each class one fresh
+        :mod:`pcapkit` import, which its tests then share. A fresh import
+        measures at roughly 0.7s, which per test would cost this tier more than
+        the extractions themselves. That is equivalent here: every test below
+        imports :mod:`pcapkit` inside the test method, so none of them depends on
+        what an earlier test left in :data:`sys.modules`.
 
-        The re-import on the last line is what keeps it once per class, and it
-        has to happen here rather than being left to the first test.
-        :func:`tests.conftest.restore_module_table` snapshots the module table
-        immediately after this method and restores to that snapshot after every
-        test, so purging without re-importing makes the snapshot an *empty*
-        table -- and then all 92 of this tier's test methods pay the 0.7s each,
-        rather than one per class across its 28 classes. Measured with a
-        throwaway subclass of this class whose second and third test methods
-        report whether ``pcapkit`` is still in :data:`sys.modules`: ``True`` on
-        ``mainline`` and ``True`` with this line, ``False`` without it. The other
-        ``setUpClass`` methods in the suite are unaffected because each already
-        loads something immediately after its own purge, which populates the
-        table before the snapshot is taken.
+        Under :program:`pytest` neither the purge nor the re-import reaches the
+        tests. :func:`tests.conftest.restore_module_table` restores the region
+        before every test to the warm snapshot
+        :func:`tests.conftest._pin_module_snapshot` took at session start, so
+        each test runs on that session-wide import instead. Measured with a
+        throwaway subclass whose tests report the ``id`` of
+        ``sys.modules['pcapkit']``: under :program:`pytest` every test saw the
+        object from before this method ran, under :mod:`unittest` every test saw
+        the one imported here.
 
-        The re-import is guarded because it is an optimisation and nothing more,
-        so it must not be able to turn a test failure into a class error. Most
+        The re-import is guarded because nothing depends on it, so it must not be
+        able to turn a test failure into a class error. Most
         subclasses carry ``@skipUnless(HAS_RUNTIME, ...)`` and never reach this
         method without the runtime dependencies installed, but
         ``PlistRoundTripTests`` and ``PcapngUnescapedKeyTests`` do not, so on a

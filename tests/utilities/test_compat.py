@@ -135,8 +135,8 @@ WARM_BEFORE_FAKING = ('aenum', 'collections.abc', 'contextlib', 'decimal', 'enum
 #: :mod:`pcapkit.protocols.misc.pcap.frame`, :mod:`pcapkit.protocols.misc.pcapng`,
 #: :mod:`pcapkit.protocols.link.ethernet` and :mod:`pcapkit.protocols.link.arp`.
 #: None of them is reachable from the branches faked here, and if one became
-#: reachable it would still be harmless: the region is purged and restored around
-#: every test, so the next import recomputes the value from source. A third-party
+#: reachable it would still be harmless: the region is restored around every
+#: test, so the next import recomputes the value from source. A third-party
 #: module is never purged, which is exactly why its cache is permanent and why the
 #: assertion is aimed there.
 OWN_MODULE_PREFIX = 'pcapkit'
@@ -172,7 +172,8 @@ class CompatTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-        # Registered before anything else, and deliberately first: cleanups run
+        # Registered deliberately early -- only ``reimport_once_per_class``'s own
+        # cleanup, which has to run last, comes before it. Cleanups run
         # last-in-first-out, so this one runs *after* the module-table restore
         # that ``load_module`` arranges below and after the test body however it
         # ended -- including when it ended by raising. It is a sweep of a handful
