@@ -191,11 +191,11 @@ class DispatchReachabilityTests(unittest.TestCase):
             self.assertTrue(any(name.endswith('Unreachable') for name in names),
                             f'audit missed the injected gap; reported {names}')
         finally:
-            # ``__subclasses__`` holds a weak reference, but the class is only
-            # collected once nothing in this frame names it -- and, a class
-            # being a reference cycle of its own, once the cycle collector has
-            # run. Until then the next audit in the same import still sees it
-            # (GitHub issue #1065: no longer one import per test).
+            # ``__subclasses__`` holds a weak reference, but a class is a
+            # reference cycle of its own, so it is only collected once nothing
+            # in this frame names it *and* the cycle collector has run. Until
+            # then the next audit on the class's shared import still sees it
+            # (GitHub issue #1065).
             del Unreachable
             gc.collect()
 

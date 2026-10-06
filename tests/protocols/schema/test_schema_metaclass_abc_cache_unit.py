@@ -52,10 +52,12 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
 
     def setUp(self) -> None:
         # Fresh :mod:`pcapkit` classes *and* a freshly reset
-        # :mod:`collections.abc` cache -- :func:`purge_modules` does both, and
-        # both matter: a stale positive cache entry left over from an earlier
-        # test in the same process would make the very first assertion below
-        # true for the wrong reason.
+        # :mod:`collections.abc` cache, for every test. Both matter: a stale
+        # positive cache entry left over from an earlier test in the same
+        # process would make the very first assertion below true for the wrong
+        # reason. :func:`reimport_once_per_class` resets the cache each time;
+        # the classes are fresh each time only because ``tearDown`` purges them
+        # before :func:`reimport_once_per_class` can keep them for the next test.
         reimport_once_per_class(self)
 
     def tearDown(self) -> None:

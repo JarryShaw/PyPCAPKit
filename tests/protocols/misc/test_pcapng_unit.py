@@ -3910,8 +3910,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
 
     #: The result of :meth:`_sweep`, computed by the first test that asks for it
     #: and shared by the other three: one extraction per octet of the sample is
-    #: the cost of this class, and every test reads the same result (GitHub
-    #: issue #1062).
+    #: this class's whole cost (GitHub issue #1062).
     _swept = None  # type: tuple[dict[int, int], dict[int, BaseException]] | None
 
     @classmethod

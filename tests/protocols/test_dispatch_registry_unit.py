@@ -94,9 +94,9 @@ class DispatchRegistryTests(unittest.TestCase):
     """One dispatch probe per entry across all seven ``__proto__`` registries."""
 
     #: The generator module, loaded once for the whole class. Loading it
-    #: imports :mod:`pcapkit`, so it must happen after :meth:`setUp` has purged
-    #: the previous test's copy -- hence a class attribute filled in
-    #: :meth:`setUpClass` rather than a module-level import.
+    #: imports :mod:`pcapkit`, so it must happen after the purge in
+    #: :meth:`setUpClass` -- hence a class attribute filled in there rather
+    #: than a module-level import.
     dispatch = None  # type: Any
 
     @classmethod
