@@ -27,9 +27,9 @@ class IPv6_Ext(Protocol):
     #: The extension header this instance stands in for -- the numeric code
     #: the caller dispatched on, resolved to its
     #: :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member.
-    #: :data:`None` when ``alias`` named no such member (:meth:`read
-    #: <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read>`
-    #: sets it so on a lookup miss, and the class property at
+    #: :data:`None` when ``alias`` was not given or named no such member
+    #: (:meth:`read <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read>`
+    #: sets it so in both cases, and the class property at
     #: :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`
     #: is typed to match).
     protocol: 'Optional[ExtensionHeader]'

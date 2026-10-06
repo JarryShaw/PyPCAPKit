@@ -49,7 +49,7 @@ class ToSField(Data):
     """Data model for IPv4 ToS fields.
 
     Important:
-        Due to the preserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use :meth:`from_dict`
         to create an instance of this data model.
 
     """
@@ -68,7 +68,7 @@ class ToSField(Data):
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'ToSField':
         self = super().__new__(cls, *args, **kwargs)
 
-        # NOTE: We cannot define ``del`` due to preserved keyword conflict.
+        # NOTE: We cannot define ``del`` due to reserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
         cls.__annotations__['del'] = ToSDelay
 
@@ -118,6 +118,7 @@ class IPv4(Protocol):
     dst: 'IPv4Address'
 
     if TYPE_CHECKING:
+        #: Options, present only when the header carries any.
         options: 'OrderedMultiDict[OptionNumber, Option]'
 
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -137,7 +138,7 @@ class OptionType(Data):
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'OptionType':
         self = super().__new__(cls, *args, **kwargs)
 
-        # NOTE: We cannot define ``class`` due to preserved keyword conflict.
+        # NOTE: We cannot define ``class`` due to reserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
         cls.__annotations__['class'] = OptionClass
 
@@ -302,7 +303,7 @@ class TROption(Option):
     """Data model for IPv4 Traceroute (``TR``) option.
 
     Important:
-        Due to the preserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use :meth:`from_dict`
         to create an instance of this data model.
 
     """
@@ -313,12 +314,13 @@ class TROption(Option):
     outbound: 'int'
     #: Return hop count.
     #return: 'int'
+    #: Originator IP address.
     originator: 'IPv4Address'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'TROption':
         self = super().__new__(cls, *args, **kwargs)
 
-        # NOTE: We cannot define ``return`` due to preserved keyword conflict.
+        # NOTE: We cannot define ``return`` due to reserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
         cls.__annotations__['return'] = int
 

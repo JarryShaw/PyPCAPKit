@@ -785,7 +785,7 @@ class WireGuardKeyLog(DSBSecrets):
 
 @info_final
 class ZigBeeNWKKey(DSBSecrets):
-    """Data model for ZigBEE NWK Key and ZigBee PANID secrets data."""
+    """Data model for ZigBee NWK Key and ZigBee PANID secrets data."""
 
     #: AES-128 NKW key.
     nwk_key: 'bytes'
@@ -798,7 +798,7 @@ class ZigBeeNWKKey(DSBSecrets):
 
 @info_final
 class ZigBeeAPSKey(DSBSecrets):
-    """Data model for ZigBEE APS Key secrets data."""
+    """Data model for ZigBee APS Key secrets data."""
 
     #: AES-128 APS key.
     aps_key: 'bytes'

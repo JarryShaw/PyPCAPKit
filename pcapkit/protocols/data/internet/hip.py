@@ -225,9 +225,9 @@ class SolutionParameter(Parameter):
     #: Reserved octet -- "zero when sent, ignored when received"
     #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
     #: Carried verbatim rather than interpreted, so that re-serialising a parsed
-    #: parameter reproduces the octet it arrived with. It used to be read as a
-    #: ``PUZZLE`` ``Lifetime``, which only :rfc:`7401#section-5.2.4` defines, and
-    #: the conformant ``0x00`` then could not be re-serialised at all. See :issue:`654`.
+    #: parameter reproduces the octet it arrived with. It is not a ``Lifetime``:
+    #: only ``PUZZLE`` has one (:rfc:`7401#section-5.2.4`), and reading it as one
+    #: would leave the conformant ``0x00`` impossible to re-serialise. See :issue:`654`.
     reserved: 'int'
     #: Solution data.
     opaque: 'bytes'

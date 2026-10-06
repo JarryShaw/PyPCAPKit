@@ -258,7 +258,7 @@ class GoawayFrame(HTTP):
 
 @info_final
 class WindowUpdateFrame(HTTP):
-    """Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame."""
+    """Data model for HTTP/2 ``WINDOW_UPDATE`` frame."""
 
     #: Flags.
     flags: 'Literal[None]'
