@@ -1330,11 +1330,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         qs_unknown = schema.QuickStartRequestOption(
             type=Option.Quick_Start,
             len=6,
-            flags={'func': QSFunction.Quick_Start_Request, 'rate': 1},
+            flags={'func': QSFunction.get(1), 'rate': 1},
             ttl=7,
             nonce={'nonce': 3},
         )
-        object.__setattr__(qs_unknown, 'func', QSFunction.get(1))
         assert_bad(proto._read_opt_qs, qs_unknown)
         assert_bad(proto._read_opt_rpl, schema.RPLOption(
             type=Option.RPL_Option_0x63, len=3,

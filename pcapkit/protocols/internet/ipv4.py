@@ -1178,7 +1178,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         if schema.length != 8:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
-        func = schema.func
+        func = Enum_QSFunction.get(schema.flags['func'])
         if func == Enum_QSFunction.Quick_Start_Request:
             schema_req = cast('Schema_QuickStartRequestOption', schema)
 

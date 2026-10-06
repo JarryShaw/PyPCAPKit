@@ -1859,11 +1859,10 @@ class IPv4UnitTests(unittest.TestCase):
         qs_unknown = QuickStartRequestOption(
             type=OptionNumber.QS,
             length=8,
-            flags={'func': QSFunction.Quick_Start_Request, 'rate': 1},
+            flags={'func': QSFunction.get(1), 'rate': 1},
             ttl=7,
             nonce={'nonce': 3},
         )
-        object.__setattr__(qs_unknown, 'func', QSFunction.get(1))
         assert_bad(proto._read_opt_qs, qs_unknown)
 
     def test_ipv4_schema_helpers_and_post_process_branches(self) -> None:
