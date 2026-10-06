@@ -1,0 +1,109 @@
+name: Project Status
+
+# Keeps the *Status* field of the project board (users/JarryShaw/projects/2) in
+# line with each item's state labels. The board's built-in workflows add items and
+# set Done on close and merge, but no built-in workflow observes a label change, so
+# every other transition used to be made by hand. The mapping lives in
+# util/project_status.py:status_for and is documented under "Milestones and the
+# Project Board" in docs/source/contributing/conventions/process.rst; the tests in
+# tests/project/test_project_status.py hold the two to each other.
+#
+# SECURITY. `pull_request_target` is used for one reason only: a pull request from
+# a fork gets no secrets under `pull_request`, and PROJECT_TOKEN is a secret. The
+# price is that this workflow runs with that secret *on events a stranger can
+# cause*, so it must never execute anything the pull request supplies -- the
+# classic "pwn request". Concretely, the job below:
+#
+#   * never checks out the repository, at any ref, and has no `uses:` step at all;
+#   * fetches util/project_status.py through the API at `github.sha`, which under
+#     `pull_request_target` is the tip of the *base* branch, never the PR head --
+#     so editing the script in a pull request changes nothing about its own run;
+#   * takes nothing from the event payload except the item number, passed through
+#     `env:` rather than interpolated into the script, and re-reads everything else
+#     (labels, state) from the API.
+#
+# tests/project/test_project_status.py asserts all three over this file -- no
+# checkout or `uses:`, no `${{ }}` inside a `run:` script, and no event-payload
+# reference outside `env:` other than the item number -- so a later edit that
+# breaks one fails a test rather than a security review.
+#
+# `workflow_dispatch` is the other way in, and it is not a fork boundary: it runs
+# the workflow file *of the branch selected* with PROJECT_TOKEN in scope. Only
+# someone with write access can dispatch, and write access can already change any
+# workflow, so this trusts collaborators rather than forks -- the same trust the
+# rest of the repository's secrets rely on.
+#
+# Event runs and reconciles are in different concurrency groups, so they can
+# overlap. A reconcile reads an item, an event run then sets a fresher Status,
+# and the reconcile writes its older answer over it. The window is the length of
+# one reconcile, and the damage is self-repairing: the item's next event, or the
+# next nightly run, re-reads the labels and sets it right. Serializing the two
+# would mean one global group, which lets a reconcile hold every event run.
+#
+# PROJECT_TOKEN is a classic PAT with `project` and `repo` scopes, because
+# GITHUB_TOKEN cannot write a user-owned project. Without it every run skips with a
+# `::notice::` instead of failing, so the workflow can land before the secret does.
+
+on:
+  issues:
+    types: [opened, reopened, labeled, unlabeled, closed]
+  pull_request_target:
+    types: [opened, reopened, labeled, unlabeled, closed, ready_for_review]
+  schedule:
+    # Nightly backstop for events this workflow missed -- a run cancelled by the
+    # concurrency group below before it re-read the labels, a GitHub outage, or a
+    # label changed while the secret was absent. 00:37 UTC sits well clear of the
+    # Saturday jobs (CodeQL and GitHub Pages at 02:00, Python Compatibility at
+    # 04:00, Lint at 06:00, Vendor and Conda Update at 10:00), and off the hour
+    # mark that GitHub's scheduler queues most heavily.
+    - cron: '37 0 * * *'
+  workflow_dispatch:
+
+# The job authenticates with PROJECT_TOKEN throughout and never uses GITHUB_TOKEN,
+# so it is granted nothing.
+permissions: {}
+
+# Event runs are keyed on the item number, so a label swap -- which fires an
+# `unlabeled` and a `labeled` within the same second -- serializes on one item,
+# and the later run supersedes the earlier. That is safe to cancel because each
+# run re-reads the labels rather than trusting its payload: the last one to run
+# sees the final state. Issues and pull requests share one number space, so the
+# key cannot collide across the two event types.
+#
+# Scheduled and manual reconciles share their own group and are never cancelled
+# mid-run; a newer one only displaces one still pending, which would have done the
+# same work.
+concurrency:
+  group: project-status-${{ (github.event.issue.number || github.event.pull_request.number) && format('item-{0}', github.event.issue.number || github.event.pull_request.number) || 'reconcile' }}
+  cancel-in-progress: ${{ github.event_name == 'issues' || github.event_name == 'pull_request_target' }}
+
+jobs:
+  status:
+    name: Sync Status
+    runs-on: ubuntu-latest
+    # A single item is a handful of API calls; a full reconcile is one search
+    # page per 50 items plus one mutation per item that changed.
+    timeout-minutes: 10
+
+    steps:
+      - name: Sync the project board
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ITEM: ${{ github.event.issue.number || github.event.pull_request.number }}
+          SCRIPT_REF: ${{ github.sha }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo '::notice title=Project Status::The PROJECT_TOKEN secret is not set, so the project board was not updated.'
+            exit 0
+          fi
+
+          # The base branch's copy of the script -- see the security note above.
+          gh api -H 'Accept: application/vnd.github.raw' \
+            "repos/${GITHUB_REPOSITORY}/contents/util/project_status.py?ref=${SCRIPT_REF}" \
+            > "${RUNNER_TEMP}/project_status.py"
+
+          if [ -n "$ITEM" ]; then
+            python3 "${RUNNER_TEMP}/project_status.py" --item "$ITEM"
+          else
+            python3 "${RUNNER_TEMP}/project_status.py" --reconcile
+          fi
