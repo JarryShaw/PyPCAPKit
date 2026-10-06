@@ -98,7 +98,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Whole seconds one case may take. Generous next to a working case, which takes
 #: low single-digit milliseconds; the point of the deadline is the cases that
 #: never finish at all.
-CASE_TIMEOUT = 10
+CASE_TIMEOUT = 30
 
 
 class Gap(NamedTuple):

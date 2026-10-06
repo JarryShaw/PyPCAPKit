@@ -171,6 +171,8 @@ import sys
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import scale_timeout
+
 if TYPE_CHECKING:
     from typing import Optional
 
@@ -2407,7 +2409,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
         env.update(overrides)
         return subprocess.run(  # type: ignore[return-value]
             ['bash', '-c', self.script],  # type: ignore[attr-defined]
-            env=env, capture_output=True, text=True, timeout=10,
+            env=env, capture_output=True, text=True, timeout=scale_timeout(10),
         )
 
     #: ``(scenario name, env overrides, expected title substring, expected exit code)``.
@@ -2592,7 +2594,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
                 )
                 result = subprocess.run(
                     [interpreter, '-'], input=source, capture_output=True,
-                    text=True, timeout=10,
+                    text=True, timeout=scale_timeout(10),
                 )
                 self.assertNotIn(
                     'IndentationError', result.stderr,

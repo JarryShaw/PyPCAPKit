@@ -112,7 +112,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
                     # is entitled to complain about; the chain is what is under
                     # test.
                     warnings.simplefilter('ignore')
-                    with time_limit(5):
+                    with time_limit():
                         proto = TCP(raw, len(raw))
 
                 self.assertEqual(str(proto.protochain), expected)

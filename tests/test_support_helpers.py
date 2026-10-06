@@ -54,6 +54,7 @@ extractors, so it reads no sample capture and needs no engine installed.
 from __future__ import annotations
 
 import importlib
+import os
 import pathlib
 import signal
 import sys
@@ -61,11 +62,12 @@ import threading
 import time
 import types
 import unittest
+from unittest import mock
 
-from tests._support import (bootstrap_core_modules, close_extractor, ensure_package,
-                            install_fake_protocol_module, isolate_modules, purge_modules,
-                            restore_modules, restore_modules_after, snapshot_modules,
-                            time_limit)
+from tests._support import (MAX_TIMEOUT, TIMEOUT_SCALE_ENV, bootstrap_core_modules, close_extractor,
+                            ensure_package, install_fake_protocol_module, isolate_modules,
+                            purge_modules, restore_modules, restore_modules_after, scale_timeout,
+                            snapshot_modules, time_limit)
 
 
 class Closeable:
@@ -227,6 +229,13 @@ class TimeLimitTests(unittest.TestCase):
         self.addCleanup(signal.signal, signal.SIGALRM, previous)
         self.addCleanup(signal.alarm, 0)
 
+        # A scale set for the whole run (#1058) would stretch every deadline
+        # below, so each test starts unscaled and sets its own when it wants one.
+        environ = mock.patch.dict(os.environ)
+        environ.start()
+        self.addCleanup(environ.stop)
+        os.environ.pop(TIMEOUT_SCALE_ENV, None)
+
     def test_the_deadline_fires_on_a_body_that_overruns(self) -> None:
         """The point of the helper, pinned so the rest cannot be met by disarming."""
         with self.assertRaises(TimeoutError):
@@ -281,6 +290,92 @@ class TimeLimitTests(unittest.TestCase):
             pass
 
         self.assertEqual(signal.alarm(0), 0)
+
+    def test_the_default_deadline_is_thirty_seconds(self) -> None:
+        """Five seconds expired on a loaded CI runner over a millisecond body (#1058)."""
+        with time_limit():
+            # Reading the pending alarm cancels it; the helper's own cancel on the
+            # way out is then a no-op.
+            armed = signal.alarm(0)
+
+        self.assertIn(armed, (29, 30))
+
+    def test_the_environment_scales_the_armed_deadline(self) -> None:
+        """:data:`TIMEOUT_SCALE_ENV` stretches what is armed, not just what is reported."""
+        os.environ[TIMEOUT_SCALE_ENV] = '3'
+        with time_limit(2):
+            armed = signal.alarm(0)
+
+        self.assertIn(armed, (5, 6))
+
+    def test_the_timeout_message_names_the_scaled_deadline(self) -> None:
+        """The seconds reported are the seconds that were actually allowed."""
+        os.environ[TIMEOUT_SCALE_ENV] = '0.5'
+        with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+            with time_limit(2):
+                while True:
+                    pass
+
+    def test_a_scaled_deadline_rounds_up_to_whole_seconds(self) -> None:
+        """An alarm counts whole seconds, and a deadline of zero is no deadline."""
+        for raw, seconds, expected in (('', 5, 5), ('1', 30, 30), ('1.5', 5, 8),
+                                       ('0.01', 5, 1), (' 2 ', 10, 20)):
+            with self.subTest(scale=raw, seconds=seconds):
+                os.environ[TIMEOUT_SCALE_ENV] = raw
+                self.assertEqual(scale_timeout(seconds), expected)
+
+    def test_a_malformed_scale_is_refused_before_anything_is_armed(self) -> None:
+        """Ignoring it would undo a scale CI asked for; zero would disarm the guard."""
+        own_handler = signal.getsignal(signal.SIGALRM)
+        for raw in ('0', '-1', 'nan', 'inf', 'fast'):
+            with self.subTest(scale=raw):
+                os.environ[TIMEOUT_SCALE_ENV] = raw
+                with self.assertRaisesRegex(ValueError, TIMEOUT_SCALE_ENV):
+                    with time_limit(5):
+                        self.fail('the body ran under a malformed scale')
+
+                self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+                self.assertEqual(signal.alarm(0), 0)
+
+    def test_an_oversized_scale_is_refused_and_leaks_no_handler(self) -> None:
+        """A scale past a day is refused, not handed to ``signal.alarm``.
+
+        ``1e9`` once reached :func:`signal.alarm` as an int past its C ``int``,
+        which raised :exc:`OverflowError` after the helper's handler was installed
+        and before anything would restore it, so the handler leaked into every test
+        that ran afterwards. ``1e308`` overflows the float product itself.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        self.assertEqual(scale_timeout(MAX_TIMEOUT), MAX_TIMEOUT)
+        for raw in ('1e9', '1e308', '2881'):
+            with self.subTest(scale=raw):
+                os.environ[TIMEOUT_SCALE_ENV] = raw
+                with self.assertRaisesRegex(ValueError, 'ceiling'):
+                    with time_limit(30):
+                        self.fail('the body ran under an oversized scale')
+
+                self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+                self.assertEqual(signal.alarm(0), 0)
+
+    def test_a_failure_while_arming_restores_the_handler_and_the_enclosing_alarm(self) -> None:
+        """Whatever ``signal.alarm`` raises, the handler and an outer deadline survive."""
+        own_handler = signal.getsignal(signal.SIGALRM)
+        real_alarm = signal.alarm
+
+        def alarm(seconds: int) -> int:
+            if seconds == 7:
+                raise OverflowError('arming failed')
+            return real_alarm(seconds)
+
+        real_alarm(30)
+        with mock.patch.object(signal, 'alarm', side_effect=alarm):
+            with self.assertRaises(OverflowError):
+                with time_limit(7):
+                    self.fail('the body ran without a deadline')
+
+        self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+        self.assertIn(real_alarm(0), range(28, 31))
 
 
 class SnapshotRestoreTests(unittest.TestCase):
