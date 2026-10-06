@@ -366,13 +366,14 @@ EXPECTED_FAILURES = {
     # cycle closes and the entry is deleted rather than kept as documentation of
     # a defect that is no longer there.
 
-    # A parameter whose own packed length is not what the header arithmetic
-    # can represent, at one copy or two. The generator's HIP_COPIES note
-    # records it as the one HIP case that fails at either setting.
-    'hip-parameter/HOST_ID': Gap(
-        'CONSTRUCT', 'HIPv2: invalid format',
-        'pcapkit/protocols/internet/hip.py:698 -- HOST_ID packs to 14 octets '
-        'with len=8, so it is not even 4-aligned'),
+    # ``HOST_ID`` and ``HIP_TRANSFORM`` were the last two entries here, and
+    # neither was helped by a second copy -- each failed at two copies as well as
+    # at one. #1128 built ``HIP_TRANSFORM`` at the HIPv1 its constructor demands,
+    # through the generator's ``HIP_VERSION``, instead of the version 2 the table
+    # had been using; #1118 made ``HOST_ID``'s DI-Type/DI-Length word the single
+    # 16-bit one of :rfc:`7401` Section 5.2.9, where the schema had declared four
+    # octets for it. Every HIP case round-trips now, at either setting of
+    # ``HIP_COPIES``, so no entries are needed here any more.
 
     # -- HTTP/2 ---------------------------------------------------------------
 

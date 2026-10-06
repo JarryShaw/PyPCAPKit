@@ -942,7 +942,7 @@ class HostIDParameter(Parameter, code=Enum_Parameter.HOST_ID):
     hi_len: 'int' = UInt16Field()
     #: Domain ID type and length.
     di_data: 'DIData' = BitField(
-        length=4,
+        length=2,
         namespace={
             'type': (0, 4),
             'len': (4, 12),
