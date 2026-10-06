@@ -850,9 +850,19 @@ disagree the label wins and Status is corrected.</p>
 <em>Auto-add to project</em> for this repository, <em>Item closed</em> and <em>Pull request merged</em>
 both setting <em>Done</em>, and <em>Auto-add sub-issues</em>. <strong>Item added to project stays off</strong>:
 it stamps a default Status on every new item, overwriting the label-derived one. The
-remaining transitions follow a label change, which no workflow observes, so they are
-applied by hand alongside the label. The workflows can only be configured in the web
-interface.</p>
+built-in workflows can only be configured in the web interface.</p>
+<p>The remaining transitions follow a label change, which no built-in workflow observes,
+so <code class="file docutils literal notranslate"><span class="pre">.github/workflows/project-status.yml</span></code> applies them: on every label change,
+open, reopen and close of an issue or pull request, and on a draft pull request being
+marked ready for review (<code class="docutils literal notranslate"><span class="pre">ready_for_review</span></code>), it re-reads the item’s labels and
+sets Status by the table above, adding the item to the board first if it is missing.
+The mapping is <code class="docutils literal notranslate"><span class="pre">status_for</span></code> in <code class="file docutils literal notranslate"><span class="pre">util/project_status.py</span></code>, and a test holds it
+to the table. A <strong>nightly run is the backstop</strong> for missed events, reconciling every
+open item and everything closed in the last seven days. The workflow writes with the
+<code class="docutils literal notranslate"><span class="pre">PROJECT_TOKEN</span></code> repository secret, a classic token with <code class="docutils literal notranslate"><span class="pre">project</span></code> and <code class="docutils literal notranslate"><span class="pre">repo</span></code>
+scopes, because <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> cannot write a user-owned project; <strong>without the
+secret every run skips with a notice</strong> rather than failing, and Status falls back to
+being set by hand.</p>
 <p>The board has seven views: <em>All items</em>; <em>Board</em>, the open items in one column per
 Status; <em>Release 1.5</em>, the open milestone; <em>Needs decision</em> and <em>Blocked</em>, each the
 open items in that state; <em>Open pull requests</em>; and <em>History</em>, everything <em>Done</em>.

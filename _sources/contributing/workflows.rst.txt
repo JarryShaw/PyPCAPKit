@@ -3,7 +3,7 @@ GitHub Actions Workflows
 
 .. important::
 
-   The eight workflows under :file:`.github/workflows/` trigger each other, and
+   The nine workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
    to start. This page is the repository-wide graph. The release *pipeline*
@@ -79,6 +79,13 @@ At a Glance
      - --
      - **Vendor Update**
      - --
+   * - Project Status
+     - :file:`project-status.yml`
+     - --
+     - --
+     - daily 00:37
+     - --
+     - ``issues``, ``pull_request_target``, ``workflow_dispatch``
 
 .. note::
 
@@ -104,7 +111,9 @@ than starting a new one.
        PUSH["push: main"]
        PR["pull_request: main"]
        TAG["push: tags v*"]
-       SCHED["schedule (Saturday)"]
+       SCHED["schedule (Saturday, or daily)"]
+       ISSUES["issues"]
+       PRT["pull_request_target"]
        DISPATCH["workflow_dispatch"]
 
        CQ["CodeQL<br/>codeql-analysis.yml"]
@@ -115,6 +124,7 @@ than starting a new one.
        CU["Conda Update<br/>cron-conda.yml"]
        GP["GitHub Pages<br/>deploy-pages.yml"]
        CR["Create Release<br/>create-release.yml"]
+       PS["Project Status<br/>project-status.yml"]
 
        PUSH --> CQ
        PR --> CQ
@@ -139,6 +149,11 @@ than starting a new one.
 
        TAG --> CR
 
+       ISSUES --> PS
+       PRT --> PS
+       SCHED -->|daily 00:37| PS
+       DISPATCH --> PS
+
        UT ==>|workflow_run: completed| VU
        UT ==>|workflow_run: completed| CU
        UT ==>|workflow_run: completed| GP
@@ -150,7 +165,7 @@ than starting a new one.
        CR -.->|uses: gate-only| UT
 
        classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PR,TAG,SCHED,DISPATCH trig
+       class PUSH,PR,TAG,SCHED,DISPATCH,ISSUES,PRT trig
 
 The double relationship between **Unit Tests** and its four dependants is the
 part that reading a single file cannot show, and it is deliberate rather than
@@ -295,6 +310,19 @@ This is a distinct mechanism from the ``PCAPKIT_TAG_EXISTS`` skip
 skipping because the tag a *previous* run already created still exists): this
 one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude ``success``.
+
+``pull_request_target``
+-----------------------
+
+**Project Status** is the only workflow on ``pull_request_target``, and the only one
+that runs with a secret on an event a fork can cause: it writes the project board's
+*Status* field with ``PROJECT_TOKEN``, which a fork's ``pull_request`` run would not
+receive. It therefore never checks out the repository and has no ``uses:`` step. It
+fetches :file:`util/project_status.py` through the API at ``github.sha`` -- the base
+branch's tip under that event -- and takes only the item number from the payload.
+``tests/project/test_project_status.py`` asserts this over the file. Without the
+secret it skips with a ``::notice::``. The Status mapping it applies is documented in
+:doc:`conventions/process`.
 
 Required Status Checks
 ----------------------
