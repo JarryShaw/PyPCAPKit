@@ -238,11 +238,15 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             addr: MAC address.
 
         Returns:
-            MAC address.
+            MAC address packed as 6 octets.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
+                *hex* encoded MAC address.
 
         """
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-            return _addr.replace(b':', b'').replace(b'-', b'')
+            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
         raise ProtocolError(f'invalid MAC address: {addr!r}')
