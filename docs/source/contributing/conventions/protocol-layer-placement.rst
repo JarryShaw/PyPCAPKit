@@ -194,8 +194,8 @@ they share (``__data__``, ``__layer__``, ``__schema__``, ``layer``) plus
 ``register`` and ``_read_protos`` -- but all three also exist on ``ProtocolBase``, so
 the strict difference ``Link`` minus ``Application`` minus ``ProtocolBase`` is **empty**
 and every one of them still resolves on ``OSPF``. What changes is which registry it
-resolves *to*: ``OSPF.__proto__`` is now ``ProtocolBase.__proto__`` rather than
-``Link.__proto__``, so OSPF no longer sees Link's EtherType entries. That is inert --
+resolves *to*: ``OSPF.__proto__`` is ``ProtocolBase.__proto__`` rather than
+``Link.__proto__``, so OSPF does not see Link's EtherType entries. That is inert --
 nothing reaches OSPF by EtherType, and a ``-1`` lookup misses in both registries alike
 and resolves to :class:`~pcapkit.protocols.misc.raw.Raw`, inserting nothing on the miss.
 ``RARP`` keeps ``Link``'s through ``ARP``.

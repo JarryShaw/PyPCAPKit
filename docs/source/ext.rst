@@ -648,9 +648,9 @@ The following code snippet shows how to create a new dumper class:
    # dumper registries, and use it to dump the extracted network packets.
    class MyDumper(Dumper, fmt='pcap', ext='.pcap'):
 
-       # NOTE: This property is to define the file format of the dumper.
-       # It is expected to be a string, which is used as the file extension
-       # of the output file.
+       # NOTE: This property names the file format of the dumper, as a string.
+       # It is not the file extension -- that is the ``ext`` given at class
+       # definition above.
        @property
        def kind(self) -> 'str':
            return 'pcap'
@@ -856,8 +856,8 @@ Callback Functions
 ~~~~~~~~~~~~~~~~~~
 
 Callback functions can be registered on the reassembly and flow tracing
-classes, and run at the end of the respective process -- to inspect the
-reassembled datagrams or flows, or to discard some of them.
+classes, to inspect the reassembled datagrams or traced flows as they are
+produced.
 
 .. seealso::
 
@@ -869,9 +869,13 @@ reassembled datagrams or flows, or to discard some of them.
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback`
 
-A callback takes one argument -- the list of reassembled datagrams or flows --
-and returns :obj:`None`; any return value is ignored.
+A reassembly callback runs on every submission and takes one argument, the list
+of datagrams that submission produced. A flow tracing callback runs as each flow
+is finalised and takes that flow's
+:class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Either returns
+:obj:`None`; any return value is ignored.
 
-That list can be modified in place, but prefer not to: if the reassembly or
-tracing result itself is wrong for your purpose, subclass the reassembly or
-flow tracing class and change its algorithm instead.
+A reassembly callback can modify its list in place, which discards datagrams,
+but prefer not to: if the reassembly or tracing result itself is wrong for your
+purpose, subclass the reassembly or flow tracing class and change its algorithm
+instead.

@@ -570,10 +570,9 @@ rather than changing it.
    ``Command.get`` upper-cases its key
    before matching, which makes it look as though the base were case-insensitive --
    deliberately, since :rfc:`959#section-5` treats FTP command codes identically
-   regardless of case. ``Method.get`` used to fold case the same way, but
-   :issue:`896` made it
-   case-sensitive instead: :rfc:`9110#section-9.1` says the HTTP method token is
-   case-sensitive, so ``Method.get('get')`` no longer resolves to
+   regardless of case. ``Method.get`` does not fold case, as ruled on :issue:`896`:
+   :rfc:`9110#section-9.1` says the HTTP method token is case-sensitive, so
+   ``Method.get('get')`` does not resolve to
    ``Method.GET`` -- it builds its own unregistered member, preserving the
    caller's exact casing, the same way an unrecognised value always does.
 

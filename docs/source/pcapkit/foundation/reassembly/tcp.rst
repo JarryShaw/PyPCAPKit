@@ -2,8 +2,10 @@
 TCP Datagram Reassembly
 =======================
 
+.. module:: pcapkit.foundation.reassembly.tcp
+
 :mod:`pcapkit.foundation.reassembly.tcp` contains
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
+:class:`~pcapkit.foundation.reassembly.tcp.TCP` only,
 which reconstructs fragmented TCP packets back to origin.
 
 .. autoclass:: pcapkit.foundation.reassembly.tcp.TCP
@@ -159,27 +161,31 @@ Terminology
 
        .. code-block:: python
 
+          ip_info = ip.info
+          tcp_info = tcp.info
+
+          raw_len = len(tcp.packet.payload)
           packet_dict = Info(
-            bufid = tuple(
-                ip.src,                     # source IP address
-                tcp.srcport,                # source port
-                ip.dst,                     # destination IP address
-                tcp.dstport,                # destination port
+            bufid = (
+                ip_info.src,                    # source IP address
+                tcp_info.srcport.port,          # source port
+                ip_info.dst,                    # destination IP address
+                tcp_info.dstport.port,          # destination port
             ),
-            dsn = tcp.seq,                  # data sequence number
-            ack = tcp.ack,                  # acknowledgement number
-            num = frame.number,             # original packet range number
-            syn = tcp.flags.syn,            # synchronise flag
-            fin = tcp.flags.fin,            # finish flag
-            rst = tcp.flags.rst,            # reset connection flag
-            len = tcp.raw_len,              # payload length, header excludes
-            first = tcp.seq,                # first sequence number of payload
-            last = tcp.seq + tcp.raw_len - 1,
-                                            # last sequence number of payload
-            header = tcp.packet.header,     # raw bytes type header
-            payload = tcp.raw,              # raw bytearray type payload
+            num = frame.info.number,            # original packet range number
+            ack = tcp_info.ack,                 # acknowledgement
+            dsn = tcp_info.seq,                 # data sequence number
+            syn = tcp_info.flags.syn,           # synchronise flag
+            fin = tcp_info.flags.fin,           # finish flag
+            rst = tcp_info.flags.rst,           # reset connection flag
+            header = tcp.packet.header,         # raw bytes type header
+            payload = bytearray(
+                tcp.packet.payload),            # raw bytearray type payload
+            first = tcp_info.seq,               # first sequence number of payload
+            last = tcp_info.seq + raw_len - 1,  # last sequence number of payload
+            len = raw_len,                      # payload length, header excludes
             timestamp = float(
-                frame.time_epoch),          # capture timestamp
+                frame.info.time_epoch),         # capture timestamp
           )
 
        Both ``first`` and ``last`` are absolute TCP sequence numbers and

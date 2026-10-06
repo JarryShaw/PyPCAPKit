@@ -59,9 +59,12 @@ Command Line Tool
 
 .. module:: pcapkit.__main__
 
-.. important::
+.. note::
 
-   This module requires ``emoji`` package to be installed.
+   The ``emoji`` package (the ``cli`` extra) decorates the ``-v`` output.
+   Without it, importing the module warns with
+   :class:`~pcapkit.utilities.warnings.EmojiWarning` and the CLI prints plain
+   text instead.
 
 :mod:`pcapkit.__main__` provides the CLI, merged in from the deprecated
 |jspcapy|_ project.
@@ -72,23 +75,24 @@ Command Line Tool
 .. code-block:: text
 
    usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
-                      [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
+                      [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER] [-B]
+                      [-O file-name]
                       input-file-name
 
    PCAP file extractor and formatted dumper
 
    positional arguments:
      input-file-name       The name of input pcap file. If ".pcap" omits, it will
-                           be automatically appended.
+                           be automatically appended. Use "-" to indicate reading
+                           from `stdin'.
 
-   optional arguments:
+   options:
      -h, --help            show this help message and exit
      -V, --version         show program's version number and exit
-     -o file-name, --output file-name
+     -o, --output file-name
                            The name of input pcap file. If format extension
                            omits, it will be automatically appended.
-     -f format, --format format
-                           Print a extraction report in the specified output
+     -f, --format format   Print a extraction report in the specified output
                            format. Available are all formats supported by
                            dictdumper, e.g.: json, plist, and tree.
      -j, --json            Display extraction report as json. This will yield
@@ -104,13 +108,17 @@ Command Line Tool
      -a, --auto-extension  If output file extension omits, append automatically.
      -v, --verbose         Show more information.
      -F, --files           Split each frame into different files.
-     -E PKG, --engine PKG  Indicate extraction engine. Note that except default
+     -E, --engine PKG      Indicate extraction engine. Note that except default
                            or pcapkit engine, all other engines need support of
                            corresponding packages.
-     -P PROTOCOL, --protocol PROTOCOL
+     -P, --protocol PROTOCOL
                            Indicate extraction stops after which protocol.
-     -L LAYER, --layer LAYER
-                           Indicate extract frames until which layer.
+     -L, --layer LAYER     Indicate extract frames until which layer.
+     -B, --buffer-save     Indicate if store buffer to file when reading from
+                           stdin.
+     -O, --buffer-path file-name
+                           The name of buffer storage file. If `--buffer-save` is
+                           set and this omits, it will be automatically assigned.
 
 Environment Variables
 =====================

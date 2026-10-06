@@ -169,6 +169,8 @@ Terminology
            |                         |               |--> (int) packet range number
            |                         |--> 'header' : (bytes) header buffer
            |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+           |                         |--> 'timestamp' : (float) capture timestamp of the
+           |                         |                          first-arriving fragment
            |                         |--> 'conflict' : (list) octet ranges on which an arriving
            |                         |                  fragment disagreed with bytes already in
            |                         |                  'datagram'
