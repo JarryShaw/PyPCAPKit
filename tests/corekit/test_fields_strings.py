@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 
 class BitFieldTests(unittest.TestCase):
     """Packing and parsing of :class:`~pcapkit.corekit.fields.strings.BitField`."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.strings import BitField
 

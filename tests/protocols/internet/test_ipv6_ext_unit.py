@@ -6,7 +6,7 @@ import struct
 import unittest
 import warnings
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -39,7 +39,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     # -- direct construction: the per-protocol length rules -----------------
 
@@ -120,6 +120,11 @@ class IPv6ExtUnitTests(unittest.TestCase):
     # -- __index__ and the guarded extension-mode accessors ------------------
 
     def test_index_raises_because_no_class_level_identity_exists(self) -> None:
+        """The fallback has no class-level identity, so it keeps raising rather
+        than being handed a placeholder index. This is also the other half of
+        the #917 contract in :class:`IPv6ExtSharedBaseContractTests`, which
+        relies on this test rather than repeating it.
+        """
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
         from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -420,7 +425,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     })
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _subclasses(base: type) -> 'list[type]':
@@ -611,17 +616,6 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
             with self.subTest(klass=klass.__qualname__):
                 self.assertNotEqual(self._constant(klass, 'name'), base_name)
                 self.assertNotEqual(self._constant(klass, 'alias'), base_alias)
-
-    def test_the_base_itself_still_has_no_class_level_identity(self) -> None:
-        """The other half of the contract: the fallback genuinely has none, so
-        it must keep raising rather than be handed a placeholder index to
-        satisfy the rule above.
-        """
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-        from pcapkit.utilities.exceptions import UnsupportedCall
-
-        with self.assertRaises(UnsupportedCall):
-            IPv6_Ext.__index__()
 
     def test_ah_and_esp_double_inherit_and_linearise(self) -> None:
         """Both are IPsec members *and* IPv6 extension headers -- IANA marks

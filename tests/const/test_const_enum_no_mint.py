@@ -176,7 +176,8 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
+                            restore_modules, snapshot_modules)
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -774,9 +775,7 @@ class GetNoLongerMintsTests(unittest.TestCase):
     same ruling applied to the int path above."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_unresolvable_string_key_without_default_raises(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
@@ -818,9 +817,7 @@ class RegisterStillMintsTests(unittest.TestCase):
     """The one caller-named, explicit path must still grow the registry."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_register_mints_a_real_permanent_member(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
@@ -882,9 +879,7 @@ class UnregisteredMemberHelperTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_builds_an_absent_member_on_every_registry(self) -> None:
         value = 0x6E7A0002  # arbitrary, distinct from the register() sweep's
@@ -1504,9 +1499,7 @@ class EtherTypeMixedMintTests(unittest.TestCase):
     rather than renamed, so history stays easy to follow)."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_unassigned_rows_do_not_mint(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
@@ -1572,9 +1565,7 @@ class IPXSocketMixedMintTests(unittest.TestCase):
     :meth:`test_registered_by_xerox_no_longer_mints` below."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_unassigned_rows_do_not_mint(self) -> None:
         from pcapkit.const.ipx.socket import Socket
@@ -1651,9 +1642,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_unassigned_value_resolves_without_minting(self) -> None:
         """Swept across all 5: resolves, does not mint, repeated lookup is
@@ -1907,9 +1896,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_featcode_import_mints_nothing(self) -> None:
         """The guard against the import-time mutation coming back -- count-
@@ -2185,9 +2172,7 @@ class BespokeGetReplacementTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_statuscode_get_omitted_default_still_raises(self) -> None:
         """The one production call site's shape: no default passed, so an
@@ -2258,7 +2243,10 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     case-insensitively (GitHub issue #582 -- ``Command.get('abor')`` must
     return :attr:`Command.ABOR`, not raise), which the base's plain
     ``_member_map_``/``_value2member_map_`` lookup does not do -- swapping in
-    the base would silently reintroduce #582.
+    the base would silently reintroduce #582. That pin lives in
+    :mod:`tests.const.test_const_method_case_sensitive_896_unit`
+    (``test_command_get_stays_case_insensitive``), whose body this class used
+    to repeat verbatim.
 
     :class:`Method` used to resolve case-insensitively the same way (#583),
     but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP
@@ -2281,16 +2269,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
-
-    def test_command_get_is_still_case_insensitive(self) -> None:
-        from pcapkit.const.ftp.command import Command
-
-        for key in ('RETR', 'retr', 'ReTr', 'rEtR'):
-            with self.subTest(key=key):
-                self.assertIs(Command.get(key), Command.RETR)  # type: ignore[attr-defined]
+        reimport_once_per_class(self, restore=True)
 
     def test_method_get_is_now_case_sensitive(self) -> None:
         """GitHub issue #896: only the exact registered casing resolves.
@@ -2404,9 +2383,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_apptype_family_carries_the_registry_protocol(self) -> None:
         """#842's ruling is that ``get``/``get_all``/``register``/

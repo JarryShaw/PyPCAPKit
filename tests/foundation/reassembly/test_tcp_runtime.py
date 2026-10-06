@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -23,7 +23,7 @@ class TCPReassemblyRuntimeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_sample_capture_reassembles_every_stream_byte_exactly(self) -> None:
         """``test.pcap`` through :func:`~pcapkit.interface.extract`.

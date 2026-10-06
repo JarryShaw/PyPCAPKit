@@ -4,7 +4,7 @@ import collections
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -22,7 +22,7 @@ class OptionFieldTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         from pcapkit.corekit.fields.collections import OptionField
         from pcapkit.corekit.fields.numbers import UInt16Field
@@ -130,7 +130,7 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         #: Every schema unpacked while parsing an option list, in order. The base
         #: schema appearing here is what distinguishes the full unpack from the
@@ -287,7 +287,7 @@ class OptionFieldPackageDeclarationTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_no_declaration_in_the_package_falls_back(self) -> None:
         import pcapkit.all  # noqa: F401  (realises every schema declaration)
@@ -302,6 +302,11 @@ class OptionFieldPackageDeclarationTests(unittest.TestCase):
         fell_back = []  # type: list[str]
         total = 0
         for cls in set(subclasses(Schema)):
+            # Only this package's own declarations: a test that builds a schema
+            # of its own leaves it among the subclasses for as long as the
+            # import lives, and that is no longer one import per test (#1065).
+            if cls.__module__.split('.')[0] != 'pcapkit':
+                continue
             for name, field in getattr(cls, '__fields__', {}).items():
                 if not isinstance(field, OptionField):
                     continue
@@ -332,7 +337,7 @@ class ListFieldSchemaItemTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_length_callback_is_honoured(self) -> None:
         """The per-item field's own resolved length must reach its schema.

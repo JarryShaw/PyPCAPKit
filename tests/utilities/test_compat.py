@@ -57,7 +57,7 @@ import sys
 import unittest
 from unittest import mock
 
-from tests._support import load_module, purge_modules
+from tests._support import load_module, purge_modules, reimport_once_per_class
 
 # NOTE: :mod:`aenum` is deliberately *not* imported at module scope, however
 # convenient that would be for the assertions below. A module-level import would
@@ -170,6 +170,8 @@ def aenum_pyver_readings() -> 'dict[str, tuple[int, ...]]':
 
 class CompatTests(unittest.TestCase):
     def setUp(self) -> None:
+        reimport_once_per_class(self)
+
         # Registered before anything else, and deliberately first: cleanups run
         # last-in-first-out, so this one runs *after* the module-table restore
         # that ``load_module`` arranges below and after the test body however it
@@ -179,7 +181,6 @@ class CompatTests(unittest.TestCase):
         # fake a version without going through ``load_compat_as_python35``.
         self.addCleanup(self.assert_aenum_is_not_poisoned)
 
-        purge_modules(['pcapkit'])
         self.compat = load_module('pcapkit.utilities.compat', 'pcapkit/utilities/compat.py')
 
     def assert_aenum_is_not_poisoned(self) -> None:

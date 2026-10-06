@@ -7,7 +7,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import purge_modules, sample_path
+from tests._support import reimport_once_per_class, sample_path
 
 #: Packages :mod:`pcapkit` needs before it can parse anything at all; the default
 #: engine and therefore every test here depends on them. They are core install
@@ -70,7 +70,8 @@ class FollowTCPStreamTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         # follow_tcp_stream always drives the flow tracer, whose output root
         # defaults to './tmp' under the working directory when ``fout`` is unset
         # (TraceFlow.__init__). Point it at a scratch directory so a test run

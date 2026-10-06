@@ -41,9 +41,9 @@ three siblings end in that same tail, the one
 this module carries a companion sweep over the :class:`~aenum.IntFlag` classes,
 covering the contract the :class:`~aenum.IntEnum` sweep declines to.
 
-Every test class purges :mod:`pcapkit` from :data:`sys.modules` in ``setUp``,
+Every test class re-imports :mod:`pcapkit` for itself from ``setUp``,
 matching the convention every other module in this suite uses (see
-:func:`tests._support.purge_modules`). It matters more here than usual: this
+:func:`tests._support.reimport_once_per_class`). It matters more here than usual: this
 module is the first thing in the whole suite to import *every* submodule
 under :mod:`pcapkit.const`, including ones nothing else touches (e.g.
 :mod:`pcapkit.const.reg.apptype`). ``tests/cli/test_main.py`` stubs pieces of
@@ -69,7 +69,8 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag
 
-from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
+                            restore_modules, snapshot_modules)
 
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
@@ -249,7 +250,7 @@ class ConstMissingClassmethodTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_every_missing_is_a_classmethod(self) -> None:
         offenders = []  # type: list[str]
@@ -441,7 +442,7 @@ class RouterAlertPacketParseTests(unittest.TestCase):
     """Parse an on-the-wire packet carrying RFC 2113's Router Alert value 0."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_parses_igmp_over_router_alert_zero(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4

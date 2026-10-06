@@ -35,7 +35,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import close_extractor, purge_modules, time_limit
+from tests._support import close_extractor, reimport_once_per_class, time_limit
 from tests._tiers import SAMPLE_ROOT
 
 if TYPE_CHECKING:
@@ -86,7 +86,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
     """The generated option captures extract cleanly."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_every_option_capture_extracts(self) -> None:
         """Each capture reads back, with every frame reaching its expected layer.

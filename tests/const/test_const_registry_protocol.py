@@ -29,7 +29,8 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum, IntFlag, StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
-from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
+                            restore_modules, snapshot_modules)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -252,16 +253,14 @@ class TCPFlagsConversionTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_tcp_flags_now_inherits_the_base(self) -> None:
         """Fails on ``02296b5dd``, where ``Flags`` is a plain ``IntFlag``.
 
         Resolves ``EnumRegistry`` freshly from the just-reimported
         ``pcapkit.corekit.enum`` rather than the module-scope import above --
-        ``setUp`` purged ``pcapkit`` from ``sys.modules``, so ``Flags`` now
+        ``setUp`` re-imported ``pcapkit`` for this class, so ``Flags`` now
         inherits a *new* ``EnumRegistry`` class object, and identity against
         the stale outer one would fail for a reason that says nothing about
         the product (see ``ProtocolIsInheritedTests.setUpClass`` above, which
@@ -328,9 +327,7 @@ class GetContractTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_name_and_value_both_resolve_to_the_same_member(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
@@ -406,9 +403,7 @@ class GetAllContractTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_a_one_to_one_registry_matches_exactly_one_member(self) -> None:
         """An alias is a second *name* for the canonical member, not a second
@@ -447,9 +442,7 @@ class RegisterContractTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_register_adds_a_new_member_under_the_given_name(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
@@ -589,9 +582,7 @@ class RegisterAliasContractTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_alias_adds_a_name_not_a_member(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
@@ -654,9 +645,7 @@ class UnregisteredMemberTests(unittest.TestCase):
     member types the base serves."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_int_valued_registries(self) -> None:
         for module_name, class_name, _ in CONVERTED:
@@ -932,9 +921,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
     regression pin on that claim rather than a test of new behaviour."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_hardware_still_bounds_and_resolves_its_unassigned_ranges(self) -> None:
         """:class:`~pcapkit.const.arp.hardware.Hardware` declares ``0..38``
@@ -1011,9 +998,7 @@ class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestC
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_register_over_a_taken_value_now_raises(self) -> None:
         from pcapkit.const.reg.transtype import TransType
@@ -1071,9 +1056,7 @@ class GetDispatchMatrixTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_valid_int_value(self) -> None:
         from pcapkit.const.reg.transtype import TransType
@@ -1138,9 +1121,7 @@ class GetDispatchMatrixIntFlagTests(unittest.TestCase):
     the ``IntFlag`` path really is untouched, not to assume it."""
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_valid_int_value(self) -> None:
         from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
@@ -1340,9 +1321,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_no_default_is_not_equal_to_any_plausible_caller_value(self) -> None:
         """The sentinel's whole point: unlike ``-1``, a
@@ -1421,66 +1400,55 @@ class NoDefaultSentinelTests(unittest.TestCase):
         self.assertIs(module_again.NO_DEFAULT, first_import)
 
     def test_missing_name_with_default_negative_one_is_now_a_real_default(self) -> None:
-        """Coincidentally passes on the pre-#857 tree too, not just this one:
-        ``ExtensionHeader.get(<missing>, -1)`` raised :exc:`KeyError` there
-        as well, because ``-1 == NO_DEFAULT`` read the caller's ``-1`` as *no
-        default* and re-raised the name lookup's own error -- the same
-        exception type and content this test asserts, but for the wrong
-        reason (silently discarding an explicit default rather than
-        genuinely attempting and failing to resolve it). This test no longer
-        discriminates that defect; the pin for it is
-        :meth:`NoDefaultSentinelTests.test_no_default_is_not_equal_to_any_plausible_caller_value`,
-        which checks the sentinel's identity comparison directly, never
-        touches :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, and so is
-        unaffected by #864 -- look there, not here, for that discrimination.
+        """``-1`` and ``-1.0`` are honoured as defaults by
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.get` itself.
 
-        ``-1`` is a genuine default here, not a rediscovered sentinel; it is
-        simply not a *resolvable* one, since #864 restricts
-        ``default`` to :attr:`~pcapkit.corekit.enum.EnumRegistry._value2member_map_`,
-        every registry's domain starts at ``0``, and there is no
-        ``cls(default)`` fallback left to attempt and raise a fresh
-        :exc:`ValueError` from. So the original name lookup's own
-        :exc:`KeyError` propagates instead, exactly as it would with no
-        default at all. Updated from the pre-#864 tree, which asserted
-        :exc:`ValueError` mentioning ``-1`` and not the original key -- that
-        assertion described ``cls(-1)`` failing, a code path #864 removes; it
-        is not weakened here, it is retargeted at the deliberate replacement
-        contract, and still pins that ``-1`` never mints anything.
+        This used to probe :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
+        and its docstring conceded that it no longer discriminated #857: no
+        shipped registry's domain reaches ``-1``, so since #864 the name
+        lookup's :exc:`KeyError` propagates whether ``-1`` is read as a default
+        or as the old marker. A throwaway registry holding ``-1`` tells the two
+        apart again: it resolves to that member now, while the pre-#857
+        ``default == -1`` check read the caller's ``-1`` (and ``-1.0``, which
+        compares equal) as *no default* and raised (GitHub issue #1062).
+        """
+        from aenum import IntEnum
+
+        from pcapkit.corekit.enum import EnumRegistry
+
+        class Signed(EnumRegistry, IntEnum):
+            MINUS_ONE = -1
+            ZERO = 0
+
+        for default in (-1, -1.0):
+            with self.subTest(default=default):
+                self.assertIs(Signed.get('Definitely-Not-A-Member', default), Signed.MINUS_ONE)
+        with self.assertRaises(KeyError):
+            Signed.get('Definitely-Not-A-Member')
+        self.assertEqual(len(Signed.__members__), 2)
+
+    def test_negative_one_defaults_on_a_shipped_registry_raise_and_mint_nothing(self) -> None:
+        """The #864 contract for ``-1`` and ``-1.0`` on a real registry.
+
+        Neither is a registered value of any shipped registry, whose domains
+        all start at ``0``, so ``default`` does not resolve: there is no
+        ``cls(default)`` fallback left to attempt, and the name lookup's own
+        :exc:`KeyError` propagates, as with no default at all. Pinned from the
+        pre-#864 tree, which raised :exc:`ValueError` from ``cls(-1)``. This
+        does *not* discriminate #857, which raised the same :exc:`KeyError`;
+        :meth:`test_missing_name_with_default_negative_one_is_now_a_real_default`
+        does. Merged from separate ``-1`` and ``-1.0`` tests (GitHub issue
+        #1062).
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 
-        before = len(ExtensionHeader.__members__)
-        with self.assertRaises(KeyError) as caught:
-            ExtensionHeader.get('Definitely-Not-A-Member', -1)
-        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
-        self.assertEqual(before, len(ExtensionHeader.__members__))
-
-    def test_missing_name_with_default_negative_one_float_is_now_a_real_default(self) -> None:
-        """The float case that actually motivates #857: ``-1.0 == -1`` is
-        ``True``, so the old ``==`` comparison could not tell a caller's
-        ``-1.0`` apart from the ``-1`` marker either. Coincidentally passes
-        on the pre-#857 tree too, for the same reason its sibling test above
-        explains -- the old comparison read ``-1.0`` as the sentinel there,
-        producing the very same :exc:`KeyError` this asserts, for the wrong
-        reason. The discriminating pin for #857 lives in
-        :meth:`NoDefaultSentinelTests.test_no_default_is_not_equal_to_any_plausible_caller_value`
-        instead, not here -- see that sibling test's docstring for why.
-
-        Raises :exc:`KeyError` here, post-#864, for the reason its sibling
-        test above explains: ``-1.0`` is not a registered value, ``default``
-        no longer reaches ``cls(default)`` to fail on its own terms, and the
-        original name lookup's error propagates instead. Updated from the
-        pre-#864 tree, which asserted :exc:`ValueError` mentioning ``-1.0``
-        for ``ExtensionHeader(-1.0)`` -- that path no longer exists; this is
-        the same no-weaker retargeting as above.
-        """
-        from pcapkit.const.ipv6.extension_header import ExtensionHeader
-
-        before = len(ExtensionHeader.__members__)
-        with self.assertRaises(KeyError) as caught:
-            ExtensionHeader.get('Definitely-Not-A-Member', -1.0)
-        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
-        self.assertEqual(before, len(ExtensionHeader.__members__))
+        for default in (-1, -1.0):
+            with self.subTest(default=default):
+                before = len(ExtensionHeader.__members__)
+                with self.assertRaises(KeyError) as caught:
+                    ExtensionHeader.get('Definitely-Not-A-Member', default)
+                self.assertIn('Definitely-Not-A-Member', str(caught.exception))
+                self.assertEqual(before, len(ExtensionHeader.__members__))
 
     def test_missing_name_without_default_still_raises_on_an_int_enum(self) -> None:
         """Omitting ``default`` entirely is unaffected by this change -- it
@@ -1525,9 +1493,7 @@ class GetDefaultNoMintTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        snapshot = snapshot_modules(ISOLATED_PREFIXES)
-        purge_modules(['pcapkit'])
-        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+        reimport_once_per_class(self, restore=True)
 
     def test_the_issues_own_case_no_longer_mints_and_raises_instead(self) -> None:
         """The exact reproduction from #864, on the real shipped registry.

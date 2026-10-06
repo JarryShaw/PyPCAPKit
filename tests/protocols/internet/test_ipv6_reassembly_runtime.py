@@ -6,7 +6,7 @@ import struct
 import tempfile
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -68,7 +68,8 @@ class IPv6ReassemblyRuntimeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         self._tmpdir = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmpdir.cleanup)
         self.tmp_path = pathlib.Path(self._tmpdir.name)

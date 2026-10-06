@@ -30,7 +30,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -126,7 +126,7 @@ class ESPRegistryTests(unittest.TestCase):
     """Algorithm registries and Security Association validation."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_cipher_registry(self) -> None:
         from pcapkit.const.esp.cipher import Cipher as Const_Cipher
@@ -406,7 +406,7 @@ class ESPProtocolTests(unittest.TestCase):
     """Parsing, decryption and construction."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     ##########################################################################
     # Registration and identity.

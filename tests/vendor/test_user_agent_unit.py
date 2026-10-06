@@ -45,7 +45,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -137,7 +137,7 @@ class VendorUserAgentTests(unittest.TestCase):
         requests: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import requests
 

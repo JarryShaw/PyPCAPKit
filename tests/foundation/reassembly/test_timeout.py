@@ -17,7 +17,7 @@ from ipaddress import ip_address
 import math
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -29,7 +29,7 @@ T0 = 1_600_000_000.0
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPReassemblyTimeoutTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, timestamp: float,
                 id: int = 42):  # pylint: disable=redefined-builtin
@@ -232,7 +232,7 @@ class IPLooseModeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes):
         from pcapkit.const.reg.transtype import TransType
@@ -327,7 +327,7 @@ class IPLooseModeTests(unittest.TestCase):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPReassemblyTimeoutTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _segment(self, *, num: int, seq: int, payload: bytes, timestamp: float,
                  fin: bool = False):

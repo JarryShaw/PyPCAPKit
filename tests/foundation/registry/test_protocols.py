@@ -6,7 +6,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -37,7 +37,7 @@ SCHEMA_REGISTRARS = (
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ProtocolRegistryTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _unit_protocol(self):
         from pcapkit.protocols.protocol import ProtocolBase
@@ -412,6 +412,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import RegistryError
 
         UnitProtocol = self._unit_protocol()
+        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
         registry.register_protocol(UnitProtocol)
         self.assertIs(registry.protocol_registry['UNITPROTOCOL'], UnitProtocol)
 
@@ -457,6 +458,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 
         UnitProtocol = self._unit_protocol()
+        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
         raw_module = ('pcapkit.protocols.misc.raw', 'Raw')
 
         class_routes = [

@@ -30,12 +30,13 @@ this belongs to the unit tier.
 """
 from __future__ import annotations
 
+import gc
 import importlib.util
 import pkgutil
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -144,7 +145,7 @@ class DispatchReachabilityTests(unittest.TestCase):
     """No protocol class declares a code that nothing dispatches."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_every_indexed_class_is_reachable_under_the_code_it_declares(self) -> None:
         """The invariant itself, over every class rather than a hand-picked few."""
@@ -191,8 +192,12 @@ class DispatchReachabilityTests(unittest.TestCase):
                             f'audit missed the injected gap; reported {names}')
         finally:
             # ``__subclasses__`` holds a weak reference, but the class is only
-            # collected once nothing in this frame names it.
+            # collected once nothing in this frame names it -- and, a class
+            # being a reference cycle of its own, once the cycle collector has
+            # run. Until then the next audit in the same import still sees it
+            # (GitHub issue #1065: no longer one import per test).
             del Unreachable
+            gc.collect()
 
     def test_transtype_l2tp_is_unbound_because_v3_has_no_class(self) -> None:
         """115's gap is a missing *class*, not a missing registration.

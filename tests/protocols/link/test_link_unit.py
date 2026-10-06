@@ -6,7 +6,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -19,7 +19,7 @@ class DummyData(dict):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class LinkProtocolUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_vlan_indices_follow_the_one_module_per_index_rule(self) -> None:
         """Each tag declares the EtherType it is reached by; the base declares none.

@@ -4,7 +4,7 @@ import importlib.util
 import unittest
 from types import SimpleNamespace
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -17,7 +17,7 @@ class DummyData(dict):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class RawNullUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_raw_properties_make_data_and_index_error(self) -> None:
         from pcapkit.protocols.misc.raw import Raw

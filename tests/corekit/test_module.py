@@ -7,12 +7,13 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import load_module, purge_modules
+from tests._support import load_module, reimport_once_per_class
 
 
 class ModuleDescriptorTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         self.module = load_module('pcapkit.corekit.module', 'pcapkit/corekit/module.py')
 
     def _register(self, name: str, module: types.ModuleType) -> None:

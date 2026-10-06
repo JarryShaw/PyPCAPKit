@@ -65,7 +65,7 @@ import re
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -195,7 +195,7 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         vendor_module: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import pcapkit.vendor.ipv6.extension_header as vendor_module
 

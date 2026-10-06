@@ -61,7 +61,7 @@ import importlib.util
 import struct
 import unittest
 
-from tests._support import purge_modules, sample_path
+from tests._support import reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -178,7 +178,7 @@ class PcapFrameLengthRuntimeTests(unittest.TestCase):
     """#618, on the classic-PCAP reader -- the one that was wrong."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def frames(self, name: 'str') -> 'tuple[bytes, list]':
         """Read a fixture's octets and the frames :mod:`pcapkit` parses from it.
@@ -290,7 +290,7 @@ class PcapngFrameLengthRuntimeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def blocks(self) -> 'tuple[bytes, list]':
         """Read ``test.pcapng``'s octets and the packet blocks parsed from it.
@@ -378,7 +378,7 @@ class ReadersAgreeRuntimeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_truncated_frame_reads_alike_whichever_container_it_came_from(self) -> None:
         """One caller, two capture formats, one meaning per attribute.

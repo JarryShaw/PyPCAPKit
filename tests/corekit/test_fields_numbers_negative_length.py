@@ -27,7 +27,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -40,7 +40,7 @@ class NegativeResolvedLengthTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_literal_negative_length_raises_protocolerror(self) -> None:
         """The narrowest reproduction: ``length=-1`` supplied directly.
@@ -199,7 +199,7 @@ class NegativeBitLengthTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_negative_bit_length_raises_protocolerror(self) -> None:
         """The narrowest reproduction: ``bit_length=-1`` supplied directly.

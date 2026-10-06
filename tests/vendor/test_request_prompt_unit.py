@@ -83,7 +83,7 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import purge_modules, time_limit
+from tests._support import reimport_once_per_class, time_limit
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -224,7 +224,7 @@ class StdinInteractivityTests(unittest.TestCase):
         default: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import pcapkit.vendor.default as default
 
@@ -278,7 +278,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
         requests: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import requests
 

@@ -28,7 +28,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -51,7 +51,8 @@ class PlistKeyEscapingTests(unittest.TestCase):
     """The reports of :file:`test.pcapng`, one per output format."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
         tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-772-')
         self.addCleanup(tmpdir.cleanup)
         self.tmp_path = pathlib.Path(tmpdir.name)

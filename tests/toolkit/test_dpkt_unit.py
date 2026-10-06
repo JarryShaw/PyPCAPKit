@@ -10,7 +10,7 @@ import types
 import unittest
 import warnings
 
-from tests._support import close_extractor, purge_modules, sample_path
+from tests._support import close_extractor, reimport_once_per_class, sample_path
 
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
@@ -117,7 +117,7 @@ class FakeDPKTPacket:
 @unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
 class DPKTToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make_ipv4_tcp_packet(self, *, df: bool = False, fragmented: bool = False):
         import dpkt
@@ -394,7 +394,7 @@ class DPKTTCPHeaderSplitTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_header_ends_at_data_offset_and_len_matches_payload(self) -> None:
         from pcapkit.toolkit import dpkt as toolkit
@@ -489,7 +489,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
     """The IPv4 path carries the same class of defect as the TCP one."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_header_ends_at_internet_header_length_with_options(self) -> None:
         from pcapkit.toolkit import dpkt as toolkit
@@ -576,7 +576,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
     """IPv6 reassembly against a real :class:`dpkt.ip6.IP6FragmentHeader`."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_reads_the_real_fragment_header_attributes(self) -> None:
         import dpkt
@@ -790,7 +790,7 @@ class DPKTEngineParityTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _reassemble(self, path: str, engine: str):
         import pcapkit
@@ -840,7 +840,7 @@ class DPKTTimestampTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_engine_attaches_each_frames_capture_timestamp(self) -> None:
         import pcapkit

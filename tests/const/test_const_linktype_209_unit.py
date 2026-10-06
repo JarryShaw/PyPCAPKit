@@ -70,7 +70,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 #: The crawler dependencies :class:`LinkTypeGeneratorLegacyOrderingTests` needs to
 #: parse its fixture. Spelled exactly as
@@ -128,7 +128,7 @@ class LinkType209ConstResolutionTests(unittest.TestCase):
     """Against the generated, committed :class:`~pcapkit.const.reg.linktype.LinkType`."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_value_209_resolves_to_the_current_name(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
@@ -153,7 +153,7 @@ class LinkTypeGeneratorLegacyOrderingTests(unittest.TestCase):
     """Against the generator's own ``process()``, root cause rather than symptom."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _process_fixture() -> 'list[str]':
@@ -288,7 +288,7 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _process(html: str) -> 'list[str]':
@@ -401,7 +401,7 @@ class LinkTypeGeneratorRangeSinkIsolationTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_legacy_worded_range_row_still_lands_entirely_in_enum(self) -> None:
         import bs4
@@ -476,7 +476,7 @@ class LinkTypeGeneratorCrossRangeDuplicateTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_legacy_row_duplicating_a_range_member_is_sunk(self) -> None:
         import bs4
@@ -590,7 +590,7 @@ class LinkTypeGeneratorSignedOrUnderscoredValueTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @staticmethod
     def _process(html: str) -> 'list[str]':

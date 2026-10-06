@@ -71,7 +71,7 @@ import unittest
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -115,7 +115,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
         Vendor: 'Any'
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         import pcapkit
         import pcapkit.vendor as vendor

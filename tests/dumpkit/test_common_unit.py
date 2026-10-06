@@ -14,7 +14,7 @@ import unittest
 from unittest import mock
 import warnings
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -99,7 +99,7 @@ def plist_like_dumper() -> 'object':
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DumpkitCommonTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_dumper_subclass_registration_is_opt_in(self) -> None:
         """Registration happens if and only if ``fmt`` is given.
@@ -399,7 +399,7 @@ class DumpkitCommonTests(unittest.TestCase):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DumpkitIOTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_null_dumper_noops_and_pcap_dumper_writes_file(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

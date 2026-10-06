@@ -18,7 +18,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -27,7 +27,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAP_CTToolkitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_packet2chain_reports_the_link_layer_and_raw(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

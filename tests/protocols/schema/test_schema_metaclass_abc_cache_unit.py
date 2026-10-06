@@ -5,7 +5,7 @@ import unittest
 from collections import ChainMap
 from collections.abc import Mapping
 
-from tests._support import purge_modules
+from tests._support import purge_modules, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -56,7 +56,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         # both matter: a stale positive cache entry left over from an earlier
         # test in the same process would make the very first assertion below
         # true for the wrong reason.
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def tearDown(self) -> None:
         # A couple of tests below deliberately poison collections.abc's shared
@@ -307,7 +307,7 @@ class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_each_reserved_keyword_raises_a_named_schema_error(self) -> None:
         """Every reserved keyword raises :exc:`SchemaError`, not a bare TypeError.

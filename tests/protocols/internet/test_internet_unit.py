@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -20,7 +20,7 @@ class MutableInfo(dict):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class InternetBaseUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _make_internet_class(self, default_protocol: type | None = None):
         from pcapkit.protocols.internet.internet import Internet

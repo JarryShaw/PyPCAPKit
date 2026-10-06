@@ -4,7 +4,7 @@ import importlib.util
 import inspect
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -38,7 +38,7 @@ class FixedSignTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_census_is_complete(self) -> None:
         """:data:`FIXED_SIGN` is every subclass that fixes a sign, by introspection."""
@@ -125,7 +125,7 @@ class DeferredSignTests(unittest.TestCase):
     """``signed=`` where no ``__signed__`` fixes it, which is where it works."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_base_class_still_honours_signed(self) -> None:
         from pcapkit.corekit.fields.numbers import NumberField

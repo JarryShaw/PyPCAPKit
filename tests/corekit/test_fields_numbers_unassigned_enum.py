@@ -67,7 +67,7 @@ import struct
 import tempfile
 import unittest
 
-from tests._support import close_extractor, purge_modules
+from tests._support import close_extractor, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -122,7 +122,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
     """The field layer, in isolation from any protocol."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_an_unassigned_registry_value_resolves_instead_of_raising(self) -> None:
         """The reported lookup, as a field unpack.
@@ -370,7 +370,7 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
     """The consequence the issue was filed about, end to end."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _protochains(self, path: str) -> 'list[str]':
         """Extract a capture and report each frame's protocol chain.

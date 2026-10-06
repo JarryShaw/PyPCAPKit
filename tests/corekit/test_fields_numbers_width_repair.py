@@ -40,7 +40,7 @@ import importlib.util
 import math
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -77,7 +77,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
     """One method per octet boundary, each asserting the pair across it."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_the_one_octet_boundary_needs_two_octets_past_255(self) -> None:
         """``255`` fits one octet; ``256`` needs two and was given one.
@@ -251,7 +251,7 @@ class WidthRepairReachabilityTests(unittest.TestCase):
     """How a caller gets to the repair at all, which bounds what this fix touches."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_resolving_the_field_bypasses_the_repair_entirely(self) -> None:
         """The repair is a net under the *unresolved* field, nothing more.
@@ -314,7 +314,7 @@ class WidthRepairSurroundingContractTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_a_field_with_no_length_at_all_is_refused_outright(self) -> None:
         """Ruling out the other way the placeholder might have been thought to arise.

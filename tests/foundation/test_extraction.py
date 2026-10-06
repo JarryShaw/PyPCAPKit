@@ -13,7 +13,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import purge_modules, sample_path
+from tests._support import reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -83,7 +83,20 @@ class FakeEngine:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ExtractorTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
+
+        from pcapkit.foundation.extraction import Extractor
+
+        # Several tests here register into the four registries for real --
+        # overwriting ``json``, ``dpkt``, ``ipv4`` and ``tcp`` with stand-ins,
+        # or adding ``unit-*`` names -- so each table is put back in place
+        # afterwards. A fresh import per test used to do that implicitly; without
+        # it, a later extraction ran the stand-in engine and hung, and
+        # :mod:`tests.interface.test_core` found engines it has no constant for
+        # (GitHub issue #1065).
+        for table in (Extractor.__output__, Extractor.__engine__,
+                      Extractor.__reassembly__, Extractor.__traceflow__):
+            self.addCleanup(lambda table=table, saved=dict(table): (table.clear(), table.update(saved)))
 
     def _bare_extractor(self):
         from pcapkit.foundation.extraction import Extractor
@@ -1162,7 +1175,7 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
     def test_dpkt_traced_extraction_writes_flows_instead_of_crashing(self) -> None:

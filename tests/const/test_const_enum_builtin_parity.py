@@ -58,7 +58,8 @@ from typing import TYPE_CHECKING
 
 import aenum
 
-from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
+                            restore_modules, snapshot_modules)
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -546,7 +547,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_tcp_flag_composites_resolve(self) -> None:
         from pcapkit.const.tcp.flags import Flags
@@ -675,6 +676,10 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # Per test, unlike most classes since GitHub issue #1065: these read the
+        # registries' lookup tables, which any earlier lookup in the same import
+        # can grow -- ``Flags(0)`` anywhere caches ``0`` as a pseudo-member, and
+        # ``Flags.get(UNRESOLVABLE, 0)`` then resolves instead of raising.
         purge_modules(['pcapkit'])
 
     def tearDown(self) -> None:
@@ -909,7 +914,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')

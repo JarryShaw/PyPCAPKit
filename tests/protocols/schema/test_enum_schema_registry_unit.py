@@ -21,7 +21,7 @@ import importlib.util
 import unittest
 import warnings
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -30,7 +30,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class EnumSchemaRegistryRetentionTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_lookup_miss_on_auto_created_registry_does_not_grow_it(self) -> None:
         """A miss on an auto-created ``__enum__`` must not be retained.
@@ -186,7 +186,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _guard_registry(self, registry, key) -> None:
         """Restore ``key`` in ``registry`` on teardown, absence included.

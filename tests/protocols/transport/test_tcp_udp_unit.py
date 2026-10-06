@@ -9,7 +9,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -69,7 +69,7 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPUDPUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_udp_index_make_and_make_data_preserve_core_fields(self) -> None:
         from pcapkit.const.reg.apptype import AppType, TransportProtocol

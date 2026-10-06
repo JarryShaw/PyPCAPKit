@@ -5,7 +5,7 @@ from ipaddress import ip_address
 import sys
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -21,7 +21,7 @@ ISN = 0xC0DE1234
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPReassemblyTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _bufid(self):
         return (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
@@ -277,7 +277,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _bufid(self):
         return (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
@@ -593,7 +593,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _bufid(self):
         return (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)

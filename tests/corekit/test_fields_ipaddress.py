@@ -4,7 +4,7 @@ import importlib.util
 import ipaddress
 import unittest
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -26,7 +26,7 @@ SPEC_ENCODING = bytes.fromhex('2001 0db8 85a3 08d3 1319 8a2e 0370 7344 40'.repla
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPAddressFieldTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_address_fields_round_trip_and_reject_the_other_version(self) -> None:
         from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField

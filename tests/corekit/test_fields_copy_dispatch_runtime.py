@@ -37,7 +37,7 @@ from __future__ import annotations
 import importlib.util
 import unittest
 
-from tests._support import purge_modules, sample_path
+from tests._support import reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -92,7 +92,7 @@ class FieldCopyDispatchByteIdentityTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def assertCaptureRoundTripsByteForByte(self, name: str) -> None:
         """Walk every record of ``name`` and compare its repack to the file's own bytes.

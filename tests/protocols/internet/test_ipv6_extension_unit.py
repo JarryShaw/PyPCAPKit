@@ -8,7 +8,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules, time_limit
+from tests._support import reimport_once_per_class, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -21,7 +21,7 @@ class DummyDict(dict):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPv6ExtensionUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _assert_extension_accessors_blocked(self, protocol_cls: type) -> None:
         from pcapkit.utilities.exceptions import UnsupportedCall

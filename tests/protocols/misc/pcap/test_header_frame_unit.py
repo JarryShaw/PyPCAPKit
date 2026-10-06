@@ -9,7 +9,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest import mock
 
-from tests._support import purge_modules, sample_path
+from tests._support import reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -25,7 +25,7 @@ class DummyData(dict):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_header_make_length_index_and_make_data(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

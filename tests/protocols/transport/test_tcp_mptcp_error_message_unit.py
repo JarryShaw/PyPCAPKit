@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING
 
 import importlib.util
 
-from tests._support import purge_modules
+from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from typing import Any
@@ -118,7 +118,7 @@ def build_mptcp(*, syn: 'bool' = False, ack: 'bool' = False, **option: 'Any') ->
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_read_mptcp_join_message(self) -> None:
         """``_read_mptcp_join``'s fall-through, the message #649 was reported against.

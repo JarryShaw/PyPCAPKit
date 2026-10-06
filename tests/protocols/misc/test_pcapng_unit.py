@@ -20,7 +20,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import ROOT, purge_modules, sample_path
+from tests._support import ROOT, reimport_once_per_class, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -62,7 +62,7 @@ def block_body(body: bytes) -> bytes:
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PCAPNGUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_pcapng_index_length_and_make_data(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
@@ -1487,8 +1487,15 @@ class PCAPNGUnitTests(unittest.TestCase):
             self.assertIs(registry['opt'][OptionType.opt_comment], LocalDefaultOption)
             self.assertIs(registry['localtest'][OptionType.if_name], LocalIterableOption)
         finally:
-            registry.clear()
-            registry.update(saved_registry)
+            # Restored in place: the per-namespace tables are shared by
+            # reference, so swapping in copies would leave the originals --
+            # still holding ``LocalDefaultOption`` -- live for every later
+            # test in the same import (GitHub issue #1065).
+            for key in [key for key in registry if key not in saved_registry]:
+                del registry[key]
+            for key, saved in saved_registry.items():
+                registry[key].clear()
+                registry[key].update(saved)
 
         mismatch = schema_pcapng.UnknownBlock(length=16, body=b'abcd', length2=20)
         with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
@@ -3483,7 +3490,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _unpack_epb(self, options: bytes, packet_data: bytes = bytes(4)):
         """Unpack an EPB whose option area is exactly ``options``."""
@@ -3901,8 +3908,19 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
 
     """
 
+    #: The result of :meth:`_sweep`, computed by the first test that asks for it
+    #: and shared by the other three: one extraction per octet of the sample is
+    #: the cost of this class, and every test reads the same result (GitHub
+    #: issue #1062).
+    _swept = None  # type: tuple[dict[int, int], dict[int, BaseException]] | None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls._swept = None
+
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
         with open(sample_path('dhcp.pcapng'), 'rb') as stream:
             self.whole = stream.read()
@@ -3925,7 +3943,17 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         have chosen by hand -- 372 and 373 are where ``struct.error`` lived, and
         376 is where the cut happens to land on a block boundary.
 
+        Computed once per class, lazily rather than in :meth:`setUpClass`, so the
+        sweep runs against the class's own :mod:`pcapkit` import, which
+        :func:`tests._support.reimport_once_per_class` sets up from ``setUp``.
+
         """
+        if type(self)._swept is None:
+            type(self)._swept = self._sweep_uncached()
+        return type(self)._swept
+
+    def _sweep_uncached(self) -> 'tuple[dict[int, int], dict[int, BaseException]]':
+        """Run the sweep :meth:`_sweep` caches."""
         frames = {}  # type: dict[int, int]
         failures = {}  # type: dict[int, BaseException]
 
@@ -4177,7 +4205,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
     }
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _hostile_packet(self):
         """``HOSTILE``, with zero for any key it does not name."""
@@ -4895,7 +4923,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def _snapshot(self):
         """Restore every namespace dictionary on teardown."""
