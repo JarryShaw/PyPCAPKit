@@ -346,6 +346,34 @@ stripped when an item closes, so they say only what is live. The `PyPCAPKit proj
 close. **The labels stay authoritative**: Status mirrors them, and where the two
 disagree the label wins and Status is corrected.
 
+Status is derived from an item's labels and state, first match winning:
+
+======================  ==================================================
+Status                  When
+======================  ==================================================
+*Done*                  the item is closed or merged
+*Needs decision*        it carries ``needs: decision``
+*Blocked*               it carries ``blocked``
+*In review*             it is an open pull request
+*WIP*                   it carries ``wip``
+*Pending*               anything else open
+======================  ==================================================
+
+The board's built-in workflows do the transitions GitHub can see on its own --
+*Auto-add to project* for this repository, *Item closed* and *Pull request merged*
+both setting *Done*, and *Auto-add sub-issues*. **Item added to project stays off**:
+it stamps a default Status on every new item, overwriting the label-derived one. The
+remaining transitions follow a label change, which no workflow observes, so they are
+applied by hand alongside the label. The workflows can only be configured in the web
+interface.
+
+The board has seven views: *All items*; *Board*, the open items in one column per
+Status; *Release 1.5*, the open milestone; *Needs decision* and *Blocked*, each the
+open items in that state; *Open pull requests*; and *History*, everything *Done*.
+Rename *Release 1.5* when the next milestone opens. Sorting and grouping are set in
+the web interface; names, layouts, filters and columns can also be set through the
+GraphQL API (``updateProjectV2View``).
+
 Link neither from docstrings, code comments or Markdown files. Both are tracking
 metadata that changes as work moves, and a link to them goes stale the way a line
 number does; the changelog's ``:issue:`` and ``:pr:`` roles are the durable trail.
