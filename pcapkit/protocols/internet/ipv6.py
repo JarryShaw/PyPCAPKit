@@ -330,8 +330,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         """
         _htet = self._read_fileng(4).hex()
         _vers = int(_htet[0], base=16)      # version number (6)
-        _tcls = int(_htet[0:2], base=16)    # traffic class
-        _flow = int(_htet[2:], base=16)     # flow label
+        _tcls = int(_htet[1:3], base=16)    # traffic class
+        _flow = int(_htet[3:], base=16)     # flow label
 
         return (_vers, _tcls, _flow)
 
