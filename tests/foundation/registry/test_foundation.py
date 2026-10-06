@@ -179,8 +179,8 @@ class FoundationRegistryTests(unittest.TestCase):
         # path instead of the public wrappers. The subject classes and the read-back
         # are unchanged.
         #
-        # NOTE: imported inside the test because ``setUp`` swaps in a fresh ``pcapkit`` in
-        # ``sys.modules``, which is why every sibling test imports locally too.
+        # NOTE: imported inside the test because ``setUp`` puts the class's own ``pcapkit``
+        # import in ``sys.modules``, which is why every sibling test imports locally too.
         # ``Extractor`` is needed by name here so the registries can be read back.
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
         from pcapkit.foundation.extraction import Extractor

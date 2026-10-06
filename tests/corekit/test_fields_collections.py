@@ -302,9 +302,9 @@ class OptionFieldPackageDeclarationTests(unittest.TestCase):
         fell_back = []  # type: list[str]
         total = 0
         for cls in set(subclasses(Schema)):
-            # Only this package's own declarations: a test that builds a schema
-            # of its own leaves it among the subclasses for as long as the
-            # import lives, and that is no longer one import per test (#1065).
+            # Only this package's own declarations: a schema a test builds for
+            # itself stays among the subclasses for as long as the import lives,
+            # and the whole class shares one import (#1065).
             if cls.__module__.split('.')[0] != 'pcapkit':
                 continue
             for name, field in getattr(cls, '__fields__', {}).items():

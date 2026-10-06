@@ -236,11 +236,10 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         self.FieldValueError = FieldValueError
         self.ceiling = field_module._MAX_ZERO_PAD_LENGTH
 
-        # The ledger is cumulative per context, so whatever ran earlier in this
-        # process -- a sibling class, another module -- has already earned
-        # allowance against it. Start every test from the unset default, as a
-        # freshly imported module would, rather than relying on a re-import per
-        # test to do it (GitHub issue #1065).
+        # The ledger is cumulative per context, and this class's tests share one
+        # import of the module, so an earlier test has already earned allowance
+        # against it. Start every test from the unset default, as a freshly
+        # imported module would (GitHub issue #1065).
         token = field_module._zero_pad_ledger.set(None)
         self.addCleanup(field_module._zero_pad_ledger.reset, token)
 
