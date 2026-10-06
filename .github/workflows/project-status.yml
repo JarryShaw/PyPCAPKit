@@ -50,9 +50,9 @@ on:
   pull_request_target:
     types: [opened, reopened, labeled, unlabeled, closed, ready_for_review]
   schedule:
-    # Nightly backstop for events this workflow missed -- a run cancelled by the
-    # concurrency group below before it re-read the labels, a GitHub outage, or a
-    # label changed while the secret was absent. 00:37 UTC sits well clear of the
+    # Nightly backstop for events this workflow missed -- a run dropped because
+    # its item's concurrency queue below was full, a GitHub outage, or a label
+    # changed while the secret was absent. 00:37 UTC sits well clear of the
     # Saturday jobs (CodeQL and GitHub Pages at 02:00, Python Compatibility at
     # 04:00, Lint at 06:00, Vendor and Conda Update at 10:00), and off the hour
     # mark that GitHub's scheduler queues most heavily.
@@ -64,18 +64,33 @@ on:
 permissions: {}
 
 # Event runs are keyed on the item number, so a label swap -- which fires an
-# `unlabeled` and a `labeled` within the same second -- serializes on one item,
-# and the later run supersedes the earlier. That is safe to cancel because each
-# run re-reads the labels rather than trusting its payload: the last one to run
-# sees the final state. Issues and pull requests share one number space, so the
-# key cannot collide across the two event types.
+# `unlabeled` and a `labeled` within the same second -- serializes on one item.
+# Issues and pull requests share one number space, so the key cannot collide
+# across the two event types.
 #
-# Scheduled and manual reconciles share their own group and are never cancelled
-# mid-run; a newer one only displaces one still pending, which would have done the
-# same work.
+# Nothing in a group is cancelled. `cancel-in-progress` used to cancel the older
+# run of a label swap, and a cancelled run stays on the PR head as a failed Sync
+# Status check although the newer run fixed the board (#1066). Dropping it is not
+# enough on its own: by default a group holds one pending run and cancels it when
+# a newer one arrives. `queue: max` lets up to 100 wait instead; only a run past
+# that is cancelled. GitHub documents both, and that the two keys together are a
+# validation error:
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+#
+# The board still ends right, whatever order the queue runs in -- GitHub states
+# that order is not guaranteed. Runs on one item never overlap, and each re-reads
+# the labels rather than trusting its payload. So the last run to execute starts
+# after every other run on the item has finished, including the one started by
+# the final label event. It therefore reads the final labels, and its write is
+# the last. The cost is that a burst of N events makes N runs instead of
+# collapsing into one, each a handful of API calls.
+#
+# Scheduled and manual reconciles share their own group and queue the same way.
+# A second reconcile waiting behind the first repeats its work, which is cheap at
+# nightly cadence.
 concurrency:
   group: project-status-${{ (github.event.issue.number || github.event.pull_request.number) && format('item-{0}', github.event.issue.number || github.event.pull_request.number) || 'reconcile' }}
-  cancel-in-progress: ${{ github.event_name == 'issues' || github.event_name == 'pull_request_target' }}
+  queue: max
 
 jobs:
   status:

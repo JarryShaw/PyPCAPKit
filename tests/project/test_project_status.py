@@ -17,7 +17,8 @@ tree, and each has its own class:
   announce the mistake. :class:`TestScannerFailsClosed` holds the line scan those
   assertions read to refusing any YAML it cannot read with certainty.
   :class:`TestConcurrency` evaluates the ``concurrency:``
-  expressions per event, so the cancel policy is pinned rather than eyeballed.
+  expressions per event and pins that no run is cancelled, so the queueing policy
+  is checked rather than eyeballed.
 
 :class:`TestBoardSync` drives the script against a fake GraphQL endpoint, which is
 as close to the live board as a unit test may get: the tier has no network and no
@@ -401,30 +402,36 @@ class TestWorkflowSafety(unittest.TestCase):
 
 
 class TestConcurrency(unittest.TestCase):
-    """Per-item runs supersede each other; reconciles never cancel mid-run."""
+    """Runs serialize per item, or per reconcile, and none is cancelled (#1066)."""
 
     def setUp(self) -> None:
-        pairs = dict(scan(WORKFLOW.read_text(encoding='utf-8')))
-        self.group = pairs[('concurrency', 'group')]
-        self.cancel = pairs[('concurrency', 'cancel-in-progress')]
+        self.concurrency = {path[1]: value
+                            for path, value in scan(WORKFLOW.read_text(encoding='utf-8'))
+                            if path[:1] == ('concurrency',)}
 
-    def resolve(self, context: 'dict') -> 'tuple[object, object]':
-        return evaluate_expression(self.group, context), evaluate_expression(self.cancel, context)
+    def group(self, context: 'dict') -> 'object':
+        return evaluate_expression(self.concurrency['group'], context)
 
     def test_item_events(self) -> None:
         for event, key in (('issues', 'github.event.issue.number'),
                            ('pull_request_target', 'github.event.pull_request.number')):
             with self.subTest(event=event):
-                group, cancel = self.resolve({'github.event_name': event, key: 42})
-                self.assertEqual(group, 'project-status-item-42')
-                self.assertIs(cancel, True)
+                self.assertEqual(self.group({'github.event_name': event, key: 42}),
+                                 'project-status-item-42')
 
     def test_reconcile(self) -> None:
         for event in ('schedule', 'workflow_dispatch'):
             with self.subTest(event=event):
-                group, cancel = self.resolve({'github.event_name': event})
-                self.assertEqual(group, 'project-status-reconcile')
-                self.assertIs(cancel, False)
+                self.assertEqual(self.group({'github.event_name': event}),
+                                 'project-status-reconcile')
+
+    def test_nothing_is_cancelled(self) -> None:
+        # A cancelled run stays on the PR head as a failed check. Without
+        # `queue: max` a group keeps one pending run and cancels it for the next;
+        # with `cancel-in-progress` the running one goes too, and GitHub rejects
+        # the two together.
+        self.assertEqual(sorted(self.concurrency), ['group', 'queue'])
+        self.assertEqual(self.concurrency['queue'], 'max')
 
 
 _TITLE = '${{ github.event.issue.title }}'
