@@ -11,9 +11,11 @@ tree, and each has its own class:
   Board" in :file:`process.rst` *is* that mapping. The table is parsed rather than
   restated here, so a row reordered or reworded on either side fails.
 * :class:`TestWorkflowSafety` -- the workflow runs on ``pull_request_target`` with
-  a secret in scope, so it must never check out code or read anything from the
-  pull request's head. Asserted over the file, because nothing at run time would
-  announce the mistake.
+  a secret in scope, so it must never check out code, never splice an expression
+  into a ``run:`` script, and never read the event payload outside ``env:`` beyond
+  the item number. Asserted over the file, because nothing at run time would
+  announce the mistake. :class:`TestConcurrency` evaluates the ``concurrency:``
+  expressions per event, so the cancel policy is pinned rather than eyeballed.
 
 :class:`TestBoardSync` drives the script against a fake GraphQL endpoint, which is
 as close to the live board as a unit test may get: the tier has no network and no
@@ -180,15 +182,106 @@ def strip_comments(text: 'str') -> 'str':
     return '\n'.join(line for line in text.splitlines() if not line.strip().startswith('#'))
 
 
+#: The one event-payload expression allowed outside an ``env:`` block: the item
+#: number, which keys the concurrency group. A number cannot carry a script.
+ITEM_NUMBER = 'github.event.issue.number || github.event.pull_request.number'
+
+_KEY_RE = re.compile(r'''(?P<key>[\w-]+|'[^']*'|"[^"]*"):(?:[ ]+(?P<rest>.*))?$''')
+_BLOCK_INDICATORS = {'|', '|-', '|+', '>', '>-', '>+'}
+
+
+def _unquote(value: 'str') -> 'str':
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        return value[1:-1]
+    return value
+
+
+def scan(text: 'str') -> 'list[tuple[tuple[str, ...], str]]':
+    """Every scalar in a workflow, as ``(key path, value)``; list indices dropped.
+
+    A line scan rather than a YAML parser, because :mod:`yaml` is in no extra of
+    :file:`pyproject.toml` and this check has to run everywhere.
+    :class:`TestYAMLAgreesWithTheScanner` holds it to :func:`yaml.safe_load`
+    wherever PyYAML is installed. It understands the subset these workflows use:
+    block mappings, ``- `` sequence items, block scalars (``|``, ``>``), quoted and
+    plain inline scalars, and flow sequences of plain scalars.
+
+    """
+    lines = text.splitlines()
+    out = []  # type: list[tuple[tuple[str, ...], str]]
+    stack = []  # type: list[tuple[int, str]]
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        i += 1
+        if not line.strip() or line.strip().startswith('#'):
+            continue
+        indent = len(line) - len(line.lstrip(' '))
+        content = line.strip()
+        while content.startswith('- ') or content == '-':
+            content = content[2:].lstrip()
+            indent += 2
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        path = tuple(key for _, key in stack)
+        match = _KEY_RE.match(content)
+        if match is None:
+            out.append((path, _unquote(content)))
+            continue
+        key = _unquote(match.group('key'))
+        rest = (match.group('rest') or '').strip()
+        if rest in _BLOCK_INDICATORS:
+            block = []
+            while i < len(lines) and (not lines[i].strip()
+                                      or len(lines[i]) - len(lines[i].lstrip(' ')) > indent):
+                block.append(lines[i].strip())
+                i += 1
+            out.append((path + (key,), '\n'.join(block).strip()))
+        elif not rest:
+            stack.append((indent, key))
+        elif rest.startswith('[') and rest.endswith(']'):
+            out.extend((path + (key,), _unquote(item)) for item in rest[1:-1].split(',') if item.strip())
+        elif rest != '{}':
+            out.append((path + (key,), _unquote(rest)))
+    return out
+
+
+def evaluate_expression(value: 'str', context: 'dict') -> 'object':
+    """Evaluate a workflow value's ``${{ }}`` parts against ``context``.
+
+    Enough of the expression language for this workflow's ``concurrency:`` --
+    context lookups, ``==``, ``&&``, ``||`` and ``format()`` -- with ``&&`` and
+    ``||`` returning an operand, as GitHub's do. An unknown context is ``null``.
+
+    """
+    def one(expr: 'str') -> 'object':
+        expr = re.sub(r'\bgithub\.[\w.]+',
+                      lambda m: repr(context.get(m.group(0))), expr)
+        expr = expr.replace('&&', ' and ').replace('||', ' or ')
+        return eval(expr, {'__builtins__': {}},  # nosec B307 -- test-only, fixed input
+                    {'format': lambda fmt, *args: fmt.format(*args)})
+
+    parts = re.split(r'\$\{\{(.*?)\}\}', value)
+    if len(parts) == 3 and not parts[0].strip() and not parts[2].strip():
+        return one(parts[1])
+    if len(parts) == 1:
+        return {'true': True, 'false': False}.get(value, value)
+    return ''.join(part if n % 2 == 0 else str(one(part)) for n, part in enumerate(parts))
+
+
 class TestWorkflowSafety(unittest.TestCase):
     """The ``pull_request_target`` job runs no code from the pull request."""
 
     def setUp(self) -> None:
         self.raw = WORKFLOW.read_text(encoding='utf-8')
         self.text = strip_comments(self.raw)
+        self.pairs = scan(self.raw)
 
     def test_runs_on_pull_request_target(self) -> None:
-        # Without this the two tests below would pass vacuously on a workflow that
+        # Without this the tests below would pass vacuously on a workflow that
         # had dropped the trigger they exist to guard.
         self.assertRegex(self.text, r'(?m)^  pull_request_target:')
 
@@ -201,6 +294,25 @@ class TestWorkflowSafety(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertNotIn(marker, self.text)
 
+    def test_no_expression_inside_a_run_script(self) -> None:
+        # An expression is substituted into the script text before the shell sees
+        # it, so a PR title containing `'; curl … | sh #` becomes code. Values
+        # reach the script through `env:` only.
+        runs = [(path, value) for path, value in self.pairs if path[-1] == 'run']
+        self.assertTrue(runs, 'the scanner found no run: block to check')
+        for path, value in runs:
+            with self.subTest(path='.'.join(path)):
+                self.assertNotIn('${{', value)
+
+    def test_event_payload_only_in_env(self) -> None:
+        for path, value in self.pairs:
+            if 'github.event.' not in value or 'env' in path:
+                continue
+            with self.subTest(path='.'.join(path)):
+                self.assertNotIn('github.event.', value.replace(ITEM_NUMBER, ''),
+                                 'an event-payload reference outside env: other than the '
+                                 'item number')
+
     def test_script_fetched_at_the_base_sha(self) -> None:
         self.assertIn('SCRIPT_REF: ${{ github.sha }}', self.text)
         self.assertIn('ref=${SCRIPT_REF}', self.text)
@@ -209,15 +321,66 @@ class TestWorkflowSafety(unittest.TestCase):
         self.assertRegex(self.text, r'(?m)^permissions: \{\}$')
         self.assertRegex(self.text, r'(?m)^\s+timeout-minutes: \d+$')
 
-    def test_yaml_agrees(self) -> None:
+
+class TestConcurrency(unittest.TestCase):
+    """Per-item runs supersede each other; reconciles never cancel mid-run."""
+
+    def setUp(self) -> None:
+        pairs = dict(scan(WORKFLOW.read_text(encoding='utf-8')))
+        self.group = pairs[('concurrency', 'group')]
+        self.cancel = pairs[('concurrency', 'cancel-in-progress')]
+
+    def resolve(self, context: 'dict') -> 'tuple[object, object]':
+        return evaluate_expression(self.group, context), evaluate_expression(self.cancel, context)
+
+    def test_item_events(self) -> None:
+        for event, key in (('issues', 'github.event.issue.number'),
+                           ('pull_request_target', 'github.event.pull_request.number')):
+            with self.subTest(event=event):
+                group, cancel = self.resolve({'github.event_name': event, key: 42})
+                self.assertEqual(group, 'project-status-item-42')
+                self.assertIs(cancel, True)
+
+    def test_reconcile(self) -> None:
+        for event in ('schedule', 'workflow_dispatch'):
+            with self.subTest(event=event):
+                group, cancel = self.resolve({'github.event_name': event})
+                self.assertEqual(group, 'project-status-reconcile')
+                self.assertIs(cancel, False)
+
+
+def yaml_pairs(node, path=()):
+    """:func:`scan`'s output, computed from :func:`yaml.safe_load` instead."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            key = 'on' if key is True else str(key)
+            yield from yaml_pairs(value, path + (key,))
+    elif isinstance(node, list):
+        for value in node:
+            yield from yaml_pairs(value, path)
+    elif node is not None:
+        yield path, node.strip() if isinstance(node, str) else str(node)
+
+
+class TestYAMLAgreesWithTheScanner(unittest.TestCase):
+    """The hand-rolled :func:`scan` reads the workflow as PyYAML does."""
+
+    def setUp(self) -> None:
         try:
             import yaml
         except ImportError:  # pragma: no cover
             self.skipTest('PyYAML not installed')
-        doc = yaml.safe_load(self.raw)
-        on = doc.get('on', doc.get(True))
-        self.assertIn('pull_request_target', on)
-        for name, job in doc['jobs'].items():
+        self.raw = WORKFLOW.read_text(encoding='utf-8')
+        self.doc = yaml.safe_load(self.raw)
+
+    def test_same_scalars(self) -> None:
+        def norm(pairs):
+            return sorted((path, ' '.join(str(value).split()).lower()) for path, value in pairs)
+        self.assertEqual(norm(scan(self.raw)), norm(yaml_pairs(self.doc)))
+
+    def test_no_step_uses_an_action(self) -> None:
+        self.assertIn('pull_request_target', self.doc.get('on', self.doc.get(True)))
+        for name, job in self.doc['jobs'].items():
             for step in job['steps']:
                 with self.subTest(job=name, step=step.get('name')):
                     self.assertNotIn('uses', step)
@@ -242,7 +405,8 @@ def item(number, *labels, state='OPEN', kind='Issue', on_board=None):
 class FakeGraphQL:
     """Answers the script's queries from fixtures and records its mutations."""
 
-    def __init__(self, items, project_id=PROJECT, field_id=FIELD, options=None):
+    def __init__(self, items, project_id=PROJECT, field_id=FIELD, options=None, issue_count=None):
+        self.issue_count = issue_count
         self.items = {it['number']: it for it in items}
         self.project_id = project_id
         self.field_id = field_id
@@ -262,7 +426,9 @@ class FakeGraphQL:
             self.searches.append(variables['q'])
             want_open = 'is:open' in variables['q']
             nodes = [it for it in self.items.values() if (it['state'] == 'OPEN') == want_open]
-            return {'search': {'pageInfo': {'hasNextPage': False, 'endCursor': None}, 'nodes': nodes}}
+            count = len(nodes) if self.issue_count is None else self.issue_count
+            return {'search': {'issueCount': count, 'nodes': nodes,
+                               'pageInfo': {'hasNextPage': False, 'endCursor': None}}}
         if 'addProjectV2ItemById' in query:
             self.mutations.append(('add', variables['content']))
             return {'addProjectV2ItemById': {'item': {'id': 'PVTI_new'}}}
@@ -331,6 +497,22 @@ class TestBoardSync(unittest.TestCase):
                                          'repo:JarryShaw/PyPCAPKit is:closed closed:>=2026-09-28'])
         self.assertEqual(fake.mutations, [('set', 'PVTI_1', OPTIONS['WIP']),
                                           ('set', 'PVTI_2', OPTIONS['Done'])])
+
+    def test_a_complete_reconcile_does_not_warn(self) -> None:
+        _, out = self.run_main(['--reconcile'], FakeGraphQL([item(1, on_board='Pending')]))
+        self.assertNotIn('::warning', out)
+
+    def test_a_truncated_reconcile_warns(self) -> None:
+        # Search returns at most 1000 results; issueCount still says how many matched.
+        for count in (1001, 5):
+            with self.subTest(issue_count=count):
+                fake = FakeGraphQL([item(1, 'wip', on_board='Pending')], issue_count=count)
+                code, out = self.run_main(['--reconcile'], fake)
+                self.assertEqual(code, 0)
+                self.assertIn('::warning', out)
+                self.assertIn('partial', out)
+                # The items that did come back are still synced.
+                self.assertIn(('set', 'PVTI_1', OPTIONS['WIP']), fake.mutations)
 
     def test_a_recreated_board_is_refused(self) -> None:
         fake = FakeGraphQL([item(1)], project_id='PVT_other')

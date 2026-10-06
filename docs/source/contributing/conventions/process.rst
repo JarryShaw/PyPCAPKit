@@ -367,7 +367,8 @@ built-in workflows can only be configured in the web interface.
 
 The remaining transitions follow a label change, which no built-in workflow observes,
 so :file:`.github/workflows/project-status.yml` applies them: on every label change,
-open, reopen and close of an issue or pull request it re-reads the item's labels and
+open, reopen and close of an issue or pull request, and on a draft pull request being
+marked ready for review (``ready_for_review``), it re-reads the item's labels and
 sets Status by the table above, adding the item to the board first if it is missing.
 The mapping is ``status_for`` in :file:`util/project_status.py`, and a test holds it
 to the table. A **nightly run is the backstop** for missed events, reconciling every

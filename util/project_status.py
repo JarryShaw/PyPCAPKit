@@ -54,6 +54,9 @@ FIELD_NAME = 'Status'
 
 #: How far back ``--reconcile`` looks at closed items, in days.
 RECENT_DAYS = 7
+#: GitHub's search returns at most this many results for one query, however many
+#: match; ``issueCount`` still reports the full number.
+SEARCH_LIMIT = 1000
 
 DONE = 'Done'
 NEEDS_DECISION = 'Needs decision'
@@ -150,6 +153,7 @@ query($owner: String!, $repo: String!, $number: Int!) {
 _SEARCH_QUERY = _ITEM_FIELDS + '''
 query($q: String!, $after: String) {
   search(query: $q, type: ISSUE, first: 50, after: $after) {
+    issueCount
     pageInfo { hasNextPage endCursor }
     nodes { ...Item }
   }
@@ -237,15 +241,28 @@ def fetch_item(graphql: 'GraphQL', repo: 'str', number: 'int') -> 'dict[str, Any
 
 
 def search_items(graphql: 'GraphQL', query: 'str') -> 'list[dict[str, Any]]':
-    """Every issue and pull request matching a search ``query``, all pages."""
+    """Every issue and pull request matching a search ``query``, all pages.
+
+    Search stops at :data:`SEARCH_LIMIT` results, so a query matching more than that
+    -- or returning fewer items than it reports matching -- is a partial reconcile.
+    That is warned about rather than raised: syncing the items that did come back is
+    still better than syncing none.
+
+    """
     items = []  # type: list[dict[str, Any]]
     after = None  # type: Optional[str]
+    total = 0
     while True:
         page = graphql(_SEARCH_QUERY, {'q': query, 'after': after})['search']
+        total = max(total, page.get('issueCount') or 0)
         items.extend(node for node in page['nodes'] if node)
         if not page['pageInfo']['hasNextPage']:
-            return items
+            break
         after = page['pageInfo']['endCursor']
+    if total > SEARCH_LIMIT or len(items) < total:
+        print(f'::warning title=Project Status::search {query!r} matched {total} item(s) but '
+              f'returned {len(items)}; this reconcile is partial (search caps at {SEARCH_LIMIT}).')
+    return items
 
 
 def reconcile_queries(repo: 'str', today: 'datetime.date') -> 'list[str]':

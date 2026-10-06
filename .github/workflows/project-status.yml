@@ -22,9 +22,23 @@ name: Project Status
 #     `env:` rather than interpolated into the script, and re-reads everything else
 #     (labels, state) from the API.
 #
-# tests/project/test_project_status.py asserts the first and the last of those over
-# this file, so a later edit that adds a checkout or reads the PR head fails a test
-# rather than a security review.
+# tests/project/test_project_status.py asserts all three over this file -- no
+# checkout or `uses:`, no `${{ }}` inside a `run:` script, and no event-payload
+# reference outside `env:` other than the item number -- so a later edit that
+# breaks one fails a test rather than a security review.
+#
+# `workflow_dispatch` is the other way in, and it is not a fork boundary: it runs
+# the workflow file *of the branch selected* with PROJECT_TOKEN in scope. Only
+# someone with write access can dispatch, and write access can already change any
+# workflow, so this trusts collaborators rather than forks -- the same trust the
+# rest of the repository's secrets rely on.
+#
+# Event runs and reconciles are in different concurrency groups, so they can
+# overlap. A reconcile reads an item, an event run then sets a fresher Status,
+# and the reconcile writes its older answer over it. The window is the length of
+# one reconcile, and the damage is self-repairing: the item's next event, or the
+# next nightly run, re-reads the labels and sets it right. Serializing the two
+# would mean one global group, which lets a reconcile hold every event run.
 #
 # PROJECT_TOKEN is a classic PAT with `project` and `repo` scopes, because
 # GITHUB_TOKEN cannot write a user-owned project. Without it every run skips with a
