@@ -363,9 +363,19 @@ The board's built-in workflows do the transitions GitHub can see on its own --
 *Auto-add to project* for this repository, *Item closed* and *Pull request merged*
 both setting *Done*, and *Auto-add sub-issues*. **Item added to project stays off**:
 it stamps a default Status on every new item, overwriting the label-derived one. The
-remaining transitions follow a label change, which no workflow observes, so they are
-applied by hand alongside the label. The workflows can only be configured in the web
-interface.
+built-in workflows can only be configured in the web interface.
+
+The remaining transitions follow a label change, which no built-in workflow observes,
+so :file:`.github/workflows/project-status.yml` applies them: on every label change,
+open, reopen and close of an issue or pull request it re-reads the item's labels and
+sets Status by the table above, adding the item to the board first if it is missing.
+The mapping is ``status_for`` in :file:`util/project_status.py`, and a test holds it
+to the table. A **nightly run is the backstop** for missed events, reconciling every
+open item and everything closed in the last seven days. The workflow writes with the
+``PROJECT_TOKEN`` repository secret, a classic token with ``project`` and ``repo``
+scopes, because ``GITHUB_TOKEN`` cannot write a user-owned project; **without the
+secret every run skips with a notice** rather than failing, and Status falls back to
+being set by hand.
 
 The board has seven views: *All items*; *Board*, the open items in one column per
 Status; *Release 1.5*, the open milestone; *Needs decision* and *Blocked*, each the
