@@ -51,7 +51,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
             network=LinkType.ETHERNET,
         )
         data = DummyData(
-            magic_number=DummyData(data=b'\xa1\xb2\x3c\x4d'),
+            magic_number=DummyData(data=b'\xa1\xb2\x3c\x4d', byteorder='big', nanosecond=True),
             version=SimpleNamespace(major=2, minor=4),
             thiszone=0,
             sigfigs=0,
@@ -71,6 +71,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         self.assertEqual(override_schema.version_minor, 9)
         self.assertEqual(override_schema.network, LinkType.ETHERNET)
         self.assertEqual(Header._make_data(data)['network'], LinkType.ETHERNET)
+        self.assertEqual(Header._make_data(data)['byteorder'], 'big')
+        self.assertTrue(Header._make_data(data)['nanosecond'])
         with self.assertRaises(UnsupportedCall):
             Header.__index__()
 
