@@ -32,8 +32,8 @@ import unittest
 
 __all__ = ['AppTypeSplitTests']
 
-#: Stride of :func:`_dunder_sample`: about 48 evenly spaced members of each
-#: registry, plus the ones it always keeps.
+#: Divisor of :func:`_dunder_sample`'s stride, ``len(registry) // 48``: about 50
+#: evenly spaced members of TCP and UDP, and every member of a registry under 96.
 _DUNDER_SAMPLE_SIZE = 48
 
 
@@ -46,7 +46,7 @@ def _dunder_sample(registry: 'type') -> 'list':
     registry, the port and the service name never change which code runs. So
     the sample keeps every member that carries an alias (the suffix branch),
     the first and last row, and an evenly spaced stride through the rest, which
-    covers all four sets in every registry and is the same list on every run.
+    covers all four sets across the registries and is the same list on every run.
 
     """
     members = list(registry)
@@ -1208,12 +1208,12 @@ class AppTypeSplitTests(unittest.TestCase):
         """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` moved
         from ``%`` formatting to f-strings, and ``__new__``'s format sets every
         real member's underlying :class:`~aenum.StrEnum` value -- a far larger
-        blast radius than an error path. This was once checked member by
-        member; it is now a deterministic sample, because one f-string formats
-        every member and the sweep only ever reached four distinct code paths
-        (see :func:`_dunder_sample`).
+        blast radius than an error path. It is checked on a deterministic
+        sample rather than member by member, because one f-string formats every
+        member and a full sweep reaches only four distinct code paths (see
+        :func:`_dunder_sample`).
 
-        The population is still counted over all 12,391 real members (TCP 6147,
+        The population is counted over all 12,391 real members (TCP 6147,
         UDP 6143, SCTP 91, DCCP 10, matching the population PR #783 measured),
         but only :func:`_dunder_sample` is formatted, each member compared
         against what the pre-#798 ``%``-style formula would have produced for

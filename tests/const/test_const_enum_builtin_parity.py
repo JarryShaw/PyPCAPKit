@@ -676,7 +676,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        # Per test, unlike most classes since GitHub issue #1065: these read the
+        # Per test, not per class (``reimport_once_per_class``): these read the
         # registries' lookup tables, which any earlier lookup in the same import
         # can grow -- ``Flags(0)`` anywhere caches ``0`` as a pseudo-member, and
         # ``Flags.get(UNRESOLVABLE, 0)`` then resolves instead of raising.

@@ -102,13 +102,11 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
     missing altogether. That one-second floor covers every case where the body ran
     for longer than the enclosing deadline had left.
 
-    The deadline is a wall-clock one, so it measures the runner as much as the
-    body: a 5-second default, against bodies that take single-digit milliseconds,
-    still expired on a loaded 4-core CI runner under :program:`pytest-xdist`
-    (#1058). Hence the 30-second default, the same bound the extraction tests
-    already used -- several thousand times a working body, and still a fast failure
-    next to a run that never ends -- and :func:`scale_timeout` on top, for a runner
-    slower than that.
+    The deadline is wall-clock, so it measures the runner as much as the body: five
+    seconds over a body of single-digit milliseconds has expired on a loaded 4-core
+    CI runner under :program:`pytest-xdist` (#1058). Hence the 30-second default --
+    several thousand times a working body, and still a fast failure next to a run
+    that never ends -- and :func:`scale_timeout` for a runner slower than that.
 
     Args:
         seconds: Whole seconds to allow the body, before
@@ -139,9 +137,8 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
 
     previous_handler = signal.signal(signal.SIGALRM, expire)
 
-    # Armed inside the ``try``, so that anything raised while arming -- the
-    # ``OverflowError`` an oversized value once produced, say -- still puts the
-    # previous handler back on the way out rather than leaking ``expire``.
+    # Armed inside the ``try``, so that anything raised while arming still puts
+    # the previous handler back on the way out rather than leaking ``expire``.
     armed = False
     pending = 0
     started = time.monotonic()
@@ -936,26 +933,25 @@ _CLASS_IMPORT = '_pcapkit_class_import'
 def reimport_once_per_class(test: 'unittest.TestCase', restore: bool = False) -> None:
     """Give ``test``'s class one fresh :mod:`pcapkit` import, shared by its tests.
 
-    GitHub issue #1065. Calling :func:`purge_modules` from ``setUp`` re-imports
-    the package before every test -- about 0.67s and 329 modules each, which was
-    some 85% of the suite's serial time. Call this from ``setUp`` instead. The
-    first test of the class purges, and the class keeps what that test imports.
-    Every later test of the class has that same import put back in
-    :data:`sys.modules`. So a class gets a private import, which its own tests
-    may mutate, and the import is dropped when the class finishes. Nothing is
-    imported here: a class that only loads modules by path, or that never
-    imports :mod:`pcapkit` at all, keeps an empty region, as it did before.
+    GitHub issue #1065. Call this from ``setUp`` in place of
+    :func:`purge_modules`, under which every test re-imports the package -- about
+    0.67s and 329 modules each, some 85% of the suite's serial time. The first
+    test of the class purges, and the class keeps what its tests import; every
+    later test has that import put back in :data:`sys.modules`. So a class gets a
+    private import, which its own tests may mutate, and lets go of it when the
+    class finishes. Nothing is imported here: a class that only loads modules by
+    path, or never imports :mod:`pcapkit` at all, keeps an empty region.
 
     A purge in ``setUpClass`` would not do this under :program:`pytest`.
     :func:`tests.conftest.restore_module_table` swaps the region back to its
     session-wide pin before every test, so such a class would run on the shared
-    import that every other class mutates as well. That is exactly the
-    cross-class leakage a per-test purge used to hide.
+    import that every other class mutates as well -- the cross-class leakage a
+    private import rules out.
 
-    Under plain :mod:`unittest`, the import is also left in place after the class
-    finishes, as a per-test purge left one. ``util/run_unittest_leg.py`` relies
-    on that to catch a module still holding an earlier import (GitHub issue
-    #981).
+    Under plain :mod:`unittest`, unless ``restore`` is set, the import is also
+    left in place after the class finishes, as a per-test purge leaves the last
+    test's. ``util/run_unittest_leg.py`` relies on that to catch a module still
+    holding an earlier import (GitHub issue #981).
 
     Args:
         test: The test being set up.
@@ -984,11 +980,11 @@ def _keep_lazy_imports(held: 'dict[str, types.ModuleType]') -> None:
 
     This is how the class's import is built up. Without it, the conftest restore
     drops a submodule imported during the test, and the next test of the class
-    imports it again as a second module object. The parent package still holds the first one as an attribute, and
-    :func:`unittest.mock.patch` resolves through that attribute before Python
-    3.12 -- so a patch landed on a module the code under test no longer used.
-    Only modules loaded from a file are kept; a stand-in a test bound, and its
-    own cleanup has not removed, is not.
+    imports it again as a second module object. The parent package still holds
+    the first one as an attribute, and :func:`unittest.mock.patch` resolves
+    through that attribute before Python 3.12 -- so a patch would land on a module
+    the code under test no longer uses. Only modules loaded from a file are kept;
+    a stand-in a test bound, and its own cleanup has not removed, is not.
 
     """
     for name, module in snapshot_modules(ISOLATED_PREFIXES).items():

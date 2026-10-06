@@ -2245,8 +2245,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     ``_member_map_``/``_value2member_map_`` lookup does not do -- swapping in
     the base would silently reintroduce #582. That pin lives in
     :mod:`tests.const.test_const_method_case_sensitive_896_unit`
-    (``test_command_get_stays_case_insensitive``), whose body this class used
-    to repeat verbatim.
+    (``test_command_get_stays_case_insensitive``).
 
     :class:`Method` used to resolve case-insensitively the same way (#583),
     but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP

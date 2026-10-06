@@ -41,9 +41,9 @@ three siblings end in that same tail, the one
 this module carries a companion sweep over the :class:`~aenum.IntFlag` classes,
 covering the contract the :class:`~aenum.IntEnum` sweep declines to.
 
-Every test class re-imports :mod:`pcapkit` for itself from ``setUp``,
-matching the convention every other module in this suite uses (see
-:func:`tests._support.reimport_once_per_class`). It matters more here than usual: this
+Every test class purges :mod:`pcapkit` before its tests import it -- from
+``setUp`` through :func:`tests._support.reimport_once_per_class`, or in
+``setUpClass`` -- matching the rest of the suite. It matters more here than usual: this
 module is the first thing in the whole suite to import *every* submodule
 under :mod:`pcapkit.const`, including ones nothing else touches (e.g.
 :mod:`pcapkit.const.reg.apptype`). ``tests/cli/test_main.py`` stubs pieces of

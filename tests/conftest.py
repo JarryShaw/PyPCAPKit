@@ -70,10 +70,9 @@ _pinned_snapshot = None  # type: Optional[dict[str, types.ModuleType]]
 def _pin_module_snapshot() -> None:
     """Capture the :mod:`pcapkit` region as the restore target, once.
 
-    :func:`restore_module_table` used to restore to a snapshot taken at its own
-    entry -- "whatever the region held when this test began" -- which is exact
-    for a leak the fixture's own window can see, but blind to one planted
-    outside it. :meth:`~unittest.TestCase.setUpClass` runs *before* the first
+    :func:`restore_module_table` restores to this pinned snapshot, not to one
+    taken at its own entry. An entry snapshot is exact for a leak the fixture's
+    own window can see, but blind to one planted outside it. :meth:`~unittest.TestCase.setUpClass` runs *before* the first
     test's fixture entry and a class-level cleanup runs *after* the last one's
     fixture exit, so a purge in either place is invisible to an entry-snapshot
     restore: the entry snapshot for that first test is already the post-purge
@@ -140,12 +139,11 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     this import, and every later test -- including a purging class's own first
     one -- is restored to it going in as well as coming out, regardless of
     whether that class reloads anything for itself.
-    :class:`tests.integration._helpers.EndToEndTestCase` does reload immediately
-    after its own purge, for the unrelated reason given in its own docstring --
-    saving roughly 45s across its 92 test methods -- and nothing here disturbs
-    that: rebinding :data:`sys.modules` to the pin does not invalidate a module
-    object a class attribute already holds a direct reference to, so a class
-    that reimports for itself keeps exactly what it reimported.
+    So a class that purges and reimports for itself, as
+    :class:`tests.integration._helpers.EndToEndTestCase` does, still runs its
+    tests on the pin. Only a module object a class attribute holds a direct
+    reference to survives the rebinding, since restoring :data:`sys.modules`
+    does not invalidate it.
 
     Warming it also means the restore is a no-op for the common case. A test
     that imports the library and nothing else leaves the region exactly as it
@@ -260,8 +258,7 @@ def pytest_timeout_cancel_timer(item: 'pytest.Item') -> 'Iterator[None]':
     installs fresh tbtrim hooks there, so each retained timer pins the
     :mod:`pcapkit` generation that was live when its test started. Measured on
     ``tests/const/test_const_registry_protocol.py`` under ``thread``: past 9 GiB
-    and killed, against 283 MiB with this hook. That growth is what took every
-    ``test`` leg's runner down at about 13% on CI. ``optionalhook``: without
+    and killed, against 283 MiB with this hook. ``optionalhook``: without
     pytest-timeout installed the hookspec does not exist.
 
     """
