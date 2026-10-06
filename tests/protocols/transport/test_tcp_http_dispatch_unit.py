@@ -11,11 +11,10 @@ port cannot decide the version and the payload has to, which is what
 :class:`pcapkit.protocols.application.http.HTTP` does.
 
 Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
-segments below are built in memory, and the HTTP/2 payload is the *verbatim*
-nine octets that :file:`examples/captures/options-transport.pcap` frame 34
-carries -- a fixture this library's own ``httpv2.HTTP.make`` produced -- rather
-than a hand-rolled frame, so the frame is whatever the library itself writes and
-cannot fail for a reason that has nothing to do with dispatch.
+segments below are built in memory, and the HTTP/2 payload is the nine octets
+this library's own ``httpv2.HTTP`` writes for an empty ``DATA`` frame on stream
+1, rather than a hand-rolled frame, so the frame is whatever the library itself
+writes and cannot fail for a reason that has nothing to do with dispatch.
 
 """
 
@@ -36,9 +35,11 @@ _TCP_TO_80 = bytes.fromhex('c350005000000001000000015010ffff00000000')
 _TCP_TO_8080 = bytes.fromhex('c3501f9000000001000000015010ffff00000000')
 
 #: A nine-octet HTTP/2 ``DATA`` frame: declared length 0 (the payload, the
-#: header excluded), type 0, no flags, stream 0. Copied verbatim from
-#: ``options-transport.pcap`` frame 34.
-_HTTP2_FRAME = bytes.fromhex('000000000000000000')
+#: header excluded), type 0, no flags, stream 1, as
+#: ``httpv2.HTTP(type=Frame.DATA, sid=1, frame={'data': b''})`` writes it. A
+#: ``DATA`` frame needs a non-zero stream (:rfc:`9113#section-6.1`), so the
+#: version guess does not take a stream-0 one for HTTP/2.
+_HTTP2_FRAME = bytes.fromhex('000000000000000001')
 #: A minimal HTTP/1.1 request, which must keep decoding as HTTP/1.1.
 _HTTP1_REQUEST = b'GET / HTTP/1.1\r\nHost: example.invalid\r\n\r\n'
 

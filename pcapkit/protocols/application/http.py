@@ -39,6 +39,65 @@ __all__ = ['HTTP']
 #: :meth:`HTTP._guess_version` tests it before attempting any parse.
 _HTTP2_PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 
+#: What :rfc:`9113#section-6` allows a sender to put in the frame header of each
+#: frame type it defines: the flags that type defines, and the stream identifier
+#: it is sent on -- ``True`` for a non-zero stream, ``False`` for stream 0 and
+#: :obj:`None` for either. :meth:`HTTP._guess_version` checks a bare frame
+#: against this before its HTTP/2 trial parse; see :func:`_test_http2_frame`.
+_HTTP2_FRAME_RULES = {
+    0x0: (0x09, True),    # DATA: END_STREAM, PADDED (Section 6.1)
+    0x1: (0x2D, True),    # HEADERS: END_STREAM, END_HEADERS, PADDED, PRIORITY (Section 6.2)
+    0x2: (0x00, True),    # PRIORITY (Section 6.3)
+    0x3: (0x00, True),    # RST_STREAM (Section 6.4)
+    0x4: (0x01, False),   # SETTINGS: ACK (Section 6.5)
+    0x5: (0x0C, True),    # PUSH_PROMISE: END_HEADERS, PADDED (Section 6.6)
+    0x6: (0x01, False),   # PING: ACK (Section 6.7)
+    0x7: (0x00, False),   # GOAWAY (Section 6.8)
+    0x8: (0x00, None),    # WINDOW_UPDATE: either stream (Section 6.9)
+    0x9: (0x04, True),    # CONTINUATION: END_HEADERS (Section 6.10)
+}  # type: dict[int, tuple[int, Optional[bool]]]
+
+
+def _test_http2_frame(data: 'bytes') -> 'bool':
+    """Test whether ``data`` opens with a frame header a conforming sender could write.
+
+    This is a plausibility test for :meth:`HTTP._guess_version`'s fall-through
+    only. ``httpv2.HTTP`` itself parses every frame :rfc:`9113` lets a receiver
+    accept, which includes frames this test turns down.
+
+    Args:
+        data: Payload, starting at the frame header.
+
+    Returns:
+        :data:`True` if the nine-octet header carries a frame type defined by
+        :rfc:`9113#section-6`, sets no flag that type leaves undefined, leaves the
+        reserved bit clear, and names a stream that type may be sent on.
+
+    Notes:
+        Undefined flags and the reserved bit "MUST be left unset (0x00) when
+        sending" (:rfc:`9113#section-4.1`), and each stream rule is one a
+        receiver "MUST treat as a connection error" when broken (e.g. ``DATA``
+        on stream 0, :rfc:`9113#section-6.1`), so no frame a conforming peer
+        sends fails here. Frame types outside the ten that :rfc:`9113` defines
+        are legal and ignored by a receiver (:rfc:`9113#section-5.5`), but on a
+        payload with no other evidence they are what arbitrary binary looks
+        like most of the time, so they are not guessed.
+
+    """
+    if len(data) < 9:
+        return False
+    rules = _HTTP2_FRAME_RULES.get(data[3])
+    if rules is None:
+        return False
+    flags, stream = rules
+    if data[4] & ~flags:
+        return False
+    if data[5] & 0x80:
+        return False
+    if stream is None:
+        return True
+    return any(data[5:9]) is stream
+
 
 class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     """This class implements all protocols in HTTP family.
@@ -253,14 +312,16 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
               preface ahead of it, or an opaque HTTP/1 message body -- is
               genuinely undecidable from one payload, and the honest answer is
               the ``Raw`` that an escaping ``ProtocolError`` becomes under
-              :func:`~pcapkit.protocols.misc.raw.beholder`. In particular there
-              is deliberately *no* heuristic on the nine-octet frame header
-              ("type at most 9, reserved bit clear"): that misfires on binary
-              HTTP/1 bodies, which is precisely how garbage text was classified
-              HTTP/2 to begin with. A self-consistent bare frame is still parsed
-              as HTTP/2, but by the fall-through below -- on the parser's own
-              length/type consistency rules -- rather than by a guess dressed up
-              as identification.
+              :func:`~pcapkit.protocols.misc.raw.beholder`. The nine-octet frame
+              header is therefore never used to *identify* HTTP/2 ahead of
+              HTTP/1: as identification it misfires on binary HTTP/1 bodies,
+              which is precisely how garbage text was classified HTTP/2 to begin
+              with. A bare frame is parsed as HTTP/2 only by the fall-through
+              below, and only if its header is one a conforming sender could
+              write (see :func:`_test_http2_frame`): a frame type :rfc:`9113`
+              defines, no undefined flag, and a stream that type may be sent on.
+              Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error
+              under :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.
 
         """
         # NOTE: Positive identification, before any parse attempt. The preface is
@@ -367,6 +428,16 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # ``StructError.eof``, which ``NoPayload`` handling reads.
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._data, length, **kwargs)
+
+        # NOTE: The HTTP/2 trial runs only on a header that passes
+        # :func:`_test_http2_frame`. Since a frame's Length counts the payload
+        # alone (:rfc:`9113#section-4.1`), any nine octets with a small enough
+        # Length are self-consistent, so the parser's own checks accept most
+        # zero-heavy binary as a ``DATA`` frame or a frame of unknown type. The
+        # test rejects only headers that no conforming sender writes, and it
+        # gates this guess alone: an explicit ``version=2`` is not affected.
+        if not _test_http2_frame(self._data[:length]):
+            raise ProtocolError("unknown HTTP version")
 
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError, struct.error):

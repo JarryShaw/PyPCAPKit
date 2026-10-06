@@ -147,10 +147,18 @@ class HTTPUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.application.httpv2.HTTP', FakeHTTPv2):
             self.assertEqual(http.make(version=2, sid=1), ('v2-made', {'sid': 1}))
 
+        # The HTTP/2 arm runs only on a frame header a sender could write
+        # (#1141), so the fall-through is driven with one: an empty ``DATA``
+        # frame on stream 1.
+        frame = object.__new__(HTTP)
+        frame._data = http2_frame_bytes(0x0, 0, 1, b'')
+        frame._file = object()
+        frame.__cached__ = {}
+
         with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
                         mock.Mock(side_effect=ProtocolError('bad v1'))), \
                 mock.patch('pcapkit.protocols.application.httpv2.HTTP', FakeHTTPv2):
-            self.assertIsInstance(HTTP._guess_version(http, 9), FakeHTTPv2)
+            self.assertIsInstance(HTTP._guess_version(frame, 9), FakeHTTPv2)
         with mock.patch('pcapkit.protocols.application.httpv1.HTTP', FakeHTTPv1):
             self.assertIsInstance(HTTP._guess_version(http, 9), FakeHTTPv1)
         with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
@@ -158,7 +166,7 @@ class HTTPUnitTests(unittest.TestCase):
                 mock.patch('pcapkit.protocols.application.httpv2.HTTP',
                            mock.Mock(side_effect=ProtocolError('bad v2'))):
             with self.assertRaises(ProtocolError):
-                HTTP._guess_version(http, 9)
+                HTTP._guess_version(frame, 9)
 
     def test_http_make_dispatches_to_real_versioned_classes(self) -> None:
         """Regression test for GH-452.
@@ -427,12 +435,19 @@ class HTTPUnitTests(unittest.TestCase):
         ``test_guess_version_reaches_http2_on_the_connection_preface``, which is
         where that assertion belongs.
 
+        Since #1141 the HTTP/2 arm runs only on a frame header a sender could
+        write, and ``b'not http at all'`` (type ``0x20``) is turned away before
+        it. So the payload is now a ``DATA`` frame header on stream 1 that
+        declares 255 octets of payload, with six behind it. That header passes
+        the plausibility test, so arm 2 is entered, and the declared length then
+        makes the arm decline it, as "not"'s did.
+
         """
         from pcapkit.protocols.application.http import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         http = object.__new__(HTTP)
-        http._data = b'not http at all'
+        http._data = bytes.fromhex('0000ff000000000001') + b'x' * 6
 
         entered = []  # type: list[str]
         real_v1 = importlib.import_module('pcapkit.protocols.application.httpv1').HTTP
