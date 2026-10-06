@@ -934,7 +934,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         if schema.len != 6:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
-        func = schema.func
+        func = Enum_QSFunction.get(schema.flags['func'])
         if func == Enum_QSFunction.Quick_Start_Request:
             schema_req = cast('Schema_QuickStartRequestOption', schema)
 

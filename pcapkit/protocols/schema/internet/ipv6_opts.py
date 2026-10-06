@@ -252,7 +252,11 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     schema = QuickStartOption.registry[func]
     if schema is None:
         raise FieldValueError(f'IPv6-Opts: invalid QS function: {func}')
-    return SchemaField(length=5, schema=schema)
+
+    # NOTE: The suboption schemas carry the option's own ``type`` and ``len``
+    # octets, so this is the width of the whole option: the two header octets
+    # plus the six data octets :rfc:`4782#section-3.2` gives both functions.
+    return SchemaField(length=8, schema=schema)
 
 
 def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
