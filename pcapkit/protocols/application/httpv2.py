@@ -13,7 +13,7 @@ below:
 ======= ========= ===================== ==========================
 Octets      Bits        Name                    Description
 ======= ========= ===================== ==========================
-  0           0   ``http.length``             Length
+  0           0   ``http.length``             Payload Length
   3          24   ``http.type``               Type
   4          32   ``http.flags``              Flags
   5          40                               Reserved
@@ -290,12 +290,11 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         # than it claims report a length nothing backs (e.g. a nine-octet buffer
         # declaring 16777215). ``length`` is the number of octets actually
         # available for this frame (``Protocol.__len__`` returns
-        # ``len(self._data)``, and an explicit ``length`` means the same), so
-        # both have to clear the minimum header size *and* the declared value
-        # must not exceed what is available. This library's convention (see
-        # ``_make_http_length``) is that ``length`` counts the whole frame,
-        # header included, so the two are directly comparable.
-        if schema.length < 9 or length < 9 or schema.length > length:
+        # ``len(self._data)``, and an explicit ``length`` means the same), so it
+        # has to clear the 9-octet header *and* back the declared value. The
+        # declared value counts the frame payload only, the header excluded
+        # (:rfc:`9113#section-4.1`), so ``length`` must hold both.
+        if length < 9 or schema.length + 9 > length:
             raise ProtocolError(f'HTTP/2: [Type {schema.type}] invalid format')
         if schema.type in (Enum_Frame.SETTINGS, Enum_Frame.PING) and schema.stream['sid'] != 0:
             raise ProtocolError(f'HTTP/2: [Type {schema.type}] invalid format')
@@ -364,7 +363,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         for bit in range(8):
             flags_val[f'bit_{bit}'] = (int(flags) & (1 << bit)) >> bit
 
-        length = self._make_http_length(frame_val, flags) + 9
+        length = self._make_http_length(frame_val, flags)
 
         return Schema_HTTP(
             length=length,
@@ -634,7 +633,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if header.length != 9:
+        if header.length != 5:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         data = Data_PriorityFrame(
@@ -677,7 +676,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if header.length != 13:
+        if header.length != 4:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         data = Data_RSTStreamFrame(
@@ -721,7 +720,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if (header.length - 9) % 6 != 0 or header.stream['sid'] != 0:
+        if header.length % 6 != 0 or header.stream['sid'] != 0:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         flag = Data_SettingsFrameFlags(
@@ -731,7 +730,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             '__value__': schema.__flags__,
         })
 
-        if flag.ACK and header.length - 9 != 0:
+        if flag.ACK and header.length != 0:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         sets = OrderedMultiDict()  # type: OrderedMultiDict[Enum_Setting, int]
@@ -782,7 +781,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if header.length < 13:
+        if header.length < 4:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         flag = Data_PushPromiseFrameFlags(
@@ -836,7 +835,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if header.length != 17:
+        if header.length != 8:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         flag = Data_PingFrameFlags(
@@ -925,7 +924,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        if header.length != 13:
+        if header.length != 4:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
         data = Data_WindowUpdateFrame(

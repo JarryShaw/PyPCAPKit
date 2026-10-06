@@ -42,7 +42,7 @@ class Flags(Data):
 class HTTP(Protocol):
     """Data model for HTTP/2 protocol."""
 
-    #: Length.
+    #: Length of the frame payload, the 9-octet header excluded.
     length: 'int'
     #: Frame type.
     type: 'Frame'

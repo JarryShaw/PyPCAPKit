@@ -17,7 +17,7 @@ around ``packet['__length__'] < 0``), which this module does not touch. See
 :mod:`tests.corekit.test_fields_field`'s ``FieldBaseLengthNegativeResolvedLengthTests``
 for the property-level unit tests and the unaffected non-negative control.
 
-``read()``'s own ``schema.length > length`` guard (`httpv2.py`) cannot see
+``read()``'s own ``schema.length + 9 > length`` guard (`httpv2.py`) cannot see
 this class of input: the crash happens while resolving the *inner* frame's
 own fields, during :meth:`Schema.unpack`, before that comparison ever runs.
 So these are built by constructing :class:`HTTP` (HTTP/2) directly, which is
@@ -47,12 +47,12 @@ def http2_frame_bytes(type_: 'int', flags: 'int', sid: 'int', payload: 'bytes') 
         payload: The frame payload, header excluded.
 
     Returns:
-        The packed frame, its 3-octet length field counting the whole frame
-        (header included), this library's convention.
+        The packed frame, its 3-octet length field counting the payload only,
+        the 9-octet header excluded [:rfc:`9113#section-4.1`].
 
     """
     return (
-        (len(payload) + 9).to_bytes(3, 'big')
+        len(payload).to_bytes(3, 'big')
         + bytes([type_, flags])
         + sid.to_bytes(4, 'big')
         + payload

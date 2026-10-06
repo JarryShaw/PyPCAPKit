@@ -14,9 +14,8 @@ Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
 segments below are built in memory, and the HTTP/2 payload is the *verbatim*
 nine octets that :file:`examples/captures/options-transport.pcap` frame 34
 carries -- a fixture this library's own ``httpv2.HTTP.make`` produced -- rather
-than a hand-rolled frame, because HTTP/2's declared length is whole-frame here
-and a synthetic frame written to the payload-only convention would fail for a
-reason that has nothing to do with dispatch.
+than a hand-rolled frame, so the frame is whatever the library itself writes and
+cannot fail for a reason that has nothing to do with dispatch.
 
 """
 
@@ -36,9 +35,10 @@ _TCP_TO_80 = bytes.fromhex('c350005000000001000000015010ffff00000000')
 #: The same, to port 8080.
 _TCP_TO_8080 = bytes.fromhex('c3501f9000000001000000015010ffff00000000')
 
-#: A nine-octet HTTP/2 ``DATA`` frame: declared length 9, type 0, no flags,
-#: stream 0. Copied verbatim from ``options-transport.pcap`` frame 34.
-_HTTP2_FRAME = bytes.fromhex('000009000000000000')
+#: A nine-octet HTTP/2 ``DATA`` frame: declared length 0 (the payload, the
+#: header excluded), type 0, no flags, stream 0. Copied verbatim from
+#: ``options-transport.pcap`` frame 34.
+_HTTP2_FRAME = bytes.fromhex('000000000000000000')
 #: A minimal HTTP/1.1 request, which must keep decoding as HTTP/1.1.
 _HTTP1_REQUEST = b'GET / HTTP/1.1\r\nHost: example.invalid\r\n\r\n'
 

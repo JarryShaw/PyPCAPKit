@@ -35,15 +35,12 @@ def http2_schema(**kwargs: object) -> SimpleNamespace:
 def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes:
     """Build the wire bytes of one HTTP/2 frame.
 
-    The length field counts the *whole* frame, header included -- this
-    library's convention rather than :rfc:`9113#section-4.1`'s, as the NOTE in
-    :meth:`test_unregistered_frame_type_does_not_mutate_the_class_registry`
-    spells out. ``make`` writes ``payload + 9`` and the readers recover the
-    payload as ``length - 9``.
+    The length field counts the frame payload only, the 9-octet header
+    excluded [:rfc:`9113#section-4.1`].
 
     """
     return (
-        (len(payload) + 9).to_bytes(3, 'big')
+        len(payload).to_bytes(3, 'big')
         + bytes([type_, flags])
         + sid.to_bytes(4, 'big')
         + payload
@@ -550,8 +547,8 @@ class HTTPUnitTests(unittest.TestCase):
         * the parsed frame is *the SETTINGS frame*, byte-identical to reading
           that frame on its own -- which is what proves the preface was skipped
           rather than consumed as framing;
-        * the reported declared length is the frame's real 9, not a number the
-          preface's ASCII happens to spell.
+        * the reported declared length is the empty SETTINGS frame's real 0,
+          not a number the preface's ASCII happens to spell.
 
         """
         import io
@@ -579,7 +576,7 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(guessed.length, len(preface) + frame_only.length)
         self.assertEqual(guessed.info, frame_only.info)
         self.assertEqual(guessed.info.packet, b'')
-        self.assertEqual(guessed.info.length, 9)
+        self.assertEqual(guessed.info.length, 0)
         self.assertNotEqual(guessed.info.length, 5265993)
         self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
 
@@ -912,8 +909,8 @@ class HTTPUnitTests(unittest.TestCase):
         arms fail with :class:`~pcapkit.utilities.exceptions.ProtocolError`, so
         it needs a payload that ``httpv2.HTTP`` rejects too -- a frame whose
         declared length contradicts its type. A PING frame carries eight octets
-        of opaque data and so must declare 17 by this library's whole-frame
-        convention; 9 is refused by ``_read_http_ping``.
+        of opaque data and so must declare 8 [:rfc:`9113#section-6.7`]; 0 is
+        refused by ``_read_http_ping``.
 
         A frame is used as the probe rather than short garbage because it
         exercises the intended route: both arms declining with
@@ -930,7 +927,7 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.protocols.application.http import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
-        raw = http2_frame_bytes(0x06, 0x00, 0, b'')  # PING, declared length 9
+        raw = http2_frame_bytes(0x06, 0x00, 0, b'')  # PING, declared length 0
 
         with self.assertRaises(ProtocolError) as ctx:
             HTTP(io.BytesIO(raw), len(raw))
@@ -1531,8 +1528,8 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
-        # GOAWAY (type 0x07), sid 0, declared length 0x15 (21, this library's
-        # whole-frame convention) -- but only sixteen octets actually follow.
+        # GOAWAY (type 0x07), sid 0, declared length 0x15 (21 octets of
+        # payload) -- but only sixteen octets are present, header included.
         raw = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
         self.assertEqual(len(raw), 16)
 
@@ -1827,7 +1824,7 @@ class HTTPUnitTests(unittest.TestCase):
             self.assertEqual(proto.version, '2')
             self.assertEqual(proto.length, 9)
             self.assertEqual(proto.__length_hint__(), 9)
-            self.assertEqual(schema.length, 13)
+            self.assertEqual(schema.length, 4)
             self.assertEqual(schema.type, Frame.DATA)
             self.assertEqual(schema.flags['bit_0'], 1)
             self.assertEqual(schema.stream['sid'], 3)
@@ -1856,18 +1853,10 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 
-        # Length 13, type 0xF0, no flags, stream 1, then four octets of payload.
-        #
-        # 13 is the *whole* frame, header included, which is this library's
-        # convention rather than :rfc:`9113#section-4.1`'s -- that one counts the
-        # payload alone, so a real frame with four octets of payload declares 4.
-        # ``make`` writes ``payload + 9`` (httpv2.py:292) and the readers recover
-        # the payload as ``length - 9`` (httpv2.py:658,668), and ``read`` rejects
-        # anything under 9 outright, so a wire-accurate 4 raises here. Declaring
-        # 13 is what reaches the registry lookup; the mismatch with the RFC is a
-        # separate defect and not this test's to assert.
-        packet = bytes.fromhex('00000d' 'f0' '00' '00000001' '61626364')
-        self.assertEqual(int.from_bytes(packet[:3], 'big'), len(packet))
+        # Length 4, type 0xF0, no flags, stream 1, then four octets of payload.
+        # The length counts the payload only [:rfc:`9113#section-4.1`].
+        packet = bytes.fromhex('000004' 'f0' '00' '00000001' '61626364')
+        self.assertEqual(int.from_bytes(packet[:3], 'big'), len(packet) - 9)
 
         registry = HTTPv2.__dict__['__frame__']
         before = set(registry)
@@ -1898,7 +1887,7 @@ class HTTPUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
             none = proto._read_http_none(
                 http2_schema(data=b'unknown'),
-                header=http2_header(10, 250, flags=0x01, sid=3),
+                header=http2_header(7, 250, flags=0x01, sid=3),
             )
         self.assertEqual(none.to_dict()['data'], b'unknown')
         self.assertIsNone(none.flags)
@@ -1907,14 +1896,14 @@ class HTTPUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
             none_clean = proto._read_http_none(
                 http2_schema(data=b'clean'),
-                header=SimpleNamespace(length=9, type=251, flags={}, stream={'sid': 4}),
+                header=SimpleNamespace(length=5, type=251, flags={}, stream={'sid': 4}),
             )
         self.assertEqual(none_clean.data, b'clean')
         warn.assert_not_called()
 
         data = proto._read_http_data(
             http2_schema(pad_len=2, data=b'data', __flags__=0x09),
-            header=http2_header(16, Frame.DATA, flags=0x09, sid=1),
+            header=http2_header(7, Frame.DATA, flags=0x09, sid=1),
         )
         self.assertTrue(data.flags.to_dict()['END_STREAM'])
         self.assertTrue(data.flags.to_dict()['PADDED'])
@@ -1929,7 +1918,7 @@ class HTTPUnitTests(unittest.TestCase):
                 fragment=b'headers',
                 __flags__=0x2D,
             ),
-            header=http2_header(22, Frame.HEADERS, flags=0x2D, sid=1),
+            header=http2_header(14, Frame.HEADERS, flags=0x2D, sid=1),
         )
         self.assertTrue(headers.flags.to_dict()['END_STREAM'])
         self.assertTrue(headers.flags.to_dict()['END_HEADERS'])
@@ -1941,7 +1930,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         priority = proto._read_http_priority(
             http2_schema(stream={'exclusive': 1, 'sid': 5}, weight=9),
-            header=http2_header(9, Frame.PRIORITY, sid=1),
+            header=http2_header(5, Frame.PRIORITY, sid=1),
         )
         self.assertTrue(priority.to_dict()['excl_dependency'])
         self.assertEqual(priority.to_dict()['stream_dependency'], 5)
@@ -1949,7 +1938,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         rst = proto._read_http_rst_stream(
             http2_schema(error=ErrorCode.NO_ERROR),
-            header=http2_header(13, Frame.RST_STREAM, sid=1),
+            header=http2_header(4, Frame.RST_STREAM, sid=1),
         )
         self.assertEqual(rst.to_dict()['error'], ErrorCode.NO_ERROR)
 
@@ -1958,7 +1947,7 @@ class HTTPUnitTests(unittest.TestCase):
                 SimpleNamespace(id=Setting.HEADER_TABLE_SIZE, value=4096),
                 SimpleNamespace(id=Setting.ENABLE_PUSH, value=0),
             ], __flags__=0),
-            header=http2_header(21, Frame.SETTINGS, sid=0),
+            header=http2_header(12, Frame.SETTINGS, sid=0),
         )
         self.assertFalse(settings.flags.to_dict()['ACK'])
         self.assertEqual(settings.settings[Setting.HEADER_TABLE_SIZE], 4096)
@@ -1966,7 +1955,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         push = proto._read_http_push_promise(
             http2_schema(pad_len=1, stream={'sid': 11}, fragment=b'push', __flags__=0x0C),
-            header=http2_header(18, Frame.PUSH_PROMISE, flags=0x0C, sid=1),
+            header=http2_header(10, Frame.PUSH_PROMISE, flags=0x0C, sid=1),
         )
         self.assertTrue(push.flags.to_dict()['END_HEADERS'])
         self.assertTrue(push.flags.to_dict()['PADDED'])
@@ -1975,27 +1964,27 @@ class HTTPUnitTests(unittest.TestCase):
 
         ping = proto._read_http_ping(
             http2_schema(data=b'12345678', __flags__=0x01),
-            header=http2_header(17, Frame.PING, flags=0x01, sid=0),
+            header=http2_header(8, Frame.PING, flags=0x01, sid=0),
         )
         self.assertTrue(ping.flags.to_dict()['ACK'])
         self.assertEqual(ping.to_dict()['data'], b'12345678')
 
         goaway = proto._read_http_goaway(
             http2_schema(stream={'sid': 13}, error=ErrorCode.NO_ERROR, debug=b'bye'),
-            header=http2_header(20, Frame.GOAWAY, sid=0),
+            header=http2_header(11, Frame.GOAWAY, sid=0),
         )
         self.assertEqual(goaway.to_dict()['last_sid'], 13)
         self.assertEqual(goaway.to_dict()['debug_data'], b'bye')
 
         window = proto._read_http_window_update(
             http2_schema(size={'incr': 65535}),
-            header=http2_header(13, Frame.WINDOW_UPDATE, sid=1),
+            header=http2_header(4, Frame.WINDOW_UPDATE, sid=1),
         )
         self.assertEqual(window.to_dict()['increment'], 65535)
 
         continuation = proto._read_http_continuation(
             http2_schema(fragment=b'cont', __flags__=0x04),
-            header=http2_header(13, Frame.CONTINUATION, flags=0x04, sid=1),
+            header=http2_header(4, Frame.CONTINUATION, flags=0x04, sid=1),
         )
         self.assertTrue(continuation.flags.to_dict()['END_HEADERS'])
         self.assertEqual(continuation.to_dict()['fragment'], b'cont')
@@ -2009,25 +1998,25 @@ class HTTPUnitTests(unittest.TestCase):
 
         with self.assertRaises(ProtocolError):
             proto._read_http_priority(http2_schema(stream={'exclusive': 0, 'sid': 1}, weight=1),
-                                      header=http2_header(10, Frame.PRIORITY))
+                                      header=http2_header(1, Frame.PRIORITY))
         with self.assertRaises(ProtocolError):
             proto._read_http_rst_stream(http2_schema(error=0),
-                                        header=http2_header(12, Frame.RST_STREAM))
+                                        header=http2_header(3, Frame.RST_STREAM))
         with self.assertRaises(ProtocolError):
             proto._read_http_settings(http2_schema(settings=[], __flags__=0),
-                                      header=http2_header(14, Frame.SETTINGS, sid=0))
+                                      header=http2_header(5, Frame.SETTINGS, sid=0))
         with self.assertRaises(ProtocolError):
             proto._read_http_settings(http2_schema(settings=[], __flags__=0x01),
-                                      header=http2_header(15, Frame.SETTINGS, flags=0x01, sid=0))
+                                      header=http2_header(6, Frame.SETTINGS, flags=0x01, sid=0))
         with self.assertRaises(ProtocolError):
             proto._read_http_push_promise(http2_schema(pad_len=0, stream={'sid': 1}, fragment=b''),
-                                          header=http2_header(12, Frame.PUSH_PROMISE))
+                                          header=http2_header(3, Frame.PUSH_PROMISE))
         with self.assertRaises(ProtocolError):
             proto._read_http_ping(http2_schema(data=b'bad', __flags__=0),
-                                  header=http2_header(16, Frame.PING, sid=0))
+                                  header=http2_header(7, Frame.PING, sid=0))
         with self.assertRaises(ProtocolError):
             proto._read_http_window_update(http2_schema(size={'incr': 1}),
-                                           header=http2_header(12, Frame.WINDOW_UPDATE))
+                                           header=http2_header(3, Frame.WINDOW_UPDATE))
 
     def test_httpv2_read_validates_common_frame_header_rules(self) -> None:
         from pcapkit.const.http.frame import Frame
@@ -2044,17 +2033,17 @@ class HTTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto.read(length=17)
 
-        proto.__header__ = http2_header(9, Frame.DATA, sid=1)
+        proto.__header__ = http2_header(0, Frame.DATA, sid=1)
         proto.__header__.frame = http2_schema(pad_len=0, data=b'', __flags__=0)
         self.assertEqual(proto.read(length=9).to_dict()['type'], Frame.DATA)
         proto._data = b'\x00' * 9
         proto.__cached__ = {}
         self.assertEqual(proto.read().to_dict()['type'], Frame.DATA)
 
-        # #799: a well-formed *declared* length (9, i.e. clears the header-only
-        # guard on its own) must still be refused if the *available* buffer
-        # does not also clear nine -- ``read``'s guard now checks both.
-        proto.__header__ = http2_header(9, Frame.DATA, sid=1)
+        # #799: a well-formed *declared* length (0, an empty payload) must
+        # still be refused if the *available* buffer does not clear the
+        # nine-octet header -- ``read``'s guard checks both.
+        proto.__header__ = http2_header(0, Frame.DATA, sid=1)
         proto.__header__.frame = http2_schema(pad_len=0, data=b'', __flags__=0)
         with self.assertRaises(ProtocolError):
             proto.read(length=8)
@@ -2114,8 +2103,8 @@ class HTTPUnitTests(unittest.TestCase):
         """The uniformity holds for other frame types and other buffer sizes too.
 
         The ``SETTINGS``-specific sweep above shows the exact reported shape,
-        but the guard fix (``schema.length < 9 or length < 9 or schema.length
-        > length``) is general: it must reject a too-short buffer for *any*
+        but the guard (``length < 9 or schema.length + 9 > length``) is
+        general: it must reject a too-short buffer for *any*
         frame type, and at every buffer length under nine, not only four.
 
         """
@@ -2172,19 +2161,20 @@ class HTTPUnitTests(unittest.TestCase):
                 with self.assertRaises(ProtocolError):
                     HTTPv2(io.BytesIO(raw), len(raw))
 
-        # The boundary itself: declared exactly equal to the buffer is fine
-        # (covered by other tests too), one octet past it is not.
-        exact = frame(9, 9)
+        # The boundary itself: a declared payload that exactly fills the buffer
+        # after the header is fine (covered by other tests too), one octet past
+        # it is not.
+        exact = frame(0, 9)
         HTTPv2(io.BytesIO(exact), len(exact))  # must not raise
 
-        one_over = frame(10, 9)
+        one_over = frame(1, 9)
         with self.assertRaises(ProtocolError):
             HTTPv2(io.BytesIO(one_over), len(one_over))
 
     def test_httpv2_boundary_buffer_exactly_nine_octets(self) -> None:
         """The boundary itself: a buffer of exactly nine octets must parse.
 
-        Nine is the header's own size, so a ``DATA`` frame declaring nine (an
+        Nine is the header's own size, so a ``DATA`` frame declaring zero (an
         empty payload) backed by exactly nine real octets is the smallest
         legitimate HTTP/2 frame there is. One octet short of that must still be
         refused -- pinning that the fix's ``>= 9`` is not an off-by-one ``> 9``.
@@ -2198,7 +2188,7 @@ class HTTPUnitTests(unittest.TestCase):
         exactly_nine = http2_frame_bytes(0x00, 0x00, 1, b'')
         self.assertEqual(len(exactly_nine), 9)
         info = HTTPv2(io.BytesIO(exactly_nine), len(exactly_nine)).info
-        self.assertEqual(info.length, 9)
+        self.assertEqual(info.length, 0)
         self.assertEqual(info.data, b'')
 
         one_short = exactly_nine[:8]
@@ -2208,8 +2198,8 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv2_well_formed_frame_still_parses(self) -> None:
         """The fix must not refuse a frame whose buffer backs its declared length.
 
-        A ``DATA`` frame declaring 21 (nine octets of header plus twelve of
-        payload) backed by all 21 real octets is exactly the well-formed case
+        A ``DATA`` frame declaring 12 (its payload, the nine header octets
+        excluded) backed by all 21 real octets is exactly the well-formed case
         the guard must keep accepting.
 
         """
@@ -2221,7 +2211,7 @@ class HTTPUnitTests(unittest.TestCase):
         raw = http2_frame_bytes(0x00, 0x00, 1, payload)
 
         info = HTTPv2(io.BytesIO(raw), len(raw)).info
-        self.assertEqual(info.length, len(raw))
+        self.assertEqual(info.length, len(payload))
         self.assertEqual(info.data, payload)
 
     def test_httpv2_unpack_rejects_a_short_buffer_before_the_schema_layer_crashes(self) -> None:
@@ -2450,13 +2440,13 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(made_from_dict.type, Frame.HEADERS)
         self.assertEqual(made_from_dict.flags['bit_2'], 1)
         made_from_bytes = proto.make(type=Frame.DATA, sid=1, frame=b'raw')
-        self.assertEqual(made_from_bytes.length, 12)
+        self.assertEqual(made_from_bytes.length, 3)
         self.assertEqual(made_from_bytes.frame, b'raw')
         made_from_schema = proto.make(type=Frame.DATA, sid=1,
                                       frame=schema_httpv2.UnassignedFrame(data=b'schema'))
-        self.assertEqual(made_from_schema.length, 15)
+        self.assertEqual(made_from_schema.length, 6)
         ping_data = PingFrame(
-            length=17,
+            length=8,
             type=Frame.PING,
             flags=PingFrameFlags(ACK=True),
             sid=0,
@@ -2560,15 +2550,15 @@ class HTTPUnitTests(unittest.TestCase):
                 HTTPv2.register_frame(custom, (read_frame, make_frame))
             warn.assert_not_called()
 
-            proto.__header__ = http2_header(9, custom, sid=3)
+            proto.__header__ = http2_header(4, custom, sid=3)
             proto.__header__.frame = SimpleNamespace(data=b'read')
-            parsed = proto.read(length=9)
+            parsed = proto.read(length=13)
             self.assertEqual(parsed.data, b'read')
             self.assertEqual(parsed.sid, 3)
 
             made = proto.make(type=custom, sid=3, frame={'data': b'made'})
             self.assertEqual(made.frame.data, b'made')
-            self.assertEqual(made.length, 13)
+            self.assertEqual(made.length, 4)
         finally:
             if original is None:
                 frame_registry.pop(custom, None)
