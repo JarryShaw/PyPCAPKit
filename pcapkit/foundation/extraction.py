@@ -300,7 +300,7 @@ class Extractor(Generic[_P]):
 
         """
         if self._flag_q:
-            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
+            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'output'")
         return cast('str', self._ofnm)
 
     @property
@@ -809,7 +809,11 @@ class Extractor(Generic[_P]):
             ofnm = None
             ext = None
         else:
-            registered = cls.__output__[fmt][1]
+            # NOTE: ``__output__`` is a defaultdict, so look ``fmt`` up with
+            # :meth:`dict.get` -- subscripting would insert an unknown format
+            # into the registry before the error below is raised.
+            entry = cls.__output__.get(fmt)
+            registered = entry[1] if entry is not None else None
             if registered is None:
                 raise FormatError(f'unknown output format: {fmt}')
 
