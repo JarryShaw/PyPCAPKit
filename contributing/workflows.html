@@ -723,19 +723,23 @@ repository target the same reusable workflow, with the same input:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml:47</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects <strong>two</strong> of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <strong>eight</strong> jobs,
+<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects <strong>two</strong> of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <strong>ten</strong> jobs,
 not one: <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full suite, one Python version) and <code class="docutils literal notranslate"><span class="pre">changelog</span></code>
 (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its source entry). It skips the other
-<strong>six</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs),
-<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a Python x engine matrix),
-<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> (eleven matrix cells),
-each of which has already run once for this commit from Unit Tests’ own
-<code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> triggers, so running any of them again per caller
-would test the same commit several times over – and
-<code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status Checks</a> below), gated out by its
-own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
+<strong>eight</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs),
+<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (one job per engine, each looping
+over six Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>
+(eleven matrix cells), each of which has already run once for this commit
+from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>,
+which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a>, from its
+<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so running any of them again per caller would
+test the same commit several times over – the docs-only path’s <code class="docutils literal notranslate"><span class="pre">changes</span></code>
+and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
+Checks</a> below), gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
+already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1040-1046</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1013-1019</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -861,7 +865,7 @@ grepping every workflow file for its name:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1290</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1338</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.10</span></code></p></td>
@@ -887,15 +891,15 @@ grepping every workflow file for its name:</p>
 </table>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1290</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by two in
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1338</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by two in
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>: the required <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job (<code class="docutils literal notranslate"><span class="pre">:31</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, expanding to the five required
 legs at <code class="docutils literal notranslate"><span class="pre">:41-45</span></code>) and the non-required <code class="docutils literal notranslate"><span class="pre">compatibility-nightly</span></code> job (<code class="docutils literal notranslate"><span class="pre">:69</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span> <span class="pre">(scheduled)</span></code>, see below). A comment in
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:1151</span></code>) mentions the string without defining it.</p>
+<code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span> <span class="pre">(scheduled)</span></code>, see below). A comment at
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1237</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is itself an aggregate, not a single check run –
 but it stands in for <strong>17</strong> of the ruleset’s originally-named 22 contexts,
-not all 22. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:1150-1171</span></code>) accounts for the
+not all 22. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1236-1257</span></code>) accounts for the
 22: five each for <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code>, five for the live <code class="docutils literal notranslate"><span class="pre">Compat</span>
 <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> contexts (emitted by <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, a
 <em>different</em> workflow file – nothing in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> could ever stand
@@ -904,18 +908,19 @@ the now-dead single-cell <code class="docutils literal notranslate"><span class=
 stopped producing once it became a Python x engine matrix, and two for
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>. <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> replaces only the
 <code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code>/dead-<code class="docutils literal notranslate"><span class="pre">Engines</span></code>/<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> slots – 5 + 5 +
-5 + 2 = 17 – via its own <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[test,</span> <span class="pre">integration,</span> <span class="pre">engine-tests,</span>
-<span class="pre">pypcap-parity]</span></code> plus an explicit per-dependency check
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1289-1315</span></code>). The five <code class="docutils literal notranslate"><span class="pre">Compat</span></code> contexts stay required
+5 + 2 = 17 – via its own <code class="docutils literal notranslate"><span class="pre">needs:</span></code> on those four jobs plus an explicit per-dependency
+check (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1337-1391</span></code>), which accepts them as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only
+on a docs-only pull request, where <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> – every test that
+reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown – must pass instead. The five <code class="docutils literal notranslate"><span class="pre">Compat</span></code> contexts stay required
 exactly as they are and are listed separately in the table above. This job
 runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> triggers; the
 <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">:1292</span></code>), so it is never
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1340</span></code>), so it is never
 produced – and never expected – on those paths.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> are five ordinary matrix legs, not an
 aggregate: <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:37-40</span></code>) and
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s matching one for its own, differently-matrixed
-<code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code> jobs (<code class="docutils literal notranslate"><span class="pre">:58-61</span></code>, <code class="docutils literal notranslate"><span class="pre">:228</span></code>) both say why 3.15 is
+<code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code> jobs (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:59-62</span></code>, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:230</span></code>) both say why 3.15 is
 excluded from every <em>required</em> matrix in this repository – the ruleset’s
 required-checks list stops at 3.14, so a 3.15 leg cannot gate a merge and is
 kept advisory (<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code> in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
