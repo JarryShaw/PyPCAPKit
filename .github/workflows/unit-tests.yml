@@ -64,6 +64,15 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+        # #1063: exactly one leg runs under coverage, so measuring it adds no
+        # leg to the queue #1052 is cutting. 3.14 because it had the most
+        # headroom under the 45-minute cap on main (15.6, 15.8 and 16.8 minutes
+        # in runs 37393532176, 37392964804 and 37391296686, against 12.8-22.0
+        # for the other four), and because coverage's sys.monitoring core,
+        # which measures branches only from 3.14 on, is its cheapest tracer.
+        include:
+          - python-version: "3.14"
+            coverage: true
 
     steps:
       - uses: actions/checkout@v7
@@ -107,6 +116,12 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,DPKT,crypto,NGAP]'
 
+      # 7.10 is the first release with `[run] patch = ["subprocess"]`, which
+      # .github/coverage.toml relies on to measure the xdist workers.
+      - name: Install coverage
+        if: ${{ matrix.coverage }}
+        run: python -m pip install 'coverage>=7.10'
+
       # `-n auto` resolves to whatever this runner reports, and nothing else in
       # the log says what that was -- print it so the number `-n auto` picked
       # is a measured fact instead of an assumption about runner size.
@@ -116,15 +131,90 @@ jobs:
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       - name: Run unit tests
+        id: tests
         # `--dist load` is pinned explicitly rather than left to default: a
         # future change to xdist's own default, or someone "optimising" to
         # `loadfile`/`loadscope`, cannot silently change how this suite is
-        # distributed.
-        run: >-
-          python -m pytest -q -n auto --dist load
-          --ignore=tests/integration
-          --ignore-glob='*_runtime.py'
-          --ignore-glob='*_regression.py'
+        # distributed. The coverage leg runs the identical selection.
+        env:
+          COVERAGE: ${{ matrix.coverage }}
+        run: |
+          set -- -q -n auto --dist load \
+            --ignore=tests/integration \
+            --ignore-glob='*_runtime.py' \
+            --ignore-glob='*_regression.py'
+          if [ "$COVERAGE" = "true" ]; then
+            python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
+          else
+            python -m pytest "$@"
+          fi
+
+      # The table goes to the job summary. The numbers also go to an artifact
+      # that coverage-comment.yml renders as a PR comment once this run
+      # completes; that comment cannot be posted from here, because this file is
+      # also a reusable workflow and its callers grant only `contents: read`.
+      # `!cancelled()` so a failing test still reports what it measured, and
+      # says the tests failed in the first line.
+      - name: Report coverage
+        if: ${{ !cancelled() && matrix.coverage }}
+        shell: bash
+        env:
+          SHA: ${{ github.sha }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+        run: |
+          set -euo pipefail
+          python -m coverage combine --rcfile=.github/coverage.toml
+          python -m coverage report --rcfile=.github/coverage.toml
+          python -m coverage html --rcfile=.github/coverage.toml -d coverage-html
+          python -m coverage json --rcfile=.github/coverage.toml -o coverage.json
+          mkdir -p coverage-comment
+          # Writes the numbers as JSON for coverage-comment.yml, which renders
+          # its own Markdown from them rather than posting text from this run.
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import collections, json, os
+          data = json.load(open('coverage.json'))
+          keys = ('num_statements', 'missing_lines', 'num_branches', 'num_partial_branches',
+                  'covered_lines', 'covered_branches')
+          packages = collections.defaultdict(collections.Counter)
+          for path, info in data['files'].items():
+              parts = path.split('/')
+              name = '/'.join(parts[:2]) if len(parts) > 2 else 'pcapkit (top level)'
+              packages[name].update({k: info['summary'][k] for k in keys})
+          def pct(c):
+              total = c['num_statements'] + c['num_branches']
+              return 100.0 * (c['covered_lines'] + c['covered_branches']) / total if total else 100.0
+          rows = [[name, c['num_statements'], c['missing_lines'], c['num_branches'],
+                   c['num_partial_branches'], round(pct(c), 2)] for name, c in sorted(packages.items())]
+          total = round(data['totals']['percent_covered'], 2)
+          tests = os.environ['TESTS_OUTCOME']
+          json.dump({'total': total, 'tests': tests, 'packages': rows},
+                    open('coverage-comment/coverage-summary.json', 'w'))
+          status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
+          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python 3.14, `{os.environ['SHA'][:9]}`)")
+          print()
+          print('| Package | Statements | Missed | Branches | Partial | Cover |')
+          print('|---|--:|--:|--:|--:|--:|')
+          for row in rows:
+              print('| `{}` | {} | {} | {} | {} | {:.2f}% |'.format(*row))
+          print()
+          print('Per-file detail: the `coverage-html` artifact of this run.')
+          PY
+
+      - name: Upload coverage HTML report
+        if: ${{ !cancelled() && matrix.coverage }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-html
+          path: coverage-html/
+          retention-days: 30
+
+      - name: Upload coverage summary
+        if: ${{ !cancelled() && matrix.coverage }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-summary
+          path: coverage-comment/coverage-summary.json
+          retention-days: 7
 
   integration:
     name: Integration Python ${{ matrix.python-version }}

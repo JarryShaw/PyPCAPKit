@@ -1,0 +1,111 @@
+name: Coverage Comment
+
+# #1063: posts the coverage the `test` job's Python 3.14 leg measured in
+# unit-tests.yml as a pull-request comment. It runs no tests. The comment cannot
+# be posted from unit-tests.yml itself: that file is also a reusable workflow,
+# and a called workflow can only narrow the token its caller passes, never widen
+# it. All four callers grant `contents: read`, so asking for
+# `pull-requests: write` there would break every one of them, the release gate
+# included.
+#
+# `workflow_run` runs this file as it is on the default branch, with a token of
+# its own, so fork pull requests get a comment too. The price is that the
+# triggering run's artifact is untrusted input. So this workflow:
+#
+#   * never checks out or executes anything from the pull request;
+#   * takes the PR number from the API (the open PR whose head is this run's
+#     head sha), not from the artifact, and accepts it only if it is all digits;
+#   * renders its own Markdown from the artifact's numbers, accepting only the
+#     shapes the `test` job writes, rather than posting text from the run.
+on:
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types: [completed]
+
+permissions:
+  actions: read
+  pull-requests: write
+
+# One comment per PR, so serialise per head branch. A run that finishes after a
+# newer push skips itself below, since its sha is no longer the PR's head.
+concurrency:
+  group: coverage-comment-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  comment:
+    name: Coverage comment
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Post or update the coverage comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -eu
+          case "$HEAD_SHA" in
+            *[!0-9a-f]*|'') echo "::error::unexpected head sha"; exit 1 ;;
+          esac
+
+          # `workflow_run.pull_requests` is empty for fork PRs, so ask the API.
+          pr=$(gh api -X GET "repos/$REPO/pulls" -f state=open -f head="$HEAD_OWNER:$HEAD_BRANCH" \
+            --jq ".[] | select(.head.sha == \"$HEAD_SHA\") | .number" | head -n 1)
+          case "$pr" in
+            *[!0-9]*|'') echo "::notice::No open PR has $HEAD_SHA as its head; nothing to comment on."; exit 0 ;;
+          esac
+
+          dir="$RUNNER_TEMP/coverage"
+          if ! gh run download "$RUN_ID" --repo "$REPO" --name coverage-summary --dir "$dir"; then
+            echo "::notice::Run $RUN_ID uploaded no coverage-summary artifact (the coverage leg did not get that far)."
+            exit 0
+          fi
+
+          python3 - "$dir/coverage-summary.json" > "$RUNNER_TEMP/body.md" <<'PY'
+          import json, os, re, sys
+          data = json.load(open(sys.argv[1]))
+          def number(value, ints=False):
+              ok = isinstance(value, int) if ints else isinstance(value, (int, float))
+              if isinstance(value, bool) or not ok or not 0 <= value < 10**7:
+                  sys.exit(f'invalid number in artifact: {value!r}')
+              return value
+          tests = data['tests']
+          if tests not in ('success', 'failure', 'cancelled', 'skipped'):
+              sys.exit(f'invalid test outcome in artifact: {tests!r}')
+          total = number(data['total'])
+          status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
+          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python 3.14, "
+                f"`{os.environ['HEAD_SHA'][:9]}`, Unit Tests run {os.environ['RUN_CONCLUSION']})")
+          print()
+          print('| Package | Statements | Missed | Branches | Partial | Cover |')
+          print('|---|--:|--:|--:|--:|--:|')
+          for name, *counts, cover in data['packages']:
+              if not isinstance(name, str) or not re.fullmatch(r'pcapkit(/\w+| \(top level\))?', name):
+                  sys.exit(f'invalid package name in artifact: {name!r}')
+              counts = [number(c, ints=True) for c in counts]
+              if len(counts) != 4:
+                  sys.exit('invalid row in artifact')
+              print('| `{}` | {} | {} | {} | {} | {:.2f}% |'.format(name, *counts, number(cover)))
+          print()
+          print(f"Per-file detail: the `coverage-html` artifact of [this run]({os.environ['RUN_URL']}).")
+          print()
+          print('<!-- pcapkit-coverage-report -->')
+          PY
+
+          # Edit the one comment this workflow posted, found by its marker and
+          # author, rather than adding one per push.
+          id=$(gh api --paginate "repos/$REPO/issues/$pr/comments" --jq \
+            '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- pcapkit-coverage-report -->"))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@"$RUNNER_TEMP/body.md" > /dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$pr/comments" -F body=@"$RUNNER_TEMP/body.md" > /dev/null
+          fi

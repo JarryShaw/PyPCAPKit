@@ -3,7 +3,7 @@ GitHub Actions Workflows
 
 .. important::
 
-   The nine workflows under :file:`.github/workflows/` trigger each other, and
+   The ten workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
    to start. This page is the repository-wide graph. The release *pipeline*
@@ -86,10 +86,18 @@ At a Glance
      - daily 00:37
      - --
      - ``issues``, ``pull_request_target``, ``workflow_dispatch``
+   * - Coverage Comment
+     - :file:`coverage-comment.yml`
+     - --
+     - --
+     - --
+     - **Unit Tests**
+     - --
 
 .. note::
 
-   No workflow here fires *exclusively* on ``workflow_run``. Each of the four
+   Only Coverage Comment fires *exclusively* on ``workflow_run``: it has
+   nothing to do without a completed Unit Tests run. Each of the other four
    that carry one pairs it with a direct trigger of its own -- a Saturday
    ``schedule`` for Vendor Update, Conda Update and GitHub Pages, a ``v*`` tag
    push for Create Release -- for the path where no upstream run exists yet to
@@ -125,6 +133,7 @@ than starting a new one.
        GP["GitHub Pages<br/>deploy-pages.yml"]
        CR["Create Release<br/>create-release.yml"]
        PS["Project Status<br/>project-status.yml"]
+       CC["Coverage Comment<br/>coverage-comment.yml"]
 
        PUSH --> CQ
        PR --> CQ
@@ -158,6 +167,7 @@ than starting a new one.
        UT ==>|workflow_run: completed| CU
        UT ==>|workflow_run: completed| GP
        VU ==>|workflow_run: completed| CR
+       UT ==>|workflow_run: completed| CC
 
        VU -.->|uses: gate-only| UT
        CU -.->|uses: gate-only| UT
@@ -167,7 +177,8 @@ than starting a new one.
        classDef trig fill:none,stroke-dasharray:2 2
        class PUSH,PR,TAG,SCHED,DISPATCH,ISSUES,PRT trig
 
-The double relationship between **Unit Tests** and its four dependants is the
+The double relationship between **Unit Tests** and the four dependants that
+also call it is the
 part that reading a single file cannot show, and it is deliberate rather than
 redundant: each of the four calls ``unit-tests.yml`` with ``gate-only: true``
 itself (dotted, above) **only when its own trigger is not** ``workflow_run``
@@ -180,7 +191,7 @@ re-running the gate a second time.
 ``workflow_run`` Edges
 ----------------------
 
-Four in total, found by grepping every ``on:`` block rather than trusting a
+Five in total, found by grepping every ``on:`` block rather than trusting a
 hand-maintained list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
@@ -191,12 +202,14 @@ hand-maintained list:
   completion of **Unit Tests**.
 * ``.github/workflows/create-release.yml:6-9`` -- **Create Release** fires on
   completion of **Vendor Update**.
+* ``.github/workflows/coverage-comment.yml:21-23`` -- **Coverage Comment** fires
+  on completion of **Unit Tests**.
 
 ``workflow_run`` fires for *every* completion of the named workflow --
 success, failure, or skipped -- and regardless of what triggered it,
-including a pull request's own run of Unit Tests. Every one of the four
+including a pull request's own run of Unit Tests. Every one of the five
 downstream workflows therefore re-checks ``github.event.workflow_run.event``
-and ``.head_branch`` (or, for Create Release, ``.conclusion``) itself before
+and ``.head_branch`` (or, for Create Release and Coverage Comment, ``.conclusion``) itself before
 doing anything with an outward effect; none of the filtering happens in the
 ``on:`` block.
 
@@ -229,7 +242,7 @@ would test the same commit several times over -- and
 ``required-checks`` (see `Required Status Checks`_ below), gated out by its
 own ``if:`` rather than by having already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:950-956``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1040-1046``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -324,6 +337,34 @@ branch's tip under that event -- and takes only the item number from the payload
 secret it skips with a ``::notice::``. The Status mapping it applies is documented in
 :doc:`conventions/process`.
 
+Coverage (`#1063 <https://github.com/JarryShaw/PyPCAPKit/issues/1063>`__)
+-------------------------------------------------------------------------
+
+Coverage is measured inside an existing leg rather than by a workflow of its
+own: the ``Python 3.14`` leg of ``test`` (matrix key ``coverage: true``) runs
+its unchanged pytest selection under ``coverage run
+--rcfile=.github/coverage.toml``. That rcfile repeats
+:file:`pyproject.toml`'s ``[tool.coverage.*]`` settings
+(``tests/project/test_coverage_rcfile.py`` asserts it) and adds ``parallel``
+and ``patch = ["subprocess"]``, without which only the xdist controller is
+measured, not its workers, plus ``core = "ctrace"``: under the default
+``sys.monitoring`` core, the suite's purge-and-reimport of pcapkit grew one
+module's peak RSS from 0.40 to 4.17 GiB and killed the runner. The leg then writes the total and a per-package
+table to the job summary and uploads the HTML report as the ``coverage-html``
+artifact (30 days), with the bare numbers as the ``coverage-summary`` artifact.
+
+The PR comment comes from **Coverage Comment** (:file:`coverage-comment.yml`),
+not from ``unit-tests.yml``. That file is also a reusable workflow, a called
+workflow can only narrow the token its caller passes, and all four callers grant
+``contents: read``, so a ``pull-requests: write`` job there would break them.
+Coverage Comment runs no tests. On ``workflow_run`` it uses the default
+branch's file and its own token, so fork pull requests get a comment too. It
+treats the artifact as untrusted: it never checks out pull-request code. It
+takes the PR number from the API, as the open PR whose head is the run's head
+sha, and renders its own Markdown from validated numbers. It edits one comment,
+found by a hidden marker, on each push. The first line says when the tests
+failed. Neither workflow's coverage step is a required check.
+
 Required Status Checks
 ----------------------
 
@@ -340,7 +381,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1200``
+     - ``unit-tests.yml:1290``
    * - ``Compat Python 3.10``
      - job ``compatibility``, matrix leg ``3.10``
      - ``python-compatibility.yml:31,41``
@@ -358,16 +399,16 @@ grepping every workflow file for its name:
      - ``python-compatibility.yml:31,45``
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1200``). ``Compat Python`` is defined by two in
+(``unit-tests.yml:1290``). ``Compat Python`` is defined by two in
 ``python-compatibility.yml``: the required ``compatibility`` job (``:31``,
 ``Compat Python ${{ matrix.python-version }}``, expanding to the five required
 legs at ``:41-45``) and the non-required ``compatibility-nightly`` job (``:69``,
 ``Compat Python 3.15 (scheduled)``, see below). A comment in
-``unit-tests.yml`` (``:1061``) mentions the string without defining it.
+``unit-tests.yml`` (``:1151``) mentions the string without defining it.
 
 ``Required checks passed`` is itself an aggregate, not a single check run --
 but it stands in for **17** of the ruleset's originally-named 22 contexts,
-not all 22. ``unit-tests.yml``'s own comment (``:1060-1081``) accounts for the
+not all 22. ``unit-tests.yml``'s own comment (``:1150-1171``) accounts for the
 22: five each for ``test`` and ``integration``, five for the live ``Compat
 Python 3.10``-``3.14`` contexts (emitted by ``python-compatibility.yml``, a
 *different* workflow file -- nothing in ``unit-tests.yml`` could ever stand
@@ -378,17 +419,17 @@ stopped producing once it became a Python x engine matrix, and two for
 ``test``/``integration``/dead-``Engines``/``pypcap-parity`` slots -- 5 + 5 +
 5 + 2 = 17 -- via its own ``needs: [test, integration, engine-tests,
 pypcap-parity]`` plus an explicit per-dependency check
-(``unit-tests.yml:1199-1225``). The five ``Compat`` contexts stay required
+(``unit-tests.yml:1289-1315``). The five ``Compat`` contexts stay required
 exactly as they are and are listed separately in the table above. This job
 runs on Unit Tests' own ``push``/``pull_request`` triggers; the
 ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``:1202``), so it is never
+``if: ${{ always() && inputs.gate-only != true }}`` (``:1292``), so it is never
 produced -- and never expected -- on those paths.
 
 ``Compat Python 3.10``-``3.14`` are five ordinary matrix legs, not an
 aggregate: ``python-compatibility.yml``'s own comment (``:37-40``) and
 ``unit-tests.yml``'s matching one for its own, differently-matrixed
-``test``/``integration`` jobs (``:58-61``, ``:138``) both say why 3.15 is
+``test``/``integration`` jobs (``:58-61``, ``:228``) both say why 3.15 is
 excluded from every *required* matrix in this repository -- the ruleset's
 required-checks list stops at 3.14, so a 3.15 leg cannot gate a merge and is
 kept advisory (``continue-on-error: true`` in ``python-compatibility.yml``'s
