@@ -465,7 +465,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
 
         """
         return {
-            'ts_src': data.frame_info.ts_sec,
+            'ts_sec': data.frame_info.ts_sec,
             'ts_usec': data.frame_info.ts_usec,
             'incl_len': data.frame_info.incl_len,
             'orig_len': data.frame_info.orig_len,

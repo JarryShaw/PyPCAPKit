@@ -600,56 +600,56 @@ class ReconstructionTests(unittest.TestCase):
         <pcapkit.protocols.protocol.ProtocolBase._make_data>` returned into
         ``__init__``, so nobody typed those keywords: a mismatch is a defect in the
         protocol's own pair of mappings, and the caller who meets it cannot fix it.
-        Raising there would also convert three latent defects of that shape into a
+        Raising there would also convert a latent defect of that shape into a
         broken ``from_data`` -- see
-        :meth:`test_the_three_known_make_data_mismatches_are_recorded`.
+        :meth:`test_the_known_make_data_mismatches_are_recorded`.
 
-        ``L2TPv2`` is used because it is one of the three and therefore exercises
-        the real path rather than a contrived one. When its ``_make_data`` is fixed
-        this test goes red, which is the point: the entry is then deleted.
+        ``L2TPv2`` is subclassed with a ``_make_data`` that returns one key no
+        signature declares, so the case does not depend on a real mismatch that
+        will itself be fixed.
 
         """
         from pcapkit.protocols.link.l2tpv2 import L2TPv2
         from pcapkit.utilities.warnings import UnknownFieldWarning
+
+        class Mismatched(L2TPv2):
+            @classmethod
+            def _make_data(cls, data: 'Any') -> 'dict[str, Any]':
+                return {**super()._make_data(data), 'prio': True}
 
         octets = bytes(L2TPv2(version=2, tunnel_id=1, session_id=2, payload=b'ab'))
         parsed = L2TPv2(io.BytesIO(octets), len(octets))
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            rebuilt = L2TPv2.from_data(parsed.info)
+            rebuilt = Mismatched.from_data(parsed.info)
 
-        self.assertIsInstance(rebuilt, L2TPv2)
+        self.assertIsInstance(rebuilt, Mismatched)
         messages = [item for item in caught
                     if isinstance(item.message, UnknownFieldWarning)]
         self.assertEqual(len(messages), 1, [str(item.message) for item in caught])
         self.assertIn("'prio'", str(messages[0].message))
         self.assertIn('_make_data', str(messages[0].message))
 
-    def test_the_three_known_make_data_mismatches_are_recorded(self) -> None:
+    def test_the_known_make_data_mismatches_are_recorded(self) -> None:
         """The latent defects this check made visible, named so they can be fixed.
 
         Each of these has ``_make_data`` returning a key that no signature of the
         same protocol declares, so :meth:`ProtocolBase.from_data
-        <pcapkit.protocols.protocol.ProtocolBase.from_data>` has been dropping that
-        field in silence -- a frame's timestamp, an L2TPv2 priority bit, and a
-        capture's byte order. They are recorded rather than fixed here because each
-        is a defect in its own protocol rather than in this mechanism, and because
-        two of them need a decision about what ``make`` should be called rather than
-        a rename.
+        <pcapkit.protocols.protocol.ProtocolBase.from_data>` drops that field --
+        a capture's byte order. It is recorded rather than fixed here because it
+        is a defect in its own protocol rather than in this mechanism.
 
         Written as an expected-failure table for the reason the round-trip module
         writes its own that way: fixing one of these turns this red and the entry
         gets deleted, where a silent skip would leave the defect recorded forever.
 
         """
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
-        from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcap.header import Header
         from pcapkit.protocols.protocol import _declared_keywords
 
         # protocol -> the ``_make_data`` key it returns that nothing declares
-        recorded = {Frame: 'ts_src', L2TPv2: 'prio', Header: 'magic_number'}
+        recorded = {Header: 'magic_number'}
 
         for protocol, key in recorded.items():
             with self.subTest(protocol=protocol.__name__):

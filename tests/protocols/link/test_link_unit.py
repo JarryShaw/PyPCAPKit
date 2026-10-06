@@ -370,7 +370,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(proto.__length_hint__(), 16)
         values = L2TPv2._make_data(data)
         self.assertEqual(values['type'], True)
-        self.assertEqual(values['prio'], False)
+        self.assertEqual(values['priority'], False)
         self.assertEqual(values['version'], 2)
         self.assertEqual(values['tunnel_id'], 3)
         self.assertEqual(values['session_id'], 4)

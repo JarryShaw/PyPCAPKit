@@ -362,7 +362,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         """
         return {
             'type': data.flags.type,
-            'prio': data.flags.prio,
+            'priority': data.flags.prio,
             'version': data.version,
             'length': data.length,
             'tunnel_id': data.tunnelid,
