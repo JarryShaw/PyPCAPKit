@@ -14,7 +14,9 @@ tree, and each has its own class:
   a secret in scope, so it must never check out code, never splice an expression
   into a ``run:`` script, and never read the event payload outside ``env:`` beyond
   the item number. Asserted over the file, because nothing at run time would
-  announce the mistake. :class:`TestConcurrency` evaluates the ``concurrency:``
+  announce the mistake. :class:`TestScannerFailsClosed` holds the line scan those
+  assertions read to refusing any YAML it cannot read with certainty.
+  :class:`TestConcurrency` evaluates the ``concurrency:``
   expressions per event, so the cancel policy is pinned rather than eyeballed.
 
 :class:`TestBoardSync` drives the script against a fake GraphQL endpoint, which is
@@ -186,16 +188,34 @@ def strip_comments(text: 'str') -> 'str':
 #: number, which keys the concurrency group. A number cannot carry a script.
 ITEM_NUMBER = 'github.event.issue.number || github.event.pull_request.number'
 
-_KEY_RE = re.compile(r'''(?P<key>[\w-]+|'[^']*'|"[^"]*"):(?:[ ]+(?P<rest>.*))?$''')
+_KEY_RE = re.compile(r'''(?P<key>[\w-]+|'[^']*'|"[^"\\]*"):(?:[ ]+(?P<rest>.*))?$''')
 _BLOCK_INDICATORS = {'|', '|-', '|+', '>', '>-', '>+'}
+#: Characters a plain scalar may not start with: anchors, aliases, tags, flow
+#: collections, block-scalar headers, comments and directives (YAML 1.2 §5.3).
+_NOT_PLAIN = frozenset('&*!{}[],|>#%@`?:')
 
 
-def _unquote(value: 'str') -> 'str':
+class UnsupportedYAML(ValueError):
+    """A line :func:`scan` cannot read with certainty, so it refuses the file."""
+
+
+def _scalar(value: 'str', lineno: 'int') -> 'str':
+    """``value`` unquoted, or :exc:`UnsupportedYAML` if it is not a one-line scalar.
+
+    Single-quoted, double-quoted without escapes, and plain scalars that YAML would
+    read as one string are accepted. Anything else -- an alias, an anchor, a flow
+    mapping, an unterminated quote that would continue on the next line, a ``\\``
+    escape that could spell ``$`` -- could hide a value from the scan, so it fails.
+
+    """
     value = value.strip()
-    if len(value) >= 2 and value[0] == value[-1] == "'":
+    if re.fullmatch(r"'(?:[^']|'')*'", value):
         return value[1:-1].replace("''", "'")
-    if len(value) >= 2 and value[0] == value[-1] == '"':
+    if re.fullmatch(r'"[^"\\]*"', value):
         return value[1:-1]
+    if (not value or value[0] in _NOT_PLAIN or value[0] in '\'"'
+            or ': ' in value or value.endswith(':') or ' #' in value):
+        raise UnsupportedYAML(f'line {lineno}: not a scalar scan() can read: {value!r}')
     return value
 
 
@@ -206,33 +226,65 @@ def scan(text: 'str') -> 'list[tuple[tuple[str, ...], str]]':
     :file:`pyproject.toml` and this check has to run everywhere.
     :class:`TestYAMLAgreesWithTheScanner` holds it to :func:`yaml.safe_load`
     wherever PyYAML is installed. It understands the subset these workflows use:
-    block mappings, ``- `` sequence items, block scalars (``|``, ``>``), quoted and
-    plain inline scalars, and flow sequences of plain scalars.
+    block mappings, ``- `` sequence items, block scalars (``|``, ``>`` and their
+    chomping forms), one-line quoted and plain scalars, ``{}``, and flow sequences
+    of such scalars.
+
+    It *fails closed*: any line outside that subset raises :exc:`UnsupportedYAML`
+    rather than being read as something it is not. A value the scan misreads is a
+    ``run:`` script the safety tests never see -- a flow-mapping step, ``run :``,
+    ``run: |2``, or ``run: *alias`` all were (#1060) -- and CI has no PyYAML to
+    catch the disagreement, so refusing is the only answer that cannot pass
+    vacuously.
 
     """
     lines = text.splitlines()
     out = []  # type: list[tuple[tuple[str, ...], str]]
     stack = []  # type: list[tuple[int, str]]
+    #: Column a line must not be deeper than, when the line before ended in a scalar.
+    inline = None  # type: int | None
     i = 0
     while i < len(lines):
         line = lines[i]
         i += 1
+        lineno = i
         if not line.strip() or line.strip().startswith('#'):
             continue
+        if '\t' in line[:len(line) - len(line.lstrip())]:
+            raise UnsupportedYAML(f'line {lineno}: tab in indentation')
         indent = len(line) - len(line.lstrip(' '))
+        if inline is not None and indent > inline:
+            # Deeper than the line before, which ended in a scalar: YAML folds
+            # this line into that scalar -- even a ``- `` line, which the scan
+            # would otherwise read as a sequence item of its own.
+            raise UnsupportedYAML(f'line {lineno}: continues the scalar on the line above')
+        inline = None
         content = line.strip()
+        item = False
         while content.startswith('- ') or content == '-':
             content = content[2:].lstrip()
             indent += 2
+            item = True
         while stack and stack[-1][0] >= indent:
             stack.pop()
         path = tuple(key for _, key in stack)
         match = _KEY_RE.match(content)
         if match is None:
-            out.append((path, _unquote(content)))
+            # A bare scalar is only a sequence item; on a line of its own it is
+            # the continuation of a multi-line scalar, whose key the scan has lost.
+            if not item:
+                raise UnsupportedYAML(f'line {lineno}: neither a key nor a sequence item: '
+                                      f'{content!r}')
+            out.append((path, _scalar(content, lineno)))
+            inline = indent - 2  # the column of its ``- ``
             continue
-        key = _unquote(match.group('key'))
+        key = match.group('key')
+        key = key[1:-1] if key[0] in '\'"' else key
         rest = (match.group('rest') or '').strip()
+        if rest[:1] in ('|', '>') and rest not in _BLOCK_INDICATORS:
+            # An indentation indicator or a trailing comment: the block that
+            # follows would be read as stray scalars, outside this key.
+            raise UnsupportedYAML(f'line {lineno}: block scalar header {rest!r}')
         if rest in _BLOCK_INDICATORS:
             block = []
             while i < len(lines) and (not lines[i].strip()
@@ -243,9 +295,14 @@ def scan(text: 'str') -> 'list[tuple[tuple[str, ...], str]]':
         elif not rest:
             stack.append((indent, key))
         elif rest.startswith('[') and rest.endswith(']'):
-            out.extend((path + (key,), _unquote(item)) for item in rest[1:-1].split(',') if item.strip())
+            out.extend((path + (key,), _scalar(entry, lineno))
+                       for entry in rest[1:-1].split(',') if entry.strip())
+            inline = indent
         elif rest != '{}':
-            out.append((path + (key,), _unquote(rest)))
+            out.append((path + (key,), _scalar(rest, lineno)))
+            inline = indent
+        else:
+            inline = indent
     return out
 
 
@@ -270,6 +327,17 @@ def evaluate_expression(value: 'str', context: 'dict') -> 'object':
     if len(parts) == 1:
         return {'true': True, 'false': False}.get(value, value)
     return ''.join(part if n % 2 == 0 else str(one(part)) for n, part in enumerate(parts))
+
+
+def payload_outside_env(pairs) -> 'list[tuple[str, ...]]':
+    """Paths of values reading the event payload, beyond the item number, outside ``env:``."""
+    found = []
+    for path, value in pairs:
+        # The value's own mapping must be an ``env:`` -- not a job named ``env``.
+        in_env = len(path) >= 2 and path[-2] == 'env' and path[-3:-2] != ('jobs',)
+        if not in_env and 'github.event.' in value.replace(ITEM_NUMBER, ''):
+            found.append(path)
+    return found
 
 
 class TestWorkflowSafety(unittest.TestCase):
@@ -305,13 +373,17 @@ class TestWorkflowSafety(unittest.TestCase):
                 self.assertNotIn('${{', value)
 
     def test_event_payload_only_in_env(self) -> None:
-        for path, value in self.pairs:
-            if 'github.event.' not in value or 'env' in path:
-                continue
-            with self.subTest(path='.'.join(path)):
-                self.assertNotIn('github.event.', value.replace(ITEM_NUMBER, ''),
-                                 'an event-payload reference outside env: other than the '
-                                 'item number')
+        self.assertEqual(payload_outside_env(self.pairs), [],
+                         'an event-payload reference outside env: other than the item number')
+
+    def test_the_env_exemption_is_the_value_s_own_mapping(self) -> None:
+        # A job or step key merely *under* something named ``env`` is not in an
+        # ``env:`` block; ``'env' in path`` exempted both (#1060).
+        text = (f'jobs:\n  env:\n    runs-on: {_TITLE}\n'
+                f'    steps:\n      - name: x\n        if: {_TITLE}\n'
+                f'        env:\n          T: {_TITLE}\n')
+        self.assertEqual(payload_outside_env(scan(text)),
+                         [('jobs', 'env', 'runs-on'), ('jobs', 'env', 'steps', 'if')])
 
     def test_script_fetched_at_the_base_sha(self) -> None:
         self.assertIn('SCRIPT_REF: ${{ github.sha }}', self.text)
@@ -349,6 +421,61 @@ class TestConcurrency(unittest.TestCase):
                 self.assertIs(cancel, False)
 
 
+_TITLE = '${{ github.event.issue.title }}'
+_STEPS = 'jobs:\n  j:\n    steps:\n'
+
+#: Workflows that splice :data:`_TITLE` into a ``run:`` script in a form the old
+#: line scan read as something else (#1060). Each must make :func:`scan` raise.
+BYPASSES = {
+    'flow-mapping step': f'      - {{name: x, run: "echo {_TITLE}"}}\n',
+    'space before the colon': f'      - name: x\n        run : echo {_TITLE}\n',
+    'indentation indicator': f'      - name: x\n        run: |2\n          echo {_TITLE}\n',
+    'alias': f'      - name: x\n        env:\n          T: &a echo {_TITLE}\n        run: *a\n',
+    'block header with a comment': f'      - name: x\n        run: | # c\n          echo {_TITLE}\n',
+    'multi-line plain scalar': f'      - name: x\n        run: echo\n          {_TITLE}\n',
+    'continuation that looks like an item': f'      - name: x\n        run: echo\n          - {_TITLE}\n',
+    'multi-line quoted scalar': f'      - name: x\n        run: "echo\n          {_TITLE}"\n',
+    'escaped dollar': '      - name: x\n        run: "echo \\x24{{ github.event.issue.title }}"\n',
+    'escaped key': f'      - name: x\n        "r\\x75n": echo {_TITLE}\n',
+}
+
+#: The safe shape of the same step: the title reaches the script through ``env:``.
+SAFE = f'      - name: x\n        env:\n          T: {_TITLE}\n        run: |\n          echo "$T"\n'
+
+
+def guard_trips(text: 'str') -> 'bool':
+    """Whether :meth:`TestWorkflowSafety.test_no_expression_inside_a_run_script` fails on ``text``."""
+    try:
+        pairs = scan(text)
+    except UnsupportedYAML:
+        return True
+    return any(path and path[-1] == 'run' and '${{' in value for path, value in pairs)
+
+
+class TestScannerFailsClosed(unittest.TestCase):
+    """:func:`scan` refuses what it cannot read, with or without PyYAML installed."""
+
+    def test_each_bypass_trips_the_guard(self) -> None:
+        for form, step in BYPASSES.items():
+            with self.subTest(form=form):
+                self.assertTrue(guard_trips(_STEPS + step), 'the expression in run: went unseen')
+
+    def test_each_bypass_is_refused(self) -> None:
+        for form, step in BYPASSES.items():
+            with self.subTest(form=form):
+                self.assertRaises(UnsupportedYAML, scan, _STEPS + step)
+
+    def test_the_safe_form_is_read(self) -> None:
+        # Without this, a scanner that refused everything would pass the two above.
+        pairs = scan(_STEPS + SAFE)
+        self.assertFalse(guard_trips(_STEPS + SAFE))
+        self.assertIn((('jobs', 'j', 'steps', 'env', 'T'), _TITLE), pairs)
+        self.assertIn((('jobs', 'j', 'steps', 'run'), 'echo "$T"'), pairs)
+
+    def test_the_workflow_is_inside_the_subset(self) -> None:
+        self.assertTrue(scan(WORKFLOW.read_text(encoding='utf-8')))
+
+
 def yaml_pairs(node, path=()):
     """:func:`scan`'s output, computed from :func:`yaml.safe_load` instead."""
     if isinstance(node, dict):
@@ -363,13 +490,18 @@ def yaml_pairs(node, path=()):
 
 
 class TestYAMLAgreesWithTheScanner(unittest.TestCase):
-    """The hand-rolled :func:`scan` reads the workflow as PyYAML does."""
+    """The hand-rolled :func:`scan` reads the workflow as PyYAML does.
+
+    No CI job installs PyYAML, so this class skips there. It is a cross-check and
+    not the guard: :class:`TestScannerFailsClosed` is what holds without it.
+
+    """
 
     def setUp(self) -> None:
         try:
             import yaml
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML not installed')
+            self.skipTest('PyYAML not installed; scan() fails closed without it (#1060)')
         self.raw = WORKFLOW.read_text(encoding='utf-8')
         self.doc = yaml.safe_load(self.raw)
 
@@ -377,6 +509,16 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
         def norm(pairs):
             return sorted((path, ' '.join(str(value).split()).lower()) for path, value in pairs)
         self.assertEqual(norm(scan(self.raw)), norm(yaml_pairs(self.doc)))
+
+    def test_each_bypass_is_real(self) -> None:
+        # Each fixture really does put the expression into a run: script, so
+        # TestScannerFailsClosed is testing bypasses and not malformed YAML.
+        import yaml
+        for form, step in BYPASSES.items():
+            with self.subTest(form=form):
+                runs = [value for path, value in yaml_pairs(yaml.safe_load(_STEPS + step))
+                        if path[-1] == 'run']
+                self.assertTrue(any('${{' in value for value in runs), runs)
 
     def test_no_step_uses_an_action(self) -> None:
         self.assertIn('pull_request_target', self.doc.get('on', self.doc.get(True)))
