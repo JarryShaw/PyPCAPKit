@@ -89,11 +89,10 @@ class ExtractorTests(unittest.TestCase):
 
         # Several tests here register into the four registries for real --
         # overwriting ``json``, ``dpkt``, ``ipv4`` and ``tcp`` with stand-ins,
-        # or adding ``unit-*`` names -- so each table is put back in place
-        # afterwards. A fresh import per test used to do that implicitly; without
-        # it, a later extraction ran the stand-in engine and hung, and
-        # :mod:`tests.interface.test_core` found engines it has no constant for
-        # (GitHub issue #1065).
+        # or adding ``unit-*`` names -- and the class shares one import, so each
+        # table is put back afterwards. Without that, a later extraction ran the
+        # stand-in engine and hung, and :mod:`tests.interface.test_core` found
+        # engines it has no constant for (GitHub issue #1065).
         for table in (Extractor.__output__, Extractor.__engine__,
                       Extractor.__reassembly__, Extractor.__traceflow__):
             self.addCleanup(lambda table=table, saved=dict(table): (table.clear(), table.update(saved)))
