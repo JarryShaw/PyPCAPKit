@@ -243,9 +243,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(schema.htype, Hardware.Ethernet)
         self.assertEqual(schema.ptype, EtherType.Internet_Protocol_version_4)
         self.assertEqual(schema.oper, Operation.REPLY)
-        self.assertEqual(schema.sha, b'00aabbccddee')
+        self.assertEqual(schema.sha, b'\x00\xaa\xbb\xcc\xdd\xee')
         self.assertEqual(schema.spa, b'\xc6\x33\x64\x01')
-        self.assertEqual(schema.tha, b'112233445566')
+        self.assertEqual(schema.tha, b'\x11\x22\x33\x44\x55\x66')
         self.assertEqual(schema.tpa, b'\xc6\x33\x64\x02')
 
     def test_arp_proto_resolve_rejects_a_bool(self) -> None:

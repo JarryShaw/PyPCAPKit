@@ -369,24 +369,32 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Arguments:
             addr: Hardware address.
+            htype: Hardware type.
 
         Returns:
-            Hardware address as :obj:`bytes`. If ``htype`` is ``1``, i.e. MAC
-            address, the ``:``- or ``-``-separated hex string is validated and
-            returned with the separators removed (still hex encoded).
+            Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.
+            MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address
+            is validated and packed as 6 octets; otherwise, a :data:`str` is
+            taken as the *hex* encoded address that :meth:`_read_addr_resolve`
+            returns, and :obj:`bytes` are returned as given.
 
         Raises:
             ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a
-                well-formed MAC address.
+                well-formed MAC address, or if ``htype`` is not ``1`` and
+                ``addr`` is a :data:`str` that is not *hex* encoded.
 
         """
-        _addr = addr.encode() if isinstance(addr, str) else addr
-
         if htype == Enum_Hardware.Ethernet:
+            _addr = addr.encode() if isinstance(addr, str) else addr
             if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-                return _addr.replace(b':', b'').replace(b'-', b'')
+                return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
             raise ProtocolError(f'Invalid MAC address: {addr!r}')
-        return _addr
+        if isinstance(addr, str):
+            try:
+                return bytes.fromhex(addr.replace(':', '').replace('-', ''))
+            except ValueError:
+                raise ProtocolError(f'Invalid hardware address: {addr!r}') from None
+        return addr
 
     def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int') -> 'bytes':
         """Resolve protocol address according to protocol.
