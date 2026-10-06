@@ -2619,7 +2619,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_UserTimeout(
             kind=code,
-            length=3,
+            length=4,
             info={
                 'granularity': granularity,
                 'timeout': timeout_val,

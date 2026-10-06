@@ -137,15 +137,6 @@ EXPECTED_FAILURES = {
 
     # -- TCP ------------------------------------------------------------------
 
-    # ``_make_mode_timeout`` writes ``length=3`` into an option that packs to
-    # four octets (kind, length, and a two-octet bitfield), and
-    # ``_read_mode_timeout`` checks the length exactly. Measured: the schema
-    # packs ``1c03003c`` where a correct one is ``1c04003c``.
-    'tcp-option/User_Timeout_Option': Gap(
-        'CONSTRUCT', 'TCP: [OptNo 28] invalid format',
-        'pcapkit/protocols/transport/tcp.py:2506 -- _make_mode_timeout sets '
-        'length=3 for a 4-octet option'),
-
     # ``_make_mode_qs`` computes ``rate_val`` as a floor of a logarithm that is
     # negative for any rate under 40 kbps, and a negative value then fails to
     # pack into the 4-bit field with ``ValueError: invalid literal for int()
