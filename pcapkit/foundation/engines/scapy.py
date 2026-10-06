@@ -206,6 +206,8 @@ class Scapy(EngineBase['ScapyPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
+                ofile = ext._ofile
+            ext._offmt = ofile.kind
 
         # record fragments
         if ext._flag_r:
