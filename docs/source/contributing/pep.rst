@@ -62,7 +62,8 @@ whose *layout* is identical -- it holds the whole of the tag, and
    ``NotImplemented`` folder. **Those files are not a roadmap.** They are
    scratch reminders, so a stub's presence does not mean a protocol is planned or
    claimed, and its absence does not mean the protocol is unwanted:
-   ``LINUX_SLL``, ``QUIC`` and **DTLS** have no stub and are on the list above,
+   ``LINUX_SLL``, ``LINUX_SLL2``, ``QUIC`` and **DTLS** have no stub and are on the
+   list above,
    while **NGAP** has none either and is implemented. Take this page as the
    record and ignore the folder.
 
@@ -210,8 +211,8 @@ look like ordinary fields and are not:
 DTLS
 ~~~~
 
-**Not started**, and unlike everything in the list above it has no stub in the
-tree at all -- only TLS/SSL does. It earns its own entry because the registries
+**Not started**, and it has no stub in the tree -- of the TLS/SSL and DTLS pair,
+only TLS/SSL does. It earns its own entry because the registries
 have moved ahead of it, and a growing part of SCTP's surface now names a protocol
 that does not exist:
 
@@ -820,9 +821,9 @@ from *wrong*, or it will cry wolf on the commonest capture there is —
 model for how to spell "expected, not an error".
 
 Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
-ESP has already laid the groundwork, but the checksum half genuinely wants the
-parent-access question answered first, and that is worth doing deliberately
-rather than as a side effect of a checksum patch.
+ESP has already laid the groundwork, but the checksum half needs the IP
+pseudo-header class defined first, and that is worth doing deliberately rather
+than as a side effect of a checksum patch.
 
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
@@ -969,7 +970,7 @@ dispatcher registers exactly three link types
 work above rather than a separate concern — all four are link types the library
 enumerates but cannot parse. It surfaced while deciding what an unresolvable
 link-layer name should do: neither value is an honest stand-in for "unknown link
-type", which is why the toolkit now raises instead of defaulting to
+type", which is why the toolkit raises instead of defaulting to
 ``LinkType.NULL``.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a

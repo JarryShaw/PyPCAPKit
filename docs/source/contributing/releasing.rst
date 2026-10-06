@@ -186,10 +186,10 @@ pushed, trading a clean skip for a checkout failure; the equality pair skips
 ``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
 produces the evidence the gates read, so a skipped or cancelled
 ``version_check`` leaves them nothing to decide on. ``unit-tests`` is held to
-the same bar for a different reason: it is the release test gate, and since
-`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ it skips when
-nothing is publishable, so accepting ``skipped`` there would publish
-untested. ``github`` names it in ``needs:`` instead and relies on the implicit
+the same bar for a different reason: it is the release test gate, and it skips
+when nothing is publishable
+(`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so accepting
+``skipped`` there would publish untested. ``github`` names it in ``needs:`` instead and relies on the implicit
 ``success()``. The gate's own ``if:`` is the union of the four publishers'
 conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
 ever drift apart, the failure is a release that did not happen, which
@@ -257,7 +257,7 @@ Precautions
    above is what prevents it: ``tag``, ``pypi`` and ``conda`` each check whether
    *their own* artefact is missing rather than whether the ``v*`` tag exists, so an
    incomplete release runs the jobs that did not finish instead of skipping them.
-   A half-finished release now self-heals on the next ``workflow_run``-triggered
+   A half-finished release self-heals on the next ``workflow_run``-triggered
    attempt, or on re-running the workflow by hand -- see `Recovery`_ below.
    ``release_status`` is the other half: it runs unconditionally and reports,
    with a ``::notice``, a ``::warning`` or a failing ``::error``, why a run
@@ -275,7 +275,7 @@ here), so the push only fires again after the tag is deleted -- which touches a
 ref the release automation owns, and lands the retry back on the tag-push path,
 where every job's guard is bypassed regardless of what has already gone out.
 Neither is worth the risk of a double upload to an index that cannot take one
-back, and neither is needed, since a plain re-run now self-heals; see
+back, and neither is needed, since a plain re-run self-heals; see
 `Recovery`_ below.
 
 **``environment: pypi`` stays even though its reviewer is gone.** ``pypi``
@@ -305,8 +305,8 @@ actual fix rather than a best-effort suggestion: `Per-Job Evidence, Not a
 Shared Proxy`_ above means ``tag``, ``pypi`` and ``conda`` each check whether
 *their own* artefact is missing, so a re-run finishes whichever jobs did not
 complete last time instead of skipping them on the ``v*`` tag's mere
-existence. ``pypi`` was always safe to re-run (``skip-existing: true``);
-``conda`` now is too, because each matrix leg checks Anaconda for its own
+existence. ``pypi`` is safe to re-run (``skip-existing: true``), and so is
+``conda``, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there.
 

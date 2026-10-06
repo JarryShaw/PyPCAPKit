@@ -167,8 +167,8 @@ rewrites the regenerated constants, not as a check, so nothing verifies import o
 request.
 
 One trap: `make vermin` redirects its report into `temp/vermin.txt` rather than to your terminal,
-and vermin exits 1 because `vermin.ini` sets `targets = 3.6` against a real floor of 3.11. Make
-gives up at the redirect with `make: *** [vermin] Error 1`, the report left in the file and the line
+and vermin exits 1 because `vermin.ini` sets `targets = 3.6` against the 3.11 minimum it detects.
+Make gives up at the redirect with `make: *** [vermin] Error 1`, the report left in the file and the line
 that would have opened it never reached. `make vermin-ci` runs the same flags to stdout, which is why
 CI uses it and why it is easier to read at a desk. Running the lot before you push still saves a
 review round.
@@ -199,9 +199,9 @@ BLANK LINE
 footer (optional)
 ```
 
-`type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci` or `chore` — those are the
-ones in use. `scope` names the part of the package affected — `tcp`, `corekit`, `schema`, `ipv4`,
-`vendor` — and several are separated by commas inside the parentheses, as in `fix(link,internet):`
+`type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci`, `chore` or `release` —
+those are the ones in use. `scope` names the part of the package affected — `tcp`, `corekit`,
+`schema`, `ipv4`, `vendor` — and several are separated by commas inside the parentheses, as in `fix(link,internet):`
 or `test(utilities,foundation):`. The scope may be omitted where nothing narrower than the whole
 project applies, as in `docs:`.
 

@@ -59,7 +59,7 @@ What reaches users is the **object only**. The owner ruled on GitHub issue :issu
 that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a public
 sentinel names its instance in its module's ``__all__`` and leaves the type out of it.
 The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
-is ``import *`` that no longer offers it. A private sentinel such as ``ABSENT`` is in
+is only ``import *`` that does not offer it. A private sentinel such as ``ABSENT`` is in
 neither, which is what private means here -- dropping its leading underscore did not
 add it to either list, and :class:`~pcapkit.corekit.sentinels.AbsentType` and
 :data:`~pcapkit.corekit.sentinels.ABSENT` are documented on

@@ -260,8 +260,7 @@ The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 
 The two relationships above compose into a failure mode worth seeing on its
 own graph. Create Release's first job, ``version_check`` -- ahead of the
-``uses:`` call above since
-`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ -- carries:
+``uses:`` call above -- carries:
 
 .. code-block:: yaml
 

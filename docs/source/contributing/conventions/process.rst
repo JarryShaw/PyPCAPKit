@@ -3,7 +3,7 @@
 Running the Repository
 ----------------------
 
-The four pages before this one are about writing library code. The rulings here are
+The five pages before this one are about writing library code. The rulings here are
 about running the repository -- what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
 module, and none fits a code-convention page, so the owner ruled on
