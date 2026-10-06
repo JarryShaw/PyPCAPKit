@@ -142,6 +142,9 @@ class Scapy(EngineBase['ScapyPacket']):
         :mod:`scapy.all`, since that is the import that populates the layer
         registries ``sniff`` needs to dissect anything.
 
+        The global header is parsed and dumped first, by
+        :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
+
         Warns:
             AttributeWarning: If :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                 and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
@@ -170,6 +173,9 @@ class Scapy(EngineBase['ScapyPacket']):
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )
+
+        # extract global header
+        ext.record_header()
 
         # extract & analyse file
         logger.debug('scapy: sniffing %s', ext._ifnm)
@@ -206,8 +212,6 @@ class Scapy(EngineBase['ScapyPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
-                ofile = ext._ofile
-            ext._offmt = ofile.kind
 
         # record fragments
         if ext._flag_r:
