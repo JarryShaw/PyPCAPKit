@@ -1387,16 +1387,21 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
-        # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
-        if len(schema.ciphers) > 5:
+        # more than six (6) Cipher IDs in one HIP_CIPHER parameter. Conversely, a
+        # recipient MUST be prepared to handle received transport parameters that
+        # contain more than six Cipher IDs by accepting the first six Cipher IDs and
+        # dropping the rest. [:rfc:`7401#section-5.2.8`]
+        ciphers = schema.ciphers
+        if len(ciphers) > 6:
             warn(f'HIPv{version}: [ParamNo {schema.type}] invalid format', ProtocolWarning)
             # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+            ciphers = ciphers[:6]
 
         hip_cipher = Data_HIPCipherParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
-            cipher_id=tuple(schema.ciphers),
+            cipher_id=tuple(ciphers),
         )
         return hip_cipher
 

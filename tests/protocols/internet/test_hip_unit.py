@@ -584,8 +584,8 @@ class HIPUnitTests(unittest.TestCase):
             )
         with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
             hip_cipher = proto._read_param_hip_cipher(
-                hip_schema.HIPCipherParameter(type=Parameter.HIP_CIPHER, len=12,
-                                              ciphers=[Cipher.NULL_ENCRYPT] * 6),
+                hip_schema.HIPCipherParameter(type=Parameter.HIP_CIPHER, len=14,
+                                              ciphers=[Cipher.NULL_ENCRYPT] * 7),
                 version=2,
                 options=options,
             )
