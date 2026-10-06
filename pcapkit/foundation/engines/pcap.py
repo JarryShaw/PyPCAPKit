@@ -103,8 +103,11 @@ class PCAP(EngineBase[Frame]):
         link layer protocol type and nanosecond flag are also saved on the
         current :class:`PCAP` engine instance.
 
-        For output, the method will dump the parsed PCAP global header under
-        the name of ``Global Header``.
+        For output, the method will create the output writer from the parsed
+        PCAP global header, via :meth:`Extractor._open_output
+        <pcapkit.foundation.extraction.Extractor._open_output>`, and dump the
+        header under the name of ``Global Header`` -- except to a PCAP writer,
+        which has already written it.
 
         """
         # pylint: disable=attribute-defined-outside-init,protected-access
@@ -121,12 +124,14 @@ class PCAP(EngineBase[Frame]):
         if ext._flag_q:
             return
 
+        ext._open_output(protocol=self._dlink, byteorder=self._gbhdr.byteorder, nanosecond=self._nnsec)
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/Global Header.{ext._fext}')
-            ofile(self._gbhdr.info.to_dict(), name='Global Header')
         else:
-            ext._ofile(self._gbhdr.info.to_dict(), name='Global Header')
             ofile = ext._ofile
+        # NOTE: a PCAP writer has already written the global header on creation.
+        if ofile.kind != 'pcap':
+            ofile(self._gbhdr.info.to_dict(), name='Global Header')
         ext._offmt = ofile.kind
 
     def read_frame(self) -> 'Frame':
@@ -161,11 +166,14 @@ class PCAP(EngineBase[Frame]):
         # write plist
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
+            # NOTE: a PCAP writer takes the frame itself, for its octets and
+            # record header; the other writers take its fields.
+            info = frame.info if ext._offmt == 'pcap' else frame.info.to_dict()
             if ext._flag_f:
                 ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
-                ofile(frame.info.to_dict(), name=frnum)
+                ofile(info, name=frnum)
             else:
-                ext._ofile(frame.info.to_dict(), name=frnum)
+                ext._ofile(info, name=frnum)
 
         # record fragments
         if ext._flag_r:

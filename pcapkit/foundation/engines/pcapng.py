@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
@@ -155,6 +156,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         shb._ctx = self._ctx
 
         logger.debug('PCAP-NG section %d header read', len(self._ctx_list))
+
+        # NOTE: a PCAP file has one link type and one timestamp resolution,
+        # where a PCAP-NG file declares them per interface, in blocks that follow.
+        if not ext._flag_q and isinstance(ext._ofile, type) and issubclass(ext._ofile, PCAPIO):
+            raise FormatError('PCAP-NG: PCAP output is not supported for a PCAP-NG input')
+        ext._open_output()
         self._write_file(shb.info, name=f'Section Header {len(self._ctx_list)}')
 
     def read_frame(self) -> 'P_PCAPNG':
