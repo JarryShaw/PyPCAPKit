@@ -330,7 +330,7 @@ class SettingsFrame(FrameType, code=Enum_Frame.SETTINGS):
     #: Settings.
     settings: 'list[SettingPair]' = ListField(
         length=lambda pkt: pkt['__length__'],
-        item_type=SchemaField(schema=SettingPair),
+        item_type=SchemaField(length=6, schema=SettingPair),
     )
 
     if TYPE_CHECKING:
