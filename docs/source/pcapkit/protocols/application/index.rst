@@ -32,4 +32,4 @@ Protocol Registry
 
 .. data:: pcapkit.protocols.application.APPTYPE
 
-   alias of :class:`pcapkit.const.reg.apptype.AppType`
+   alias of :class:`pcapkit.const.reg.apptype.apptype.AppType`

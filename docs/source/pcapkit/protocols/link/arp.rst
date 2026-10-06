@@ -4,8 +4,9 @@ ARP/InARP - (Inverse) Address Resolution Protocol
 .. module:: pcapkit.protocols.link.arp
 
 :mod:`pcapkit.protocols.link.arp` contains
-:class:`~pcapkit.protocols.link.arp.ARP` only,
-which implements extractor for (Inverse) Address Resolution
+:class:`~pcapkit.protocols.link.arp.ARP` and
+:class:`~pcapkit.protocols.link.arp.InARP`,
+which implement extractors for (Inverse) Address Resolution
 Protocol (ARP/InARP) [*]_, whose structure is described as
 below:
 
