@@ -215,8 +215,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
              ptype_default: 'Optional[int]' = None,
              ptype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              ptype_reversed: 'bool' = False,
-             hlen: 'int' = 6,
-             plen: 'int' = 4,
+             hlen: 'Optional[int]' = None,
+             plen: 'Optional[int]' = None,
              oper: 'Enum_Operation | StdlibEnum | AenumEnum | str | int' = Enum_Operation.REQUEST,
              oper_default: 'Optional[int]' = None,
              oper_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -238,8 +238,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
             ptype_default: Default value of protocol type.
             ptype_namespace: Namespace of protocol type.
             ptype_reversed: Reversed flag of protocol type.
-            hlen: Hardware address length.
-            plen: Protocol address length.
+            hlen: Hardware address length; derived from the packed ``sha`` if
+                not given.
+            plen: Protocol address length; derived from the packed ``spa`` if
+                not given.
             oper: Operation.
             oper_default: Default value of operation.
             oper_namespace: Namespace of operation.
@@ -254,6 +256,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If a packed hardware address is not ``hlen`` octets
+                long, or a packed protocol address is not ``plen`` octets long.
+
         """
         _htype = self._make_index(htype, htype_default, namespace=htype_namespace,
                                   reversed=htype_reversed, pack=False)
@@ -262,16 +268,29 @@ class ARP(Link[Data_ARP, Schema_ARP],
         _oper = self._make_index(oper, oper_default, namespace=oper_namespace,
                                  reversed=oper_reversed, pack=False)
 
+        _sha = self._make_addr_resolve(sha, _htype)
+        _spa = self._make_proto_resolve(spa, _ptype)
+        _tha = self._make_addr_resolve(tha, _htype)
+        _tpa = self._make_proto_resolve(tpa, _ptype)
+
+        _hlen = len(_sha) if hlen is None else hlen
+        _plen = len(_spa) if plen is None else plen
+        for name, addr, size in (('sha', _sha, _hlen), ('tha', _tha, _hlen),
+                                 ('spa', _spa, _plen), ('tpa', _tpa, _plen)):
+            if len(addr) != size:
+                raise ProtocolError(f'{self.__class__.__name__}: [{name}] address is '
+                                    f'{len(addr)} octets, but its length field is {size}')
+
         return Schema_ARP(
             htype=_htype,
             ptype=_ptype,
-            hlen=hlen,
-            plen=plen,
+            hlen=_hlen,
+            plen=_plen,
             oper=_oper,
-            sha=self._make_addr_resolve(sha, _htype),
-            spa=self._make_proto_resolve(spa, _ptype),
-            tha=self._make_addr_resolve(tha, _htype),
-            tpa=self._make_proto_resolve(tpa, _ptype),
+            sha=_sha,
+            spa=_spa,
+            tha=_tha,
+            tpa=_tpa,
             payload=payload,
         )
 
@@ -401,17 +420,21 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Arguments:
             addr: Protocol address.
+            ptype: Protocol type.
 
         Returns:
             Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or
             ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16
-            octets; otherwise, a :data:`str` is encoded, an
+            octets; otherwise, a :data:`str` is taken as the *hex* encoded
+            address that :meth:`_read_proto_resolve` returns, an
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is
             packed, and anything else is returned as given.
 
         Raises:
             FieldValueError: If ``addr`` is a :obj:`bool` (c.f.
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+            ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``
+                is a :data:`str` that is not *hex* encoded.
 
         Notes:
             Through :func:`parse_ip_address` rather than
@@ -440,7 +463,11 @@ class ARP(Link[Data_ARP, Schema_ARP],
                 addr, f'{self.__class__.__name__}: invalid protocol address', version=6)).packed
 
         if isinstance(addr, str):
-            return addr.encode()
+            try:
+                return bytes.fromhex(addr.replace(':', '').replace('-', ''))
+            except ValueError:
+                raise ProtocolError(f'{self.__class__.__name__}: invalid protocol address: '
+                                    f'{addr!r}') from None
         if isinstance(addr, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             return addr.packed
         return addr
