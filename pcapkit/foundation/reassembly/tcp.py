@@ -5,7 +5,7 @@
 .. module:: pcapkit.foundation.reassembly.tcp
 
 :mod:`pcapkit.foundation.reassembly.tcp` contains
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
+:class:`~pcapkit.foundation.reassembly.tcp.TCP` only,
 which reconstructs fragmented TCP packets back to origin.
 
 """
@@ -29,8 +29,9 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     """Reassembly for TCP payload.
 
     Args:
-        strict: if return all datagrams (including those not
-                implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload, its holes zero-filled
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
@@ -393,7 +394,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             new: the arriving segment's bytes over the same range.
             start: absolute sequence number of ``old[0]``/``new[0]``, which
                 cover the same range by construction -- see the two call
-                sites in :meth:`reassembly`.
+                sites, :meth:`_reassemble_append` and :meth:`_reassemble_prepend`.
 
         Returns:
             The bytes to keep for the range, and any ``(first, last)``

@@ -110,8 +110,10 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
     """Base class for reassembly procedure.
 
     Args:
-        strict: if return all datagrams (including those not
-                implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload, its holes zero-filled -- or, for IP while the
+            total length is unknown, only the prefix up to the first hole
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <_dtgram>` (if not, datagram
             will be discarded after callback)
@@ -401,7 +403,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
             callback: callback function, which will be called
                 when reassembled datagram is obtained, with the
                 list of reassembled datagrams as its only argument
-            index: index to be inserted in the callback list,; by
+            index: index to be inserted in the callback list; by
                 default, the callback will be appended to the end
                 of the list
 
@@ -429,8 +431,10 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         """Initialise packet reassembly.
 
         Args:
-            strict: if return all datagrams (including those not
-                implemented) when submit
+            strict: if :data:`True`, report a datagram that is not completely
+                reassembled as the tuple of its received runs; otherwise as one
+                contiguous payload, its holes zero-filled -- or, for IP while the
+                total length is unknown, only the prefix up to the first hole
             store: if store reassembled datagram in memory, i.e.,
                 :attr:`self._dtgram <_dtgram>` (if not, datagram
                 will be discarded after callback)
@@ -443,10 +447,11 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
             FieldValueError: If ``timeout`` is negative.
 
         """
-        #: bool: Strict mode flag. If set to :data:`True`, all
-        #: data will be returned, including those not completely
-        #: reassembled; otherwise, only completely reassembled
-        #: data will be returned.
+        #: bool: Strict mode flag. If set to :data:`True`, a datagram
+        #: not completely reassembled is reported as the tuple of its
+        #: received runs; otherwise, as one contiguous payload, its
+        #: holes zero-filled -- or, for IP while the total length is
+        #: unknown, only the prefix up to the first hole.
         self._flag_s = strict
         #: bool: Store mode flag. If set to :data:`True`, all
         #: reassembled datagram will be stored in memory, i.e.,
@@ -526,8 +531,10 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
            Extractor.register_reassembly('my_mixin', MyMixin)
 
     Arguments:
-        strict: if return all datagrams (including those not
-                implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload, its holes zero-filled -- or, for IP while the
+            total length is unknown, only the prefix up to the first hole
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <_dtgram>` (if not, datagram
             will be discarded after callback)
@@ -556,7 +563,7 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         rather than having to inherit :class:`ReassemblyBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
-        has guarded on its own ``code`` keyword all along.
+        guards on its own ``code`` keyword the same way.
 
         Note:
             :attr:`__protocol_name__` is *not* an opt-in. It supplies the
@@ -570,10 +577,10 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
 
         """
         # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
-        # idea ``name`` -- so guessing ``name=`` by analogy is the expected
-        # mistake, not a careless one. Left in ``**kwargs`` it would be
-        # dropped by the bare ``super().__init_subclass__()`` below, leaving the
-        # class registered under its own class name: no exception, no warning.
+        # idea ``engine`` -- so guessing the other base's keyword, or ``name=``,
+        # is the expected mistake, not a careless one. Left in ``**kwargs`` it
+        # would be dropped by the bare ``super().__init_subclass__()`` below,
+        # leaving the class silently unregistered: no exception, no warning.
         # See the sibling note in ``Engine.__init_subclass__``.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])

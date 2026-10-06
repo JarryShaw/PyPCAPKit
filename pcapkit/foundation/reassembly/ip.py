@@ -9,7 +9,7 @@
 only, which reconstructs fragmented IP packets back to
 origin. The following algorithm implement is based on IP
 reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment receivedbit table). Though another
+``RCVBT`` (fragment received bit table). Though another
 algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
 however, this implement still used the elder one.
 
@@ -34,8 +34,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
     """Reassembly for IP payload.
 
     Args:
-        strict: if return all datagrams (including those not
-                implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload, its holes zero-filled -- or, while the total
+            length is unknown, only the prefix up to the first hole
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
@@ -147,7 +149,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # TCP's first-write-wins (:rfc:`9293#section-3.10`) -- so the arriving
         # payload always overwrites here; ``conflicts`` above is what records
         # that it *disagreed* with what it overwrote, which is the part RFC 791
-        # leaves unrecorded and this fix adds.
+        # leaves unrecorded.
         buf.datagram[start:stop] = info.payload
 
         # set RCVBT bits (in 8 octets)
@@ -318,8 +320,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             if TDL > 0:
                 # The length is known. Report it, holes and all: the gaps read as
                 # zeros, exactly as they do in the TCP reassembler's loose mode.
-                # This is unchanged behaviour, and the reason ``strict=False``
-                # exists -- a caller who wants the gaps *marked* rather than
+                # This is the reason ``strict=False`` exists -- a caller who
+                # wants the gaps *marked* rather than
                 # zero-filled uses ``strict=True`` and gets the runs.
                 stop = TDL
             else:

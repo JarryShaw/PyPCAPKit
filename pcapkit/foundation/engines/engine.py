@@ -262,7 +262,7 @@ class Engine(EngineBase[_T], Generic[_T]):
         rather than having to inherit :class:`EngineBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
-        has guarded on its own ``code`` keyword all along.
+        guards on its own ``code`` keyword the same way.
 
         Note:
             :attr:`__engine_name__
@@ -295,11 +295,10 @@ class Engine(EngineBase[_T], Generic[_T]):
         """
         # NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then
         # dropped by the bare ``super().__init_subclass__()`` below, since
-        # ``object.__init_subclass__`` takes none. Silently swallowing it is how
-        # ``class MyEngine(Engine, engnie='x')`` would register under its class
-        # name instead -- no exception, no warning. Since a missing keyword means
-        # "do not register", the same typo would silently skip registration
-        # altogether, which is quieter still. So reject it.
+        # ``object.__init_subclass__`` takes none. Since a missing keyword means
+        # "do not register", silently swallowing it would make
+        # ``class MyEngine(Engine, engnie='x')`` skip registration altogether --
+        # no exception, no warning. So reject it.
         #
         # One typo this cannot catch is ``name=``, and only on Python 3.10: it is
         # one of the four names that collide with ``ABCMeta.__new__``, so it fails

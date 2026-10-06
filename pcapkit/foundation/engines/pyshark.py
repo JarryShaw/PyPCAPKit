@@ -137,7 +137,7 @@ class PyShark(EngineBase['PySharkPacket']):
             # reports that case in its own words, and answering here as well would
             # produce two warnings for one problem. An ImportError from a *renamed*
             # upstream helper lands here too, and the engine then simply proceeds
-            # as it did before this check existed.
+            # without the ``tshark`` check.
             return None
 
         try:

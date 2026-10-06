@@ -75,8 +75,10 @@ class IPv6(IP):
     """Reassembly for IPv6 payload.
 
     Args:
-        strict: if return all datagrams (including those not
-                implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload, its holes zero-filled -- or, while the total
+            length is unknown, only the prefix up to the first hole
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)

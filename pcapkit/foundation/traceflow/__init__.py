@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 class TraceFlowManager(Info):
     """TraceFlow Manager."""
 
-    #: TCP reassembly.
+    #: TCP flow tracing.
     tcp: 'TCP_TraceFlow'
 
     if TYPE_CHECKING:

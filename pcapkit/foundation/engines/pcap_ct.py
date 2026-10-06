@@ -326,7 +326,7 @@ class PCAP_CT(EngineBase['RawFrame']):
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
-                file. PCAP-NG is rejected explicitly even though the vendored
+                file. PCAP-NG is rejected explicitly even though
                 :manpage:`libpcap(3)` can read one -- see the note below.
             UnsupportedCall: If the input is not a file on disk, as
                 :c:func:`pcap_open_offline` can only open a savefile by name.

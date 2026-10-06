@@ -89,7 +89,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: How completely the datagram was reassembled, and why reassembly stopped;
     #: see :class:`~pcapkit.foundation.reassembly.data.data.Completion`. Only
     #: :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:`` reads
-    #: as it did while this was a :obj:`bool`.
+    #: as it would for a :obj:`bool`.
     completed: 'Completion'
     #: Listing ``packet`` here is what makes it lazy -- see
     #: :class:`~pcapkit.foundation.reassembly.data.data.DeferredPacket`.
@@ -157,7 +157,7 @@ class HoleDescriptor(Info):
 class Fragment(Info):
     """Data model for :term:`TCP <reasm.tcp.buffer>` ACK list fragment item."""
 
-    #: List of reassembled packets.
+    #: Numbers of the packets merged into this fragment.
     ind: 'list[int]'
     #: Sequence number of the octet held in ``raw[0]``, i.e. the origin this
     #: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number
