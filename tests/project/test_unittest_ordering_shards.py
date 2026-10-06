@@ -16,7 +16,7 @@ job stays green while covering less. The assertions are therefore over the
   ``--exclude``, i.e. runs exactly what it ran before the split.
 
 The workflow is read with a small hand-rolled scan rather than :mod:`yaml`,
-which is in no extra of :file:`pyproject.toml`; the same split
+which comes only with the ``test`` extra of :file:`pyproject.toml`; the same split
 :file:`tests/project/test_workflow_apt_timeouts.py` uses.
 
 """

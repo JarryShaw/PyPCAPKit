@@ -47,9 +47,9 @@ Two things this deliberately does **not** test, because it cannot:
   since #887 removed their required reviewers. The question would resurface
   only if a matrix job were gated by its own environment again.
 
-:mod:`yaml` is not in the ``test`` extra, so the scanner in this module is
+:mod:`yaml` comes only with the ``test`` extra, so the scanner in this module is
 hand-rolled and dependency-free, and :class:`TestYAMLAgreesWithTheScanner` checks
-it against :func:`yaml.safe_load` only when PyYAML happens to be installed. The
+it against :func:`yaml.safe_load`, skipping on an install without that extra. The
 same split as ``test_the_rewritten_date_is_a_string_and_not_a_yaml_date`` in
 :file:`tests/project/test_bump_version.py`: the assertion that must run everywhere
 does not need the dependency, and the one that needs it guards the substitute.
@@ -240,7 +240,7 @@ def job_blocks(text: 'str') -> 'dict[str, str]':
     """``{job name: the job's own lines}`` for a workflow's top-level ``jobs:``.
 
     Indentation-based rather than a YAML parse, so that this module keeps working
-    on a fresh clone where PyYAML is not installed.
+    on a fresh clone without the ``test`` extra, where PyYAML is not installed.
     :class:`TestYAMLAgreesWithTheScanner` is what stops the two from drifting.
 
     """
@@ -2692,7 +2692,7 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         try:
             import yaml
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML is not in the test extra; the textual scan is '
+            self.skipTest('PyYAML, from the test extra, is not installed; the textual scan is '
                           'asserted by TestPublishingJobsAreGated')
 
         parsed = yaml.safe_load(self.text)
@@ -2711,7 +2711,7 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         try:
             import yaml
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML is not in the test extra; the textual scan is '
+            self.skipTest('PyYAML, from the test extra, is not installed; the textual scan is '
                           'asserted by TestGatedJobsDependOnGithub')
 
         parsed = yaml.safe_load(self.text)
@@ -2738,7 +2738,7 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         try:
             import yaml
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML is not in the test extra; the textual scan is '
+            self.skipTest('PyYAML, from the test extra, is not installed; the textual scan is '
                           'asserted by TestEvidenceBasedGating')
 
         parsed = yaml.safe_load(self.text)

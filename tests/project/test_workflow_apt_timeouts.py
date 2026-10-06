@@ -39,12 +39,13 @@ Two things this deliberately does **not** test:
   is enforced by the Actions runner, so nothing here can exercise it. The test is
   an assertion over the file, as #641's gating test is.
 
-:mod:`yaml` is in no extra of :file:`pyproject.toml`, so the scanner here is
-hand-rolled and dependency-free, and :class:`TestYAMLAgreesWithTheScanner`
-checks it against :func:`yaml.safe_load` only when PyYAML happens to be
-installed. That is the same split :file:`tests/project/test_release_gates.py`
-uses, and for the same reason: the assertion that must run everywhere does not
-need the dependency, and the one that needs it guards the substitute.
+:mod:`yaml` comes only with the ``test`` extra of :file:`pyproject.toml`, so
+the scanner here is hand-rolled and dependency-free, and
+:class:`TestYAMLAgreesWithTheScanner` checks it against :func:`yaml.safe_load`,
+skipping on an install without that extra. That is the same split
+:file:`tests/project/test_release_gates.py` uses, and for the same reason: the
+assertion that must run everywhere does not need the dependency, and the one
+that needs it guards the substitute.
 
 Comments are stripped before the ``apt-get`` marker is looked for. Without that,
 prose *about* apt -- including the long note #974 added above the very step this
@@ -147,8 +148,8 @@ def steps(path: 'pathlib.Path') -> 'list[Step]':
     """Every step of the workflow at ``path``.
 
     An indentation scan rather than a YAML parse, for the reason this module's
-    docstring gives: PyYAML is in no extra, so the assertion that must run
-    everywhere cannot depend on it.
+    docstring gives: PyYAML comes only with the ``test`` extra, so the
+    assertion that must run everywhere cannot depend on it.
 
     A step runs from its ``- key:`` line to just before the next line that is
     neither blank nor indented past the ``-``, which is what ends a block in
@@ -278,7 +279,7 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
         try:
             import yaml  # noqa: F401
         except ImportError:  # pragma: no cover
-            self.skipTest('PyYAML is in no extra of pyproject.toml; scanner unchecked here')
+            self.skipTest('PyYAML, from the test extra, is not installed; scanner unchecked here')
 
     def test_yaml_finds_the_same_apt_steps(self) -> None:
         """:func:`yaml.safe_load` agrees on which steps invoke apt."""
