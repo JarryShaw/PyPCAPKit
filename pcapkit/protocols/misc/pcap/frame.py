@@ -85,8 +85,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name, or
-    #: a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+    #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
+    #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -282,10 +282,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # as "Frame length stored into the capture file", and raises
             # ``frame.len_lt_caplen`` (``PI_MALFORMED``) on ``frame_len <
             # cap_len``, which could not be malformed if ``len`` were the smaller,
-            # captured one. Age does not settle it: this reader's older
-            # convention (c43892af, 2022-01-11) was the swapped one, and the
-            # PCAP-NG reader's later one (25f216f4, 2023-04-27) matches the names,
-            # so this reader was brought into line with it.
+            # captured one. The PCAP-NG reader uses the same convention.
             len=_olen,
             cap_len=_ilen,
         )

@@ -15,11 +15,11 @@ service tag (``0x88A8``). The tag structure is described as below:
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================
-  1           0   ``vlan.tci``              Tag Control Information
-  1           0   ``vlan.tci.pcp``          Priority Code Point
-  1           3   ``vlan.tci.dei``          Drop Eligible Indicator
-  1           4   ``vlan.tci.vid``          VLAN Identifier
-  3          24   ``vlan.type``             Protocol (Internet Layer)
+  0           0   ``vlan.tci``              Tag Control Information
+  0           0   ``vlan.tci.pcp``          Priority Code Point
+  0           3   ``vlan.tci.dei``          Drop Eligible Indicator
+  0           4   ``vlan.tci.vid``          VLAN Identifier
+  2          16   ``vlan.type``             Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
 The two tags carry an **identical** tag control information layout -- the same

@@ -316,8 +316,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: Protocol index mapping for decoding next layer, c.f.
     #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: The values should be a tuple representing the module name and class name,
-    #: or a :class:`Protocol` subclass.
+    #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
+    #: module and class, or a :class:`Protocol` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )
@@ -603,7 +603,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             byte: Source bytestring.
             encoding: The encoding with which to decode the :obj:`bytes`.
                 If not provided, :mod:`pcapkit` will first try detecting its encoding
-                using |chardet|_. The fallback encoding would is **UTF-8**.
+                using |chardet|_. The fallback encoding is **UTF-8**.
             errors: The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
                 :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
@@ -635,8 +635,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             url: URL string.
             encoding: The encoding with which to decode the :obj:`bytes`.
             errors: The error handling scheme to use for the handling of decoding errors.
-                The default is ``'strict'`` meaning that decoding errors raise a
-                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
+                The default is ``'replace'``, which substitutes a replacement marker for
+                each undecodable sequence. Other possible values are ``'strict'``, under
+                which decoding errors raise a :exc:`UnicodeDecodeError`, and ``'ignore'``,
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
 
@@ -1127,7 +1128,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Example:
             >>> protocol
-            <Frame alias='...' frame=(..., packet=b'...', sethernet=..., protocols='Ethernet:IPv6:Raw')>
+            <Frame frame=<Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'>>
 
         """
         if (cached := self.__cached__.get('__repr__')) is not None:
@@ -1144,7 +1145,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Example:
             >>> protocol
-            Frame(..., packet=b"...", sethernet=..., protocols='Ethernet:IPv6:Raw')
+            <Frame frame=<Frame ..., ethernet=Ethernet(...), protocols='Ethernet:IPv6:Raw', packet=b'...'>>
             >>> print(protocol)
             00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00     ..........'........
             00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00     .....|w..F.........
@@ -1277,7 +1278,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Returns if ``other`` is of the same protocol as the current object.
 
         Args:
-            other: Comparision against the object.
+            other: Comparison against the object.
 
         """
         if isinstance(other, type) and issubclass(other, ProtocolBase):
@@ -1375,7 +1376,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Unpacked data upon success
 
         Raises:
-            StructError: If unpack (:func:`struct.pack`) failed, and :exc:`struct.error` raised.
+            StructError: If unpack (:func:`struct.unpack`) failed, and :exc:`struct.error` raised.
 
         """
         endian = '<' if lilendian else '>'
@@ -1387,7 +1388,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             kind = 'h' if signed else 'H'
         elif size == 1:     # unpack to 1-byte integer (char)
             kind = 'b' if signed else 'B'
-        else:               # do not unpack
+        else:               # no struct format, see int.from_bytes below
             kind = None
 
         mem = self._file.read(size)
@@ -1480,15 +1481,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         endian = '<' if lilendian else '>'
-        if size == 8:                       # unpack to 8-byte integer (long long)
+        if size == 8:                       # pack from 8-byte integer (long long)
             kind = 'q' if signed else 'Q'
-        elif size == 4:                     # unpack to 4-byte integer (int / long)
+        elif size == 4:                     # pack from 4-byte integer (int / long)
             kind = 'i' if signed else 'I'
-        elif size == 2:                     # unpack to 2-byte integer (short)
+        elif size == 2:                     # pack from 2-byte integer (short)
             kind = 'h' if signed else 'H'
-        elif size == 1:                     # unpack to 1-byte integer (char)
+        elif size == 1:                     # pack from 1-byte integer (char)
             kind = 'b' if signed else 'B'
-        else:                               # do not unpack
+        else:                               # no struct format, see int.to_bytes below
             kind = None
 
         if kind is None:

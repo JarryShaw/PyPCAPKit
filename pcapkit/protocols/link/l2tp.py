@@ -29,8 +29,8 @@ across them is the *first 16-bit word carrying a version nibble at bits 12-15*;
 everything after it differs, so a base that parsed further would be assuming one
 version's layout for all of them.
 
-What the family still wants
----------------------------
+Unimplemented Members
+---------------------
 
 **L2TPv3** [:rfc:`3931`] has a different session header and a different control
 message header from v2, and is reachable two ways -- over UDP port 1701 like v2
@@ -65,7 +65,7 @@ the same relationship HTTP/3 has to QUIC. c.f.
 version-flavoured alias is spelled: canonical name first, alias second, since
 callers take element zero as canonical.
 
-Selecting a version
+Selecting a Version
 -------------------
 
 Nothing *dispatches* on the version nibble, because only one version exists

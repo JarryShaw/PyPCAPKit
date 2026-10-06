@@ -135,8 +135,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         datagram whose nibble is not ``2``, so this hard-coded answer cannot
         disagree with
         :attr:`info.version <pcapkit.protocols.data.link.l2tp.L2TP.version>`
-        on the same octets. It did before that guard landed, reporting ``2``
-        here and ``3`` there.
+        on the same octets.
 
         """
         return 2
@@ -234,9 +233,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         # L2TP carries no next-protocol field -- the payload is a PPP frame,
         # which pcapkit does not dissect -- so dispatch on the -1 sentinel, as
         # ARP does, rather than on a code read off the wire. Passing the
-        # remaining length here (as this did) dispatched on it as if it were an
-        # EtherType, which resolved to Raw only because a length rarely collides
-        # with a registered one.
+        # remaining length here would dispatch on it as if it were an EtherType,
+        # resolving to Raw only because a length rarely collides with a
+        # registered one.
         return self._decode_next_layer(l2tp, -1, length - hdr_len)
 
     def make(self,
@@ -335,7 +334,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             ``__index__`` value anywhere in this package -- every non-raising
             ``__index__`` returns a :class:`~pcapkit.const.reg.transtype.TransType`,
             :class:`~pcapkit.const.reg.ethertype.EtherType` or
-            :class:`~pcapkit.const.reg.linktype.LinkType`, and
+            :class:`~pcapkit.const.reg.linktype.LinkType`, bar the PCAP frame and
+            PCAP-NG block instances that return their own index number, and
             :meth:`Application.__index__
             <pcapkit.protocols.application.application.Application.__index__>`
             raises for exactly this reason. So there is no index to return here.
