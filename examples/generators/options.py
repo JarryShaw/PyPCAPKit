@@ -976,11 +976,14 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
 #: which is what moved the one-copy figure from 44 to 46, level with two copies.
 #:
-#: Two remained, neither helped by a second copy since each fails at two copies
-#: as well as at one:
+#: Two remained after that, neither helped by a second copy since each failed at
+#: two copies as well as at one. Both are closed now:
 #:
-#: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
-#:   ``hip-parameter/HOST_ID``.
+#: * ``HOST_ID`` declared four octets for the single 16-bit DI-Type/DI-Length
+#:   word of :rfc:`7401` Section 5.2.9, so it packed two surplus octets -- 18 at
+#:   this table's key, where ``len=8`` makes the record 16 -- and read a
+#:   conformant record two octets late, taking the curve as ``Algorithm``. #1118
+#:   made the field two octets.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
 #:   any other version -- and is now built at version 1 through
 #:   :data:`HIP_VERSION`, so it round-trips and is no longer recorded.
@@ -997,19 +1000,24 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: So the pair was routing around nothing by the time #672, #679 and #690 had
 #: all landed, and dropping to one copy does not change what round-trips.
 #: Measured over this table's 49 HIP codes on ``5f0a1aa90`` (after #696, which
-#: #689 itself waited on -- see the issue) and again after #690:
+#: #689 itself waited on -- see the issue), again after #690, and again once
+#: #1128 and #1118 had landed:
 #:
 #: ======================  ========  ==========
 #: tree                    one copy  two copies
 #: ======================  ========  ==========
 #: ``5f0a1aa90``           46 OK     46 OK
 #: after #690              47 OK     47 OK
+#: after #1128 and #1118   49 OK     49 OK
 #: ======================  ========  ==========
 #:
-#: ``HOST_ID`` is now the only case either setting fails, and neither its
-#: ``status`` nor its ``defect`` moves between settings, so
+#: ``HOST_ID`` and ``HIP_TRANSFORM`` were the only two cases either setting
+#: failed at those measurements, and neither their ``status`` nor their
+#: ``defect`` moved between settings, so
 #: :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` needed no
-#: change to keep recording them accurately at one copy.
+#: change to keep recording them accurately at one copy. #1128 and #1118 closed
+#: them, which takes both columns to all 49 and leaves that table with no HIP
+#: entries at all.
 #:
 #: The single-parameter case is asserted directly, and positively, by
 #: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
