@@ -12,7 +12,8 @@ tree, and each has its own class:
   restated here, so a row reordered or reworded on either side fails.
 * :class:`TestWorkflowSafety` -- the workflow runs on ``pull_request_target`` with
   a secret in scope, so it must never check out code, never splice an expression
-  into a ``run:`` script or a ``shell:`` command, and never read the event payload outside ``env:`` beyond
+  into a ``run:`` script, a ``shell:`` command, a Docker ``options:`` string or a
+  ``working-directory:``, and never read the event payload outside ``env:`` beyond
   the item number. Asserted over the file, because nothing at run time would
   announce the mistake. :class:`TestScannerFailsClosed` holds the line scan those
   assertions read to refusing any YAML it cannot read with certainty.
@@ -194,6 +195,26 @@ ITEM_NUMBER = 'github.event.issue.number || github.event.pull_request.number'
 #: it (#1068).
 SHELL_EVALUATED = frozenset({'run', 'shell'})
 
+#: Path suffixes whose value reaches a command line other than the script:
+#: ``container.options`` and ``services.<id>.options`` are passed to
+#: ``docker create``, so an expression there can add flags such as ``--privileged``,
+#: and ``working-directory`` sets where the script runs (#1077). Matched by suffix
+#: rather than by last key, because ``options`` and ``working-directory`` are also
+#: legal ``env:`` names, and ``env:`` is the safe channel for a value.
+SPLICED_SUFFIXES = (('container', 'options'), ('steps', 'working-directory'),
+                    ('run', 'working-directory'))
+
+
+def expression_spliced(path: 'tuple[str, ...]') -> 'bool':
+    """Whether a ``${{ }}`` at ``path`` is substituted into a command before it runs."""
+    if path[-1:] and path[-1] in SHELL_EVALUATED:
+        return True
+    if path[-2:] in SPLICED_SUFFIXES:
+        return True
+    # ``services.<id>.options``: the service id sits between the two keys.
+    return len(path) >= 3 and path[-3] == 'services' and path[-1] == 'options'
+
+
 _KEY_RE = re.compile(r'''(?P<key>[\w-]+|'[^']*'|"[^"\\]*"):(?:[ ]+(?P<rest>.*))?$''')
 _BLOCK_INDICATORS = {'|', '|-', '|+', '>', '>-', '>+'}
 #: Characters a plain scalar may not start with: anchors, aliases, tags, flow
@@ -228,20 +249,20 @@ def _scalar(value: 'str', lineno: 'int') -> 'str':
 def scan(text: 'str') -> 'list[tuple[tuple[str, ...], str]]':
     """Every scalar in a workflow, as ``(key path, value)``; list indices dropped.
 
-    A line scan rather than a YAML parser, because :mod:`yaml` is in no extra of
-    :file:`pyproject.toml` and this check has to run everywhere.
-    :class:`TestYAMLAgreesWithTheScanner` holds it to :func:`yaml.safe_load`
-    wherever PyYAML is installed. It understands the subset these workflows use:
-    block mappings, ``- `` sequence items, block scalars (``|``, ``>`` and their
-    chomping forms), one-line quoted and plain scalars, ``{}``, and flow sequences
-    of such scalars.
+    A line scan rather than a YAML parser, because it is the guard and a guard
+    must not depend on an optional import: it runs wherever the tests run, and
+    :class:`TestYAMLAgreesWithTheScanner` is the cross-check, holding it to
+    :func:`yaml.safe_load` wherever PyYAML is installed. It understands the
+    subset these workflows use: block mappings, ``- `` sequence items, block
+    scalars (``|``, ``>`` and their chomping forms), one-line quoted and plain
+    scalars, ``{}``, and flow sequences of such scalars.
 
     It *fails closed*: any line outside that subset raises :exc:`UnsupportedYAML`
     rather than being read as something it is not. A value the scan misreads is a
     ``run:`` script the safety tests never see -- a flow-mapping step, ``run :``,
-    ``run: |2``, or ``run: *alias`` all were (#1060) -- and CI has no PyYAML to
-    catch the disagreement, so refusing is the only answer that cannot pass
-    vacuously.
+    ``run: |2``, or ``run: *alias`` all were (#1060) -- and a run without PyYAML
+    has nothing to catch the disagreement, so refusing is the only answer that
+    cannot pass vacuously.
 
     """
     lines = text.splitlines()
@@ -371,10 +392,11 @@ class TestWorkflowSafety(unittest.TestCase):
     def test_no_expression_inside_a_run_script(self) -> None:
         # An expression is substituted into the script text before the shell sees
         # it, so a PR title containing `'; curl … | sh #` becomes code. Values
-        # reach the script through `env:` only. `shell:` is spliced the same way.
+        # reach the script through `env:` only. `shell:`, Docker `options:` and
+        # `working-directory:` are spliced the same way.
         self.assertTrue([path for path, _ in self.pairs if path[-1] == 'run'],
                         'the scanner found no run: block to check')
-        guarded = [(path, value) for path, value in self.pairs if path[-1] in SHELL_EVALUATED]
+        guarded = [(path, value) for path, value in self.pairs if expression_spliced(path)]
         for path, value in guarded:
             with self.subTest(path='.'.join(path)):
                 self.assertNotIn('${{', value)
@@ -468,13 +490,46 @@ SHELL_SAFE = (f'      - name: x\n        shell: bash -e {{0}}\n'
               f'        env:\n          X: {_INPUT}\n        run: echo "$X"\n')
 
 
+def _spliced_key_fixtures(value: 'str') -> 'dict[str, tuple[str, tuple[str, ...]]]':
+    """A workflow per :data:`SPLICED_SUFFIXES` key holding ``value``, with its path."""
+    return {
+        'container options': (f'jobs:\n  j:\n    container:\n      image: alpine\n'
+                              f'      options: {value}\n',
+                              ('jobs', 'j', 'container', 'options')),
+        'service options': (f'jobs:\n  j:\n    services:\n      db:\n        image: postgres\n'
+                            f'        options: {value}\n',
+                            ('jobs', 'j', 'services', 'db', 'options')),
+        'step working-directory': (f'{_STEPS}      - name: x\n'
+                                   f'        working-directory: {value}\n        run: echo\n',
+                                   ('jobs', 'j', 'steps', 'working-directory')),
+        'defaults working-directory': (f'defaults:\n  run:\n    working-directory: {value}\n',
+                                       ('defaults', 'run', 'working-directory')),
+        'job defaults working-directory': (f'jobs:\n  j:\n    defaults:\n      run:\n'
+                                           f'        working-directory: {value}\n',
+                                           ('jobs', 'j', 'defaults', 'run', 'working-directory')),
+    }
+
+
+#: An expression in each key Docker or the runner splices into a command line
+#: (#1077). Each is in the subset :func:`scan` reads, so it must trip the guard
+#: rather than be refused.
+SPLICED_BYPASSES = _spliced_key_fixtures(f'--cpus 1 {_INPUT}')
+
+#: The same keys holding a literal, which must pass.
+SPLICED_SAFE = _spliced_key_fixtures('--cpus 1')
+
+#: An ``env:`` name that matches a guarded key but is the safe channel, so the
+#: guard must not trip on it.
+ENV_NAMED_OPTIONS = f'{_STEPS}      - name: x\n        env:\n          options: {_INPUT}\n        run: echo\n'
+
+
 def guard_trips(text: 'str') -> 'bool':
     """Whether :meth:`TestWorkflowSafety.test_no_expression_inside_a_run_script` fails on ``text``."""
     try:
         pairs = scan(text)
     except UnsupportedYAML:
         return True
-    return any(path and path[-1] in SHELL_EVALUATED and '${{' in value for path, value in pairs)
+    return any(path and expression_spliced(path) and '${{' in value for path, value in pairs)
 
 
 class TestScannerFailsClosed(unittest.TestCase):
@@ -509,6 +564,24 @@ class TestScannerFailsClosed(unittest.TestCase):
         self.assertIn((('jobs', 'j', 'steps', 'env', 'X'), _INPUT), pairs)
         self.assertFalse(guard_trips(_STEPS + SHELL_SAFE))
 
+    def test_an_expression_in_each_spliced_key_trips_the_guard(self) -> None:
+        for form, (text, path) in SPLICED_BYPASSES.items():
+            with self.subTest(form=form):
+                pairs = scan(text)
+                self.assertIn((path, f'--cpus 1 {_INPUT}'), pairs)
+                self.assertEqual(payload_outside_env(pairs), [])
+                self.assertTrue(guard_trips(text), f'the expression in {path[-1]}: went unseen')
+
+    def test_a_literal_in_each_spliced_key_is_read(self) -> None:
+        for form, (text, path) in SPLICED_SAFE.items():
+            with self.subTest(form=form):
+                self.assertIn((path, '--cpus 1'), scan(text))
+                self.assertFalse(guard_trips(text))
+
+    def test_an_env_name_matching_a_spliced_key_is_not_guarded(self) -> None:
+        self.assertIn((('jobs', 'j', 'steps', 'env', 'options'), _INPUT), scan(ENV_NAMED_OPTIONS))
+        self.assertFalse(guard_trips(ENV_NAMED_OPTIONS))
+
     def test_the_workflow_is_inside_the_subset(self) -> None:
         self.assertTrue(scan(WORKFLOW.read_text(encoding='utf-8')))
 
@@ -529,7 +602,7 @@ def yaml_pairs(node, path=()):
 class TestYAMLAgreesWithTheScanner(unittest.TestCase):
     """The hand-rolled :func:`scan` reads the workflow as PyYAML does.
 
-    No CI job installs PyYAML, so this class skips there. It is a cross-check and
+    The class skips where PyYAML is not installed. It is a cross-check and
     not the guard: :class:`TestScannerFailsClosed` is what holds without it.
 
     """
@@ -563,6 +636,17 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
             with self.subTest(step=step):
                 self.assertIn((('jobs', 'j', 'steps', 'shell'), want),
                               list(yaml_pairs(yaml.safe_load(_STEPS + step))))
+
+    def test_the_spliced_key_fixtures_are_real(self) -> None:
+        import yaml
+        fixtures = [(text, path, f'--cpus 1 {_INPUT}') for text, path in SPLICED_BYPASSES.values()]
+        fixtures += [(text, path, '--cpus 1') for text, path in SPLICED_SAFE.values()]
+        fixtures.append((ENV_NAMED_OPTIONS, ('jobs', 'j', 'steps', 'env', 'options'), _INPUT))
+        for text, path, want in fixtures:
+            with self.subTest(text=text):
+                pairs = list(yaml_pairs(yaml.safe_load(text)))
+                self.assertIn((path, want), pairs)
+                self.assertEqual(sorted(scan(text)), sorted(pairs))
 
     def test_no_step_uses_an_action(self) -> None:
         self.assertIn('pull_request_target', self.doc.get('on', self.doc.get(True)))
