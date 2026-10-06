@@ -197,8 +197,8 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         Args:
             byteorder: header byte order
-            lilendian: little-endian flag
-            bigendian: big-endian flag
+            lilendian: little-endian flag; overrides ``byteorder`` if given
+            bigendian: big-endian flag; overrides ``byteorder`` if given
             nanosecond: nanosecond-resolution file flag
             version: version information
             version_major: major version number
@@ -336,21 +336,20 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         Args:
             byteorder: header byte order
-            lilendian: little-endian flag
-            bigendian: big-endian flag
+            lilendian: little-endian flag; overrides ``byteorder`` if given
+            bigendian: big-endian flag; overrides ``byteorder`` if given
             nanosecond: nanosecond-resolution file flag
 
         Returns:
             Magic number and little-endian flag.
 
         """
-        if lilendian is not None and bigendian is not None:
-            if lilendian == bigendian:
-                raise EndianError('unresolved byte order')
-            if bigendian:
-                return _MAGIC_NUM[('big', nanosecond)], False
-            if lilendian:
-                return _MAGIC_NUM[('little', nanosecond)], True
+        if lilendian is not None and bigendian is not None and lilendian == bigendian:
+            raise EndianError('unresolved byte order')
+        if bigendian is not None:
+            byteorder = 'big' if bigendian else 'little'
+        elif lilendian is not None:
+            byteorder = 'little' if lilendian else 'big'
 
         if byteorder not in ('little', 'big'):
             raise EndianError(f"unknown byte order: {byteorder!r}")
