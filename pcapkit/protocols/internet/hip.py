@@ -401,10 +401,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:
     #: Parameter code to method mapping, c.f. :meth:`_read_hip_param` and/or
-    #: :meth:`_make_hip_param`. Method names are expected to be referred to the
-    #: class by ``_read_param_${name}`` and/or ``_make_param_${name}``, and if
-    #: such name not found, the value should then be a method that can parse the
-    #: parameter by itself.
+    #: :meth:`_make_hip_param`. A :obj:`str` value names the methods
+    #: ``_read_param_${name}`` and ``_make_param_${name}``, falling back to
+    #: ``_read_param_unassigned`` / ``_make_param_unassigned`` when they do not
+    #: exist; any other value is a ``(parser, constructor)`` pair of callables.
     __parameter__ = collections.defaultdict(
         lambda: 'unassigned',
         {
@@ -971,10 +971,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 locator: locator data
 
             Returns:
-                * If ``kind`` is ``0`` and ``size`` is ``16``,
-                  returns an :class:`~ipaddress.IPv4Address` object.
-                * If ``kind`` is ``1`` and ``size`` is ``20``,
-                  returns a :class:`~pcapkit.protocols.data.internet.hip.Locator` object.
+                * If ``kind`` is ``0`` and the locator is 16 octets,
+                  an :class:`~ipaddress.IPv6Address` object.
+                * If ``kind`` is ``1`` and the locator is 20 octets,
+                  a :class:`~pcapkit.protocols.data.internet.hip.LocatorData` object.
 
             Raises:
                 ProtocolError: in other cases
@@ -1052,7 +1052,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: The parameter is **ONLY** supported in HIPv1.
+            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**
+                ``12``.
 
         """
         if version == 1 and schema.len != 12:
@@ -1110,7 +1111,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: The parameter is **ONLY** supported in HIPv1.
+            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**
+                ``20``, or if ``schema.len - 4`` is odd.
 
         """
         if version == 1 and schema.len != 20:
