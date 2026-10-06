@@ -593,7 +593,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(arp._make_proto_resolve('2001:db8::1',
                                                  EtherType.Internet_Protocol_version_6),
                          ip_address('2001:db8::1').packed)
-        self.assertEqual(arp._make_proto_resolve('raw', EtherType.get(0x88B5)), b'raw')
+        self.assertEqual(arp._make_proto_resolve('c0000209', EtherType.get(0x88B5)), b'\xc0\x00\x02\x09')
         self.assertEqual(arp._make_proto_resolve(ip_address('192.0.2.9'), EtherType.get(0x88B5)),
                          ip_address('192.0.2.9').packed)
         self.assertEqual(arp._make_proto_resolve(b'bytes', EtherType.get(0x88B5)), b'bytes')
