@@ -238,15 +238,14 @@ not one: ``gate`` (the full suite, one Python version) and ``changelog``
 over six Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
 from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
-which runs on ``main`` pushes only since
-`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__, from its
-``pull_request`` trigger), so running any of them again per caller would
+which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
+running any of them again per caller would
 test the same commit several times over -- the docs-only path's ``changes``
 and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1013-1019``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1011-1017``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -351,10 +350,11 @@ its unchanged pytest selection under ``coverage run
 :file:`pyproject.toml`'s ``[tool.coverage.*]`` settings
 (``tests/project/test_coverage_rcfile.py`` asserts it) and adds ``parallel``
 and ``patch = ["subprocess"]``, without which only the xdist controller is
-measured, not its workers, plus ``core = "ctrace"``: under the default
-``sys.monitoring`` core, the suite's purge-and-reimport of pcapkit grew one
-module's peak RSS from 0.40 to 4.17 GiB and killed the runner. The leg then writes the total and a per-package
-table to the job summary and uploads the HTML report as the ``coverage-html``
+measured, not its workers, plus ``core = "ctrace"``: with the suite purging
+and re-importing pcapkit, one module's peak RSS was 4.17 GiB under the default
+``sys.monitoring`` core against 0.41 GiB under ``ctrace``, and that growth
+killed the runner. The leg then writes the total and a per-package table to the
+job summary and uploads the HTML report as the ``coverage-html``
 artifact (30 days), with the bare numbers as the ``coverage-summary`` artifact.
 
 The PR comment comes from **Coverage Comment** (:file:`coverage-comment.yml`),
@@ -385,7 +385,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1338``
+     - ``unit-tests.yml:1320``
    * - ``Compat Python 3.10``
      - job ``compatibility``, matrix leg ``3.10``
      - ``python-compatibility.yml:31,41``
@@ -403,33 +403,30 @@ grepping every workflow file for its name:
      - ``python-compatibility.yml:31,45``
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1338``). ``Compat Python`` is defined by two in
+(``unit-tests.yml:1320``). ``Compat Python`` is defined by two in
 ``python-compatibility.yml``: the required ``compatibility`` job (``:31``,
 ``Compat Python ${{ matrix.python-version }}``, expanding to the five required
 legs at ``:41-45``) and the non-required ``compatibility-nightly`` job (``:69``,
 ``Compat Python 3.15 (scheduled)``, see below). A comment at
-``unit-tests.yml:1237`` mentions the string without defining it.
+``unit-tests.yml:1235`` mentions the string without defining it.
 
-``Required checks passed`` is itself an aggregate, not a single check run --
-but it stands in for **17** of the ruleset's originally-named 22 contexts,
-not all 22. ``unit-tests.yml``'s own comment (``unit-tests.yml:1236-1257``) accounts for the
-22: five each for ``test`` and ``integration``, five for the live ``Compat
-Python 3.10``-``3.14`` contexts (emitted by ``python-compatibility.yml``, a
-*different* workflow file -- nothing in ``unit-tests.yml`` could ever stand
-in for them, since a job cannot depend on a job living elsewhere), five for
-the now-dead single-cell ``Engines Python <version>`` name ``engine-tests``
-stopped producing once it became a Python x engine matrix, and two for
-``pypcap-parity``. ``Required checks passed`` replaces only the
-``test``/``integration``/dead-``Engines``/``pypcap-parity`` slots -- 5 + 5 +
-5 + 2 = 17 -- via its own ``needs:`` on those four jobs plus an explicit per-dependency
-check (``unit-tests.yml:1337-1391``), which accepts them as ``skipped`` only
-on a docs-only pull request, where ``project-tests`` -- every test that
-reads ``docs/`` or Markdown -- must pass instead. The five ``Compat`` contexts stay required
-exactly as they are and are listed separately in the table above. This job
-runs on Unit Tests' own ``push``/``pull_request`` triggers; the
-``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1340``), so it is never
-produced -- and never expected -- on those paths.
+``Required checks passed`` is an aggregate, not a single check run. The ruleset
+requires it and the five ``Compat Python 3.10``-``3.14`` legs, nothing else, as
+``unit-tests.yml``'s own comment (``unit-tests.yml:1234-1244``) records. It
+``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
+``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
+for the docs-only path -- and checks each result explicitly
+(``unit-tests.yml:1319-1373``). Rulesets match check names literally, with no
+wildcard, so requiring the matrix cells one by one would mean editing the
+ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
+It accepts the four legs as ``skipped`` only on a docs-only pull request, where
+``project-tests`` -- every test that reads ``docs/`` or Markdown -- must pass
+instead. The ``Compat`` legs stay required separately because they come from
+``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
+workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
+triggers; the ``gate-only: true`` reusable calls documented above skip it via
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1322``),
+so it is never produced -- and never expected -- on those paths.
 
 ``Compat Python 3.10``-``3.14`` are five ordinary matrix legs, not an
 aggregate: ``python-compatibility.yml``'s own comment (``:37-40``) and

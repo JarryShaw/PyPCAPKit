@@ -3,7 +3,7 @@ name: Project Status
 # Keeps the *Status* field of the project board (users/JarryShaw/projects/2) in
 # line with each item's state labels. The board's built-in workflows add items and
 # set Done on close and merge, but no built-in workflow observes a label change, so
-# every other transition used to be made by hand. The mapping lives in
+# this one makes every other transition. The mapping lives in
 # util/project_status.py:status_for and is documented under "Milestones and the
 # Project Board" in docs/source/contributing/conventions/process.rst; the tests in
 # tests/project/test_project_status.py hold the two to each other.
@@ -42,7 +42,7 @@ name: Project Status
 #
 # PROJECT_TOKEN is a classic PAT with `project` and `repo` scopes, because
 # GITHUB_TOKEN cannot write a user-owned project. Without it every run skips with a
-# `::notice::` instead of failing, so the workflow can land before the secret does.
+# `::notice::` instead of failing.
 
 on:
   issues:
@@ -68,13 +68,12 @@ permissions: {}
 # Issues and pull requests share one number space, so the key cannot collide
 # across the two event types.
 #
-# Nothing in a group is cancelled. `cancel-in-progress` used to cancel the older
-# run of a label swap, and a cancelled run stays on the PR head as a failed Sync
-# Status check although the newer run fixed the board (#1066). Dropping it is not
-# enough on its own: by default a group holds one pending run and cancels it when
-# a newer one arrives. `queue: max` lets up to 100 wait instead; only a run past
-# that is cancelled. GitHub documents both, and that the two keys together are a
-# validation error:
+# Nothing in a group is cancelled: a cancelled run stays on the PR head as a
+# failed Sync Status check even after a newer run has fixed the board. So there
+# is no `cancel-in-progress`, and that is not enough on its own: by default a
+# group holds one pending run and cancels it when a newer one arrives.
+# `queue: max` lets up to 100 wait instead; only a run past that is cancelled.
+# GitHub documents both, and that the two keys together are a validation error:
 # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 #
 # The board still ends right, whatever order the queue runs in -- GitHub states
