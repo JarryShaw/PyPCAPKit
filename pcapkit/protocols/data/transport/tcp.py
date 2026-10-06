@@ -49,7 +49,7 @@ class Flags(Data):
     """Data model for TCP flags."""
 
     #: ECN-nonce concealment protection.
-    #ns: 'bool'
+    ns: 'bool'
     #: Congestion window reduced.
     cwr: 'bool'
     #: ECN-Echo.
@@ -68,7 +68,7 @@ class Flags(Data):
     fin: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool',
+        def __init__(self, ns: 'bool', cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool',
                      psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 

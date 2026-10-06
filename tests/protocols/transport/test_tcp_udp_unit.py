@@ -119,7 +119,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.transport.tcp import TCP
 
-        flags = DummyData(cwr=False, ece=False, urg=False, ack=True, psh=True, rst=False, syn=False, fin=True)
+        flags = DummyData(ns=False, cwr=False, ece=False, urg=False, ack=True, psh=True, rst=False, syn=False, fin=True)
         data = DummyData(
             srcport=443,
             dstport=59000,
