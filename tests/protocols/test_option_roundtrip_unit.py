@@ -137,17 +137,6 @@ EXPECTED_FAILURES = {
 
     # -- TCP ------------------------------------------------------------------
 
-    # ``_make_mode_qs`` computes ``rate_val`` as a floor of a logarithm that is
-    # negative for any rate under 40 kbps, and a negative value then fails to
-    # pack into the 4-bit field with ``ValueError: invalid literal for int()
-    # with base 2: b'0000-110'``. At the default ``rate=0`` it is guarded, and
-    # the option constructs -- and then will not parse back.
-    'tcp-option/Quick_Start_Response': Gap(
-        'PARSE', 'StructError',
-        'pcapkit/protocols/transport/tcp.py:2465 -- _make_mode_qs; rate_val is '
-        'negative below 40 kbps, and the option it emits at rate=0 does not '
-        'parse back'),
-
     # #541 declared real ``kind``/``length`` fields on ``MPTCP``, which got six
     # of these seven far enough to construct and pack, and #566/#567 closed
     # the rest of the chain: #566 gave ``MPTCP.subtype`` the same treatment

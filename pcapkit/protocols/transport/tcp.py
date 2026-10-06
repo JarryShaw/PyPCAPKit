@@ -1348,7 +1348,6 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ProtocolError: If length is **NOT** ``8``.
 
         """
-        size = self._read_unpack(1)
         if schema.length != 8:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
@@ -2576,7 +2575,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             diff = opt.ttl_diff
             nonce = opt.nonce
 
-        rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
+        # :rfc:`4782` Section 3.1 encodes the rate as 40 kbps * 2 ** N, with
+        # N = 0 meaning a rate of zero; a response may report a lower rate than
+        # requested (Section 4.3), so a rate under 80 kbps rounds down to N = 0.
+        rate_val = max(math.floor(math.log2(rate * 1000 / 40000)), 0) if rate > 0 else 0
         diff_val = diff if isinstance(diff, int) else math.floor(diff.total_seconds())
 
         return Schema_QuickStartResponse(
