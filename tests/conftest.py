@@ -249,6 +249,26 @@ def restore_module_table() -> 'Iterator[None]':
         restore_modules(_pinned_snapshot, ISOLATED_PREFIXES)
 
 
+@pytest.hookimpl(hookwrapper=True, optionalhook=True)
+def pytest_timeout_cancel_timer(item: 'pytest.Item') -> 'Iterator[None]':
+    """Drop the timer :mod:`pytest_timeout` leaves on ``item`` once it is cancelled.
+
+    Issue #1052. pytest-timeout's ``thread`` method keeps ``item.cancel_timeout``, a
+    closure over the test's :class:`threading.Timer`, for the whole session. A
+    :class:`~threading.Thread` captures :data:`sys.excepthook` and
+    :data:`threading.excepthook` when it is created, and every ``import pcapkit``
+    installs fresh tbtrim hooks there, so each retained timer pins the
+    :mod:`pcapkit` generation that was live when its test started. Measured on
+    ``tests/const/test_const_registry_protocol.py`` under ``thread``: past 9 GiB
+    and killed, against 283 MiB with this hook. That growth is what took every
+    ``test`` leg's runner down at about 13% on CI. ``optionalhook``: without
+    pytest-timeout installed the hookspec does not exist.
+
+    """
+    yield
+    item.__dict__.pop('cancel_timeout', None)
+
+
 def _collected_modules(items: 'Iterable[pytest.Item]') -> 'Iterator[pathlib.Path]':
     """Distinct module paths behind ``items``, in collection order.
 

@@ -278,6 +278,12 @@ test = [
     # test_xdist_run_reports_the_diagnostic_and_fails goes red rather than
     # skipped, since `importlib.util.find_spec('xdist')` still succeeds.
     "pytest-xdist>=3.6.1",
+    # A per-test backstop (#1052): a hung test fails by name, with every
+    # thread's stack, instead of running until the job's ``timeout-minutes``
+    # cancels it with nothing in the log. The value and method live in
+    # [tool.pytest.ini_options] below. Unpinned, like ``isort`` below, rather
+    # than inventing a floor (verified against 2.4.0).
+    "pytest-timeout",
     "typing-extensions",
     # Enough of the ``vendor`` extra for a test to import a vendor crawler.
     # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports "9 skipped"
@@ -354,6 +360,16 @@ testpaths = [
 python_files = [
     "test_*.py",
 ]
+# pytest-timeout (#1052). 900s per test is a hang backstop, not a speed limit:
+# the slowest test measured locally was 21s (in test_pyshark_encap_map.py), so
+# even the 10-15x slowdown seen on CI (315s) leaves it about 3x short, while a
+# hang still fails by name well inside the jobs' 45-minute cap. ``thread``, not
+# the POSIX default ``signal``: a pending SIGALRM fails
+# TimeLimitTests.test_nothing_is_re_armed_when_nothing_was_pending, measured.
+# ``thread`` leaks a pcapkit generation per test unless tests/conftest.py's
+# pytest_timeout_cancel_timer hook drops the retained timer.
+timeout = 900
+timeout_method = "thread"
 
 [tool.coverage.run]
 source = [

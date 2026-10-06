@@ -100,10 +100,37 @@ both because it needs generated captures this script does not build and
 because it is already run whole, under :program:`pytest`, by the
 ``integration`` job.
 
+GitHub issue #1052 -- a stalled leg: ``--stall-dump SECONDS`` (or
+``PCAPKIT_UNITTEST_STALL_DUMP``) arms :func:`faulthandler.dump_traceback_later`
+so that a leg still running after that long writes every thread's stack to
+stderr once, then carries on. The default, 1080s, is just under a 20-minute step
+cap, so a leg that is about to be killed says where it was first; ``0`` disables
+it.
+
+#1052 also found the memory growth behind the slow ``test_mh_unit`` tail. Every
+purge-then-import leaves the previous generation as cyclic garbage, and the
+interpreter's own collector intermittently falls behind: three plain runs of
+``protocols/internet`` peaked at 1008, 781 and 1650 MiB, the last with ``test_mh_unit``
+tests at up to 7.3s rather than 1.2-1.8s. ``--gc-every N`` (default 10) therefore
+runs :func:`gc.collect` after every N tests: 491 MiB peak at the same 420s wall.
+Every test cost 80s more for 320 MiB.
+
+It is a collect, deliberately *not* the :data:`sys.modules` restore #1052 first
+proposed. The loader imports every module before any test runs, so a module's
+import-time bindings belong to the generation live at load; restoring that
+snapshot hands it back, which is the very skew this leg exists to expose. On
+#981's own reproduction (``32bcfba15^``, ``test_http_unit`` then
+``test_base_class_contract``) no restore gives 1 failure and 3 errors; restoring
+after each module, or around each test, gives 0 and 0; a collect after each test
+keeps 1 and 3, since it frees only what no test can reach.
+
 """
 from __future__ import annotations
 
 import argparse
+import faulthandler
+import gc
+import os
 import pathlib
 import sys
 import time
@@ -136,6 +163,34 @@ from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-impor
 #: that cost here would buy nothing against the ordering class of defect
 #: this script exists to catch.
 _EXCLUDED_ROOT_MODULES = frozenset({'tests.test_tier_guard_xdist'})
+
+#: Seconds before a still-running leg dumps every thread's stack (#1052): just
+#: under the 20-minute step cap, so the dump lands before the kill.
+DEFAULT_STALL_DUMP = 1080
+
+#: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
+STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
+
+#: Run a full :func:`gc.collect` after every this many tests (#1052); see the
+#: module docstring for the measurements behind it. ``--gc-every 0`` disables.
+DEFAULT_GC_EVERY = 10
+
+
+class _CollectingResult(unittest.TextTestResult):
+    """A :class:`~unittest.TextTestResult` that runs :func:`gc.collect` every *n* tests.
+
+    Only unreachable objects are freed, so nothing a later test can reach -- the
+    :data:`sys.modules` table above all -- changes; when they would otherwise be
+    freed was already up to the interpreter's own thresholds.
+
+    """
+
+    gc_every = DEFAULT_GC_EVERY
+
+    def stopTest(self, test: 'unittest.TestCase') -> None:
+        super().stopTest(test)
+        if self.gc_every > 0 and self.testsRun % self.gc_every == 0:
+            gc.collect()
 
 
 def _dotted(path: 'pathlib.Path') -> 'str':
@@ -228,11 +283,42 @@ def main(argv: 'list[str] | None' = None) -> 'int':
         '-v', '--verbose', action='store_true',
         help='pass verbosity 2 to unittest.TextTestRunner instead of the default 1',
     )
+    parser.add_argument(
+        '--stall-dump', type=float, default=None, metavar='SECONDS',
+        help=f"dump every thread's stack to stderr once the leg has run this long "
+             f"(default ${STALL_DUMP_ENV}, else {DEFAULT_STALL_DUMP}); 0 disables",
+    )
+    parser.add_argument(
+        '--gc-every', type=int, default=DEFAULT_GC_EVERY, metavar='N',
+        help=f'run gc.collect() after every N tests (default {DEFAULT_GC_EVERY}); 0 disables',
+    )
     args = parser.parse_args(argv)
+    stall_dump = args.stall_dump
+    if stall_dump is None:
+        try:
+            stall_dump = float(os.environ.get(STALL_DUMP_ENV) or DEFAULT_STALL_DUMP)
+        except ValueError:
+            parser.error(f'${STALL_DUMP_ENV} is not a number of seconds: '
+                         f'{os.environ[STALL_DUMP_ENV]!r}')
 
     start = time.monotonic()
+    if stall_dump > 0:
+        # ``sys.__stderr__``, not ``sys.stderr``: faulthandler keeps the file
+        # descriptor it is given, and a test that swaps ``sys.stderr`` for a
+        # buffer must not be where the dump goes.
+        faulthandler.dump_traceback_later(stall_dump, repeat=False,
+                                          file=sys.__stderr__ or sys.stderr, exit=False)
+    try:
+        return _run(args, start)
+    finally:
+        faulthandler.cancel_dump_traceback_later()
+
+
+def _run(args: 'argparse.Namespace', start: 'float') -> 'int':
+    """Build and run the leg, then print its one-line tally whatever happened."""
     suite = build_suite(args.directory, args.exclude)
-    runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1)
+    result_class = type('_LegResult', (_CollectingResult,), {'gc_every': args.gc_every})
+    runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1, resultclass=result_class)
     result: 'unittest.TestResult | None' = None
     try:
         result = runner.run(suite)
