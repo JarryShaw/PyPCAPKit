@@ -181,7 +181,7 @@ class ProtoChain(collections.abc.Sequence):
         return f"ProtoChain({', '.join(map(lambda p: p[1].__name__, self.__data__))})"
 
     def __str__(self) -> 'str':
-        """Returns formatted hex representation of source data stream.
+        """Returns the protocol aliases of the chain, joined by colons.
 
         Example:
             >>> protochain

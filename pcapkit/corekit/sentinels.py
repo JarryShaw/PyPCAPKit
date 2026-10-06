@@ -12,20 +12,19 @@ See the "Naming a Sentinel" section of
 :file:`docs/source/contributing/conventions/sentinel-convention.rst` for the
 house rule the four below follow.
 
-Before this module existed, each of the four lived beside the one class that
-used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,
-:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,
-:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and
-:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling
-on GitHub issue :issue:`911`, choosing one shared module over one module per
-sentinel, moves the four *definitions* here; each original module keeps a three-line
-re-export so that no existing ``from <module> import <name>`` breaks,
-including the ``if TYPE_CHECKING:``-only imports of the *types* that
+The owner's ruling on GitHub issue :issue:`911` chose one shared module over
+one module per sentinel. Each sentinel is also re-exported, in a single
+import line, from the module of the one class that uses it --
+:class:`NullType` from :mod:`pcapkit.corekit.module`, :class:`NoValueType`
+from :mod:`pcapkit.corekit.fields.field`, :class:`NoDefaultType` from
+:mod:`pcapkit.corekit.enum` and :class:`AbsentType` from
+:mod:`pcapkit.protocols.protocol` -- so that no ``from <module> import <name>``
+breaks, including the ``if TYPE_CHECKING:``-only imports of the *types* that
 :mod:`pcapkit.foundation.registry.foundation`,
 :mod:`pcapkit.foundation.registry.protocols` and
 :mod:`pcapkit.corekit.fields.ipaddress`, :mod:`~pcapkit.corekit.fields.misc`,
 :mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`
-already carry.
+carry.
 
 ``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``
 is documented as the value of
@@ -35,12 +34,9 @@ so it is a published contract and the re-export at
 package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --
 nothing outside that module ever imports it, from here or from there -- so
 its re-export exists only so that module's own code keeps reading
-``ABSENT`` rather than a fully-qualified name; see :class:`AbsentType`'s
-own docstring below for why it stays private after the move. GitHub issue
-:issue:`937` later dropped the leading underscore both used to carry
-(``_Absent``, ``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like
-their two siblings; the privacy this paragraph describes did not move with the
-name -- see :class:`AbsentType`'s docstring for what carries it now.
+``ABSENT`` rather than a fully-qualified name. It carries no leading
+underscore; :class:`AbsentType`'s docstring says what marks it private
+instead.
 
 """
 from typing import TYPE_CHECKING
@@ -59,13 +55,10 @@ if TYPE_CHECKING:
 class NullType:
     """Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.
 
-    A distinct class rather than a plain :class:`str` -- which is what the
-    registry helpers in :mod:`pcapkit.foundation.registry.protocols` and
-    :mod:`pcapkit.foundation.registry.foundation` used to define,
-    independently of each other -- so that ``is`` comparisons against it mean
-    what they say: no :class:`str` a caller passes, including one that
-    happens to spell ``'(null)'`` itself, can compare equal to this sentinel
-    by identity. See GitHub issue :issue:`833`.
+    A distinct class rather than a plain :class:`str` such as ``'(null)'``,
+    so that ``is`` comparisons against it mean what they say: no
+    :class:`str` a caller passes, including one that happens to spell
+    ``'(null)'`` itself, can be this sentinel. See GitHub issue :issue:`833`.
 
     Genuinely a singleton, not merely a class this module happens to
     instantiate once: :meth:`__new__` always hands back the one instance
@@ -74,37 +67,25 @@ class NullType:
     the scenes -- can end up holding a second object that fails an ``is
     NULL`` check downstream. :meth:`ModuleDescriptor.klass
     <pcapkit.corekit.module.ModuleDescriptor.klass>` makes exactly that
-    check, and a stricter guard that raises on a second call would be truer
-    to "singleton" in the abstract, but it would also mean the module's own
-    ``NULL = NullType()`` below is the only call that is ever allowed to
+    check; a second instance would slip past it to :func:`getattr` and
+    downgrade a clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into
+    a bare :exc:`TypeError` (``attribute name must be string, not
+    'NullType'``). A stricter guard that raises on a second call would be
+    truer to "singleton" in the abstract, but it would also mean the module's
+    own ``NULL = NullType()`` below is the only call that is ever allowed to
     succeed -- fragile for no real benefit, since nothing here needs
     *rejecting* a second construction, only preventing it from producing a
     distinct object.
 
-    That still leaves :func:`copy.deepcopy`, :func:`copy.copy` and
-    :mod:`pickle` unhandled: none of them constructs a new instance by
-    calling ``NullType()`` themselves, so the guard above never runs for
-    them. Each is therefore given its own override below, rather than left
-    to fall back to the default behaviour for a plain object:
-
-    * :func:`copy.copy` and :func:`copy.deepcopy` check for
-      :meth:`__copy__`/:meth:`__deepcopy__` before ever falling back to
-      reduction, so :meth:`__deepcopy__` in particular has to be defined --
-      its absence is the actual defect this class used to have: deepcopying
-      a :class:`~pcapkit.corekit.module.ModuleDescriptor` recursed into this
-      sentinel, reduced it, and rebuilt a second, non-identical
-      :class:`NullType` that then read as an ordinary attribute name to
-      :func:`getattr`, downgrading a clean
-      :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare
-      :exc:`TypeError` (``attribute name must be string, not 'NullType'``).
-    * :mod:`pickle` protocols 2 and up reconstruct through
-      ``cls.__new__(cls)``, which the guarded :meth:`__new__` already keeps
-      to one instance -- but protocols 0 and 1 reconstruct through
-      :func:`copyreg._reconstructor`, which calls :func:`object.__new__`
-      *directly*, bypassing :meth:`__new__` entirely. :meth:`__reduce__` is
-      defined so that every protocol, not only the ones that happen to go
-      through this class's own :meth:`__new__`, is routed through the same
-      module-level getter instead of through reconstruction at all.
+    :func:`copy.copy`, :func:`copy.deepcopy` and :mod:`pickle` protocols 2
+    and up reconstruct through ``cls.__new__(cls)``, which the guard above
+    already keeps to one instance. Pickle protocols 0 and 1 do not: they
+    reconstruct through :func:`copyreg._reconstructor`, which calls
+    :func:`object.__new__` *directly*, bypassing :meth:`__new__` entirely.
+    :meth:`__reduce__` is defined so that every protocol is routed through
+    the same module-level getter instead of through reconstruction at all,
+    and :meth:`__copy__`/:meth:`__deepcopy__` return ``self`` without
+    reducing anything.
 
     A caveat rather than a defect: :func:`importlib.reload` on this module
     re-executes ``NULL = NullType()`` below, producing a *second* singleton
@@ -116,21 +97,17 @@ class NullType:
     of problem for the *class* it resolves, which is why it re-reads
     :data:`sys.modules` on every call rather than memoising; nothing
     equivalent is possible here, because unlike a resolved class there is no
-    live registry this sentinel could be re-read from. The pre-:issue:`833`
-    ``str`` sentinel had the same fragility for the same reason -- it is a
-    property of sharing one module-level binding across a reload, not
-    something this class's singleton guarantees claim to solve -- and nothing
-    in this package reloads :mod:`pcapkit.corekit.sentinels` after import.
+    live registry this sentinel could be re-read from. It is a property of
+    sharing one module-level binding across a reload, not something this
+    class's singleton guarantees claim to solve, and nothing in this package
+    reloads :mod:`pcapkit.corekit.sentinels` after import.
 
-    A second caveat, specific to this class now living apart from its one
-    caller-visible re-export: reloading :mod:`pcapkit.corekit.module`
-    itself -- rather than this module -- no longer has any effect on the
-    singleton at all. That module now only re-imports :data:`NULL` and
+    Reloading :mod:`pcapkit.corekit.module` instead has no effect on the
+    singleton at all. That module only re-imports :data:`NULL` and
     :class:`NullType` from here, and re-running an already-satisfied
     ``from ... import`` reads the current binding in :mod:`sys.modules`
     rather than re-executing anything, so it neither mints a new instance
-    nor loses the old one. The reload hazard this docstring describes moved
-    with the class definition; it did not double.
+    nor loses the old one.
 
     """
 
@@ -188,11 +165,9 @@ class NullType:
 
 #: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``
 #: helpers in :mod:`pcapkit.foundation.registry.protocols` and
-#: :mod:`pcapkit.foundation.registry.foundation`. Housed here, alongside the
-#: package's other sentinels, rather than in :mod:`pcapkit.corekit.module`
-#: where it used to live -- per the owner's ruling on GitHub issue
-#: :issue:`911`, see the module docstring above. :mod:`pcapkit.corekit.module`
-#: keeps a re-export so every existing
+#: :mod:`pcapkit.foundation.registry.foundation`. Housed here with the
+#: package's other sentinels, per the module docstring above;
+#: :mod:`pcapkit.corekit.module` keeps a re-export so every
 #: ``from pcapkit.corekit.module import NULL`` keeps working.
 NULL = NullType()
 
@@ -212,10 +187,10 @@ def _get_null() -> 'NullType':
 class NoValueType:
     """Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.
 
-    Housed here per GitHub issue :issue:`911` rather than in
-    :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where
+    Housed here per GitHub issue :issue:`911`, and re-exported from
+    :mod:`pcapkit.corekit.fields.field`, where
     :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
-    still documents it as the field-default sentinel.
+    documents it as the field-default sentinel.
 
     """
 
@@ -228,8 +203,6 @@ class NoValueType:
 #: :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`.
 #: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that
 #: attribute's own documentation is a published contract naming this object.
-#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue :issue:`937`,
-#: which normalised all four sentinel *objects* to SCREAMING_SNAKE.
 NO_VALUE = NoValueType()
 
 
@@ -238,35 +211,16 @@ class NoDefaultType:
     """Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`.
 
-    A dedicated class rather than a bare :class:`object`, per a ruling given in
-    review of the work for :issue:`857`, which asked for a dedicated class that
-    follows the house convention. A bare :class:`object` compares under
-    ``is`` exactly as safely as a dedicated class with no ``__eq__`` of its
-    own does -- identity comparison was never the problem an earlier
-    revision's docstring here overstated it to be. What a bare
-    :class:`object` actually lacks is a readable representation: it prints
-    as ``<object object at 0x...>`` in a signature, in :func:`help`, and in
-    a traceback, where ``NoDefaultType()``
-    -- via :meth:`__repr__` below -- prints as ``<NO_DEFAULT>``.
-
-    Named ``NoDefaultType`` for the *class* because that half of the house
-    convention is settled: both :class:`NullType` and :class:`NoValueType`
-    use ``<Name>Type``. At the time, the *instance*'s own name was not
-    similarly settled -- a follow-up given in review of the work for
-    :issue:`857` was explicit that ``NULL`` (``SCREAMING_CASE``) and
-    ``NoValue`` (``CapWords``) disagreed, and that the choice should follow
-    what each sentinel is needed for rather than a settled rule. The need here
-    was continuity: ``NO_DEFAULT`` was already the name on ``main`` --
-    referenced in
-    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s signature,
-    its docstring, and both comparison sites -- and that change was to *what
-    the sentinel is*, not to *what it is called*, so it kept that name rather
-    than being renamed to match either precedent's instance casing for its own
-    sake. ``NULL``'s ``SCREAMING_CASE`` was the closer match regardless, since
-    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue
-    :issue:`937` later settled the question this paragraph left open:
-    ``NoValue`` became :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`,
-    so every instance name now agrees on SCREAMING_SNAKE.
+    A dedicated class rather than a bare :class:`object`, as review of the
+    work for :issue:`857` asked, following the house convention. A bare
+    :class:`object` compares under ``is`` exactly as safely as a dedicated
+    class with no ``__eq__`` of its own does; what it lacks is a readable
+    representation: it prints as ``<object object at 0x...>`` in a signature,
+    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via
+    :meth:`__repr__` below -- prints as ``<NO_DEFAULT>``. The names follow
+    the convention every sentinel here shares, settled by GitHub issue
+    :issue:`937`: ``<Name>Type`` for the class and SCREAMING_SNAKE for the
+    instance.
 
     Genuinely a singleton, not merely a class this module happens to
     instantiate once: :meth:`__new__` always hands back the one instance that
@@ -320,76 +274,53 @@ class NoDefaultType:
     deep-copying either still reduces the sentinel itself through the same,
     guarded protocol-2 path measured above.
 
-    A caveat that turns out to be dormant rather than live, on the current
-    tree -- worth stating precisely rather than either repeating the older,
-    inaccurate claim or dropping the topic. :func:`importlib.reload` on this
-    module re-executes both ``class NoDefaultType:`` and ``NO_DEFAULT =
-    NoDefaultType()`` below, producing a fresh, distinct object; any consumer
-    that had already captured the pre-reload one -- as a bound parameter
-    default, say -- goes on holding the stale one, and a bare
+    A reload caveat that is dormant rather than live. :func:`importlib.reload`
+    on this module re-executes both ``class NoDefaultType:`` and
+    ``NO_DEFAULT = NoDefaultType()`` below, producing a fresh, distinct
+    object; any consumer that had already captured the pre-reload one -- as a
+    bound parameter default, say -- goes on holding the stale one, and a bare
     ``held_default is NO_DEFAULT`` comparison against the post-reload global
     then reads :data:`False` where it once read :data:`True`.
-    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` looked
-    exactly like such a consumer before GitHub issue :issue:`864`: an
-    unrecognised, non-``NO_DEFAULT`` value used to fall through to
-    ``cls(default)``, so a stale sentinel handed to that call could raise a
-    :exc:`ValueError` a caller had no reason to expect from an *omitted*
-    argument. :issue:`864` closed a different hole -- ``default`` could mint
-    a new member -- by replacing that call with a
-    ``default not in cls._value2member_map_`` guard, and the guard happens to
-    close this one too: a :class:`NoDefaultType` instance, stale or fresh, is
-    never a registered enum value, so the guard's ``not in`` half reads
-    :data:`True` for it either way and ``get`` re-raises the original lookup
-    error correctly regardless of which :data:`NO_DEFAULT` a caller's stale
-    default is stale *against*. Measured on the current tree, guard
-    included::
+    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` is such a
+    consumer but is not affected: its fallback is guarded by
+    ``default not in cls._value2member_map_`` (added by GitHub issue
+    :issue:`864` to stop ``default`` minting a new member), and a
+    :class:`NoDefaultType` instance, stale or fresh, is never a registered
+    enum value, so the guard reads :data:`True` for it either way and ``get``
+    re-raises the original lookup error regardless of which
+    :data:`NO_DEFAULT` a caller's default is stale *against*. Measured::
 
         >>> Hardware.get('Definitely-Not-A-Member')              # before reload
-        KeyError: 'Definitely-Not-A-Member'
+        EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"
         >>> importlib.reload(pcapkit.corekit.sentinels)
         >>> Hardware.get('Definitely-Not-A-Member')               # after reload
-        KeyError: 'Definitely-Not-A-Member'
+        EnumKeyError: "'Definitely-Not-A-Member' is not a valid Hardware"
 
-    So the docstring this class carried before GitHub issue :issue:`911`'s
-    move -- which claimed the second call above raises :exc:`ValueError` --
-    was already wrong on ``main`` at ``d31c0aaf6``, independently of the
-    move: it described the pre-:issue:`864` ``cls(default)`` call, and
-    nobody had re-verified it against the guard :issue:`864` added
-    afterwards. Fixed here as a drive-by correction, not a consequence of
-    the housing change itself.
-
-    None of that makes the underlying hazard theoretical elsewhere in this
-    package: ``-1`` never had this failure mode at all, since ``-1 == -1``
-    compares by value rather than identity, and reload staleness is a
-    *tracked* defect class here for other constructs -- see
+    The hazard is not theoretical elsewhere: reload staleness is a *tracked*
+    defect class here for other constructs -- see
     :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own
     docstring note on why it declines to memoise a resolved class, and
     :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
     ``test_no_stale_class_survives_a_module_reload``, which reloads a module
-    deliberately to pin the fix for exactly that class of bug elsewhere. A
-    *future* comparison site written the vulnerable way -- a bare ``is
-    NO_DEFAULT`` with no independent guard behind it, the way :issue:`864`'s
-    fix itself was not -- would still reproduce it. "Nothing in this package
-    reloads :mod:`pcapkit.corekit.sentinels` after import" remains true
-    today, but it is a caveat to keep honest rather than a guarantee this
-    class enforces.
+    deliberately to pin the fix for exactly that class of bug. A *future*
+    comparison site written the vulnerable way -- a bare ``is NO_DEFAULT``
+    with no independent guard behind it -- would reproduce it. Nothing in
+    this package reloads :mod:`pcapkit.corekit.sentinels` after import, but
+    that is a caveat to keep honest rather than a guarantee this class
+    enforces.
 
     .. note::
 
-       GitHub issue :issue:`911` also changes *which* reload is the one that
-       matters, independently of the :issue:`864` finding above.
-       :mod:`pcapkit.corekit.enum` no longer defines ``NoDefaultType``
-       itself; it only reads :data:`NO_DEFAULT` off this module once, at its
-       own import time, into its own module global. Reloading
-       :mod:`pcapkit.corekit.enum` alone therefore now just re-runs that
-       read, which -- so long as this module has not *also* been reloaded --
-       fetches back the identical object and changes nothing. Producing a
-       fresh :data:`NO_DEFAULT` at all now takes reloading *this* module,
-       where the class statement lives; reloading only
-       :mod:`pcapkit.corekit.enum` is not enough on its own, because ``from
-       ... import`` binds a copy rather than a live alias, and that module's
-       own global stays pointed at whatever it read until something re-runs
-       that import.
+       Reloading :mod:`pcapkit.corekit.enum` alone does not produce a fresh
+       :data:`NO_DEFAULT`. That module does not define ``NoDefaultType``; it
+       reads :data:`NO_DEFAULT` off this module once, at its own import time,
+       into its own module global, and a reload just re-runs that read,
+       which -- so long as this module has not *also* been reloaded --
+       fetches back the identical object. Producing a fresh one takes
+       reloading *this* module, where the class statement lives; and since
+       ``from ... import`` binds a copy rather than a live alias,
+       :mod:`pcapkit.corekit.enum`'s own global stays pointed at whatever it
+       read until something re-runs that import.
 
     Also unlike both :class:`NullType` and :class:`NoValueType`, this
     deliberately does *not* define ``__bool__``. Both of those model an
@@ -402,9 +333,9 @@ class NoDefaultType:
     exactly the conflation this sentinel exists to rule out: code that writes
     ``if not default:`` instead of ``if default is NO_DEFAULT:`` would then
     read :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy
-    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the exact
-    collision ``-1`` used to cause under ``==`` and the reason :issue:`857`
-    exists. Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy
+    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the
+    collision with a genuine default that :issue:`857` exists to rule out.
+    Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy
     (the default for any object defining neither ``__bool__`` nor
     ``__len__``), which at least does not *look* like one of the falsy values
     it must never be mistaken for.
@@ -454,21 +385,17 @@ class AbsentType:
     and means "no value was given", not "this key is not here".
 
     Defined here, alongside the package's other sentinels, per the owner's
-    ruling on GitHub issue :issue:`911`. Originally named
-    ``_AbsentType``/``_Absent``, with the leading underscore standing in for
-    "private" -- GitHub issue :issue:`937` normalised every sentinel *object*
-    to SCREAMING_SNAKE and dropped it, so this pair now reads as
-    CamelCase/SCREAMING_SNAKE like their two siblings and privacy is no longer
-    signalled by the name at all. The owner's ruling on GitHub issue
-    :issue:`719` accepted that rename, and held that documenting ``ABSENT`` as
-    a private type and class, not for public use, is enough to replace the
-    underscore. So this class and :data:`ABSENT` stay exactly as private as
-    they were: nothing outside :mod:`pcapkit.protocols.protocol` reads
-    :data:`ABSENT`, from here or from there, and neither this module's nor
-    that module's :attr:`__all__` names either one. This docstring, and the
-    "Naming a Sentinel" section of
+    ruling on GitHub issue :issue:`911`. **Private**, although the names
+    carry no leading underscore: GitHub issue :issue:`937` put every sentinel
+    on the CamelCase/SCREAMING_SNAKE convention, and the owner's ruling on
+    GitHub issue :issue:`719` held that documenting ``ABSENT`` as a private
+    type and class, not for public use, is enough to replace the underscore.
+    Nothing outside :mod:`pcapkit.protocols.protocol` reads :data:`ABSENT`,
+    from here or from there, and neither this module's nor that module's
+    :attr:`__all__` names either one. This docstring, and the "Naming a
+    Sentinel" section of
     :file:`docs/source/contributing/conventions/sentinel-convention.rst`, are
-    what now records that fact in place of the leading underscore.
+    what record that.
 
     """
 
@@ -489,7 +416,6 @@ class AbsentType:
 #: :attr:`ProtocolBase.__keywords__
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
 #: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it
-#: for exactly that one read. Private by convention and documentation only,
-#: not by a leading underscore, which GitHub issue :issue:`937` dropped --
-#: see :class:`AbsentType`'s own docstring for why.
+#: for exactly that one read. Private by documentation rather than by a
+#: leading underscore -- see :class:`AbsentType`'s own docstring.
 ABSENT = AbsentType()

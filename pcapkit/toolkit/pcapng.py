@@ -270,11 +270,9 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
         # NOTE: ``len`` is the on-wire length and ``cap_len`` the captured one,
         # which is the way round Wireshark's ``packet-frame.c`` registers the two
         # field names this pair borrows. Do not swap them to match some other
-        # reader: #618 made this the reference and brought the PCAP reader in
-        # :mod:`pcapkit.protocols.misc.pcap.frame` into line with it, on the
-        # strength of those registered names rather than of which came first --
-        # this spelling is in fact the *later* of the two, and the note at the
-        # corresponding site over there records the dates.
+        # reader: this is the reference, and the PCAP reader in
+        # :mod:`pcapkit.protocols.misc.pcap.frame` follows it (#618), on the
+        # strength of those registered names.
         len=block.original_len,
         cap_len=block.captured_len,
     )

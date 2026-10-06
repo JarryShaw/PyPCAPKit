@@ -90,11 +90,11 @@ def beholder(
     Important:
         This decorator function is designed for decorating *class methods*.
 
-    This decorator first keep the current offset of
-    :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`, then
-    try to call the decorated function. Should any exception raised, it will
-    re-parse the :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`
-    as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.
+    This decorator calls the decorated function. Should any exception be
+    raised, it logs the error and re-parses the current layer's payload as
+    :class:`~pcapkit.protocols.misc.raw.Raw` -- or as
+    :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an
+    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
 
     Note:
         The decorated function should have following signature::
@@ -122,7 +122,6 @@ def beholder(
         except IndexError:
             length = None
 
-        # record file pointer
         try:
             # call method
             return func(*args, **kwargs)
@@ -148,7 +147,7 @@ def beholder(
             # ``payload`` field at all. Going through the schema there raises
             # ProtocolUnbound('unknown field: payload') *from the recovery path*,
             # turning a next-layer parse failure that should have degraded to
-            # Raw into a crash. Unreachable until something was registered on an
+            # Raw into a crash. Reachable once something is registered on an
             # SCTP payload protocol identifier, which NGAP is.
             file_ = self._get_payload()
 
@@ -162,7 +161,7 @@ def beholder(
             # Measured, because the layers differ and it is easy to state this too
             # broadly: SCTP's unregistered path keeps its enumeration -- an unknown
             # PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so
-            # without this line, *registering* NGAP on PPID 60 would have made a
+            # without this line, *registering* NGAP on PPID 60 would make a
             # failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less
             # than the same bytes gave while unregistered. TCP's unregistered
             # path keeps its code too, but as a plain integer: an unknown port
@@ -172,8 +171,8 @@ def beholder(
             # whether or not it is registered. So both *unknown* paths preserve
             # the code that arrived; what differs is only that SCTP's is an
             # enumeration the protochain can name, while TCP's is an ``int`` and
-            # renders as ``Raw``. That was #418; this line is
-            # about the *failure* path, which it makes uniform.
+            # renders as ``Raw`` (#418). This line is about the *failure* path,
+            # which it makes uniform.
             next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
@@ -183,7 +182,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
     """Prepare schema packet data before unpacking.
 
     Important:
-        This decorate function is designed for decorating the
+        This decorator function is designed for decorating the
         :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
         *class method*.
 
@@ -204,12 +203,9 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         forwarded to -- the decorated function. :func:`prepare` is applied to
         exactly one function in this tree,
         :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`,
-        whose real signature has never had more than these four parameters,
-        and nothing calls it with more; an earlier revision of this note
-        nonetheless promised implementors a trailing ``*args, **kwargs``, which
-        the wrapper below never populated. A caller relying on that promise
-        got extras silently discarded instead of forwarded -- see :issue:`454` -- so the
-        wrapper raises :exc:`TypeError` for a fifth positional argument or
+        whose real signature has exactly these four parameters, and nothing
+        calls it with more. Rather than discard extras silently (:issue:`454`),
+        the wrapper raises :exc:`TypeError` for a fifth positional argument or
         an unconsumed keyword, the same as an ordinary call with too many
         arguments would.
 
@@ -295,10 +291,10 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         # ``post_process`` a *second* time, with a packet context rebuilt from
         # the schema's own fields and therefore holding none of the enclosing
         # layer's, so it overwrites exactly the values ``post_process`` derived
-        # from that context. It is what discarded the IPv6 source address that
-        # ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
-        # had just resolved: ``OptionField.unpack`` measures each parsed option
-        # with ``len(data)``, which triggered the re-pack one option later.
+        # from that context. It would discard, for one, the IPv6 source address
+        # that ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
+        # has just resolved: ``OptionField.unpack`` measures each parsed option
+        # with ``len(data)``, which triggers the re-pack one option later.
         #
         # ``Schema.pack`` already orders the two the other way round -- clear the
         # flag *after* ``post_process``, not before -- so match it here and the

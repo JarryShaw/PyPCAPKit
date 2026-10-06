@@ -6,8 +6,8 @@
 .. module:: pcapkit.utilities
 
 :mod:`pcapkit.utilities` contains several useful functions
-and classes which are fundations of :mod:`pcapkit`, including
-decorater function :func:`~pcapkit.utilities.decorators.seekset`
+and classes which are foundations of :mod:`pcapkit`, including
+decorator function :func:`~pcapkit.utilities.decorators.seekset`
 and :func:`~pcapkit.utilities.decorators.beholder`, etc., and
 several user-refined exceptions and warnings.
 

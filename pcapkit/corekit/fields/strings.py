@@ -103,13 +103,13 @@ class StringField(_TextField[str]):
         default: Field default value, if any.
         encoding: The encoding with which to decode the :obj:`bytes`.
             If not provided, :mod:`pcapkit` will first try detecting its encoding
-            using |chardet|_. The fallback encoding would is **UTF-8**.
+            using |chardet|_. The fallback encoding is **UTF-8**.
         errors: The error handling scheme to use for the handling of decoding errors.
             The default is ``'strict'`` meaning that decoding errors raise a
             :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
             as well as any other name registered with :func:`codecs.register_error` that
             can handle :exc:`UnicodeDecodeError`.
-        unquote: Whether to unquote the decoded string as a URL. Should decoding failed ,
+        unquote: Whether to unquote the decoded string as a URL. Should decoding fail,
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
         callback: Callback function to be called upon
@@ -198,9 +198,9 @@ class BitField(_TextField[Dict[str, Any]]):
 
         # NOTE: A subfield reaching past the end of the field is a mistake in the
         # schema that declares it, not something a packet can cause, so it is
-        # rejected here rather than at packing time -- where it used to grow the
-        # buffer instead, and surface much later as an opaque ``OverflowError``
-        # from :meth:`int.to_bytes`.
+        # rejected here rather than at packing time -- where it would instead grow
+        # the buffer, and surface much later as an opaque ``OverflowError`` from
+        # :meth:`int.to_bytes`.
         width = self.length * 8
         for name, (start, size) in self._namespace.items():
             if start < 0 or size < 1 or start + size > width:

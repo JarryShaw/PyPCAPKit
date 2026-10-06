@@ -142,7 +142,7 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
     """Convert DPKT packet into :obj:`dict`.
 
     Args:
-        packet: Scapy packet.
+        packet: DPKT packet.
         timestamp: Timestamp of packet.
         data_link: Data link type.
 
@@ -175,7 +175,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         timestamp: Capture timestamp of the packet, which drives the reassembly
             timeout. `DPKT`_'s reader yields it beside the record's octets rather
             than on the packet, so it is passed in -- as :func:`tcp_traceflow`
-            already does. A caller holding only a frame can read it back with
+            does. A caller holding only a frame can read it back with
             :func:`packet2timestamp`, which is where
             :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.
         count: Packet index. If not provided, default to ``-1``.
@@ -266,8 +266,8 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
                 # (:rfc:`8200#section-4.5`), not the IPv6 header's Flow Label. The
                 # label is optional and routinely zero, so keying on it collapses
                 # every datagram between one address pair into a single buffer and
-                # interleaves their fragments; it also disagreed with ``bufid[2]``
-                # in every other engine, which feeds
+                # interleaves their fragments; it would also disagree with
+                # ``bufid[2]`` in every other engine, which feeds
                 # :attr:`pcapkit.foundation.reassembly.data.ip.DatagramID.id`.
                 ipv6_frag.id,                                    # identification
                 Enum_TransType.get(ipv6_frag.nxt),               # next header field in IPv6 Fragment Header

@@ -32,7 +32,7 @@ different components.
 
   Synthesises file I/O and protocol analysis, coordinates
   information exchange in all network layers, as well as
-  provides the foundamental functions for :mod:`pcapkit`.
+  provides the fundamental functions for :mod:`pcapkit`.
 
 - Protocols (:mod:`pcapkit.protocols`)
 

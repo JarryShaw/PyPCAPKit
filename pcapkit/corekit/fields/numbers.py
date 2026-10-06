@@ -62,12 +62,12 @@ class NumberField(Field[int], Generic[_T]):
 
     Notes:
         A subclass such as :class:`UInt32Field` fixes the sign through
-        ``__signed__``, so ``signed`` there is at best redundant. It used to be
-        discarded outright, in both directions, which meant
-        ``UInt32Field(signed=True)`` handed back an unsigned field whose values
-        only looked wrong once the high bit was set -- see GitHub issue
-        :issue:`545`. A contradicting value is now rejected instead; omitting
-        it, or passing the sign the class already fixes, stays legal.
+        ``__signed__``, so ``signed`` there is at best redundant. A
+        contradicting value is rejected rather than discarded, since
+        discarding it would make ``UInt32Field(signed=True)`` hand back an
+        unsigned field whose values only look wrong once the high bit is set
+        -- see GitHub issue :issue:`545`. Omitting it, or passing the sign the
+        class already fixes, stays legal.
 
     """
 
@@ -103,10 +103,10 @@ class NumberField(Field[int], Generic[_T]):
             self._bit_length, self._bit_mask = -1, -1
 
         # NOTE: ``__signed__`` fixes the sign for a subclass such as
-        # :class:`UInt32Field`, and used to *discard* the ``signed`` argument to
-        # do it -- in both directions, so ``UInt32Field(signed=True)`` returned
-        # an unsigned field and ``Int8Field(signed=False)`` a signed one, both
-        # without a word. ``None`` is what "not given" looks like, which is what
+        # :class:`UInt32Field`; discarding a contradicting ``signed`` would make
+        # ``UInt32Field(signed=True)`` return an unsigned field and
+        # ``Int8Field(signed=False)`` a signed one, both without a word.
+        # ``None`` is what "not given" looks like, which is what
         # lets a contradicting value be told apart from the default and rejected
         # while leaving an agreeing one alone. See #545.
         if self.__signed__ is None:
@@ -173,7 +173,7 @@ class NumberField(Field[int], Generic[_T]):
             Rebuilding the template here is what applies a callable ``length``,
             and :meth:`build_template` recomputes ``self._need_process`` as it
             goes, so the flag and the template always describe the same width.
-            They did not always: see GitHub issue :issue:`591`.
+            See GitHub issue :issue:`591`.
 
         """
         new_self = super().__call__(packet)
@@ -207,15 +207,14 @@ class NumberField(Field[int], Generic[_T]):
         Notes:
             ``self._need_process`` is **assigned** here rather than only ever
             raised, so that it always describes the ``length`` this template
-            was built for. It used to be
-            set :data:`True` in the fall-through branch and never put back,
-            which made it a latch: a callable ``length`` is a placeholder of
-            ``-1`` at construction, ``-1`` takes the fall-through branch, and
-            the flag then survived the rebuild in :meth:`__call__` that
-            resolved the real width. :meth:`pre_process` consequently handed
-            :obj:`bytes` to a template that had become ``>Q`` -- or ``>I``,
-            ``>H``, ``>B`` -- and :func:`struct.pack` refused it. See GitHub
-            issue :issue:`591`.
+            was built for. Only ever setting it :data:`True` in the
+            fall-through branch would make it a latch: a callable ``length`` is
+            a placeholder of ``-1`` at construction, ``-1`` takes the
+            fall-through branch, and the flag would then survive the rebuild in
+            :meth:`__call__` that resolves the real width. :meth:`pre_process`
+            would consequently hand :obj:`bytes` to a template that had become
+            ``>Q`` -- or ``>I``, ``>H``, ``>B`` -- and :func:`struct.pack` would
+            refuse it. See GitHub issue :issue:`591`.
 
             Assigning it is what tells a placeholder apart from a width that
             genuinely needs byte packing, without having to remember that a
@@ -264,17 +263,16 @@ class NumberField(Field[int], Generic[_T]):
             that rebuild can land on a width :func:`struct` has a native
             integer code for. The flag is therefore consulted **after** the
             rebuild rather than before it, since deciding first and rebuilding
-            second is how the template and the value being returned came to
-            disagree in the first place. C.f. :issue:`591`.
+            second would let the template and the value being returned
+            disagree. C.f. :issue:`591`.
 
             That width is a **ceiling** of the bit length over eight, and it is
-            written as one. It used to read
-            ``math.ceil(value.bit_length() // 8)``, which is not a ceiling at
-            all: :func:`math.ceil` of an :obj:`int` is that :obj:`int`, so the
-            ``//`` had already floored the quotient and the outer call did
-            nothing. Every value whose bit length is not an exact multiple of
-            eight was therefore sized one octet short -- ``256`` at one octet,
-            ``65536`` at two, and ``1`` itself at *zero* -- which
+            written as one. ``math.ceil(value.bit_length() // 8)`` is not a
+            ceiling at all: :func:`math.ceil` of an :obj:`int` is that
+            :obj:`int`, so the ``//`` has already floored the quotient and the
+            outer call does nothing. Every value whose bit length is not an
+            exact multiple of eight would be sized one octet short -- ``256`` at
+            one octet, ``65536`` at two, and ``1`` itself at *zero* -- which
             :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub
             issue :issue:`599`.
 
@@ -561,29 +559,29 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         Notes:
             The registry is consulted through its constructor, which raises for
             a value no member and no ``_missing_`` rule accounts for. That raise
-            used to propagate, and it is :mod:`aenum`'s own bare
-            :exc:`ValueError`: not one of :mod:`pcapkit.utilities.exceptions`,
-            so a caller cannot tell it from a bug of its own, and not an
-            :exc:`EOFError`, so :meth:`Extractor.record_frames
+            is :mod:`aenum`'s own bare :exc:`ValueError`: not one of
+            :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell it from
+            a bug of its own, and not an :exc:`EOFError`, so
+            :meth:`Extractor.record_frames
             <pcapkit.foundation.extraction.Extractor.record_frames>` does not
-            catch it. One unassigned code therefore cost the whole extraction.
+            catch it. Left to propagate, one unassigned code would cost the
+            whole extraction.
 
-            It also made the "unknown" reader the formats require unreachable
-            for any genuinely unassigned code -- PCAP-NG's
+            It would also make the "unknown" reader the formats require
+            unreachable for any genuinely unassigned code -- PCAP-NG's
             :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the
             ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --
-            because the lookup failed several frames before the dispatch that
-            would have selected it. PCAP-NG repeats a block's total length at
-            both ends precisely so that a reader can skip a block type it does
-            not recognise; that skip is what this fallback restores. See GitHub
-            issue :issue:`701`.
+            because the lookup would fail before the dispatch that selects it.
+            PCAP-NG repeats a block's total length at both ends precisely so
+            that a reader can skip a block type it does not recognise; that skip
+            is what this fallback keeps working. See GitHub issue :issue:`701`.
 
             The fallback is the same nameless pseudo-member this method already
             builds for a field carrying no registry at all, so it is a value
             shape the package already produces and the dump layer already
             renders -- as ``<unknown>::<unassigned> [28]``, through
-            :func:`~pcapkit.dumpkit.common.render_enum`, not through the
-            ``name is None`` branch :issue:`648` added, which a member named
+            :func:`~pcapkit.dumpkit.common.render_enum`, not through its
+            ``name is None`` branch (:issue:`648`), which a member named
             ``<unassigned>`` never takes -- and one an :class:`int`-keyed
             dispatch registry looks up by value like any declared member. It is
             built per value rather than grafted onto
@@ -659,7 +657,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         names -- ``isinstance`` against it and every ancestor holds, and it
         renders and dispatches exactly like a declared one -- provided
         building it never grows the registry, which is the whole reason the
-        field stopped calling ``get()`` unconditionally in the first place.
+        field does not call ``get()`` unconditionally.
         This is what gets there: it calls ``namespace``'s own storage base's
         ``__new__`` directly -- :class:`str` or :class:`int`, whichever
         ``namespace`` derives from -- which skips ``namespace``'s *own*
@@ -683,12 +681,12 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
 
             The member this returns is absent from ``_value2member_map_``, so
             a *value*-keyed lookup on it -- ``self._namespace(value)`` --
-            still raises exactly as it did before this existed. Nothing on the
+            still raises. Nothing on the
             parse or reconstruction path does that to a value it just resolved
             this way, which is what keeps this safe to return from
             ``post_process``. A direct call to
             :meth:`~pcapkit.const.reg.apptype.AppType.get` for the same port
-            is a different matter and deliberately unchanged: asking the
+            is a different matter and deliberately so: asking the
             registry for a name is an explicit request for a named member, so
             it still mints one -- measured on this tree,
             ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and
@@ -707,17 +705,15 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             :mod:`pickle` and :func:`copy.copy`/:func:`copy.deepcopy` all
             reduce an :class:`~enum.Enum` member through
             ``Enum.__reduce_ex__``, which returns ``(cls, (value,))`` -- the
-            one lookup this member is deliberately absent from. Left alone
-            that is a genuine regression rather than a pre-existing
-            limitation, because the call sites used to *mint*, so the member
-            was registered and a round-trip worked. Measured on CPython
-            3.14.7, resolving port 53406 through
-            :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`:
-            on ``83b58ebda`` ``pickle.loads(pickle.dumps(member))`` returned
-            the member, and with the mint removed and nothing in its place it
-            raised ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP``
-            -- while ``pickle.dumps`` still succeeded, so the failure
-            surfaced only on read-back rather than where it was caused.
+            one lookup this member is deliberately absent from. A minted
+            member is registered and so round-trips; left alone, this one
+            would not. Measured on CPython 3.14.7, resolving port 53406
+            through :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`
+            with nothing in place of the override,
+            ``pickle.loads(pickle.dumps(member))`` raised
+            ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP`` -- while
+            ``pickle.dumps`` still succeeded, so the failure surfaced only on
+            read-back rather than where it was caused.
 
             So ``__reduce_ex__`` is set on the member itself, reducing it to
             :func:`_rebuild_unregistered_member` instead of to a value lookup.

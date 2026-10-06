@@ -35,10 +35,10 @@ ST = TypeVar('ST', bound='Type[Info]')
 class FinalisedState(EnumLookup, enum.IntEnum):
     """Finalised state.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
+    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
     :issue:`877`'s ruling that every non-registry enumeration shares that
-    lookup contract -- pure re-parenting, since this class defines neither
-    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+    lookup contract; this class defines neither ``get`` nor ``_missing_`` of
+    its own.
 
     """
 
@@ -108,7 +108,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     # reaches here with ``__final__`` already set by a decorator that generated
     # nothing: a ``__final__`` test would read that as "already finalised", skip
     # the generation, and hand back precisely the ``__init__``-less class
-    # :meth:`Info.__new__` now refuses -- while the opposite order worked. Keying
+    # :meth:`Info.__new__` refuses -- while the opposite order works. Keying
     # on ``__finalised__`` is what makes the two orders agree.
     #
     # ``cls.__dict__`` rather than ``getattr``: ``__finalised__`` is an ordinary
@@ -280,9 +280,10 @@ class InfoMeta(abc.ABCMeta):
 class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     """Turn dictionaries into :obj:`object` like instances.
 
-    * :class:`Info` objects inherit from :obj:`dict` type
-    * :class:`Info` objects are *iterable*, and support all functions as
-      :obj:`dict` type
+    * :class:`Info` objects are :class:`~collections.abc.Mapping` instances,
+      not :obj:`dict` subclasses
+    * :class:`Info` objects are *iterable*, and support the read-only
+      :obj:`dict` interface
     * :class:`Info` objects are **immutable**, thus cannot set or delete
       attributes after initialisation
 
@@ -352,8 +353,8 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
                                 'which is final')
 
         # NOTE: ``*args`` and ``**kwargs`` are forwarded rather than swallowed, so
-        # that a class keyword nobody accepts still reaches ``object`` and still
-        # fails there, as it did before this hook existed.
+        # that a class keyword nobody accepts still reaches ``object`` and fails
+        # there.
         super().__init_subclass__(*args, **kwargs)
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Self':  # pylint: disable=unused-argument
@@ -393,8 +394,8 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # bare ``@final`` lands -- it cannot see the mistake, and no other
         # class-creation hook fires later. First instantiation is the next event
         # in the class's life this library controls, and it is also where the
-        # damage surfaced: an unfinalised class has no generated ``__init__``, so
-        # construction fell through to :meth:`__update__` and failed with
+        # damage surfaces: an unfinalised class has no generated ``__init__``, so
+        # construction would fall through to :meth:`__update__` and fail with
         # ``TypeError: 'int' object is not iterable``, naming neither the class
         # nor the mistake.
         #
@@ -446,7 +447,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # NOTE: Keys with the same names as the class's builtin methods will be
         # renamed with the class name prefixed as mangled class variables
         # implicitly and internally. Such mapping information will be stored
-        # within: attr: `__map__` attribute.
+        # within the :attr:`__map__` attribute.
 
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 

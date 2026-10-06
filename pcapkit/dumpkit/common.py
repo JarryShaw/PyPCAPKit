@@ -118,7 +118,7 @@ class Dumper(DumperBase):
         rather than having to inherit :class:`DumperBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
-        has guarded on its own ``code`` keyword all along.
+        guards on its own ``code`` keyword the same way.
 
         Note:
             Inferring ``fmt`` from the subclass'
@@ -185,8 +185,8 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
     Note:
         A :class:`~enum.Flag` value composed **entirely of undeclared bits** has
         no name at all -- :attr:`~enum.Enum.name` is :data:`None`, not a string --
-        so interpolating it unguarded put the literal four characters ``None``
-        into the name half and rendered
+        so interpolating it unguarded would put the literal four characters
+        ``None`` into the name half and render
         :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as ``'Flags::None [0]'``
         (GitHub issue :issue:`648`).
 
@@ -205,8 +205,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         rendering with no declared bit to precede it, so ``Flags(9)`` becomes
         ``'Flags::9 [9]'`` and ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also
         cannot be mistaken for a member name, since a Python identifier may not
-        begin with a digit -- none of the 1867 identifiers declared under
-        :mod:`pcapkit.const` is a bare decimal, and none ever can be.
+        begin with a digit.
 
         This is *not* an :mod:`aenum` quirk. A stdlib :class:`enum.IntFlag` built
         from the same members answers ``name is None`` identically on CPython
@@ -268,19 +267,18 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
             A non-:class:`str` key is rendered with :func:`format`, which is the
             very conversion ``'{item}'.format(item=key)`` already applies to it,
-            so the ``<key>`` text is what it always was apart from the escaping.
+            so the ``<key>`` text is unchanged apart from the escaping.
             Rendering such a key rather than passing it over is deliberate:
             :file:`examples/captures/test.pcapng` keys the TLS key log entries
             of its decryption secrets block by a raw :class:`bytes` client
             random (:meth:`TLSKeyLog.post_process
             <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`), and
-            the ``bytes`` repr of that one carries ``&``, ``<`` *and* ``>``. That
-            is what made the fixture's ``plist`` report unparseable:
-            :func:`xml.etree.ElementTree.parse` stopped at the key's ``&`` on
-            line 1517 of 1958. The same key also breaks the fixture's ``json``
-            report, but on the quotes in that repr rather than on these three
-            characters, so that half is :mod:`dictdumper`'s to fix and is left
-            exactly as it is.
+            the ``bytes`` repr of that one carries ``&``, ``<`` *and* ``>``.
+            Unescaped, that makes the fixture's ``plist`` report unparseable:
+            :func:`xml.etree.ElementTree.parse` stops at the key's ``&``. The
+            same key also breaks the fixture's ``json`` report, but on the quotes
+            in that repr rather than on these three characters, so that half is
+            :mod:`dictdumper`'s to fix and is left alone.
 
         """
         if not escape_strings:

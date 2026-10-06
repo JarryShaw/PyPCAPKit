@@ -6,7 +6,9 @@
 
 .. important::
 
-   This module requires ``emoji`` package to be installed.
+   The ``emoji`` package is optional. Without it, importing this module
+   warns :class:`~pcapkit.utilities.warnings.EmojiWarning` and the verbose
+   messages print as plain text.
 
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is deprecated and merged with :mod:`pcapkit`.
@@ -84,8 +86,8 @@ def get_parser() -> 'ArgumentParser':
     # outside it is not rejected anywhere downstream -- it simply never matches a
     # protocol's ``__layer__`` and the parse silently runs to the top of the
     # stack, which is the failure mode GH-356 was about. ``type=str.lower`` keeps
-    # ``-L Internet`` working, as it did before the choices were declared, since
-    # ``Extractor.__init__`` lowercases the value anyway.
+    # ``-L Internet`` accepted, matching ``Extractor.__init__``, which lowercases
+    # the value anyway.
     #
     # The defaults are :data:`None` and not the ``'None'``/``'null'`` strings:
     # ``Extractor.__init__`` substitutes its own sentinels for an

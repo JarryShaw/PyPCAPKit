@@ -25,10 +25,11 @@ cannot be used for it.
    a side effect, because by the time any of these functions runs the engine has
    already called ``sniff`` and every frame has already been dissected -- or not.
 
-   That distinction is what made :issue:`406` hard to see. Reaching
-   :func:`ipv6_reassembly` repaired ``conf.l2types`` mid-run, one call too late to
-   affect the frames being reassembled, so whether a process dissected correctly
-   depended on what had imported `Scapy`_ earlier. Populating the registries before
+   That distinction is what makes :issue:`406` hard to see. Reaching
+   :func:`ipv6_reassembly` populates ``conf.l2types`` mid-run, one call too late to
+   affect the frames being reassembled, so relying on it would make whether a
+   process dissects correctly depend on what had imported `Scapy`_ earlier.
+   Populating the registries before
    ``sniff`` is
    :class:`~pcapkit.foundation.engines.scapy.Scapy`'s job, and it does it by
    importing :mod:`scapy.all` in its constructor.
@@ -232,7 +233,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             mf=bool(ipv6_frag.m),                         # more fragment flag
             # NOTE: ``len(ipv6)`` counts the Fragment header, so it overstates
             # this by 8 -- and the reassembly machinery writes the payload over
-            # the span ``tl - ihl``, so those 8 octets became 8 octets of stray
+            # the span ``tl - ihl``, so using it would leave 8 octets of stray
             # zeroes in every reassembled datagram.
             tl=hdr_len + len(payload),                    # total length, header includes
             header=bytes(ipv6)[:hdr_len],                 # raw bytes type header before IPv6-Frag
@@ -320,9 +321,9 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
 
-        # NOTE: no default here, deliberately. Since #775 tier 1, ``get()``
-        # with no default raises on an unresolvable name instead of minting
-        # one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP
+        # NOTE: no default here, deliberately. ``get()`` with no default
+        # raises on an unresolvable name rather than minting one (#775).
+        # NULL and RAW are genuine DLTs -- BSD loopback and raw IP
         # framing, respectively -- each meant to go with its own handler
         # protocol class, so neither is an honest stand-in for "unknown link
         # type" and this must not paper over the miss with either. An
@@ -331,7 +332,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         # is not a choice made here: an IPv6-rooted packet's name uppercases to
         # ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it
         # resolves silently -- to a DLT the caller never chose. Only the v4 name
-        # happens to miss. The bare ``KeyError``
+        # happens to miss. The ``KeyError``
         # from :meth:`LinkType.get` is caught and re-raised as
         # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
         # package's own house exception for a lookup miss -- rather than
@@ -353,10 +354,10 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             dst=ipaddress.ip_address(ip.dst),                    # destination IP
             srcport=tcp.sport,                                   # TCP source port
             dstport=tcp.dport,                                   # TCP destination port
-            # NOTE: the *capture's* clock, not the host's. This read
-            # ``time.time()``, which put the moment of parsing into every flow
-            # label -- so the same capture traced twice produced different label
-            # strings and different output filenames. Scapy carries the record's
+            # NOTE: the *capture's* clock, not the host's. ``time.time()`` would
+            # put the moment of parsing into every flow label -- so the same
+            # capture traced twice would produce different label strings and
+            # different output filenames. Scapy carries the record's
             # own timestamp on ``Packet.time``, which is what every other
             # engine's adapter reports.
             timestamp=float(packet.time),                        # capture timestamp
