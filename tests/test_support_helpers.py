@@ -64,7 +64,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import (TIMEOUT_SCALE_ENV, bootstrap_core_modules, close_extractor,
+from tests._support import (MAX_TIMEOUT, TIMEOUT_SCALE_ENV, bootstrap_core_modules, close_extractor,
                             ensure_package, install_fake_protocol_module, isolate_modules,
                             purge_modules, restore_modules, restore_modules_after, scale_timeout,
                             snapshot_modules, time_limit)
@@ -336,6 +336,46 @@ class TimeLimitTests(unittest.TestCase):
 
                 self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
                 self.assertEqual(signal.alarm(0), 0)
+
+    def test_an_oversized_scale_is_refused_and_leaks_no_handler(self) -> None:
+        """A scale past a day is refused, not handed to ``signal.alarm``.
+
+        ``1e9`` once reached :func:`signal.alarm` as an int past its C ``int``,
+        which raised :exc:`OverflowError` after the helper's handler was installed
+        and before anything would restore it, so the handler leaked into every test
+        that ran afterwards. ``1e308`` overflows the float product itself.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        self.assertEqual(scale_timeout(MAX_TIMEOUT), MAX_TIMEOUT)
+        for raw in ('1e9', '1e308', '2881'):
+            with self.subTest(scale=raw):
+                os.environ[TIMEOUT_SCALE_ENV] = raw
+                with self.assertRaisesRegex(ValueError, 'ceiling'):
+                    with time_limit(30):
+                        self.fail('the body ran under an oversized scale')
+
+                self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+                self.assertEqual(signal.alarm(0), 0)
+
+    def test_a_failure_while_arming_restores_the_handler_and_the_enclosing_alarm(self) -> None:
+        """Whatever ``signal.alarm`` raises, the handler and an outer deadline survive."""
+        own_handler = signal.getsignal(signal.SIGALRM)
+        real_alarm = signal.alarm
+
+        def alarm(seconds: int) -> int:
+            if seconds == 7:
+                raise OverflowError('arming failed')
+            return real_alarm(seconds)
+
+        real_alarm(30)
+        with mock.patch.object(signal, 'alarm', side_effect=alarm):
+            with self.assertRaises(OverflowError):
+                with time_limit(7):
+                    self.fail('the body ran without a deadline')
+
+        self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+        self.assertIn(real_alarm(0), range(28, 31))
 
 
 class SnapshotRestoreTests(unittest.TestCase):

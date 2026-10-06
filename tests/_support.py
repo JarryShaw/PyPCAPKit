@@ -24,6 +24,12 @@ from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
 #: it above ``1`` to stretch all of them at once rather than editing each call site.
 TIMEOUT_SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'
 
+#: Longest deadline :func:`scale_timeout` hands out: one day. A hang guard longer
+#: than that guards nothing, and the ceiling keeps the value far inside the C
+#: ``int`` :func:`signal.alarm` takes -- ``2**31 - 1`` on Linux, measured, past
+#: which it raises :exc:`OverflowError` instead of arming anything.
+MAX_TIMEOUT = 86400
+
 
 def scale_timeout(seconds: float) -> int:
     """Stretch a hang-guard deadline by :data:`TIMEOUT_SCALE_ENV`.
@@ -31,7 +37,8 @@ def scale_timeout(seconds: float) -> int:
     Read on every call, not once at import, so that a test can set the variable
     for itself. A value that is not a positive finite number is refused rather than
     ignored: falling back to ``1`` would quietly undo a scale CI asked for, and a
-    zero would disarm the guard altogether.
+    zero would disarm the guard altogether. A scale stretching the deadline past
+    :data:`MAX_TIMEOUT` is refused the same way.
 
     Args:
         seconds: The deadline as written at the call site.
@@ -42,7 +49,8 @@ def scale_timeout(seconds: float) -> int:
 
     Raises:
         ValueError: If :data:`TIMEOUT_SCALE_ENV` is set to anything other than a
-            positive finite number.
+            positive finite number, or to one that scales ``seconds`` past
+            :data:`MAX_TIMEOUT`.
 
     """
     raw = os.environ.get(TIMEOUT_SCALE_ENV, '').strip()
@@ -52,7 +60,13 @@ def scale_timeout(seconds: float) -> int:
         scale = math.nan
     if not (math.isfinite(scale) and scale > 0):
         raise ValueError(f'{TIMEOUT_SCALE_ENV} must be a positive number, not {raw!r}')
-    return max(1, math.ceil(seconds * scale))
+    # Compared before rounding: the product of two finite floats can still be
+    # infinite, and ``math.ceil`` raises on that rather than returning.
+    scaled = seconds * scale
+    if not scaled <= MAX_TIMEOUT:
+        raise ValueError(f'{TIMEOUT_SCALE_ENV}={raw!r} stretches a {seconds}s deadline '
+                         f'past the {MAX_TIMEOUT}s ceiling')
+    return max(1, math.ceil(scaled))
 
 
 @contextlib.contextmanager
@@ -125,20 +139,30 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
 
     previous_handler = signal.signal(signal.SIGALRM, expire)
 
-    # NOTE: ``signal.alarm`` returns the seconds left on the alarm it replaces, or
-    # zero when there was none. That return value is the only record of an
-    # enclosing deadline, so it is read here rather than discarded -- there is no
-    # way to ask for it again afterwards.
-    pending = signal.alarm(seconds)
+    # Armed inside the ``try``, so that anything raised while arming -- the
+    # ``OverflowError`` an oversized value once produced, say -- still puts the
+    # previous handler back on the way out rather than leaking ``expire``.
+    armed = False
+    pending = 0
     started = time.monotonic()
     try:
+        # NOTE: ``signal.alarm`` returns the seconds left on the alarm it
+        # replaces, or zero when there was none. That return value is the only
+        # record of an enclosing deadline, so it is read here rather than
+        # discarded -- there is no way to ask for it again afterwards.
+        pending = signal.alarm(seconds)
+        armed = True
+        started = time.monotonic()
         yield
     finally:
         # Cancel first, so that an alarm which fires between here and the handler
         # being restored cannot be delivered to whatever handler was installed
         # before -- and so that the alarm re-armed below belongs to that handler
-        # rather than to ``expire``.
-        signal.alarm(0)
+        # rather than to ``expire``. Only if arming happened, though: a failed
+        # ``signal.alarm`` replaced nothing, so an enclosing deadline is still
+        # pending as it was, and cancelling it here would drop it unrecorded.
+        if armed:
+            signal.alarm(0)
         signal.signal(signal.SIGALRM, previous_handler)
         if pending:
             left = pending - (time.monotonic() - started)
