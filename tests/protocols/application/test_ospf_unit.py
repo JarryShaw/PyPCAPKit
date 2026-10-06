@@ -63,10 +63,10 @@ class OSPFUnitTests(unittest.TestCase):
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.const.ospf.packet import Packet
         from pcapkit.protocols.data.application.ospf import \
-            CrytographicAuthentication as DataCryptoAuth
+            CryptographicAuthentication as DataCryptoAuth
         from pcapkit.protocols.application.ospf import OSPF
         from pcapkit.protocols.schema.application.ospf import \
-            CrytographicAuthentication as SchemaCryptoAuth
+            CryptographicAuthentication as SchemaCryptoAuth
         from pcapkit.protocols.schema.application.ospf import OSPF as SchemaOSPF
         from pcapkit.utilities.exceptions import ProtocolError
 

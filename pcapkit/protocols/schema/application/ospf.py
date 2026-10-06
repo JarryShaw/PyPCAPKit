@@ -12,7 +12,7 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, U
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
-__all__ = ['OSPF', 'CrytographicAuthentication']
+__all__ = ['OSPF', 'CryptographicAuthentication']
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -30,17 +30,17 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Returns:
         * If :attr:`OSPF.auth_type` is 2, a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.application.ospf.CrytographicAuthentication` instance.
+          wrapped :class:`~pcapkit.protocols.schema.application.ospf.CryptographicAuthentication` instance.
         * Otherwise, a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
 
     """
     if pkt['auth_type'] == Enum_Authentication.Cryptographic_authentication:
-        return SchemaField(length=8, schema=CrytographicAuthentication)
+        return SchemaField(length=8, schema=CryptographicAuthentication)
     return BytesField(length=8)
 
 
 @schema_final
-class CrytographicAuthentication(Schema):
+class CryptographicAuthentication(Schema):
     """Header schema for OSPF cryptographic authentication."""
 
     #: Reserved bytes.
@@ -75,7 +75,7 @@ class OSPF(Schema):
     #: Authentication type.
     auth_type: 'Enum_Authentication' = EnumField(length=2, namespace=Enum_Authentication)
     #: Authentication data.
-    auth_data: 'bytes | CrytographicAuthentication' = SwitchField(
+    auth_data: 'bytes | CryptographicAuthentication' = SwitchField(
         selector=ospf_auth_data_selector,
     )
     #: Payload.
@@ -86,5 +86,5 @@ class OSPF(Schema):
                      router_id: 'IPv4Address | bytes | str | int',
                      area_id: 'IPv4Address | bytes | str | int',
                      checksum: 'bytes', auth_type: 'Enum_Authentication',
-                     auth_data: 'bytes | CrytographicAuthentication',
+                     auth_data: 'bytes | CryptographicAuthentication',
                      payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

@@ -61,9 +61,6 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
-    # Open Shortest Path First
-    'OSPF', 'OSPF_CrytographicAuthentication',
-
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 
@@ -204,6 +201,9 @@ __all__ = [
     # NG Application Protocol
     'NGAP',
     'NGAP_IE', 'NGAP_Choice', 'NGAP_BitString', 'NGAP_Sequence',
+
+    # Open Shortest Path First
+    'OSPF', 'OSPF_CryptographicAuthentication',
 
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',

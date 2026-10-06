@@ -46,11 +46,11 @@ from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.application.ospf import \
-    CrytographicAuthentication as Data_CrytographicAuthentication
+    CryptographicAuthentication as Data_CryptographicAuthentication
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.application.ospf import OSPF as Schema_OSPF
 from pcapkit.protocols.schema.application.ospf import \
-    CrytographicAuthentication as Schema_CrytographicAuthentication
+    CryptographicAuthentication as Schema_CryptographicAuthentication
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -178,7 +178,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         if ospf.autype == Enum_Authentication.Cryptographic_authentication:
             ospf.__update__([
                 ('auth', self._read_encrypt_auth(
-                    cast('Schema_CrytographicAuthentication', schema.auth_data),
+                    cast('Schema_CryptographicAuthentication', schema.auth_data),
                 )),
             ])
         else:
@@ -204,7 +204,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
              auth_type_default: 'Optional[int]' = None,
              auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              auth_type_reversed: 'bool' = False,
-             auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+             auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_OSPF':
         """Make (construct) packet data.
@@ -346,7 +346,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         return cast('IPv4Address', parse_ip_address(
             id, f'{self.__class__.__name__}: invalid ID', version=4)).packed
 
-    def _read_encrypt_auth(self, schema: 'Schema_CrytographicAuthentication') -> 'Data_CrytographicAuthentication':
+    def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~OSPF.autype` is ``2``.
 
@@ -369,7 +369,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Parsed packet data.
 
         """
-        auth = Data_CrytographicAuthentication(
+        auth = Data_CryptographicAuthentication(
             key_id=schema.key_id,
             len=schema.len,
             seq=schema.seq,
@@ -377,8 +377,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         return auth
 
     def _make_encrypt_auth(self,
-                           auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication'  # pylint: disable=line-too-long
-                           ) -> 'bytes | Schema_CrytographicAuthentication':
+                           auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'  # pylint: disable=line-too-long
+                           ) -> 'bytes | Schema_CryptographicAuthentication':
         """Make Authentication field when Cryptographic Authentication is employed.
 
         Args:
@@ -388,10 +388,10 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Authentication bytes.
 
         """
-        if isinstance(auth_data, (Schema_CrytographicAuthentication, bytes)):
+        if isinstance(auth_data, (Schema_CryptographicAuthentication, bytes)):
             return auth_data
-        if isinstance(auth_data, Data_CrytographicAuthentication):
-            return Schema_CrytographicAuthentication(
+        if isinstance(auth_data, Data_CryptographicAuthentication):
+            return Schema_CryptographicAuthentication(
                 key_id=auth_data.key_id,
                 len=auth_data.len,
                 seq=auth_data.seq,
