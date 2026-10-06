@@ -263,21 +263,29 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 
 
 class ProtocolMeta(abc.ABCMeta):
-    """Meta class to add dynamic support to :class:`Protocol`.
+    """Metaclass of :class:`ProtocolBase`, and so of every protocol class.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`Protocol` class. It can be useful to reduce unnecessary
-    registry calls and simplify the customisation process.
+    It adds no behaviour of its own over :class:`abc.ABCMeta`.
 
     """
 
 
 class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
-    """Abstract base class for all protocol family.
+    """Abstract base class for all protocol families.
+
+    The built-in protocol families -- the layer base classes
+    :class:`~pcapkit.protocols.link.link.Link`,
+    :class:`~pcapkit.protocols.internet.internet.Internet`,
+    :class:`~pcapkit.protocols.transport.transport.Transport` and
+    :class:`~pcapkit.protocols.application.application.Application`, and the
+    miscellaneous protocols in :mod:`pcapkit.protocols.misc`, PCAP and PCAP-NG
+    included -- derive from this class directly. Its metaclass is
+    :class:`ProtocolMeta`.
 
     Note:
-        This class is for internal use only. For customisation, please use
-        :class:`Protocol` instead.
+        This class is for internal use only. For customisation, subclass
+        :class:`Protocol` to create a new protocol stack, or the matching
+        layer base class above for a new protocol in an existing layer.
 
     """
 
@@ -1828,7 +1836,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
 
 class Protocol(ProtocolBase, Generic[_PT, _ST]):
-    """Abstract base class for all protocol family."""
+    """User-facing abstract base class for third-party protocols.
+
+    Inherit it directly only to create a new protocol stack; a new protocol in
+    an existing layer subclasses that layer's base class instead, c.f.
+    :doc:`/ext`. The built-in protocol families do not derive from this class
+    but from :class:`ProtocolBase`, whose metaclass is :class:`ProtocolMeta`.
+
+    """
 
     def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
                           data: 'Optional[Type[_PT]]' = None,
