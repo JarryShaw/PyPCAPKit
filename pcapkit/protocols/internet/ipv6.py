@@ -321,11 +321,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         }
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
-        """Read first four hextets of IPv6.
+        """Read the first four octets of IPv6.
 
         Returns:
-            Parsed hextets data, including version number, traffic class and
-            flow label.
+            Parsed data of those four octets: version number, traffic class
+            and flow label.
 
         """
         _htet = self._read_fileng(4).hex()
@@ -350,7 +350,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Arguments:
             ipv6: info buffer
-            proto: next layer protocol name
+            proto: next layer protocol index
             length: valid (*not padding*) length
             packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
@@ -365,7 +365,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         raw_len = ipv6.payload      # payload length
         _protos = []                # ProtoChain buffer
 
-        # traverse if next header is an extensive header
+        # traverse if next header is an extension header
         payload = self.__header__.get_payload()
         while True:
             try:
@@ -405,30 +405,25 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             payload = payload[next_.length:]
 
             # A layer with no ``next`` field cannot safely continue the walk.
-            # This is a *structural* check -- does the parsed info even carry a
-            # ``next`` attribute? -- not a fixed set of codes, and deliberately
-            # so: HOPOPT, IPv6-Route, IPv6-Opts, MH, HIP, IPv6-Frag and AH all
-            # have dedicated parsers whose data carries ``next``, and Shim6 and
-            # any recognised header whose own parser raised are both handled by
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, which also
-            # carries ``next`` (possibly :data:`None`, on an overrun -- see its
-            # module docstring). Every IANA extension header code without a
-            # dedicated parser -- ``253`` and ``254`` today, and whatever IANA
-            # assigns next -- has no generic fallback either (see
-            # :attr:`__generic_ext_codes__`'s docstring for why), so
-            # :meth:`_import_next_layer` returns a plain
-            # :class:`~pcapkit.protocols.misc.raw.Raw`, whose info carries no
-            # ``next`` at all. Reading ``info.next`` on that unconditionally
-            # would raise ``AttributeError`` and let a further-out
-            # :func:`~pcapkit.utilities.decorators.beholder` degrade the *whole*
-            # packet. Stopping here instead keeps this layer's own fields (still
-            # recorded above, in ``self._exthdr`` and in the packet dict) and
-            # reports no further next header, exactly like the overrun case.
+            # This is a *structural* check, not a fixed set of codes: every
+            # dedicated parser and
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry
+            # ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no
+            # dedicated parser but is registered to ``IPv6_Ext`` directly --
+            # while every other code with no dedicated parser -- ``253``,
+            # ``254``, or whatever IANA assigns next -- resolves to plain
+            # :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see
+            # :attr:`__generic_ext_codes__`). Reading
+            # ``info.next`` on that would raise ``AttributeError`` and let a
+            # further-out :func:`~pcapkit.utilities.decorators.beholder` degrade
+            # the *whole* packet. Stopping here instead keeps this layer's own
+            # fields (recorded above, in ``self._exthdr`` and in the packet
+            # dict) and reports no further next header, as on an overrun.
             #
             # This has to run -- and, on a hit, has to set ``proto`` --
             # *before* the fragment-header special case below: IPv6-Frag
-            # always carries a real ``next`` (the ``hasattr`` check above
-            # never actually fires for it), and that ``next`` is the real
+            # always carries a real ``next`` (this ``hasattr`` check never
+            # fires for it), and that ``next`` is the real
             # transport layer's code, which the fragment branch's own
             # ``break`` must leave in ``proto`` for the final
             # ``super()._decode_next_layer`` call below the loop to dispatch

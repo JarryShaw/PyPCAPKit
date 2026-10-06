@@ -13,7 +13,7 @@ only, which implements extractor for Routing Header for IPv6
 Octets      Bits        Name                    Description
 ======= ========= ==================== ===============================
   0           0   ``route.next``            Next Header
-  1           8   ``route.length``          Header Extensive Length
+  1           8   ``route.length``          Header Extension Length
   2          16   ``route.type``            Routing Type
   3          24   ``route.seg_left``        Segments Left
   4          32   ``route.data``            Type-Specific Data
@@ -99,10 +99,10 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
     ##########################################################################
 
     #: DefaultDict[Enum_Routing, str | tuple[TypeParser, TypeConstructor]]: Type
-    #: code to method mapping. Method names are expected to be referred to
-    #: the class by ``_read_data_type_${name}`` and/or ``_make_data_type_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the routing type by itself.
+    #: code to method mapping. A :obj:`str` value names the methods
+    #: ``_read_data_type_${name}`` and ``_make_data_type_${name}``, falling back
+    #: to ``_read_data_type_none`` / ``_make_data_type_none`` when they do not
+    #: exist; any other value is a ``(parser, constructor)`` pair of callables.
     __routing__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -229,16 +229,16 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         :mod:`pcapkit.protocols.schema.internet.ipv6_route` is the inverse,
         used on the read side.
 
-        This is the *only* place ``Hdr Ext Len`` is computed on the write side.
-        Computing it separately per branch in :meth:`make` let the copies
-        drift apart, so keep one helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
+        This is the *only* place ``Hdr Ext Len`` is computed on the write side:
+        separate per-branch copies in :meth:`make` drift apart, so keep one
+        helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
         away: the units either side differ (octets vs. 8-octet units), and
         dropping the offset silently reinterprets the field.
 
         Args:
             data_length: packed length, in octets, of the type-specific data
-                (i.e. ``len(data_val.pack())`` for a :class:`~pcapkit.protocols.
-                schema.schema.Schema`-based payload, or the padded raw
+                (i.e. ``len(data_val.pack())`` for a
+                :class:`~pcapkit.protocols.schema.schema.Schema`-based payload, or the padded raw
                 :obj:`bytes` length for the unknown/raw-bytes case).
 
         Returns:
@@ -337,7 +337,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
     @classmethod
     def register_routing(cls, code: 'Enum_Routing', meth: 'str | tuple[TypeParser, TypeConstructor]') -> 'None':
-        """Register an routing data parser.
+        """Register a routing data parser.
 
         Args:
             code: IPv6-Route data type code.

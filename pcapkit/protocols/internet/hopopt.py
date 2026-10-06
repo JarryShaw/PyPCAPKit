@@ -14,7 +14,7 @@ described as below:
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
   0           0   ``hopopt.next``             Next Header
-  1           8   ``hopopt.length``           Header Extensive Length
+  1           8   ``hopopt.length``           Header Extension Length
   2          16   ``hopopt.options``          Options
 ======= ========= =================== =================================
 
@@ -189,10 +189,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
     #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
     #: code to method mapping, c.f. :meth:`_read_hopopt_options` and/or
-    #: :meth:`_make_hopopt_options`. Method names are expected to be referred
-    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and
-    #: if such name not found, the value should then be a method that can parse
-    #: the option by itself.
+    #: :meth:`_make_hopopt_options`. A :obj:`str` value names the methods
+    #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
+    #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
+    #: value is a ``(parser, constructor)`` pair of callables.
     __option__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -477,7 +477,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         whole option, which is what every ``_read_opt_*`` below reports back
         as the parsed option's own ``.length``, is two octets more. This is
         the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
-        vs. ``Schema_PadOption.length`` below). The read-side half lives in this
+        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
         one helper so the arithmetic has a single home. Do NOT drop the
         ``+ 2``.
 
@@ -516,7 +516,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Extracted HOPOPT options
 
         Raises:
-            ProtocolError: If the threshold is **NOT** matching.
+            ProtocolError: If the parsed options do not total exactly ``length``
+                octets.
 
         """
         counter = 0                   # length of read options
@@ -657,7 +658,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``1``.
+            ProtocolError: If ``schema.len`` is **NOT** ``1``.
 
         """
         if schema.len != 1:
@@ -691,7 +692,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``2``.
+            ProtocolError: If ``schema.len`` is **NOT** ``2``.
 
         """
         if schema.len != 2:
@@ -868,7 +869,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.pdm.length`` is **NOT** ``10``.
+            ProtocolError: If ``schema.len`` is **NOT** ``10``.
 
         """
         if schema.len != 10:
@@ -990,7 +991,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.rpl.length`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
         if schema.len != 4:
@@ -1168,7 +1169,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
         if schema.len != 4:
@@ -1212,7 +1213,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``16``.
+            ProtocolError: If ``schema.len`` is **NOT** ``16``.
 
         """
         if schema.len != 16:
@@ -1250,7 +1251,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``hopopt.ip_dff.length`` is **NOT** ``2``.
+            ProtocolError: If ``schema.len`` is **NOT** ``2``.
 
         """
         if schema.len != 2:

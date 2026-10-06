@@ -192,10 +192,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
     #: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:
     #: Option code to method mapping, c.f. :meth:`_read_ipv4_options` and/or
-    #: :meth:`_make_ipv4_options`. Method names are expected to be referred
-    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and
-    #: if such name not found, the value should then be a method that can parse
-    #: the option by itself.
+    #: :meth:`_make_ipv4_options`. A :obj:`str` value names the methods
+    #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
+    #: ``_read_opt_unassigned`` / ``_make_opt_unassigned`` when they do not
+    #: exist; any other value is a ``(parser, constructor)`` pair of callables.
     __option__ = collections.defaultdict(
         lambda: 'unassigned',
         {
@@ -589,7 +589,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Extracted IPv4 options.
 
         Raises:
-            ProtocolError: If the threshold is **NOT** matching.
+            ProtocolError: If the parsed options total more than ``length`` octets.
 
         """
         counter = 0                   # length of read option list

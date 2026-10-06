@@ -14,7 +14,7 @@ as below:
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
   0           0   ``opt.next``              Next Header
-  1           8   ``opt.length``            Header Extensive Length
+  1           8   ``opt.length``            Header Extension Length
   2          16   ``opt.options``           Options
 ======= ========= =================== =================================
 
@@ -193,10 +193,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
     #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
     #: code to method mapping, c.f. :meth:`_read_ipv6_opts` and/or
-    #: :meth:`_make_ipv6_opts`. Method names are expected to be referred to the
-    #: class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``, and if such
-    #: name not found, the value should then be a method that can parse the
-    #: option by itself.
+    #: :meth:`_make_ipv6_opts`. A :obj:`str` value names the methods
+    #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
+    #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
+    #: value is a ``(parser, constructor)`` pair of callables.
     __option__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -334,7 +334,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             next_default: Default value of next header type.
             next_namespace: Namespace of next header type.
             next_reversed: If the namespace of next header type is reversed.
-            options: Hop-by-Hop Options.
+            options: Destination Options.
             payload: Payload of current protocol.
             **kwargs: Arbitrary keyword arguments.
 
@@ -469,7 +469,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         whole option, which is what every ``_read_opt_*`` below reports back
         as the parsed option's own ``.length``, is two octets more. This is
         the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
-        vs. ``Schema_PadOption.length`` below). The read-side half lives in this
+        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
         one helper so the arithmetic has a single home. Do NOT drop the
         ``+ 2``.
 
@@ -504,7 +504,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Extracted IPv6-Opts options
 
         Raises:
-            ProtocolError: If the threshold is **NOT** matching.
+            ProtocolError: If the parsed options do not total exactly ``length``
+                octets.
 
         """
         counter = 0                   # length of read options
@@ -646,7 +647,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``1``.
+            ProtocolError: If ``schema.len`` is **NOT** ``1``.
 
         """
         if schema.len != 1:
@@ -680,7 +681,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``2``.
+            ProtocolError: If ``schema.len`` is **NOT** ``2``.
 
         """
         if schema.len != 2:
@@ -857,7 +858,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.pdm.length`` is **NOT** ``10``.
+            ProtocolError: If ``schema.len`` is **NOT** ``10``.
 
         """
         if schema.len != 10:
@@ -979,7 +980,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.rpl.length`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
         if schema.len != 4:
@@ -1157,7 +1158,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
         if schema.len != 4:
@@ -1201,7 +1202,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``16``.
+            ProtocolError: If ``schema.len`` is **NOT** ``16``.
 
         """
         if schema.len != 16:
@@ -1239,7 +1240,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``ipv6_opts.ip_dff.length`` is **NOT** ``2``.
+            ProtocolError: If ``schema.len`` is **NOT** ``2``.
 
         """
         if schema.len != 2:
@@ -1279,7 +1280,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             option to 8 octets on its own leaves the options area a multiple of
             8 octets long, whereas :meth:`read` sizes it as
             ``hdr_ext_len * 8 + 6`` -- six short of a multiple of 8 -- so the
-            constructed header declared 6 octets more than it actually carried.
+            header would declare 6 octets more than it carried.
 
             A ``PadN`` option spends two octets on its own type and
             ``Opt Data Len`` fields before any padding data, so occupying

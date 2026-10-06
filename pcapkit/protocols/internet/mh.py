@@ -1160,10 +1160,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     ##########################################################################
 
     #: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:
-    #: Message type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_msg_${name}`` and/or ``_make_msg_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the message type by itself.
+    #: Message type to method mapping. A :obj:`str` value names the methods
+    #: ``_read_msg_${name}`` and ``_make_msg_${name}``, falling back to
+    #: ``_read_msg_unknown`` / ``_make_msg_unknown`` when they do not exist; any
+    #: other value is a ``(parser, constructor)`` pair of callables.
     __message__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -1195,10 +1195,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
     #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
-    #: Option type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the option by itself.
+    #: Option type to method mapping. A :obj:`str` value names the methods
+    #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
+    #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
+    #: value is a ``(parser, constructor)`` pair of callables.
     __option__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -1277,10 +1277,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
     #: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:
-    #: CGA extension type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_ext_${name}`` and/or ``_make_ext_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the CGA extension by itself.
+    #: CGA extension type to method mapping. A :obj:`str` value names the
+    #: methods ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to
+    #: ``_read_ext_none`` / ``_make_ext_none`` when they do not exist; any other
+    #: value is a ``(parser, constructor)`` pair of callables.
     __extension__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -8083,7 +8083,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             timestamp: NTP timestamp, c.f., :rfc:`1305`.
-            interval: Timestamp interval (since UNIX-epoch).
+            interval: Moment to encode when neither ``option`` nor
+                ``timestamp`` is given (``option`` supplies its own
+                ``ntp_timestamp``); defaults to the current time.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8131,7 +8133,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_cga_param(self, type: 'Enum_Option', option: 'Optional[Data_CGAParametersOption]' = None, *,
                             parameters: 'Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]' = None,
                             **kwargs: 'Any') -> 'Schema_CGAParametersOption':
-        """Make MH CGA paramters option.
+        """Make MH CGA parameters option.
 
         Args:
             type: Option type.
@@ -9295,12 +9297,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             The data model parameter is named ``option`` rather than ``data`` to
             match :meth:`_make_opt_fid` and the rest of this module -- and because
-            naming it ``data`` made it **shadow a field**. The traffic selector and
-            unassigned sub-options both carry a field of their own called ``data``,
-            so a caller's ``data=`` bound to the model parameter instead of landing
-            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below could
-            never see it: the payload was silently dropped and the length written as
-            though it were empty. No exception, just a lost field.
+            ``data`` would **shadow a field**. The traffic selector and unassigned
+            sub-options both carry a field of their own called ``data``, so a
+            caller's ``data=`` would bind to the model parameter instead of landing
+            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below would
+            never see it: the payload would be silently dropped and the length
+            written as though it were empty, with no exception.
 
             Dispatch is on ``code`` rather than on ``isinstance`` of the schema or
             data class, for the reason given in :meth:`_read_fid_suboptions`.
@@ -9653,7 +9655,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
             The data model parameter is named ``option`` rather than ``data`` so
             that it cannot shadow a sub-option field of that name -- see
-            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``
+            :meth:`_make_fid_suboption`. Dispatch is on ``code``
             rather than on ``isinstance``, for the reason given in
             :meth:`_read_fid_suboptions`.
 
@@ -10288,7 +10290,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             The data model parameter is named ``option`` rather than ``data`` so
             that it cannot shadow a sub-option field of that name -- see
-            :meth:`_make_fid_suboption`, where it did. Dispatch is on ``code``
+            :meth:`_make_fid_suboption`. Dispatch is on ``code``
             rather than on ``isinstance``, for the reason given in
             :meth:`_read_fid_suboptions`.
 
