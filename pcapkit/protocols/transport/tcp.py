@@ -20,7 +20,7 @@ Octets      Bits        Name                    Description
   8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)
   12         96   ``tcp.hdr_len``           Data Offset
   12        100                             Reserved (must be ``\\x00``)
-  12        103                             ECN Concealment Protection (NS), not parsed
+  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)
   13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)
   13        105   ``tcp.flags.ece``         ECN-Echo (ECE)
   13        106   ``tcp.flags.urg``         Urgent (URG)
@@ -471,7 +471,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ack=schema.ack,
             hdr_len=schema.offset['offset'] * 4,
             flags=Data_Flags(
-                #ns=bool(schema.offset['ns']),
+                ns=bool(schema.offset['ns']),
                 cwr=bool(schema.flags['cwr']),
                 ece=bool(schema.flags['ece']),
                 urg=bool(schema.flags['urg']),
@@ -692,7 +692,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'dstport': data.dstport,
             'seq_no': data.seq,
             'ack_no': data.ack,
-            #'ns': data.flags.ns,
+            'ns': data.flags.ns,
             'cwr': data.flags.cwr,
             'ece': data.flags.ece,
             'urg': data.flags.urg,
