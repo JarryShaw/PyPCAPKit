@@ -30,7 +30,7 @@ from pcapkit.protocols.schema.application.ngap import NGAP
 # Open Shortest Path First
 from pcapkit.protocols.schema.application.ospf import OSPF
 from pcapkit.protocols.schema.application.ospf import \
-    CrytographicAuthentication as OSPF_CrytographicAuthentication
+    CryptographicAuthentication as OSPF_CryptographicAuthentication
 
 __all__ = [
     # File Transfer Protocol
@@ -50,5 +50,5 @@ __all__ = [
     'NGAP',
 
     # Open Shortest Path First
-    'OSPF', 'OSPF_CrytographicAuthentication',
+    'OSPF', 'OSPF_CryptographicAuthentication',
 ]

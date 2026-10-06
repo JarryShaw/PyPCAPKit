@@ -28,7 +28,6 @@ __all__ = [
     'ARP',
     'Ethernet',
     'L2TP',
-    'OSPF', 'OSPF_CrytographicAuthentication',  # application layer
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols
@@ -136,6 +135,7 @@ __all__ = [
     # Application Layer Protocols
     'FTP',
     'NGAP',
+    'OSPF', 'OSPF_CryptographicAuthentication',
     'HTTPv1',
     'HTTPv2',
     'HTTPv2_FrameType',

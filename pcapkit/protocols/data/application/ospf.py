@@ -13,11 +13,11 @@ if TYPE_CHECKING:
     from pcapkit.const.ospf.authentication import Authentication
     from pcapkit.const.ospf.packet import Packet
 
-__all__ = ['OSPF', 'CrytographicAuthentication']
+__all__ = ['OSPF', 'CryptographicAuthentication']
 
 
 @info_final
-class CrytographicAuthentication(Data):
+class CryptographicAuthentication(Data):
     """Data model for OSPF cryptographic authentication."""
 
     #: Key ID.
@@ -52,7 +52,7 @@ class OSPF(Protocol):
 
     if TYPE_CHECKING:
         #: Authentication.
-        auth: 'bytes | CrytographicAuthentication'
+        auth: 'bytes | CryptographicAuthentication'
 
         def __init__(self, version: 'int', type: 'Packet', len: 'int', router_id: 'IPv4Address',
                      area_id: 'IPv4Address', chksum: 'bytes', autype: 'Authentication') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin

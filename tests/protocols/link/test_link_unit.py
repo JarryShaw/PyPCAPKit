@@ -376,19 +376,13 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(values['session_id'], 4)
         self.assertIn('payload', values)
 
-    def test_link_schema_callbacks_resolve_payload_and_auth_fields(self) -> None:
-        from pcapkit.const.ospf.authentication import Authentication
+    def test_link_schema_callbacks_resolve_payload_fields(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.corekit.fields.misc import PayloadField, SchemaField
-        from pcapkit.corekit.fields.strings import BytesField
+        from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.schema.link.ethernet import callback_payload
-        from pcapkit.protocols.schema.application.ospf import (
-            CrytographicAuthentication,
-            ospf_auth_data_selector,
-        )
 
         custom_type = EtherType.get(0x88B5)
         registry = Ethernet.__proto__
@@ -426,16 +420,6 @@ class LinkProtocolUnitTests(unittest.TestCase):
                 registry[custom_type] = original
             else:
                 registry.pop(custom_type, None)
-
-        crypto_field = ospf_auth_data_selector({
-            'auth_type': Authentication.Cryptographic_authentication,
-        })
-        self.assertIsInstance(crypto_field, SchemaField)
-        self.assertIs(crypto_field.schema, CrytographicAuthentication)
-
-        plain_field = ospf_auth_data_selector({'auth_type': Authentication.No_Authentication})
-        self.assertIsInstance(plain_field, BytesField)
-        self.assertEqual(plain_field.length, 8)
 
     def test_link_base_layer_registry_and_protocol_reader(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType

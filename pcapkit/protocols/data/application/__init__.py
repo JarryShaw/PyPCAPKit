@@ -46,7 +46,7 @@ from pcapkit.protocols.data.application.ngap import Sequence as NGAP_Sequence
 # Open Shortest Path First
 from pcapkit.protocols.data.application.ospf import OSPF
 from pcapkit.protocols.data.application.ospf import \
-    CrytographicAuthentication as OSPF_CrytographicAuthentication
+    CryptographicAuthentication as OSPF_CryptographicAuthentication
 
 __all__ = [
     # File Transfer Protocol
@@ -72,5 +72,5 @@ __all__ = [
     'NGAP_IE', 'NGAP_Choice', 'NGAP_BitString', 'NGAP_Sequence',
 
     # Open Shortest Path First
-    'OSPF', 'OSPF_CrytographicAuthentication',
+    'OSPF', 'OSPF_CryptographicAuthentication',
 ]
