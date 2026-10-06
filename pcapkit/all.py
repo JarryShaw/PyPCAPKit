@@ -51,7 +51,8 @@ __all__ = [
     # 'vendor',
 
     # pcapkit.corekit
-    'Info',                                                 # Info Class
+    'EnumRegistry',                                         # Enum Registry
+    'Info', 'info_final',                                   # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
     'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields
@@ -65,6 +66,8 @@ __all__ = [
     'IPv4InterfaceField', 'IPv6InterfaceField',
     'ListField', 'OptionField',                             # container protocol fields
     'SeekableReader',                                       # Seekable Reader
+    'MultiDict', 'OrderedMultiDict',                        # Multi Dict
+    'ModuleDescriptor',                                     # Module Descriptor
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper
@@ -72,9 +75,10 @@ __all__ = [
 
     # pcapkit.foundation
     'Extractor',                                            # Extraction
-    'TCP_TraceFlow',                                        # Trace Flow
+    'TraceFlowManager', 'TCP_TraceFlow',                    # Trace Flow
 
     # pcapkit.foundation.reassembly
+    'ReassemblyManager',                                    # Reassembly Manager
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
 
@@ -97,6 +101,9 @@ __all__ = [
     'register_extractor_engine',
     'register_dumper',
     'register_extractor_dumper', 'register_traceflow_dumper',
+    'register_extractor_reassembly', 'register_extractor_traceflow',
+    'register_reassembly_ipv4_callback', 'register_reassembly_ipv6_callback',
+    'register_reassembly_tcp_callback', 'register_traceflow_tcp_callback',
 
     # pcapkit.interface
     'extract', 'reassemble', 'trace',                       # Interface Functions
@@ -108,16 +115,17 @@ __all__ = [
     # pcapkit.protocols
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',        # Protocol Numbers
     'Header', 'Frame',                                      # PCAP Headers
+    'PCAPNG',                                               # PCAPNG Format
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2',
     'S_Tag', 'VLAN',                                        # Link Layer
-    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
-    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
+    'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
+    'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP', 'NGAP', 'OSPF', 'RARP', 'DRARP',
+    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'RARP', 'DRARP',
     'Schema', 'schema',                                     # Protocol Schema
     'Data', 'data',                                         # Protocol Data
 
@@ -133,6 +141,8 @@ __all__ = [
     'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
                                                             # Scapy engine
 
-    # pcapkit.utilities
+    # pcapkit.utilities -- unlisted since 769a17c78 (2022-05-29): its names stay
+    # reachable as attributes, but ``import *`` leaves out generic helpers such
+    # as ``warn``, ``reset``, ``configure`` and ``detect``
     #'beholder_ng', 'seekset_ng',                            # Decorators
 ]
