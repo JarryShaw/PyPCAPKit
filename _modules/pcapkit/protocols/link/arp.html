@@ -864,24 +864,32 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            addr: Hardware address.</span>
+<span class="sd">            htype: Hardware type.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Hardware address as :obj:`bytes`. If ``htype`` is ``1``, i.e. MAC</span>
-<span class="sd">            address, the ``:``- or ``-``-separated hex string is validated and</span>
-<span class="sd">            returned with the separators removed (still hex encoded).</span>
+<span class="sd">            Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.</span>
+<span class="sd">            MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address</span>
+<span class="sd">            is validated and packed as 6 octets; otherwise, a :data:`str` is</span>
+<span class="sd">            taken as the *hex* encoded address that :meth:`_read_addr_resolve`</span>
+<span class="sd">            returns, and :obj:`bytes` are returned as given.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a</span>
-<span class="sd">                well-formed MAC address.</span>
+<span class="sd">                well-formed MAC address, or if ``htype`` is not ``1`` and</span>
+<span class="sd">                ``addr`` is a :data:`str` that is not *hex* encoded.</span>
 
 <span class="sd">        """</span>
-        <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span>
-
         <span class="k">if</span> <span class="n">htype</span> <span class="o">==</span> <span class="n">Enum_Hardware</span><span class="o">.</span><span class="n">Ethernet</span><span class="p">:</span>
+            <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span>
             <span class="k">if</span> <span class="n">PAT_MAC_ADDR</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">_addr</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">':'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'-'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">_addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">':'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'-'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid MAC address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_addr</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid hardware address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">return</span> <span class="n">addr</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | str | bytes'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve protocol address according to protocol.</span>

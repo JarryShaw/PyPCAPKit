@@ -482,7 +482,7 @@
 <span class="sd">======= ========= ===================== ==========================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
 <span class="sd">======= ========= ===================== ==========================</span>
-<span class="sd">  0           0   ``http.length``             Length</span>
+<span class="sd">  0           0   ``http.length``             Payload Length</span>
 <span class="sd">  3          24   ``http.type``               Type</span>
 <span class="sd">  4          32   ``http.flags``              Flags</span>
 <span class="sd">  5          40                               Reserved</span>
@@ -763,12 +763,11 @@
         <span class="c1"># than it claims report a length nothing backs (e.g. a nine-octet buffer</span>
         <span class="c1"># declaring 16777215). ``length`` is the number of octets actually</span>
         <span class="c1"># available for this frame (``Protocol.__len__`` returns</span>
-        <span class="c1"># ``len(self._data)``, and an explicit ``length`` means the same), so</span>
-        <span class="c1"># both have to clear the minimum header size *and* the declared value</span>
-        <span class="c1"># must not exceed what is available. This library's convention (see</span>
-        <span class="c1"># ``_make_http_length``) is that ``length`` counts the whole frame,</span>
-        <span class="c1"># header included, so the two are directly comparable.</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="c1"># ``len(self._data)``, and an explicit ``length`` means the same), so it</span>
+        <span class="c1"># has to clear the 9-octet header *and* back the declared value. The</span>
+        <span class="c1"># declared value counts the frame payload only, the header excluded</span>
+        <span class="c1"># (:rfc:`9113#section-4.1`), so ``length`` must hold both.</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
@@ -840,7 +839,7 @@
         <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
             <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
 
-        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_http_length</span><span class="p">(</span><span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span> <span class="o">+</span> <span class="mi">9</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_http_length</span><span class="p">(</span><span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -1131,7 +1130,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PriorityFrame</span><span class="p">(</span>
@@ -1177,7 +1176,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">13</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RSTStreamFrame</span><span class="p">(</span>
@@ -1224,7 +1223,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span> <span class="o">%</span> <span class="mi">6</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">6</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_SettingsFrameFlags</span><span class="p">(</span>
@@ -1234,7 +1233,7 @@
             <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">ACK</span> <span class="ow">and</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">9</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">ACK</span> <span class="ow">and</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">sets</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[Enum_Setting, int]</span>
@@ -1288,7 +1287,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_PushPromiseFrameFlags</span><span class="p">(</span>
@@ -1345,7 +1344,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">flag</span> <span class="o">=</span> <span class="n">Data_PingFrameFlags</span><span class="p">(</span>
@@ -1440,7 +1439,7 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">13</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_WindowUpdateFrame</span><span class="p">(</span>

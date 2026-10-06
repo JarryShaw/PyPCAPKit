@@ -771,7 +771,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(nofile=True)' object has no attribute 'format'"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(nofile=True)' object has no attribute 'output'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'str'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -1300,7 +1300,11 @@
             <span class="n">ofnm</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">registered</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># NOTE: ``__output__`` is a defaultdict, so look ``fmt`` up with</span>
+            <span class="c1"># :meth:`dict.get` -- subscripting would insert an unknown format</span>
+            <span class="c1"># into the registry before the error below is raised.</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+            <span class="n">registered</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">registered</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 

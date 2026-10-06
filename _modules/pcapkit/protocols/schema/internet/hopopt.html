@@ -759,7 +759,11 @@
     <span class="n">schema</span> <span class="o">=</span> <span class="n">QuickStartOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HOPOPT: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+
+    <span class="c1"># NOTE: The suboption schemas carry the option's own ``type`` and ``len``</span>
+    <span class="c1"># octets, so this is the width of the whole option: the two header octets</span>
+    <span class="c1"># plus the six data octets :rfc:`4782#section-3.2` gives both functions.</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 

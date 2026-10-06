@@ -520,7 +520,7 @@
 <span class="w">    </span><span class="sd">"""Data model for TCP flags."""</span>
 
     <span class="c1">#: ECN-nonce concealment protection.</span>
-    <span class="c1">#ns: 'bool'</span>
+    <span class="n">ns</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Congestion window reduced.</span>
     <span class="n">cwr</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: ECN-Echo.</span>
@@ -539,7 +539,7 @@
     <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cwr</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ece</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">urg</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">cwr</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ece</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">urg</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
                      <span class="n">psh</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 

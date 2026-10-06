@@ -1714,7 +1714,7 @@
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
-        <span class="n">func</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">func</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">:</span>
             <span class="n">schema_req</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QuickStartRequestOption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 

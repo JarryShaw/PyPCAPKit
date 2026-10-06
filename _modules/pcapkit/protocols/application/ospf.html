@@ -515,11 +515,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ospf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">Data_OSPF</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ospf</span><span class="w"> </span><span class="kn">import</span> \
-    <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Data_CrytographicAuthentication</span>
+    <span class="n">CryptographicAuthentication</span> <span class="k">as</span> <span class="n">Data_CryptographicAuthentication</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.ospf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">Schema_OSPF</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.ospf</span><span class="w"> </span><span class="kn">import</span> \
-    <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Schema_CrytographicAuthentication</span>
+    <span class="n">CryptographicAuthentication</span> <span class="k">as</span> <span class="n">Schema_CryptographicAuthentication</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -651,7 +651,7 @@
         <span class="k">if</span> <span class="n">ospf</span><span class="o">.</span><span class="n">autype</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
             <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'auth'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_encrypt_auth</span><span class="p">(</span>
-                    <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_CrytographicAuthentication'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">auth_data</span><span class="p">),</span>
+                    <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_CryptographicAuthentication'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">auth_data</span><span class="p">),</span>
                 <span class="p">)),</span>
             <span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -680,7 +680,7 @@
              <span class="n">auth_type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">auth_type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">auth_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_OSPF'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -831,7 +831,7 @@
 
 <div class="viewcode-block" id="OSPF._read_encrypt_auth">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF._read_encrypt_auth">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CrytographicAuthentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CrytographicAuthentication'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CryptographicAuthentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CryptographicAuthentication'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read Authentication field when Cryptographic Authentication is employed,</span>
 <span class="sd">        i.e. :attr:`~OSPF.autype` is ``2``.</span>
 
@@ -854,7 +854,7 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        """</span>
-        <span class="n">auth</span> <span class="o">=</span> <span class="n">Data_CrytographicAuthentication</span><span class="p">(</span>
+        <span class="n">auth</span> <span class="o">=</span> <span class="n">Data_CryptographicAuthentication</span><span class="p">(</span>
             <span class="n">key_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -865,8 +865,8 @@
 <div class="viewcode-block" id="OSPF._make_encrypt_auth">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF._make_encrypt_auth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                           <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication'</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | Schema_CrytographicAuthentication'</span><span class="p">:</span>
+                           <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | Schema_CryptographicAuthentication'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make Authentication field when Cryptographic Authentication is employed.</span>
 
 <span class="sd">        Args:</span>
@@ -876,10 +876,10 @@
 <span class="sd">            Authentication bytes.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="p">(</span><span class="n">Schema_CrytographicAuthentication</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="p">(</span><span class="n">Schema_CryptographicAuthentication</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">auth_data</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Data_CrytographicAuthentication</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Schema_CrytographicAuthentication</span><span class="p">(</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Data_CryptographicAuthentication</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">(</span>
                 <span class="n">key_id</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
                 <span class="nb">len</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
                 <span class="n">seq</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>

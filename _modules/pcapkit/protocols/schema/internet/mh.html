@@ -472,7 +472,6 @@
 <span class="sd">"""header schema for mobility header"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.access_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
@@ -1417,9 +1416,9 @@
         <span class="c1"># convert timestamp to datetime</span>
         <span class="c1"># c.f., http://tickelton.gitlab.io/articles/ntp-timestamps/</span>
         <span class="n">ts_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds</span> <span class="o">-</span> <span class="mi">2_208_988_800</span>  <span class="c1"># 70 years</span>
-        <span class="n">ts_usec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fraction</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">)</span>
+        <span class="n">ts_frac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraction</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span>  <span class="c1"># fraction of a second</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="n">ts_usec</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="n">ts_frac</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 

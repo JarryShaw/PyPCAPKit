@@ -12,7 +12,7 @@ below:
 ======= ========= ===================== ==========================
 Octets      Bits        Name                    Description
 ======= ========= ===================== ==========================
-  0           0   ``http.length``             Length
+  0           0   ``http.length``             Payload Length
   3          24   ``http.type``               Type
   4          32   ``http.flags``              Flags
   5          40                               Reserved

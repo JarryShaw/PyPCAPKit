@@ -482,13 +482,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.authentication</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authentication</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPF'</span><span class="p">,</span> <span class="s1">'CrytographicAuthentication'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OSPF'</span><span class="p">,</span> <span class="s1">'CryptographicAuthentication'</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="CrytographicAuthentication">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.data.application.ospf.CrytographicAuthentication">[docs]</a>
+<div class="viewcode-block" id="CryptographicAuthentication">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.data.application.ospf.CryptographicAuthentication">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CryptographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for OSPF cryptographic authentication."""</span>
 
     <span class="c1">#: Key ID.</span>
@@ -526,7 +526,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Authentication.</span>
-        <span class="n">auth</span><span class="p">:</span> <span class="s1">'bytes | CrytographicAuthentication'</span>
+        <span class="n">auth</span><span class="p">:</span> <span class="s1">'bytes | CryptographicAuthentication'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span>
                      <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">autype</span><span class="p">:</span> <span class="s1">'Authentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>

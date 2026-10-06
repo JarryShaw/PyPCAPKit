@@ -489,7 +489,7 @@
 <span class="sd">  8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)</span>
 <span class="sd">  12         96   ``tcp.hdr_len``           Data Offset</span>
 <span class="sd">  12        100                             Reserved (must be ``\\x00``)</span>
-<span class="sd">  12        103                             ECN Concealment Protection (NS), not parsed</span>
+<span class="sd">  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)</span>
 <span class="sd">  13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)</span>
 <span class="sd">  13        105   ``tcp.flags.ece``         ECN-Echo (ECE)</span>
 <span class="sd">  13        106   ``tcp.flags.urg``         Urgent (URG)</span>
@@ -944,7 +944,7 @@
             <span class="n">ack</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>
             <span class="n">hdr_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">offset</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
-                <span class="c1">#ns=bool(schema.offset['ns']),</span>
+                <span class="n">ns</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">offset</span><span class="p">[</span><span class="s1">'ns'</span><span class="p">]),</span>
                 <span class="n">cwr</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'cwr'</span><span class="p">]),</span>
                 <span class="n">ece</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'ece'</span><span class="p">]),</span>
                 <span class="n">urg</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'urg'</span><span class="p">]),</span>
@@ -1180,7 +1180,7 @@
             <span class="s1">'dstport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
             <span class="s1">'seq_no'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="s1">'ack_no'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>
-            <span class="c1">#'ns': data.flags.ns,</span>
+            <span class="s1">'ns'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ns</span><span class="p">,</span>
             <span class="s1">'cwr'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">cwr</span><span class="p">,</span>
             <span class="s1">'ece'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ece</span><span class="p">,</span>
             <span class="s1">'urg'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">urg</span><span class="p">,</span>
@@ -3278,7 +3278,7 @@
 
         <span class="k">return</span> <span class="n">Schema_UserTimeout</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">info</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'granularity'</span><span class="p">:</span> <span class="n">granularity</span><span class="p">,</span>
                 <span class="s1">'timeout'</span><span class="p">:</span> <span class="n">timeout_val</span><span class="p">,</span>

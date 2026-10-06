@@ -810,7 +810,7 @@
 <span class="sd">            Link layer protocol enumeration.</span>
 
 <span class="sd">        """</span>
-        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span>
 
@@ -833,9 +833,9 @@
             <span class="k">if</span> <span class="n">lilendian</span> <span class="o">==</span> <span class="n">bigendian</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="s1">'unresolved byte order'</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bigendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)],</span> <span class="kc">False</span>
+                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'big'</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)],</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">lilendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)],</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)],</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown byte order: </span><span class="si">{</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>

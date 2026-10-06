@@ -1917,16 +1917,21 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no</span>
-        <span class="c1"># more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ciphers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="c1"># more than six (6) Cipher IDs in one HIP_CIPHER parameter. Conversely, a</span>
+        <span class="c1"># recipient MUST be prepared to handle received transport parameters that</span>
+        <span class="c1"># contain more than six Cipher IDs by accepting the first six Cipher IDs and</span>
+        <span class="c1"># dropping the rest. [:rfc:`7401#section-5.2.8`]</span>
+        <span class="n">ciphers</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ciphers</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ciphers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="c1"># raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')</span>
+            <span class="n">ciphers</span> <span class="o">=</span> <span class="n">ciphers</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
 
         <span class="n">hip_cipher</span> <span class="o">=</span> <span class="n">Data_HIPCipherParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
-            <span class="n">cipher_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ciphers</span><span class="p">),</span>
+            <span class="n">cipher_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ciphers</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hip_cipher</span></div>
 

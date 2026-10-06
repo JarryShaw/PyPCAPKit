@@ -63,7 +63,7 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.ospf.CrytographicAuthentication
+.. autoclass:: pcapkit.protocols.schema.application.ospf.CryptographicAuthentication
    :members:
    :show-inheritance:
 
@@ -81,7 +81,7 @@ Data Models
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.ospf.CrytographicAuthentication
+.. autoclass:: pcapkit.protocols.data.application.ospf.CryptographicAuthentication
    :members:
    :show-inheritance:
 
