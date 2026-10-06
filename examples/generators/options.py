@@ -944,8 +944,9 @@ HIP_BASE = {
     'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b'',
 }
 
-#: Codes that are HIPv1-only, and the version their constructor demands.
-HIP_VERSION = {129: 2, 128: 1}
+#: Codes tied to one HIP version, and the version their constructor demands:
+#: ``R1_Counter`` (128) and ``HIP_TRANSFORM`` (577) are :rfc:`5201` only.
+HIP_VERSION = {129: 2, 128: 1, 577: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
@@ -975,14 +976,14 @@ HIP_VERSION = {129: 2, 128: 1}
 #: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
 #: which is what moved the one-copy figure from 44 to 46, level with two copies.
 #:
-#: Two remain, neither helped by a second copy since each fails at two copies
+#: Two remained, neither helped by a second copy since each fails at two copies
 #: as well as at one:
 #:
 #: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
 #:   ``hip-parameter/HOST_ID``.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
-#:   any other version -- while this table builds it at version 2. Recorded as
-#:   ``hip-parameter/HIP_TRANSFORM``.
+#:   any other version -- and is now built at version 1 through
+#:   :data:`HIP_VERSION`, so it round-trips and is no longer recorded.
 #:
 #: A third gap here, ``R1_Counter`` (128), was closed separately by #690 and was
 #: never one of the pair's cancellations above: it parsed as an
@@ -1005,8 +1006,8 @@ HIP_VERSION = {129: 2, 128: 1}
 #: after #690              47 OK     47 OK
 #: ======================  ========  ==========
 #:
-#: The two gaps above are the only cases either setting fails, and neither
-#: their ``status`` nor their ``defect`` moves between settings, so
+#: ``HOST_ID`` is now the only case either setting fails, and neither its
+#: ``status`` nor its ``defect`` moves between settings, so
 #: :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` needed no
 #: change to keep recording them accurately at one copy.
 #:
