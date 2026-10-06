@@ -463,6 +463,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Returns:
             Key-value pairs for protocol construction.
 
+        Notes:
+            The frame index and the global header are context of the PCAP file
+            rather than fields of the frame, so they are not returned here: pass
+            them to :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` as
+            ``num`` and ``header``.
+
         """
         return {
             'ts_sec': data.frame_info.ts_sec,
