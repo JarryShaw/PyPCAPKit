@@ -6,6 +6,7 @@ import contextlib
 import importlib.util
 import inspect
 import math
+import os
 import pathlib
 import signal
 import sys
@@ -18,8 +19,44 @@ from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
 
 
+#: Environment variable multiplying every :func:`time_limit` deadline. Unset, the
+#: deadlines apply as written; a CI job on a slow or oversubscribed runner can set
+#: it above ``1`` to stretch all of them at once rather than editing each call site.
+TIMEOUT_SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'
+
+
+def scale_timeout(seconds: float) -> int:
+    """Stretch a hang-guard deadline by :data:`TIMEOUT_SCALE_ENV`.
+
+    Read on every call, not once at import, so that a test can set the variable
+    for itself. A value that is not a positive finite number is refused rather than
+    ignored: falling back to ``1`` would quietly undo a scale CI asked for, and a
+    zero would disarm the guard altogether.
+
+    Args:
+        seconds: The deadline as written at the call site.
+
+    Returns:
+        Whole seconds, at least one -- :func:`signal.alarm` counts in whole
+        seconds, and an alarm of zero is no alarm at all.
+
+    Raises:
+        ValueError: If :data:`TIMEOUT_SCALE_ENV` is set to anything other than a
+            positive finite number.
+
+    """
+    raw = os.environ.get(TIMEOUT_SCALE_ENV, '').strip()
+    try:
+        scale = float(raw) if raw else 1.0
+    except ValueError:
+        scale = math.nan
+    if not (math.isfinite(scale) and scale > 0):
+        raise ValueError(f'{TIMEOUT_SCALE_ENV} must be a positive number, not {raw!r}')
+    return max(1, math.ceil(seconds * scale))
+
+
 @contextlib.contextmanager
-def time_limit(seconds: int = 5) -> Iterator[None]:
+def time_limit(seconds: int = 30) -> Iterator[None]:
     """Fail the calling test if its body has not finished in ``seconds`` seconds.
 
     A parser defect that degenerates into a loop making no progress -- GitHub
@@ -51,15 +88,27 @@ def time_limit(seconds: int = 5) -> Iterator[None]:
     missing altogether. That one-second floor covers every case where the body ran
     for longer than the enclosing deadline had left.
 
+    The deadline is a wall-clock one, so it measures the runner as much as the
+    body: a 5-second default, against bodies that take single-digit milliseconds,
+    still expired on a loaded 4-core CI runner under :program:`pytest-xdist`
+    (#1058). Hence the 30-second default, the same bound the extraction tests
+    already used -- several thousand times a working body, and still a fast failure
+    next to a run that never ends -- and :func:`scale_timeout` on top, for a runner
+    slower than that.
+
     Args:
-        seconds: Whole seconds to allow the body. :func:`signal.alarm` counts in
+        seconds: Whole seconds to allow the body, before
+            :data:`TIMEOUT_SCALE_ENV` is applied. :func:`signal.alarm` counts in
             whole seconds, so this cannot usefully be fractional.
 
     Yields:
         Nothing. The deadline applies to the body of the ``with`` statement.
 
     Raises:
-        TimeoutError: If the body has not finished within ``seconds`` seconds.
+        TimeoutError: If the body has not finished within ``seconds`` seconds,
+            as scaled.
+        ValueError: If :data:`TIMEOUT_SCALE_ENV` is malformed; see
+            :func:`scale_timeout`.
 
     """
     # An interval timer is a POSIX facility, and the deadline is the whole point
@@ -67,6 +116,9 @@ def time_limit(seconds: int = 5) -> Iterator[None]:
     # the wedged run it exists to prevent, so the test is skipped instead.
     if not hasattr(signal, 'SIGALRM'):
         raise unittest.SkipTest('signal.alarm is unavailable on this platform')
+
+    # Before the handler is swapped, so a malformed scale leaves nothing to undo.
+    seconds = scale_timeout(seconds)
 
     def expire(signum: int, frame: object) -> None:
         raise TimeoutError(f'did not finish within {seconds}s')

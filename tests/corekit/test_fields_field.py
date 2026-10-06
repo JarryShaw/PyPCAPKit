@@ -174,7 +174,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         huge_declared_length = 2 ** 34  # 16 GiB; must never actually be allocated.
         field = self.BytesField(length=huge_declared_length)
 
-        with time_limit(5):
+        with time_limit():
             with self.assertRaises(self.FieldValueError):
                 field.unpack(b'AB', {})
 
@@ -505,7 +505,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         """
         self.pad_until_refused(self.ceiling - 2, b'\xaa\xbb')
 
-        with time_limit(5):
+        with time_limit():
             self.assertEqual(self.BytesField(length=1).unpack(b'', {}), b'\x00')
             self.assertEqual(self.BytesField(length=4).unpack(b'\x01\x02\x03', {}),
                              b'\x01\x02\x03\x00')

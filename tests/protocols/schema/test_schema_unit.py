@@ -491,7 +491,7 @@ class SchemaUnitTests(unittest.TestCase):
         schema = self._make_wrapped_options_schema()
 
         with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
-            with time_limit(5):
+            with time_limit():
                 schema.unpack(b'\x01\xff\x00', 3, {})
 
     def test_schema_option_field_unpack_reports_a_field_relative_offset(self) -> None:
@@ -518,7 +518,7 @@ class SchemaUnitTests(unittest.TestCase):
         stream.seek(2)
 
         with self.assertRaisesRegex(FieldValueError, r'at offset 3 of 3\b'):
-            with time_limit(5):
+            with time_limit():
                 field.unpack(stream, {})
 
     def test_schema_list_field_unpack_rejects_a_schema_item_consuming_nothing(self) -> None:
@@ -563,7 +563,7 @@ class SchemaUnitTests(unittest.TestCase):
         stream.seek(2)
 
         with self.assertRaisesRegex(FieldValueError, r'after 2 item\(s\), at offset 2 of 8\b'):
-            with time_limit(5):
+            with time_limit():
                 field.unpack(stream, {})
 
     def _make_previewed_item_schema(self):

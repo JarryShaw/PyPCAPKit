@@ -1308,7 +1308,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         # one 8-octet block, declared as 10 octets, then two no-operations
         good = segment(8, bytes([Option.SACK, 10]) + struct.pack('!II', 1, 2) + b'\x01\x01')
-        with time_limit(5):
+        with time_limit():
             proto = TCP(good, len(good))
 
         self.assertEqual(proto.info.hdr_len, len(good))
@@ -1323,7 +1323,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         bad = segment(6, bytes([Option.SACK, 22]) + b'\x36\xcc')
         with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
-            with time_limit(5):
+            with time_limit():
                 TCP(bad, len(bad))
 
     def test_an_option_area_longer_than_the_segment_still_parses(self) -> None:
@@ -1345,7 +1345,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from tests._support import time_limit
 
         raw = bytes.fromhex('00501f900000000100000002a002ffff00000000020405b4')
-        with time_limit(5):
+        with time_limit():
             proto = TCP(raw, len(raw))
 
         self.assertEqual(proto.info.hdr_len, 40)
@@ -1417,7 +1417,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         for declared_length, zeroes in ((12, 4), (32, 24)):
             with self.subTest(declared_length=declared_length):
                 raw = segment(7, bytes([custom, declared_length]) + trailing)
-                with time_limit(5):
+                with time_limit():
                     proto = TCP(raw, len(raw))
 
                 self.assertEqual(proto.info.hdr_len, 28)

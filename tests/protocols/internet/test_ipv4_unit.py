@@ -1993,7 +1993,7 @@ class IPv4UnitTests(unittest.TestCase):
         from tests._support import time_limit
 
         raw = bytes.fromhex('4a00001800010000400600000a0000010a000002')
-        with time_limit(5):
+        with time_limit():
             proto = IPv4(raw, len(raw))
 
         self.assertEqual(proto.info.hdr_len, 40)
@@ -2062,7 +2062,7 @@ class IPv4UnitTests(unittest.TestCase):
         trailing = bytes.fromhex('aabbccddeeff')
         raw = (bytes.fromhex('4900001c00010000400600000a0000010a000002') +
                bytes([custom, 12]) + trailing)
-        with time_limit(5):
+        with time_limit():
             proto = IPv4(raw, len(raw))
 
         self.assertEqual(proto.info.hdr_len, 36)

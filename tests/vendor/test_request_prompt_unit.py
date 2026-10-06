@@ -117,7 +117,7 @@ PROMPT_BUDGET = 16
 #: :func:`~tests._support.time_limit`. Every case here is sub-millisecond work;
 #: the deadline exists for a regression that finds a way to not terminate which
 #: :data:`PROMPT_BUDGET` does not bound.
-CASE_TIMEOUT = 10
+CASE_TIMEOUT = 30
 
 #: Page body the fake fetches and the fake operator produce. Distinctive so that
 #: a test asserting on it cannot be satisfied by an empty string.

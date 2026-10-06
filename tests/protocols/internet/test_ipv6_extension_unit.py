@@ -1931,7 +1931,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         for name, raw, expected, expected_hav in cases:
             with self.subTest(case=name):
-                with time_limit(5):
+                with time_limit():
                     proto = protocol_cls(raw, extension=True)
 
                 options = list(proto.info.options.items(multi=True))
@@ -2003,7 +2003,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         for name, raw, length, tid_type, tid_len, tid, identifier in cases:
             with self.subTest(case=name):
-                with time_limit(5):
+                with time_limit():
                     proto = protocol_cls(raw, extension=True)
 
                 option = next(opt for code, opt in proto.info.options.items(multi=True)
@@ -2048,7 +2048,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         raw = bytes.fromhex('1100080100010100')
 
-        with time_limit(5):
+        with time_limit():
             proto = protocol_cls(raw, extension=True)
 
         options = list(proto.info.options.items(multi=True))
@@ -2097,7 +2097,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         raw = bytes.fromhex('3b00080000000000')
 
         with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
-            with time_limit(5):
+            with time_limit():
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_identification_based_dpd_option_rejects_underflowing_length(self) -> None:
@@ -2133,7 +2133,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         raw = bytes.fromhex('3b0007000000000000000000000000')
 
         with self.assertRaisesRegex(FieldValueError, 'invalid CALIPSO option length'):
-            with time_limit(5):
+            with time_limit():
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_calipso_option_rejects_underflowing_length(self) -> None:
@@ -2168,7 +2168,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         raw = bytes.fromhex('3b006d0000000000')
 
         with self.assertRaisesRegex(FieldValueError, 'invalid MPL option length'):
-            with time_limit(5):
+            with time_limit():
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_mpl_option_rejects_underflowing_length(self) -> None:
@@ -2206,7 +2206,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ):
             with self.subTest(case=name):
                 with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
-                    with time_limit(5):
+                    with time_limit():
                         protocol_cls(raw, len(raw), extension=True)
 
     def test_hopopt_truncated_option_area_is_diagnosed(self) -> None:

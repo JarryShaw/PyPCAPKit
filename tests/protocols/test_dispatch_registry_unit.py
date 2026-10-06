@@ -44,7 +44,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: Whole seconds one case may take. A working case takes low single-digit
 #: milliseconds; the point of the deadline is a case that never finishes.
-CASE_TIMEOUT = 10
+CASE_TIMEOUT = 30
 
 
 class Degrade(NamedTuple):

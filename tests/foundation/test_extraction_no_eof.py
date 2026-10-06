@@ -105,7 +105,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import sample_path, time_limit
+from tests._support import sample_path, scale_timeout, time_limit
 from tests._tiers import ROOT
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
@@ -160,16 +160,18 @@ class ChildBoundedTestCase(unittest.TestCase):
 
         Raises:
             AssertionError: If the child did not finish inside :data:`DEADLINE`
-                seconds, which is the failure mode #620 is about, or if it exited
-                non-zero.
+                seconds, as :func:`~tests._support.scale_timeout` scales them,
+                which is the failure mode #620 is about, or if it exited non-zero.
 
         """
         script = CHILD_PREAMBLE.format(cap=ADDRESS_SPACE_CAP, root=str(ROOT)) \
             + textwrap.dedent(body)
+        # Scaled like the in-process deadline, so one setting stretches both.
+        deadline = scale_timeout(DEADLINE)
         try:
             completed = subprocess.run(  # nosec: B603
                 [sys.executable, '-c', script],
-                capture_output=True, text=True, timeout=DEADLINE, check=False,
+                capture_output=True, text=True, timeout=deadline, check=False,
                 cwd=str(ROOT),
             )
         except subprocess.TimeoutExpired as exc:
@@ -182,7 +184,7 @@ class ChildBoundedTestCase(unittest.TestCase):
             if isinstance(partial, bytes):
                 partial = partial.decode(errors='replace')
             raise AssertionError(
-                f'the extraction did not return within {DEADLINE}s, which is the '
+                f'the extraction did not return within {deadline}s, which is the '
                 f'non-termination #620 reports. Child output so far:\n{partial}'
             ) from exc
 
