@@ -742,8 +742,22 @@ class SchemaField(FieldBase[_TS]):
         else:
             file = buffer
 
+        # NOTE: a negative length means the field was declared without one, so
+        # the nested schema is sized by whatever remains in ``file`` instead.
+        # Passing ``-1`` on would seed its ``__length__`` negative, and every
+        # sub-field read would then warn ``packet length < 0``. The remainder is
+        # measured here rather than left to ``prepare`` (by passing
+        # :data:`None`), because there a remainder of zero raises the quiet
+        # end-of-stream signal that ends a whole extraction, whereas here it
+        # only means the item is truncated.
+        length = self.length
+        if length < 0:
+            current = file.tell()
+            length = file.seek(0, io.SEEK_END) - current
+            file.seek(current)
+
         packet.update(self._packet)
-        return cast('_TS', self._schema.unpack(file, self.length,  # type: ignore[call-arg,misc]
+        return cast('_TS', self._schema.unpack(file, length,  # type: ignore[call-arg,misc]
                                                 nested_packet_context(packet)))
 
 

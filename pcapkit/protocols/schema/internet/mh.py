@@ -1373,13 +1373,14 @@ class ContextRequestOption(Option, code=Enum_Option.Context_Request_Option):
         :class:`~pcapkit.corekit.fields.collections.ListField` of a nested schema.
         Each entry is self-describing -- a type octet, a length octet and that many
         octets of value [:rfc:`5949#section-6.2.1`] -- so a nested schema would need
-        a :class:`~pcapkit.corekit.fields.misc.SchemaField` with no fixed length,
-        and such a field is handed ``-1`` as its length and hands that on as the
-        nested schema's ``__length__``. Every field then decrements a budget that
-        started negative, and parsing a perfectly valid option emits a
-        :class:`~pcapkit.utilities.warnings.SchemaWarning` per field saying
-        ``packet length < 0``. Decoding the run directly costs a few lines and
-        keeps a valid packet quiet.
+        a :class:`~pcapkit.corekit.fields.misc.SchemaField` with no fixed length.
+        Such a field sizes the nested schema by what is left of the run, which
+        parses a valid option cleanly, but an entry whose length overruns the
+        option would then only raise a
+        :class:`~pcapkit.utilities.warnings.SchemaWarning` and come back with its
+        value padded out by zero octets. Decoding the run directly costs a few
+        lines and rejects that entry with
+        :exc:`~pcapkit.utilities.exceptions.ProtocolError` instead.
 
     """
 
