@@ -20,6 +20,7 @@ Tick the [commit type](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBU
 - [ ] `test` — tests only
 - [ ] `docs` — documentation only
 - [ ] `ci` — workflows or build tooling
+- [ ] `release` — bumps the version or rolls up a distribution
 - [ ] `chore` — anything else
 
 ---
