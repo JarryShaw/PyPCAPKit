@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/engines/builtin.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="PCAP Support: This module contains the implementation for PCAP file extraction support, as is used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: This module contains the implementati..." />
-<meta name="description" content="PCAP Support: This module contains the implementation for PCAP file extraction support, as is used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: This module contains the implementati..." />
+<meta property="og:description" content="PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pcapkit.foundation.engines.pcapng is the PCAP-NG extrac..." />
+<meta name="description" content="PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pcapkit.foundation.engines.pcapng is the PCAP-NG extrac..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="3rd-Party Engines" href="3rdparty.html"><link rel="prev" title="Base Engine" href="engine.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -487,8 +487,8 @@
 <h1>Built-in Engines<a class="headerlink" href="#built-in-engines" title="Link to this heading">¶</a></h1>
 <section id="module-pcapkit.foundation.engines.pcap">
 <span id="pcap-support"></span><h2>PCAP Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pcap" title="Link to this heading">¶</a></h2>
-<p>This module contains the implementation for PCAP file extraction
-support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.foundation.engines.pcap" title="pcapkit.foundation.engines.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap</span></code></a> is the PCAP extraction engine used by
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap.PCAP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pcap.</span></span><span class="sig-name descname"><span class="pre">PCAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap.html#PCAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap.PCAP" title="Link to this definition">¶</a></dt>
@@ -604,8 +604,8 @@ the name of <code class="docutils literal notranslate"><span class="pre">Global<
 </section>
 <section id="module-pcapkit.foundation.engines.pcapng">
 <span id="pcap-ng-support"></span><h2>PCAP-NG Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pcapng" title="Link to this heading">¶</a></h2>
-<p>This module contains the implementation for PCAP-NG file extraction
-support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.foundation.engines.pcapng" title="pcapkit.foundation.engines.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcapng</span></code></a> is the PCAP-NG extraction engine used
+by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.PCAPNG">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pcapng.</span></span><span class="sig-name descname"><span class="pre">PCAPNG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcapng.html#PCAPNG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.PCAPNG" title="Link to this definition">¶</a></dt>
@@ -686,12 +686,12 @@ context storage.</p>
 <p>Context manager for PCAP-NG file format.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>We do not store any packet blocks, e.g.,
+<p>Packet blocks –
 <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PacketBlock" title="pcapkit.protocols.data.misc.pcapng.PacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">PacketBlock</span></code></a>,
-<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock" title="pcapkit.protocols.data.misc.pcapng.SimplePacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimplePacketBlock</span></code></a>,
-and <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock" title="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPacketBlock</span></code></a>,
-in the <a class="reference internal" href="#pcapkit.foundation.engines.pcapng.Context" title="pcapkit.foundation.engines.pcapng.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> object, as they will be directly
-stored in the <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>.</p>
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock" title="pcapkit.protocols.data.misc.pcapng.SimplePacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimplePacketBlock</span></code></a> and
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock" title="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPacketBlock</span></code></a> – are
+not stored in <a class="reference internal" href="#pcapkit.foundation.engines.pcapng.Context" title="pcapkit.foundation.engines.pcapng.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a>, since the
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> stores them directly.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.section">

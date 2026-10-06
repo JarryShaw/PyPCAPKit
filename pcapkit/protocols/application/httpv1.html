@@ -691,16 +691,17 @@ looser than the parser classifies payloads the parser then refuses, and
 one tighter than the parser hands real HTTP/1 to a later arm.
 <code class="docutils literal notranslate"><span class="pre">test_start_line_predicate_agrees_with_the_httpv1_parser</span></code> pins that
 agreement.</p>
-<p>Both of the unpackings the parser performs <em>before</em> those patterns are
-mirrored too, and this is not pedantry – the second of them is the whole
-reason the HTTP/2 connection preface is not claimed here. <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span>
+<p>The checks the parser performs <em>before</em> those patterns are mirrored too,
+and this is not pedantry – they are the whole reason the HTTP/2
+connection preface is not claimed here. <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span>
 <span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n</span></code> is deliberately a well-formed
 HTTP/1.1 <em>request line</em> (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>), so a predicate that
 tested only the first line would answer <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it. Split at the
 header/body separator first, as <a class="reference internal" href="#pcapkit.protocols.application.httpv1.HTTP.read" title="pcapkit.protocols.application.httpv1.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.read</span></code></a> does, and the preface’s
-header is <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0</span></code> with no CRLF left in it – which is why the
-parser refuses it, and why this does. Without the separator split this
-returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for the preface.</p>
+header is exactly <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0</span></code> (<code class="docutils literal notranslate"><span class="pre">_HTTP2_PREFACE_HEADER</span></code>), which
+the parser refuses by name and so does this. Any <em>other</em> header with no
+CRLF in it is a start line with zero field lines, which
+<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a> allows and both accept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1041">#1041</a>).</p>
 <p>An HTTP/0.9 request line carries only two tokens and so is not recognised
 here either, matching the parser, which raises on fewer than three.</p>
 </div>

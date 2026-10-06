@@ -101,7 +101,7 @@ commands down instead of a figure that will be stale by the next merge:
 The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
 per-file and not per-subpackage. The file carries **9** module-level sections holding
-164 entries, and no entry carries an inline kind label::
+166 entries, and no entry carries an inline kind label::
 
    $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
    0
@@ -165,7 +165,9 @@ The ones that carry meaning here fall into five groups, which stack rather than
 compete: a pull request normally carries one from the first group and as many of the
 rest as apply. **The five groups are not the whole label set** -- the repository also
 has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` and
-``duplicate`` are all in live use and only ``good first issue`` has never been applied.
+``duplicate`` are all in live use and ``good first issue`` is archived. GitHub cannot
+archive a label, so an archived one keeps its name and description and is recoloured
+grey (``cccccc``); it is kept rather than deleted so the name stays reserved.
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added::
 
@@ -325,3 +327,55 @@ carrying it are that kind:
           --json number -q '[.[].number]|sort|@json'
       gh issue list -R JarryShaw/PyPCAPKit --state all --label breaking --limit 100 \
           --json number -q '[.[].number]|sort|@json'
+
+Milestones and the Project Board
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Milestones are release lines**, titled by minor version (``1.4``, ``1.5``). An issue
+or pull request belongs to the line it ships in: the open milestone collects work
+targeting the next release, and it is closed when that release's final tag is cut,
+with ``due_on`` set to the tag date. Work closed without shipping -- an unmerged pull
+request, an issue closed as not planned -- takes no milestone. The closed milestones
+were backfilled from merge and close dates against the release tags, so an item that
+landed just before a tag may sit one line early.
+
+**The project board records state that the labels drop.** The state labels above are
+stripped when an item closes, so they say only what is live. The `PyPCAPKit project
+<https://github.com/users/JarryShaw/projects/2>`__ keeps a *Status* per item --
+*Pending*, *WIP*, *Blocked*, *Needs decision*, *In review*, *Done* -- that outlives the
+close. **The labels stay authoritative**: Status mirrors them, and where the two
+disagree the label wins and Status is corrected.
+
+Status is derived from an item's labels and state, first match winning:
+
+======================  ==================================================
+Status                  When
+======================  ==================================================
+*Done*                  the item is closed or merged
+*Needs decision*        it carries ``needs: decision``
+*Blocked*               it carries ``blocked``
+*In review*             it is an open pull request
+*WIP*                   it carries ``wip``
+*Pending*               anything else open
+======================  ==================================================
+
+The board's built-in workflows do the transitions GitHub can see on its own --
+*Auto-add to project* for this repository, *Item closed* and *Pull request merged*
+both setting *Done*, and *Auto-add sub-issues*. **Item added to project stays off**:
+it stamps a default Status on every new item, overwriting the label-derived one. The
+remaining transitions follow a label change, which no workflow observes, so they are
+applied by hand alongside the label. The workflows can only be configured in the web
+interface.
+
+The board has seven views: *All items*; *Board*, the open items in one column per
+Status; *Release 1.5*, the open milestone; *Needs decision* and *Blocked*, each the
+open items in that state; *Open pull requests*; and *History*, everything *Done*.
+Rename *Release 1.5* when the next milestone opens. Sorting and grouping are set in
+the web interface; names, layouts, filters and columns can also be set through the
+GraphQL API (``updateProjectV2View``).
+
+Link neither from docstrings, code comments or Markdown files. Both are tracking
+metadata that changes as work moves, and a link to them goes stale the way a line
+number does; the changelog's ``:issue:`` and ``:pr:`` roles are the durable trail.
+The repository wiki is disabled -- contributor documentation lives on these pages.
+

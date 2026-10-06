@@ -4,9 +4,8 @@ Dump Utilities
 
 .. module:: pcapkit.dumpkit
 
-:mod:`pcapkit.dumpkit` is the collection of dumpers for
-:mod:`pcapkit` implementation, which is alike those described
-in :mod:`dictdumper`.
+:mod:`pcapkit.dumpkit` is the collection of :mod:`pcapkit`'s own dumpers,
+alike those in :mod:`dictdumper`.
 
 .. toctree::
    :maxdepth: 2
@@ -15,10 +14,9 @@ in :mod:`dictdumper`.
    null
    common
 
-All dumper classes are implemented as :class:`dictdumper.dumper.Dumper`
-subclasses, which are responsible for writing the parsed packet data into
-formatted output files. Below is a brief diagram of the class hierarchy
-of :mod:`pcapkit.dumpkit`:
+Every dumper class is a :class:`dictdumper.dumper.Dumper` subclass, responsible
+for writing parsed packet data into a formatted output file. The class
+hierarchy:
 
 .. mermaid::
 

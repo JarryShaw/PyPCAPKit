@@ -573,7 +573,7 @@ gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>
 <p>The grouping scheme was settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level module, with</strong>
 <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
 per-file and not per-subpackage. The file carries <strong>9</strong> module-level sections holding
-164 entries, and no entry carries an inline kind label:</p>
+166 entries, and no entry carries an inline kind label:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
 0
 </pre></div>
@@ -631,7 +631,9 @@ workflows is a conda channel label, unrelated to these.</p>
 compete: a pull request normally carries one from the first group and as many of the
 rest as apply. <strong>The five groups are not the whole label set</strong> – the repository also
 has GitHub’s own defaults, of which <code class="docutils literal notranslate"><span class="pre">wontfix</span></code>, <code class="docutils literal notranslate"><span class="pre">invalid</span></code>, <code class="docutils literal notranslate"><span class="pre">help</span> <span class="pre">wanted</span></code> and
-<code class="docutils literal notranslate"><span class="pre">duplicate</span></code> are all in live use and only <code class="docutils literal notranslate"><span class="pre">good</span> <span class="pre">first</span> <span class="pre">issue</span></code> has never been applied.
+<code class="docutils literal notranslate"><span class="pre">duplicate</span></code> are all in live use and <code class="docutils literal notranslate"><span class="pre">good</span> <span class="pre">first</span> <span class="pre">issue</span></code> is archived. GitHub cannot
+archive a label, so an archived one keeps its name and description and is recoloured
+grey (<code class="docutils literal notranslate"><span class="pre">cccccc</span></code>); it is kept rather than deleted so the name stays reserved.
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
@@ -800,6 +802,68 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
 </div>
 </div>
 </section>
+<section id="milestones-and-the-project-board">
+<h2>Milestones and the Project Board<a class="headerlink" href="#milestones-and-the-project-board" title="Link to this heading">¶</a></h2>
+<p><strong>Milestones are release lines</strong>, titled by minor version (<code class="docutils literal notranslate"><span class="pre">1.4</span></code>, <code class="docutils literal notranslate"><span class="pre">1.5</span></code>). An issue
+or pull request belongs to the line it ships in: the open milestone collects work
+targeting the next release, and it is closed when that release’s final tag is cut,
+with <code class="docutils literal notranslate"><span class="pre">due_on</span></code> set to the tag date. Work closed without shipping – an unmerged pull
+request, an issue closed as not planned – takes no milestone. The closed milestones
+were backfilled from merge and close dates against the release tags, so an item that
+landed just before a tag may sit one line early.</p>
+<p><strong>The project board records state that the labels drop.</strong> The state labels above are
+stripped when an item closes, so they say only what is live. The <a class="reference external" href="https://github.com/users/JarryShaw/projects/2">PyPCAPKit project</a> keeps a <em>Status</em> per item –
+<em>Pending</em>, <em>WIP</em>, <em>Blocked</em>, <em>Needs decision</em>, <em>In review</em>, <em>Done</em> – that outlives the
+close. <strong>The labels stay authoritative</strong>: Status mirrors them, and where the two
+disagree the label wins and Status is corrected.</p>
+<p>Status is derived from an item’s labels and state, first match winning:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Status</p></th>
+<th class="head"><p>When</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Done</em></p></td>
+<td><p>the item is closed or merged</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Needs decision</em></p></td>
+<td><p>it carries <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">decision</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><em>Blocked</em></p></td>
+<td><p>it carries <code class="docutils literal notranslate"><span class="pre">blocked</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><em>In review</em></p></td>
+<td><p>it is an open pull request</p></td>
+</tr>
+<tr class="row-even"><td><p><em>WIP</em></p></td>
+<td><p>it carries <code class="docutils literal notranslate"><span class="pre">wip</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Pending</em></p></td>
+<td><p>anything else open</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The board’s built-in workflows do the transitions GitHub can see on its own –
+<em>Auto-add to project</em> for this repository, <em>Item closed</em> and <em>Pull request merged</em>
+both setting <em>Done</em>, and <em>Auto-add sub-issues</em>. <strong>Item added to project stays off</strong>:
+it stamps a default Status on every new item, overwriting the label-derived one. The
+remaining transitions follow a label change, which no workflow observes, so they are
+applied by hand alongside the label. The workflows can only be configured in the web
+interface.</p>
+<p>The board has seven views: <em>All items</em>; <em>Board</em>, the open items in one column per
+Status; <em>Release 1.5</em>, the open milestone; <em>Needs decision</em> and <em>Blocked</em>, each the
+open items in that state; <em>Open pull requests</em>; and <em>History</em>, everything <em>Done</em>.
+Rename <em>Release 1.5</em> when the next milestone opens. Sorting and grouping are set in
+the web interface; names, layouts, filters and columns can also be set through the
+GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
+<p>Link neither from docstrings, code comments or Markdown files. Both are tracking
+metadata that changes as work moves, and a link to them goes stale the way a line
+number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are the durable trail.
+The repository wiki is disabled – contributor documentation lives on these pages.</p>
+</section>
 </section>
 
         </article>
@@ -862,6 +926,7 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
 <li><a class="reference internal" href="#changelog-entry-granularity">Changelog Entry Granularity</a></li>
 <li><a class="reference internal" href="#issue-and-pull-request-labels">Issue and Pull Request Labels</a></li>
 <li><a class="reference internal" href="#the-breaking-label">The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label</a></li>
+<li><a class="reference internal" href="#milestones-and-the-project-board">Milestones and the Project Board</a></li>
 </ul>
 </li>
 </ul>

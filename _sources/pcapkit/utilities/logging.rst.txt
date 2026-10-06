@@ -4,10 +4,9 @@ Logging System
 
 .. module:: pcapkit.utilities.logging
 
-:mod:`pcapkit.utilities.logging` integrates :mod:`pcapkit` with the standard
-:mod:`logging` system. It owns the package-wide logger hierarchy rooted at
-:data:`~pcapkit.utilities.logging.logger` and the configuration API through
-which an application decides what, if anything, :mod:`pcapkit` emits.
+:mod:`pcapkit.utilities.logging` owns :mod:`pcapkit`'s logger hierarchy, rooted
+at :data:`~pcapkit.utilities.logging.logger`, and the API through which an
+application decides what, if anything, :mod:`pcapkit` emits.
 
 .. autodata:: pcapkit.utilities.logging.logger
    :no-value:
@@ -15,10 +14,9 @@ which an application decides what, if anything, :mod:`pcapkit` emits.
 The Logger Hierarchy
 ====================
 
-``pcapkit`` is the root. Every module inside the package logs through its own
-child logger, named after the module and obtained from
-:func:`~pcapkit.utilities.logging.get_logger`, so a record carries the name of
-the code that emitted it and any subtree can be addressed on its own:
+``pcapkit`` is the root. Each module logs through a child logger named after
+the module, obtained from :func:`~pcapkit.utilities.logging.get_logger`, so any
+subtree can be addressed on its own:
 
 .. code-block:: python
 
@@ -30,8 +28,7 @@ the code that emitted it and any subtree can be addressed on its own:
    # or follow just the extraction path
    logging.getLogger('pcapkit.foundation.extraction').setLevel(logging.DEBUG)
 
-The names in use are the module paths themselves, e.g.
-``pcapkit.foundation.extraction``, ``pcapkit.foundation.registry.protocols``,
+Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``, ``pcapkit.foundation.registry.protocols``,
 ``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
 ``pcapkit.foundation.traceflow.tcp``, ``pcapkit.utilities.warnings``.
 
@@ -42,36 +39,34 @@ The names in use are the module paths themselves, e.g.
 What ``DEBUG`` Will Tell You
 ============================
 
-At :data:`logging.DEBUG` the library explains what it did with a file, without
-descending to per-field parsing: which input was opened, which engine was
-requested and which was actually used (including a fallback when an optional
-dependency is missing), the file format identified from the magic number, the
-output format and dumper, whether reassembly and flow tracing were enabled and
-with which flags, how many frames were read, and when cleanup ran. Reassembly
-reports datagram counts on flush and flow tracing reports flows opening and
-closing.
+At :data:`logging.DEBUG` the library reports what it did with a file: which
+input was opened, which engine was requested and which was actually used
+(including a fallback when an optional dependency is missing), the file format
+identified from the magic number, the output format and dumper, whether
+reassembly and flow tracing were enabled and with which flags, how many frames
+were read, and when cleanup ran. Reassembly reports datagram counts on flush and
+flow tracing reports flows opening and closing.
 
 .. note::
 
    Nothing is logged from inside per-frame or per-field parsing loops, so
-   enabling :data:`~logging.DEBUG` does not turn a capture with a million
-   packets into a million records. Registration bookkeeping across
-   :mod:`pcapkit.foundation.registry` is also at :data:`~logging.DEBUG` rather
-   than :data:`~logging.INFO`, since a library announcing its own registry
-   entries is not news to its consumer.
+   :data:`~logging.DEBUG` on a million-packet capture does not yield a million
+   records. Registration bookkeeping in :mod:`pcapkit.foundation.registry` is
+   at :data:`~logging.DEBUG` rather than :data:`~logging.INFO`, since a library
+   announcing its own registry entries is not news to its consumer.
 
 Configuring the Output
 ======================
 
 Importing :mod:`pcapkit` configures **no** logging output: the only handler
 attached to :data:`~pcapkit.utilities.logging.logger` is a
-:class:`logging.NullHandler`, and no level is set. This is the behaviour
-recommended for libraries -- the application keeps control of its own logging,
-and :mod:`pcapkit`'s records simply propagate into whatever it has configured,
-typically via :func:`logging.basicConfig` or :mod:`logging.config`.
+:class:`logging.NullHandler`, and no level is set. This is the convention for
+libraries: the application keeps control of its logging, and :mod:`pcapkit`'s
+records propagate into whatever it has configured, e.g. via
+:func:`logging.basicConfig` or :mod:`logging.config`.
 
-For an application that would rather let :mod:`pcapkit` set up its own output,
-:func:`~pcapkit.utilities.logging.configure` does so at runtime:
+An application that would rather let :mod:`pcapkit` set up its own output calls
+:func:`~pcapkit.utilities.logging.configure`:
 
 .. code-block:: python
 
@@ -121,24 +116,21 @@ Environment Variables
 
    .. seealso::
 
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_DEVMODE`.
+      Set through the environment variable :envvar:`PCAPKIT_DEVMODE`.
 
 .. autodata:: pcapkit.utilities.logging.VERBOSE
    :no-value:
 
    .. seealso::
 
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_VERBOSE`.
+      Set through the environment variable :envvar:`PCAPKIT_VERBOSE`.
 
 .. autodata:: pcapkit.utilities.logging.SPHINX_TYPE_CHECKING
    :no-value:
 
    .. seealso::
 
-      This variable can be configured through the environment variable
-      :envvar:`PCAPKIT_SPHINX`.
+      Set through the environment variable :envvar:`PCAPKIT_SPHINX`.
 
 .. _logging-compatibility:
 
@@ -147,17 +139,16 @@ Compatibility Note
 
 .. warning::
 
-   :mod:`pcapkit` used to attach a :class:`logging.StreamHandler` on
-   :obj:`sys.stderr` and force the level to :data:`logging.INFO` (or
-   :data:`logging.DEBUG` under :envvar:`PCAPKIT_DEVMODE`) **at import time**.
-   That is no longer done, because it hijacked the logging configuration of
-   every application that imported :mod:`pcapkit`.
+   Before 1.5.0, importing :mod:`pcapkit` attached a
+   :class:`logging.StreamHandler` on :obj:`sys.stderr` and forced the level to
+   :data:`logging.INFO` (or :data:`logging.DEBUG` under
+   :envvar:`PCAPKIT_DEVMODE`). It no longer does, because that hijacked the
+   logging configuration of every application importing :mod:`pcapkit`. Two
+   consequences are visible to existing code:
 
-   Two consequences are visible to existing code:
-
-   1. **Messages that used to appear on stderr no longer do.** In particular the
-      ``registered ...`` bookkeeping is now at :data:`logging.DEBUG` rather than
-      :data:`logging.INFO`. Restore the old output in one line:
+   1. **Nothing reaches stderr by default.** The ``registered ...`` bookkeeping
+      is at :data:`logging.DEBUG`, not :data:`logging.INFO`. To restore the
+      stderr output:
 
       .. code-block:: python
 
@@ -165,8 +156,8 @@ Compatibility Note
          from pcapkit.utilities.logging import configure
          configure(logging.INFO, stream=sys.stderr)
 
-      Equivalently, re-attach the module's own handler, which is still built and
-      still carries the historical format:
+      Equivalently, re-attach the module's own handler, which is still built
+      with the historical format:
 
       .. code-block:: python
 
@@ -174,26 +165,24 @@ Compatibility Note
          logger.setLevel(logging.INFO)
          logger.addHandler(handler)
 
-   2. **The handler is no longer at** ``logger.handlers[0]``. Code that reached
-      into that list to remove or reconfigure the handler should call
+   2. **The handler is not at** ``logger.handlers[0]``. Code that reached into
+      that list to remove or reconfigure it should call
       :func:`~pcapkit.utilities.logging.reset` or
       :func:`~pcapkit.utilities.logging.configure` instead.
 
-   Unaffected: :data:`~pcapkit.utilities.logging.logger` remains public,
-   importable from both :mod:`pcapkit.utilities.logging` and
-   :mod:`pcapkit.utilities`, and named ``pcapkit``;
-   :envvar:`PCAPKIT_DEVMODE` still produces the stderr handler at
+   Unchanged: :data:`~pcapkit.utilities.logging.logger` is public, importable
+   from both :mod:`pcapkit.utilities.logging` and :mod:`pcapkit.utilities`, and
+   named ``pcapkit``; :envvar:`PCAPKIT_DEVMODE` attaches the stderr handler at
    :data:`logging.DEBUG`; and ``Extractor(verbose=True)`` -- like the CLI's
-   ``-v`` -- still prints a line per frame to :data:`sys.stdout`. That output is
-   a feature of the tool rather than diagnostics, so it deliberately stays on
-   :func:`print`: routing it through :mod:`logging` would have moved it to
-   another stream and made it invisible until the consumer configured a handler.
+   ``-v`` -- prints a line per frame to :data:`sys.stdout`. That output is a
+   feature of the tool rather than diagnostics, so it deliberately stays on
+   :func:`print`: routing it through :mod:`logging` would move it to another
+   stream and hide it until the consumer configured a handler.
 
 .. note::
 
-   The warning channel is documented separately, in
-   :doc:`warnings`. In short:
+   The warning channel is documented in :doc:`warnings`. In short,
    :func:`pcapkit.utilities.warnings.warn` reports each warning exactly once per
    channel -- one :data:`logging.WARNING` record and one :func:`warnings.warn`
-   -- and constructing a warning no longer mutates the process-wide warning
+   -- and constructing a warning does not touch the process-wide warning
    filters, so suppression is the application's to configure.

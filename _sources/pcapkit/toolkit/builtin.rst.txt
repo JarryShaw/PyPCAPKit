@@ -7,9 +7,10 @@ PCAP Tools
 
 .. module:: pcapkit.toolkit.pcap
 
-:mod:`pcapkit.toolkit.pcap` contains all you need for
-PCAP file format handling. All functions returns with
-a flag to indicate if usable for its caller.
+:mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. autofunction:: pcapkit.toolkit.pcap.ipv4_reassembly
 
@@ -24,9 +25,10 @@ PCAP-NG Tools
 
 .. module:: pcapkit.toolkit.pcapng
 
-:mod:`pcapkit.toolkit.pcapng` contains all you need for
-PCAP-NG file format handling. All functions returns with
-a flag to indicate if usable for its caller.
+:mod:`pcapkit.toolkit.pcapng` contains the adapters for the PCAP-NG format.
+The reassembly and flow tracing adapters return the data their
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
+cannot be used for it.
 
 .. autofunction:: pcapkit.toolkit.pcapng.ipv4_reassembly
 

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized F..." />
-<meta name="description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized F..." />
+<meta property="og:description" content="pcapkit.corekit.fields is the collection of protocol fields that describe the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized..." />
+<meta name="description" content="pcapkit.corekit.fields is the collection of protocol fields that describe the structure of protocol headers. Base Fields- Auxiliaries, Internal Definitions, Type Variables., Numerical Fields- Sized..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Base Fields" href="field.html"><link rel="prev" title="Core Utilities" href="../index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -485,8 +485,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.fields">
 <span id="protocol-fields"></span><h1>Protocol Fields<a class="headerlink" href="#module-pcapkit.corekit.fields" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> is collection of protocol fields,
-descriptive of the structure of protocol headers.</p>
+<p><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> is the collection of protocol fields that
+describe the structure of protocol headers.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="field.html">Base Fields</a><ul>
@@ -531,10 +531,9 @@ descriptive of the structure of protocol headers.</p>
 </li>
 </ul>
 </div>
-<p>All field classes are implemented as <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>
-subclasses, which are responsible for parsing and/or formatting the field value
-following the pre-defined mechanisms. Below is a brief diagram of the class
-hierarchy of <a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>:</p>
+<p>Every field class is a <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>
+subclass, responsible for parsing and/or formatting the field value. The class
+hierarchy:</p>
 <pre  class="mermaid">
         flowchart LR
     A{{FieldMeta}} -.-&gt;|metaclass| B(FieldBase)

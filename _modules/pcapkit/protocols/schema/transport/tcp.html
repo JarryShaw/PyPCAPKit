@@ -1447,19 +1447,33 @@
         <span class="s1">'ext'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'hsa'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1">#: Option sender's key.</span>
-    <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
-    <span class="c1">#: Option receiver's key.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key</span>
-    <span class="c1">#: and 20 octets with it, so the field is present only for the latter.</span>
+    <span class="c1"># NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --</span>
+    <span class="c1"># 4 (SYN, header only), 12 (sender's key), 20 (both keys), 22 (both keys</span>
+    <span class="c1"># and Data-Level Length) and 24 (that plus the Checksum) -- so each field</span>
+    <span class="c1"># below is present from the length that first carries it.</span>
+    <span class="c1">#: Option sender's key (if option length &gt; 4).</span>
+    <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt64Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1">#: Option receiver's key (if option length &gt; 12).</span>
     <span class="n">rkey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt64Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1">#: Data-level length (if option length &gt; 20).</span>
+    <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt16Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1">#: Checksum (if option length &gt; 22).</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">22</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeCapable'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlags'</span><span class="p">,</span> <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeCapable'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlags'</span><span class="p">,</span> <span class="n">skey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

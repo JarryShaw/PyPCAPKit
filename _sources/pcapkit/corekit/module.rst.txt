@@ -3,9 +3,9 @@ Module Descriptor
 
 .. module:: pcapkit.corekit.module
 
-:mod:`pcapkit.corekit.module` contains :obj:`tuple`
-like class :class:`~pcapkit.corekit.module.ModuleDescriptor`,
-which is originally designed as :obj:`tuple[str, str] <tuple>`.
+:mod:`pcapkit.corekit.module` contains the :obj:`tuple`-like class
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, which pairs a module name
+with a class name.
 
 .. autoclass:: pcapkit.corekit.module.ModuleDescriptor
    :no-members:

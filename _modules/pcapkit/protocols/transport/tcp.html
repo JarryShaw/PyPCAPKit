@@ -2063,7 +2063,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_mptcp_capable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPTCPCapable'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPTCPCapable'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read Multipath Capable option.</span>
 
-<span class="sd">        Structure of ``MP_CAPABLE`` [:rfc:`6824`]:</span>
+<span class="sd">        Structure of ``MP_CAPABLE`` [:rfc:`8684`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -2073,13 +2073,15 @@
 <span class="sd">           |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|</span>
 <span class="sd">           +---------------+---------------+-------+-------+---------------+</span>
 <span class="sd">           |                   Option Sender's Key (64 bits)               |</span>
-<span class="sd">           |                                                               |</span>
+<span class="sd">           |                      (if option Length &gt; 4)                   |</span>
 <span class="sd">           |                                                               |</span>
 <span class="sd">           +---------------------------------------------------------------+</span>
 <span class="sd">           |                  Option Receiver's Key (64 bits)              |</span>
-<span class="sd">           |                     (if option Length == 20)                  |</span>
+<span class="sd">           |                      (if option Length &gt; 12)                  |</span>
 <span class="sd">           |                                                               |</span>
-<span class="sd">           +---------------------------------------------------------------+</span>
+<span class="sd">           +-------------------------------+-------------------------------+</span>
+<span class="sd">           |  Data-Level Length (16 bits)  |  Checksum (16 bits, optional) |</span>
+<span class="sd">           +-------------------------------+-------------------------------+</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            schema: parsed option schema</span>
@@ -2089,13 +2091,13 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If length is **NOT** ``12`` or ``20``.</span>
+<span class="sd">            ProtocolError: If length is **NOT** ``4``, ``12``, ``20``, ``22``</span>
+<span class="sd">                or ``24``.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without</span>
-        <span class="c1"># the receiver's key and 20 octets with it, hence this guard and the</span>
-        <span class="c1"># ``rkey=`` test below.</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
+        <span class="c1"># NOTE: :rfc:`8684` section 3.1 defines exactly these five lengths;</span>
+        <span class="c1"># the schema's field conditions follow from them.</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPCapable</span><span class="p">(</span>
@@ -2108,8 +2110,10 @@
                 <span class="n">ext</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'ext'</span><span class="p">]),</span>
                 <span class="n">hsa</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'hsa'</span><span class="p">]),</span>
             <span class="p">),</span>
-            <span class="n">skey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">skey</span><span class="p">,</span>
-            <span class="n">rkey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rkey</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">20</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">skey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">skey</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">rkey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rkey</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">dl_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dl_len</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">22</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3406,10 +3410,16 @@
                             <span class="n">flag_req</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">flag_ext</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">flag_hsa</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                            <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">skey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPCapable'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP capable option.</span>
+
+<span class="sd">        Each field is present only if every field before it is, which selects</span>
+<span class="sd">        one of the five :rfc:`8684` section 3.1 lengths: 4 (``skey=None``), 12</span>
+<span class="sd">        (``rkey=None``), 20 (``dl_len=None``), 22 (``checksum=None``) or 24.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
@@ -3420,10 +3430,15 @@
 <span class="sd">            flag_hsa: use of HMAC-SHA1 flag</span>
 <span class="sd">            skey: option sender's key</span>
 <span class="sd">            rkey: option receiver's key</span>
+<span class="sd">            dl_len: data-level length</span>
+<span class="sd">            checksum: checksum</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a field is given without the field before it.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -3433,12 +3448,19 @@
             <span class="n">flag_hsa</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">hsa</span>
             <span class="n">skey</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">skey</span>
             <span class="n">rkey</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rkey</span>
+            <span class="n">dl_len</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dl_len</span>
+            <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="n">skey</span><span class="p">,</span> <span class="n">rkey</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">,</span> <span class="n">checksum</span><span class="p">)</span>
+        <span class="n">present</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="n">present</span><span class="p">:]):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPCapable</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets</span>
-            <span class="c1"># without the receiver's key and 20 octets with it.</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">12</span> <span class="k">if</span> <span class="n">rkey</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="c1"># NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 4, 12, 20, 22</span>
+            <span class="c1"># or 24 octets, by how many of the fields above are present.</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">)[</span><span class="n">present</span><span class="p">],</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
@@ -3450,6 +3472,8 @@
             <span class="p">},</span>
             <span class="n">skey</span><span class="o">=</span><span class="n">skey</span><span class="p">,</span>
             <span class="n">rkey</span><span class="o">=</span><span class="n">rkey</span><span class="p">,</span>
+            <span class="n">dl_len</span><span class="o">=</span><span class="n">dl_len</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

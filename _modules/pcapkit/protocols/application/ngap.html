@@ -496,22 +496,24 @@
 <span class="sd">(``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without</span>
 <span class="sd">it; an NGAP payload simply degrades to the opaque payload path, exactly as an</span>
 <span class="sd">unregistered PPID would, because</span>
-<span class="sd">:meth:`SCTP._import_next_layer &lt;pcapkit.protocols.transport.sctp.SCTP._import_next_layer&gt;`</span>
-<span class="sd">is wrapped in :func:`~pcapkit.utilities.decorators.beholder` and falls back to</span>
+<span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.sctp.SCTP` inherits, is wrapped in</span>
+<span class="sd">:func:`~pcapkit.utilities.decorators.beholder` and falls back to</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`.</span>
 
-<span class="sd">Why |pycrate|_ rather than a PER codec of our own</span>
-<span class="sd">-------------------------------------------------</span>
+<span class="sd">Decoder Dependency</span>
+<span class="sd">------------------</span>
 
-<span class="sd">Two things make it the cheaper answer. |pycrate|_ **ships NGAP already</span>
-<span class="sd">compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP ASN.1 source does not</span>
-<span class="sd">have to be vendored here and tracked across releases; and it is **pure</span>
-<span class="sd">Python**, with no compiled extension to build on any platform. Decoding costs</span>
-<span class="sd">0.15 ms per PDU, the same order as :mod:`pcapkit`'s own per-packet cost, so</span>
-<span class="sd">the generic strategy below is not paying for the convenience.</span>
+<span class="sd">|pycrate|_ is used rather than a PER codec of our own, for two reasons. It</span>
+<span class="sd">**ships NGAP already compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP</span>
+<span class="sd">ASN.1 source does not have to be vendored here and tracked across releases; and</span>
+<span class="sd">it is **pure Python**, with no compiled extension to build on any platform.</span>
+<span class="sd">Decoding costs 0.15 ms per PDU, the same order as :mod:`pcapkit`'s own</span>
+<span class="sd">per-packet cost, so the generic strategy below is not paying for the</span>
+<span class="sd">convenience.</span>
 
-<span class="sd">Generic conversion, not 81 hand-written procedures</span>
-<span class="sd">--------------------------------------------------</span>
+<span class="sd">Generic Conversion</span>
+<span class="sd">------------------</span>
 
 <span class="sd">The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`</span>
 <span class="sd">objects **structurally**, by ASN.1 shape rather than by procedure:</span>
@@ -536,7 +538,7 @@
 <span class="sd">surfaced as first-class fields on</span>
 <span class="sd">:class:`~pcapkit.protocols.data.application.ngap.NGAP` regardless.</span>
 
-<span class="sd">Known limitations</span>
+<span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
 
 <span class="sd">* **PPID 66 payloads are not decoded.** ``NGAP_over_DTLS_over_SCTP`` wraps the</span>
@@ -544,15 +546,15 @@
 <span class="sd">  bytes reaching :meth:`NGAP.read` are not an APER encoding. The PPID is</span>
 <span class="sd">  registered so that it is *named* rather than anonymous; the payload itself</span>
 <span class="sd">  degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
-<span class="sd">* **The specification version is |pycrate|_'s, not this package's.**</span>
-<span class="sd">  :class:`ProcedureCode` and :class:`ProtocolIE` (:class:`pcapkit.const.ngap.</span>
-<span class="sd">  procedure_code.ProcedureCode` and :class:`pcapkit.const.ngap.protocol_ie.</span>
-<span class="sd">  ProtocolIE`) were generated from ``NGAP_Constants`` of |pycrate|_ 0.8.1</span>
-<span class="sd">  (Release-18-era: 81 procedure codes, 438 protocol IE IDs, highest 443). A</span>
-<span class="sd">  |pycrate|_ that carries a newer NGAP will decode IEs that this release does</span>
-<span class="sd">  not name; such a value resolves to a throwaway, non-registering member</span>
-<span class="sd">  named ``Unassigned`` rather than failing or growing either enumeration --</span>
-<span class="sd">  see :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.</span>
+<span class="sd">* **The specification version is that of the installed decoder, not this</span>
+<span class="sd">  package's.** :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and</span>
+<span class="sd">  :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` were generated from</span>
+<span class="sd">  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era: 81 procedure</span>
+<span class="sd">  codes, 438 protocol IE IDs, highest 443). A |pycrate|_ that carries a newer</span>
+<span class="sd">  NGAP will decode values these enumerations do not name. Such a value</span>
+<span class="sd">  resolves to a non-registering member called ``Unassigned`` rather than</span>
+<span class="sd">  failing or adding a member to either enumeration -- see</span>
+<span class="sd">  :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.</span>
 <span class="sd">* **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk</span>
 <span class="sd">  is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP</span>
 <span class="sd">  fragmentation fails to decode rather than being reassembled first.</span>

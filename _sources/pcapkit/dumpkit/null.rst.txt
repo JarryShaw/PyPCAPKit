@@ -3,14 +3,13 @@ Null Dumper
 
 .. module:: pcapkit.dumpkit.null
 
-:mod:`pcapkit.dumpkit.null` is the dumper for :mod:`pcapkit` implementation,
-specifically for **NotImplemented** format, which is alike those described in
-:mod:`dictdumper`.
+:mod:`pcapkit.dumpkit.null` is the dumper for the **NotImplemented** format,
+alike those in :mod:`dictdumper`.
 
 .. note::
 
-   This dumper is used when the given format is not supported, as a fallback.
-   It shall not produce any output.
+   This dumper is the fallback used when the given format is not supported. It
+   produces no output.
 
 .. autoclass:: pcapkit.dumpkit.null.NotImplementedIO
    :no-members:

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/dumpkit/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. All dumper ..." />
-<meta name="description" content="pcapkit.dumpkit is the collection of dumpers for pcapkit implementation, which is alike those described in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. All dumper ..." />
+<meta property="og:description" content="pcapkit.dumpkit is the collection of pcapkit ’s own dumpers, alike those in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. Every dumper class is a dictdumper.dumper...." />
+<meta name="description" content="pcapkit.dumpkit is the collection of pcapkit ’s own dumpers, alike those in dictdumper. PCAP Dumper, Null Dumper, Common Utilities- Internal Definitions.. Every dumper class is a dictdumper.dumper...." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PCAP Dumper" href="pcap.html"><link rel="prev" title="3rd-Party Support" href="../toolkit/3rdparty.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -485,9 +485,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.dumpkit">
 <span id="dump-utilities"></span><h1>Dump Utilities<a class="headerlink" href="#module-pcapkit.dumpkit" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> is the collection of dumpers for
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation, which is alike those described
-in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dictdumper</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> is the collection of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own dumpers,
+alike those in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dictdumper</span></code></a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pcap.html">PCAP Dumper</a></li>
@@ -498,10 +497,9 @@ in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest
 </li>
 </ul>
 </div>
-<p>All dumper classes are implemented as <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a>
-subclasses, which are responsible for writing the parsed packet data into
-formatted output files. Below is a brief diagram of the class hierarchy
-of <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>:</p>
+<p>Every dumper class is a <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a> subclass, responsible
+for writing parsed packet data into a formatted output file. The class
+hierarchy:</p>
 <pre  class="mermaid">
         flowchart LR
     A{{Dumper}} --&gt; D([other customisation ...])

@@ -963,12 +963,16 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlag'</span>
     <span class="c1">#: Option sender's key.</span>
-    <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="n">skey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
     <span class="c1">#: Option receiver's key.</span>
     <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+    <span class="c1">#: Data-level length.</span>
+    <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+    <span class="c1">#: Checksum.</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlag'</span><span class="p">,</span> <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlag'</span><span class="p">,</span> <span class="n">skey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

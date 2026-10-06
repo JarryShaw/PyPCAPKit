@@ -3,8 +3,8 @@ Protocol Chain
 
 .. module:: pcapkit.corekit.protochain
 
-:mod:`pcapkit.corekit.protochain` contains special protocol
-collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
+:mod:`pcapkit.corekit.protochain` contains the protocol collection class
+:class:`~pcapkit.corekit.protochain.ProtoChain`.
 
 .. autoclass:: pcapkit.corekit.protochain.ProtoChain
    :no-members:

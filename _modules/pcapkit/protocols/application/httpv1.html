@@ -503,6 +503,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">_HTTP2_PREFACE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">Data_RequestHeader</span>
@@ -541,6 +542,12 @@
 <span class="c1"># the syntax.</span>
 <span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
 
+<span class="c1"># The HTTP/2 connection preface's header block, as ``HTTP.read`` splits it off at</span>
+<span class="c1"># the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field lines, so</span>
+<span class="c1"># the patterns above accept it; it is refused by name in ``_read_http_header``</span>
+<span class="c1"># and ``_test_start_line`` so that the preface never parses as HTTP/1.</span>
+<span class="n">_HTTP2_PREFACE_HEADER</span> <span class="o">=</span> <span class="n">_HTTP2_PREFACE</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="_test_start_line">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._test_start_line">[docs]</a>
@@ -573,17 +580,18 @@
 <span class="sd">        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that</span>
 <span class="sd">        agreement.</span>
 
-<span class="sd">        Both of the unpackings the parser performs *before* those patterns are</span>
-<span class="sd">        mirrored too, and this is not pedantry -- the second of them is the whole</span>
-<span class="sd">        reason the HTTP/2 connection preface is not claimed here. ``PRI *</span>
+<span class="sd">        The checks the parser performs *before* those patterns are mirrored too,</span>
+<span class="sd">        and this is not pedantry -- they are the whole reason the HTTP/2</span>
+<span class="sd">        connection preface is not claimed here. ``PRI *</span>
 <span class="sd">        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed</span>
 <span class="sd">        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that</span>
 <span class="sd">        tested only the first line would answer :data:`True` for it. Split at the</span>
 <span class="sd">        header/body separator first, as :meth:`HTTP.read</span>
 <span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP.read&gt;` does, and the preface's</span>
-<span class="sd">        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is why the</span>
-<span class="sd">        parser refuses it, and why this does. Without the separator split this</span>
-<span class="sd">        returns :data:`True` for the preface.</span>
+<span class="sd">        header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which</span>
+<span class="sd">        the parser refuses by name and so does this. Any *other* header with no</span>
+<span class="sd">        CRLF in it is a start line with zero field lines, which</span>
+<span class="sd">        :rfc:`9112#section-2.1` allows and both accept (:issue:`1041`).</span>
 
 <span class="sd">        An HTTP/0.9 request line carries only two tokens and so is not recognised</span>
 <span class="sd">        here either, matching the parser, which raises on fewer than three.</span>
@@ -593,10 +601,10 @@
     <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">data</span><span class="p">:</span>  <span class="c1"># no header/body separator -- ``read`` raises</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="n">startline</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">startline</span> <span class="o">==</span> <span class="n">header</span><span class="p">:</span>  <span class="c1"># header holds no CRLF -- ``_read_http_header`` raises</span>
+    <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>  <span class="c1"># the preface -- ``_read_http_header`` raises</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+    <span class="n">startline</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -860,15 +868,21 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: Both unpackings are short for input that is not an HTTP/1</span>
-        <span class="c1"># message: a header of one line with no CRLF -- the HTTP/2 connection</span>
-        <span class="c1"># preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that</span>
-        <span class="c1"># -- and a start line of fewer than three whitespace-separated tokens.</span>
-        <span class="c1"># Raised as ``ProtocolError`` for the reason ``read`` gives above, with</span>
-        <span class="c1"># the same message this method uses below for a start line it cannot</span>
-        <span class="c1"># recognise.</span>
+        <span class="c1"># NOTE: A header with no CRLF is a start line with zero field lines,</span>
+        <span class="c1"># which :rfc:`9112#section-2.1` allows (``*( field-line CRLF )``). The</span>
+        <span class="c1"># one such header refused by name is the HTTP/2 connection preface's:</span>
+        <span class="c1"># ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`` splits in ``read`` to exactly</span>
+        <span class="c1"># ``PRI * HTTP/2.0``, which ``_RE_METHOD`` and ``_RE_VERSION`` would</span>
+        <span class="c1"># otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER``).</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
+        <span class="n">startline</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Short for a start line of fewer than three whitespace-separated</span>
+        <span class="c1"># tokens. Raised as ``ProtocolError`` for the reason ``read`` gives</span>
+        <span class="c1"># above, with the same message this method uses below for a start line</span>
+        <span class="c1"># it cannot recognise.</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">startline</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
@@ -885,7 +899,7 @@
         <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).</span>
         <span class="c1"># Unfolded, a folded message parses to the field it actually carries.</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">headerfield</span> <span class="k">else</span> <span class="p">():</span>
             <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
                 <span class="c1"># A continuation with nothing to continue -- the first field line</span>
                 <span class="c1"># folded -- is malformed rather than unfoldable.</span>

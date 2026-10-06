@@ -3,8 +3,8 @@ Base Engine
 
 .. module:: pcapkit.foundation.engines.engine
 
-This is the abstract base class implementation for
-all engine support functionality.
+:mod:`pcapkit.foundation.engines.engine` defines the abstract base class of
+every extraction engine.
 
 .. autoclass:: pcapkit.foundation.engines.engine.Engine
    :no-members:
@@ -12,8 +12,7 @@ all engine support functionality.
 
    .. seealso::
 
-      For more information on customisation and extension, please
-      refer to :doc:`../../../ext`.
+      For customisation and extension, see :doc:`../../../ext`.
 
    .. automethod:: __init_subclass__
 
@@ -28,8 +27,8 @@ all engine support functionality.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__engine_name__` class attribute.
+         Also available as a class variable; set it with the
+         :attr:`__engine_name__` class attribute.
 
 
    .. property:: module
@@ -39,8 +38,8 @@ all engine support functionality.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__engine_module__` class attribute.
+         Also available as a class variable; set it with the
+         :attr:`__engine_module__` class attribute.
 
    .. property:: registry
       :type: python:dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
@@ -49,11 +48,10 @@ all engine support functionality.
 
       .. note::
 
-         This property is only available as a class variable, since it is
-         defined on :class:`EngineMeta`. It reads
+         Only available as a class variable, since it is defined on
+         :class:`EngineMeta`. It is not a per-class mapping: it reads
          :attr:`~pcapkit.foundation.extraction.Extractor.__engine__`, the
-         single table every engine registration lands in, so it is not a
-         per-class mapping.
+         single table every engine registration lands in.
 
    .. autoproperty:: extractor
 

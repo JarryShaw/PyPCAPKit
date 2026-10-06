@@ -3,10 +3,9 @@ Info Class
 
 .. module:: pcapkit.corekit.infoclass
 
-:mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class
-:class:`~pcapkit.corekit.infoclass.Info` only, which is originally
-designed to work alike :func:`dataclasses.dataclass` as introduced
-in :pep:`557`.
+:mod:`pcapkit.corekit.infoclass` contains the :obj:`dict`-like class
+:class:`~pcapkit.corekit.infoclass.Info`, modelled on
+:func:`dataclasses.dataclass` (:pep:`557`).
 
 .. autoclass:: pcapkit.corekit.infoclass.Info
    :members:

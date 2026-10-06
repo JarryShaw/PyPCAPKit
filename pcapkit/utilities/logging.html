@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/logging.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.logging integrates pcapkit with the standard logging system. It owns the package-wide logger hierarchy rooted at logger and the configuration API through which an application deci..." />
-<meta name="description" content="pcapkit.utilities.logging integrates pcapkit with the standard logging system. It owns the package-wide logger hierarchy rooted at logger and the configuration API through which an application deci..." />
+<meta property="og:description" content="pcapkit.utilities.logging owns pcapkit ’s logger hierarchy, rooted at logger, and the API through which an application decides what, if anything, pcapkit emits. The Logger Hierarchy: pcapkit is the..." />
+<meta name="description" content="pcapkit.utilities.logging owns pcapkit ’s logger hierarchy, rooted at logger, and the API through which an application decides what, if anything, pcapkit emits. The Logger Hierarchy: pcapkit is the..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Character Set Detection" href="chardet.html"><link rel="prev" title="User Defined Warnings" href="warnings.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -485,10 +485,9 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.utilities.logging">
 <span id="logging-system"></span><h1>Logging System<a class="headerlink" href="#module-pcapkit.utilities.logging" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> integrates <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> with the standard
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> system. It owns the package-wide logger hierarchy rooted at
-<a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> and the configuration API through
-which an application decides what, if anything, <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> emits.</p>
+<p><a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> owns <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s logger hierarchy, rooted
+at <a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a>, and the API through which an
+application decides what, if anything, <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> emits.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.logger">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#pcapkit.utilities.logging.logger" title="Link to this definition">¶</a></dt>
@@ -504,10 +503,9 @@ children, so configuring this one configures all of <a class="reference internal
 
 <section id="the-logger-hierarchy">
 <h2>The Logger Hierarchy<a class="headerlink" href="#the-logger-hierarchy" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> is the root. Every module inside the package logs through its own
-child logger, named after the module and obtained from
-<a class="reference internal" href="#pcapkit.utilities.logging.get_logger" title="pcapkit.utilities.logging.get_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_logger()</span></code></a>, so a record carries the name of
-the code that emitted it and any subtree can be addressed on its own:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> is the root. Each module logs through a child logger named after
+the module, obtained from <a class="reference internal" href="#pcapkit.utilities.logging.get_logger" title="pcapkit.utilities.logging.get_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_logger()</span></code></a>, so any
+subtree can be addressed on its own:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="c1"># quieten the registry's bookkeeping, keep everything else</span>
@@ -517,8 +515,7 @@ the code that emitted it and any subtree can be addressed on its own:</p>
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">'pcapkit.foundation.extraction'</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The names in use are the module paths themselves, e.g.
-<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code>,
+<p>Logger names are the module paths, e.g. <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code>,
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.reassembly</span></code>,
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code>.</p>
 <dl class="py function">
@@ -561,34 +558,32 @@ configuration.</p>
 </section>
 <section id="what-debug-will-tell-you">
 <h2>What <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> Will Tell You<a class="headerlink" href="#what-debug-will-tell-you" title="Link to this heading">¶</a></h2>
-<p>At <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a> the library explains what it did with a file, without
-descending to per-field parsing: which input was opened, which engine was
-requested and which was actually used (including a fallback when an optional
-dependency is missing), the file format identified from the magic number, the
-output format and dumper, whether reassembly and flow tracing were enabled and
-with which flags, how many frames were read, and when cleanup ran. Reassembly
-reports datagram counts on flush and flow tracing reports flows opening and
-closing.</p>
+<p>At <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a> the library reports what it did with a file: which
+input was opened, which engine was requested and which was actually used
+(including a fallback when an optional dependency is missing), the file format
+identified from the magic number, the output format and dumper, whether
+reassembly and flow tracing were enabled and with which flags, how many frames
+were read, and when cleanup ran. Reassembly reports datagram counts on flush and
+flow tracing reports flows opening and closing.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Nothing is logged from inside per-frame or per-field parsing loops, so
-enabling <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> does not turn a capture with a million
-packets into a million records. Registration bookkeeping across
-<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is also at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> rather
-than <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">INFO</span></code></a>, since a library announcing its own registry
-entries is not news to its consumer.</p>
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> on a million-packet capture does not yield a million
+records. Registration bookkeeping in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is
+at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> rather than <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">INFO</span></code></a>, since a library
+announcing its own registry entries is not news to its consumer.</p>
 </div>
 </section>
 <section id="configuring-the-output">
 <h2>Configuring the Output<a class="headerlink" href="#configuring-the-output" title="Link to this heading">¶</a></h2>
 <p>Importing <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> configures <strong>no</strong> logging output: the only handler
 attached to <a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> is a
-<a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a>, and no level is set. This is the behaviour
-recommended for libraries – the application keeps control of its own logging,
-and <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s records simply propagate into whatever it has configured,
-typically via <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.basicConfig" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.basicConfig()</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#module-logging.config" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging.config</span></code></a>.</p>
-<p>For an application that would rather let <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> set up its own output,
-<a class="reference internal" href="#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a> does so at runtime:</p>
+<a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a>, and no level is set. This is the convention for
+libraries: the application keeps control of its logging, and <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s
+records propagate into whatever it has configured, e.g. via
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.basicConfig" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.basicConfig()</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#module-logging.config" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging.config</span></code></a>.</p>
+<p>An application that would rather let <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> set up its own output calls
+<a class="reference internal" href="#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
@@ -797,8 +792,7 @@ pre-1.4 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>This variable can be configured through the environment variable
-<span class="target" id="index-3"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>.</p>
+<p>Set through the environment variable <span class="target" id="index-3"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -813,8 +807,7 @@ pre-1.4 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>This variable can be configured through the environment variable
-<span class="target" id="index-4"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a>.</p>
+<p>Set through the environment variable <span class="target" id="index-4"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -829,8 +822,7 @@ pre-1.4 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>This variable can be configured through the environment variable
-<span class="target" id="index-5"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>.</p>
+<p>Set through the environment variable <span class="target" id="index-5"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -839,51 +831,49 @@ pre-1.4 default output.</p>
 <span id="logging-compatibility"></span><h2>Compatibility Note<a class="headerlink" href="#compatibility-note" title="Link to this heading">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> used to attach a <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.StreamHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.StreamHandler</span></code></a> on
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> and force the level to <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.INFO</span></code></a> (or
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a> under <span class="target" id="index-6"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>) <strong>at import time</strong>.
-That is no longer done, because it hijacked the logging configuration of
-every application that imported <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
-<p>Two consequences are visible to existing code:</p>
+<p>Before 1.5.0, importing <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attached a
+<a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.StreamHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.StreamHandler</span></code></a> on <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> and forced the level to
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.INFO</span></code></a> (or <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a> under
+<span class="target" id="index-6"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>). It no longer does, because that hijacked the
+logging configuration of every application importing <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. Two
+consequences are visible to existing code:</p>
 <ol class="arabic">
-<li><p><strong>Messages that used to appear on stderr no longer do.</strong> In particular the
-<code class="docutils literal notranslate"><span class="pre">registered</span> <span class="pre">...</span></code> bookkeeping is now at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a> rather than
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.INFO</span></code></a>. Restore the old output in one line:</p>
+<li><p><strong>Nothing reaches stderr by default.</strong> The <code class="docutils literal notranslate"><span class="pre">registered</span> <span class="pre">...</span></code> bookkeeping
+is at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>, not <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.INFO</span></code></a>. To restore the
+stderr output:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">configure</span>
 <span class="n">configure</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Equivalently, re-attach the module’s own handler, which is still built and
-still carries the historical format:</p>
+<p>Equivalently, re-attach the module’s own handler, which is still built
+with the historical format:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">handler</span><span class="p">,</span> <span class="n">logger</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>The handler is no longer at</strong> <code class="docutils literal notranslate"><span class="pre">logger.handlers[0]</span></code>. Code that reached
-into that list to remove or reconfigure the handler should call
+<li><p><strong>The handler is not at</strong> <code class="docutils literal notranslate"><span class="pre">logger.handlers[0]</span></code>. Code that reached into
+that list to remove or reconfigure it should call
 <a class="reference internal" href="#pcapkit.utilities.logging.reset" title="pcapkit.utilities.logging.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> or
 <a class="reference internal" href="#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a> instead.</p></li>
 </ol>
-<p>Unaffected: <a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> remains public,
-importable from both <a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> and
-<a class="reference internal" href="index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>, and named <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>;
-<span class="target" id="index-7"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> still produces the stderr handler at
+<p>Unchanged: <a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a> is public, importable
+from both <a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> and <a class="reference internal" href="index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>, and
+named <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>; <span class="target" id="index-7"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> attaches the stderr handler at
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>; and <code class="docutils literal notranslate"><span class="pre">Extractor(verbose=True)</span></code> – like the CLI’s
-<code class="docutils literal notranslate"><span class="pre">-v</span></code> – still prints a line per frame to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>. That output is
-a feature of the tool rather than diagnostics, so it deliberately stays on
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#print" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>: routing it through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> would have moved it to
-another stream and made it invisible until the consumer configured a handler.</p>
+<code class="docutils literal notranslate"><span class="pre">-v</span></code> – prints a line per frame to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>. That output is a
+feature of the tool rather than diagnostics, so it deliberately stays on
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#print" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>: routing it through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> would move it to another
+stream and hide it until the consumer configured a handler.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The warning channel is documented separately, in
-<a class="reference internal" href="warnings.html"><span class="doc">User Defined Warnings</span></a>. In short:
+<p>The warning channel is documented in <a class="reference internal" href="warnings.html"><span class="doc">User Defined Warnings</span></a>. In short,
 <a class="reference internal" href="functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> reports each warning exactly once per
 channel – one <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> record and one <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>
-– and constructing a warning no longer mutates the process-wide warning
+– and constructing a warning does not touch the process-wide warning
 filters, so suppression is the application’s to configure.</p>
 </div>
 </section>

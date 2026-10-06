@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/toolkit/builtin.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="PCAP Tools: pcapkit.toolkit.pcap contains all you need for PCAP file format handling. All functions returns with a flag to indicate if usable for its caller. PCAP-NG Tools: pcapkit.toolkit.pcapng c..." />
-<meta name="description" content="PCAP Tools: pcapkit.toolkit.pcap contains all you need for PCAP file format handling. All functions returns with a flag to indicate if usable for its caller. PCAP-NG Tools: pcapkit.toolkit.pcapng c..." />
+<meta property="og:description" content="PCAP Tools: pcapkit.toolkit.pcap contains the adapters for the PCAP format. The reassembly and flow tracing adapters return the data their pcapkit.foundation counterpart consumes, or None if the fr..." />
+<meta name="description" content="PCAP Tools: pcapkit.toolkit.pcap contains the adapters for the PCAP format. The reassembly and flow tracing adapters return the data their pcapkit.foundation counterpart consumes, or None if the fr..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="3rd-Party Support" href="3rdparty.html"><link rel="prev" title="Compatibility Tools" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -487,9 +487,10 @@
 <h1>Built-in Support<a class="headerlink" href="#built-in-support" title="Link to this heading">¶</a></h1>
 <section id="module-pcapkit.toolkit.pcap">
 <span id="pcap-tools"></span><h2>PCAP Tools<a class="headerlink" href="#module-pcapkit.toolkit.pcap" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pcap" title="pcapkit.toolkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap</span></code></a> contains all you need for
-PCAP file format handling. All functions returns with
-a flag to indicate if usable for its caller.</p>
+<p><a class="reference internal" href="#module-pcapkit.toolkit.pcap" title="pcapkit.toolkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap</span></code></a> contains the adapters for the PCAP format.
+The reassembly and flow tracing adapters return the data their
+<a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the frame
+cannot be used for it.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcap.ipv4_reassembly">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap.ipv4_reassembly" title="Link to this definition">¶</a></dt>
@@ -614,9 +615,10 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </section>
 <section id="module-pcapkit.toolkit.pcapng">
 <span id="pcap-ng-tools"></span><h2>PCAP-NG Tools<a class="headerlink" href="#module-pcapkit.toolkit.pcapng" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pcapng" title="pcapkit.toolkit.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcapng</span></code></a> contains all you need for
-PCAP-NG file format handling. All functions returns with
-a flag to indicate if usable for its caller.</p>
+<p><a class="reference internal" href="#module-pcapkit.toolkit.pcapng" title="pcapkit.toolkit.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcapng</span></code></a> contains the adapters for the PCAP-NG format.
+The reassembly and flow tracing adapters return the data their
+<a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the frame
+cannot be used for it.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcapng.ipv4_reassembly">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcapng.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcapng.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcapng.ipv4_reassembly" title="Link to this definition">¶</a></dt>

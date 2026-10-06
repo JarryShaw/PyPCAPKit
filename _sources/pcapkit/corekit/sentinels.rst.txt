@@ -3,15 +3,15 @@ Sentinel Objects
 
 .. module:: pcapkit.corekit.sentinels
 
-:mod:`pcapkit.corekit.sentinels` is the single, shared home for every
-module-level singleton sentinel this package defines for itself -- a value
-whose only job is to be recognised by identity (``value is SENTINEL``), so
-that it can never be confused with a value a caller might legitimately pass.
+:mod:`pcapkit.corekit.sentinels` is the shared home of every module-level
+singleton sentinel this package defines for itself: a value recognised only by
+identity (``value is SENTINEL``), so it cannot be confused with a value a
+caller might legitimately pass.
 
 All four are defined here. The three public ones are also re-exported by
 :mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field` and
 :mod:`pcapkit.corekit.enum` respectively, so ``from <module> import <name>``
-resolves from either path.
+works from either path.
 
 .. autoclass:: pcapkit.corekit.sentinels.NullType
 .. autodata:: pcapkit.corekit.sentinels.NULL
@@ -29,8 +29,7 @@ resolves from either path.
    :mod:`pcapkit.protocols.protocol`, and named in no module's ``__all__``. For
    SCREAMING_SNAKE consistency with the other three sentinels (see
    :ref:`sentinel-convention`), neither carries the leading underscore that would
-   otherwise hide it from Sphinx automatically, so both are documented below and
-   explicitly marked private. Neither is for use outside this package.
+   hide it from Sphinx, so both are documented below and marked private.
 
 .. autoclass:: pcapkit.corekit.sentinels.AbsentType
 .. autodata:: pcapkit.corekit.sentinels.ABSENT
