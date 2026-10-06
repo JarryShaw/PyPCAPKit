@@ -18,7 +18,7 @@ __all__ = ['OSPF', 'CrytographicAuthentication']
 
 @info_final
 class CrytographicAuthentication(Data):
-    """Data model for OSPF crytographic authentication."""
+    """Data model for OSPF cryptographic authentication."""
 
     #: Key ID.
     key_id: 'int'

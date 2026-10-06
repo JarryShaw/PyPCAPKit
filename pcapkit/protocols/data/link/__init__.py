@@ -9,7 +9,7 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
-# 802.1Q Customer VLAN Tag Type
+# 802.1Q/802.1ad VLAN Tag Types
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
 from pcapkit.protocols.data.link.vlan import VLAN
 
@@ -20,6 +20,6 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
-    # 802.1Q Customer VLAN Tag Type
+    # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 ]

@@ -64,7 +64,7 @@ __all__ = [
     # Open Shortest Path First
     'OSPF', 'OSPF_CrytographicAuthentication',
 
-    # 802.1Q Customer VLAN Tag Type
+    # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 
     # Authentication Header

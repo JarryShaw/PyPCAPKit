@@ -12,7 +12,8 @@ class NoPayload(Protocol):
     """No-payload packet is an empty packet."""
 
     # NOTE: We add this method for both type annotation and to mark that this
-    # class accepts no arguments at runtime, since :class:`Info` explicitly
-    # skipped those whose :attr:`__annotations__` is empty :obj:`dict`.
+    # class accepts no arguments at runtime, since for a class with no
+    # annotations :class:`Info` generates an ``__init__`` taking any mapping
+    # and keywords.
     def __init__(self) -> 'None':  # pylint: disable=super-init-not-called
         pass

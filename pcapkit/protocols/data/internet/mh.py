@@ -174,7 +174,7 @@ class BindingRefreshRequestMessage(MH):
 
 @info_final
 class HomeTestInitMessage(MH):
-    """Data modelf for MH Home Test Init (HoTI) message type."""
+    """Data model for MH Home Test Init (HoTI) message type."""
 
     #: Home init cookie.
     cookie: 'bytes'
@@ -248,7 +248,7 @@ class BindingUpdateMessage(MH):
     ack: 'bool'
     #: home registration flag.
     home: 'bool'
-    #: Link-local address compability flag.
+    #: Link-local address compatibility flag.
     lla_compat: 'bool'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
@@ -855,7 +855,7 @@ class CGAParameter(Data):
     prefix: 'int'
     #: Collision count.
     collision_count: 'int'
-    #: Publick key (ASN.1 encoded).
+    #: Public key (ASN.1 encoded).
     public_key: 'bytes'
     #: Extension fields.
     extensions: 'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'

@@ -440,7 +440,7 @@ class MPTCPJoinSYN(MPTCPJoin):
     addr_id: 'int'
     #: Receiver's token.
     token: 'int'
-    #: Sendder's random number.
+    #: Sender's random number.
     nonce: 'int'
 
     if TYPE_CHECKING:
@@ -457,7 +457,7 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     addr_id: 'int'
     #: Sender's truncated HMAC.
     hmac: 'bytes'
-    #: Sendder's random number.
+    #: Sender's random number.
     nonce: 'int'
 
     if TYPE_CHECKING:

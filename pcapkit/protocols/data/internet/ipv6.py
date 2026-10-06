@@ -25,7 +25,7 @@ class IPv6(Protocol):
     """Data model for Internet Protocol version 6.
 
     Important:
-        Due to the preserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use :meth:`from_dict`
         to create an instance of this data model.
 
     """
@@ -60,7 +60,7 @@ class IPv6(Protocol):
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)
 
-        # NOTE: We cannot define ``class`` due to preserved keyword conflict.
+        # NOTE: We cannot define ``class`` due to reserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
         cls.__annotations__['class'] = int
 

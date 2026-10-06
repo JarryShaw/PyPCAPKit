@@ -342,7 +342,7 @@ class IPDFFOption(Option):
 
     #: Version.
     version: 'int'
-    #:Flags.
+    #: Flags.
     flags: 'DFFFlags'
     #: Sequence number.
     seq: 'int'
