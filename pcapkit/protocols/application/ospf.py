@@ -17,19 +17,19 @@ as below:
    ====== ===== ================== ===============================
    0          0 ``ospf.version``   Version Number
    ------ ----- ------------------ -------------------------------
-   0          0 ``ospf.type``      Type
+   1          8 ``ospf.type``      Type
    ------ ----- ------------------ -------------------------------
-   0          1 ``ospf.len``       Packet Length (header included)
+   2         16 ``ospf.len``       Packet Length (header included)
    ------ ----- ------------------ -------------------------------
-   0          2 ``ospf.router_id`` Router ID
+   4         32 ``ospf.router_id`` Router ID
    ------ ----- ------------------ -------------------------------
-   0          4 ``ospf.area_id``   Area ID
+   8         64 ``ospf.area_id``   Area ID
    ------ ----- ------------------ -------------------------------
-   0          6 ``ospf.chksum``    Checksum
+   12        96 ``ospf.chksum``    Checksum
    ------ ----- ------------------ -------------------------------
-   0          7 ``ospf.autype``    Authentication Type
+   14       112 ``ospf.autype``    Authentication Type
    ------ ----- ------------------ -------------------------------
-   1          8 ``ospf.auth``      Authentication
+   16       128 ``ospf.auth``      Authentication
    ====== ===== ================== ===============================
 
 .. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First
@@ -187,10 +187,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             ])
         # OSPF carries no next-protocol field -- the body is LSAs and packet-type
         # specific fields, which pcapkit does not dissect -- so dispatch on the
-        # -1 sentinel, as ARP does, rather than on a code read off the wire.
-        # Passing the remaining length here (as this did) dispatched on it as if
-        # it were an EtherType, which resolved to Raw only because a length
-        # rarely collides with a registered one.
+        # -1 sentinel, as ARP does, rather than on a code read off the wire;
+        # ``Application._decode_next_layer`` refuses any other value.
         return self._decode_next_layer(ospf, -1, length - self.length)
 
     def make(self,

@@ -6,10 +6,9 @@
 
 :mod:`pcapkit.protocols.application.application` contains only
 :class:`~pcapkit.protocols.application.application.Application`,
-which is a base class for application layer protocols, eg.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`,
-:class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`
-and etc.
+which is a base class for application layer protocols, e.g.
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>` and
+:class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 
 """
 from typing import TYPE_CHECKING, Generic, overload
@@ -87,7 +86,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # ``_decode_next_layer``, which already set the payload and the chain
         # (basis included); only a protocol that did not gets the empty default
         if getattr(self, '_next', None) is None:
-            #: pcapkit.protocols.null.NoPayload: Payload of current instance.
+            #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.
             self._next = NoPayload()
             #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
             self._protos = ProtoChain(self.__class__, self.alias)

@@ -65,8 +65,9 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 # Regular expression to match HTTP status code. Anchored for the same reason as
 # ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and the
 # value is taken from ``int(para2)`` on the raw token, so an unanchored prefix
-# match let ``200x`` and ``2000`` past the guard and then out of ``int()`` as a
-# bare ``ValueError`` -- where ``_read_http_header`` documents ``ProtocolError``.
+# match would let ``200x`` and ``2000`` past the guard and then out of ``int()``
+# as a bare ``ValueError`` -- where ``_read_http_header`` documents
+# ``ProtocolError``.
 # :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the
 # grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``
 # production; :rfc:`9110#section-15` covers the code semantics and registry, not
@@ -404,9 +405,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         # unfolded here -- the RFC's own remedy -- rather than treated as a field
         # line of its own. Deprecated, but present in real captures. Treating a
         # continuation as a field line of its own goes wrong twice: one carrying
-        # no colon leaves the split below one element long, so ``item[1]`` raises
-        # :exc:`IndexError`, which is neither a :exc:`ValueError` nor a
-        # ``ProtocolError`` and escapes ``HTTP._guess_version``'s suppression;
+        # no colon fails the colon check below, so a valid message is refused;
         # one that happens to contain a colon parses silently into a spurious
         # extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).
         # Unfolded, a folded message parses to the field it actually carries.
@@ -421,10 +420,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 # continuation, because the production is ``obs-fold = OWS CRLF
                 # RWS`` and it is the *whole* obs-fold that is replaced by a
                 # single space -- the OWS before the CRLF belongs to the fold,
-                # not to the value. Stripping only the continuation left that OWS
-                # in place, so ``X: a \t\r\n\tb`` unfolded to ``'a \t  b'``
-                # rather than ``'a b'``: four of five folded/literal pairs
-                # disagreed, and a HTAB survived where the RFC prescribes SP.
+                # not to the value. Stripping only the continuation would leave
+                # that OWS in place, so ``X: a \t\r\n\tb`` would unfold to
+                # ``'a \t  b'`` rather than ``'a b'``, keeping a HTAB where the
+                # RFC prescribes SP.
                 fields[-1] = fields[-1].rstrip() + b' ' + line.strip()
                 continue
             fields.append(line)
