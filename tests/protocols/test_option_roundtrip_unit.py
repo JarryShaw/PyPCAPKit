@@ -583,9 +583,9 @@ class OptionRoundTripTests(unittest.TestCase):
     """One construct -> parse -> construct cycle per registered code."""
 
     #: The generator module, loaded once for the whole class. Loading it imports
-    #: :mod:`pcapkit`, so it must happen after :meth:`setUp` has purged the
-    #: previous test's copy -- hence a class attribute filled in
-    #: :meth:`setUpClass` rather than a module-level import.
+    #: :mod:`pcapkit`, so it must happen after the purge in :meth:`setUpClass`
+    #: -- hence a class attribute filled in there rather than a module-level
+    #: import.
     options = None  # type: Any
 
     @classmethod

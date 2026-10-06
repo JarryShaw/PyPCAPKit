@@ -121,9 +121,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
     def test_index_raises_because_no_class_level_identity_exists(self) -> None:
         """The fallback has no class-level identity, so it keeps raising rather
-        than being handed a placeholder index. This is also the other half of
-        the #917 contract in :class:`IPv6ExtSharedBaseContractTests`, which
-        relies on this test rather than repeating it.
+        than being handed a placeholder index.
+        :class:`IPv6ExtSharedBaseContractTests` relies on this test for that
+        half of the #917 contract.
         """
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
         from pcapkit.utilities.exceptions import UnsupportedCall
