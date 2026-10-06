@@ -63,7 +63,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph application [Application Layer]
-           Application --> HTTP & FTP & OSPF & RARP
+           Application --> HTTP & FTP & NGAP & OSPF & RARP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -108,14 +108,11 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click Ethernet "/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
        click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click L2TPv2 "/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
-       click OSPF "/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
        click VLAN "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
        click C_Tag "/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
        click ARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP"
        click InARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP"
-       click RARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP"
-       click DRARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
 
        click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet"
        click AH "/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH"
@@ -143,6 +140,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click h2 "/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
        click FTP "/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP"
        click FTP_DATA "/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA"
+       click NGAP "/pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP"
+       click OSPF "/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
+       click RARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP"
+       click DRARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
 
        click Raw "/pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw"
        click NoPayload "/pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload"

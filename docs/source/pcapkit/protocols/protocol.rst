@@ -6,8 +6,17 @@ Root Protocol
 .. currentmodule:: pcapkit.protocols.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
-:class:`~pcapkit.protocols.protocol.Protocol` only, the abstract base class for
-all protocol families, with pre-defined utility arguments and methods.
+:class:`~pcapkit.protocols.protocol.Protocol`, an abstract base class with
+pre-defined utility arguments and methods. Inherit it directly only to create a
+new protocol stack; a new protocol in an existing layer subclasses that layer's
+base class -- :class:`~pcapkit.protocols.link.link.Link`,
+:class:`~pcapkit.protocols.internet.internet.Internet`,
+:class:`~pcapkit.protocols.transport.transport.Transport` or
+:class:`~pcapkit.protocols.application.application.Application` -- instead, c.f.
+:doc:`/ext`. The built-in protocol families, those layer classes included,
+derive from :class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass
+is :class:`~pcapkit.protocols.protocol.ProtocolMeta`; both are listed under
+Internal Definitions below.
 
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:
