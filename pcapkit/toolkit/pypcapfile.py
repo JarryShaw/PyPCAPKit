@@ -568,8 +568,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         fin=bool(tcp.fin),                    # finish flag
         header=segment[:hdr_len],             # raw bytes type header
         payload=bytearray(payload),           # raw bytearray type payload
-        first=tcp.seqnum,                     # this sequence number
-        last=tcp.seqnum + len(payload),       # next (wanted) sequence number
+        first=tcp.seqnum,                     # first sequence number of payload
+        last=tcp.seqnum + len(payload) - 1,   # last sequence number of payload
         len=len(payload),                     # payload length, header excludes
         timestamp=packet2timestamp(packet),   # capture timestamp
     )
