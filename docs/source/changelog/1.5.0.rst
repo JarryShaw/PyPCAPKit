@@ -4,8 +4,8 @@
 The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
-and a defect programme run through the issue tracker, citing 301 issues and pull
-requests from :pr:`121` to :issue:`1156` as of this revision. The programme is still
+and a defect programme run through the issue tracker, citing 319 issues and pull
+requests from :pr:`121` to :issue:`1195` as of this revision. The programme is still
 running, so those figures are a snapshot rather than a total.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
@@ -901,7 +901,10 @@ Fixed
   ``Global Header`` record, so the default engine writes ``in.pcap`` back byte for
   byte. The third-party engines hand the writer no frame octets, so they fall back to
   JSON with a ``FormatWarning``, as their flow tracing already does, and a PCAP-NG
-  input raises ``FormatError`` (:issue:`1127`).
+  input raises ``FormatError`` (:issue:`1127`). The written global header also
+  dropped the input's ``thiszone``, ``sigfigs`` and ``snaplen``, so only 1 of 17
+  sample PCAP files came back byte for byte; the PCAP engine now passes all three
+  through ``_open_output`` to ``PCAPIO``, and all 17 do (:issue:`1165`).
 
 pcapkit.protocols
 -----------------
@@ -2025,6 +2028,63 @@ Fixed
   ``make()``'s new ``total_length`` (IPv4, UDP) or ``payload_length`` (IPv6) keyword,
   which computes the length as before when omitted, so ``IPv4(payload=...)`` is
   unchanged (:issue:`1155`).
+* **a breaking change to** the layer chain of a capture cut inside a header: a next
+  layer parsed from too few captured octets was zero-filled, and ``from_data`` rebuilt
+  the fabricated octets. ``IPv4.read`` handed UDP the declared payload length when
+  nothing past the IPv4 header was captured, so ``test.pcapng`` frame 3 rebuilt with
+  8 invented UDP octets (:issue:`1167`). Every ``_import_next_layer`` now goes through
+  one guard: no captured octets gives ``NoPayload``, and fewer than the next layer's
+  ``__length_hint__`` gives ``Raw`` unless the parsed header fits anyway, as a 12-octet
+  L2TPv2 ZLB does. A header-only IPv6 packet is ``IPv6`` rather than ``IPv6:UDP:Raw``,
+  and frame 3 is ``Ethernet:Raw``, rebuilt byte for byte (:issue:`1170`). The guard
+  needed honest hints, so ``IPv6_Route`` (4), ``MH`` (6), ``HOPOPT`` and
+  ``IPv6_Opts`` (2) now hint their 8-octet minimum header (:issue:`1173`), and so does
+  the ``IPv6_Ext`` fallback, which hinted 2 (:issue:`1178`).
+* **a breaking change to** ``L2TPv2``, against :rfc:`2661` section 3.1. ``Type`` was
+  inverted; it is now ``Data = 0`` and ``Control = 1``, regenerated in
+  ``pcapkit.const`` from the fixed ``pcapkit.vendor`` table, so the same bytes parse
+  to the other ``flags.type``, and a default ``make()`` writes T=0 where it wrote T=1.
+  A control message now gets ``L`` and a Length field automatically, and the offset
+  pad, which ``from_data`` zero-filled, is kept as ``info.padding`` -- a new key in
+  ``info`` and in dumped output (:issue:`1175`). ``from_data`` also cleared ``L`` and
+  dropped the Length field: ``_make_data`` returned it as ``length``, which
+  ``ProtocolBase`` takes as the parse length. ``make()``'s ``length`` keyword is now
+  ``total_length``, written as given; a call still passing ``length`` loses ``L``
+  silently (:issue:`1172`). ``make()`` also gains ``length_flag`` and ``padding``,
+  and raises ``ProtocolError`` for a ``total_length`` with ``length_flag=False``.
+* **a breaking change to** ``IPv6.from_data``: it dropped the extension-header
+  chain, so a packet carrying a Routing header rebuilt 48 octets as 40. The chain is
+  now kept in wire order under a hidden ``__exthdr__`` key, absent from ``to_dict``
+  and dumped output, and re-emitted ahead of the upper layer. Of 1,602 sample frames,
+  130 that rebuilt wrong now rebuild exactly, and 50 that rebuilt with wrong bytes
+  raised ``AttributeError`` instead (:issue:`1177`). Those were two older defects, now fixed:
+  ``HIP.alias`` read ``_info`` before ``read`` had set it, which also broke a
+  standalone HIP parse and ``HIP.from_data`` (:issue:`1184`), and the MPL option's
+  maker called ``bit_length()`` on the ``IPv6Address`` seed of an S=0 option. MPL in
+  ``HOPOPT`` and ``IPv6_Opts`` now takes ``S`` from the parsed option or a new
+  ``seed_type`` keyword, and a missing or oversized seed raises ``ProtocolError``
+  (:issue:`1185`). With both fixed, all 179 IPv6 frames of the five
+  ``options-*.pcap`` captures rebuild byte for byte.
+* **a breaking change to** the SMF_DPD option's maker in ``HOPOPT`` and
+  ``IPv6_Opts``: it overwrote the parsed DPD mode, so H-DPD rebuilt as I-DPD, and
+  inferred the TaggerID type from the Tagger ID's length, so a 4-octet ``DEFAULT``
+  Tagger ID rebuilt as IPv4. Both now come from the parsed option, or from ``mode``
+  and a new ``tid_type`` keyword. A Tagger ID that does not fit its type raises
+  ``ProtocolError``, so a 17-octet one does where it raised ``FieldValueError``, and
+  ``tid=b''`` builds a NULL Tagger ID where it raised ``ValueError`` (:issue:`1190`).
+  An H-DPD option with an empty Hash Assist Value raises ``ProtocolError`` where it
+  raised a bare ``IndexError`` (:issue:`1193`).
+* a ``ForwardMatchField`` that read short at the end of the stream rewound by its
+  declared width, not by the octets it read, so the fields after it re-read the
+  preceding octet. An SMF_DPD option in the last two octets of a ``HOPOPT`` or
+  ``IPv6_Opts`` header was re-read from the padding and raised a bare
+  ``TypeError``; it now raises ``FieldValueError``, as CALIPSO and MPL do. A full
+  read rewinds as before (:issue:`1195`).
+* ``HIP()`` with no parameters wrote Header Length 0, below :rfc:`7401` section
+  5.1's minimum of 4 for the two HITs, so it failed to read back with
+  ``ProtocolError``; it now writes 4. ``read`` names a Header Length below 4 in a new
+  ``invalid header length`` message. Lengths 0 to 3 already raised ``ProtocolError``,
+  so only the message changes (:issue:`1189`).
 
 pcapkit.toolkit
 ---------------
@@ -2438,6 +2498,15 @@ Changed
   PR does not touch; the five ``Compat`` names are excluded from the replacement. One
   file, ``.github/workflows/unit-tests.yml``, 167 lines added; no library or test code
   (:pr:`856`).
+* the prose the post-:issue:`719` defect wave added or touched, checked against the
+  code; no code changes. ``MesgIDOption.seconds`` in the Mobility Header schema said
+  seconds since 1970 where it holds an :rfc:`1305` NTP count from 1900; two
+  ``HTTP._guess_version`` comments predated the HTTP/2 gate; and the
+  ``_parse_next_layer`` note miscounted the captured octets. ``Extractor._open_output``
+  now says only the PCAP engine passes header fields, ``Extractor.run`` and
+  the PCAP-NG engine's ``run`` list the ``FormatError`` for PCAP output from a PCAP-NG input, and
+  the extraction and engine pages document the PCAP-output path (:pr:`1179`,
+  :pr:`1180`, :pr:`1186`, :issue:`1103`).
 
 Fixed
 ~~~~~
