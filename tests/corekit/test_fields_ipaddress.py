@@ -606,30 +606,24 @@ class IPAddressFieldTests(unittest.TestCase):
                 locator_set=[{'ip': int(True)}]).pack().hex(),
             '00c1001800000400000000000000000000000000000000000000000100000000')
 
-    def test_ipv4_interface_post_process_rejects_a_non_contiguous_netmask(self) -> None:
-        """``IPv4InterfaceField.post_process`` builds
-        ``ipaddress.ip_interface(f'{ip}/{mask}')`` from wire bytes whose
-        trailing four octets are meant to be a dotted netmask. Unlike the
-        leading four octets (always exactly 4 octets, so always a valid
-        address), those trailing octets are not guaranteed to form a
-        *contiguous* netmask -- e.g. a capture with a malformed or corrupted
-        IPv4 interface option can carry ``0.255.0.255``, which
-        :func:`ipaddress.ip_interface` rejects with a bare
-        :exc:`~ipaddress.NetmaskValueError`. This is reachable through
-        :meth:`~pcapkit.corekit.fields.field.FieldBase.unpack` alone, with no
-        malformed-length input required, and must raise :exc:`FieldValueError`
-        instead.
+    def test_ipv4_interface_post_process_keeps_a_non_contiguous_netmask(self) -> None:
+        """``IPv4InterfaceField.post_process`` reads wire bytes whose trailing
+        four octets are meant to be a dotted netmask. Those octets are not
+        guaranteed to form a *contiguous* netmask -- e.g. a capture with a
+        malformed or corrupted IPv4 interface option can carry
+        ``0.255.0.255``, which :func:`ipaddress.ip_interface` rejects. The
+        field keeps such a mask as given, so the value packs back to the same
+        octets (c.f. :issue:`1294`).
         """
         from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField
-        from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         field = IPv4InterfaceField()
         raw = ipaddress.IPv4Address('1.2.3.4').packed + bytes([0, 255, 0, 255])
 
-        with self.assertRaises(FieldValueError) as context:
-            field.unpack(raw, {})
-        self.assertIsInstance(context.exception, BaseError)
-        self.assertIn('0.255.0.255', str(context.exception))
+        value = field.unpack(raw, {})
+        self.assertIsInstance(value, ipaddress.IPv4Interface)
+        self.assertEqual(value.netmask, ipaddress.IPv4Address('0.255.0.255'))
+        self.assertEqual(field.pack(value, {}), raw)
 
 
 if __name__ == '__main__':
