@@ -202,18 +202,20 @@ class FTPUnitTests(unittest.TestCase):
         from pcapkit.const.ftp.return_code import ReturnCode
         from pcapkit.protocols.application.ftp import FTP
 
-        request = DummyData(cmmd=Command.USER, code=None, args='anonymous', more=False, charset=None)
+        request = DummyData(cmmd=Command.USER, code=None, args='anonymous', more=False, charset=None,
+                            raw_cmmd=None, lines=())
         response = DummyData(cmmd=None, code=ReturnCode.CODE_220, args='Ready', more=True,
-                             charset='latin-1')
+                             charset='latin-1', raw_cmmd=None, lines=())
 
         self.assertEqual(
             FTP._make_data(request),
-            {'cmmd': Command.USER, 'code': None, 'args': 'anonymous', 'more': False, 'charset': None},
+            {'cmmd': Command.USER, 'code': None, 'args': 'anonymous', 'more': False, 'charset': None,
+             'raw_cmmd': None, 'lines': ()},
         )
         self.assertEqual(
             FTP._make_data(response),
             {'cmmd': None, 'code': ReturnCode.CODE_220, 'args': 'Ready', 'more': True,
-             'charset': 'latin-1'},
+             'charset': 'latin-1', 'raw_cmmd': None, 'lines': ()},
         )
 
     def test_ftp_data_channel_name_is_stable(self) -> None:

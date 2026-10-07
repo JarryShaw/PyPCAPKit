@@ -1614,6 +1614,7 @@ class HTTPUnitTests(unittest.TestCase):
             receipt=SimpleNamespace(version='1.1', method=Method.GET, uri='/index.html'),
             header=headers,
             body=b'body',
+            raw_header=(),
         )
 
         self.assertEqual(HTTPv1.id(), ('HTTP', 'HTTPv1'))

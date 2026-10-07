@@ -33,9 +33,12 @@ class HTTP(Protocol):
     header: 'OrderedMultiDict[str, str]'
     #: HTTP body.
     body: 'Any'
+    #: HTTP field lines as received, CRLF excluded and ``obs-fold``
+    #: continuations kept: one per field in :attr:`header`, in order.
+    raw_header: 'tuple[bytes, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, receipt: 'Header', header: 'OrderedMultiDict[str, str]', body: 'Any') -> None: ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, receipt: 'Header', header: 'OrderedMultiDict[str, str]', body: 'Any', raw_header: 'tuple[bytes, ...]') -> None: ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Header(Data):
@@ -59,9 +62,11 @@ class RequestHeader(Header):
     version: 'str'
     #: Charset to encode :attr:`uri` with, :obj:`None` for UTF-8.
     charset: 'Optional[str]'
+    #: HTTP request line as received, CRLF excluded.
+    raw_line: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str', charset: 'Optional[str]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str', charset: 'Optional[str]', raw_line: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -78,6 +83,8 @@ class ResponseHeader(Header):
     message: 'str'
     #: Charset to encode :attr:`message` with, :obj:`None` for UTF-8.
     charset: 'Optional[str]'
+    #: HTTP status line as received, CRLF excluded.
+    raw_line: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str', charset: 'Optional[str]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str', charset: 'Optional[str]', raw_line: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

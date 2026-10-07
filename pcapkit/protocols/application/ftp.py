@@ -31,7 +31,7 @@ from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from typing import Any, Iterable, NoReturn, Optional
 
     from typing_extensions import Literal
 
@@ -110,11 +110,24 @@ class FTP(Application[Data_FTP, Schema_FTP],
         schema = self.__header__
 
         data = schema.data
-        if (match := FTP_REQUEST.match(data)) is not None:
-            cmmd = match.group('cmmd').decode()
+        # NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive whole in one
+        # segment. Its first line is parsed as any reply line, and the lines
+        # after it are kept as received in ``lines``. A segment holding anything
+        # else -- no closing line, or more after it -- is refused as before.
+        line, lines = data, ()  # type: bytes, tuple[bytes, ...]
+        if FTP_RESPONSE.match(data) is None and data.endswith(b'\r\n'):
+            first, _, rest = data.partition(b'\r\n')
+            if rest and (match := FTP_RESPONSE.match(first + b'\r\n')) is not None \
+                    and match.group('more'):
+                rest_lines = tuple(rest[:-2].split(b'\r\n'))
+                if self._test_lines(match.group('code'), rest_lines):
+                    line, lines = first + b'\r\n', rest_lines
+
+        if (match := FTP_REQUEST.match(line)) is not None:
+            raw_cmmd = match.group('cmmd')
             args = match.group('args')
 
-            cmmd_val = Enum_Command.get(cmmd)
+            cmmd_val = Enum_Command.get(raw_cmmd.decode())
             args_val, charset = self._decode_args(args)
 
             ftp = Data_Request(
@@ -122,8 +135,9 @@ class FTP(Application[Data_FTP, Schema_FTP],
                 cmmd=cmmd_val,
                 args=args_val,
                 charset=charset,
+                raw_cmmd=raw_cmmd,
             )  # type: Data_FTP
-        elif (match := FTP_RESPONSE.match(data)) is not None:
+        elif (match := FTP_RESPONSE.match(line)) is not None:
             code = int(match.group('code'))
             more = bool(match.group('more'))
             args = match.group('text') if more else match.group('args')
@@ -137,6 +151,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
                 more=more,
                 args=args_val,
                 charset=charset,
+                lines=lines,
             )
         else:
             raise ProtocolError('FTP: invalid packet format')
@@ -148,6 +163,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
              args: 'Optional[str | bytes]' = None,
              more: 'bool' = False,
              charset: 'Optional[str]' = None,
+             raw_cmmd: 'Optional[bytes]' = None,
+             lines: 'Iterable[bytes]' = (),
              **kwargs: 'Any') -> 'Schema_FTP':
         """Make (construct) packet data.
 
@@ -156,16 +173,29 @@ class FTP(Application[Data_FTP, Schema_FTP],
         the command or code, except after the hyphen of a multi-line reply,
         which the text follows immediately (:rfc:`959#section-4`).
 
+        Commands are case-insensitive (:rfc:`959#section-5`), so ``raw_cmmd``
+        is written in place of ``cmmd`` whenever the two differ only in case,
+        which keeps the case the command was read in.
+
         Args:
             cmmd: FTP command.
             code: FTP status code.
             args: Optional FTP command arguments and/or status messages.
             more: More status messages to follow for response packets.
             charset: Encoding for :obj:`str` arguments, **UTF-8** if not given.
+            raw_cmmd: FTP command as received, in its original case.
+            lines: Lines of a multi-line reply after the first, each written
+                verbatim and terminated with CRLF; the last, and only the last,
+                is the closing line, ``<code> SP <text>``.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
+
+        Raises:
+            ProtocolError: If neither or both of ``cmmd`` and ``code`` are
+                given, or if ``lines`` are given other than as the rest of a
+                multi-line reply.
 
         """
         if cmmd is not None and code is None:
@@ -175,6 +205,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
                 prefix = cmmd.encode()
             else:
                 prefix = cmmd.value
+            if raw_cmmd is not None and raw_cmmd.upper() == prefix.upper():
+                prefix = raw_cmmd
 
             mf = b''
         elif cmmd is None and code is not None:
@@ -184,6 +216,10 @@ class FTP(Application[Data_FTP, Schema_FTP],
             mf = b'-' if more else b''
         else:
             raise ProtocolError('FTP: invalid packet type')
+
+        lines = tuple(lines)
+        if lines and not (mf and self._test_lines(prefix, lines)):
+            raise ProtocolError('FTP: lines must close a multi-line reply')
 
         if args is None:
             suffix = b''
@@ -195,7 +231,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
         # the separating SP, absent with no arguments and after a hyphen
         sep = b'' if args is None or mf else b' '
         return Schema_FTP(
-            data=b'%s%s%s%s\r\n' % (prefix, mf, sep, suffix),
+            data=b'%s%s%s%s\r\n' % (prefix, mf, sep, suffix) + b''.join(b'%s\r\n' % line for line in lines),
         )
 
     ##########################################################################
@@ -219,7 +255,31 @@ class FTP(Application[Data_FTP, Schema_FTP],
             'args': getattr(data, 'args', None),
             'more': getattr(data, 'more', False),
             'charset': getattr(data, 'charset', None),
+            'raw_cmmd': getattr(data, 'raw_cmmd', None),
+            'lines': getattr(data, 'lines', ()),
         }
+
+    @staticmethod
+    def _test_lines(code: 'bytes', lines: 'tuple[bytes, ...]') -> 'bool':
+        """Whether ``lines`` are the rest of a multi-line reply with ``code``.
+
+        A multi-line reply ends at the first line that starts with its code
+        followed by SP (:rfc:`959#section-4`). The lines before that one are
+        free text, which may begin with digits -- the code with a hyphen
+        included -- but, as in any reply line, carry no LF.
+
+        Args:
+            code: Reply code of the first line.
+            lines: Lines after the first, CRLF excluded.
+
+        Returns:
+            Whether the last line, and only the last, is the closing line.
+
+        """
+        closing = code + b' '
+        if not lines or not all(isinstance(line, bytes) and b'\n' not in line for line in lines):
+            return False
+        return lines[-1].startswith(closing) and not any(line.startswith(closing) for line in lines[:-1])
 
     def _decode_args(self, args: 'Optional[bytes]') -> 'tuple[Optional[str], Optional[str]]':
         """Decode arguments, recording how to encode them back.
