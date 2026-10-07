@@ -8,7 +8,7 @@ from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
     from pcapkit.const.http.method import Method as Enum_Method
     from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
@@ -57,9 +57,11 @@ class RequestHeader(Header):
     uri: 'str'
     #: HTTP request version.
     version: 'str'
+    #: Charset to encode :attr:`uri` with, :obj:`None` for UTF-8.
+    charset: 'Optional[str]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str', charset: 'Optional[str]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -74,6 +76,8 @@ class ResponseHeader(Header):
     status: 'Enum_StatusCode'
     #: HTTP response status message.
     message: 'str'
+    #: Charset to encode :attr:`message` with, :obj:`None` for UTF-8.
+    charset: 'Optional[str]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str', charset: 'Optional[str]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
