@@ -979,7 +979,13 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
                 # and :class:`~pcapkit.corekit.fields.collections.ListField` both
                 # do this -- see the octets actually consumed.
-                data.seek(-length, io.SEEK_CUR)
+                #
+                # The rewind is by the octets actually read, not by ``length``:
+                # near the end of the stream the read comes back short, and
+                # rewinding the full width would move the stream *before* the
+                # forward match, so the fields after it would re-read the
+                # preceding octet as their first.
+                data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
             elif isinstance(field, OptionField) and field.option_padding > 0:
                 # the option list ended before the declared field length was
