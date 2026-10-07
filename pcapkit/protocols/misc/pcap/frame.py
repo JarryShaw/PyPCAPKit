@@ -37,7 +37,7 @@ from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.compat import localcontext
-from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import RegistryError, StreamEOFError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -213,6 +213,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         """
         if cast('Optional[Schema_Frame]', self.__header__) is None:
             packet = kwargs.get('__packet__', {})  # packet data
+
+            # NOTE: Reached on the parsing path only; the construction path
+            # sets ``__header__`` before unpacking its own buffer.
+            self._check_record_floor(length)
+
             packet['byteorder'] = self._ghdr.magic_number.byteorder
             self.__header__ = cast('Schema_Frame', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
@@ -428,6 +433,35 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
         return 16
+
+    def _check_record_floor(self, length: 'Optional[int]') -> 'None':
+        """Refuse a tail too short to hold a record header.
+
+        Args:
+            length: Length of packet data, as the caller declared it, or
+                :obj:`None` to measure what is left in
+                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+
+        Raises:
+            StreamEOFError: If fewer than sixteen octets are left to read.
+
+        A PCAP record header is sixteen octets, which is what
+        :meth:`__length_hint__` reports. A shorter tail is not a record, so
+        parsing one would only invent fields from zero padding. Reporting the
+        end of the stream instead lets :meth:`Extractor.record_frames
+        <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
+        frames read so far, as the PCAP-NG reader does for a truncated block
+        (:issue:`678`). See GitHub issue :issue:`1265`.
+
+        """
+        if length is None:
+            current = self._file.tell()
+            length = self._file.seek(0, io.SEEK_END) - current
+            self._file.seek(current, io.SEEK_SET)
+
+        if length < 16:
+            raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
+                                 'fewer than the 16 a record header needs', quiet=True)
 
     # NOTE: This is a hack to make the ``__index__`` method work both as a
     # class method and an instance method.
