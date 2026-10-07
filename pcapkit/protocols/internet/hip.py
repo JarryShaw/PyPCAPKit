@@ -592,6 +592,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         if extension:
             return hip
+
+        # NOTE: ``_decode_next_layer`` builds the protocol chain from
+        # :attr:`self.alias <HIP.alias>`, which reads ``self._info``, and
+        # ``__post_init__`` assigns that only once this method returns.
+        self._info = hip
         return self._decode_next_layer(hip, schema.next, length - hip.length)
 
     def make(self,
