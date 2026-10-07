@@ -18,34 +18,54 @@ smallest non-zero code (80 kbps) is rounded down to ``N = 0`` rather than refuse
 
 Every case builds its own octets in memory, so this belongs to the unit tier.
 
+:mod:`pcapkit` is resolved at call time, after
+:func:`~tests._support.reimport_once_per_class`, not at module load: a
+:class:`TCP` bound at load builds option schemas of whatever import was live
+then, and once an earlier module has purged it, :meth:`ListField.pack
+<pcapkit.corekit.fields.collections.ListField.pack>` checks them against the new
+import's ``Schema`` and raises ``Field options has invalid value``.
+
 """
 from __future__ import annotations
 
 import unittest
+from typing import TYPE_CHECKING
 
-from pcapkit.const.tcp.option import Option
-from pcapkit.protocols.transport.tcp import TCP
+from tests._support import reimport_once_per_class
 
-#: Quick-Start Response option kind, per :rfc:`4782`.
-QS = Option.Quick_Start_Response
+if TYPE_CHECKING:
+    from pcapkit.const.tcp.option import Option
+    from pcapkit.protocols.transport.tcp import TCP
+
+
+def qs() -> 'Option':
+    """Quick-Start Response option kind, per :rfc:`4782`."""
+    from pcapkit.const.tcp.option import Option
+    return Option.Quick_Start_Response
 
 
 def build(rate: 'int', payload: 'bytes' = b'') -> 'bytes':
     """Construct a segment that carries one Quick-Start Response option."""
+    from pcapkit.protocols.transport.tcp import TCP
     return TCP(srcport=1, dstport=2, payload=payload,
-               options=[(QS, {'rate': rate, 'diff': 3, 'nonce': 0x1234})]).data
+               options=[(qs(), {'rate': rate, 'diff': 3, 'nonce': 0x1234})]).data
 
 
 def parse(raw: 'bytes') -> 'TCP':
     """Parse ``raw`` as a TCP segment."""
+    from pcapkit.protocols.transport.tcp import TCP
     return TCP(raw, len(raw))
 
 
 class QuickStartResponseTests(unittest.TestCase):
     """Quick-Start Response against :rfc:`4782` Sections 3.1 and 4.2."""
 
+    def setUp(self) -> 'None':
+        reimport_once_per_class(self)
+
     def test_wire_octets_parse(self) -> 'None':
         """Hand-built option octets parse, with and without a payload."""
+        QS = qs()
         option = bytes([27, 8, 0x04, 3]) + (0x1234 << 2).to_bytes(4, 'big')
         header = bytes.fromhex('0001000200000000000000007010ffff00000000')
         for payload in (b'', b'xyz'):
@@ -60,6 +80,9 @@ class QuickStartResponseTests(unittest.TestCase):
 
     def test_round_trip(self) -> 'None':
         """Construct, parse and construct again gives identical octets."""
+        from pcapkit.protocols.transport.tcp import TCP
+
+        QS = qs()
         for rate in (0, 80, 640, 1_310_720):
             for payload in (b'', b'xyz'):
                 with self.subTest(rate=rate, payload=payload):
@@ -73,6 +96,7 @@ class QuickStartResponseTests(unittest.TestCase):
 
     def test_rate_rounds_down_to_a_representable_code(self) -> 'None':
         """A rate is floored to ``40 * 2 ** N``, and below 80 kbps to ``N = 0``."""
+        QS = qs()
         for rate, code in ((1, 0), (20, 0), (39, 0), (40, 0), (79, 0), (80, 1), (159, 1), (160, 2)):
             with self.subTest(rate=rate):
                 raw = build(rate)

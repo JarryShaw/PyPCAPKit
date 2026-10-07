@@ -11,11 +11,17 @@ frame could not reproduce it.
 
 Every case builds its own octets in memory and reads no capture.
 
+:class:`Ethernet` is imported inside each test, after
+:func:`~tests._support.reimport_once_per_class`, not at module load: a class
+bound at load belongs to whatever :mod:`pcapkit` import was live then, and once
+an earlier module has purged it, the payload :class:`Raw` resolves to the new
+import, which the old :class:`ProtocolBase` rejects, so ``from_data`` drops it.
+
 """
 
 import unittest
 
-from pcapkit.protocols.link.ethernet import Ethernet
+from tests._support import reimport_once_per_class
 
 #: Destination MAC, source MAC, EtherType (IPv4) and a short payload.
 FRAMES = {
@@ -27,7 +33,12 @@ FRAMES = {
 class TestEthernetMacRoundTrip(unittest.TestCase):
     """Pin the wire form of the MAC address fields."""
 
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
     def test_make_packs_mac_addresses_as_octets(self) -> None:
+        from pcapkit.protocols.link.ethernet import Ethernet
+
         proto = Ethernet(dst='01:23:45:67:89:ab', src='fe-dc-ba-98-76-54',
                          payload=b'payload')
         self.assertEqual(proto.data, FRAMES['nontrivial'])
@@ -35,10 +46,14 @@ class TestEthernetMacRoundTrip(unittest.TestCase):
         self.assertEqual(proto.info.src, 'fe:dc:ba:98:76:54')
 
     def test_make_default_mac_is_all_zero_octets(self) -> None:
+        from pcapkit.protocols.link.ethernet import Ethernet
+
         proto = Ethernet(payload=b'payload')
         self.assertEqual(proto.data, FRAMES['all-zero'])
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
+        from pcapkit.protocols.link.ethernet import Ethernet
+
         for name, frame in FRAMES.items():
             with self.subTest(frame=name):
                 parsed = Ethernet(frame)
