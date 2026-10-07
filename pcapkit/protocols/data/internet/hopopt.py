@@ -270,10 +270,10 @@ class MPLOption(Option):
     #: Sequence number.
     seq: 'int'
     #: Seed ID.
-    seed_id: 'Optional[int]'
+    seed_id: 'Optional[int | IPv6Address]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', seed_type: 'int', flags: 'MPLFlags', seq: 'int', seed_id: 'Optional[int]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', seed_type: 'int', flags: 'MPLFlags', seq: 'int', seed_id: 'Optional[int | IPv6Address]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final

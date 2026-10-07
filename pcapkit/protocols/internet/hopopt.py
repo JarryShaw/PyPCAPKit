@@ -1845,47 +1845,78 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         )
 
     def _make_opt_mpl(self, code: 'Enum_Option', opt: 'Optional[Data_MPLOption]' = None, *,
+                      seed_type: 'Optional[Enum_SeedID | StdlibEnum | AenumEnum | str | int]' = None,
+                      seed_type_default: 'Optional[int]' = None,
+                      seed_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                      seed_type_reversed: 'bool' = False,
                       max: 'bool' = False,
                       drop: 'bool' = False,
                       seq: 'int' = 0,
-                      seed: 'Optional[int]' = None,
+                      seed: 'Optional[int | IPv6Address]' = None,
                       **kwargs: 'Any') -> 'Schema_MPLOption':
         """Make HOPOPT MPL option.
 
         Args:
             code: option type value
             opt: option data
+            seed_type: seed-id type (``S`` field); inferred from ``seed`` if not given
+            seed_type_default: default value of seed-id type
+            seed_type_namespace: namespace of seed-id type
+            seed_type_reversed: reversed flag of seed-id type
             max: maximum sequence number flag
             drop: drop packet flag
             seq: MPL sequence number
-            seed: MPL seed ID
+            seed: MPL seed ID, ignored when the seed-id type is
+                :attr:`~pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS`,
+                as the seed is then the IPv6 source address
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the seed ID is missing or does not fit the seed-id type.
+
         """
         if opt is not None:
+            seed_type = opt.seed_type
             max = opt.flags.max
             drop = opt.flags.drop
             seq = opt.seq
             seed = opt.seed_id
 
-        if seed is None:
+        if seed_type is not None:
+            kind = self._make_index(seed_type, seed_type_default, namespace=seed_type_namespace,
+                                    reversed=seed_type_reversed, pack=False)
+        elif seed is None or isinstance(seed, ipaddress.IPv6Address):
             kind = Enum_SeedID.IPV6_SOURCE_ADDRESS
-            clen = 2
         else:
             seed_bl = seed.bit_length()
             if seed_bl <= 16:
                 kind = Enum_SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER
-                clen = 4
             elif seed_bl <= 64:
                 kind = Enum_SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER
-                clen = 10
-            elif seed_bl <= 128:
+            else:
                 kind = Enum_SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER
+
+        if kind == Enum_SeedID.IPV6_SOURCE_ADDRESS:
+            # The seed is the IPv6 source address, which is not on the wire.
+            seed_id = None  # type: Optional[int]
+            clen = 2
+        else:
+            if kind == Enum_SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER:
+                clen = 4
+            elif kind == Enum_SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER:
+                clen = 10
+            elif kind == Enum_SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER:
                 clen = 18
             else:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid MPL seed-id type: {kind}')
+
+            if seed is None:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] missing MPL seed ID for type {kind}')
+            seed_id = int(seed)
+            if seed_id.bit_length() > (clen - 2) * 8:
                 raise ProtocolError(f'{self.alias}: [OptNo {code}] too large MPL seed ID: {seed}')
 
         return Schema_MPLOption(
@@ -1897,7 +1928,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 'drop': drop,
             },
             seq=seq,
-            seed=seed,
+            seed=seed_id,
         )
 
     def _make_opt_ilnp(self, code: 'Enum_Option', opt: 'Optional[Data_ILNPOption]' = None, *,
