@@ -245,7 +245,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              priority: 'bool' = False,
-             length: 'Optional[int]' = None,
+             total_length: 'Optional[int]' = None,
              tunnel_id: 'int' = 0,
              session_id: 'int' = 0,
              ns: 'Optional[int]' = None,
@@ -262,7 +262,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             type_namespace: Namespace of type.
             type_reversed: Reversed namespace of type.
             priority: Priority flag.
-            length: Length of packet data.
+            total_length: Length of the datagram, header included; the Length
+                field and its ``L`` flag are omitted when this is :data:`None`.
             tunnel_id: Tunnel ID.
             session_id: Session ID.
             ns: Sequence number.
@@ -281,13 +282,13 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         return Schema_L2TP(
             flags={
                 'type': type_,
-                'len': length is not None,
+                'len': total_length is not None,
                 'seq': ns is not None and nr is not None,
                 'offset': offset is not None,
                 'prio': priority,
                 'version': version,
             },
-            length=length,
+            length=total_length,
             tunnel_id=tunnel_id,
             session_id=session_id,
             ns=ns,
@@ -364,7 +365,11 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             'type': data.flags.type,
             'priority': data.flags.prio,
             'version': data.version,
-            'length': data.length,
+            # NOTE: Passed as ``total_length`` since ``length`` is the parse
+            # length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so
+            # under that key it never reached :meth:`make`, and the rebuild
+            # dropped both the Length field and the ``L`` flag (:issue:`1172`).
+            'total_length': data.length,
             'tunnel_id': data.tunnelid,
             'session_id': data.sessionid,
             'ns': data.ns,
