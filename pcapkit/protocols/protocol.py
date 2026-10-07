@@ -12,6 +12,7 @@ utility arguments and methods of specified protocols.
 
 """
 import abc
+import ast
 import collections
 import contextlib
 import difflib
@@ -30,6 +31,7 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 import aenum
 
 from pcapkit.corekit.context import ContextRegistry
+from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.sentinels import ABSENT, AbsentType  # pylint: disable=unused-import
@@ -43,8 +45,9 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
-                                          StructError, UnsupportedCall)
+from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
+                                          ProtocolNotImplemented, RegistryError, StructError,
+                                          UnsupportedCall)
 from pcapkit.utilities.warnings import RegistryWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
@@ -66,6 +69,128 @@ _VT = TypeVar('_VT')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
+
+
+@functools.lru_cache(maxsize=None)
+def _make_index_calls(func: 'Callable[..., Any]') -> 'tuple[tuple[int, int, str], ...]':
+    """Locate the ``_make_index`` calls in the source of ``func``.
+
+    Args:
+        func: method calling ``_make_index``
+
+    Returns:
+        One ``(first_line, last_line, argument)`` triple per call whose first
+        argument is a plain name, with absolute line numbers. Empty if the
+        source of ``func`` is unavailable.
+
+    """
+    try:
+        lines, start = inspect.getsourcelines(func)
+        tree = ast.parse(textwrap.dedent(''.join(lines)))
+    except (OSError, TypeError, SyntaxError):
+        return ()
+    return tuple(
+        (node.lineno + start - 1, getattr(node, 'end_lineno', node.lineno) + start - 1, node.args[0].id)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        and node.func.attr == '_make_index' and node.args and isinstance(node.args[0], ast.Name)
+    )
+
+
+def _passes_raw(value: 'Any', nested: 'bool' = False) -> 'bool':
+    """Tell if ``make()`` keywords may carry a raw :obj:`bytes` item.
+
+    Args:
+        value: keyword arguments of ``make()``, or a value within them
+        nested: if ``value`` sits inside a container
+
+    Returns:
+        :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,
+        :obj:`tuple` or :obj:`dict` among ``value``, or a
+        :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A
+        top-level :obj:`bytes` keyword (e.g. a payload) does not count.
+
+    """
+    if isinstance(value, bytes):
+        return nested
+    if isinstance(value, Schema):  # a ready-made item, which ``make()`` may pack into raw octets
+        return True
+    if isinstance(value, dict):
+        return any(_passes_raw(item, nested) for key, item in value.items() if key != '__packet__')
+    if isinstance(value, (list, tuple)):
+        return any(_passes_raw(item, True) for item in value)
+    return False
+
+
+@functools.lru_cache(maxsize=None)
+def _schema_slots(schema: 'Type[Schema]') -> 'tuple[str, ...]':
+    """Names of the fields of ``schema`` that hold a schema.
+
+    Args:
+        schema: schema class
+
+    Returns:
+        Names of the :class:`~pcapkit.corekit.fields.misc.SchemaField` and
+        :class:`~pcapkit.corekit.fields.misc.SwitchField` fields, including
+        those wrapped in a :class:`~pcapkit.corekit.fields.misc.ConditionalField`.
+
+    """
+    slots = []
+    for name, field in schema.__fields__.items():
+        while isinstance(field, ConditionalField):
+            field = field.field
+        if isinstance(field, (SchemaField, SwitchField)):
+            slots.append(name)
+    return tuple(slots)
+
+
+def _holds_raw(value: 'Any') -> 'bool':
+    """Tell if a made schema may hold raw :obj:`bytes` in place of a schema.
+
+    Args:
+        value: made schema, or a value within it
+
+    Returns:
+        :data:`True` if ``value`` holds :obj:`bytes` as a list item, or as
+        the value of a field that holds a schema
+        (:class:`~pcapkit.corekit.fields.misc.SchemaField` or
+        :class:`~pcapkit.corekit.fields.misc.SwitchField`).
+
+    """
+    if isinstance(value, (list, tuple)):
+        return any(isinstance(item, bytes) or _holds_raw(item) for item in value)
+    if isinstance(value, Schema):
+        for name, field in value.__fields__.items():
+            item = value.get(name)
+            while isinstance(field, ConditionalField):
+                field = field.field
+            if isinstance(item, bytes) and isinstance(field, (SchemaField, SwitchField)):
+                return True
+            if _holds_raw(item):
+                return True
+    return False
+
+
+def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
+    """Tell if ``made`` holds raw :obj:`bytes` where ``parsed`` holds a schema.
+
+    Args:
+        made: made schema, or a value within it
+        parsed: the same position in the schema parsed from its packed octets
+
+    Returns:
+        :data:`True` if, at some position both share, ``made`` holds
+        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.schema.Schema`.
+
+    """
+    if isinstance(made, bytes):
+        return isinstance(parsed, Schema)
+    if isinstance(made, (list, tuple)) and isinstance(parsed, (list, tuple)):
+        return any(_raw_where_parsed(item, other) for item, other in zip(made, parsed))
+    if isinstance(made, Schema) and isinstance(parsed, Schema):
+        return any(_raw_where_parsed(made.get(name), parsed.get(name))
+                   for name in made.__fields__ if name in parsed.__fields__)
+    return False
 
 #: Keywords that configure the construction rather than naming a field, and are
 #: therefore consumed by :meth:`ProtocolBase.__init__
@@ -572,6 +697,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         self.__header__ = self.make(**kwargs)
+        #: bool: If the made header may hold raw items (see :meth:`unpack`).
+        self._make_raw = _passes_raw(kwargs) or any(
+            isinstance(self.__header__.get(name), bytes) for name in _schema_slots(type(self.__header__)))
         packet = kwargs.get('__packet__', {})  # packet data
         return self.__header__.pack(packet)
 
@@ -590,10 +718,28 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
+            When :meth:`pack` or :meth:`from_schema` has already set
+            :attr:`self.__header__ <Protocol.__header__>`, that schema is
+            kept, unless it still holds raw :obj:`bytes` where parsing its
+            packed octets yields a schema -- e.g. a raw option given to
+            ``make()`` -- which :meth:`read` cannot consume. The header is
+            then replaced by the parsed one (:issue:`1312`).
+
+        Raises:
+            ProtocolError: If the made header holds raw items and its packed
+                octets do not parse.
+
         """
+        packet = kwargs.get('__packet__', {})  # packet data
         if cast('Optional[_ST]', self.__header__) is None:
-            packet = kwargs.get('__packet__', {})  # packet data
             self.__header__ = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
+        elif self._make_raw and _holds_raw(self.__header__):
+            try:
+                parsed = cast('_ST', type(self.__header__).unpack(io.BytesIO(self._data), length, packet))  # type: ignore[call-arg,misc]
+            except (BaseError, struct.error) as error:  # pylint: disable=no-member
+                raise ProtocolError(f'{type(self).__name__}: malformed raw item given to make()') from error
+            if _raw_where_parsed(self.__header__, parsed):
+                self.__header__ = parsed
         return self.read(length, **kwargs)
 
     @staticmethod
@@ -857,6 +1003,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # reference between instances.
         self.__cached__ = {}
         self.__header__ = None  # type: ignore[assignment]
+        #: bool: If a header set before :meth:`unpack` may hold raw items;
+        #: :meth:`pack` narrows it down for a made one.
+        self._make_raw = True
 
         return self
 
@@ -1603,12 +1752,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,
             the namespace is inferred from the calling ``make`` method: it
             is the enumeration class of the default value of the argument
-            that ``name`` was passed as. If several arguments were given the
-            same name, every one of their enumerations must have the name
-            and map it to the same value; otherwise
-            :exc:`~pcapkit.utilities.exceptions.ProtocolNotImplemented` is
-            raised, asking for an explicit ``*_namespace`` (see
-            :meth:`_make_index_namespace`).
+            that ``name`` was passed as, found from the call in the
+            caller's source (see :meth:`_make_index_namespace`).
 
         """
         if isinstance(name, (enum.Enum, aenum.Enum)):
@@ -1659,6 +1804,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         member. The candidate namespace of a match is the class of that
         default value.
 
+        Only the argument the call passes as ``name`` is considered: the
+        caller's source is parsed (by ``_make_index_calls``) for the
+        :meth:`_make_index` call spanning the current line, and its first
+        argument names the method argument, so two arguments holding the
+        same member name each resolve against their own enumeration. Every
+        argument is considered when that call cannot be located (e.g. the
+        source is unavailable) or its first argument is not an argument of
+        the method (e.g. ``value = arg; self._make_index(value)``).
+
         Args:
             name: member name given to :meth:`_make_index`
             frame: frame of :meth:`_make_index`
@@ -1671,9 +1825,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             candidate has ``name`` as a member.
 
         Raises:
-            ProtocolNotImplemented: If several arguments match and their
-                candidates disagree on ``name``: some lack it, or they map
-                it to different values.
+            ProtocolNotImplemented: If every argument is considered, several
+                arguments match and their candidates disagree on ``name``:
+                some lack it, or they map it to different values.
 
         """
         caller = frame.f_back if frame is not None else None
@@ -1696,8 +1850,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 return None
 
             params = inspect.signature(func).parameters
+            lineno = caller.f_lineno
+            located = {arg for first, last, arg in _make_index_calls(func) if first <= lineno <= last}
             found = {}  # type: dict[str, Type[StdlibEnum] | Type[AenumEnum]]
             for arg, param in params.items():
+                # once the call is located, only its own argument is a candidate
+                if len(located) == 1 and located <= params.keys() and arg not in located:
+                    continue
                 value = values.get(arg)
                 if f'{arg}_namespace' not in params or not isinstance(value, str) or value != name:
                     continue
