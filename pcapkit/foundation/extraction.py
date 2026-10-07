@@ -188,7 +188,8 @@ class Extractor(Generic[_P]):
 
         #: Input file object.
         _ifile: 'BufferedReader'
-        #: Output file object.
+        #: Output writer. It holds the writer class until :meth:`_open_output`
+        #: replaces it with the writer, or under split mode with a factory.
         _ofile: 'Dumper | Type[Dumper]'
 
         #: Position of the input stream at the previous end of stream, or
@@ -668,7 +669,8 @@ class Extractor(Generic[_P]):
 
         Raises:
             FormatError: If the selected engine cannot read the input's format --
-                for the default engine, if it is neither PCAP nor PCAP-NG.
+                for the default engine, if it is neither PCAP nor PCAP-NG -- or if
+                the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.
 
         :rtype: None
         """
@@ -893,14 +895,14 @@ class Extractor(Generic[_P]):
     def _open_output(self, **kwargs: 'Any') -> 'None':
         """Create the output writer.
 
-        The engines call this at their global-header step, passing the header's
-        link type, byte order and timestamp resolution as ``protocol``,
-        ``byteorder`` and ``nanosecond``, and the PCAP engine also its
-        ``thiszone``, ``sigfigs`` and ``snaplen``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`
-        writes its own global header from them, and the other writers ignore
-        them. :meth:`run` calls it again, without arguments, after the engine
-        has started, for the engines that have no such step. Only the first
-        call has an effect.
+        The built-in engines call this at their global-header step. The PCAP
+        engine passes the header's fields as ``protocol``, ``byteorder``,
+        ``nanosecond``, ``thiszone``, ``sigfigs`` and ``snaplen``:
+        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from
+        them, and the other writers ignore them. The PCAP-NG engine passes none.
+        :meth:`run` calls it again, without arguments, after the engine has
+        started, for the engines that have no such step. Only the first call has
+        an effect.
 
         Under split mode, i.e. :attr:`self._flag_f <Extractor._flag_f>` is
         :data:`True`, :attr:`self._ofile <Extractor._ofile>` stays a factory,

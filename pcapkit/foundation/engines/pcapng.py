@@ -144,6 +144,10 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         block, and then save the related information into the internal
         context storage.
 
+        Raises:
+            FormatError: If the first block is not a section header block, or if
+                the output format is PCAP.
+
         """
         ext = self._extractor
 

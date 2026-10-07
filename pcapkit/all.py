@@ -141,8 +141,8 @@ __all__ = [
     'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
                                                             # Scapy engine
 
-    # pcapkit.utilities -- unlisted since 769a17c78 (2022-05-29): its names stay
-    # reachable as attributes, but ``import *`` leaves out generic helpers such
-    # as ``warn``, ``reset``, ``configure`` and ``detect``
+    # pcapkit.utilities -- unlisted: its names stay reachable as attributes, but
+    # ``import *`` leaves out generic helpers such as ``warn``, ``reset``,
+    # ``configure`` and ``detect``
     #'beholder_ng', 'seekset_ng',                            # Decorators
 ]

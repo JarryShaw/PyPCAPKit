@@ -247,9 +247,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # concrete writer this applies to.
     escape_strings = issubclass(output, dictdumper.plist.PLIST)
     # NOTE: :class:`~dictdumper.json.JSON` escapes every string *value* it
-    # writes, but interpolates a mapping key into ``'"{item}": '`` raw, so a key
-    # carrying a ``"`` or a ``\`` closes the JSON string early (GitHub issue
-    # #1152). The defect is :mod:`dictdumper`'s, so it is worked around here.
+    # writes, but interpolates a mapping key into ``'"{item}": '`` raw: a ``"``
+    # in a key closes the JSON string early, and a ``\`` escapes the character
+    # after it (GitHub issue #1152). The defect is :mod:`dictdumper`'s, so it is
+    # worked around here.
     escape_json_keys = issubclass(output, dictdumper.json.JSON)
     escape_keys = escape_strings or escape_json_keys
 
