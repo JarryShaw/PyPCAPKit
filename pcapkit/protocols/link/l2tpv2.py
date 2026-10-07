@@ -206,6 +206,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             seq=bool(_flag['seq']),
             offset=bool(_flag['offset']),
             prio=bool(_flag['prio']),
+            reserved=(_flag['reserved_1'] << 12) | (_flag['reserved_2'] << 10) | (_flag['reserved_3'] << 4),
         )
 
         _size = schema.offset if flags.offset else 0
@@ -245,6 +246,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              priority: 'bool' = False,
+             reserved: 'int' = 0,
              total_length: 'Optional[int]' = None,
              length_flag: 'Optional[bool]' = None,
              tunnel_id: 'int' = 0,
@@ -264,6 +266,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             type_namespace: Namespace of type.
             type_reversed: Reversed namespace of type.
             priority: Priority flag.
+            reserved: Reserved bits of the flags word, in their on-wire
+                positions (bits 2, 3, 5 and 8-11, i.e. within ``0x34F0``).
             total_length: Length of the datagram, header included, written as
                 given; the real header-plus-payload length when :data:`None`
                 and the Length field is present.
@@ -286,12 +290,21 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         Raises:
             ProtocolError: If ``total_length`` is given with ``length_flag``
-                set to :data:`False`.
+                set to :data:`False`, if only one of ``ns`` and ``nr`` is
+                given, or if ``reserved`` sets a bit outside ``0x34F0``.
 
         """
         type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
-        seq = ns is not None and nr is not None
+        # NOTE: :rfc:`2661` §3.1 makes ``S`` mark the presence of *both* Ns and
+        # Nr, so a header cannot carry one without the other. Refuse a lone
+        # value rather than drop it, or invent the other on the wire.
+        if (ns is None) != (nr is None):
+            raise ProtocolError(f'{self.alias}: ns and nr must be given together')
+        seq = ns is not None
+
+        if reserved & ~0x34F0:
+            raise ProtocolError(f'{self.alias}: reserved bits outside 0x34F0: {reserved:#06x}')
 
         if length_flag is None:
             length_flag = total_length is not None or type_ == Enum_Type.Control
@@ -312,6 +325,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
                 'seq': seq,
                 'offset': offset is not None,
                 'prio': priority,
+                'reserved_1': (reserved >> 12) & 0b11,
+                'reserved_2': (reserved >> 10) & 0b1,
+                'reserved_3': (reserved >> 4) & 0b1111,
                 'version': version,
             },
             length=total_length,
@@ -391,6 +407,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         return {
             'type': data.flags.type,
             'priority': data.flags.prio,
+            'reserved': data.flags.reserved,
             'version': data.version,
             # NOTE: Passed as ``total_length`` since ``length`` is the parse
             # length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so

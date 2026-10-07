@@ -348,7 +348,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         data = DummyData(
-            flags=DummyData(type=True, len=True, prio=False),
+            flags=DummyData(type=True, len=True, prio=False, reserved=0),
             version=2,
             length=32,
             tunnelid=3,
@@ -635,7 +635,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         reader = object.__new__(L2TPv2)
         reader.__header__ = SchemaL2TP(
             flags={'type': Type.Control, 'len': True, 'seq': True, 'offset': True,
-                   'prio': True, 'version': 2},
+                   'prio': True, 'reserved_1': 0, 'reserved_2': 0,
+                   'reserved_3': 0, 'version': 2},
             length=24,
             tunnel_id=1,
             session_id=2,
@@ -658,7 +659,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         reader_no_flags._data = b'\x00' * 14
         reader_no_flags.__header__ = SchemaL2TP(
             flags={'type': Type.Data, 'len': False, 'seq': False, 'offset': False,
-                   'prio': False, 'version': 2},
+                   'prio': False, 'reserved_1': 0, 'reserved_2': 0,
+                   'reserved_3': 0, 'version': 2},
             length=None,
             tunnel_id=5,
             session_id=6,

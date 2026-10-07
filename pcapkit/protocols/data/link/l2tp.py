@@ -29,9 +29,14 @@ class Flags(Data):
     offset: 'bool'
     #: Priority.
     prio: 'bool'
+    #: Reserved bits 2, 3, 5 and 8-11 of the flags word, in their on-wire
+    #: positions (i.e. masked by ``0x34F0``). :rfc:`2661` §3.1 has them "set
+    #: to 0 on outgoing messages and ignored on incoming messages"; they are
+    #: carried verbatim so that a rebuild reproduces the word as it arrived.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Type', len: 'bool', seq: 'bool', offset: 'bool', prio: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
+        def __init__(self, type: 'Type', len: 'bool', seq: 'bool', offset: 'bool', prio: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
