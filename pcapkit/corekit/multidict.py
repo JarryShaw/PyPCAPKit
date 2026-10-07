@@ -497,6 +497,18 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
 
     __hash__ = None  # type: ignore[assignment]
 
+    def deepcopy(self, memo: 'Optional[dict]' = None) -> 'OrderedMultiDict[_KT, _VT]':
+        """Return a deep copy of this object.
+
+        Notes:
+            :meth:`MultiDict.deepcopy` rebuilds from :meth:`to_dict` with
+            ``flat=False``, which groups the values by key. This rebuilds from
+            ``items(multi=True)`` instead, so the copy keeps the insertion
+            order of interleaved keys. :meth:`__deepcopy__` reaches it too.
+
+        """
+        return self.__class__(copy.deepcopy(list(self.items(multi=True)), memo=memo))
+
     def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'tuple[type, tuple[list[tuple[_KT, _VT]]]]':
         return type(self), (list(self.items(multi=True)),)
 
