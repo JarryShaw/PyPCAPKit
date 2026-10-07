@@ -19,6 +19,7 @@ import importlib
 import io
 import os
 import sys
+import types
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from dictdumper.dumper import Dumper
@@ -92,6 +93,93 @@ __all__ = ['Extractor']
 logger = get_logger(__name__)
 
 _P = TypeVar('_P')
+
+
+def _same_entry(entry: 'Any', other: 'Any') -> 'bool':
+    """Tell whether two registry entries name the same class.
+
+    An entry is a class or a :class:`~pcapkit.corekit.module.ModuleDescriptor`.
+    Two descriptors are the same entry when they are equal, and a descriptor
+    and a class are when the descriptor names that class. The class is looked
+    up in :data:`sys.modules` rather than imported: a class someone holds has
+    its module loaded already, so a descriptor whose module is not loaded
+    cannot name it, and an optional engine that is not installed is never
+    imported to answer the question.
+
+    Arguments:
+        entry: registry entry
+        other: registry entry to compare against
+
+    Returns:
+        :data:`True` if both name the same class.
+
+    """
+    if entry is other:
+        return True
+    if isinstance(entry, ModuleDescriptor) and isinstance(other, ModuleDescriptor):
+        return entry == other
+    if isinstance(other, ModuleDescriptor):
+        entry, other = other, entry
+    if not isinstance(entry, ModuleDescriptor) or not isinstance(entry.name, str):
+        return False
+    module = sys.modules.get(entry.module)
+    return module is not None and getattr(module, entry.name, None) is other
+
+
+def _restore_shipped(registry: 'dict[str, Any]', key: 'str', shipped: 'Any', kind: 'str') -> 'None':
+    """Put the entry ``registry`` shipped with back under ``key``.
+
+    The public registrars call this when handed the built-in that shipped under
+    ``key``, so an override can be undone (:issue:`1363`). It stores the shipped
+    object itself, a descriptor if a descriptor shipped, and it is a silent
+    no-op when the incumbent already names the shipped class.
+
+    Arguments:
+        registry: registry to restore
+        key: registry key
+        shipped: entry the registry shipped with under ``key``
+        kind: entry kind, for the warning message
+
+    Warns:
+        RegistryWarning: If a different class is registered under ``key``; it
+            is overwritten.
+
+    """
+    incumbent = registry.get(key)
+    if incumbent is not None and _same_entry(shipped, incumbent):
+        return
+    if incumbent is not None:
+        warn(f'{kind} {key} already registered, overwriting', RegistryWarning)
+    registry[key] = shipped
+
+
+def _restore_shipped_dumper(registry: 'dict[str, Any]', format: 'str',  # pylint: disable=redefined-builtin
+                            shipped: 'tuple[Any, str | None]', ext: 'str') -> 'None':
+    """Put the dumper ``registry`` shipped with back under ``format``.
+
+    The ``__output__`` counterpart of :func:`_restore_shipped`: an entry is a
+    ``(dumper, ext)`` pair, so the shipped pair itself is stored when ``ext``
+    matches it, and the shipped dumper with the new ``ext`` otherwise. A
+    re-registration that only changes ``ext`` stays silent, as the dumper
+    registrars document.
+
+    Arguments:
+        registry: ``__output__`` registry to restore
+        format: format name
+        shipped: ``(dumper, ext)`` pair the registry shipped with under ``format``
+        ext: file extension
+
+    Warns:
+        RegistryWarning: If a different dumper is registered for ``format``;
+            it is overwritten.
+
+    """
+    incumbent = registry.get(format)
+    if incumbent is not None and not _same_entry(shipped[0], incumbent[0]):
+        warn(f'dumper {format} already registered, overwriting', RegistryWarning)
+    elif incumbent is not None and incumbent[1] == ext:
+        return
+    registry[format] = shipped if ext == shipped[1] else (shipped[0], ext)
 
 
 class Extractor(Generic[_P]):
@@ -268,6 +356,14 @@ class Extractor(Generic[_P]):
         'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
     }  # type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
 
+    # Read-only copies of the four registries as shipped. A public registrar
+    # handed the built-in a name shipped with restores this entry, so an
+    # override can be undone (:issue:`1363`).
+    _shipped_output = types.MappingProxyType(dict(__output__))
+    _shipped_engine = types.MappingProxyType(dict(__engine__))
+    _shipped_reassembly = types.MappingProxyType(dict(__reassembly__))
+    _shipped_traceflow = types.MappingProxyType(dict(__traceflow__))
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -399,6 +495,11 @@ class Extractor(Generic[_P]):
             the default factory the way ``cls.__output__[format]`` would, so
             it stays non-inserting here as well.
 
+            The dumper ``format`` shipped with, as its descriptor or as the
+            class it names, restores the shipped entry rather than storing
+            the class, so an override can be undone and the deferred import
+            is kept (:issue:`1363`, :issue:`1364`).
+
         Arguments:
             format: format name
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
@@ -412,8 +513,12 @@ class Extractor(Generic[_P]):
                 ``format``; it is overwritten.
 
         """
-        if isinstance(dumper, ModuleDescriptor):
+        shipped = cls._shipped_output.get(format)
+        if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
             dumper = dumper.klass
+        if shipped is not None and _same_entry(shipped[0], dumper):
+            _restore_shipped_dumper(cls.__output__, format, shipped, ext)
+            return
         if not isinstance(dumper, type):
             raise RegistryError(f'dumper must be a class, not {dumper!r}')
         if not issubclass(dumper, Dumper):
@@ -438,13 +543,18 @@ class Extractor(Generic[_P]):
             the identity guard of the code-keyed registrars (:issue:`718`,
             :issue:`739`).
 
+            The one built-in admitted is the engine ``name`` shipped with, as
+            its descriptor or as the class it names: it restores the shipped
+            entry, so an override can be undone (:issue:`1363`).
+
         Arguments:
             name: engine name
             engine: module descriptor or an :class:`~pcapkit.foundation.engines.engine.Engine`
                 subclass; a class deriving only from
                 :class:`~pcapkit.foundation.engines.engine.EngineBase` is refused, as
                 that is the base for pcapkit's own engines, which the library
-                registers itself (GitHub issue :issue:`1016`)
+                registers itself (GitHub issue :issue:`1016`), unless it is the
+                engine ``name`` shipped with
 
         Raises:
             RegistryError: If ``engine`` is not a class, or not an ``Engine`` subclass.
@@ -454,8 +564,14 @@ class Extractor(Generic[_P]):
                 ``name``; it is overwritten.
 
         """
-        if isinstance(engine, ModuleDescriptor):
+        # The shipped built-in is matched before the descriptor is resolved, so
+        # restoring an optional engine does not import it (#1363).
+        shipped = cls._shipped_engine.get(name)
+        if isinstance(engine, ModuleDescriptor) and engine != shipped:
             engine = engine.klass
+        if shipped is not None and _same_entry(shipped, engine):
+            _restore_shipped(cls.__engine__, name, shipped, 'engine')
+            return
         if not isinstance(engine, type):
             raise RegistryError(f'engine must be a class, not {engine!r}')
         # NOTE: checked against the public ``Engine``, the class third-party engines are
@@ -465,7 +581,8 @@ class Extractor(Generic[_P]):
         # base. The wider ``EngineBase`` is deliberately not accepted here: it is
         # the internal base of the built-ins, and a class deriving only from it
         # lacks the ``engine=`` hook, so the public door admits the public base
-        # alone (#513, #1016).
+        # alone (#513, #1016). The exception is the built-in a name shipped with,
+        # restored above, which the library registered itself (#1363).
         if not issubclass(engine, Engine):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
         cls._register_internal_engine(name, engine)
@@ -514,13 +631,18 @@ class Extractor(Generic[_P]):
             the identity guard of the code-keyed registrars (:issue:`718`,
             :issue:`739`).
 
+            The one built-in admitted is the class ``protocol`` shipped with,
+            as its descriptor or as the class it names: it restores the
+            shipped entry, so an override can be undone (:issue:`1363`).
+
         Arguments:
             protocol: protocol name
             reassembly: module descriptor or a
                 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass; a class deriving
                 only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` is refused, as
                 that is the base for pcapkit's own classes, which the library registers
-                itself (GitHub issue :issue:`1016`)
+                itself (GitHub issue :issue:`1016`), unless it is the class
+                ``protocol`` shipped with
 
         Raises:
             RegistryError: If ``reassembly`` is not a class, or not a ``Reassembly`` subclass.
@@ -530,13 +652,18 @@ class Extractor(Generic[_P]):
                 ``protocol``; it is overwritten.
 
         """
-        if isinstance(reassembly, ModuleDescriptor):
+        shipped = cls._shipped_reassembly.get(protocol)
+        if isinstance(reassembly, ModuleDescriptor) and reassembly != shipped:
             reassembly = reassembly.klass
+        if shipped is not None and _same_entry(shipped, reassembly):
+            _restore_shipped(cls.__reassembly__, protocol, shipped, 'reassembly')
+            return
         if not isinstance(reassembly, type):
             raise RegistryError(f'reassembly must be a class, not {reassembly!r}')
         # NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in
         # :meth:`register_engine` above -- see #1016. Built-ins go through
-        # :meth:`_register_internal_reassembly`.
+        # :meth:`_register_internal_reassembly`, except the one a name shipped
+        # with, restored above (#1363).
         if not issubclass(reassembly, Reassembly):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
         cls._register_internal_reassembly(protocol, reassembly)
@@ -585,13 +712,18 @@ class Extractor(Generic[_P]):
             the identity guard of the code-keyed registrars (:issue:`718`,
             :issue:`739`).
 
+            The one built-in admitted is the class ``protocol`` shipped with,
+            as its descriptor or as the class it names: it restores the
+            shipped entry, so an override can be undone (:issue:`1363`).
+
         Arguments:
             protocol: protocol name
             traceflow: module descriptor or a
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass; a class deriving
                 only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` is refused, as
                 that is the base for pcapkit's own classes, which the library registers
-                itself (GitHub issue :issue:`1016`)
+                itself (GitHub issue :issue:`1016`), unless it is the class
+                ``protocol`` shipped with
 
         Raises:
             RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlow`` subclass.
@@ -601,13 +733,18 @@ class Extractor(Generic[_P]):
                 ``protocol``; it is overwritten.
 
         """
-        if isinstance(traceflow, ModuleDescriptor):
+        shipped = cls._shipped_traceflow.get(protocol)
+        if isinstance(traceflow, ModuleDescriptor) and traceflow != shipped:
             traceflow = traceflow.klass
+        if shipped is not None and _same_entry(shipped, traceflow):
+            _restore_shipped(cls.__traceflow__, protocol, shipped, 'traceflow')
+            return
         if not isinstance(traceflow, type):
             raise RegistryError(f'traceflow must be a class, not {traceflow!r}')
         # NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in
         # :meth:`register_engine` above -- see #1016. Built-ins go through
-        # :meth:`_register_internal_traceflow`.
+        # :meth:`_register_internal_traceflow`, except the one a name shipped
+        # with, restored above (#1363).
         if not issubclass(traceflow, TraceFlow):
             raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
         cls._register_internal_traceflow(protocol, traceflow)
