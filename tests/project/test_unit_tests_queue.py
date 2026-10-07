@@ -458,15 +458,16 @@ class TestAptRetry(_Scratch):
                 self.assertNotEqual(status, 0)
                 self.assertEqual(apt, ['update', 'update'])
 
-    def test_both_attempts_fit_inside_a_five_minute_step_cap(self) -> None:
-        """Every apt call is bounded, and two full attempts fit the 5-minute cap."""
+    def test_both_attempts_fit_inside_a_ten_minute_step_cap(self) -> None:
+        """Every apt call is bounded, and two full attempts fit the 10-minute cap (#1306)."""
         for job_name, name, extra in APT_STEPS:
             with self.subTest(job=job_name):
                 status, apt, bounds = self.run_apt(name, job_name, extra, fail_updates=0)
                 self.assertEqual(status, 0)
                 self.assertEqual(len(bounds), len(apt), 'an apt-get call runs without timeout')
-                self.assertEqual(step_cap(job(job_name), name), 5)
-                self.assertLessEqual(2 * sum(bounds), 5 * 60)
+                self.assertEqual(bounds, [60, 180])
+                self.assertEqual(step_cap(job(job_name), name), 10)
+                self.assertLessEqual(2 * sum(bounds), 10 * 60)
 
 
 #: Matches a string literal that is a path into docs/ or names Markdown files.
