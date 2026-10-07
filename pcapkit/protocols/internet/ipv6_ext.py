@@ -578,12 +578,15 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     def __length_hint__(self) -> 'int':
         """Return an estimated length for the object.
 
-        Two octets -- all :rfc:`6564#section-4` guarantees. Annotated ``int``
-        rather than ``Literal[2]``, for the reason given on :attr:`name`: every
-        subclass has a longer fixed header and its own ``Literal``.
+        Eight octets, the shortest header :rfc:`6564#section-4` allows: Hdr
+        Ext Len counts 8-octet units "not including the first 8 octets", and
+        :rfc:`8200#section-4` makes every extension header a multiple of 8
+        octets. Annotated ``int`` rather than ``Literal[8]``, for the reason
+        given on :attr:`name`: every subclass has its own fixed header and its
+        own ``Literal``.
 
         """
-        return 2
+        return 8
 
     @classmethod
     def __index__(cls) -> 'NoReturn':

@@ -758,13 +758,13 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                 # ``read`` with no explicit length falls back to ``len(self)``
                 self.assertEqual(inst.read().length, 16)
 
-    def test_length_hint_is_the_two_octets_rfc_6564_guarantees(self) -> None:
-        """Two, not a real header length: those two octets are all
-        :rfc:`6564#section-4` promises of a header this class has never seen.
+    def test_length_hint_is_the_eight_octet_rfc_6564_minimum(self) -> None:
+        """Eight: :rfc:`6564#section-4`'s Hdr Ext Len excludes the first 8
+        octets, so no conforming header is shorter (:rfc:`8200#section-4`).
         """
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 
-        self.assertEqual(object.__new__(IPv6_Ext).__length_hint__(), 2)
+        self.assertEqual(object.__new__(IPv6_Ext).__length_hint__(), 8)
 
     def test_next_is_now_shared_by_every_subclass(self) -> None:
         """None of the eight declared a ``next`` property before #917, so
