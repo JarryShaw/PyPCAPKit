@@ -49,6 +49,7 @@ from pcapkit.utilities.warnings import RegistryWarning, UnknownFieldWarning, war
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
+    from types import FrameType
     from typing import IO, Any, Callable, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
@@ -1598,12 +1599,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             ProtocolNotImplemented: If ``name`` is **NOT** in ``namespace``
                 and ``default`` is :data:`None`.
 
+        Note:
+            If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,
+            the namespace is inferred from the calling ``make`` method: it
+            is the enumeration class of the default value of the argument
+            that ``name`` was passed as. If several arguments were given the
+            same name, every one of their enumerations must have the name
+            and map it to the same value; otherwise
+            :exc:`~pcapkit.utilities.exceptions.ProtocolNotImplemented` is
+            raised, asking for an explicit ``*_namespace`` (see
+            :meth:`_make_index_namespace`).
+
         """
         if isinstance(name, (enum.Enum, aenum.Enum)):
             index = cast('int', name.value)
         elif isinstance(name, int):
             index = name
         else:  # name is str
+            if namespace is None:
+                namespace = cls._make_index_namespace(name, inspect.currentframe())
             try:
                 if isinstance(namespace, type) and issubclass(namespace, (enum.IntEnum, aenum.IntEnum)):
                     index = cast('int', namespace[name].value)
@@ -1630,6 +1644,84 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if pack:
             return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
+
+    @classmethod
+    def _make_index_namespace(cls, name: 'str',
+                              frame: 'Optional[FrameType]') -> 'Optional[Type[StdlibEnum] | Type[AenumEnum]]':
+        """Infer the enumeration namespace of ``name`` for :meth:`_make_index`.
+
+        The caller of :meth:`_make_index` (``frame.f_back``) is looked up
+        among the methods of ``cls``. An argument ``arg`` of that method
+        matches if it is accompanied by an ``arg_namespace`` argument that
+        is :data:`None`, its current value is a :obj:`str` equal to
+        ``name``, and its default
+        value is an :class:`~enum.IntEnum` (or :class:`aenum.IntEnum`)
+        member. The candidate namespace of a match is the class of that
+        default value.
+
+        Args:
+            name: member name given to :meth:`_make_index`
+            frame: frame of :meth:`_make_index`
+
+        Returns:
+            The candidate namespace if exactly one argument matches. If
+            several match, any candidate, provided every candidate has
+            ``name`` as a member and maps it to the same value.
+            :data:`None` if the caller is not found, nothing matches, or no
+            candidate has ``name`` as a member.
+
+        Raises:
+            ProtocolNotImplemented: If several arguments match and their
+                candidates disagree on ``name``: some lack it, or they map
+                it to different values.
+
+        """
+        caller = frame.f_back if frame is not None else None
+        if caller is None:
+            return None
+        try:
+            code = caller.f_code
+            values = caller.f_locals
+
+            func = None
+            for klass in cls.__mro__:
+                for attr in vars(klass).values():
+                    attr = getattr(attr, '__func__', attr)
+                    if getattr(attr, '__code__', None) is code:
+                        func = attr
+                        break
+                if func is not None:
+                    break
+            if func is None:
+                return None
+
+            params = inspect.signature(func).parameters
+            found = {}  # type: dict[str, Type[StdlibEnum] | Type[AenumEnum]]
+            for arg, param in params.items():
+                value = values.get(arg)
+                if f'{arg}_namespace' not in params or not isinstance(value, str) or value != name:
+                    continue
+                # an explicit namespace resolves that argument by itself
+                if values.get(f'{arg}_namespace') is not None:
+                    continue
+                if isinstance(param.default, (enum.IntEnum, aenum.IntEnum)):
+                    found[arg] = type(param.default)
+        finally:
+            del caller, frame
+
+        if len(found) == 1:
+            return next(iter(found.values()))
+
+        known = {arg: int(space[name]) for arg, space in found.items() if name in space.__members__}
+        if not known:
+            return None
+        if len(known) < len(found) or len(set(known.values())) > 1:
+            matches = ', '.join(f'{space.__name__}.{name} = {known[arg]}' if arg in known
+                                else f'{space.__name__} has no {name!r}' for arg, space in found.items())
+            hint = ' or '.join(f'{arg}_namespace=' for arg in found)
+            raise ProtocolNotImplemented(f'{cls.__name__}: ambiguous member name {name!r} given to '
+                                         f'{", ".join(found)} ({matches}); pass {hint} explicitly')
+        return next(iter(found.values()))
 
     @classmethod
     def _make_data(cls, data: 'Data') -> 'dict[str, Any]':
