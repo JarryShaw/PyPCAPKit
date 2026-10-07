@@ -121,7 +121,6 @@ The overrun guard
 The house convention for a declared length that does not fit what remains
 is warn-and-clip: emit a warning naming what was declared against what is
 left, then read only what is left. See
-:func:`pcapkit.protocols.schema.misc.pcapng.bounded_option`,
 :func:`pcapkit.protocols.schema.misc.pcapng.bounded_area` and
 :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
 

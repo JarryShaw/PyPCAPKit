@@ -2001,82 +2001,49 @@ class IPv4UnitTests(unittest.TestCase):
         )
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
-        """A capture cut short mid-option is tolerated, not just mid-header. C.f. #431, #572.
+        """A capture cut short mid-option is refused alone, and kept as captured in a frame. C.f. #431, #572, #1325.
 
         :meth:`test_an_option_area_longer_than_the_datagram_still_parses` above
         pins the *empty*-tail half of the #431 accommodation: an option area
-        that runs out before it starts. Nothing pinned the other half -- an
-        option that *does* start, declares more data than the capture actually
-        holds, and runs out partway through, the shape of a datagram cut short
-        by the snapshot length rather than one with no options at all. A
-        candidate fix for #554 (PR #571) turned that into an unwrapped
-        ``FieldValueError`` while the rest of the suite stayed green, because
-        nothing exercised it. See
-        ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
-        for the same case on TCP, where the shortfall is simpler to reach.
+        that runs out before it starts. This is the other half -- an option
+        that *does* start, declares more data than the capture holds, and runs
+        out partway through.
 
         The header below sets ``ihl`` to 9 -- 16 declared octets of options --
-        for an unassigned option (code 31) declaring ``length=12``, which asks
-        :class:`~pcapkit.protocols.schema.internet.ipv4.UnassignedOption`'s
-        ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
-        10 octets here) for more than the 6 octets actually behind it, and
-        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
-        pads the short read with zero octets rather than raising -- the
-        same accommodation as the TCP case, reached the same way. The zeros go
-        on the *tail*, where the octets that were never read would have been;
-        before #604 they were placed at the front, which for a numeric field
-        corrupted the value outright.
-
-        ``ihl`` has to declare *more* than the 8 octets actually present,
-        though, which the TCP case does not need. Unlike TCP,
-        :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options` sums
-        each option's self-*declared* ``length`` -- not what it actually
-        consumed -- and raises ``IPv4: invalid format`` once its loop over the
-        parsed options finishes, if that sum exceeds the declared option
-        area. Declaring exactly 8 does not skip the accommodation -- the short
-        ``data`` field is still read and tail-padded as above -- it just trips
-        that check afterwards, discarding the result before the test can
-        assert on it. Declaring 16 leaves headroom, at the cost of a second
-        effect: once the option loop's 16-octet budget outlives the 8 octets
-        its one real option consumed, the loop reads one further, fully
-        exhausted phantom option, decodes it as end-of-option-list (the same
-        mechanism the test above pins), and :meth:`Schema.unpack
-        <pcapkit.protocols.schema.schema.Schema.unpack>` hands the same 8
-        octets to the schema a second time as padding, via the
-        ``option_padding`` rewind that #371 added -- code that predates #431
-        and lives outside :meth:`OptionField.unpack
-        <pcapkit.corekit.fields.collections.OptionField.unpack>`. That is why
-        ``bytes(proto.__header__)`` does not round-trip to ``raw`` here and is
-        not asserted -- immaterial to what this test pins: the option's
-        declared ``length``, the full parsed options list, and the ``data``
-        field's short-read reconstruction.
+        for an unassigned option (code 31) declaring ``length=12``, with only
+        6 of its 10 data octets behind it. Those 4 missing octets used to be
+        read as zeros and rebuilt as if captured. :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` now refuses
+        the option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+        instead (#1325). Inside a frame the datagram is kept as the octets
+        captured, a :class:`~pcapkit.protocols.misc.raw.Raw` payload carrying
+        that error, and rebuilds byte for byte.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
         custom = OptionNumber.get(31)
         trailing = bytes.fromhex('aabbccddeeff')
         raw = (bytes.fromhex('4900001c00010000400600000a0000010a000002') +
                bytes([custom, 12]) + trailing)
-        with time_limit():
-            proto = IPv4(raw, len(raw))
+        with time_limit(), warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            with self.assertRaisesRegex(ProtocolError, 'runs past the end of the data'):
+                IPv4(raw, len(raw))
 
-        self.assertEqual(proto.info.hdr_len, 36)
-        self.assertEqual(
-            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
-            [(custom, 12), (OptionNumber.EOOL, 1)],
-        )
-        unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
-                           if code == custom)
-        # the six octets actually behind the option come first, where they were
-        # read, and the four synthesised for the ones that were not follow them.
-        # Before #604 they arrived the other way round. See #604 and
-        # ``FieldBaseShortReadPaddingSideTests`` in
-        # ``tests/corekit/test_fields_field.py``.
-        self.assertEqual(unassigned.data, trailing + b'\x00\x00\x00\x00')
+            frame = bytes.fromhex('0123456789ab' 'fedcba987654' '0800') + raw
+            proto = Ethernet(frame, len(frame))
 
+        self.assertIsInstance(proto.payload, Raw)
+        self.assertIn('runs past the end of the data', str(proto.payload.info.error))
+        # the option octets are kept as captured, with nothing synthesised
+        self.assertEqual(proto.payload.data, raw)
+        self.assertEqual(Ethernet.from_data(proto.info).data, frame)
 
 if __name__ == '__main__':
     unittest.main()

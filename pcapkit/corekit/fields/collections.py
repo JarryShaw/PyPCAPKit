@@ -9,7 +9,7 @@ from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.utilities.compat import List
-from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 __all__ = [
     'ListField', 'OptionField',
@@ -27,6 +27,44 @@ if TYPE_CHECKING:
 
 _TL = TypeVar('_TL', 'Schema', 'FieldBase', 'bytes')
 _TS = TypeVar('_TS', bound='Schema')
+
+
+class _ShortReadTracker:
+    """Stream proxy recording whether a read came back short.
+
+    Args:
+        file: Stream to read from.
+
+    Only the ``read``, ``seek`` and ``tell`` calls that
+    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` and
+    :meth:`OptionField.unpack` make are delegated.
+
+    """
+
+    __slots__ = ('_file', 'short')
+
+    def __init__(self, file: 'IO[bytes]') -> 'None':
+        self._file = file
+        #: bool: Whether a read since the last reset returned fewer octets than
+        #: it asked for.
+        self.short = False
+
+    def read(self, size: 'Optional[int]' = -1) -> 'bytes':
+        """Read ``size`` octets, noting a short read."""
+        if size is None:
+            size = -1
+        data = self._file.read(size)
+        if 0 <= size and len(data) < size:
+            self.short = True
+        return data
+
+    def seek(self, offset: 'int', whence: 'int' = io.SEEK_SET) -> 'int':
+        """Seek the underlying stream."""
+        return self._file.seek(offset, whence)
+
+    def tell(self) -> 'int':
+        """Tell the underlying stream's position."""
+        return self._file.tell()
 
 
 class ListField(FieldBase[List[_TL]], Generic[_TL]):
@@ -362,6 +400,8 @@ class OptionField(ListField, Generic[_TS]):
         Raises:
             FieldValueError: If an option consumes nothing from ``buffer``, since
                 the loop below has then no way to get past it.
+            ProtocolError: If an option that begins with octets present reads
+                past the end of the data.
 
         """
         length = self._length
@@ -421,8 +461,24 @@ class OptionField(ListField, Generic[_TS]):
         # number of octets to rewind to get back to the front of the option.
         type_field = self._type_field
 
+        # NOTE: An option whose declared length runs past the octets behind it
+        # reads short, and every field reading off the end pads the missing
+        # octets with zeros, so the option would rebuild octets that were never
+        # there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH
+        # ``PadN`` declaring 3 with none. Nothing downstream can tell, because
+        # the schema records the zeros as values. C.f. #1325.
+        #
+        # So the stream is read through a proxy that notes any short read, and
+        # an option that began with at least one octet present and then read
+        # short is rejected. An option that begins at the end of the data reads
+        # nothing at all and is left to the end-of-option-list and progress
+        # handling below, which is what an option area declared longer than its
+        # octets relies on.
+        tracker = file = _ShortReadTracker(file)  # type: ignore[assignment]
+
         temp = []  # type: list[_TS]
         while length > 0:
+            tracker.short = False
             if type_field is None:
                 # unpack option type using base schema
                 meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
@@ -443,6 +499,13 @@ class OptionField(ListField, Generic[_TS]):
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
+            if tracker.short and consumed > 0:
+                raise ProtocolError(
+                    f'Field {self.name} has an option that runs past the end of '
+                    f'the data: {code!r} at offset {offset - start} of '
+                    f'{self._length}, with only {file.tell() - offset} octet(s) '
+                    f'of it present'
+                )
             new_packet[self.name].add(code, data)
             temp.append(data)
 
