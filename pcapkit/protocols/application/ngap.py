@@ -396,8 +396,9 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
             Parsed packet data.
 
         Raises:
-            ProtocolError: If |pycrate|_ is not installed, or if the payload is
-                not a well formed aligned PER ``NGAP-PDU``.
+            ProtocolError: If |pycrate|_ is not installed, if the payload is
+                not a well formed aligned PER ``NGAP-PDU``, or if octets follow
+                the ``NGAP-PDU``.
 
         """
         if length is None:
@@ -417,7 +418,23 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
                 # some 700x the ~0.15 ms of the decode itself; and `from_aper()`
                 # overwrites the stored value outright, so it would buy nothing
                 # even if it were free.
-                pdu.from_aper(schema.data)
+                from pycrate_core.charpy import Charpy  # pylint: disable=import-outside-toplevel
+
+                # NOTE: decoded from a `Charpy` rather than from the bytes, so
+                # that what the decoder did not consume can be measured: a bare
+                # `from_aper(bytes)` ignores a suffix. SCTP preserves message
+                # boundaries: each user message occupies its own DATA chunk
+                # (RFC 9260 §1.3), and one with both B and E set is a complete,
+                # unfragmented message (§3.3.1). The outermost APER encoding is
+                # padded with zero to seven zero bits up to the next octet
+                # (X.691 (02/2021) §11.1.4), and the result is the complete
+                # encoding (§11.1.5). So a whole octet left over is not part of
+                # the NGAP-PDU.
+                char = Charpy(schema.data)
+                pdu.from_aper(char)
+                trailing = char.len_byte()
+                if trailing:
+                    raise ProtocolError(f'NGAP: {trailing} octet(s) after the NGAP-PDU')
                 kind, body = pdu.get_val()
 
                 message, message_body = body['value']
@@ -447,9 +464,9 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
                 )
             except ProtocolError:
                 # NOTE: a ProtocolError raised inside this block is already
-                # specific about what went wrong, so it must not be caught below
-                # and relabelled "malformed NGAP-PDU". Nothing here raises one
-                # now; this keeps that true of the next edit.
+                # specific about what went wrong, such as the trailing-octet
+                # check above, so it must not be caught below and relabelled
+                # "malformed NGAP-PDU".
                 raise
             except Exception as exc:
                 # NOTE: `Exception` rather than something narrower on purpose.
