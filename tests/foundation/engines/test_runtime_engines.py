@@ -98,7 +98,7 @@ class PCAPEngineTests(unittest.TestCase):
                 self.protocol = LinkType.ETHERNET
                 self.byteorder = 'little'
                 self.nanosecond = True
-                self.info = FakeInfo(header='global')
+                self.info = FakeInfo(header='global', thiszone=-3600, sigfigs=1, snaplen=65535)
 
         for flag_f in (True, False):
             with self.subTest(flag_f=flag_f):
@@ -113,7 +113,8 @@ class PCAPEngineTests(unittest.TestCase):
                 self.assertEqual(extractor._offmt, 'unit')
                 self.assertEqual(sink.records[-1][1], 'Global Header')
                 extractor._open_output.assert_called_once_with(
-                    protocol=LinkType.ETHERNET, byteorder='little', nanosecond=True)
+                    protocol=LinkType.ETHERNET, byteorder='little', nanosecond=True,
+                    thiszone=-3600, sigfigs=1, snaplen=65535)
 
         quiet, sink = make_extractor(_flag_q=True)
         engine = PCAP(quiet)

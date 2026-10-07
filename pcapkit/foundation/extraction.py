@@ -895,7 +895,8 @@ class Extractor(Generic[_P]):
 
         The engines call this at their global-header step, passing the header's
         link type, byte order and timestamp resolution as ``protocol``,
-        ``byteorder`` and ``nanosecond``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`
+        ``byteorder`` and ``nanosecond``, and the PCAP engine also its
+        ``thiszone``, ``sigfigs`` and ``snaplen``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`
         writes its own global header from them, and the other writers ignore
         them. :meth:`run` calls it again, without arguments, after the engine
         has started, for the engines that have no such step. Only the first

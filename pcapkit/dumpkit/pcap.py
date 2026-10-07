@@ -125,8 +125,9 @@ class PCAPIO(DumperBase):
     # Utilities.
     ##########################################################################
 
-    def _dump_header(self, *, protocol: 'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ
+    def _dump_header(self, *, protocol: 'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ,too-many-arguments
                      byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False,
+                     thiszone: 'int' = 0, sigfigs: 'int' = 0, snaplen: 'int' = 0x40_000,
                      **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.
 
@@ -134,6 +135,9 @@ class PCAPIO(DumperBase):
             protocol: data link type
             byteorder: header byte order
             nanosecond: nanosecond-resolution file flag
+            thiszone: GMT to local correction
+            sigfigs: accuracy of timestamps
+            snaplen: max length of captured packets, in octets
             **kwargs: arbitrary keyword arguments
 
         """
@@ -141,6 +145,9 @@ class PCAPIO(DumperBase):
             network=protocol,
             byteorder=byteorder,
             nanosecond=nanosecond,
+            thiszone=thiszone,
+            sigfigs=sigfigs,
+            snaplen=snaplen,
         )
         packet = header.data
         with open(self._file, 'wb') as file:

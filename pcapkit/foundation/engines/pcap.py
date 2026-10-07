@@ -124,7 +124,9 @@ class PCAP(EngineBase[Frame]):
         if ext._flag_q:
             return
 
-        ext._open_output(protocol=self._dlink, byteorder=self._gbhdr.byteorder, nanosecond=self._nnsec)
+        ext._open_output(protocol=self._dlink, byteorder=self._gbhdr.byteorder,
+                         nanosecond=self._nnsec, thiszone=self._gbhdr.info.thiszone,
+                         sigfigs=self._gbhdr.info.sigfigs, snaplen=self._gbhdr.info.snaplen)
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/Global Header.{ext._fext}')
         else:
