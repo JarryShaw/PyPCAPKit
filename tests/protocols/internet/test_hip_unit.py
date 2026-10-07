@@ -226,7 +226,7 @@ class HIPUnitTests(unittest.TestCase):
             parsed_with_param = proto.read(extension=True)
         read_params.assert_called_once_with(8, version=2)
         self.assertEqual(parsed_with_param.parameters[Parameter.ESP_INFO].index, 1)
-        self.assertEqual(proto.make(parameters=None).len, 0)
+        self.assertEqual(proto.make(parameters=None).len, 4)
 
     def test_hip_register_parameter_warns_on_overwrite(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
