@@ -121,7 +121,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.transport.tcp import TCP
 
-        flags = DummyData(ns=False, cwr=False, ece=False, urg=False, ack=True, psh=True, rst=False, syn=False, fin=True)
+        flags = DummyData(ns=False, cwr=False, ece=False, urg=False, ack=True, psh=True, rst=False, syn=False, fin=True,
+                          reserved=0)
         data = DummyData(
             srcport=443,
             dstport=59000,
@@ -132,6 +133,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             checksum=b'\xfe\xed',
             urgent_pointer=0,
             options=None,
+            padding=b'',
             __next_type__=None,
         )
 
@@ -179,7 +181,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             dstport=AppType.get(59000, proto=TransportProtocol.tcp),
             seq=1,
             ack=2,
-            offset={'offset': 6, 'ns': 0},
+            offset={'offset': 6, 'reserved': 0, 'ns': 0},
             flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': 1,
                    'psh': 0, 'rst': 0, 'syn': 1, 'fin': 0},
             window=4096,
@@ -205,7 +207,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             dstport=AppType.get(5353, proto=TransportProtocol.tcp),
             seq=3,
             ack=4,
-            offset={'offset': 5, 'ns': 0},
+            offset={'offset': 5, 'reserved': 0, 'ns': 0},
             flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': 0,
                    'psh': 0, 'rst': 0, 'syn': 0, 'fin': 1},
             window=1024,
@@ -456,6 +458,7 @@ class TCPUDPUnitTests(unittest.TestCase):
                 length=3,
                 start=True,
                 end=True,
+                reserved=0,
             ),
         ).profile['end'], True)
         self.assertEqual(proto._make_mode_cc(
@@ -492,13 +495,15 @@ class TCPUDPUnitTests(unittest.TestCase):
             Option.Quick_Start_Response,
             tcp_data.QuickStartResponse(kind=Option.Quick_Start_Response,
                                         length=8, req_rate=80,
-                                        ttl_diff=7, nonce=9),
+                                        ttl_diff=7, nonce=9,
+                                        reserved=0, nonce_reserved=0),
         ).diff, 7)
         self.assertEqual(proto._make_mode_timeout(
             Option.User_Timeout_Option,
             tcp_data.UserTimeout(kind=Option.User_Timeout_Option,
                                  length=4,
-                                 timeout=datetime.timedelta(seconds=120)),
+                                 timeout=datetime.timedelta(seconds=120),
+                                 granularity=False),
         ).info['timeout'], 120)
         self.assertEqual(proto._make_mode_ao(
             Option.TCP_Authentication_Option,
@@ -755,7 +760,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         )
         profile = proto._read_mode_pocsp(
             PartialOrderServiceProfile(kind=Option.Partial_Order_Service_Profile, length=3,
-                                       profile={'start': 1, 'end': 0}),
+                                       profile={'start': 1, 'end': 0, 'reserved': 0}),
             options=options,
         )
         self.assertTrue(profile.start)
@@ -781,7 +786,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         ).digest, b'0' * 16)
         self.assertEqual(proto._read_mode_qs(
             QuickStartResponse(kind=Option.Quick_Start_Response, length=8,
-                               flags={'rate': 1}, diff=4, nonce={'nonce': 5}),
+                               flags={'reserved': 0, 'rate': 1}, diff=4,
+                               nonce={'nonce': 5, 'reserved': 0}),
             options=options,
         ).req_rate, 80.0)
         self.assertEqual(proto._read_mode_timeout(

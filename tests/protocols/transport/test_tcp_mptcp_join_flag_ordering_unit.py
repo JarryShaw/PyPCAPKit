@@ -239,7 +239,7 @@ def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool', ack: 'bool') -> 'b
 
     schema = Schema_TCP(
         srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'ns': 0},
+        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
         flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': int(ack), 'psh': 0, 'rst': 0,
                'syn': int(syn), 'fin': 0},
         window=8192, checksum=b'\x00\x00', urgent=0,
@@ -593,7 +593,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
 
         source = inspect.getsource(TCP.make)
         assignment = source.index('self._flags = _flag')
-        build = source.index('self._make_tcp_options(options)')
+        build = source.index('self._make_tcp_options(options')
 
         self.assertLess(
             assignment, build,
@@ -612,7 +612,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp import TCP
 
         source = inspect.getsource(TCP.make)
-        build = source.index('self._make_tcp_options(options)')
+        build = source.index('self._make_tcp_options(options')
         offset = source.index('offset = math.ceil')
 
         self.assertLess(build, offset,

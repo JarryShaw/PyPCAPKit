@@ -208,7 +208,7 @@ def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool' = True,
 
     schema = Schema_TCP(
         srcport=50000, dstport=80, seq=1, ack=0,
-        offset={'offset': 5 + len(option_octets) // 4, 'ns': 0},
+        offset={'offset': 5 + len(option_octets) // 4, 'reserved': 0, 'ns': 0},
         flags={'cwr': 0, 'ece': 0, 'urg': 0, 'ack': int(ack_flag), 'psh': 0, 'rst': 0,
                'syn': int(syn), 'fin': 0},
         window=8192, checksum=b'\x00\x00', urgent=0,

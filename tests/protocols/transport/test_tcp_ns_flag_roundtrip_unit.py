@@ -53,12 +53,12 @@ class TCPNSFlagRoundTripUnitTests(unittest.TestCase):
                 self.assertIs(rebuilt.info.flags.ns, ns)
 
     def test_flags_field_order(self) -> None:
-        """``ns`` leads the flags, in wire order, ahead of ``cwr``."""
+        """``ns`` leads the flags, in wire order, ahead of ``cwr``; ``reserved`` trails them."""
         from pcapkit.protocols.transport.tcp import TCP
 
         flags = TCP(TCP(srcport=1, dstport=2).data).info.flags
         self.assertEqual(list(flags.keys()),
-                         ['ns', 'cwr', 'ece', 'urg', 'ack', 'psh', 'rst', 'syn', 'fin'])
+                         ['ns', 'cwr', 'ece', 'urg', 'ack', 'psh', 'rst', 'syn', 'fin', 'reserved'])
 
 
 if __name__ == '__main__':

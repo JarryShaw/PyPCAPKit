@@ -66,10 +66,12 @@ class Flags(Data):
     syn: 'bool'
     #: Last packet from sender.
     fin: 'bool'
+    #: Reserved bits 4-6 of octet 12, between the Data Offset and ``NS``.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, ns: 'bool', cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool',
-                     psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+                     psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -98,6 +100,8 @@ class TCP(Protocol):
     if TYPE_CHECKING:
         #: TCP options.
         options: 'OrderedMultiDict[OptionNumber, Option]'
+        #: Octets of the option area after the End of Option List option.
+        padding: 'bytes'
         #: Connection control flags.
         connection: 'TCP_Flags'
 
@@ -246,9 +250,11 @@ class PartialOrderServiceProfile(Option):
     start: 'bool'
     #: End flag.
     end: 'bool'
+    #: Reserved bits (``Filler``).
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', start: 'bool', end: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', start: 'bool', end: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -327,9 +333,13 @@ class QuickStartResponse(Option):
     ttl_diff: 'int'
     #: QS nonce.
     nonce: 'int'
+    #: Reserved bits before the rate request (``Resv.``).
+    reserved: 'int'
+    #: Reserved bits after the QS nonce (``R``).
+    nonce_reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int', reserved: 'int', nonce_reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -338,9 +348,11 @@ class UserTimeout(Option):
 
     #: User timeout.
     timeout: 'timedelta'
+    #: Granularity (``G``): the timeout is in minutes if set, in seconds if not.
+    granularity: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', timeout: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', timeout: 'timedelta', granularity: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
