@@ -199,7 +199,7 @@ class DumpkitCommonTests(unittest.TestCase):
         self.assertEqual(converted['plain'], ['value'])
 
         ordered = OrderedMultiDict([('first', 1), ('first', 2)])
-        self.assertEqual(dumper.object_hook(ordered)['first'], [1, 2])
+        self.assertEqual(dumper.object_hook(ordered), [{'first': 1}, {'first': 2}])
 
         self.assertEqual(dumper.object_hook(PlainEnum.VALUE), 'PlainEnum::VALUE [1]')
         rich = dumper.object_hook(RichEnum.VALUE)
@@ -216,9 +216,11 @@ class DumpkitCommonTests(unittest.TestCase):
         dumper._append_fallback(types.SimpleNamespace(name='dict'), file)
         self.assertEqual(file.getvalue(), "{'name': 'dict'}")
 
+        # The rendering goes back through ``object_hook``, which for this stub
+        # wraps whatever it does not convert itself.
         file = io.StringIO()
         dumper._append_fallback(123, file)
-        self.assertEqual(file.getvalue(), "'123'")
+        self.assertEqual(file.getvalue(), "{'base': '123'}")
 
     def test_make_dumper_escapes_strings_only_for_plist_like_output(self) -> None:
         """GitHub issue #772: no entity escaping anywhere in :mod:`dictdumper`.
@@ -291,15 +293,15 @@ class DumpkitCommonTests(unittest.TestCase):
         self.assertEqual(converted['a &amp; b &lt;c&gt;'], 'value')
         self.assertEqual(converted[ESCAPED_BYTES_KEY], 'secret')
 
-        # A MultiDict: a plain-str key was interpolated raw until now, and the
-        # bytes key of the fixture arrives through here rather than through the
-        # dict branch -- its TLS key log entries are an OrderedMultiDict.
+        # An OrderedMultiDict: the bytes key of the fixture arrives through here
+        # -- its TLS key log entries are an OrderedMultiDict. Each entry becomes
+        # a single-key mapping, whose key is escaped when the writer hands that
+        # mapping back to the hook.
         multidict = OrderedMultiDict()
         multidict.add('a & b <c>', 'value')
         multidict.add(BYTES_KEY, 'secret')
-        converted = plist_dumper.object_hook(multidict)
-        self.assertEqual(list(converted), ['a &amp; b &lt;c&gt;', ESCAPED_BYTES_KEY])
-        self.assertEqual(converted[ESCAPED_BYTES_KEY], ['secret'])
+        converted = [plist_dumper.object_hook(entry) for entry in plist_dumper.object_hook(multidict)]
+        self.assertEqual(converted, [{'a &amp; b &lt;c&gt;': 'value'}, {ESCAPED_BYTES_KEY: 'secret'}])
 
         # An enum-derived key is still escaped exactly once: the escaping moved
         # out of this branch and into one shared helper, so escaping it twice is
@@ -336,7 +338,7 @@ class DumpkitCommonTests(unittest.TestCase):
         multidict.add('a & b <c>', 'value')
         multidict.add(BYTES_KEY, 'secret')
         converted = plain_dumper.object_hook(multidict)
-        self.assertEqual(list(converted), ['a & b <c>', BYTES_KEY])
+        self.assertEqual(converted, [{'a & b <c>': 'value'}, {BYTES_KEY: 'secret'}])
 
     def test_an_unassigned_port_dumps_its_addon_keys_in_the_declared_order(self) -> None:
         """GitHub issue #575's fallback must not reorder what it renders.

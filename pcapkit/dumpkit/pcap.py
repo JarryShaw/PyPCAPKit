@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.corekit.version import VersionInfo
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 __all__ = [
@@ -57,8 +58,8 @@ class PCAPIO(DumperBase):
         protocol: data link type
         byteorder: header byte order
         nanosecond: nanosecond-resolution file flag
-        **kwargs: further global header fields, i.e. ``thiszone``, ``sigfigs``
-            and ``snaplen``, and arbitrary keyword arguments
+        **kwargs: further global header fields, i.e. ``version``, ``thiszone``,
+            ``sigfigs`` and ``snaplen``, and arbitrary keyword arguments
 
     """
     if TYPE_CHECKING:
@@ -90,8 +91,9 @@ class PCAPIO(DumperBase):
             protocol: data link type
             byteorder: header byte order
             nanosecond: nanosecond-resolution file flag
-            **kwargs: further global header fields, i.e. ``thiszone``,
-                ``sigfigs`` and ``snaplen``, and arbitrary keyword arguments
+            **kwargs: further global header fields, i.e. ``version``,
+                ``thiszone``, ``sigfigs`` and ``snaplen``, and arbitrary keyword
+                arguments
 
         """
         #: int: Frame counter.
@@ -129,6 +131,7 @@ class PCAPIO(DumperBase):
 
     def _dump_header(self, *, protocol: 'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ,too-many-arguments
                      byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False,
+                     version: 'tuple[int, int] | VersionInfo' = (2, 4),
                      thiszone: 'int' = 0, sigfigs: 'int' = 0, snaplen: 'int' = 0x40_000,
                      **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.
@@ -137,6 +140,7 @@ class PCAPIO(DumperBase):
             protocol: data link type
             byteorder: header byte order
             nanosecond: nanosecond-resolution file flag
+            version: format version, as ``(major, minor)``
             thiszone: GMT to local correction
             sigfigs: accuracy of timestamps
             snaplen: max length of captured packets, in octets
@@ -147,6 +151,7 @@ class PCAPIO(DumperBase):
             network=protocol,
             byteorder=byteorder,
             nanosecond=nanosecond,
+            version=version,
             thiszone=thiszone,
             sigfigs=sigfigs,
             snaplen=snaplen,

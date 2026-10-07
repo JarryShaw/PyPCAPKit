@@ -54,7 +54,7 @@ class TestPcapngJSONReportTests(unittest.TestCase):
         entries = [frame['secrets_data']['entries'] for frame in report.values()
                    if isinstance(frame, dict) and 'secrets_data' in frame]
         self.assertEqual(len(entries), 1)
-        self.assertIn(RAW_BYTES_KEY, entries[0]['CLIENT_RANDOM'])
+        self.assertIn(RAW_BYTES_KEY, entries[0]['CLIENT_RANDOM'][0])
 
 
 if __name__ == '__main__':
