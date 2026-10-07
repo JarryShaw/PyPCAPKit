@@ -761,7 +761,7 @@ class AuthOption(Option, code=Enum_Option.AUTH_OPTION_TYPE):
 class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
     """Header schema for Mobility Message Replay Protection options."""
 
-    #: Timestamp (seconds since January 1st, 1970, c.f., :rfc:`1305`).
+    #: Timestamp (seconds since January 1st, 1900, c.f., :rfc:`1305`).
     seconds: 'int' = UInt32Field()
     #: Timestamp fractions (1/2**32 seconds per unit, c.f., :rfc:`1305`).
     fraction: 'int' = UInt32Field()
