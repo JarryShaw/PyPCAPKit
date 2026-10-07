@@ -73,6 +73,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         rank_err: int
         #: Forwarding error flag.
         fwd_err: int
+        #: Reserved flag bits.
+        reserved: int
 
     class MPLFlags(TypedDict):
         """MPL flags."""
@@ -117,6 +119,21 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Nonce.
         nonce: int
+
+
+def rpl_opt_sub_tlv_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return RPL option sub-TLV length.
+
+    Args:
+        pkt: RPL option unpacked schema.
+
+    Returns:
+        RPL option sub-TLV length, i.e. ``Opt Data Len`` less the four octets
+        of the fixed fields. An ``Opt Data Len`` below ``4`` gives ``0``, and
+        the reader then rejects the option.
+
+    """
+    return max(pkt['len'] - 4, 0)
 
 
 def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
@@ -667,15 +684,18 @@ class RPLOption(Option, code=[Enum_Option.RPL_Option_0x23,
         'down': (0, 1),
         'rank_err': (1, 1),
         'fwd_err': (2, 1),
+        'reserved': (3, 5),
     })
     #: RPL instance ID.
     id: 'int' = UInt8Field()
     #: Sender rank.
     rank: 'int' = UInt16Field()
+    #: Sub-TLVs, kept as raw octets.
+    sub_tlvs: 'bytes' = BytesField(length=rpl_opt_sub_tlv_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'RPLFlags', id: 'int',
-                     rank: 'int') -> 'None': ...
+                     rank: 'int', sub_tlvs: 'bytes') -> 'None': ...
 
 
 @schema_final

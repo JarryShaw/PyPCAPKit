@@ -226,9 +226,11 @@ class RPLFlags(Data):
     rank_err: 'bool'
     #: Forwarding error flag.
     fwd_err: 'bool'
+    #: Reserved flag bits, carried verbatim so that a rebuild reproduces them.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, down: 'bool', rank_err: 'bool', fwd_err: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, down: 'bool', rank_err: 'bool', fwd_err: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
@@ -241,9 +243,11 @@ class RPLOption(Option):
     id: 'int'
     #: Sender rank.
     rank: 'int'
+    #: Sub-TLVs [:rfc:`6553#section-3`], kept as raw octets.
+    sub_tlvs: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int', sub_tlvs: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
