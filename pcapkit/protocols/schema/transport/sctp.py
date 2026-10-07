@@ -59,6 +59,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class DATAChunkFlags(TypedDict):
         """SCTP DATA chunk flags."""
 
+        #: Reserved bits.
+        reserved: int
         #: (I)mmediate bit, i.e., request a SACK chunk without delay.
         I: int
         #: (U)nordered bit, i.e., no stream sequence number is assigned.
@@ -72,6 +74,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """SCTP chunk flags carrying only the T bit, i.e., ABORT and
         SHUTDOWN COMPLETE chunks."""
 
+        #: Reserved bits.
+        reserved: int
         #: T bit, i.e., the verification tag has been reflected.
         T: int
 
@@ -162,9 +166,10 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
       one shared ``packet`` mapping down into the nested schemas, and each
       nested parameter overwrites ``packet['length']`` with *its* length, so a
       trailing field would size itself from the last parameter rather than from
-      the chunk. Folding avoids the question: the constructors always declare a
-      chunk length that already covers every parameter's padding, hence a
-      multiple of four, hence no chunk-level padding to emit.
+      the chunk. Folding avoids the question: every nested parameter packs its
+      own padding, the last one's included, so the list already ends on a
+      four-byte boundary whether or not the chunk length counts that final
+      padding.
 
     """
     def callback(pkt: 'dict[str, Any]') -> 'int':
@@ -276,12 +281,13 @@ class InvalidStreamIdentifierCause(ErrorCause, code=Enum_CauseCode.Invalid_Strea
     #: Stream identifier of the offending DATA chunk.
     stream_id: 'int' = UInt16Field()
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=2)
+    reserved: 'bytes' = BytesField(length=2)
     #: Padding.
     padding: 'bytes' = PaddingField(length=padding_length)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_CauseCode', length: 'int', stream_id: 'int') -> 'None': ...
+        def __init__(self, code: 'Enum_CauseCode', length: 'int', stream_id: 'int',
+                     reserved: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -620,6 +626,7 @@ class DATAChunk(Chunk, code=Enum_Chunk.Payload_Data):
 
     #: Chunk flags.
     flags: 'DATAChunkFlags' = BitField(length=1, namespace={
+        'reserved': (0, 4),
         'I': (4, 1),
         'U': (5, 1),
         'B': (6, 1),
@@ -782,6 +789,7 @@ class AbortChunk(Chunk, code=Enum_Chunk.Abort):
 
     #: Chunk flags.
     flags: 'TBitFlags' = BitField(length=1, namespace={
+        'reserved': (0, 7),
         'T': (7, 1),
     })
     #: Zero or more error causes, including the chunk's own trailing padding;
@@ -872,6 +880,7 @@ class ShutdownCompleteChunk(Chunk, code=Enum_Chunk.Shutdown_Complete):
 
     #: Chunk flags.
     flags: 'TBitFlags' = BitField(length=1, namespace={
+        'reserved': (0, 7),
         'T': (7, 1),
     })
     #: Padding.
