@@ -100,7 +100,11 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         packet: Scapy packet.
 
     Returns:
-        A :obj:`dict` mapping of packet data.
+        A :obj:`dict` mapping of packet data. Each layer carries only the fields
+        set on it (for a dissected packet, those read from the wire, with no
+        defaults filled in). Field values that are themselves
+        Scapy packets (e.g. IP options, DNS records), including those inside
+        lists, are converted recursively. The ``packet`` itself is not modified.
 
     Raises:
         ModuleNotFound: If `Scapy`_ is not installed.
@@ -108,10 +112,20 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     """
     if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
-    from scapy.packet import NoPayload
+    from scapy.packet import NoPayload, Packet
+
+    def convert(value: 'Any') -> 'Any':
+        if isinstance(value, Packet):
+            return wrapper(value)
+        if isinstance(value, list):
+            return [convert(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(convert(item) for item in value)
+        return value
 
     def wrapper(packet: 'Packet') -> 'dict[str, Any]':
-        dict_ = packet.fields
+        # copy, so the payload names are not written into ``packet.fields``
+        dict_ = {key: convert(val) for key, val in packet.fields.items()}
         payload = packet.payload
         if not isinstance(payload, NoPayload):
             dict_[payload.name] = wrapper(payload)
