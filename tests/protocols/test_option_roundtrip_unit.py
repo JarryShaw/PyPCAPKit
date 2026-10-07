@@ -393,82 +393,33 @@ EXPECTED_FAILURES = {
 
     # -- PCAP-NG --------------------------------------------------------------
 
-    # ``PCAPNG.__post_init__`` packs and then re-parses *on the same instance*,
-    # and both halves share the per-instance option counter: the make path
-    # increments it, the read path then trips its own "only one of these"
-    # guard on the option it just built. Twenty-seven options have such a
-    # guard; the ten that construct are the ones that do not.
+    # Thirty-three PCAP-NG entries used to be recorded here, for four defects
+    # that #1267-#1270 fixed. ``PCAPNG.__post_init__`` carried the make pass's
+    # option count into its own re-parse, so every option with an "only one"
+    # guard tripped it (27 options). ``if_IPv6addr`` declared 8 octets for 17.
+    # ``isb_starttime``/``isb_endtime`` read an interface ID that only the parse
+    # path set. And an EPB, SPB or PB rebuilt from its data model lost its
+    # packet data. All of them round-trip now.
+
+    # The two key-log secrets used to fail for #1271, which is fixed: lines
+    # ended with ``os.sep``, and the body carried ``datetime.now()``. That
+    # unmasked #1279: ``_make_block_dsb`` never pads the secrets data, so the
+    # newline-terminated logs this suite builds give a Block Total Length that
+    # is not a multiple of four. The logs' header comment embeds
+    # ``pcapkit.__version__``, so the length varies by release and the
+    # fragment names only the block and the check.
+    #
+    # A release whose version string happens to make the log a multiple of four
+    # octets long turns these 'OK' without #1279 being fixed. If they start
+    # passing, check the log length before deleting them.
     **{
-        f'pcapng-option/{name}': Gap(
-            'CONSTRUCT', 'option must be only one',
-            'pcapkit/protocols/misc/pcapng.py:1078 packs and :1088 re-parses on '
-            'one instance, sharing self._opt; incremented at :3941, checked at '
-            ':2175')
-        for name in (
-            'if_name_2', 'if_description_3', 'if_MACaddr_6', 'if_EUIaddr_7',
-            'if_speed_8', 'if_tsresol_9', 'if_tzone_10', 'if_filter_11',
-            'if_os_12', 'if_fcslen_13', 'if_tsoffset_14', 'if_hardware_15',
-            'if_txspeed_16', 'if_rxspeed_17',
-            'epb_flags_2', 'epb_dropcount_4', 'epb_packetid_5', 'epb_queue_6',
-            'ns_dnsname_2', 'ns_dnsIP4addr_3', 'ns_dnsIP6addr_4',
-            'isb_ifrecv_4', 'isb_ifdrop_5', 'isb_filteraccept_6',
-            'isb_osdrop_7', 'isb_usrdeliv_8',
-            'pack_flags_2',
-        )
+        f'pcapng-secrets/{name}': Gap(
+            'CONSTRUCT', ('PCAP-NG: [Block 10]', 'invalid length'),
+            'pcapkit/protocols/misc/pcapng.py _make_block_dsb -- the block '
+            'length omits the pad that DecryptionSecretsBlock.padding_data in '
+            'pcapkit/protocols/schema/misc/pcapng.py reads (#1279)')
+        for name in ('TLS_Key_Log', 'WireGuard_Key_Log')
     },
-
-    # ``_make_option_if_ipv6`` hardcodes ``length=8``, copied from its IPv4
-    # sibling where 8 is right, while ``IPv6InterfaceField`` is 17 octets. The
-    # option packs to 21, the block total becomes 41, and no argument the caller
-    # can pass changes it.
-    'pcapng-option/if_IPv6addr_5': Gap(
-        'CONSTRUCT', 'invalid length: 41',
-        'pcapkit/protocols/misc/pcapng.py:4190 -- length=8 for a 17-octet '
-        'IPv6InterfaceField'),
-
-    # ``_isb_interface_id`` is read by these two make-side constructors but
-    # assigned only by ``_read_block_isb``.
-    'pcapng-option/isb_starttime_2': Gap(
-        'CONSTRUCT', "no attribute '_isb_interface_id'",
-        'pcapkit/protocols/misc/pcapng.py:4991 -- reads an attribute set only '
-        'at :1790, on the parse path'),
-    'pcapng-option/isb_endtime_3': Gap(
-        'CONSTRUCT', "no attribute '_isb_interface_id'",
-        'pcapkit/protocols/misc/pcapng.py:5024 -- as above'),
-
-    # The three packet-carrying blocks lose their payload on the way back:
-    # ``_make_block_*`` never restores ``packet_data``, and it could not, since
-    # the data model has no field to keep it in -- the octets go to the
-    # next-layer dissector and survive only as the decoded chain. The rebuilt
-    # block keeps ``captured_len`` while carrying no data, so it is malformed
-    # rather than merely shorter.
-    **{
-        f'pcapng-block/{name}': Gap(
-            'MISMATCH', '',
-            'pcapkit/protocols/misc/pcapng.py:3514, :3565, :3851 -- '
-            'packet_data is not restored, and '
-            'pcapkit/protocols/data/misc/pcapng.py:442, :474, :895 have no '
-            'field to restore it from')
-        for name in ('Enhanced_Packet_Block', 'Simple_Packet_Block', 'Packet_Block')
-    },
-
-    # The two key-log secrets writers terminate each line with ``os.sep`` -- a
-    # forward slash on POSIX -- where a newline is meant, while the readers
-    # split on newlines. So the whole log parses as one comment line and every
-    # entry is lost. They also stamp the current time into the body with no way
-    # to override it, which is why these two are the only cases in the suite
-    # whose failure detail is not stable, and why the generator's
-    # Decryption Secrets Block case uses a ZigBee key instead.
-    'pcapng-secrets/TLS_Key_Log': Gap(
-        'MISMATCH', '',
-        'pcapkit/protocols/misc/pcapng.py:5553 and :5556 -- os.sep as a line '
-        'terminator, against splitlines() at '
-        'pcapkit/protocols/schema/misc/pcapng.py:1480; and datetime.now() in '
-        'the payload'),
-    'pcapng-secrets/WireGuard_Key_Log': Gap(
-        'MISMATCH', '',
-        'pcapkit/protocols/misc/pcapng.py:5585 and :5587, against '
-        'pcapkit/protocols/schema/misc/pcapng.py:1519; and datetime.now()'),
 }
 
 
