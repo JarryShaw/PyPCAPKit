@@ -72,8 +72,8 @@ __all__ = ['ARP', 'InARP']
 # check Python version
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
-# Ethernet address pattern
-PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
+# Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)
+PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}(?:[:-][0-9a-f]{2})*)?')
 
 
 class ARP(Link[Data_ARP, Schema_ARP],
@@ -238,8 +238,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
             ptype_default: Default value of protocol type.
             ptype_namespace: Namespace of protocol type.
             ptype_reversed: Reversed flag of protocol type.
-            hlen: Hardware address length; derived from the packed ``sha`` if
-                not given.
+            hlen: Hardware address length; if not given, ``6`` when ``htype``
+                is Ethernet, otherwise derived from the packed ``sha``.
             plen: Protocol address length; derived from the packed ``spa`` if
                 not given.
             oper: Operation.
@@ -258,7 +258,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Raises:
             ProtocolError: If a packed hardware address is not ``hlen`` octets
-                long, or a packed protocol address is not ``plen`` octets long.
+                long (with ``hlen`` not given and ``htype`` Ethernet, not 6
+                octets long), or a packed protocol address is not ``plen``
+                octets long.
 
         """
         _htype = self._make_index(htype, htype_default, namespace=htype_namespace,
@@ -269,11 +271,15 @@ class ARP(Link[Data_ARP, Schema_ARP],
                                  reversed=oper_reversed, pack=False)
 
         _sha = self._make_addr_resolve(sha, _htype)
-        _spa = self._make_proto_resolve(spa, _ptype)
+        _spa = self._make_proto_resolve(spa, _ptype, plen)
         _tha = self._make_addr_resolve(tha, _htype)
-        _tpa = self._make_proto_resolve(tpa, _ptype)
+        _tpa = self._make_proto_resolve(tpa, _ptype, plen)
 
-        _hlen = len(_sha) if hlen is None else hlen
+        # an Ethernet MAC is 6 octets unless the caller says otherwise
+        if hlen is None:
+            _hlen = 6 if _htype == Enum_Hardware.Ethernet else len(_sha)
+        else:
+            _hlen = hlen
         _plen = len(_spa) if plen is None else plen
         for name, addr, size in (('sha', _sha, _hlen), ('tha', _tha, _hlen),
                                  ('spa', _spa, _plen), ('tpa', _tpa, _plen)):
@@ -371,16 +377,16 @@ class ARP(Link[Data_ARP, Schema_ARP],
             ptype: Protocol type.
 
         Returns:
-            Protocol address. If ``ptype`` is ``0x0800`` (IPv4), an
-            :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6), an
-            :class:`~ipaddress.IPv6Address`; otherwise, the address as a hex
-            :data:`str`.
+            Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is
+            4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)
+            and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the
+            address as a hex :data:`str`.
 
         """
-        if ptype == Enum_EtherType.Internet_Protocol_version_4:  # IPv4
-            return ipaddress.ip_address(addr)
-        if ptype == Enum_EtherType.Internet_Protocol_version_6:  # IPv6
-            return ipaddress.ip_address(addr)
+        if ptype == Enum_EtherType.Internet_Protocol_version_4 and len(addr) == 4:  # IPv4
+            return ipaddress.IPv4Address(addr)
+        if ptype == Enum_EtherType.Internet_Protocol_version_6 and len(addr) == 16:  # IPv6
+            return ipaddress.IPv6Address(addr)
         return addr.hex()
 
     def _make_addr_resolve(self, addr: 'str | bytes', htype: 'int') -> 'bytes':
@@ -393,7 +399,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
         Returns:
             Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.
             MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address
-            is validated and packed as 6 octets; otherwise, a :data:`str` is
+            is validated and packed, one octet per group (an empty string packs
+            as no octets); otherwise, a :data:`str` is
             taken as the *hex* encoded address that :meth:`_read_addr_resolve`
             returns, and :obj:`bytes` are returned as given.
 
@@ -415,16 +422,19 @@ class ARP(Link[Data_ARP, Schema_ARP],
                 raise ProtocolError(f'Invalid hardware address: {addr!r}') from None
         return addr
 
-    def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int') -> 'bytes':
+    def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int',
+                            plen: 'Optional[int]' = None) -> 'bytes':
         """Resolve protocol address according to protocol.
 
         Arguments:
             addr: Protocol address.
             ptype: Protocol type.
+            plen: Protocol address length, if given.
 
         Returns:
             Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or
-            ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16
+            ``0x86dd`` (IPv6), and ``plen`` is either not given or 4 or 16
+            respectively, the address is validated and packed to 4 or 16
             octets; otherwise, a :data:`str` is taken as the *hex* encoded
             address that :meth:`_read_proto_resolve` returns, an
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is
@@ -455,10 +465,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
             :exc:`AttributeError`, bool or not.
 
         """
-        if ptype == Enum_EtherType.Internet_Protocol_version_4:
+        if ptype == Enum_EtherType.Internet_Protocol_version_4 and plen in (None, 4):
             return cast('IPv4Address', parse_ip_address(
                 addr, f'{self.__class__.__name__}: invalid protocol address', version=4)).packed
-        if ptype == Enum_EtherType.Internet_Protocol_version_6:
+        if ptype == Enum_EtherType.Internet_Protocol_version_6 and plen in (None, 16):
             return cast('IPv6Address', parse_ip_address(
                 addr, f'{self.__class__.__name__}: invalid protocol address', version=6)).packed
 
@@ -473,7 +483,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
         return addr
 
 
-class InARP(ARP):
+class InARP(ARP, schema=Schema_ARP, data=Data_ARP):
     """This class implements Inverse Address Resolution Protocol."""
 
     ##########################################################################

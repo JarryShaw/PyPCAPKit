@@ -94,7 +94,7 @@ class RARP(Application, ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disab
         return Enum_EtherType.Reverse_Address_Resolution_Protocol  # type: ignore[return-value]
 
 
-class DRARP(RARP):
+class DRARP(RARP, schema=Schema_ARP, data=Data_ARP):
     """This class implements Dynamic Reverse Address Resolution Protocol.
 
     Inherits RARP's bases unchanged, so ``layer == 'Application'`` here too --
