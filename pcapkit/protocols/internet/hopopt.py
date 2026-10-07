@@ -992,6 +992,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
            |                         (sub-TLVs)                            |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when
+        unrecognised, are kept as raw octets in ``sub_tlvs``.
+
         Args:
             schema: parsed parameter schema
             options: extracted HOPOPT options
@@ -1000,10 +1003,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is less than ``4``.
 
         """
-        if schema.len != 4:
+        if schema.len < 4:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_RPLOption(
@@ -1015,9 +1018,11 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 down=bool(schema.flags['down']),
                 rank_err=bool(schema.flags['rank_err']),
                 fwd_err=bool(schema.flags['fwd_err']),
+                reserved=schema.flags['reserved'],
             ),
             id=schema.id,
             rank=schema.rank,
+            sub_tlvs=schema.sub_tlvs,
         )
         return opt
 
@@ -1815,6 +1820,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                       fwd_err: 'bool' = False,
                       id: 'int' = 0,
                       rank: 'int' = 0,
+                      reserved: 'int' = 0,
+                      sub_tlvs: 'bytes' = b'',
                       **kwargs: 'Any') -> 'Schema_RPLOption':
         """Make HOPOPT RPL option.
 
@@ -1826,29 +1833,44 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             fwd_err: forwarding error flag
             id: RPL instance ID
             rank: sender rank
+            reserved: reserved flag bits, i.e. the low five bits of the flags octet
+            sub_tlvs: sub-TLVs, as raw octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` does not fit in five bits, or
+                ``sub_tlvs`` does not fit in the option.
 
         """
         if opt is not None:
             down = opt.flags.down
             rank_err = opt.flags.rank_err
             fwd_err = opt.flags.fwd_err
+            reserved = opt.flags.reserved
             id = opt.id
             rank = opt.rank
+            sub_tlvs = opt.sub_tlvs
+
+        if not 0 <= reserved < 32:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid RPL reserved flags: {reserved}')
+        if len(sub_tlvs) > 251:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] too long RPL sub-TLVs: {len(sub_tlvs)}')
 
         return Schema_RPLOption(
             type=code,
-            len=4,
+            len=4 + len(sub_tlvs),
             flags={
                 'down': down,
                 'rank_err': rank_err,
                 'fwd_err': fwd_err,
+                'reserved': reserved,
             },
             id=id,
             rank=rank,
+            sub_tlvs=sub_tlvs,
         )
 
     def _make_opt_mpl(self, code: 'Enum_Option', opt: 'Optional[Data_MPLOption]' = None, *,

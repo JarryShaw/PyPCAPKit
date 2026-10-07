@@ -854,8 +854,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         rpl = proto._make_opt_rpl(
             Option.RPL_Option_0x63,
             data.RPLOption(type=Option.RPL_Option_0x63, length=6,
-                           flags=data.RPLFlags(down=True, rank_err=True, fwd_err=False),
-                           id=5, rank=6, **base),
+                           flags=data.RPLFlags(down=True, rank_err=True, fwd_err=False,
+                                               reserved=0),
+                           id=5, rank=6, sub_tlvs=b'', **base),
         )
         self.assertTrue(rpl.flags['down'])
         mpl = proto._make_opt_mpl(
@@ -1222,8 +1223,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         rpl = proto._read_opt_rpl(
             schema.RPLOption(type=Option.RPL_Option_0x63, len=4,
-                             flags={'down': 1, 'rank_err': 0, 'fwd_err': 1},
-                             id=9, rank=10),
+                             flags={'down': 1, 'rank_err': 0, 'fwd_err': 1, 'reserved': 0},
+                             id=9, rank=10, sub_tlvs=b''),
             options=options,
         )
         self.assertTrue(rpl.flags.down)
