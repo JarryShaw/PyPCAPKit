@@ -106,6 +106,7 @@ class ExtractorTests(unittest.TestCase):
         extractor._ofnm = 'output.txt'
         extractor._offmt = 'tree'
         extractor._flag_q = False
+        extractor._flag_o = True  # no writer class to open
         extractor._flag_d = True
         extractor._flag_r = True
         extractor._flag_t = True

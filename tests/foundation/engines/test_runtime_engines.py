@@ -66,6 +66,8 @@ def make_extractor(**overrides):
         'magic_number': b'\xa1\xb2\xc3\xd4',
         # the third-party engines call this at setup for the global header
         'record_header': mock.Mock(),
+        # the header step creates the writer through this; ``_ofile`` is the writer already
+        '_open_output': mock.Mock(),
     }
     values.update(overrides)
     return types.SimpleNamespace(**values), sink
@@ -94,6 +96,7 @@ class PCAPEngineTests(unittest.TestCase):
                 self.file = file
                 self.version = VersionInfo(2, 4)
                 self.protocol = LinkType.ETHERNET
+                self.byteorder = 'little'
                 self.nanosecond = True
                 self.info = FakeInfo(header='global')
 
@@ -109,6 +112,8 @@ class PCAPEngineTests(unittest.TestCase):
                 self.assertTrue(engine.nanosecond)
                 self.assertEqual(extractor._offmt, 'unit')
                 self.assertEqual(sink.records[-1][1], 'Global Header')
+                extractor._open_output.assert_called_once_with(
+                    protocol=LinkType.ETHERNET, byteorder='little', nanosecond=True)
 
         quiet, sink = make_extractor(_flag_q=True)
         engine = PCAP(quiet)

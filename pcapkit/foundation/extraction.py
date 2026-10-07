@@ -14,6 +14,7 @@ extracts parametres from a PCAP file.
 
 """
 import collections
+import functools
 import importlib
 import io
 import os
@@ -125,6 +126,9 @@ class Extractor(Generic[_P]):
         _flag_f: 'bool'
         #: No output file, i.e., no output file is to be generated.
         _flag_q: 'bool'
+        #: Output opened flag. It indicates if :meth:`~pcapkit.foundation.extraction.Extractor._open_output`
+        #: has replaced the writer class in :attr:`_ofile` with the writer.
+        _flag_o: 'bool'
         #: Reassembly flag. It indicates if datagram reassembly is enabled.
         #: Every engine reads it to decide whether to feed
         #: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the
@@ -693,6 +697,7 @@ class Extractor(Generic[_P]):
                 logger.debug('using engine %s (%s)', eng.name, eng.module)
                 self._exeng = eng(self)
                 self._exeng.run()
+                self._open_output()
 
                 # start iteration
                 self.record_frames()
@@ -718,6 +723,7 @@ class Extractor(Generic[_P]):
 
         # start engine
         self._exeng.run()
+        self._open_output()
 
         # start iteration
         self.record_frames()
@@ -884,6 +890,34 @@ class Extractor(Generic[_P]):
 
         raise FormatError(f'unknown file format: {self._magic!r}')
 
+    def _open_output(self, **kwargs: 'Any') -> 'None':
+        """Create the output writer.
+
+        The engines call this at their global-header step, passing the header's
+        link type, byte order and timestamp resolution as ``protocol``,
+        ``byteorder`` and ``nanosecond``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`
+        writes its own global header from them, and the other writers ignore
+        them. :meth:`run` calls it again, without arguments, after the engine
+        has started, for the engines that have no such step. Only the first
+        call has an effect.
+
+        Under split mode, i.e. :attr:`self._flag_f <Extractor._flag_f>` is
+        :data:`True`, :attr:`self._ofile <Extractor._ofile>` stays a factory,
+        with ``kwargs`` bound, that the engines call once per output file.
+
+        Args:
+            **kwargs: Global header fields for the writer.
+
+        """
+        if self._flag_q or self._flag_o:
+            return
+        self._flag_o = True
+
+        if self._flag_f:
+            self._ofile = functools.partial(self._ofile, **kwargs)  # type: ignore[misc]
+        else:
+            self._ofile = self._ofile(self._ofnm, **kwargs)
+
     def record_frames(self) -> 'None':
         """Read packet frames.
 
@@ -1018,6 +1052,8 @@ class Extractor(Generic[_P]):
 
                 * If using PCAP output for TCP flow tracing while the extraction engine is
                   DPKT, Scapy, PyShark or PyPCAPFile.
+                * If using PCAP output while the extraction engine is a third-party
+                  one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
                 * If output file format is not supported.
 
             pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
@@ -1031,6 +1067,17 @@ class Extractor(Generic[_P]):
         if format is None:
             format = 'tree'
 
+        # NOTE: the third-party engines' adapters hand the output writer each
+        # frame as a plain :obj:`dict` built by ``packet2dict``, which carries
+        # neither the frame's octets nor its record header, so there is nothing
+        # for the PCAP writer to write. The flow tracer has the same limitation,
+        # and is given the same replacement below.
+        if ((engine or 'default').lower() in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
+                and format in ('pcap', 'cap')):
+            warn(f"'Extractor(engine={engine})' does not support 'format={format}'; "
+                 "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
+            format = 'json'
+
         ifnm, ofnm, fmt, oext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
 
         self._ifnm = ifnm  # input file name
@@ -1042,6 +1089,7 @@ class Extractor(Generic[_P]):
         self._flag_e = False                 # EOF flag
         self._flag_f = files                 # split file flag
         self._flag_q = nofile                # no output flag
+        self._flag_o = False                 # output opened flag
         self._flag_r = reassembly            # reassembly flag
         self._flag_t = trace                 # trace flag
         self._flag_v = False                 # verbose flag
@@ -1199,7 +1247,10 @@ class Extractor(Generic[_P]):
             # NOTE: make_dumper() names every subclass it builds 'DictDumper', so the
             # useful name is the output class it wraps.
             logger.debug('dumping %s output to %s via %s', fmt, ofnm, output.__name__)
-            self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
+            # NOTE: only the writer *class* is kept here. The writer itself is
+            # created by :meth:`_open_output` once the engine has read the global
+            # header, which the PCAP writer needs in order to write its own.
+            self._ofile = dumper  # output file
         else:
             logger.debug('file output disabled')
 
