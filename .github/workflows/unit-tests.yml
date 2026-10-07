@@ -145,6 +145,8 @@ jobs:
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
           if [ "$COVERAGE" = "true" ]; then
+            # Logs every measured process and its parent, for the check below.
+            COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
             python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
           else
             python -m pytest "$@"
@@ -164,6 +166,30 @@ jobs:
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
         run: |
           set -euo pipefail
+          # #1387: a worker killed before its atexit save leaves no .coverage.*
+          # file, and combine then reports the rest as the whole. So fail, and
+          # post no number, unless the controller and every xdist worker (its
+          # direct children in the log above) left one.
+          python - <<'PY'
+          import glob, os, re, sys
+          parent, cmd = {}, {}
+          log = 'coverage-processes.log'
+          for line in open(log, errors='replace').readlines() if os.path.exists(log) else []:
+              if m := re.match(r' *(\d+)\.\w+: New process(: cmd| parent pid): (.*)', line):
+                  (parent if m[2] == ' parent pid' else cmd)[m[1]] = m[3]
+          root = [p for p, c in cmd.items() if "'run', '--rcfile=.github/coverage.toml'" in c]
+          workers = sorted(p for p, q in parent.items() if root and q == root[0])
+          saved = set(re.findall(r'\.pid(\d+)\.', ' '.join(glob.glob('.coverage.*'))))
+          missing = [p for p in root + workers if p not in saved]
+          print(f'controller {root}, {len(workers)} xdist workers, missing data: {missing}')
+          if len(root) != 1 or not workers or missing:
+              why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  print(f'**Coverage not reported:** {why} (#1387); a total would under-count.',
+                        file=summary)
+              print(f'::error::Coverage data is incomplete: {why}.')
+              sys.exit(1)
+          PY
           python -m coverage combine --rcfile=.github/coverage.toml
           python -m coverage report --rcfile=.github/coverage.toml
           python -m coverage html --rcfile=.github/coverage.toml -d coverage-html

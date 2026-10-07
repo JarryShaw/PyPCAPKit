@@ -9,7 +9,10 @@
 #   patch     -- "subprocess" (coverage 7.10+) starts measurement in every
 #                child Python process. pytest-xdist's workers are such children
 #                (execnet popen), so without it only the controller is measured
-#                and the -n auto run reports next to nothing.
+#                and the -n auto run reports next to nothing. "_exit" saves the
+#                data before os._exit(), which skips atexit: execnet calls it on
+#                a worker whose execution outlives shutdown, and pytest-timeout's
+#                thread method on a hung test (#1387).
 #   core      -- "ctrace", not the sys.monitoring default on 3.12+. Tests
 #                purge and re-import pcapkit, and sysmon keeps state for every
 #                generation's code objects: measured on test_http_unit.py
@@ -25,6 +28,7 @@ branch = true
 parallel = true
 patch = [
     "subprocess",
+    "_exit",
 ]
 core = "ctrace"
 
