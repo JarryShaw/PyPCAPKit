@@ -54,6 +54,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Data offset.
         offset: int
+        #: Reserved bits.
+        reserved: int
         #: ECN-nonce concealment protection.
         ns: int
 
@@ -84,10 +86,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         start: int
         #: End flag.
         end: int
+        #: Reserved bits (``Filler``).
+        reserved: int
 
     class QuickStartFlags(TypedDict):
         """TCP quick start flags."""
 
+        #: Reserved bits.
+        reserved: int
         #: Rate request.
         rate: int
 
@@ -96,6 +102,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Nonce.
         nonce: int
+        #: Reserved bits (``R``).
+        reserved: int
 
     class TimeoutInfo(TypedDict):
         """User timeout information."""
@@ -643,6 +651,7 @@ class PartialOrderServiceProfile(Option, code=Enum_Option.Partial_Order_Service_
     profile: 'POCProfile' = BitField(length=1, namespace={
         'start': (0, 1),
         'end': (1, 1),
+        'reserved': (2, 6),
     })
 
     if TYPE_CHECKING:
@@ -721,6 +730,7 @@ class QuickStartResponse(Option, code=Enum_Option.Quick_Start_Response):
 
     #: Flags.
     flags: 'QuickStartFlags' = BitField(length=1, namespace={
+        'reserved': (0, 4),
         'rate': (4, 4),
     })
     #: TTL difference.
@@ -728,6 +738,7 @@ class QuickStartResponse(Option, code=Enum_Option.Quick_Start_Response):
     #: QS nonce.
     nonce: 'QuickStartNonce' = BitField(length=4, namespace={
         'nonce': (0, 30),
+        'reserved': (30, 2),
     })
 
     if TYPE_CHECKING:
@@ -1176,6 +1187,7 @@ class TCP(Schema):
     #: Data offset.
     offset: 'OffsetFlag' = BitField(length=1, namespace={
         'offset': (0, 4),
+        'reserved': (4, 3),
         'ns': (7, 1),
     })
     #: TCP flags.

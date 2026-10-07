@@ -19,7 +19,7 @@ Octets      Bits        Name                    Description
   4          32   ``tcp.seq``               Sequence Number
   8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)
   12         96   ``tcp.hdr_len``           Data Offset
-  12        100                             Reserved (must be ``\\x00``)
+  12        100   ``tcp.flags.reserved``    Reserved (must be ``\\x00``)
   12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)
   13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)
   13        105   ``tcp.flags.ece``         ECN-Echo (ECE)
@@ -480,6 +480,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 rst=bool(schema.flags['rst']),
                 syn=bool(schema.flags['syn']),
                 fin=bool(schema.flags['fin']),
+                reserved=schema.offset['reserved'],
             ),
             window_size=schema.window,
             checksum=schema.checksum,
@@ -509,8 +510,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         _optl = tcp.hdr_len - 20
         if _optl:
+            # NOTE: the octets after an End of Option List option are kept as
+            # read, so that :meth:`make` rebuilds the option area -- and the
+            # Data Offset computed from it -- at its original length. A schema
+            # built by hand rather than unpacked carries no ``padding``.
             tcp.__update__({
                 'options': self._read_tcp_options(_optl),
+                'padding': schema.get('padding', b''),
             })
 
         return self._decode_next_layer(tcp, (tcp.srcport.port, tcp.dstport.port), length - tcp.hdr_len)
@@ -534,6 +540,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
              urgent: 'int' = 0,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             padding: 'bytes' = b'',
+             reserved: 'int' = 0,
              **kwargs: 'Any') -> 'Schema_TCP':
         """Make (construct) packet data.
 
@@ -556,6 +564,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             urgent: Urgent pointer.
             options: TCP options.
             payload: Payload of the packet.
+            padding: Octets after the End of Option List option; dropped
+                unless ``options`` end with one.
+            reserved: Reserved bits 4-6 of octet 12.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -603,7 +614,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         self._flags = _flag
 
         if options is not None:
-            options_value, total_length = self._make_tcp_options(options)
+            options_value, total_length = self._make_tcp_options(options, padding)
         else:
             options_value, total_length = [], 0
 
@@ -616,6 +627,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ack=ack_no,
             offset={
                 'offset': offset,
+                'reserved': reserved,
                 'ns': int(ns),
             },
             flags=flags,
@@ -705,6 +717,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'checksum': data.checksum,
             'urgent': data.urgent_pointer,
             'options': getattr(data, 'options', None),
+            'padding': getattr(data, 'padding', b''),
+            'reserved': data.flags.reserved,
             'payload': cls._make_payload(data),
         }
 
@@ -1121,6 +1135,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=schema.length,
             start=bool(schema.profile['start']),
             end=bool(schema.profile['end']),
+            reserved=schema.profile['reserved'],
         )
         return data
 
@@ -1358,6 +1373,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             req_rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
             ttl_diff=schema.diff,
             nonce=schema.nonce['nonce'],
+            reserved=schema.flags['reserved'],
+            nonce_reserved=schema.nonce['reserved'],
         )
         return data
 
@@ -1397,6 +1414,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=schema.kind,
             length=schema.length,
             timeout=time,
+            granularity=bool(schema.info['granularity']),
         )
         return data
 
@@ -2056,11 +2074,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
         return data
 
-    def _make_tcp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
+    def _make_tcp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option',
+                          padding: 'bytes' = b'') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for TCP.
 
         Args:
             options: TCP options
+            padding: octets after the End of Option List option
 
         Returns:
             Tuple of options and total length of options.
@@ -2068,9 +2088,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Note:
             The options are emitted in the given order, ``NOP`` and ``EOOL``
             included, so that a parsed option list re-emits the same octets.
-            Padding is added only once, after the last option, when the list
-            does not end on a 32-bit boundary: zero octets if the list already
-            ends with ``EOOL``, otherwise ``NOP`` options followed by an ``EOOL``.
+            ``padding`` follows them as given if they end with ``EOOL``, and is
+            dropped otherwise. Alignment is added only once, after that, when
+            the list does not end on a 32-bit boundary: zero octets if the list
+            already ends with ``EOOL``, otherwise ``NOP`` options followed by an
+            ``EOOL``.
 
         """
         total_length = 0
@@ -2116,6 +2138,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
                 options_list.append(data)
                 total_length += data_len
+
+        # NOTE: ``padding`` belongs after an End of Option List option; with
+        # that gone -- e.g. options edited after parsing -- it is dropped, and
+        # the Data Offset is computed from the options alone.
+        if padding and code == Enum_Option.End_of_Option_List:
+            options_list.append(padding)
+            total_length += len(padding)
 
         # force alignment to 32-bit boundary
         if total_length % 4:
@@ -2388,6 +2417,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _make_mode_pocsp(self, code: 'Enum_Option', opt: 'Optional[Data_PartialOrderServiceProfile]' = None, *,
                          start: 'bool' = False,
                          end: 'bool' = False,
+                         reserved: 'int' = 0,
                          **kwargs: 'Any') -> 'Schema_PartialOrderServiceProfile':
         """Make TCP partial order connection service profile option.
 
@@ -2396,6 +2426,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             opt: option data
             start: start partial order connection
             end: end partial order connection
+            reserved: reserved bits (``Filler``, 6 bits)
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -2405,6 +2436,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             start = opt.start
             end = opt.end
+            reserved = opt.reserved
 
         return Schema_PartialOrderServiceProfile(
             kind=code,
@@ -2412,6 +2444,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             profile={
                 'start': start,
                 'end': end,
+                'reserved': reserved,
             },
         )
 
@@ -2572,6 +2605,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                       rate: 'int' = 0,
                       diff: 'timedelta | int' = 0,
                       nonce: 'int' = 0,
+                      reserved: 'int' = 0,
+                      nonce_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_QuickStartResponse':
         """Make TCP quick start response option.
 
@@ -2581,6 +2616,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             rate: rate (in kbps)
             diff: time to live (in seconds) difference
             nonce: nonce value
+            reserved: reserved bits before the rate request (``Resv.``, 4 bits)
+            nonce_reserved: reserved bits after the nonce (``R``, 2 bits)
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -2591,6 +2628,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             rate = opt.req_rate
             diff = opt.ttl_diff
             nonce = opt.nonce
+            reserved = opt.reserved
+            nonce_reserved = opt.nonce_reserved
 
         # :rfc:`4782` Section 3.1 encodes the rate as 40 kbps * 2 ** N, with
         # N = 0 meaning a rate of zero; a response may report a lower rate than
@@ -2602,39 +2641,57 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=code,
             length=8,
             flags={
+                'reserved': reserved,
                 'rate': rate_val,
             },
             diff=diff_val,
             nonce={
                 'nonce': nonce,
+                'reserved': nonce_reserved,
             },
         )
 
     def _make_mode_timeout(self, code: 'Enum_Option', opt: 'Optional[Data_UserTimeout]' = None, *,
                            timeout: 'timedelta | int' = 0,
+                           granularity: 'Optional[bool]' = None,
                            **kwargs: 'Any') -> 'Schema_UserTimeout':
         """Make TCP user timeout option.
 
         Args:
             code: option code
             opt: option data
-            timeout: timeout value
+            timeout: timeout value (in seconds, if an :obj:`int`)
+            granularity: preferred unit, minutes (``G`` set) or seconds; it is
+                kept only while the value still fits in it -- seconds within 15
+                bits, minutes as a whole number of them. Otherwise, and if not
+                given, seconds are used when they fit in 15 bits, and minutes if
+                not.
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the timeout does not fit in 15 bits of minutes.
+
         """
         if opt is not None:
-            timeout_val = math.floor(opt.timeout.total_seconds())
+            seconds = math.floor(opt.timeout.total_seconds())
+            granularity = opt.granularity
         else:
-            timeout_val = timeout if isinstance(timeout, int) else math.floor(timeout.total_seconds())
+            seconds = timeout if isinstance(timeout, int) else math.floor(timeout.total_seconds())
 
-        granularity = timeout_val.bit_length() > 15
-        timeout_val = math.floor(timeout_val / 60) if granularity else timeout_val
+        # NOTE: a parsed (or requested) unit that the value no longer fits in --
+        # e.g. a parsed seconds option edited past 15 bits, or a minutes option
+        # edited to a value that is not a whole number of minutes -- falls back
+        # to the size-based choice, as when no unit is given at all.
+        fits_seconds = seconds.bit_length() <= 15
+        if granularity is None or (not granularity and not fits_seconds) or (granularity and seconds % 60):
+            granularity = not fits_seconds
+        timeout_val = math.floor(seconds / 60) if granularity else seconds
 
         if timeout_val.bit_length() > 15:
-            raise ProtocolError(f'TCP: [OptNo {code}] timeout value too large: {timeout}')
+            raise ProtocolError(f'TCP: [OptNo {code}] timeout value too large: {seconds} seconds')
 
         return Schema_UserTimeout(
             kind=code,
