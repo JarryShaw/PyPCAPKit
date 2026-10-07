@@ -812,7 +812,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._make_option_if_ipv4(OptionType.if_IPv4addr,
                                                      interface='192.0.2.1/24').to_dict()['length'], 8)
         self.assertEqual(pcapng._make_option_if_ipv6(OptionType.if_IPv6addr,
-                                                     interface='2001:db8::1/64').to_dict()['length'], 8)
+                                                     interface='2001:db8::1/64').to_dict()['length'], 17)
         self.assertEqual(pcapng._make_option_if_mac(OptionType.if_MACaddr,
                                                     interface='00:01:02:03:04:05').to_dict()['interface'],
                          b'\x00\x01\x02\x03\x04\x05')
@@ -2228,7 +2228,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             ('_make_option_if_ipv4', OptionType.if_IPv4addr,
              DummyData(interface='192.0.2.9/24'), 'length', 8),
             ('_make_option_if_ipv6', OptionType.if_IPv6addr,
-             DummyData(interface='2001:db8::9/64'), 'length', 8),
+             DummyData(interface='2001:db8::9/64'), 'length', 17),
             ('_make_option_if_mac', OptionType.if_MACaddr,
              DummyData(interface='00:01:02:03:04:06'), 'interface', b'\x00\x01\x02\x03\x04\x06'),
             ('_make_option_if_eui', OptionType.if_EUIaddr,

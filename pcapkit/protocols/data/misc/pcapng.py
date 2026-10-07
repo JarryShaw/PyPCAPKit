@@ -769,6 +769,10 @@ class TLSKeyLog(DSBSecrets):
     entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
 
     if TYPE_CHECKING:
+        #: TLS key log text as the block carries it, comments and line order
+        #: included. Set on parsing only, and written back verbatim on rebuild.
+        data: 'str'
+
         def __init__(self, entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...
 
 
@@ -780,6 +784,10 @@ class WireGuardKeyLog(DSBSecrets):
     entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]'
 
     if TYPE_CHECKING:
+        #: WireGuard key log text as the block carries it, comments included.
+        #: Set on parsing only, and written back verbatim on rebuild.
+        data: 'str'
+
         def __init__(self, entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]') -> 'None': ...
 
 

@@ -20,7 +20,6 @@ import decimal
 import enum
 import io
 import math
-import os
 import platform
 import re
 import struct
@@ -1237,6 +1236,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             self._data = self.pack(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
+
+            # NOTE: The block just built is parsed again below on this same
+            # instance, and the parse counts each option afresh against its
+            # "only one" guard -- so the count left by the make pass must not
+            # carry over into it.
+            self._opt = collections.Counter()
         else:
             _read = True
             #: io.BytesIO: Source packet stream.
@@ -1571,6 +1576,34 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             'type': data.type,
             'block': data,
         }
+
+    @classmethod
+    def _make_packet_data(cls, block: 'Data_PCAPNG') -> 'bytes | ProtocolBase':
+        """Create the packet data of an EPB, SPB or PB from its data model.
+
+        Args:
+            block: Block data model.
+
+        Returns:
+            The captured packet octets the block was parsed from, as
+            :attr:`~pcapkit.protocols.data.protocol.Protocol.packet` holds them,
+            cut to the block's ``captured_len``; or, for a data model that
+            carries none, the payload rebuilt from its decoded next layer.
+
+        Note:
+            The cut is what keeps a block with ``captured_len`` of zero intact:
+            its ``packet`` can hold octets past the payload (:issue:`1275`), and
+            writing those back would grow the block.
+
+            The fallback is lossy. A next layer rebuilt from its own data model
+            drops anything it did not decode, such as Ethernet pad octets, so
+            the block it yields can be shorter than its ``captured_len`` says.
+
+        """
+        packet = block.get('packet')
+        if isinstance(packet, bytes):
+            return packet[:block.captured_len]
+        return cls._make_payload(block)
 
     def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, *,
                         interface_id: 'int' = 0) -> 'tuple[int, int]':
@@ -3492,6 +3525,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         secrets = Data_TLSKeyLog(
             entries=schema.entries,
         )
+        # NOTE: the log text is kept as well, since :attr:`entries` holds
+        # neither its comments nor the order of its lines, and a rebuild writes
+        # it back verbatim.
+        secrets.__update__(data=schema.data)
         return secrets
 
     def _read_secrets_wireguard(self, schema: 'Schema_WireGuardKeyLog', *,
@@ -3509,6 +3546,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         secrets = Data_WireGuardKeyLog(
             entries=schema.entries,
         )
+        # NOTE: the log text is kept as well, since :attr:`entries` holds
+        # neither its comments nor the order of its lines, and a rebuild writes
+        # it back verbatim.
+        secrets.__update__(data=schema.data)
         return secrets
 
     def _read_secrets_zigbee_nwk(self, schema: 'Schema_ZigBeeNWKKey', *,
@@ -3757,6 +3798,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             timestamp = block.timestamp_epoch
             captured_len = block.captured_len
             original_len = block.original_len
+            packet_data = self._make_packet_data(block)
             options = block.options
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
@@ -3805,6 +3847,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if block is not None:
             original_len = block.original_len
+            packet_data = self._make_packet_data(block)
 
         if original_len is None:
             original_len = len(packet_data)
@@ -3878,6 +3921,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options = block.options
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
+        # NOTE: ``isb_starttime`` and ``isb_endtime`` are scaled by the
+        # resolution of this block's interface, as on the parse path.
+        self._isb_interface_id = interface_id  # pylint: disable=attribute-defined-outside-init
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='isb')
@@ -4094,6 +4140,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             timestamp = block.timestamp_epoch
             captured_len = block.captured_len
             original_len = block.original_len
+            packet_data = self._make_packet_data(block)
             options = block.options
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
@@ -4427,7 +4474,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_IPv6AddrOption(
             type=type,
-            length=8,
+            length=17,
             interface=interface,
         )
 
@@ -5774,7 +5821,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             type: Secrets type.
-            secrets: Secrets data model.
+            secrets: Secrets data model. The key log text it was parsed from,
+                if any, is written back verbatim; otherwise its entries are.
+                On a parsed model the text wins, so an edit to its
+                ``entries`` alone is silently ignored.
             entries: TLS Key Log entries.
             **kwargs: Arbitrary keyword arguments.
 
@@ -5785,15 +5835,20 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         from pcapkit import __version__
 
         if secrets is not None:
+            text = secrets.get('data')
+            if isinstance(text, str):
+                return Schema_TLSKeyLog(
+                    data=text,
+                )
             entries = secrets.entries
 
         if entries is None:
             entries = {}
 
-        data = [f'# generated by PyPCAPKit v{__version__} at {datetime.datetime.now().isoformat()}{os.sep}']  # type: list[str]
+        data = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
         for label, entry in entries.items():
             for k, v in entry.items(multi=True):
-                data.append(f'{label.name} {k.hex()} {v.hex()}{os.sep}')
+                data.append(f'{label.name} {k.hex()} {v.hex()}\n')
 
         return Schema_TLSKeyLog(
             data=''.join(data),
@@ -5806,7 +5861,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             type: Secrets type.
-            secrets: Secrets data model.
+            secrets: Secrets data model. The key log text it was parsed from,
+                if any, is written back verbatim; otherwise its entries are.
+                On a parsed model the text wins, so an edit to its
+                ``entries`` alone is silently ignored.
             entries: WireGuard Key Log entries.
             **kwargs: Arbitrary keyword arguments.
 
@@ -5817,14 +5875,19 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         from pcapkit import __version__
 
         if secrets is not None:
+            text = secrets.get('data')
+            if isinstance(text, str):
+                return Schema_WireGuardKeyLog(
+                    data=text,
+                )
             entries = secrets.entries
 
         if entries is None:
             entries = OrderedMultiDict()
 
-        data = [f'# generated by PyPCAPKit v{__version__} at {datetime.datetime.now().isoformat()}{os.sep}']  # type: list[str]
+        data = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
         for label, value in entries.items(multi=True):
-            data.append(f'{label.name} = {base64.b64encode(value).decode()}{os.sep}')
+            data.append(f'{label.name} = {base64.b64encode(value).decode()}\n')
 
         return Schema_WireGuardKeyLog(
             data=''.join(data),
