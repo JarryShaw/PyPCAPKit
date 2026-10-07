@@ -804,13 +804,18 @@ class IPv4UnitTests(unittest.TestCase):
                          datetime.timedelta(milliseconds=5))
 
         # And the third conversion in the same method, the one that reads the
-        # prespecified addresses out of the option's padding.
-        prespecified = option([int(ip_address('192.0.2.2')), 6],
-                              TSFlag.Prespecified_IP_with_Timestamp)
-        prespecified.remainder = ip_address('192.0.2.3').packed + bytes(4)
+        # prespecified addresses, those at or beyond the pointer included.
+        prespecified = TSOption(type=OptionNumber.TS, length=20, pointer=13,
+                                flags={'oflw': 0, 'flag': TSFlag.Prespecified_IP_with_Timestamp},
+                                ts_data=[int(ip_address('192.0.2.2')), 6,
+                                         int(ip_address('192.0.2.3')), 0])
         prespecified.pack()
         self.assertEqual(prespecified.data[ip_address('192.0.2.2')], 6)
         self.assertEqual(prespecified.data[ip_address('192.0.2.3')], 0)
+        with self.assertRaises(FieldValueError):
+            TSOption(type=OptionNumber.TS, length=20, pointer=13,
+                     flags={'oflw': 0, 'flag': TSFlag.Prespecified_IP_with_Timestamp},
+                     ts_data=[int(ip_address('192.0.2.2')), 6, True, 0]).pack()
 
     def test_ipv4_quick_start_option_is_eight_octets_wide_on_the_wire(self) -> None:
         """Both Quick-Start suboptions survive the round trip whole. C.f. #552.
@@ -1460,6 +1465,7 @@ class IPv4UnitTests(unittest.TestCase):
             overflow=1,
             flag=TSFlag.Timestamp_Only,
             timestamp=(datetime.timedelta(seconds=1), 0x80000000),
+            remaining=(),
         )
         # An integer is the raw field, its high-order bit marking a non-standard
         # value, so it is written as is and without a warning. C.f. #1320.
@@ -1481,6 +1487,7 @@ class IPv4UnitTests(unittest.TestCase):
             overflow=0,
             flag=TSFlag.Prespecified_IP_with_Timestamp,
             timestamp=ts_map,
+            remaining=(),
         )
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             self.assertEqual(proto._make_opt_ts(OptionNumber.TS, ts_prespecified).flags['flag'],
@@ -1720,6 +1727,7 @@ class IPv4UnitTests(unittest.TestCase):
             datetime.timedelta(seconds=1),
             datetime.timedelta(seconds=2),
         ))
+        object.__setattr__(ts_schema, 'remaining', ())
         ts = proto._read_opt_ts(ts_schema, options=options)
         self.assertEqual(ts.flag, TSFlag.Timestamp_Only)
         self.assertEqual(ts.timestamp[0], datetime.timedelta(seconds=1))
@@ -1932,7 +1940,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         pre_ts = ipv4_schema.TSOption(
             type=OptionNumber.TS,
-            length=20,
+            length=28,
             pointer=21,
             flags={'oflw': 0, 'flag': TSFlag.Prespecified_IP_with_Timestamp},
             ts_data=[
@@ -1940,9 +1948,10 @@ class IPv4UnitTests(unittest.TestCase):
                 0x80000006,
                 int(ip_address('192.0.2.5')),
                 3000,
+                int(ip_address('192.0.2.3')),
+                0,
             ],
         )
-        pre_ts.remainder = ip_address('192.0.2.3').packed + b'\x00\x00\x00\x00'
         with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
             pre_ts.post_process({})
         self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.2')], 0x80000006)
