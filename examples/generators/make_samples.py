@@ -43,6 +43,15 @@ if TYPE_CHECKING:
 
 #: Repository root, i.e. the grandparent of the directory holding this script.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+# Run as a script, sys.path[0] is this directory, not the tree root, so pcapkit
+# would resolve to whatever is installed -- an editable install pins one
+# checkout -- rather than to this tree (#1343). PathFinder precedes the
+# editable finder in sys.meta_path, so putting the root first wins. Every
+# sibling that imports pcapkit repeats this, since each may run on its own.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 #: Directory holding this script and its sibling generator modules.
 HERE = pathlib.Path(__file__).resolve().parent
 #: Destination directory for every generated capture.
