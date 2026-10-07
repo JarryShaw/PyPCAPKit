@@ -11,7 +11,7 @@ from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.collections import ListField
-from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -49,6 +50,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class StreamID(TypedDict):
         """Stream identifier."""
 
+        #: Reserved bit.
+        reserved: int
         #: Stream identifier.
         sid: int
 
@@ -63,6 +66,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class WindowSize(TypedDict):
         """Window size increment."""
 
+        #: Reserved bit.
+        reserved: int
         #: Window size increment.
         incr: int
 
@@ -81,7 +86,12 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Frame', pkt['type'])
     schema = FrameType.registry[type]
-    return SchemaField(length=pkt['__length__'], schema=schema)
+    # The frame payload is bounded by the declared Length, so anything after
+    # it -- typically the next frame -- is left for :attr:`HTTP.payload`. It is
+    # bounded by the buffer as well, so that a Length the buffer cannot back
+    # reaches :meth:`HTTP.read <pcapkit.protocols.application.httpv2.HTTP.read>`,
+    # which rejects it with :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+    return SchemaField(length=min(pkt['length'], pkt['__length__']), schema=schema)
 
 
 @schema_final
@@ -105,15 +115,18 @@ class HTTP(Schema):
     })
     #: Stream identifier.
     stream: 'StreamID' = BitField(length=4, namespace={
+        'reserved': (0, 1),
         'sid': (1, 31),
     })
     #: Frame payload.
     frame: 'FrameType' = SwitchField(
         selector=http_frame_selector,
     )
+    #: Octets after the frame, e.g. the next frame.
+    payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Enum_Frame', flags: 'FrameFlags', stream: 'StreamID', frame: 'FrameType | bytes') -> 'None': ...
+        def __init__(self, length: 'int', type: 'Enum_Frame', flags: 'FrameFlags', stream: 'StreamID', frame: 'FrameType | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
 
 
 class FrameType(EnumSchema[Enum_Frame]):
@@ -161,9 +174,8 @@ class FrameType(EnumSchema[Enum_Frame]):
         # defined`` (3.10 and earlier hand back a pseudo-member instead), so
         # the five frame schemas that inherit it unchanged -- ``UnassignedFrame``,
         # ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and
-        # ``WindowUpdateFrame`` -- keep the plain ``int``. All five pass
-        # ``flags=None`` into their data objects and never surface
-        # ``__flags__``, so nothing observes the difference for them.
+        # ``WindowUpdateFrame`` -- keep the plain ``int``, which is what their
+        # data objects' bare ``Flags`` carries as ``__value__``.
         flags = self.Flags(0) if self.Flags.__members__ else 0
         for key, val in filter(lambda kv: kv[0].startswith('BIT_'),
                                self.Flags.__members__.items()):
@@ -171,7 +183,11 @@ class FrameType(EnumSchema[Enum_Frame]):
             if packet['flags'][name]:
                 flags |= val
 
-        self.__flags__ = flags
+        # Bits the frame type leaves undefined are kept as well: a receiver
+        # ignores them (:rfc:`9113#section-4.1`), but a rebuild must not erase
+        # them. ``Flags`` keeps such bits as pseudo-members.
+        raw = sum(packet['flags'][f'bit_{bit}'] << bit for bit in range(8))
+        self.__flags__ = flags | (raw & ~int(flags))
         return self
 
 
@@ -354,6 +370,7 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
     )
     #: Promised stream ID.
     stream: 'StreamID' = BitField(length=4, namespace={
+        'reserved': (0, 1),
         'sid': (1, 31),
     })
     #: Header block fragment.
@@ -397,6 +414,7 @@ class GoawayFrame(FrameType, code=Enum_Frame.GOAWAY):
 
     #: Last stream ID.
     stream: 'StreamID' = BitField(length=4, namespace={
+        'reserved': (0, 1),
         'sid': (1, 31),
     })
     #: Error code.
@@ -414,6 +432,7 @@ class WindowUpdateFrame(FrameType, code=Enum_Frame.WINDOW_UPDATE):
 
     #: Window size increment.
     size: 'WindowSize' = BitField(length=4, namespace={
+        'reserved': (0, 1),
         'incr': (1, 31),
     })
 

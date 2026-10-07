@@ -4,24 +4,22 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import info_final
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
-    from typing import Optional
-
-    from typing_extensions import Literal
+    from typing import Iterator
 
     from pcapkit.const.http.error_code import ErrorCode
     from pcapkit.const.http.frame import Frame
     from pcapkit.const.http.setting import Setting
-    from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.schema.application.httpv2 import FrameType
 
 __all__ = [
     'HTTP',
 
-    'Flags',
+    'Flags', 'Settings',
     'DataFrameFlags', 'HeadersFrameFlags', 'SettingsFrameFlags',
     'PushPromiseFrameFlags', 'PingFrameFlags', 'ContinuationFrameFlags',
 
@@ -35,7 +33,8 @@ class Flags(Data):
     """Data model for HTTP/2 flags."""
 
     if TYPE_CHECKING:
-        #: Flags as in combination value.
+        #: Flags as in combination value, bits the frame type leaves
+        #: undefined included.
         __value__: 'FrameType.Flags'
 
 
@@ -47,7 +46,9 @@ class HTTP(Protocol):
     #: Frame type.
     type: 'Frame'
     #: Flags.
-    flags: 'Optional[Flags]'
+    flags: 'Flags'
+    #: Reserved bit of the frame header.
+    reserved: 'int'
     #: Stream ID.
     sid: 'int'
 
@@ -57,12 +58,12 @@ class UnassignedFrame(HTTP):
     """Data model for HTTP/2 unassigned frame."""
 
     #: Flags.
-    flags: 'Literal[None]'
+    flags: 'Flags'
     #: Frame payload.
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -90,7 +91,7 @@ class DataFrame(HTTP):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', pad_len: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -128,7 +129,7 @@ class HeadersFrame(HTTP):
     fragment: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -136,7 +137,7 @@ class PriorityFrame(HTTP):
     """Data model for HTTP/2 ``PRIORITY`` frame."""
 
     #: Flags.
-    flags: 'Literal[None]'
+    flags: 'Flags'
     #: Exclusive dependency.
     excl_dependency: 'bool'
     #: Stream dependency.
@@ -145,7 +146,7 @@ class PriorityFrame(HTTP):
     weight: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -153,12 +154,36 @@ class RSTStreamFrame(HTTP):
     """Data model for HTTP/2 ``RST_STREAM`` frame."""
 
     #: Flags.
-    flags: 'Literal[None]'
+    flags: 'Flags'
     #: Error code.
     error: 'ErrorCode'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', error: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', error: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+class Settings(OrderedMultiDict['Setting', int]):
+    """Settings of an HTTP/2 ``SETTINGS`` frame.
+
+    An identifier may repeat, and the values apply in order, so the last one
+    wins (:rfc:`9113#section-6.5`). Every entry is kept in wire order, as
+    :meth:`getlist` and ``items(multi=True)`` show and the rebuild writes, but
+    indexing, :meth:`get`, :meth:`values`, ``items()`` and :meth:`to_dict`
+    answer with the *last* value of each identifier rather than the first.
+
+    """
+
+    def __getitem__(self, key: 'Setting') -> 'int':
+        if key in self:
+            return self.getlist(key)[-1]
+        return super().__getitem__(key)
+
+    def items(self, multi: 'bool' = False) -> 'Iterator[tuple[Setting, int]]':  # type: ignore[override]
+        if multi:
+            yield from super().items(multi=True)
+            return
+        for key, _ in super().items():
+            yield key, self[key]
 
 
 @info_final
@@ -179,10 +204,10 @@ class SettingsFrame(HTTP):
     #: Flags.
     flags: 'SettingsFrameFlags'
     #: Settings.
-    settings: 'OrderedMultiDict[Setting, int]'
+    settings: 'Settings'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', settings: 'OrderedMultiDict[Setting, int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', settings: 'Settings') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -206,13 +231,15 @@ class PushPromiseFrame(HTTP):
     flags: 'PushPromiseFrameFlags'
     #: Padded length.
     pad_len: 'int'
+    #: Reserved bit of the promised stream ID.
+    promised_reserved: 'int'
     #: Promised stream ID.
     promised_sid: 'int'
     #: Header block fragment.
     fragment: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', pad_len: 'int', sid: 'int', promised_sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', pad_len: 'int', sid: 'int', promised_reserved: 'int', promised_sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -236,7 +263,7 @@ class PingFrame(HTTP):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -244,7 +271,9 @@ class GoawayFrame(HTTP):
     """Data model for HTTP/2 ``GOAWAY`` frame."""
 
     #: Flags.
-    flags: 'Literal[None]'
+    flags: 'Flags'
+    #: Reserved bit of the last stream ID.
+    last_reserved: 'int'
     #: Last stream ID.
     last_sid: 'int'
     #: Error code.
@@ -253,7 +282,7 @@ class GoawayFrame(HTTP):
     debug_data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', last_sid: 'int', error: 'int', debug_data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', last_reserved: 'int', last_sid: 'int', error: 'int', debug_data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -261,12 +290,14 @@ class WindowUpdateFrame(HTTP):
     """Data model for HTTP/2 ``WINDOW_UPDATE`` frame."""
 
     #: Flags.
-    flags: 'Literal[None]'
+    flags: 'Flags'
+    #: Reserved bit of the window size increment.
+    increment_reserved: 'int'
     #: Window size increment.
     increment: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', increment: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', increment_reserved: 'int', increment: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -290,4 +321,4 @@ class ContinuationFrame(HTTP):
     fragment: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

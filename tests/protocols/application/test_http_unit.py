@@ -21,7 +21,8 @@ def http2_header(length: int, type_: object, flags: int = 0, sid: int = 1) -> Si
         length=length,
         type=type_,
         flags={f'bit_{bit}': (flags & (1 << bit)) >> bit for bit in range(8)},
-        stream={'sid': sid},
+        stream={'reserved': 0, 'sid': sid},
+        get_payload=lambda: b'',
     )
 
 
@@ -532,14 +533,14 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(clean.version, '2')
         self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
 
-        # The preface prepended to the frame, read as one buffer, is still
-        # refused on the *explicit* path: ``read(version=2)`` hands the whole
-        # buffer to ``httpv2.HTTP``, which has no notion of the preface and must
-        # not read its ASCII as framing. The guess path identifies it instead --
-        # see ``test_guess_version_identifies_the_http2_connection_preface``.
+        # The preface prepended to the frame, read as one buffer, is skipped on
+        # the *explicit* path too rather than read as framing, since
+        # ``from_data`` rebuilds a prefaced frame through ``version=2`` (#1242).
+        # See ``test_guess_version_identifies_the_http2_connection_preface``.
         raw = preface + settings
-        with self.assertRaises(ProtocolError):
-            HTTP(io.BytesIO(raw), len(raw), version=2)
+        prefaced = HTTP(io.BytesIO(raw), len(raw), version=2)
+        self.assertEqual(prefaced.info.preface, preface)
+        self.assertEqual(prefaced.length, len(raw))
 
     def test_guess_version_identifies_the_http2_connection_preface(self) -> None:
         """The preface is identified by prefix compare, not by a parse (#800).
@@ -589,7 +590,11 @@ class HTTPUnitTests(unittest.TestCase):
         # reports the tail of the preface as this packet's payload, which is what
         # ``info`` equality below would otherwise catch.
         self.assertEqual(guessed.length, len(preface) + frame_only.length)
-        self.assertEqual(guessed.info, frame_only.info)
+        # Apart from the preface it records (#1242), the frame parses as it
+        # does alone.
+        self.assertEqual(guessed.info.preface, preface)
+        self.assertEqual({k: v for k, v in guessed.info.items() if k != 'preface'},
+                         dict(frame_only.info.items()))
         self.assertEqual(guessed.info.packet, b'')
         self.assertEqual(guessed.info.length, 0)
         self.assertNotEqual(guessed.info.length, 5265993)
@@ -601,8 +606,9 @@ class HTTPUnitTests(unittest.TestCase):
         settings_2 = http2_frame_bytes(0x04, 0x00, 0, b'\x00\x03\x00\x00\x00d')
         guessed_2 = HTTP(io.BytesIO(preface + settings_2), len(preface) + len(settings_2))
         self.assertEqual(guessed_2.version, '2')
-        self.assertEqual(guessed_2.info, HTTP(io.BytesIO(settings_2), len(settings_2),
-                                              version=2).info)
+        alone_2 = HTTP(io.BytesIO(settings_2), len(settings_2), version=2).info
+        self.assertEqual({k: v for k, v in guessed_2.info.items() if k != 'preface'},
+                         dict(alone_2.items()))
 
     def test_guess_version_reports_a_preface_with_no_frame_as_such(self) -> None:
         """A preface with nothing after it is HTTP/2, but carries no frame.
@@ -1901,17 +1907,18 @@ class HTTPUnitTests(unittest.TestCase):
 
         with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
             none = proto._read_http_none(
-                http2_schema(data=b'unknown'),
+                http2_schema(data=b'unknown', __flags__=0x01),
                 header=http2_header(7, 250, flags=0x01, sid=3),
             )
         self.assertEqual(none.to_dict()['data'], b'unknown')
-        self.assertIsNone(none.flags)
+        # The raw flags octet is kept for the rebuild (#1245).
+        self.assertEqual(none.flags.__value__, 0x01)
         warn.assert_called_once()
 
         with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
             none_clean = proto._read_http_none(
                 http2_schema(data=b'clean'),
-                header=SimpleNamespace(length=5, type=251, flags={}, stream={'sid': 4}),
+                header=SimpleNamespace(length=5, type=251, flags={}, stream={'reserved': 0, 'sid': 4}),
             )
         self.assertEqual(none_clean.data, b'clean')
         warn.assert_not_called()
@@ -1969,7 +1976,7 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(settings.settings[Setting.ENABLE_PUSH], 0)
 
         push = proto._read_http_push_promise(
-            http2_schema(pad_len=1, stream={'sid': 11}, fragment=b'push', __flags__=0x0C),
+            http2_schema(pad_len=1, stream={'reserved': 0, 'sid': 11}, fragment=b'push', __flags__=0x0C),
             header=http2_header(10, Frame.PUSH_PROMISE, flags=0x0C, sid=1),
         )
         self.assertTrue(push.flags.to_dict()['END_HEADERS'])
@@ -1985,14 +1992,14 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(ping.to_dict()['data'], b'12345678')
 
         goaway = proto._read_http_goaway(
-            http2_schema(stream={'sid': 13}, error=ErrorCode.NO_ERROR, debug=b'bye'),
+            http2_schema(stream={'reserved': 0, 'sid': 13}, error=ErrorCode.NO_ERROR, debug=b'bye'),
             header=http2_header(11, Frame.GOAWAY, sid=0),
         )
         self.assertEqual(goaway.to_dict()['last_sid'], 13)
         self.assertEqual(goaway.to_dict()['debug_data'], b'bye')
 
         window = proto._read_http_window_update(
-            http2_schema(size={'incr': 65535}),
+            http2_schema(size={'reserved': 0, 'incr': 65535}),
             header=http2_header(4, Frame.WINDOW_UPDATE, sid=1),
         )
         self.assertEqual(window.to_dict()['increment'], 65535)
@@ -2334,7 +2341,7 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(headers_schema.weight, 4)
         self.assertEqual(headers_flags, 0x2D)
         headers_frame_schema, headers_frame_flags = proto._make_http_headers(SimpleNamespace(
-            flags=SimpleNamespace(PRIORITY=True, END_HEADERS=True, END_STREAM=False),
+            flags=SimpleNamespace(PRIORITY=True, END_HEADERS=True, END_STREAM=False, PADDED=False),
             pad_len=0,
             excl_dependency=False,
             stream_dependency=9,
@@ -2391,8 +2398,9 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(push_schema.stream['sid'], 11)
         self.assertEqual(push_flags, 0x0C)
         push_frame_schema, push_frame_flags = proto._make_http_push_promise(SimpleNamespace(
-            flags=SimpleNamespace(END_HEADERS=False),
+            flags=SimpleNamespace(END_HEADERS=False, PADDED=False),
             pad_len=2,
+            promised_reserved=0,
             promised_sid=12,
             fragment=b'from-frame',
         ))
@@ -2423,6 +2431,7 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(goaway_schema.stream['sid'], 13)
         self.assertEqual(goaway_schema.debug, b'bye')
         goaway_frame_schema, _ = proto._make_http_goaway(SimpleNamespace(
+            last_reserved=0,
             last_sid=14,
             error=ErrorCode.PROTOCOL_ERROR,
             debug_data=b'frame',
@@ -2431,7 +2440,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         window_schema, _ = proto._make_http_window_update(incr=65535)
         self.assertEqual(window_schema.size['incr'], 65535)
-        window_frame_schema, _ = proto._make_http_window_update(SimpleNamespace(increment=7))
+        window_frame_schema, _ = proto._make_http_window_update(SimpleNamespace(increment_reserved=0, increment=7))
         self.assertEqual(window_frame_schema.size['incr'], 7)
 
         continuation_schema, continuation_flags = proto._make_http_continuation(
@@ -2464,6 +2473,7 @@ class HTTPUnitTests(unittest.TestCase):
             length=8,
             type=Frame.PING,
             flags=PingFrameFlags(ACK=True),
+            reserved=0,
             sid=0,
             data=b'12345678',
         )
@@ -2551,8 +2561,9 @@ class HTTPUnitTests(unittest.TestCase):
         original = frame_registry.get(custom)
 
         def read_frame(frame, *, header):
-            return SimpleNamespace(type=header.type, length=header.length,
-                                   sid=header.stream['sid'], data=frame.data)
+            from pcapkit.protocols.data.application.httpv2 import UnassignedFrame
+            return UnassignedFrame(type=header.type, length=header.length, flags=None,
+                                   reserved=0, sid=header.stream['sid'], data=frame.data)
 
         def make_frame(frame=None, *, data=b''):
             if frame is not None:
@@ -2587,6 +2598,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         field = schema_httpv2.http_frame_selector({
             'type': Frame.DATA,
+            'length': 4,
             '__length__': 4,
         })
         self.assertIs(field.schema, DataFrame)
