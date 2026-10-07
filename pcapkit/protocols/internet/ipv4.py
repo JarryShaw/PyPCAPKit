@@ -329,8 +329,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'dst': ipv4.dst,
         })
 
-        return self._decode_next_layer(ipv4, ipv4.protocol, ipv4.len - ipv4.hdr_len,
-                                       packet=__packet__)
+        # NOTE: A capture that ends at or inside the header has no payload
+        # octets, and parsing the next layer from none would default-fill a
+        # header that was never captured, which ``from_data`` then rebuilds
+        # (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.
+        if len(self) > ipv4.hdr_len:
+            _plen = ipv4.len - ipv4.hdr_len
+        else:
+            _plen = 0
+
+        return self._decode_next_layer(ipv4, ipv4.protocol, _plen, packet=__packet__)
 
     def make(self,
              tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,
