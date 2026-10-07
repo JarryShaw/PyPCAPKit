@@ -32,6 +32,6 @@ class QSFunction(EnumRegistry, IntEnum):
             value: Value to get enum item.
 
         """
-        if not (isinstance(value, int) and 0 <= value <= 8):
+        if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         return cls._unregistered_member(value, 'Unassigned')
