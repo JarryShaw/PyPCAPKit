@@ -10,6 +10,7 @@ and timestamp resolution to write its own.
 """
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import json
 import os
@@ -17,19 +18,27 @@ import tempfile
 import unittest
 import warnings
 
-from pcapkit.interface import extract
-from pcapkit.utilities.exceptions import FormatError
-from pcapkit.utilities.warnings import FormatWarning
 from tests._support import sample_path
 
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 
 
+def _current(module: str, name: str):
+    """``module.name`` from the :mod:`pcapkit` import live in :data:`sys.modules` now.
+
+    Not a top-level import (GitHub issue #981): a sibling test that re-imports
+    :mod:`pcapkit` leaves a newer generation behind under plain :mod:`unittest`,
+    and the extractor resolves its writer from that one. A stale ``extract``
+    then runs an engine whose ``PCAPIO`` check misses the newer writer class.
+    """
+    return getattr(importlib.import_module(module), name)
+
+
 def _extract(fin: str, fout: str, **kwargs):
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        return extract(fin=fin, fout=fout, nofile=False, **kwargs)
+        return _current('pcapkit.interface', 'extract')(fin=fin, fout=fout, nofile=False, **kwargs)
 
 
 def _read(path: str) -> bytes:
@@ -69,7 +78,8 @@ class PCAPOutputTests(unittest.TestCase):
 
     def test_pcapng_input_cannot_be_written_as_pcap(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaisesRegex(FormatError, 'PCAP output is not supported'):
+            with self.assertRaisesRegex(_current('pcapkit.utilities.exceptions', 'FormatError'),
+                                        'PCAP output is not supported'):
                 _extract(sample_path('dhcp.pcapng'), os.path.join(tmp, 'out'), format='pcap')
             self.assertEqual(os.listdir(tmp), [])
 
@@ -87,8 +97,10 @@ class ThirdPartyEngineTests(unittest.TestCase):
     """These engines' frames carry no octets, so PCAP output falls back to JSON."""
 
     def _check(self, engine: str) -> None:
+        extract = _current('pcapkit.interface', 'extract')
         with tempfile.TemporaryDirectory() as tmp:
-            with self.assertWarnsRegex(FormatWarning, "does not support 'format=pcap'"):
+            with self.assertWarnsRegex(_current('pcapkit.utilities.warnings', 'FormatWarning'),
+                                       "does not support 'format=pcap'"):
                 extractor = extract(fin=sample_path('in.pcap'), fout=os.path.join(tmp, 'out'),
                                     format='pcap', engine=engine, nofile=False)
             self.assertEqual(extractor.format, 'json')
