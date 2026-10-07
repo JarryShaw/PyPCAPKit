@@ -163,6 +163,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
        * - :attr:`~pcapkit.const.ipv6.option.Option.Quick_Start`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_qs`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x23`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_rpl`
        * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_rpl`
@@ -208,6 +211,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Enum_Option.SMF_DPD:                    'smf_dpd',  # [RFC 6621]
             Enum_Option.PDM:                        'pdm',      # [RFC 8250] 10
             Enum_Option.Quick_Start:                'qs',       # [RFC 4782][RFC Errata 2034] 6
+            Enum_Option.RPL_Option_0x23:            'rpl',      # [RFC 9008]
             Enum_Option.RPL_Option_0x63:            'rpl',      # [RFC 6553]
             Enum_Option.MPL_Option:                 'mpl',      # [RFC 7731]
             Enum_Option.ILNP_Nonce:                 'ilnp',     # [RFC 6744]
