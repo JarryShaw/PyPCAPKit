@@ -2157,8 +2157,9 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the DPD mode is invalid, or the Tagger ID does</span>
-<span class="sd">                not fit the TaggerID type.</span>
+<span class="sd">            ProtocolError: If the DPD mode is invalid, the Tagger ID does</span>
+<span class="sd">                not fit the TaggerID type, or the H-DPD Hash Assist Value is</span>
+<span class="sd">                empty.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2219,6 +2220,9 @@
                 <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># type: Schema_SMFDPDOption</span>
         <span class="k">elif</span> <span class="n">dpd_type</span> <span class="o">==</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span><span class="p">:</span>
+            <span class="c1"># The first octet of the HAV carries the H-DPD mode bit.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">hav</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] empty Hash Assist Value (HAV)'</span><span class="p">)</span>
             <span class="n">hav_ba</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">hav</span><span class="p">)</span>
             <span class="n">hav_ba</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hav</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">|</span> <span class="mh">0x80</span>
 

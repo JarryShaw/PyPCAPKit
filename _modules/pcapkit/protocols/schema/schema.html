@@ -1482,7 +1482,13 @@
                 <span class="c1"># ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
                 <span class="c1"># and :class:`~pcapkit.corekit.fields.collections.ListField` both</span>
                 <span class="c1"># do this -- see the octets actually consumed.</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+                <span class="c1">#</span>
+                <span class="c1"># The rewind is by the octets actually read, not by ``length``:</span>
+                <span class="c1"># near the end of the stream the read comes back short, and</span>
+                <span class="c1"># rewinding the full width would move the stream *before* the</span>
+                <span class="c1"># forward match, so the fields after it would re-read the</span>
+                <span class="c1"># preceding octet as their first.</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># the option list ended before the declared field length was</span>
