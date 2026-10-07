@@ -721,7 +721,7 @@
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">priority</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -738,7 +738,8 @@
 <span class="sd">            type_namespace: Namespace of type.</span>
 <span class="sd">            type_reversed: Reversed namespace of type.</span>
 <span class="sd">            priority: Priority flag.</span>
-<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            total_length: Length of the datagram, header included; the Length</span>
+<span class="sd">                field and its ``L`` flag are omitted when this is :data:`None`.</span>
 <span class="sd">            tunnel_id: Tunnel ID.</span>
 <span class="sd">            session_id: Session ID.</span>
 <span class="sd">            ns: Sequence number.</span>
@@ -757,13 +758,13 @@
         <span class="k">return</span> <span class="n">Schema_L2TP</span><span class="p">(</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'type'</span><span class="p">:</span> <span class="n">type_</span><span class="p">,</span>
-                <span class="s1">'len'</span><span class="p">:</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">'len'</span><span class="p">:</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">'seq'</span><span class="p">:</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">'prio'</span><span class="p">:</span> <span class="n">priority</span><span class="p">,</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
             <span class="n">tunnel_id</span><span class="o">=</span><span class="n">tunnel_id</span><span class="p">,</span>
             <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span>
             <span class="n">ns</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
@@ -849,7 +850,11 @@
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="s1">'priority'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">prio</span><span class="p">,</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-            <span class="s1">'length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="c1"># NOTE: Passed as ``total_length`` since ``length`` is the parse</span>
+            <span class="c1"># length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so</span>
+            <span class="c1"># under that key it never reached :meth:`make`, and the rebuild</span>
+            <span class="c1"># dropped both the Length field and the ``L`` flag (:issue:`1172`).</span>
+            <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="s1">'tunnel_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tunnelid</span><span class="p">,</span>
             <span class="s1">'session_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sessionid</span><span class="p">,</span>
             <span class="s1">'ns'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">ns</span><span class="p">,</span>

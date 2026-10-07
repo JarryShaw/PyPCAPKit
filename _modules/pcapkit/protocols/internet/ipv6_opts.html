@@ -890,9 +890,14 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[2]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[8]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object.</span>
+
+<span class="sd">        Eight octets: the two fixed ones and the options that</span>
+<span class="sd">        :rfc:`8200#section-4.6` counts in the first 8-octet unit.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="IPv6_Opts.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__index__">[docs]</a>
