@@ -38,8 +38,9 @@ class IPv4UnitTests(unittest.TestCase):
         data = DummyDict(
             tos=DummyDict(pre=0, thr=False, rel=False, ecn=0, **{'del': False}),
             len=1186,
+            padding=b'',
             id=7,
-            flags=DummyDict(df=True, mf=False),
+            flags=DummyDict(reserved=0, df=True, mf=False),
             offset=0,
             ttl=timedelta(seconds=64),
             protocol=TransType.TCP,
@@ -279,7 +280,7 @@ class IPv4UnitTests(unittest.TestCase):
                 vihl={'version': 4, 'ihl': 5},
                 tos={'pre': 0, 'del': 0, 'thr': 0, 'rel': 0, 'ecn': 0},
                 length=20 + len(payload), id=0,
-                flags={'df': 0, 'mf': 0, 'offset': 0},
+                flags={'reserved': 0, 'df': 0, 'mf': 0, 'offset': 0},
                 ttl=0, proto=6, chksum=b'\x00\x00',
                 src='127.0.0.1', dst='127.0.0.2',
                 options=[], payload=value,
@@ -496,28 +497,21 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(bytes(rebuilt), raw)
 
     def test_ipv4_make_opt_sec_sets_the_field_termination_indicator(self) -> None:
-        """A SEC option this library writes is one this library can read. C.f. #537.
+        """A SEC option this library writes is one this library can read. C.f. #537, #1321.
 
-        :rfc:`1108` section 2.2 makes bit 0 of each protection authority octet a
-        *field termination indicator*: ``0`` means another octet follows, ``1``
-        means this is the last. ``_read_opt_sec`` enforces it, warning
-        ``field termination indicator not set`` when the final octet has it
-        clear. ``_make_opt_sec`` built the bitmap purely out of authority bit
-        positions and never set it, so *every* SEC option the library wrote with
-        at least one authority was one its own reader flagged as malformed --
-        visible in the project's own generated capture
-        :file:`examples/captures/options-ipv4.pcap`, which warned
-        ``IPv4: [OptNo 130] invalid format: field termination indicator not set``
-        on extraction.
+        :rfc:`1108` section 2.4(a) makes the low-order bit of each protection
+        authority octet a *field termination indicator*: ``1`` means another
+        octet follows, ``0`` means this is the last. ``_read_opt_sec`` enforces
+        it, warning ``field termination indicator not set`` when the final octet
+        has it set. #537 made the writer and the reader agree with each other on
+        the opposite convention; #1321 made both agree with the RFC.
 
         The round trip is asserted through a real datagram and with warnings
-        promoted to errors, because the defect's only symptom was a warning:
-        asserting on the octets alone would have let it back in, and asserting
-        that the flags survive alone would too -- they always did.
+        promoted to errors, because a disagreement's only symptom is a warning.
 
-        ``0x91`` rather than ``0x90`` is the whole change on the wire:
-        ``1001 0001``, bits 0 and 3 for ``GENSER`` and ``NSA`` counted from the
-        most significant, and bit 0 of the octet for the terminator.
+        ``0x90`` is ``1001 0000``: bits 0 and 3 for ``GENSER`` and ``NSA``
+        counted from the most significant, and a clear low-order bit for the
+        final octet.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -529,14 +523,9 @@ class IPv4UnitTests(unittest.TestCase):
         authorities = [ProtectionAuthority.GENSER, ProtectionAuthority.NSA]
 
         schema = proto._make_opt_sec(OptionNumber.SEC, authorities=authorities)
-        self.assertEqual(schema.data, b'\x91')
-        self.assertEqual(schema.data[-1] & 0x01, 1)
+        self.assertEqual(schema.data, b'\x90')
+        self.assertEqual(schema.data[-1] & 0x01, 0)
         self.assertEqual(schema.length, 4)
-
-        # The reader's own predicate, stated here rather than inferred from the
-        # absence of a warning below, so a reader that stopped checking does not
-        # silently make this test vacuous.
-        self.assertNotEqual(schema.data[-1] & 0x01, 0)
 
         # And the end-to-end statement: a datagram carrying this option parses
         # with no ProtocolWarning at all. The option is four octets -- type,
@@ -583,32 +572,32 @@ class IPv4UnitTests(unittest.TestCase):
 
         proto = object.__new__(IPv4)
 
-        # One octet: GENSER at bit 0 from the most significant, and the
+        # One octet: GENSER at bit 0 from the most significant, and a clear
         # terminator. Formerly an IndexError.
         schema = proto._make_opt_sec(OptionNumber.SEC,
                                      authorities=[ProtectionAuthority.GENSER])
-        self.assertEqual(schema.data, b'\x81')
+        self.assertEqual(schema.data, b'\x80')
         self.assertEqual(schema.length, 4)
 
         # The largest authority that still fits one octet, bit 6, since bit 7 is
         # the terminator.
         schema = proto._make_opt_sec(OptionNumber.SEC,
                                      authorities=[ProtectionAuthority(6)])
-        self.assertEqual(schema.data, b'\x03')
+        self.assertEqual(schema.data, b'\x02')
         self.assertEqual(schema.length, 4)
 
         # Index 8 is the first bit of the *second* octet, so it needs two --
-        # ceil(8/8) said one. The first octet is all zeros, its own terminator
-        # included, which is what says "another octet follows".
+        # ceil(8/8) said one. The first octet carries no authority, only its
+        # terminator, set to say "another octet follows".
         schema = proto._make_opt_sec(OptionNumber.SEC,
                                      authorities=[ProtectionAuthority(8)])
-        self.assertEqual(schema.data, b'\x00\x81')
+        self.assertEqual(schema.data, b'\x01\x80')
         self.assertEqual(schema.length, 5)
 
         # Only the last octet terminates the field; an intermediate one that did
         # would make the reader warn 'remaining data'.
-        self.assertEqual(schema.data[0] & 0x01, 0)
-        self.assertEqual(schema.data[-1] & 0x01, 1)
+        self.assertEqual(schema.data[0] & 0x01, 1)
+        self.assertEqual(schema.data[-1] & 0x01, 0)
 
         # No authorities at all stays a bare 3-octet option with no bitmap, so
         # there is no final octet to terminate.
@@ -622,8 +611,7 @@ class IPv4UnitTests(unittest.TestCase):
         ``Enum_ProtectionAuthority`` member ``7`` is named
         ``Field_Termination_Indicator`` -- it is not an authority at all, yet it
         was a member of the enumeration the writer accepted as one. Passing it
-        produced ``data=b'\\x01'``: an option that reads as validly terminated
-        while encoding zero authorities.
+        produced an option encoding zero authorities.
 
         The writer and the reader disagreed about whether index 7 is data, and
         this test records which of the two won. ``_read_opt_sec`` loops over
@@ -682,7 +670,7 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(
             proto._make_opt_sec(OptionNumber.SEC,
                                 authorities=[ProtectionAuthority.DOE]).data,
-            b'\x09',
+            b'\x08',
         )
 
     def test_ipv4_sid_option_is_four_octets_wide_on_the_wire(self) -> None:
@@ -1019,7 +1007,7 @@ class IPv4UnitTests(unittest.TestCase):
             tos={'pre': 0, 'del': 0, 'thr': 0, 'rel': 0, 'ecn': 0},
             length=32,
             id=7,
-            flags={'df': 1, 'mf': 0, 'offset': 1},
+            flags={'reserved': 0, 'df': 1, 'mf': 0, 'offset': 1},
             ttl=64,
             proto=TransType.TCP,
             chksum=b'\x12\x34',
@@ -1048,7 +1036,7 @@ class IPv4UnitTests(unittest.TestCase):
             tos={'pre': 0, 'del': 0, 'thr': 0, 'rel': 0, 'ecn': 0},
             length=24,
             id=8,
-            flags={'df': 0, 'mf': 0, 'offset': 0},
+            flags={'reserved': 0, 'df': 0, 'mf': 0, 'offset': 0},
             ttl=32,
             proto=TransType.UDP,
             chksum=b'\x00\x00',
@@ -1067,7 +1055,7 @@ class IPv4UnitTests(unittest.TestCase):
             tos={'pre': 0, 'del': 0, 'thr': 0, 'rel': 0, 'ecn': 0},
             length=20,
             id=1,
-            flags={'df': 0, 'mf': 0, 'offset': 0},
+            flags={'reserved': 0, 'df': 0, 'mf': 0, 'offset': 0},
             ttl=1,
             proto=TransType.UDP,
             chksum=b'\x00\x00',
@@ -1278,19 +1266,11 @@ class IPv4UnitTests(unittest.TestCase):
                 proto._make_ipv4_options([(code, {'data': b'xx'})])
                 self.assertEqual(set(registry), before)
 
-                # The OrderedMultiDict branch cannot get as far as building the
-                # option: :meth:`IPv4._make_opt_unassigned
-                # <pcapkit.protocols.internet.ipv4.IPv4._make_opt_unassigned>`
-                # declares ``data`` keyword-only with no default, where every
-                # sibling fallback constructor defaults it to ``b''``, so it
-                # raises before reading the payload out of ``option.data``. That
-                # predates the registry migration and is left alone here; what
-                # this asserts is that the *lookup* which runs first still does
-                # not insert.
-                with self.assertRaises(TypeError):
-                    proto._make_ipv4_options(OrderedMultiDict([
-                        (code, types.SimpleNamespace(data=b'xx')),
-                    ]))
+                # The OrderedMultiDict branch too, which builds the option out
+                # of ``option.data`` since #1318 gave ``data`` a default.
+                proto._make_ipv4_options(OrderedMultiDict([
+                    (code, types.SimpleNamespace(data=b'xx')),
+                ]))
                 self.assertEqual(set(registry), before)
 
                 # a leak would make the next genuine registration warn
@@ -1311,25 +1291,22 @@ class IPv4UnitTests(unittest.TestCase):
 
         proto = object.__new__(IPv4)
 
+        # ``length`` counts the type and length octets too. C.f. #1318.
         unknown = proto._make_opt_unassigned(OptionNumber.get(31), data=b'abc')
-        self.assertEqual(unknown.to_dict()['length'], 3)
+        self.assertEqual(unknown.to_dict()['length'], 5)
         self.assertEqual(unknown.to_dict()['data'], b'abc')
 
         self.assertEqual(proto._make_opt_eool(OptionNumber.EOOL).to_dict()['length'], 1)
         self.assertEqual(proto._make_opt_nop(OptionNumber.NOP).to_dict()['length'], 1)
 
-        # ``GENSER`` alone, where this passed
-        # ``[GENSER, Field_Termination_Indicator]`` before #537: the expected
-        # octets are unchanged, because bit 0 of the last octet is now set by
-        # ``_make_opt_sec`` itself rather than by naming the terminator as though
-        # it were an authority -- which is what produced the 0x01 here, and what
-        # is now rejected.
+        # ``GENSER`` alone: the low-order bit of the last octet is clear, per
+        # :rfc:`1108` section 2.4(a). C.f. #537 and #1321.
         sec = proto._make_opt_sec(
             OptionNumber.SEC,
             authorities=[ProtectionAuthority.GENSER],
         )
         self.assertEqual(sec.to_dict()['length'], 4)
-        self.assertEqual(sec.to_dict()['data'], b'\x81')
+        self.assertEqual(sec.to_dict()['data'], b'\x80')
 
         loose = proto._make_opt_lsr(OptionNumber.LSR, counts=2, route=['192.0.2.1'])
         self.assertEqual(loose.to_dict()['length'], 11)
@@ -1388,11 +1365,9 @@ class IPv4UnitTests(unittest.TestCase):
 
         # Which is why the alignment branch gets a case of its own rather than
         # riding along on SID's old width. The padding terminator is an EOOL
-        # *option*, not the bare wire code, and these assertions pinned the
-        # latter -- that is what #506 fixed, and it would have been lost here
-        # when SID stopped being a trigger. A SEC option carrying a two-octet
-        # bitmap packs to five, so it still is one: three octets of padding, two
-        # NOPs and the EOOL.
+        # *option*, not the bare wire code -- that is what #506 fixed. A SEC
+        # option carrying a two-octet bitmap packs to five, so it is one: three
+        # octets of padding, two NOPs and the EOOL.
         padded, padded_length = proto._make_ipv4_options([
             (OptionNumber.SEC, {'authorities': [ProtectionAuthority(8)]}),
         ])
@@ -1455,6 +1430,7 @@ class IPv4UnitTests(unittest.TestCase):
             length=7,
             pointer=8,
             route=[ip_address('192.0.2.1')],
+            remaining=(),
         )
         rr = ipv4_data.RROption(
             code=OptionNumber.RR,
@@ -1462,6 +1438,7 @@ class IPv4UnitTests(unittest.TestCase):
             length=11,
             pointer=12,
             route=[ip_address('192.0.2.1'), ip_address('192.0.2.2')],
+            remaining=(),
         )
         ssr = ipv4_data.SSROption(
             code=OptionNumber.SSR,
@@ -1469,6 +1446,7 @@ class IPv4UnitTests(unittest.TestCase):
             length=7,
             pointer=8,
             route=[ip_address('192.0.2.3')],
+            remaining=(),
         )
         self.assertEqual(proto._make_opt_lsr(OptionNumber.LSR, lsr).pointer, 8)
         self.assertEqual(proto._make_opt_rr(OptionNumber.RR, rr).pointer, 12)
@@ -1483,10 +1461,13 @@ class IPv4UnitTests(unittest.TestCase):
             flag=TSFlag.Timestamp_Only,
             timestamp=(datetime.timedelta(seconds=1), 0x80000000),
         )
+        # An integer is the raw field, its high-order bit marking a non-standard
+        # value, so it is written as is and without a warning. C.f. #1320.
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             ts_schema = proto._make_opt_ts(OptionNumber.TS, ts_tuple)
         self.assertEqual(ts_schema.flags['oflw'], 1)
-        warn.assert_called_once()
+        self.assertEqual(ts_schema.ts_data[1], 0x80000000)
+        warn.assert_not_called()
 
         ts_map = OrderedMultiDict([
             (ip_address('192.0.2.10'), datetime.timedelta(seconds=2)),
@@ -1504,13 +1485,18 @@ class IPv4UnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             self.assertEqual(proto._make_opt_ts(OptionNumber.TS, ts_prespecified).flags['flag'],
                              TSFlag.Prespecified_IP_with_Timestamp)
-        warn.assert_called_once()
+        warn.assert_not_called()
 
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp=[1, 2])
         warn.assert_called_once()
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp=[0x80000000])
+        warn.assert_not_called()
+        # A timedelta too large for 31 bits still warns.
+        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+            proto._make_opt_ts(OptionNumber.TS, counts=1,
+                               timestamp=[datetime.timedelta(milliseconds=0x80000000)])
         warn.assert_called_once()
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp={
@@ -1521,7 +1507,7 @@ class IPv4UnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1,
                                timestamp={ip_address('192.0.2.22'): 0x80000000})
-        warn.assert_called_once()
+        warn.assert_not_called()
 
         e_sec = ipv4_data.ESECOption(
             code=OptionNumber.E_SEC,
@@ -1579,17 +1565,22 @@ class IPv4UnitTests(unittest.TestCase):
             rate=80,
             ttl=datetime.timedelta(seconds=7),
             nonce=3,
+            reserved=2,
         )
         self.assertEqual(proto._make_opt_qs(OptionNumber.QS, qs_request).ttl, 7)
+        self.assertEqual(proto._make_opt_qs(OptionNumber.QS, qs_request).nonce['reserved'], 2)
         qs_report = ipv4_data.QuickStartReportOption(
             code=OptionNumber.QS,
             type=opt_type(OptionNumber.QS),
             length=8,
             func=QSFunction.Report_of_Approved_Rate,
             rate=80,
+            unused=5,
             nonce=3,
+            reserved=1,
         )
         self.assertEqual(proto._make_opt_qs(OptionNumber.QS, qs_report).nonce['nonce'], 3)
+        self.assertEqual(proto._make_opt_qs(OptionNumber.QS, qs_report).reserved, 5)
 
         schema_options, schema_total = proto._make_ipv4_options([
             bytes([OptionNumber.NOP]),
@@ -1614,11 +1605,7 @@ class IPv4UnitTests(unittest.TestCase):
             (OptionNumber.SID, sid),
             (OptionNumber.LSR, lsr),
             # A SEC option whose authorities reach into a second bitmap octet, so
-            # it packs to five and needs three octets of padding -- two NOPs and
-            # the EOOL. Which is what keeps the multi-NOP arm of the alignment
-            # branch exercised on this, the data-model path: SID used to reach it
-            # by being two octets over-wide (6 % 4 == 2, one NOP), and since #534
-            # it is 4-aligned and reaches it not at all.
+            # it packs to five.
             (OptionNumber.SEC, ipv4_data.SECOption(
                 code=OptionNumber.SEC,
                 type=opt_type(OptionNumber.SEC),
@@ -1629,20 +1616,19 @@ class IPv4UnitTests(unittest.TestCase):
             (OptionNumber.MTUP, mtup),
         ])
         mapped_options, mapped_total = proto._make_ipv4_options(option_map)
-        # 4 of SID, 8 of LSR and its padding, 8 of SEC and its padding, 4 of
-        # MTUP, with the NOP dropped. The SID half of this was 20 before #534,
-        # the extra four being the two octets it was over-wide by plus the two of
-        # padding they then needed.
+        # The parsed NOP is written in place, and the options are padded once,
+        # after the last: 1 of NOP, 4 of SID, 7 of LSR, 5 of SEC and 4 of MTUP
+        # make 21, so three octets of padding -- two NOPs and the EOOL, which
+        # keeps the multi-NOP arm of the alignment branch exercised on this, the
+        # data-model path. An EOOL after each unaligned option would end the
+        # list there on parse. C.f. #1316 and #1317.
         self.assertEqual(mapped_total, 24)
-        self.assertEqual(mapped_options[0].sid, 123)
-        # As above: the terminator is an EOOL option schema, so look for its type
-        # rather than for the wire code itself. See #506.
-        self.assertIn(OptionNumber.EOOL, [item.type for item in mapped_options])
-        # Two NOPs from the SEC option's three octets of padding, which is the
-        # arm that ``for _ in range(pad_len - 1)`` only reaches when pad_len > 1.
-        self.assertEqual(
-            [item.type for item in mapped_options].count(OptionNumber.NOP), 2)
-        self.assertEqual(mapped_options[-1].mtu, 1500)
+        self.assertEqual([item.type for item in mapped_options], [
+            OptionNumber.NOP, OptionNumber.SID, OptionNumber.LSR, OptionNumber.SEC,
+            OptionNumber.MTUP, OptionNumber.NOP, OptionNumber.NOP, OptionNumber.EOOL,
+        ])
+        self.assertEqual(mapped_options[1].sid, 123)
+        self.assertEqual(mapped_options[4].mtu, 1500)
 
     def test_ipv4_option_readers_cover_common_and_error_branches(self) -> None:
         from pcapkit.const.ipv4.classification_level import ClassificationLevel
@@ -1700,7 +1686,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         sec = proto._read_opt_sec(
             SECOption(type=OptionNumber.SEC, length=4,
-                      level=ClassificationLevel.Unclassified, data=b'\x81'),
+                      level=ClassificationLevel.Unclassified, data=b'\x80'),
             options=options,
         )
         self.assertEqual(sec.level, ClassificationLevel.Unclassified)
@@ -1714,7 +1700,7 @@ class IPv4UnitTests(unittest.TestCase):
             proto._read_opt_sec(
                 SECOption(type=OptionNumber.SEC, length=5,
                           level=ClassificationLevel.Unclassified,
-                          data=b'\x05\x00'),
+                          data=b'\x04\x01'),
                 options=options,
             )
         self.assertEqual(warn.call_count, 3)
@@ -1779,7 +1765,7 @@ class IPv4UnitTests(unittest.TestCase):
             length=8,
             flags={'func': QSFunction.Quick_Start_Request, 'rate': 1},
             ttl=7,
-            nonce={'nonce': 3},
+            nonce={'nonce': 3, 'reserved': 0},
         )
         object.__setattr__(qs_request, 'func', QSFunction.Quick_Start_Request)
         qs_req = proto._read_opt_qs(qs_request, options=options)
@@ -1790,7 +1776,8 @@ class IPv4UnitTests(unittest.TestCase):
             type=OptionNumber.QS,
             length=8,
             flags={'func': QSFunction.Report_of_Approved_Rate, 'rate': 1},
-            nonce={'nonce': 3},
+            reserved=0,
+            nonce={'nonce': 3, 'reserved': 0},
         )
         object.__setattr__(qs_report, 'func', QSFunction.Report_of_Approved_Rate)
         qs_rep = proto._read_opt_qs(qs_report, options=options)
@@ -1815,7 +1802,7 @@ class IPv4UnitTests(unittest.TestCase):
             proto._read_ipv4_options(3)
 
         assert_bad(proto._read_opt_unassigned, UnassignedOption(type=OptionNumber.get(31),
-                                                               length=2, data=b''))
+                                                               length=1, data=b''))
         assert_bad(proto._read_opt_sec, SECOption(type=OptionNumber.SEC, length=2,
                                                   level=ClassificationLevel.Unclassified,
                                                   data=b''))
@@ -1891,8 +1878,9 @@ class IPv4UnitTests(unittest.TestCase):
             'flags': {'func': QSFunction.Report_of_Approved_Rate.value},
         })
         self.assertIs(report_field.schema, ipv4_schema.QuickStartReportOption)
-        with self.assertRaises(FieldValueError):
-            ipv4_schema.quick_start_data_selector({'flags': {'func': 1}})
+        unassigned_field = ipv4_schema.quick_start_data_selector({'flags': {'func': 1, 'length': 8}})
+        self.assertIs(unassigned_field.schema, ipv4_schema.UnassignedOption)
+        self.assertEqual(unassigned_field.length, 8)
 
         wrapped_qs = ipv4_schema.QuickStartReportOption(
             type=OptionNumber.QS,
@@ -1919,8 +1907,8 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(ts_only.ts_flag, TSFlag.Timestamp_Only)
         self.assertEqual(ts_only.data, [1000, 0x80000005])
         self.assertEqual(ts_only.timestamp[0], datetime.timedelta(seconds=1))
-        self.assertEqual(ts_only.timestamp[1], 5)
-        warn.assert_called_once()
+        self.assertEqual(ts_only.timestamp[1], 0x80000005)
+        warn.assert_not_called()
 
         ip_ts = ipv4_schema.TSOption(
             type=OptionNumber.TS,
@@ -1939,8 +1927,8 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertIsInstance(ip_ts.data, OrderedMultiDict)
         self.assertEqual(ip_ts.timestamp[ip_address('192.0.2.1')],
                          datetime.timedelta(seconds=2))
-        self.assertEqual(ip_ts.timestamp[ip_address('192.0.2.4')], 7)
-        warn.assert_called_once()
+        self.assertEqual(ip_ts.timestamp[ip_address('192.0.2.4')], 0x80000007)
+        warn.assert_not_called()
 
         pre_ts = ipv4_schema.TSOption(
             type=OptionNumber.TS,
@@ -1957,11 +1945,11 @@ class IPv4UnitTests(unittest.TestCase):
         pre_ts.remainder = ip_address('192.0.2.3').packed + b'\x00\x00\x00\x00'
         with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
             pre_ts.post_process({})
-        self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.2')], 6)
+        self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.2')], 0x80000006)
         self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.5')],
                          datetime.timedelta(seconds=3))
         self.assertEqual(pre_ts.data[ip_address('192.0.2.3')], 0)
-        warn.assert_called_once()
+        warn.assert_not_called()
 
         unknown = ipv4_schema.TSOption(
             type=OptionNumber.TS,

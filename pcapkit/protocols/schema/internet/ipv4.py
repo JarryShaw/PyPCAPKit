@@ -20,7 +20,7 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, U
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
-from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.exceptions import EnumValueError, FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
@@ -67,6 +67,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class Flags(TypedDict):
         """Flags and fragment offset field."""
 
+        #: Reserved flag bit.
+        reserved: int
         #: Don't fragment flag.
         df: int
         #: More fragments flag.
@@ -93,6 +95,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class QSTestFlags(TypedDict):
         """Quick start test flag."""
 
+        #: Option length.
+        length: int
         #: QS function.
         func: int
 
@@ -101,6 +105,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Nonce.
         nonce: int
+        #: Reserved bits.
+        reserved: int
 
 
 def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
@@ -194,6 +200,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`
           instance.
+        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.UnassignedOption`
+          instance, sized by the option's own ``length`` octet.
 
     Notes:
         The length handed to the :class:`~pcapkit.corekit.fields.misc.SchemaField`
@@ -203,12 +212,21 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         leftover octets are read as a further, fabricated option.
 
     """
-    func = Enum_QSFunction.get(pkt['flags']['func'])
-    pkt['flags']['func'] = func
+    # NOTE: The enumeration admits ``0`` to ``8`` only, while the field is four
+    # bits wide; a function above ``8`` is just as unassigned.
+    try:
+        func = Enum_QSFunction.get(pkt['flags']['func'])
+    except EnumValueError:
+        schema = None
+    else:
+        pkt['flags']['func'] = func
+        schema = QSOption.registry[func]
 
-    schema = QSOption.registry[func]
     if schema is None:
-        raise FieldValueError(f'IPv4: invalid QS function: {func}')
+        # An unassigned function has no defined layout, so the option is kept
+        # as raw data, sized by its own ``length`` octet: two octets at least,
+        # so that a shorter length reaches the reader and is rejected there.
+        return SchemaField(length=max(pkt['flags']['length'], 2), schema=UnassignedOption)
     return SchemaField(length=quick_start_option_length(schema), schema=schema)
 
 
@@ -290,15 +308,15 @@ class LSROption(Option, code=Enum_OptionNumber.LSR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route.
+    #: Route: every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
-        length=lambda pkt: pkt['pointer'] - 4,
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer.
+    #: Trailing octets that do not make up a whole address slot.
     remainder: 'bytes' = PaddingField(
-        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
-        default=bytes(36),  # a reasonable default
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
     )
 
     if TYPE_CHECKING:
@@ -369,9 +387,10 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             for ts in ts_data:
                 self.data.append(ts)
 
+                # NOTE: A set high-order bit marks a non-standard time value,
+                # per :rfc:`791`, so it is kept as the raw 32-bit integer.
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
+                    ts_val = ts  # type: int | timedelta
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 ts_list.append(ts_val)
@@ -387,8 +406,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF
+                    ts_val = ts
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
@@ -403,8 +421,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF
+                    ts_val = ts
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
@@ -476,15 +493,15 @@ class RROption(Option, code=Enum_OptionNumber.RR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route.
+    #: Route: every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
-        length=lambda pkt: pkt['pointer'] - 4,
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer.
+    #: Trailing octets that do not make up a whole address slot.
     remainder: 'bytes' = PaddingField(
-        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
-        default=bytes(36),  # a reasonable default
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
     )
 
     if TYPE_CHECKING:
@@ -510,15 +527,15 @@ class SSROption(Option, code=Enum_OptionNumber.SSR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route.
+    #: Route: every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
-        length=lambda pkt: pkt['pointer'] - 4,
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
         item_type=IPv4AddressField(),
     )
-    #: Remaining data buffer.
+    #: Trailing octets that do not make up a whole address slot.
     remainder: 'bytes' = PaddingField(
-        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
-        default=bytes(36),  # a reasonable default
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
     )
 
     if TYPE_CHECKING:
@@ -581,6 +598,7 @@ class _QSOption(Schema):
 
     #: Flags.
     flags: 'QSTestFlags' = ForwardMatchField(BitField(length=3, namespace={
+        'length': (8, 8),
         'func': (16, 4),
     }))
     #: QS data.
@@ -588,7 +606,7 @@ class _QSOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'QSOption':
+    def post_process(self, packet: 'dict[str, Any]') -> 'QSOption | UnassignedOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -599,7 +617,8 @@ class _QSOption(Schema):
 
         """
         ret = self.data
-        ret.func = Enum_QSFunction.get(self.flags['func'])
+        if isinstance(ret, QSOption):
+            ret.func = Enum_QSFunction.get(self.flags['func'])
         return ret
 
 
@@ -631,6 +650,7 @@ class QuickStartRequestOption(QSOption, code=Enum_QSFunction.Quick_Start_Request
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={
         'nonce': (0, 30),
+        'reserved': (30, 2),
     })
 
     if TYPE_CHECKING:
@@ -653,18 +673,18 @@ class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_R
     #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs` writes into
     #: ``length`` and the eight
     #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` demands of it,
-    #: and the ``nonce`` would decode one octet early. Declared as padding rather
-    #: than as data because :rfc:`4782` gives it no meaning and no caller should
-    #: be setting it.
-    reserved: 'bytes' = PaddingField(length=1)
+    #: and the ``nonce`` would decode one octet early. Kept as an integer rather
+    #: than as padding, so that whatever the sender put there is written back.
+    reserved: 'int' = UInt8Field()
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={
         'nonce': (0, 30),
+        'reserved': (30, 2),
     })
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
-                     nonce: 'QSNonce') -> 'None': ...
+                     reserved: 'int', nonce: 'QSNonce') -> 'None': ...
 
 
 @schema_final
@@ -690,6 +710,7 @@ class IPv4(Schema):
     id: 'int' = UInt16Field()
     #: Flags and fragment offset.
     flags: 'Flags' = BitField(length=2, namespace={
+        'reserved': (0, 1),
         'df': (1, 1),
         'mf': (2, 1),
         'offset': (3, 13),
