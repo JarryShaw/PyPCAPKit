@@ -4,8 +4,8 @@
 The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
-and a defect programme run through the issue tracker, citing 295 issues and pull
-requests from :pr:`121` to :issue:`1152` as of this revision. The programme is still
+and a defect programme run through the issue tracker, citing 301 issues and pull
+requests from :pr:`121` to :issue:`1156` as of this revision. The programme is still
 running, so those figures are a snapshot rather than a total.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
@@ -892,7 +892,16 @@ Fixed
   the default engine already writes, identical to its, and ``files=True`` writes that
   record's file too; frame records are unchanged. ``Extractor.format`` now also answers
   on a capture with no frames. ``format='pcap'`` failing on every engine is a separate
-  defect, :issue:`1127` (:issue:`1104`).
+  defect, :issue:`1127` (below) (:issue:`1104`).
+* ``format='pcap'`` failed on every engine with a ``TypeError`` from
+  ``PCAPIO.__init__()``, missing ``protocol``: ``Extractor.__init__`` created the writer
+  before any global header was read, so ``PCAPIO`` had no link type. The header step
+  now creates it through ``Extractor._open_output``, and ``run()`` opens it for engines
+  with no such step; a PCAP writer takes the frame itself and skips the
+  ``Global Header`` record, so the default engine writes ``in.pcap`` back byte for
+  byte. The third-party engines hand the writer no frame octets, so they fall back to
+  JSON with a ``FormatWarning``, as their flow tracing already does, and a PCAP-NG
+  input raises ``FormatError`` (:issue:`1127`).
 
 pcapkit.protocols
 -----------------
@@ -1923,12 +1932,16 @@ Fixed
   writes ``round(frac * 2**32)``, clamped to 32 bits, and the reader adds
   ``fraction / 2**32`` seconds, so ``timestamp`` keeps sub-second precision
   (:issue:`1093`).
-* two HIP parameter defects. ``HOST_ID`` packed DI-Type and DI-Length as a 4-octet
+* three HIP parameter defects. ``HOST_ID`` packed DI-Type and DI-Length as a 4-octet
   ``BitField`` where :rfc:`7401` section 5.2.9 has one 16-bit word, so every built
   record carried two surplus octets and read back the wrong algorithm (:issue:`1118`);
   with it, ``make_samples.py`` builds every HIP parameter. ``HIP_CIPHER`` warned at six
   Cipher IDs, which section 5.2.8 allows; it now warns only above six and keeps the
-  first six, as a recipient must. The maker is unchanged (:issue:`1092`).
+  first six, as a recipient must. The maker is unchanged (:issue:`1092`). And the
+  HIPv2-only ``DH_GROUP_LIST``, ``HIP_CIPHER``, ``HIT_SUITE_LIST`` and
+  ``TRANSPORT_FORMAT_LIST`` were built and parsed in a HIPv1 packet; at version 1 the
+  reader and the maker now raise ``ProtocolError``, as ``R1_Counter`` and
+  ``HIP_TRANSFORM`` already do on a version mismatch (:issue:`1133`).
 * the PCAP ``Header`` could not rebuild itself. ``_make_magic``'s explicit-endian branch
   ignored ``nanosecond`` (:issue:`1096`), and ``_make_data`` returned a
   ``magic_number`` that ``make()`` does not take -- one of the three keys the
@@ -1936,7 +1949,11 @@ Fixed
   ``UnknownFieldWarning`` and rebuilt every header with the host-default ``d4c3b2a1``
   magic. ``_make_data`` now returns ``byteorder`` and ``nanosecond``, and every byte
   order and timestamp resolution rebuilds unchanged. ``Header._read_protos`` also read
-  four octets whatever ``size`` asked for (:issue:`1125`).
+  four octets whatever ``size`` asked for (:issue:`1125`). And ``_make_magic`` honoured
+  ``lilendian`` and ``bigendian`` only as a pair, so ``Header(bigendian=True)`` wrote
+  ``d4c3b2a1`` on a little-endian host; either flag alone now picks the byte order and
+  overrides ``byteorder``, and equal flags still raise ``EndianError``
+  (:issue:`1144`).
 * TCP's NS flag was written by ``make()`` but never parsed: it had been commented out
   of ``Flags``, the reader and ``_make_data``, with no reason recorded. Per the owner's
   ruling it is exposed rather than removed, so ``info.flags.ns`` exists and
@@ -1949,7 +1966,13 @@ Fixed
   ``PCAPNG.from_data``, which need ``num``/``header`` and ``num``/``sct``/``ctx``, could
   not be called at all. Extra keywords now reach the construction, overriding
   ``_make_data``'s, under the construction-keyword check, so a typo raises
-  ``UnsupportedCall`` (:issue:`1126`).
+  ``UnsupportedCall`` (:issue:`1126`). ``HTTP.from_data`` always raised
+  ``invalid HTTP version: 0``, looking up a ``version`` key neither versioned data
+  class has; it now dispatches on the data's class. HTTP/2's ``_make_data`` also
+  returned the payload
+  ``length``, which ``ProtocolBase`` takes as the parse length, so even a direct call
+  failed as shorter than the 9-octet frame header; ``make`` now computes it, and all
+  231 HTTP frames in three sample captures rebuild byte for byte (:issue:`1154`).
 * Quick-Start options did not round-trip. The IPv4, HOPOPT and IPv6-Opts readers took
   the function from ``schema.func``, which only a parsed schema carries, so a built
   option raised ``AttributeError``; HOPOPT and IPv6-Opts also sized the 8-octet option
@@ -1988,6 +2011,20 @@ Fixed
   type is sent on. Over 5,000 fuzzed zero-heavy buffers, HTTP/2 labels fell from 566 to
   101, every one a legal DATA header. Explicit ``version=2`` parsing is unchanged
   (:issue:`1141`).
+* **a breaking change to** ``TCP.make()``'s options: ``_make_tcp_options`` dropped the
+  ``NOP`` and ``EOOL`` options it was given and padded each other option to 4 octets
+  separately, so ``from_data`` rebuilt none of the 1,117 segments in ``http.pcap``
+  with their original header octets. Options are now emitted as given and padded once at
+  the end -- zero octets after a trailing ``EOOL``, otherwise ``NOP`` options and an
+  ``EOOL`` -- so a built header can be shorter than before; every segment in six
+  sample captures rebuilds, and ``options-*.pcap`` regenerate unchanged (:issue:`1151`).
+* **a breaking change to** ``from_data`` on a capture truncated by snaplen: ``IPv4``,
+  ``IPv6`` and ``UDP`` rebuilt their length field from the payload at hand, writing
+  the recorded length, so ``big_endian.pcap`` frame 3 came back as ``45000052`` where
+  ``450004a2`` was on the wire. ``_make_data`` now passes the parsed length through to
+  ``make()``'s new ``total_length`` (IPv4, UDP) or ``payload_length`` (IPv6) keyword,
+  which computes the length as before when omitted, so ``IPv4(payload=...)`` is
+  unchanged (:issue:`1155`).
 
 pcapkit.toolkit
 ---------------
@@ -2573,3 +2610,9 @@ Fixed
   so ``from pcapkit.all import *`` did not bind them. ``pcapkit.utilities`` stays
   unlisted deliberately, so generic helpers such as ``warn`` do not arrive through
   ``import *`` (:issue:`1136`).
+* ``examples/generators/options.py`` wrote every HTTP/2 sample frame on stream 0, which
+  :rfc:`9113` forbids for ``DATA``, ``HEADERS`` and the other stream-level types, so six
+  of the ten frames in ``options-transport.pcap`` decoded as ``TCP:Raw``.
+  ``_httpv2_build`` now puts ``SETTINGS``, ``PING`` and ``GOAWAY`` on stream 0 and every
+  other type on stream 1, with ``PUSH_PROMISE`` promising stream 2, and all ten decode
+  as ``TCP:HTTP/2``; no other generated capture changes (:issue:`1156`).
