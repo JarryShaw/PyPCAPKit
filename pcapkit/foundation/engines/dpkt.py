@@ -150,8 +150,9 @@ class DPKT(EngineBase['DPKTPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (attach_timestamp, ipv4_reassembly, ipv6_reassembly,
-                                          packet2dict, tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.dpkt import (attach_buffer, attach_timestamp, ipv4_reassembly,
+                                          ipv6_reassembly, packet2dict, tcp_reassembly,
+                                          tcp_traceflow)
         ext = self._extractor
 
         reader = self._extmp
@@ -167,6 +168,10 @@ class DPKT(EngineBase['DPKTPacket']):
         # captured -- and anything reading a *stored* frame after this loop has
         # moved on could not find out. Keep the two together from the start.
         attach_timestamp(packet, timestamp)
+        # Nor does the packet keep the octets it was parsed from, and serialising
+        # it again recomputes zeroed checksums and lengths into it, so keep those
+        # too for the adapters to slice the wire octets out of.
+        attach_buffer(packet, pkt)
 
         # verbose output
         ext._frnum += 1
