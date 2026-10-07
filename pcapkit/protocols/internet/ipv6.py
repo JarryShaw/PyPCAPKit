@@ -408,6 +408,30 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
                                             payload=payload)  # type: ignore[misc,call-arg,arg-type]
             info = next_.info
+
+            # A layer with no ``next`` field cannot safely continue the walk.
+            # This is a *structural* check, not a fixed set of codes: every
+            # dedicated parser and
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry
+            # ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no
+            # dedicated parser but is registered to ``IPv6_Ext`` directly --
+            # while every other code with no dedicated parser -- ``253``,
+            # ``254``, or whatever IANA assigns next -- resolves to plain
+            # :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see
+            # :attr:`__generic_ext_codes__`). Reading ``info.next`` on that
+            # would raise ``AttributeError`` and let a further-out
+            # :func:`~pcapkit.utilities.decorators.beholder` degrade the
+            # *whole* packet.
+            #
+            # Such a layer is not recorded as an extension header: it consumed
+            # nothing (``Raw.length`` is 0), so recording it would emit its
+            # octets twice on rebuild, once from ``__exthdr__`` and once more as
+            # the upper layer. Stopping here with ``proto`` unchanged instead
+            # hands the remaining octets to ``super()._decode_next_layer``
+            # below, which decodes them once, as the upper layer.
+            if not hasattr(info, 'next'):
+                break
+
             name = next_.alias.lstrip('IPv6-').lower()
             ipv6.__update__({
                 name: info,
@@ -430,34 +454,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # this must happen before any exit from the loop, since the payload
             # is what gets handed to ``super()._decode_next_layer`` below
             payload = payload[next_.length:]
-
-            # A layer with no ``next`` field cannot safely continue the walk.
-            # This is a *structural* check, not a fixed set of codes: every
-            # dedicated parser and
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry
-            # ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no
-            # dedicated parser but is registered to ``IPv6_Ext`` directly --
-            # while every other code with no dedicated parser -- ``253``,
-            # ``254``, or whatever IANA assigns next -- resolves to plain
-            # :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see
-            # :attr:`__generic_ext_codes__`). Reading
-            # ``info.next`` on that would raise ``AttributeError`` and let a
-            # further-out :func:`~pcapkit.utilities.decorators.beholder` degrade
-            # the *whole* packet. Stopping here instead keeps this layer's own
-            # fields (recorded above, in ``self._exthdr`` and in the packet
-            # dict) and reports no further next header, as on an overrun.
-            #
-            # This has to run -- and, on a hit, has to set ``proto`` --
-            # *before* the fragment-header special case below: IPv6-Frag
-            # always carries a real ``next`` (this ``hasattr`` check never
-            # fires for it), and that ``next`` is the real
-            # transport layer's code, which the fragment branch's own
-            # ``break`` must leave in ``proto`` for the final
-            # ``super()._decode_next_layer`` call below the loop to dispatch
-            # to correctly.
-            if not hasattr(info, 'next'):
-                proto = None
-                break
 
             proto = info.next
 

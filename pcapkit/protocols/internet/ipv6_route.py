@@ -38,6 +38,7 @@ from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_Unkno
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as Schema_RPL
 from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
+from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_SourceRoute
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType
@@ -58,7 +59,6 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 
     TypeParser = Callable[[Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
     TypeConstructor = Callable[[Enum_Routing, DefaultArg(Optional[Data_IPv6_Route]),
@@ -299,7 +299,17 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             # ``_make_hdr_ext_len`` can express exactly, then derive
             # ``Hdr Ext Len`` from the aligned length with that same helper.
             length = self._make_hdr_ext_len(len(data))
-            data_val = data.ljust(ipv6_route_data_length(length), b'\x00')  # type: bytes | Schema_RoutingType
+            data_raw = data.ljust(ipv6_route_data_length(length), b'\x00')
+
+            # NOTE: Unpacked into the routing type's own schema, since
+            # :meth:`read` hands the schema's ``data`` to the per-type reader,
+            # which reads fields rather than octets off it.
+            try:
+                data_val = Schema_RoutingType.registry[type_val].unpack(  # pylint: disable=unsubscriptable-object
+                    data_raw, len(data_raw), {})  # type: Schema_RoutingType
+            except Exception as exc:
+                raise ProtocolError(f'{self.alias}: [TypeNo {type_val}] routing data '
+                                    f'{data_raw.hex()} does not parse as this type') from exc
         elif isinstance(data, (dict, Data_IPv6_Route)):
             name = self._lookup_registry(self.__routing__, type_val)
             if isinstance(name, str):
@@ -644,6 +654,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             cmpr_i=cmpr_i,
             cmpr_e=cmpr_e,
             pad=pad_len,
+            reserved=schema.pad['reserved'],
             ip=tuple(schema.ip),
         )
         return ipv6_route
@@ -729,6 +740,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
     def _make_data_type_rpl(self, type: 'Enum_Routing', route: 'Optional[Data_RPL]' = None, *,
                             dst: 'Optional[IPv6Address]' = None,
                             ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
+                            reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_RPL':
         """Make IPv6-Route RPL Source data.
 
@@ -737,6 +749,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             route: route data
             dst: destination IPv6 address
             ip: list of IPv6 addresses
+            reserved: reserved bits after ``Pad``
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -751,6 +764,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             cmpr_i = route.cmpr_i
             cmpr_e = route.cmpr_e
             pad = route.pad
+            reserved = route.reserved
             ip_val = [
                 addr if isinstance(addr, bytes) else addr.packed for addr in route.ip
             ]
@@ -817,6 +831,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             },
             pad={
                 'pad_len': pad,
+                'reserved': reserved,
             },
             addresses=ip_val,
         )

@@ -165,6 +165,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         data = DummyDict(
             next=TransType.TCP,
             offset=16,
+            reserved=0,
             mf=True,
             id=99,
             __next_type__=None,
@@ -246,7 +247,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         proto = object.__new__(IPv6_Frag)
         proto.__header__ = Schema_IPv6_Frag(
             next=TransType.TCP,
-            flags={'offset': 12, 'mf': 1},
+            flags={'offset': 12, 'reserved': 0, 'mf': 1},
             id=0x12345678,
             payload=b'data',
         )
@@ -326,7 +327,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=header)
 
         rpl_schema = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
-                                      pad={'pad_len': 0}, addresses=[])
+                                      pad={'pad_len': 0, 'reserved': 0}, addresses=[])
         object.__setattr__(rpl_schema, 'ip', (ip_address('2001:db8::3'),))
         rpl_header = types.SimpleNamespace(next=TransType.TCP, length=16,
                                            type=Routing.RPL_Source_Route_Header, seg_left=1)
@@ -373,7 +374,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         rpl_from_data = proto._make_data_type_rpl(
             Routing.RPL_Source_Route_Header,
             route_data.RPL(next=TransType.TCP, length=16, type=Routing.RPL_Source_Route_Header,
-                           seg_left=1, cmpr_i=1, cmpr_e=2, pad=0,
+                           seg_left=1, cmpr_i=1, cmpr_e=2, pad=0, reserved=0,
                            ip=(ip_address('2001:db8::9'),)),
         )
         self.assertEqual(rpl_from_data.cmpr['cmpr_i'], 1)
@@ -489,7 +490,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(str(type2_ctx.exception), expected)
 
         rpl_schema = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
-                                      pad={'pad_len': 0}, addresses=[])
+                                      pad={'pad_len': 0, 'reserved': 0}, addresses=[])
         with self.assertRaises(ProtocolError) as rpl_ctx:
             proto._read_data_type_rpl(rpl_schema, header=header)
         self.assertEqual(str(rpl_ctx.exception), expected)
@@ -544,13 +545,16 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             self.assertEqual(proto.read(length=208), 'decoded')
         decode.assert_called_once()
 
-        made_bytes = proto.make(type=Routing.Source_Route, data=b'abcd')
+        made_bytes = proto.make(type=Routing.Source_Route, data=bytes(4))
         # Hdr Ext Len in 8-octet units (:rfc:`8200#section-4.4`): 4 octets of
         # raw data is exactly the 4-octet fixed part every routing type's
         # data starts with, so no additional 8-octet units are needed. See
         # #487 -- this used to assert ``1``, the pre-fix octet-count value.
         self.assertEqual(made_bytes.length, 0)
-        self.assertEqual(made_bytes.data, b'abcd')
+        # Raw bytes are unpacked into the routing type's own schema, which
+        # the per-type reader needs (#1236).
+        self.assertIsInstance(made_bytes.data, route_schema.SourceRoute)
+        self.assertEqual(bytes(made_bytes.data), bytes(4))
         made_dict = proto.make(type=Routing.Source_Route, data={'ip': ['2001:db8::2']})
         self.assertEqual(made_dict.type, Routing.Source_Route)
         made_model = proto.make(
@@ -1532,19 +1536,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         first = ip_address('2001:db8::1')
         second = ip_address('2001:db8::2')
-        full = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0},
+        full = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0, 'reserved': 0},
                                 addresses=first.packed + second.packed)
         full.post_process({})
         self.assertEqual([str(item) for item in full.ip], ['2001:db8::1', '2001:db8::2'])
 
         suffixes = first.packed[8:] + second.packed[8:]
         compressed = route_schema.RPL(cmpr={'cmpr_i': 8, 'cmpr_e': 8},
-                                      pad={'pad_len': 0}, addresses=suffixes)
+                                      pad={'pad_len': 0, 'reserved': 0}, addresses=suffixes)
         compressed.post_process({})
         self.assertEqual(compressed.ip, [first.packed[8:], second.packed[8:]])
 
         with_dst = route_schema.RPL(cmpr={'cmpr_i': 8, 'cmpr_e': 8},
-                                    pad={'pad_len': 0}, addresses=suffixes)
+                                    pad={'pad_len': 0, 'reserved': 0}, addresses=suffixes)
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
 
@@ -1572,7 +1576,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # Directly at the schema level: ``addresses`` is a ``list[bytes]``,
         # exactly as ``_make_data_type_rpl`` hands it to the constructor.
         rpl_schema = route_schema.RPL(
-            cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0},
+            cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0, 'reserved': 0},
             addresses=[first.packed, second.packed],
         )
         packed = bytes(rpl_schema)
@@ -1624,7 +1628,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         # The fixed area alone, with no addresses and no padding.
         bare = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
-                                pad={'pad_len': 0}, addresses=[])
+                                pad={'pad_len': 0, 'reserved': 0}, addresses=[])
         self.assertEqual(len(bytes(bare)), 4)
 
         # CmprI is the high nibble of the first octet, CmprE the low one; Pad
@@ -1632,7 +1636,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # it. The three trailing octets are the ``padding`` field that
         # ``pad_len`` sizes, not part of the fixed area.
         nibbles = route_schema.RPL(cmpr={'cmpr_i': 1, 'cmpr_e': 2},
-                                   pad={'pad_len': 3}, addresses=[])
+                                   pad={'pad_len': 3, 'reserved': 0}, addresses=[])
         self.assertEqual(bytes(nibbles)[:4], b'\x12\x30\x00\x00')
 
         proto = object.__new__(IPv6_Route)

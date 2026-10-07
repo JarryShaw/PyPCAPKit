@@ -147,8 +147,9 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_ext import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.internet.ipv6_ext import IPv6_Ext as Schema_IPv6_Ext
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import SchemaWarning, warn
 
@@ -158,7 +159,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.protocol import ProtocolBase
 
     class _NextHeaderData(Protocol):
         """The one field every IPv6 extension header's data model carries.
@@ -442,20 +442,28 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             ext_len = nominal
             next_header = schema.next
 
+        # NOTE: The schema's payload holds every octet after the two fixed
+        # ones; the first ``ext_len - 2`` of them are this header's own body.
+        rest = schema.get_payload()
         generic_ext = Data_IPv6_Ext(
             protocol=ext_code,
             next=next_header,
+            declared_next=schema.next,
+            len=schema.len,
             length=ext_len,
+            data=rest[:max(ext_len - 2, 0)],
             error=error,
         )
 
         if extension:
             return cast('_PT', generic_ext)
-        return self._decode_next_layer(cast('_PT', generic_ext), next_header, length - ext_len)
+        return self._decode_next_layer(cast('_PT', generic_ext), next_header, length - ext_len,
+                                       payload=rest[max(ext_len - 2, 0):])
 
     def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,  # pylint: disable=redefined-builtin
              len: 'int' = 0,  # pylint: disable=redefined-builtin
+             data: 'bytes' = b'',
              payload: 'bytes | ProtocolBase | Any' = b'',
              **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
@@ -465,6 +473,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             len: Raw ``Hdr Ext Len`` octet to emit. The caller must size it,
                 since this class cannot know at construction time which
                 per-protocol rule (see the module docstring) it must satisfy.
+            data: Header-specific content after the two fixed octets, emitted
+                verbatim ahead of ``payload``.
             payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
 
@@ -474,11 +484,11 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Note:
             **Keyword-only**, for two reasons.
 
-            The three stay *declared*, unlike :meth:`read`'s own keywords,
+            The four stay *declared*, unlike :meth:`read`'s own keywords,
             because :func:`~pcapkit.protocols.protocol._check_construction_keywords`
             builds its allowlist from :func:`inspect.signature` of ``make``.
             Hiding them in ``**kwargs`` **breaks construction**: a plain
-            ``IPv6_Ext(next=..., len=..., payload=...)`` raises
+            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises
             ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The
             ``__keywords__`` escape hatch would cover that, but it is unioned
             down the MRO, so it would widen the allowlist, and weaken that
@@ -500,6 +510,15 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             check.
 
         """
+        # NOTE: The schema keeps everything after the two fixed octets as one
+        # opaque payload, so the body is packed in front of the upper layer.
+        if data:
+            if isinstance(payload, ProtocolBase):
+                payload = bytes(payload)
+            elif isinstance(payload, Schema):
+                payload = payload.pack()
+            payload = data + payload
+
         return cast('_ST', Schema_IPv6_Ext(
             next=next,
             len=len,
@@ -617,12 +636,10 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     def _make_data(cls, data: 'Data_IPv6_Ext') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
 
-        Inverts whichever per-protocol length rule :meth:`read` applied,
-        using ``data.protocol`` -- the extension header this instance stood
-        in for -- to pick the same rule back. Round-tripping a ``data.next``
-        of :data:`None` (the overrun case) is not supported: there is no
-        octet value that both satisfies the rule and still fits, which is
-        exactly why :meth:`read` stopped rather than clipped.
+        Emits the ``Hdr Ext Len`` octet and the body as they were read, so
+        the rebuild is byte-exact whichever per-protocol length rule
+        :meth:`read` applied, and also for an overrun, where ``data.next`` is
+        :data:`None` and ``data.declared_next`` keeps the octet.
 
         Args:
             data: protocol data
@@ -631,16 +648,10 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             Key-value pairs for protocol construction.
 
         """
-        if data.protocol == Enum_ExtensionHeader.IPv6_Frag:
-            len_octet = 0  # constant length; the octet itself is Reserved
-        elif data.protocol == Enum_ExtensionHeader.AH:
-            len_octet = data.length // 4 - 2
-        else:
-            len_octet = data.length // 8 - 1
-
         return {
-            'next': data.next,
-            'len': len_octet,
+            'next': data.declared_next,
+            'len': data.len,
+            'data': data.data,
             'payload': cls._make_payload(data),
         }
 

@@ -20,10 +20,13 @@ class IPv6_Frag(Protocol):
     next: 'TransType'
     #: Fragment offset.
     offset: 'int'
+    #: Reserved bits (``Res``) between the offset and the M flag, carried
+    #: verbatim so that a rebuild reproduces them.
+    reserved: 'int'
     #: More flag.
     mf: 'bool'
     #: Identification.
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', offset: 'int', mf: 'bool', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
+        def __init__(self, next: 'TransType', offset: 'int', reserved: 'int', mf: 'bool', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements

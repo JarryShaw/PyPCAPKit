@@ -145,6 +145,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         ipv6_frag = Data_IPv6_Frag(
             next=schema.next,
             offset=int(schema.flags['offset']) * 8,
+            reserved=schema.flags['reserved'],
             mf=bool(schema.flags['mf']),
             id=schema.id,
         )
@@ -159,6 +160,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              next_reversed: 'bool' = False,
              offset: 'int' = 0,
+             reserved: 'int' = 0,
              mf: 'bool' = False,
              id: 'int' = 0,
              payload: 'bytes | ProtocolBase | Schema' = b'',
@@ -174,6 +176,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
                 Note that :attr:`Data_IPv6_Frag.offset
                 <pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset>` is in
                 octets, so it must be divided by 8 before being passed here.
+            reserved: Reserved bits (``Res``) between the offset and the M flag.
             mf: More fragments flag.
             id: Identification.
             payload: Payload of current instance.
@@ -190,6 +193,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             next=next_val,  # type: ignore[arg-type]
             flags={
                 'offset': offset,
+                'reserved': reserved,
                 'mf': mf,
             },
             id=id,
@@ -264,6 +268,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         return {
             'next': data.next,
             'offset': data.offset // 8,
+            'reserved': data.reserved,
             'mf': data.mf,
             'id': data.id,
             'payload': cls._make_payload(data),

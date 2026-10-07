@@ -42,6 +42,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """Padding length and reserved."""
 
         pad_len: int
+        reserved: int
 
 
 def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
@@ -205,6 +206,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     #: Padding length and reserved.
     pad: 'PadInfo' = BitField(length=3, namespace={
         'pad_len': (0, 4),
+        'reserved': (4, 20),
     })
     #: Addresses.
     addresses: 'bytes' = ListField(
