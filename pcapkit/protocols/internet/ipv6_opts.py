@@ -1600,8 +1600,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the DPD mode is invalid, or the Tagger ID does
-                not fit the TaggerID type.
+            ProtocolError: If the DPD mode is invalid, the Tagger ID does
+                not fit the TaggerID type, or the H-DPD Hash Assist Value is
+                empty.
 
         """
         if opt is not None:
@@ -1662,6 +1663,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 id=id,
             )  # type: Schema_SMFDPDOption
         elif dpd_type == Enum_SMFDPDMode.H_DPD:
+            # The first octet of the HAV carries the H-DPD mode bit.
+            if not hav:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] empty Hash Assist Value (HAV)')
             hav_ba = bytearray(hav)
             hav_ba[0] = hav[0] | 0x80
 
