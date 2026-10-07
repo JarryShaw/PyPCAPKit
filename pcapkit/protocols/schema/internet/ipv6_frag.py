@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
         #: Fragment offset.
         offset: int
+        #: Reserved bits (``Res``).
+        reserved: int
         #: More fragments flag.
         mf: int
 
@@ -37,6 +39,7 @@ class IPv6_Frag(Schema):
     #: Fragment offset and flags.
     flags: 'Flags' = BitField(length=2, namespace={
         'offset': (0, 13),
+        'reserved': (13, 2),
         'mf': (15, 1),
     })
     #: Identification.

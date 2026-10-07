@@ -37,8 +37,16 @@ class IPv6_Ext(Protocol):
     #: length would have overrun what remained and the walk stopped instead
     #: of trusting it.
     next: 'Optional[TransType]'
+    #: Next header as declared on the wire. Equal to :attr:`next` except on
+    #: an overrun, where :attr:`next` is :data:`None` but this keeps the
+    #: octet so that a rebuild reproduces it.
+    declared_next: 'TransType'
+    #: Raw ``Hdr Ext Len`` octet, as on the wire.
+    len: 'int'
     #: Length of this extension header, in octets, actually consumed.
     length: 'int'
+    #: Header-specific content after the two fixed octets, as consumed.
+    data: 'bytes'
     #: Original parsing error, if this instance was reached as a
     #: :func:`~pcapkit.utilities.decorators.beholder` fallback rather than by
     #: direct dispatch.

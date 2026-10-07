@@ -375,14 +375,14 @@ class IPv6ExtUnitTests(unittest.TestCase):
         self.assertEqual(str(ipv6.src), '::1')
         self.assertEqual(str(ipv6.dst), '::1')
 
-        exthdrs = list(ipv6.extension_headers.items(multi=True))
-        self.assertEqual(len(exthdrs), 1)
-        code, terminal = exthdrs[0]
-        self.assertEqual(code, ExtensionHeader.Use_for_experimentation_and_testing_253)
-        self.assertIsInstance(terminal, Raw)
+        # GitHub issue #1231: the ``Raw`` layer is not recorded as an
+        # extension header, since it consumed nothing; the octets are decoded
+        # once, as the upper layer, under the code that named them.
+        self.assertEqual(list(ipv6.extension_headers.items(multi=True)), [])
+        self.assertEqual(ipv6.info.protocol, ExtensionHeader.Use_for_experimentation_and_testing_253)
 
         self.assertIsInstance(ipv6.payload, Raw)
-        self.assertEqual(str(ipv6.protochain), 'IPv6:Raw:Raw')
+        self.assertEqual(str(ipv6.protochain), 'IPv6:Use_for_experimentation_and_testing_253')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

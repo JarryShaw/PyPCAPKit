@@ -78,9 +78,11 @@ class RPL(IPv6_Route):
     cmpr_e: 'int'
     #: Pad.
     pad: 'int'
+    #: Reserved bits, carried verbatim so that a rebuild reproduces them.
+    reserved: 'int'
     #: Addresses.
     ip: 'tuple[IPv6Address | bytes, ...]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address | bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', reserved: 'int', ip: 'tuple[IPv6Address | bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
