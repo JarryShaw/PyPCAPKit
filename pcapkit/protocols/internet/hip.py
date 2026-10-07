@@ -570,6 +570,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError('HIP: invalid format')
         if schema.ver['bit_1'] != 1:
             raise ProtocolError('HIP: invalid format')
+        # Header Length below 4 cannot cover the two HITs, and would leave a
+        # negative parameter length below.
+        if schema.len < 4:
+            raise ProtocolError(f'HIP: invalid header length: {schema.len}')
 
         hip = Data_HIP(
             next=schema.next,
@@ -649,7 +653,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_value, total_length = self._make_hip_param(parameters, version=version)
             length = total_length // 8 + 4
         else:
-            parameters_value, length = [], 0
+            # NOTE: Header Length excludes the first 8 octets but always
+            # counts the two 16-octet HITs, hence the minimum of 4.
+            parameters_value, length = [], 4
 
         return Schema_HIP(
             next=next_value,  # type: ignore[arg-type]
