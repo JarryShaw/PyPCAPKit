@@ -41,7 +41,7 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from aenum import StrEnum
+from aenum import StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -144,6 +144,50 @@ class {NAME}(EnumRegistry, StrEnum):
 
         return obj
 
+    @classmethod
+    def register(cls, value: 'int', name: 'str') -> '{NAME}':
+        """Register a new option code ``value`` under ``name``.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register` because
+        of this registry's own :meth:`__new__`:
+
+        * :meth:`__new__` takes the option name as its second argument and
+          files the member under the namespace that name's prefix gives
+          (``if_rtaudit`` goes under ``if``), so ``name`` is passed through
+          to it as well as used as the member's attribute name.
+        * :attr:`~aenum.Enum._value_` is the formatted ``'{{name}} [{{value}}]'``
+          string, so the base's duplicate check against
+          :attr:`~aenum.Enum._value2member_map_` can never match an
+          :class:`int` code. The check runs against :attr:`__members_ns__`
+          instead, the table :meth:`get` resolves codes through: both
+          ``name``'s own namespace and ``opt``, whose codes are common to
+          every block and which :meth:`get` overlays the namespace on.
+
+        Args:
+            value: Option code of the new member.
+            name: Name of the new member, led by its namespace, e.g.
+                ``if_rtaudit``.
+
+        Returns:
+            The newly registered member.
+
+        Raises:
+            ValueError: If ``value`` is already assigned in ``name``'s
+                namespace or in ``opt``, or if ``name`` is already taken.
+
+        """
+        namespace = name.split('_', maxsplit=1)[0]
+        for space in ('opt', namespace):
+            existing = cls.__members_ns__.get(space, {{}}).get(value)
+            if existing is not None:
+                raise ValueError(f'{{value!r}} is already registered on {{cls.__name__}} as '
+                                 f'{{existing.name!r}} in namespace {{space!r}}')
+        cls._validate_value(value)
+        try:
+            return extend_enum(cls, name, value, name)
+        except TypeError as error:
+            raise ValueError(str(error)) from error
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -> '{NAME}':
         """Backport support for original codes.
@@ -172,6 +216,10 @@ class {NAME}(EnumRegistry, StrEnum):
             return {NAME}._unregistered_member(key, '%s_unknown' % namespace)
         if key in {NAME}.__members__:
             return getattr({NAME}, key)
+        # NOTE: a member's value is its formatted ``'{{name}} [{{value}}]'``
+        # string, so ``get(member.value)`` resolves it as ``cls(value)`` would.
+        if key in {NAME}._value2member_map_:  # type: ignore[misc]
+            return {NAME}._value2member_map_[key]  # type: ignore[misc,return-value]
         # NOTE: same ruling, the str-keyed path: this used to mint ``key``
         # itself as the member's name with ``default`` as its value. Neither
         # ``get`` nor ``_missing_`` has enough information to register one

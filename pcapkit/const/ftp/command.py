@@ -501,6 +501,50 @@ class Command(EnumRegistry, StrEnum):
         obj.conf = ConformanceRequirement.O
         return obj
 
+    @classmethod
+    def register(cls, value: 'str', name: 'str') -> 'Command':
+        """Register a new command ``value`` under ``name``, upper-cased.
+
+        :meth:`get` and :meth:`_missing_` look a command up by its
+        upper-case name, so ``name`` is canonicalised to upper case here
+        before :meth:`~pcapkit.corekit.enum.EnumRegistry.register` mints it.
+        ``value`` is kept as given, as a declared member's value is.
+
+        Args:
+            value: Value of the new member.
+            name: Name of the new member, in any case.
+
+        Returns:
+            The newly registered member.
+
+        Raises:
+            ValueError: As :meth:`~pcapkit.corekit.enum.EnumRegistry.register`.
+
+        """
+        return super().register(value, name.upper())
+
+    @classmethod
+    def register_alias(cls, value: 'str', name: 'str') -> 'Command':
+        """Add ``name``, upper-cased, as a further name for the member at ``value``.
+
+        Canonicalised for the same reason as :meth:`register`, so that
+        :meth:`get` finds the alias.
+
+        Args:
+            value: Value of the existing member to alias.
+            name: Alias to add for it, in any case.
+
+        Returns:
+            The existing member, now reachable under the upper-cased ``name``
+            as well.
+
+        Raises:
+            ValueError: As
+                :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`.
+
+        """
+        return super().register_alias(value, name.upper())
+
     @staticmethod
     def get(key: 'str', default: 'Optional[str]' = None) -> 'Command':
         """Backport support for original codes.
