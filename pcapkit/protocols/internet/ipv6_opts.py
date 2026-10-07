@@ -610,7 +610,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             itself, which sizes both the length octet and the padding data from
             the option type; ``clen`` is therefore always ``0`` here for a
             parsed ``Pad1``, and the check below only guards a schema built by
-            hand.
+            hand. A ``PadN`` whose ``Opt Data Len`` is ``0`` is a valid
+            two-octet padding option [:rfc:`8200#section-4.2`].
 
         """
         code, clen = schema.type, schema.len
@@ -618,8 +619,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         if code not in (Enum_Option.Pad1, Enum_Option.PadN):
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         if code == Enum_Option.Pad1 and clen != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        if code == Enum_Option.PadN and clen == 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         if code == Enum_Option.Pad1:
@@ -928,7 +927,14 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Raises:
             ProtocolError: If the option is malformed.
 
+        Note:
+            An option whose QS function is neither of the two above has no
+            defined layout, so the schema keeps it as an unassigned option and
+            it is parsed as one, c.f. :meth:`_read_opt_none`.
+
         """
+        if isinstance(schema, Schema_UnassignedOption):
+            return self._read_opt_none(schema, options=options)  # type: ignore[return-value]
         if schema.len != 6:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
@@ -946,6 +952,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
                 nonce=schema_req.nonce['nonce'],
+                reserved=schema_req.nonce['reserved'],
             )  # type: Data_QuickStartOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = cast('Schema_QuickStartReportOption', schema)
@@ -959,6 +966,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce['nonce'],
+                reserved=schema_rep.nonce['reserved'],
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
@@ -1080,6 +1088,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             flags=Data_MPLFlags(
                 max=bool(schema.flags['max']),
                 drop=bool(schema.flags['drop']),
+                reserved=schema.flags['reserved'],
             ),
             seq=schema.seq,
             seed_id=schema.seed if schema.seed is not NO_VALUE else None,  # type: ignore[comparison-overlap]
@@ -1246,6 +1255,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
            |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        ``OptDataLenDFF`` is ``3``, the flags octet and the sequence number,
+        as corrected by :rfc:`6971` Errata ID 3937; the RFC text says ``2``.
+
         Args:
             schema: parsed parameter schema
             options: extracted IPv6-Opts options
@@ -1254,10 +1266,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``2``.
+            ProtocolError: If ``schema.len`` is **NOT** ``3``.
 
         """
-        if schema.len != 2:
+        if schema.len != 3:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_IPDFFOption(
@@ -1269,6 +1281,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             flags=Data_DFFFlags(
                 dup=bool(schema.flags['dup']),
                 ret=bool(schema.flags['ret']),
+                reserved=schema.flags['reserved'],
             ),
             seq=schema.seq,
         )
@@ -1325,6 +1338,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Tuple of options and total length of options.
 
         Note:
+            Options given as a :obj:`list` are fresh input: padding options in
+            it are dropped, and padding is inserted after each option to align
+            the header. Options given as an
+            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, i.e. parsed
+            data, are emitted in order with their own padding options kept, and
+            padding is added only at the end if the header is not aligned.
+
             The returned length is that of the options area alone, so it is the
             value :meth:`make` needs for ``hdr_ext_len``. Since the two octets
             of the fixed header precede it, an options area is well formed only
@@ -1381,12 +1401,11 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             total_length += pad_len
             return options_list, total_length
 
+        # NOTE: Options given as parsed data are emitted as they are, padding
+        # included and in place, so that a parsed header rebuilds byte for
+        # byte; only a header left short of alignment gets trailing padding.
         options_list = []
         for code, option in options.items(multi=True):
-            # ignore padding options by default
-            if code in (Enum_Option.Pad1, Enum_Option.PadN):
-                continue
-
             name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
@@ -1400,11 +1419,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
             options_list.append(opt)
             total_length += opt_len
-
-            # force alignment of the header (fixed part included) to 8 octets
-            pad_opts, pad_len = self._make_pad_options(total_length + 2)
-            options_list.extend(pad_opts)
-            total_length += pad_len
 
         # an options area holding nothing at all is still 6 octets long
         pad_opts, pad_len = self._make_pad_options(total_length + 2)
@@ -1458,20 +1472,18 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             <pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len>` is the
             ``Opt Data Len`` field: two octets fewer, and absent altogether for a
             ``Pad1``. ``opt`` is honoured so that re-making a parsed padding
-            option keeps its size instead of collapsing to a single ``Pad1``.
+            option keeps its type and size. A ``PadN`` with ``length`` ``0`` is
+            a valid two-octet option [:rfc:`8200#section-4.2`] and is kept.
 
         """
         if opt is not None:
+            code = opt.type
             length = 0 if opt.type == Enum_Option.Pad1 else opt.length - 2
 
         if code == Enum_Option.Pad1 and length != 0:
             #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
             code = Enum_Option.PadN  # type: ignore[assignment]
-        if code == Enum_Option.PadN and length == 0:
-            #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-            warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
-            code = Enum_Option.Pad1  # type: ignore[assignment]
 
         return Schema_PadOption(
             type=code,
@@ -1539,7 +1551,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                           domain: 'int' = 0,
                           level: 'int' = 0,
                           checksum: 'bytes' = b'\x00\x00',
-                          bitmap: 'Optional[bytes]' = None,
+                          bitmap: 'Optional[bytes | tuple[int, ...]]' = None,
                           **kwargs: 'Any') -> 'Schema_CALIPSOOption':
         """Make IPv6-Opts calipso option.
 
@@ -1549,11 +1561,20 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             domain: CALIPSO domain of interpretation
             level: sensitivity level
             checksum: checksum of the option
-            bitmap: compartment bitmap
+            bitmap: compartment bitmap, as :obj:`bytes` or as the
+                :obj:`tuple` of octets the reader stores; its length must be a
+                multiple of 4 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If the bitmap is not a whole number of 32-bit words.
+
+        Note:
+            ``Cmpt Length`` on the wire counts 32-bit words [:rfc:`5570#section-5.1`],
+            whereas the bitmap here is sized in octets.
 
         """
         if opt is not None:
@@ -1561,16 +1582,19 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             level = opt.level
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
-        cmpt_len = len(bitmap) if bitmap is not None else 0
+        bitmap_bytes = bytes(bitmap) if bitmap is not None else b''
+        if len(bitmap_bytes) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap length: '
+                                f'{len(bitmap_bytes)}')
 
         return Schema_CALIPSOOption(
             type=code,
-            len=8 + cmpt_len,
+            len=8 + len(bitmap_bytes),
             domain=domain,
-            cmpt_len=cmpt_len,
+            cmpt_len=len(bitmap_bytes) // 4,
             level=level,
             checksum=checksum,
-            bitmap=bitmap,
+            bitmap=bitmap_bytes if bitmap_bytes else None,
         )
 
     def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption]' = None, *,
@@ -1692,6 +1716,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                       psnlr: 'int' = 0,
                       deltatlr: 'int' = 0,
                       deltatls: 'int' = 0,
+                      scaledtlr: 'Optional[int]' = None,
+                      scaledtls: 'Optional[int]' = None,
                       **kwargs: 'Any') -> 'Schema_PDMOption':
         """Make IPv6-Opts PDM option.
 
@@ -1702,6 +1728,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             psnlr: packet sequence number (PSN) last received
             deltatlr: delta time last received (in attoseconds)
             deltatls: delta time last sent (in attoseconds)
+            scaledtlr: scale of delta time last received; derived from
+                ``deltatlr`` if not given
+            scaledtls: scale of delta time last sent; derived from
+                ``deltatls`` if not given
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1713,15 +1743,27 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             psnlr = opt.psnlr
             deltatlr = opt.deltatlr
             deltatls = opt.deltatls
+            # NOTE: The parsed scales are kept so long as they still describe
+            # the deltas, which they always do for a parsed option.
+            if (deltatlr >> opt.scaledtlr).bit_length() <= 16:
+                scaledtlr = opt.scaledtlr
+            if (deltatls >> opt.scaledtls).bit_length() <= 16:
+                scaledtls = opt.scaledtls
 
-        dtlr_bl = deltatlr.bit_length()
-        scale_dtlr = dtlr_bl - 16 if dtlr_bl > 16 else 0
+        if scaledtlr is not None:
+            scale_dtlr = scaledtlr
+        else:
+            dtlr_bl = deltatlr.bit_length()
+            scale_dtlr = dtlr_bl - 16 if dtlr_bl > 16 else 0
         if scale_dtlr > 255:
             warn(f'{self.alias}: [OptNo {code}] too large delta time last received: {deltatlr} (scaled: {scale_dtlr})',
                  ProtocolWarning)
 
-        dtls_bl = deltatls.bit_length()
-        scale_dtls = dtls_bl - 16 if dtls_bl > 16 else 0
+        if scaledtls is not None:
+            scale_dtls = scaledtls
+        else:
+            dtls_bl = deltatls.bit_length()
+            scale_dtls = dtls_bl - 16 if dtls_bl > 16 else 0
         if scale_dtls > 255:
             warn(f'{self.alias}: [OptNo {code}] too large delta time last sent: {deltatls} (scaled: {scale_dtls})',
                  ProtocolWarning)
@@ -1737,7 +1779,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             deltatls=deltatls >> scale_dtls,
         )
 
-    def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption]' = None, *,
+    def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption | Data_UnassignedOption]' = None, *,  # pylint: disable=line-too-long
                      func: 'Enum_QSFunction | StdlibEnum | AenumEnum | str | int' = Enum_QSFunction.Quick_Start_Request,
                      func_default: 'Optional[int]' = None,
                      func_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,   # pylint: disable=line-too-long
@@ -1745,7 +1787,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
                      nonce: 'int' = 0,
-                     **kwargs: 'Any') -> 'Schema_QuickStartOption':
+                     reserved: 'int' = 0,
+                     **kwargs: 'Any') -> 'Schema_QuickStartOption | Schema_UnassignedOption':
         """Make IPv6-Opts QS option.
 
         Args:
@@ -1758,17 +1801,22 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             rate: rate (in kbps)
             ttl: time to live (in seconds)
             nonce: nonce value
+            reserved: reserved bits (``R``) after the nonce
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructed option schema.
+            Constructed option schema; an unassigned option schema if ``opt``
+            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`.
 
         """
+        if isinstance(opt, Data_UnassignedOption):
+            return self._make_opt_none(code, opt)
         if opt is not None:
             func_enum = opt.func
             rate = opt.rate
             ttl = getattr(opt, 'ttl', 0)
             nonce = getattr(opt, 'nonce', 0)
+            reserved = getattr(opt, 'reserved', 0)
         else:
             func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
@@ -1787,6 +1835,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 ttl=ttl_value,
                 nonce={
                     'nonce': nonce,
+                    'reserved': reserved,
                 },
             )
         if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
@@ -1799,6 +1848,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 },
                 nonce={
                     'nonce': nonce,
+                    'reserved': reserved,
                 },
             )
         raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
@@ -1869,6 +1919,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                       seed_type_reversed: 'bool' = False,
                       max: 'bool' = False,
                       drop: 'bool' = False,
+                      reserved: 'int' = 0,
                       seq: 'int' = 0,
                       seed: 'Optional[int | IPv6Address]' = None,
                       **kwargs: 'Any') -> 'Schema_MPLOption':
@@ -1883,6 +1934,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             seed_type_reversed: reversed flag of seed-id type
             max: maximum sequence number flag
             drop: drop packet flag
+            reserved: reserved bits (``rsv``), i.e. the low four bits of the
+                flags octet
             seq: MPL sequence number
             seed: MPL seed ID, ignored when the seed-id type is
                 :attr:`~pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS`,
@@ -1900,6 +1953,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             seed_type = opt.seed_type
             max = opt.flags.max
             drop = opt.flags.drop
+            reserved = opt.flags.reserved
             seq = opt.seq
             seed = opt.seed_id
 
@@ -1944,6 +1998,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 'type': kind,
                 'max': max,
                 'drop': drop,
+                'reserved': reserved,
             },
             seq=seq,
             seed=seed_id,
@@ -1964,8 +2019,14 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed option schema.
 
         """
+        # NOTE: A parsed nonce keeps the width it had on the wire, leading zero
+        # octets and a zero-octet nonce included.
         if opt is not None:
-            nonce = opt.nonce
+            return Schema_ILNPOption(
+                type=code,
+                len=opt.length - 2,
+                nonce=opt.nonce,
+            )
 
         # NOTE: ``nonce`` is packed by a NumberField whose width is this very
         # ``len`` (c.f. pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),
@@ -2061,6 +2122,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                          version: 'int' = 0,
                          dup: 'bool' = False,
                          ret: 'bool' = False,
+                         reserved: 'int' = 0,
                          seq: 'int' = 0,
                          **kwargs: 'Any') -> 'Schema_IPDFFOption':
         """Make IPv6-Opts IP DFF option.
@@ -2071,6 +2133,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             version: DFF version
             dup: duplicate packet flag
             ret: return packet flag
+            reserved: reserved bits, i.e. the low four bits of the flags octet
             seq: DFF sequence number
             **kwargs: arbitrary keyword arguments
 
@@ -2082,15 +2145,18 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             version = opt.version
             dup = opt.flags.dup
             ret = opt.flags.ret
+            reserved = opt.flags.reserved
             seq = opt.seq
 
+        # ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, c.f. _read_opt_ip_dff.
         return Schema_IPDFFOption(
             type=code,
-            len=2,
+            len=3,
             flags={
                 'ver': version,
                 'dup': dup,
                 'ret': ret,
+                'reserved': reserved,
             },
             seq=seq,
         )

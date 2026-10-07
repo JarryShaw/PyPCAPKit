@@ -57,7 +57,7 @@ class TestSMFDPDTruncatedLength(unittest.TestCase):
             with self.subTest(protocol=cls.__name__):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length: 0'):
+                    with self.assertRaisesRegex(FieldValueError, 'invalid SMF DPD option length: 0'):
                         cls(io.BytesIO(PREFIX + bytes.fromhex('0800')))
 
     def test_no_option_type_raises_a_non_library_error(self) -> None:
