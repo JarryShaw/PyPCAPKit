@@ -678,7 +678,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         schema = maker.make(
             type=Type.Control,
             priority=True,
-            length=20,
+            total_length=20,
             tunnel_id=7,
             session_id=8,
             ns=9,
