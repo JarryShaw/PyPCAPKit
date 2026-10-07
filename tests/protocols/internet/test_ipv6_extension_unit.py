@@ -788,8 +788,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         calipso = data.CALIPSOOption(type=Option.CALIPSO, length=10, domain=7,
                                      cmpt_len=4, level=3, checksum=b'\x01\x02',
                                      **base)
-        calipso.__update__([('cmpt_bitmap', b'\xaa')])
-        self.assertEqual(proto._make_opt_calipso(Option.CALIPSO, calipso).bitmap, b'\xaa')
+        calipso.__update__([('cmpt_bitmap', b'\xaa\xbb\xcc\xdd')])
+        self.assertEqual(proto._make_opt_calipso(Option.CALIPSO, calipso).bitmap, b'\xaa\xbb\xcc\xdd')
 
         smf_ident = data.SMFIdentificationBasedDPDOption(
             type=Option.SMF_DPD,
@@ -836,6 +836,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                                          rate=80,
                                          ttl=datetime.timedelta(seconds=5),
                                          nonce=3,
+                                         reserved=0,
                                          **base),
         )
         self.assertEqual(qs_req.ttl, 5)
@@ -846,6 +847,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                                         func=QSFunction.Report_of_Approved_Rate,
                                         rate=80,
                                         nonce=4,
+                                        reserved=0,
                                         **base),
         ).nonce['nonce'], 4)
         with self.assertRaises(ProtocolError):
@@ -863,7 +865,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             Option.MPL_Option,
             data.MPLOption(type=Option.MPL_Option, length=4,
                            seed_type=SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER,
-                           flags=data.MPLFlags(max=True, drop=False),
+                           flags=data.MPLFlags(max=True, drop=False, reserved=0),
                            seq=7, seed_id=8, **base),
         )
         self.assertEqual(mpl.seed, 8)
@@ -890,7 +892,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertTrue(proto._make_opt_ip_dff(
             Option.IP_DFF,
             data.IPDFFOption(type=Option.IP_DFF, length=4, version=1,
-                             flags=data.DFFFlags(dup=True, ret=False),
+                             flags=data.DFFFlags(dup=True, ret=False, reserved=0),
                              seq=10, **base),
         ).flags['dup'])
 
@@ -923,15 +925,17 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         base = {'action': 0, 'change': False}
 
         calipso = proto._make_opt_calipso(Option.CALIPSO, domain=1, level=2,
-                                          checksum=b'\x01\x02', bitmap=b'\xaa\xbb')
-        self.assertEqual(calipso.to_dict()['len'], 10)
-        self.assertEqual(calipso.to_dict()['cmpt_len'], 2)
-        self.assertEqual(calipso.to_dict()['bitmap'], b'\xaa\xbb')
+                                          checksum=b'\x01\x02', bitmap=b'\xaa\xbb\xcc\xdd')
+        self.assertEqual(calipso.to_dict()['len'], 12)
+        self.assertEqual(calipso.to_dict()['cmpt_len'], 1)
+        self.assertEqual(calipso.to_dict()['bitmap'], b'\xaa\xbb\xcc\xdd')
+        with self.assertRaises(ProtocolError):
+            proto._make_opt_calipso(Option.CALIPSO, bitmap=b'\xaa\xbb')
 
         with mock.patch(f'{protocol_cls.__module__}.warn') as warn:
             self.assertEqual(proto._make_opt_pad(Option.Pad1, length=1).to_dict()['type'], Option.PadN)
-            self.assertEqual(proto._make_opt_pad(Option.PadN, length=0).to_dict()['type'], Option.Pad1)
-        self.assertEqual(warn.call_count, 2)
+            self.assertEqual(proto._make_opt_pad(Option.PadN, length=0).to_dict()['type'], Option.PadN)
+        self.assertEqual(warn.call_count, 1)
 
         ident = proto._make_opt_smf_dpd(Option.SMF_DPD, mode=SMFDPDMode.I_DPD,
                                         tid=ip_address('192.0.2.1'), id=b'id')
@@ -1088,10 +1092,13 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             (Option.get(254), data.UnassignedOption(type=Option.get(254),
                                                     length=6, data=b'abcd', **base)),
         ]))
-        # 3 (tun) + 3 (PadN) + 8 + 6 + 1 + 1 (two Pad1) = 22; 2 + 22 = 24 = 3 * 8
+        # parsed data keeps its own padding in place (#1229):
+        # 1 (Pad1) + 3 (tun) + 8 + 6 + 4 (trailing PadN) = 22; 2 + 22 = 24 = 3 * 8
         self.assertEqual(dict_length, 22)
-        self.assertEqual(type(dict_options[0]).__name__, 'TunnelEncapsulationLimitOption')
-        self.assertEqual(type(dict_options[-3]).__name__, 'UnassignedOption')
+        self.assertEqual([type(opt).__name__ for opt in dict_options],
+                         ['PadOption', 'TunnelEncapsulationLimitOption', 'UnassignedOption',
+                          'UnassignedOption', 'PadOption'])
+        self.assertEqual(dict_options[0].type, Option.Pad1)
 
         # every options area the constructor produces has to leave the whole header
         # a multiple of 8 octets long, and to account for exactly what it emitted
@@ -1203,7 +1210,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             len=6,
             flags={'func': QSFunction.Quick_Start_Request, 'rate': 1},
             ttl=7,
-            nonce={'nonce': 3},
+            nonce={'nonce': 3, 'reserved': 0},
         )
         object.__setattr__(qs_request, 'func', QSFunction.Quick_Start_Request)
         qs_req = proto._read_opt_qs(qs_request, options=options)
@@ -1214,7 +1221,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Option.Quick_Start,
             len=6,
             flags={'func': QSFunction.Report_of_Approved_Rate, 'rate': 1},
-            nonce={'nonce': 3},
+            nonce={'nonce': 3, 'reserved': 0},
         )
         object.__setattr__(qs_report, 'func', QSFunction.Report_of_Approved_Rate)
         qs_rep = proto._read_opt_qs(qs_report, options=options)
@@ -1232,7 +1239,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         source_seed = schema.MPLOption(type=Option.MPL_Option, len=2,
                                        flags={'type': SeedID.IPV6_SOURCE_ADDRESS,
-                                              'max': 1, 'drop': 0},
+                                              'max': 1, 'drop': 0, 'reserved': 0},
                                        seq=1)
         object.__setattr__(source_seed, 'seed', NO_VALUE)
         self.assertIsNone(proto._read_opt_mpl(source_seed, options=options).seed_id)
@@ -1244,7 +1251,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ]:
             mpl = proto._read_opt_mpl(
                 schema.MPLOption(type=Option.MPL_Option, len=length,
-                                 flags={'type': seed_type, 'max': 0, 'drop': 1},
+                                 flags={'type': seed_type, 'max': 0, 'drop': 1, 'reserved': 0},
                                  seq=7, seed=seed),
                 options=options,
             )
@@ -1270,8 +1277,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             options=options,
         ).address), '2001:db8::1')
         dff = proto._read_opt_ip_dff(
-            schema.IPDFFOption(type=Option.IP_DFF, len=2,
-                               flags={'ver': 1, 'dup': 1, 'ret': 0}, seq=77),
+            schema.IPDFFOption(type=Option.IP_DFF, len=3,
+                               flags={'ver': 1, 'dup': 1, 'ret': 0, 'reserved': 0}, seq=77),
             options=options,
         )
         self.assertEqual(dff.version, 1)
@@ -1289,7 +1296,6 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         assert_bad(proto._read_opt_pad, schema.PadOption(type=Option.Tunnel_Encapsulation_Limit, len=1))
         assert_bad(proto._read_opt_pad, schema.PadOption(type=Option.Pad1, len=1))
-        assert_bad(proto._read_opt_pad, schema.PadOption(type=Option.PadN, len=0))
         assert_bad(proto._read_opt_tun, schema.TunnelEncapsulationLimitOption(
             type=Option.Tunnel_Encapsulation_Limit, len=2, limit=7,
         ))
@@ -1343,32 +1349,32 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=1,
-            flags={'type': SeedID.IPV6_SOURCE_ADDRESS, 'max': 0, 'drop': 0},
+            flags={'type': SeedID.IPV6_SOURCE_ADDRESS, 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1,
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=4,
-            flags={'type': SeedID.IPV6_SOURCE_ADDRESS, 'max': 0, 'drop': 0},
+            flags={'type': SeedID.IPV6_SOURCE_ADDRESS, 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1,
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=5,
-            flags={'type': SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0},
+            flags={'type': SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1, seed=1,
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=8,
-            flags={'type': SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0},
+            flags={'type': SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1, seed=1,
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=10,
-            flags={'type': SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0},
+            flags={'type': SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER, 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1, seed=1,
         ))
         assert_bad(proto._read_opt_mpl, schema.MPLOption(
             type=Option.MPL_Option, len=2,
-            flags={'type': 'Bogus_Seed_For_Test', 'max': 0, 'drop': 0},
+            flags={'type': 'Bogus_Seed_For_Test', 'max': 0, 'drop': 0, 'reserved': 0},
             seq=1,
         ))
         assert_bad(proto._read_opt_jumbo, schema.JumboPayloadOption(
@@ -1378,8 +1384,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Option.Home_Address, len=15, addr='2001:db8::1',
         ))
         assert_bad(proto._read_opt_ip_dff, schema.IPDFFOption(
-            type=Option.IP_DFF, len=3,
-            flags={'ver': 1, 'dup': 1, 'ret': 0}, seq=77,
+            type=Option.IP_DFF, len=2,
+            flags={'ver': 1, 'dup': 1, 'ret': 0, 'reserved': 0}, seq=77,
         ))
 
     def test_hopopt_option_readers_cover_branchy_values(self) -> None:
@@ -1458,13 +1464,13 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ), BytesField)
 
         for func in (QSFunction.Quick_Start_Request, QSFunction.Report_of_Approved_Rate):
-            field = schema.quick_start_data_selector({'flags': {'func': func}})
+            field = schema.quick_start_data_selector({'flags': {'func': func, 'len': 6}})
             self.assertIsInstance(field, SchemaField)
         original_qs = schema.QuickStartOption.registry[QSFunction.Quick_Start_Request]
         try:
             schema.QuickStartOption.registry[QSFunction.Quick_Start_Request] = None
-            with self.assertRaises(FieldValueError):
-                schema.quick_start_data_selector({'flags': {'func': QSFunction.Quick_Start_Request}})
+            field = schema.quick_start_data_selector({'flags': {'func': QSFunction.Quick_Start_Request, 'len': 6}})
+            self.assertIs(field._schema, schema.UnassignedOption)
         finally:
             schema.QuickStartOption.registry[QSFunction.Quick_Start_Request] = original_qs
 
@@ -1503,12 +1509,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         src = ip_address('2001:db8::1')
         source_seed = schema.MPLOption(type=Option.MPL_Option, len=2,
                                        flags={'type': SeedID.IPV6_SOURCE_ADDRESS,
-                                              'max': 0, 'drop': 0},
+                                              'max': 0, 'drop': 0, 'reserved': 0},
                                        seq=1)
         self.assertIs(source_seed.post_process({'src': src}).seed, src)
         integer_seed = schema.MPLOption(type=Option.MPL_Option, len=4,
                                         flags={'type': SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER,
-                                               'max': 0, 'drop': 0},
+                                               'max': 0, 'drop': 0, 'reserved': 0},
                                         seq=1, seed=5)
         self.assertEqual(integer_seed.post_process({}).seed, 5)
 
@@ -2096,7 +2102,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         raw = bytes.fromhex('3b00080000000000')
 
-        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+        with self.assertRaisesRegex(FieldValueError, 'invalid SMF (I-)?DPD option length'):
             with time_limit():
                 protocol_cls(raw, extension=True)
 
@@ -2421,14 +2427,14 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(parsed.nonce, nonce)
 
         # the ``opt=`` branch takes the nonce from the data model instead of the
-        # keyword, and has to size it the same way
+        # keyword, and keeps the width the parsed option had on the wire
         from_data = proto._make_opt_ilnp(
             Option.ILNP_Nonce,
             data.ILNPOption(type=Option.ILNP_Nonce, length=4, nonce=127,
                             action=0, change=False),
         )
-        self.assertEqual(from_data.len, 1)
-        self.assertEqual(bytes(from_data)[2:], b'\x7f')
+        self.assertEqual(from_data.len, 2)
+        self.assertEqual(bytes(from_data)[2:], b'\x00\x7f')
 
     def test_hopopt_ilnp_nonce_option_is_sized_by_the_ceiling(self) -> None:
         from pcapkit.protocols.internet.hopopt import HOPOPT

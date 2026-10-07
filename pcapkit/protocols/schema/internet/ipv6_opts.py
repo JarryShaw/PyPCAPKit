@@ -89,6 +89,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Verification flag. ``0`` indicates that the MPL Option
         #: conforms to this specification.
         drop: int
+        #: Reserved bits (``rsv``).
+        reserved: int
 
     class DFFFlags(TypedDict):
         """``IP_DFF`` flags."""
@@ -99,6 +101,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         dup: int
         #: Retune flag.
         ret: int
+        #: Reserved bits.
+        reserved: int
 
     class SMFDPDTestFlag(TypedDict):
         """``SMF_DPD`` test flag."""
@@ -111,6 +115,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class QSTestFlags(TypedDict):
         """Quick start test flag."""
 
+        #: Option length.
+        len: int
         #: QS function.
         func: int
 
@@ -119,6 +125,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Nonce.
         nonce: int
+        #: Reserved bits (``R``).
+        reserved: int
 
 
 def rpl_opt_sub_tlv_len(pkt: 'dict[str, Any]') -> 'int':
@@ -204,6 +212,11 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         mis-count against the option area.
 
     """
+    # NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode
+    # bit forward-matched above belongs to whatever follows the option.
+    if pkt['test']['len'] == 0:
+        raise FieldValueError('IPv6-Opts: invalid SMF DPD option length: 0')
+
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
     schema = SMFDPDOption.registry[mode]
     if schema is None:
@@ -261,6 +274,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption`
           instance.
+        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption`
+          instance, sized by the option's own ``Opt Data Len``.
 
     """
     func = Enum_QSFunction.get(pkt['flags']['func'])
@@ -268,7 +284,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     schema = QuickStartOption.registry[func]
     if schema is None:
-        raise FieldValueError(f'IPv6-Opts: invalid QS function: {func}')
+        # An unassigned function has no defined layout, so the option is kept
+        # as raw data, sized by its own ``Opt Data Len``.
+        return SchemaField(length=pkt['flags']['len'] + 2, schema=UnassignedOption)
 
     # NOTE: The suboption schemas carry the option's own ``type`` and ``len``
     # octets, so this is the width of the whole option: the two header octets
@@ -601,6 +619,7 @@ class _QuickStartOption(Schema):
 
     #: Flags.
     flags: 'QSTestFlags' = ForwardMatchField(BitField(length=3, namespace={
+        'len': (8, 8),
         'func': (16, 4),
     }))
     #: QS data.
@@ -619,7 +638,8 @@ class _QuickStartOption(Schema):
 
         """
         ret = self.data
-        ret.func = Enum_QSFunction.get(self.flags['func'])
+        if isinstance(ret, QuickStartOption):
+            ret.func = Enum_QSFunction.get(self.flags['func'])
         return ret
 
 
@@ -656,6 +676,7 @@ class QuickStartRequestOption(QuickStartOption, code=Enum_QSFunction.Quick_Start
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={
         'nonce': (0, 30),
+        'reserved': (30, 2),
     })
 
     if TYPE_CHECKING:
@@ -672,6 +693,7 @@ class QuickStartReportOption(QuickStartOption, code=Enum_QSFunction.Report_of_Ap
     #: QS nonce.
     nonce: 'QSNonce' = BitField(length=4, namespace={
         'nonce': (0, 30),
+        'reserved': (30, 2),
     })
 
     if TYPE_CHECKING:
@@ -712,6 +734,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
         'type': (0, 2),
         'max': (2, 1),
         'drop': (3, 1),
+        'reserved': (4, 4),
     })
     #: MPL sequence number.
     seq: 'int' = UInt8Field()
@@ -797,6 +820,7 @@ class IPDFFOption(Option, code=Enum_Option.IP_DFF):
         'ver': (0, 2),
         'dup': (2, 1),
         'ret': (3, 1),
+        'reserved': (4, 4),
     })
     #: Sequence number.
     seq: 'int' = UInt16Field()

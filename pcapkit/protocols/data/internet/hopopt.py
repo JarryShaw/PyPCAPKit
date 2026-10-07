@@ -199,10 +199,12 @@ class QuickStartRequestOption(QuickStartOption):
     ttl: 'timedelta'
     #: Nonce.
     nonce: 'int'
+    #: Reserved bits (``R``) after the nonce.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'timedelta',
-                     nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+                     nonce: 'int', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
@@ -211,9 +213,11 @@ class QuickStartReportOption(QuickStartOption):
 
     #: Nonce.
     nonce: 'int'
+    #: Reserved bits (``R``) after the nonce.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'int', reserved: 'int') -> 'None': ...
 
 
 @info_final
@@ -258,9 +262,11 @@ class MPLFlags(Data):
     max: 'bool'
     #: Non-conformation flag.
     drop: 'bool'
+    #: Reserved bits (``rsv``).
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, max: 'bool', drop: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, max: 'bool', drop: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
@@ -335,9 +341,11 @@ class DFFFlags(Data):
     dup: 'bool'
     #: Return flag.
     ret: 'bool'
+    #: Reserved bits, i.e. the low four bits of the flags octet.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, dup: 'bool', ret: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, dup: 'bool', ret: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 @info_final
