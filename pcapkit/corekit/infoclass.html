@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
@@ -648,6 +649,17 @@ is theoretical rather than live.</p>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is not present, then does:
 <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">kwargs.items():</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
 </ul>
+<p>A mapping given for a key whose type annotation resolves at runtime to
+an <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> subclass (or to <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a> of one) is
+rebuilt into that class, so <code class="docutils literal notranslate"><span class="pre">cls.from_dict(info.to_dict())</span></code> restores
+such nested values. A key without such an annotation keeps the mapping
+as is – see <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a>.</p>
+<p>The rebuild is as unchecked as the rest of this method: a mapping whose
+keys are not the nested class’s own is accepted and becomes an instance
+carrying those keys, exactly as a direct call to the nested class’s own
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.from_dict" title="pcapkit.corekit.infoclass.Info.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> would. Validating it here would reject data that
+<code class="docutils literal notranslate"><span class="pre">Info(**kwargs)</span></code> has always accepted, so the shape of the mapping
+stays the caller’s responsibility.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -672,6 +684,15 @@ they are the direct value of the <a class="reference internal" href="#pcapkit.co
 Should such <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> objects be nested within other data,
 types, such as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
 shall not convert them into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> and remain them intact.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info.from_dict" title="pcapkit.corekit.infoclass.Info.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> reverses the flattening only for keys whose type
+annotation resolves at runtime to an <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> subclass. For
+any other key – every key of a bare <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, and annotations
+naming a type imported only under <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code></a> –
+the conversion is one-way, and the nested value comes back as a
+plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

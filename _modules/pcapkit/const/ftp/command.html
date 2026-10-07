@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -982,6 +983,56 @@
         <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">undefined</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
         <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="Command.register">
+<a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command.register">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a new command ``value`` under ``name``, upper-cased.</span>
+
+<span class="sd">        :meth:`get` and :meth:`_missing_` look a command up by its</span>
+<span class="sd">        upper-case name, so ``name`` is canonicalised to upper case here</span>
+<span class="sd">        before :meth:`~pcapkit.corekit.enum.EnumRegistry.register` mints it.</span>
+<span class="sd">        ``value`` is kept as given, as a declared member's value is.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value of the new member.</span>
+<span class="sd">            name: Name of the new member, in any case.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The newly registered member.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: As :meth:`~pcapkit.corekit.enum.EnumRegistry.register`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Command.register_alias">
+<a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command.register_alias">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_alias</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Add ``name``, upper-cased, as a further name for the member at ``value``.</span>
+
+<span class="sd">        Canonicalised for the same reason as :meth:`register`, so that</span>
+<span class="sd">        :meth:`get` finds the alias.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value of the existing member to alias.</span>
+<span class="sd">            name: Alias to add for it, in any case.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The existing member, now reachable under the upper-cased ``name``</span>
+<span class="sd">            as well.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: As</span>
+<span class="sd">                :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">register_alias</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
 
 
     <span class="nd">@staticmethod</span>

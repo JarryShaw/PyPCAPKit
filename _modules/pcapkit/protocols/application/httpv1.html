@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -509,6 +510,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">Data_RequestHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResponseHeader</span> <span class="k">as</span> <span class="n">Data_ResponseHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Schema_HTTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
@@ -741,6 +743,7 @@
              <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">headers</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[str, str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HTTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -755,6 +758,8 @@
 <span class="sd">            message: HTTP status message.</span>
 <span class="sd">            headers: HTTP headers.</span>
 <span class="sd">            body: HTTP body.</span>
+<span class="sd">            charset: Encoding for a :obj:`str` request URI or status message,</span>
+<span class="sd">                **UTF-8** if not given.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -774,7 +779,7 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="n">uri_val</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">uri</span>
+            <span class="n">uri_val</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">uri</span>
 
             <span class="n">header_line</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> HTTP/</span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">uri_val</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -785,7 +790,7 @@
             <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">status_code</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">message</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">message</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
 
@@ -845,8 +850,36 @@
             <span class="s1">'message'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'headers'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
             <span class="s1">'body'</span><span class="p">:</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="s1">'charset'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'charset'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">}</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Decode start-line text, recording how to encode it back.</span>
+
+<span class="sd">        The text is decoded by :meth:`self.decode</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.decode&gt;`. Where the result does</span>
+<span class="sd">        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by</span>
+<span class="sd">        default -- the detected charset is returned with it, or ``'latin-1'``</span>
+<span class="sd">        (decoding again) if that does not reproduce ``text`` either, so that the</span>
+<span class="sd">        original octets survive a rebuild.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text: Raw request URI or status message.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The decoded text and the charset to encode it with, the latter</span>
+<span class="sd">            :obj:`None` for UTF-8.</span>
+
+<span class="sd">        """</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">charset</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">detect</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="n">charset</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">LookupError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'latin-1'</span><span class="p">),</span> <span class="s1">'latin-1'</span>
 
 <div class="viewcode-block" id="HTTP._read_http_header">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_header">[docs]</a>
@@ -939,18 +972,22 @@
         <span class="n">match3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span>
         <span class="n">match4</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_STATUS</span><span class="p">,</span> <span class="n">para2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">match1</span> <span class="ow">and</span> <span class="n">match2</span><span class="p">:</span>
+            <span class="n">uri</span><span class="p">,</span> <span class="n">charset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">para2</span><span class="p">)</span>
             <span class="n">header_line</span> <span class="o">=</span> <span class="n">Data_RequestHeader</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">Type</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">,</span>
                 <span class="n">method</span><span class="o">=</span><span class="n">Enum_Method</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match1</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'method'</span><span class="p">))),</span>
-                <span class="n">uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para2</span><span class="p">),</span>
+                <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match2</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)),</span>
+                <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">match3</span> <span class="ow">and</span> <span class="n">match4</span><span class="p">:</span>
+            <span class="n">message</span><span class="p">,</span> <span class="n">charset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">para3</span><span class="p">)</span>
             <span class="n">header_line</span> <span class="o">=</span> <span class="n">Data_ResponseHeader</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">Type</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match3</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)),</span>
                 <span class="n">status</span><span class="o">=</span><span class="n">Enum_StatusCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">para2</span><span class="p">)),</span>
-                <span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para3</span><span class="p">),</span>
+                <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+                <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>

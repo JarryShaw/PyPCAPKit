@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -507,6 +508,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Schema_RPL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Schema_IPv6_Route</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_RoutingType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Schema_SourceRoute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Schema_Type2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Schema_UnknownType</span>
@@ -527,7 +529,6 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Schema_RoutingType</span>
 
     <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_RoutingType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_IPv6_Route</span><span class="p">]</span>
     <span class="n">TypeConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Routing</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">]),</span>
@@ -778,7 +779,17 @@
             <span class="c1"># ``_make_hdr_ext_len`` can express exactly, then derive</span>
             <span class="c1"># ``Hdr Ext Len`` from the aligned length with that same helper.</span>
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
+            <span class="n">data_raw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: Unpacked into the routing type's own schema, since</span>
+            <span class="c1"># :meth:`read` hands the schema's ``data`` to the per-type reader,</span>
+            <span class="c1"># which reads fields rather than octets off it.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data_val</span> <span class="o">=</span> <span class="n">Schema_RoutingType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span>  <span class="c1"># pylint: disable=unsubscriptable-object</span>
+                    <span class="n">data_raw</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_raw</span><span class="p">),</span> <span class="p">{})</span>  <span class="c1"># type: Schema_RoutingType</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] routing data '</span>
+                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">data_raw</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1"> does not parse as this type'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_IPv6_Route</span><span class="p">)):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__routing__</span><span class="p">,</span> <span class="n">type_val</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1147,6 +1158,7 @@
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">cmpr_i</span><span class="p">,</span>
             <span class="n">cmpr_e</span><span class="o">=</span><span class="n">cmpr_e</span><span class="p">,</span>
             <span class="n">pad</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
@@ -1244,6 +1256,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_RPL]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">ip</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPL'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv6-Route RPL Source data.</span>
 
@@ -1252,6 +1265,7 @@
 <span class="sd">            route: route data</span>
 <span class="sd">            dst: destination IPv6 address</span>
 <span class="sd">            ip: list of IPv6 addresses</span>
+<span class="sd">            reserved: reserved bits after ``Pad``</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -1266,6 +1280,7 @@
             <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_i</span>
             <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_e</span>
             <span class="n">pad</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">pad</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">addr</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span>
             <span class="p">]</span>
@@ -1332,6 +1347,7 @@
             <span class="p">},</span>
             <span class="n">pad</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'pad_len'</span><span class="p">:</span> <span class="n">pad</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addresses</span><span class="o">=</span><span class="n">ip_val</span><span class="p">,</span>
         <span class="p">)</span></div>

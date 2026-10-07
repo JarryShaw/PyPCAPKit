@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -541,8 +542,8 @@
 <span class="c1"># check Python version</span>
 <span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
-<span class="c1"># Ethernet address pattern</span>
-<span class="n">PAT_MAC_ADDR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'(?i)(?:[0-9a-f]</span><span class="si">{2}</span><span class="s1">[:-])</span><span class="si">{5}</span><span class="s1">[0-9a-f]</span><span class="si">{2}</span><span class="s1">'</span><span class="p">)</span>
+<span class="c1"># Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)</span>
+<span class="n">PAT_MAC_ADDR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'(?i)(?:[0-9a-f]</span><span class="si">{2}</span><span class="s1">(?:[:-][0-9a-f]</span><span class="si">{2}</span><span class="s1">)*)?'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ARP">
@@ -726,8 +727,8 @@
 <span class="sd">            ptype_default: Default value of protocol type.</span>
 <span class="sd">            ptype_namespace: Namespace of protocol type.</span>
 <span class="sd">            ptype_reversed: Reversed flag of protocol type.</span>
-<span class="sd">            hlen: Hardware address length; derived from the packed ``sha`` if</span>
-<span class="sd">                not given.</span>
+<span class="sd">            hlen: Hardware address length; if not given, ``6`` when ``htype``</span>
+<span class="sd">                is Ethernet, otherwise derived from the packed ``sha``.</span>
 <span class="sd">            plen: Protocol address length; derived from the packed ``spa`` if</span>
 <span class="sd">                not given.</span>
 <span class="sd">            oper: Operation.</span>
@@ -746,7 +747,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If a packed hardware address is not ``hlen`` octets</span>
-<span class="sd">                long, or a packed protocol address is not ``plen`` octets long.</span>
+<span class="sd">                long (with ``hlen`` not given and ``htype`` Ethernet, not 6</span>
+<span class="sd">                octets long), or a packed protocol address is not ``plen``</span>
+<span class="sd">                octets long.</span>
 
 <span class="sd">        """</span>
         <span class="n">_htype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">htype</span><span class="p">,</span> <span class="n">htype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">htype_namespace</span><span class="p">,</span>
@@ -757,11 +760,15 @@
                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">oper_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">_sha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">sha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">)</span>
-        <span class="n">_spa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">spa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">)</span>
+        <span class="n">_spa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">spa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">,</span> <span class="n">plen</span><span class="p">)</span>
         <span class="n">_tha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">tha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">)</span>
-        <span class="n">_tpa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">tpa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">)</span>
+        <span class="n">_tpa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">tpa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">,</span> <span class="n">plen</span><span class="p">)</span>
 
-        <span class="n">_hlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_sha</span><span class="p">)</span> <span class="k">if</span> <span class="n">hlen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">hlen</span>
+        <span class="c1"># an Ethernet MAC is 6 octets unless the caller says otherwise</span>
+        <span class="k">if</span> <span class="n">hlen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_hlen</span> <span class="o">=</span> <span class="mi">6</span> <span class="k">if</span> <span class="n">_htype</span> <span class="o">==</span> <span class="n">Enum_Hardware</span><span class="o">.</span><span class="n">Ethernet</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">_sha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_hlen</span> <span class="o">=</span> <span class="n">hlen</span>
         <span class="n">_plen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_spa</span><span class="p">)</span> <span class="k">if</span> <span class="n">plen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plen</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'sha'</span><span class="p">,</span> <span class="n">_sha</span><span class="p">,</span> <span class="n">_hlen</span><span class="p">),</span> <span class="p">(</span><span class="s1">'tha'</span><span class="p">,</span> <span class="n">_tha</span><span class="p">,</span> <span class="n">_hlen</span><span class="p">),</span>
                                  <span class="p">(</span><span class="s1">'spa'</span><span class="p">,</span> <span class="n">_spa</span><span class="p">,</span> <span class="n">_plen</span><span class="p">),</span> <span class="p">(</span><span class="s1">'tpa'</span><span class="p">,</span> <span class="n">_tpa</span><span class="p">,</span> <span class="n">_plen</span><span class="p">)):</span>
@@ -866,16 +873,16 @@
 <span class="sd">            ptype: Protocol type.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Protocol address. If ``ptype`` is ``0x0800`` (IPv4), an</span>
-<span class="sd">            :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6), an</span>
-<span class="sd">            :class:`~ipaddress.IPv6Address`; otherwise, the address as a hex</span>
-<span class="sd">            :data:`str`.</span>
+<span class="sd">            Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is</span>
+<span class="sd">            4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)</span>
+<span class="sd">            and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the</span>
+<span class="sd">            address as a hex :data:`str`.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>  <span class="c1"># IPv4</span>
-            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>  <span class="c1"># IPv6</span>
-            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># IPv4</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>  <span class="c1"># IPv6</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str | bytes'</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
@@ -888,7 +895,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.</span>
 <span class="sd">            MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address</span>
-<span class="sd">            is validated and packed as 6 octets; otherwise, a :data:`str` is</span>
+<span class="sd">            is validated and packed, one octet per group (an empty string packs</span>
+<span class="sd">            as no octets); otherwise, a :data:`str` is</span>
 <span class="sd">            taken as the *hex* encoded address that :meth:`_read_addr_resolve`</span>
 <span class="sd">            returns, and :obj:`bytes` are returned as given.</span>
 
@@ -910,16 +918,19 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid hardware address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">return</span> <span class="n">addr</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | str | bytes'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | str | bytes'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                            <span class="n">plen</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve protocol address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            addr: Protocol address.</span>
 <span class="sd">            ptype: Protocol type.</span>
+<span class="sd">            plen: Protocol address length, if given.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or</span>
-<span class="sd">            ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16</span>
+<span class="sd">            ``0x86dd`` (IPv6), and ``plen`` is either not given or 4 or 16</span>
+<span class="sd">            respectively, the address is validated and packed to 4 or 16</span>
 <span class="sd">            octets; otherwise, a :data:`str` is taken as the *hex* encoded</span>
 <span class="sd">            address that :meth:`_read_proto_resolve` returns, an</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is</span>
@@ -950,10 +961,10 @@
 <span class="sd">            :exc:`AttributeError`, bool or not.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span> <span class="ow">and</span> <span class="n">plen</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span> <span class="ow">and</span> <span class="n">plen</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
 
@@ -971,7 +982,7 @@
 
 <div class="viewcode-block" id="InARP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InARP</span><span class="p">(</span><span class="n">ARP</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InARP</span><span class="p">(</span><span class="n">ARP</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_ARP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_ARP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Inverse Address Resolution Protocol."""</span>
 
     <span class="c1">##########################################################################</span>

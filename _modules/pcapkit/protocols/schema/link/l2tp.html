@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -504,6 +505,12 @@
         <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Priority of L2TP packet.</span>
         <span class="n">prio</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits 2 and 3 of L2TP packet.</span>
+        <span class="n">reserved_1</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bit 5 of L2TP packet.</span>
+        <span class="n">reserved_2</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits 8 to 11 of L2TP packet.</span>
+        <span class="n">reserved_3</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Version of L2TP packet.</span>
         <span class="n">version</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
 
@@ -519,9 +526,12 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'FlagsType'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved_1'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
         <span class="s1">'seq'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved_2'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'offset'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'prio'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved_3'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'version'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Length of L2TP packet.</span>

@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -803,6 +804,50 @@
 <span class="s1">        obj.type = CommandType.undefined</span>
 <span class="s1">        obj.conf = ConformanceRequirement.O</span>
 <span class="s1">        return obj</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register(cls, value: 'str', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Register a new command ``value`` under ``name``, upper-cased.</span>
+
+<span class="s1">        :meth:`get` and :meth:`_missing_` look a command up by its</span>
+<span class="s1">        upper-case name, so ``name`` is canonicalised to upper case here</span>
+<span class="s1">        before :meth:`~pcapkit.corekit.enum.EnumRegistry.register` mints it.</span>
+<span class="s1">        ``value`` is kept as given, as a declared member's value is.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value of the new member.</span>
+<span class="s1">            name: Name of the new member, in any case.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The newly registered member.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: As :meth:`~pcapkit.corekit.enum.EnumRegistry.register`.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        return super().register(value, name.upper())</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register_alias(cls, value: 'str', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Add ``name``, upper-cased, as a further name for the member at ``value``.</span>
+
+<span class="s1">        Canonicalised for the same reason as :meth:`register`, so that</span>
+<span class="s1">        :meth:`get` finds the alias.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value of the existing member to alias.</span>
+<span class="s1">            name: Alias to add for it, in any case.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The existing member, now reachable under the upper-cased ``name``</span>
+<span class="s1">            as well.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: As</span>
+<span class="s1">                :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        return super().register_alias(value, name.upper())</span>
 
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>

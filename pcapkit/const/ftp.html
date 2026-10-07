@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
@@ -517,11 +518,11 @@ names, c.f., <span class="target" id="index-0"></span><a class="rfc reference ex
 <p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more. The owner ruled on
 GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> that <code class="docutils literal notranslate"><span class="pre">get</span></code> should not mint: only IANA-registered
 values are legitimate members, a new one is properly created through
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get</span></code> is not given enough information to create
+<a class="reference internal" href="#pcapkit.const.ftp.command.Command.register" title="pcapkit.const.ftp.command.Command.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">get</span></code> is not given enough information to create
 one. Concretely true here – a bare wire command word carries no
 <a class="reference internal" href="#pcapkit.const.ftp.command.Command.feat" title="pcapkit.const.ftp.command.Command.feat"><code class="xref py py-attr docutils literal notranslate"><span class="pre">feat</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.type" title="pcapkit.const.ftp.command.Command.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.conf" title="pcapkit.const.ftp.command.Command.conf"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conf</span></code></a>, so minting one used
 to register a permanent member with all four hollowed out to their
-defaults; <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply them.</p>
+defaults; <a class="reference internal" href="#pcapkit.const.ftp.command.Command.register" title="pcapkit.const.ftp.command.Command.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> is the path that can actually supply them.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.feat">
@@ -921,7 +922,7 @@ be absent and <code class="xref py py-meth docutils literal notranslate"><span c
 raise on the result. There is no more specific value to reconstruct
 them from – a bare wire command word carries none of the four,
 which is exactly the owner’s reasoning for why <code class="docutils literal notranslate"><span class="pre">get()</span></code>/
-<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> must not mint one: <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> must not mint one: <a class="reference internal" href="#pcapkit.const.ftp.command.Command.register" title="pcapkit.const.ftp.command.Command.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> is the path that
 can actually supply them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -943,6 +944,60 @@ placeholder label to fall back to.</p></li>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command.register" title="Link to this definition">¶</a></dt>
+<dd><p>Register a new command <code class="docutils literal notranslate"><span class="pre">value</span></code> under <code class="docutils literal notranslate"><span class="pre">name</span></code>, upper-cased.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ftp.command.Command._missing_" title="pcapkit.const.ftp.command.Command._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> look a command up by its
+upper-case name, so <code class="docutils literal notranslate"><span class="pre">name</span></code> is canonicalised to upper case here
+before <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> mints it.
+<code class="docutils literal notranslate"><span class="pre">value</span></code> is kept as given, as a declared member’s value is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member, in any case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.register_alias">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command.register_alias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command.register_alias" title="Link to this definition">¶</a></dt>
+<dd><p>Add <code class="docutils literal notranslate"><span class="pre">name</span></code>, upper-cased, as a further name for the member at <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+<p>Canonicalised for the same reason as <a class="reference internal" href="#pcapkit.const.ftp.command.Command.register" title="pcapkit.const.ftp.command.Command.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, so that
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> finds the alias.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the existing member to alias.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Alias to add for it, in any case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The existing member, now reachable under the upper-cased <code class="docutils literal notranslate"><span class="pre">name</span></code>
+as well.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As
+    <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>

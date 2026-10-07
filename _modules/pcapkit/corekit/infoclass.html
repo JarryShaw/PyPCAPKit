@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -483,6 +484,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
@@ -993,7 +997,9 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">&gt;'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="c1"># NOTE: count exactly the keys :meth:`__iter__` yields, so the</span>
+        <span class="c1"># bookkeeping attributes in ``__excluded__`` are not counted.</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[str]'</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
@@ -1025,6 +1031,19 @@
 <span class="sd">        * If ``dict_`` is not present, then does:</span>
 <span class="sd">          ``for k, v in kwargs.items(): self[k] = v``.</span>
 
+<span class="sd">        A mapping given for a key whose type annotation resolves at runtime to</span>
+<span class="sd">        an :class:`Info` subclass (or to :data:`~typing.Optional` of one) is</span>
+<span class="sd">        rebuilt into that class, so ``cls.from_dict(info.to_dict())`` restores</span>
+<span class="sd">        such nested values. A key without such an annotation keeps the mapping</span>
+<span class="sd">        as is -- see :meth:`to_dict`.</span>
+
+<span class="sd">        The rebuild is as unchecked as the rest of this method: a mapping whose</span>
+<span class="sd">        keys are not the nested class's own is accepted and becomes an instance</span>
+<span class="sd">        carrying those keys, exactly as a direct call to the nested class's own</span>
+<span class="sd">        :meth:`from_dict` would. Validating it here would reject data that</span>
+<span class="sd">        ``Info(**kwargs)`` has always accepted, so the shape of the mapping</span>
+<span class="sd">        stays the caller's responsibility.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            dict\_: Source data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -1032,6 +1051,12 @@
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">info_cls</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_info_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
@@ -1046,6 +1071,14 @@
 <span class="sd">            Should such :class:`Info` objects be nested within other data,</span>
 <span class="sd">            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we</span>
 <span class="sd">            shall not convert them into :obj:`dict` and remain them intact.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :meth:`from_dict` reverses the flattening only for keys whose type</span>
+<span class="sd">            annotation resolves at runtime to an :class:`Info` subclass. For</span>
+<span class="sd">            any other key -- every key of a bare :class:`Info`, and annotations</span>
+<span class="sd">            naming a type imported only under :data:`~typing.TYPE_CHECKING` --</span>
+<span class="sd">            the conversion is one-way, and the nested value comes back as a</span>
+<span class="sd">            plain :obj:`dict`.</span>
 
 <span class="sd">        """</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
@@ -1071,6 +1104,129 @@
         <span class="k">return</span> <span class="n">dict_</span></div>
 </div>
 
+
+
+<span class="c1">#: Name of the per-class attribute :func:`_nested_info_types` caches its answer in.</span>
+<span class="n">_NESTED_INFO_CACHE</span> <span class="o">=</span> <span class="s1">'__nested_info_types__'</span>
+
+<span class="c1">#: :pep:`604` union type, i.e. the origin of ``int | None``. It is absent below</span>
+<span class="c1">#: Python 3.10, where only :data:`typing.Optional` spells a union, and is the</span>
+<span class="c1">#: same object as :data:`typing.Union` from 3.14 on.</span>
+<span class="n">_UNION_TYPE</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s1">'UnionType'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#: Type of :data:`None`, i.e. the member ``Optional`` adds to a union.</span>
+<span class="n">_NONE_TYPE</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_info_type</span><span class="p">(</span><span class="n">hint</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[Info]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the :class:`Info` subclass a resolved annotation names, if any.</span>
+
+<span class="sd">    :data:`~typing.Optional` of a single :class:`Info` subclass counts as that</span>
+<span class="sd">    subclass. A parametrised generic such as ``list[Packet]`` does not: the</span>
+<span class="sd">    value it describes is a container, and :meth:`Info.from_dict` has nothing</span>
+<span class="sd">    to rebuild it from.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hint: Resolved type annotation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The :class:`Info` subclass the annotation names, or :data:`None`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Both guards below are load-bearing on Python 3.9 and 3.10, where a</span>
+<span class="sd">        :class:`types.GenericAlias` such as ``list[Packet]`` satisfies</span>
+<span class="sd">        ``isinstance(hint, type)`` while :func:`issubclass` still refuses it</span>
+<span class="sd">        with :exc:`TypeError` -- which would otherwise escape</span>
+<span class="sd">        :meth:`Info.from_dict` for the 26 of 487 :class:`Info` classes that</span>
+<span class="sd">        carry such an annotation. From 3.11 on the ``isinstance`` is already</span>
+<span class="sd">        :data:`False`, so only the older interpreters reach the</span>
+<span class="sd">        :exc:`TypeError`; ``NestedTypeResolverTests`` in</span>
+<span class="sd">        :file:`tests/corekit/test_from_dict_roundtrip_unit.py` pins the shape</span>
+<span class="sd">        on every version by handing this function an object that mimics it.</span>
+
+<span class="sd">    """</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="c1"># NOTE: a union of exactly one non-``None`` member is ``Optional`` of</span>
+        <span class="c1"># that member, so it unwraps to it; anything else is not an ``Info``.</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="s1">'__args__'</span><span class="p">,</span> <span class="p">())</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NONE_TYPE</span><span class="p">]</span>
+        <span class="n">is_union</span> <span class="o">=</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span> <span class="ow">or</span> <span class="p">(</span><span class="n">_UNION_TYPE</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">_UNION_TYPE</span><span class="p">)</span>
+        <span class="n">hint</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">is_union</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hint</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nested_info_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Type[Info]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.</span>
+
+<span class="sd">    Each annotation is resolved on its own, in the namespace of the module and</span>
+<span class="sd">    the class that declared it, so one that cannot be resolved at runtime (e.g.</span>
+<span class="sd">    a name imported only under :data:`~typing.TYPE_CHECKING`) is skipped rather</span>
+<span class="sd">    than spoiling the rest.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: Info class.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Mapping of key names to the :class:`Info` subclass annotated for them.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The answer is cached in ``cls``'s own ``__dict__``, read back from</span>
+<span class="sd">        there rather than through :func:`getattr` so a subclass never inherits</span>
+<span class="sd">        its parent's map. The cache is deliberately kept on the class rather</span>
+<span class="sd">        than in a module-level :class:`weakref.WeakKeyDictionary`: such a map</span>
+<span class="sd">        would pin every self-referential class forever, since the cached value</span>
+<span class="sd">        strongly references the class the weak key points at, whereas the</span>
+<span class="sd">        reference cycle a class attribute creates is collectable.</span>
+
+<span class="sd">        An unresolvable annotation is cached as "skip" alongside the rest, so a</span>
+<span class="sd">        forward reference whose target is defined only *after* the first</span>
+<span class="sd">        :meth:`Info.from_dict` call stays one-way for the life of the process.</span>
+<span class="sd">        That is accepted rather than fixed: :meth:`Info.from_dict` runs per</span>
+<span class="sd">        parsed packet (see :meth:`IPv4._read_ipv4_options</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options&gt;`), and</span>
+<span class="sd">        re-resolving the annotations on every call to catch a case that does</span>
+<span class="sd">        not arise in this package costs far more than it saves.</span>
+
+<span class="sd">    """</span>
+    <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_INFO_CACHE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cached</span>
+
+    <span class="n">nested</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Type[Info]]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[str]</span>
+    <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>  <span class="c1"># pragma: no branch</span>
+        <span class="c1"># NOTE: same walk as :func:`info_final`, which builds ``__init__``</span>
+        <span class="c1"># from these annotations; the most derived declaration of a key wins.</span>
+        <span class="k">if</span> <span class="n">cls_</span> <span class="ow">is</span> <span class="n">Info</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span>
+        <span class="n">globalns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">module</span><span class="p">))</span> <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">localns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">cls_</span><span class="p">))</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ann</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__annotations__'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls_</span><span class="p">,</span> <span class="s1">'__annotations__'</span><span class="p">,</span> <span class="p">{}))</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hint</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">SimpleNamespace</span><span class="p">(</span><span class="vm">__annotations__</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">ann</span><span class="p">}),</span>
+                                             <span class="n">globalns</span><span class="p">,</span> <span class="n">localns</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+                <span class="k">continue</span>
+
+            <span class="n">info_cls</span> <span class="o">=</span> <span class="n">_as_info_type</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">info_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nested</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_INFO_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nested</span>
 </pre></div>
         </article>
       </div>

@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -537,9 +538,12 @@
 
     <span class="c1">#: Anonymous flag.</span>
     <span class="n">anonymous</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits -- the 15 high-order bits of ``Controls``, carried</span>
+    <span class="c1">#: verbatim so that re-serialising reproduces them.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anonymous</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">anonymous</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,multiple-statements</span></div>
 
 
 
@@ -608,6 +612,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ESPInfoParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``ESP_INFO`` parameter."""</span>
 
+    <span class="c1">#: Reserved octets, carried verbatim so that re-serialising reproduces them.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: KEYMAT index.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Old SDI.</span>
@@ -616,7 +622,7 @@
     <span class="n">new_spi</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">old_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">new_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">old_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">new_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -696,8 +702,16 @@
 
     <span class="c1">#: Numeric index.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
+    <span class="c1">#: The ``Lifetime`` octet as it appears on the wire. :rfc:`7401#section-5.2.4`</span>
+    <span class="c1">#: defines the lifetime as ``2^(value - 32)`` seconds, and this is ``value``.</span>
+    <span class="c1">#: It is what re-serialising writes back, since most of the 256 octets have</span>
+    <span class="c1">#: no exact :class:`~datetime.timedelta`.</span>
+    <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Lifetime, derived from :attr:`lifetime_exponent` to</span>
+    <span class="c1">#: :class:`~datetime.timedelta`'s microsecond resolution, so octets below</span>
+    <span class="c1">#: ``12`` read as ``timedelta(0)``. :obj:`None` for octets of ``79`` and above,</span>
+    <span class="c1">#: whose duration exceeds :attr:`datetime.timedelta.max`.</span>
+    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'Optional[timedelta]'</span>
     <span class="c1">#: Puzzle data.</span>
     <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Random number.</span>
@@ -711,7 +725,7 @@
     <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'Optional[timedelta]'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 

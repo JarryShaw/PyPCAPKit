@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -1118,7 +1119,8 @@
 <span class="sd">            itself, which sizes both the length octet and the padding data from</span>
 <span class="sd">            the option type; ``clen`` is therefore always ``0`` here for a</span>
 <span class="sd">            parsed ``Pad1``, and the check below only guards a schema built by</span>
-<span class="sd">            hand.</span>
+<span class="sd">            hand. A ``PadN`` whose ``Opt Data Len`` is ``0`` is a valid</span>
+<span class="sd">            two-octet padding option [:rfc:`8200#section-4.2`].</span>
 
 <span class="sd">        """</span>
         <span class="n">code</span><span class="p">,</span> <span class="n">clen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span>
@@ -1126,8 +1128,6 @@
         <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
@@ -1454,7 +1454,14 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the option is malformed.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            An option whose QS function is neither of the two above has no</span>
+<span class="sd">            defined layout, so the schema keeps it as an unassigned option and</span>
+<span class="sd">            it is parsed as one, c.f. :meth:`_read_opt_none`.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnassignedOption</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_none</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -1472,6 +1479,7 @@
                 <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">ttl</span><span class="p">),</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">)</span>  <span class="c1"># type: Data_QuickStartOption</span>
         <span class="k">elif</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
             <span class="n">schema_rep</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QuickStartReportOption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
@@ -1485,6 +1493,7 @@
                 <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span>
                 <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] unknown QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1612,6 +1621,7 @@
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_MPLFlags</span><span class="p">(</span>
                 <span class="nb">max</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'max'</span><span class="p">]),</span>
                 <span class="n">drop</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'drop'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">seed_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
@@ -1793,6 +1803,9 @@
 <span class="sd">           |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
+<span class="sd">        ``OptDataLenDFF`` is ``3``, the flags octet and the sequence number,</span>
+<span class="sd">        as corrected by :rfc:`6971` Errata ID 3937; the RFC text says ``2``.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: parsed parameter schema</span>
 <span class="sd">            options: extracted HOPOPT options</span>
@@ -1801,10 +1814,10 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``2``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``3``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_IPDFFOption</span><span class="p">(</span>
@@ -1816,6 +1829,7 @@
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_DFFFlags</span><span class="p">(</span>
                 <span class="n">dup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'dup'</span><span class="p">]),</span>
                 <span class="n">ret</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'ret'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1875,6 +1889,13 @@
 <span class="sd">            Tuple of options and total length of options.</span>
 
 <span class="sd">        Note:</span>
+<span class="sd">            Options given as a :obj:`list` are fresh input: padding options in</span>
+<span class="sd">            it are dropped, and padding is inserted after each option to align</span>
+<span class="sd">            the header. Options given as an</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, i.e. parsed</span>
+<span class="sd">            data, are emitted in order with their own padding options kept, and</span>
+<span class="sd">            padding is added only at the end if the header is not aligned.</span>
+
 <span class="sd">            The returned length is that of the options area alone, so it is the</span>
 <span class="sd">            value :meth:`make` needs for ``hdr_ext_len``. Since the two octets</span>
 <span class="sd">            of the fixed header precede it, an options area is well formed only</span>
@@ -1931,12 +1952,11 @@
             <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
             <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
 
+        <span class="c1"># NOTE: Options given as parsed data are emitted as they are, padding</span>
+        <span class="c1"># included and in place, so that a parsed header rebuilds byte for</span>
+        <span class="c1"># byte; only a header left short of alignment gets trailing padding.</span>
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="c1"># ignore padding options by default</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
-                <span class="k">continue</span>
-
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -1950,11 +1970,6 @@
 
             <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
             <span class="n">total_length</span> <span class="o">+=</span> <span class="n">opt_len</span>
-
-            <span class="c1"># force alignment of the header (fixed part included) to 8 octets</span>
-            <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">options_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pad_opts</span><span class="p">)</span>
-            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
         <span class="c1"># an options area holding nothing at all is still 6 octets long</span>
         <span class="n">pad_opts</span><span class="p">,</span> <span class="n">pad_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pad_options</span><span class="p">(</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
@@ -2014,20 +2029,18 @@
 <span class="sd">            &lt;pcapkit.protocols.schema.internet.hopopt.PadOption.len&gt;` is the</span>
 <span class="sd">            ``Opt Data Len`` field: two octets fewer, and absent altogether for a</span>
 <span class="sd">            ``Pad1``. ``opt`` is honoured so that re-making a parsed padding</span>
-<span class="sd">            option keeps its size instead of collapsing to a single ``Pad1``.</span>
+<span class="sd">            option keeps its type and size. A ``PadN`` with ``length`` ``0`` is</span>
+<span class="sd">            a valid two-octet option [:rfc:`8200#section-4.2`] and is kept.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">type</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="k">else</span> <span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1">#raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1">#raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -2104,7 +2117,7 @@
                           <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
-                          <span class="n">bitmap</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">bitmap</span><span class="p">:</span> <span class="s1">'Optional[bytes | tuple[int, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CALIPSOOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT calipso option.</span>
 
@@ -2114,11 +2127,20 @@
 <span class="sd">            domain: CALIPSO domain of interpretation</span>
 <span class="sd">            level: sensitivity level</span>
 <span class="sd">            checksum: checksum of the option</span>
-<span class="sd">            bitmap: compartment bitmap</span>
+<span class="sd">            bitmap: compartment bitmap, as :obj:`bytes` or as the</span>
+<span class="sd">                :obj:`tuple` of octets the reader stores; its length must be a</span>
+<span class="sd">                multiple of 4 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the bitmap is not a whole number of 32-bit words.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            ``Cmpt Length`` on the wire counts 32-bit words [:rfc:`5570#section-5.1`],</span>
+<span class="sd">            whereas the bitmap here is sized in octets.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2126,16 +2148,19 @@
             <span class="n">level</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">level</span>
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
             <span class="n">bitmap</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">cmpt_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap length: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="n">cmpt_len</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">),</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-            <span class="n">cmpt_len</span><span class="o">=</span><span class="n">cmpt_len</span><span class="p">,</span>
+            <span class="n">cmpt_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
-            <span class="n">bitmap</span><span class="o">=</span><span class="n">bitmap</span><span class="p">,</span>
+            <span class="n">bitmap</span><span class="o">=</span><span class="n">bitmap_bytes</span> <span class="k">if</span> <span class="n">bitmap_bytes</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2263,6 +2288,8 @@
                       <span class="n">psnlr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">deltatls</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">scaledtls</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PDMOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT PDM option.</span>
 
@@ -2273,6 +2300,10 @@
 <span class="sd">            psnlr: packet sequence number (PSN) last received</span>
 <span class="sd">            deltatlr: delta time last received (in attoseconds)</span>
 <span class="sd">            deltatls: delta time last sent (in attoseconds)</span>
+<span class="sd">            scaledtlr: scale of delta time last received; derived from</span>
+<span class="sd">                ``deltatlr`` if not given</span>
+<span class="sd">            scaledtls: scale of delta time last sent; derived from</span>
+<span class="sd">                ``deltatls`` if not given</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2284,15 +2315,27 @@
             <span class="n">psnlr</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">psnlr</span>
             <span class="n">deltatlr</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">deltatlr</span>
             <span class="n">deltatls</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">deltatls</span>
+            <span class="c1"># NOTE: The parsed scales are kept so long as they still describe</span>
+            <span class="c1"># the deltas, which they always do for a parsed option.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">deltatlr</span> <span class="o">&gt;&gt;</span> <span class="n">opt</span><span class="o">.</span><span class="n">scaledtlr</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="n">scaledtlr</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">scaledtlr</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">deltatls</span> <span class="o">&gt;&gt;</span> <span class="n">opt</span><span class="o">.</span><span class="n">scaledtls</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="n">scaledtls</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">scaledtls</span>
 
-        <span class="n">dtlr_bl</span> <span class="o">=</span> <span class="n">deltatlr</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
-        <span class="n">scale_dtlr</span> <span class="o">=</span> <span class="n">dtlr_bl</span> <span class="o">-</span> <span class="mi">16</span> <span class="k">if</span> <span class="n">dtlr_bl</span> <span class="o">&gt;</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">scaledtlr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scale_dtlr</span> <span class="o">=</span> <span class="n">scaledtlr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dtlr_bl</span> <span class="o">=</span> <span class="n">deltatlr</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
+            <span class="n">scale_dtlr</span> <span class="o">=</span> <span class="n">dtlr_bl</span> <span class="o">-</span> <span class="mi">16</span> <span class="k">if</span> <span class="n">dtlr_bl</span> <span class="o">&gt;</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">scale_dtlr</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too large delta time last received: </span><span class="si">{</span><span class="n">deltatlr</span><span class="si">}</span><span class="s1"> (scaled: </span><span class="si">{</span><span class="n">scale_dtlr</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">)</span>
 
-        <span class="n">dtls_bl</span> <span class="o">=</span> <span class="n">deltatls</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
-        <span class="n">scale_dtls</span> <span class="o">=</span> <span class="n">dtls_bl</span> <span class="o">-</span> <span class="mi">16</span> <span class="k">if</span> <span class="n">dtls_bl</span> <span class="o">&gt;</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">scaledtls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scale_dtls</span> <span class="o">=</span> <span class="n">scaledtls</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dtls_bl</span> <span class="o">=</span> <span class="n">deltatls</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
+            <span class="n">scale_dtls</span> <span class="o">=</span> <span class="n">dtls_bl</span> <span class="o">-</span> <span class="mi">16</span> <span class="k">if</span> <span class="n">dtls_bl</span> <span class="o">&gt;</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">scale_dtls</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too large delta time last sent: </span><span class="si">{</span><span class="n">deltatls</span><span class="si">}</span><span class="s1"> (scaled: </span><span class="si">{</span><span class="n">scale_dtls</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">)</span>
@@ -2311,7 +2354,7 @@
 
 <div class="viewcode-block" id="HOPOPT._make_opt_qs">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_qs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_QuickStartOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_QuickStartOption | Data_UnassignedOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                      <span class="n">func</span><span class="p">:</span> <span class="s1">'Enum_QSFunction | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">,</span>
                      <span class="n">func_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">func_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># pylint: disable=line-too-long</span>
@@ -2319,7 +2362,8 @@
                      <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">:</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QuickStartOption | Schema_UnassignedOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT QS option.</span>
 
 <span class="sd">        Args:</span>
@@ -2332,17 +2376,22 @@
 <span class="sd">            rate: rate (in kbps)</span>
 <span class="sd">            ttl: time to live (in seconds)</span>
 <span class="sd">            nonce: nonce value</span>
+<span class="sd">            reserved: reserved bits (``R``) after the nonce</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed option schema.</span>
+<span class="sd">            Constructed option schema; an unassigned option schema if ``opt``</span>
+<span class="sd">            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">Data_UnassignedOption</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_none</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">func_enum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">func</span>
             <span class="n">rate</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rate</span>
             <span class="n">ttl</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'ttl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'nonce'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">func_enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">func_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">func_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">func_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -2361,6 +2410,7 @@
                 <span class="n">ttl</span><span class="o">=</span><span class="n">ttl_value</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="p">{</span>
                     <span class="s1">'nonce'</span><span class="p">:</span> <span class="n">nonce</span><span class="p">,</span>
+                    <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">func_enum</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
@@ -2373,6 +2423,7 @@
                 <span class="p">},</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="p">{</span>
                     <span class="s1">'nonce'</span><span class="p">:</span> <span class="n">nonce</span><span class="p">,</span>
+                    <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid QS function: </span><span class="si">{</span><span class="n">func_enum</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
@@ -2449,6 +2500,7 @@
                       <span class="n">seed_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="nb">max</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">drop</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">seed</span><span class="p">:</span> <span class="s1">'Optional[int | IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPLOption'</span><span class="p">:</span>
@@ -2463,6 +2515,8 @@
 <span class="sd">            seed_type_reversed: reversed flag of seed-id type</span>
 <span class="sd">            max: maximum sequence number flag</span>
 <span class="sd">            drop: drop packet flag</span>
+<span class="sd">            reserved: reserved bits (``rsv``), i.e. the low four bits of the</span>
+<span class="sd">                flags octet</span>
 <span class="sd">            seq: MPL sequence number</span>
 <span class="sd">            seed: MPL seed ID, ignored when the seed-id type is</span>
 <span class="sd">                :attr:`~pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS`,</span>
@@ -2480,6 +2534,7 @@
             <span class="n">seed_type</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seed_type</span>
             <span class="nb">max</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">max</span>
             <span class="n">drop</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">drop</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">seed</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seed_id</span>
 
@@ -2524,6 +2579,7 @@
                 <span class="s1">'type'</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
                 <span class="s1">'max'</span><span class="p">:</span> <span class="nb">max</span><span class="p">,</span>
                 <span class="s1">'drop'</span><span class="p">:</span> <span class="n">drop</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed_id</span><span class="p">,</span>
@@ -2547,8 +2603,14 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: A parsed nonce keeps the width it had on the wire, leading zero</span>
+        <span class="c1"># octets and a zero-octet nonce included.</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
+            <span class="k">return</span> <span class="n">Schema_ILNPOption</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+                <span class="nb">len</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">nonce</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">nonce</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># NOTE: ``nonce`` is packed by a NumberField whose width is this very</span>
         <span class="c1"># ``len`` (c.f. pcapkit.protocols.schema.internet.hopopt.ILNPOption), so</span>
@@ -2656,6 +2718,7 @@
                          <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">dup</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                          <span class="n">ret</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPDFFOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT IP DFF option.</span>
@@ -2666,6 +2729,7 @@
 <span class="sd">            version: DFF version</span>
 <span class="sd">            dup: duplicate packet flag</span>
 <span class="sd">            ret: return packet flag</span>
+<span class="sd">            reserved: reserved bits, i.e. the low four bits of the flags octet</span>
 <span class="sd">            seq: DFF sequence number</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -2677,15 +2741,18 @@
             <span class="n">version</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">version</span>
             <span class="n">dup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">dup</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ret</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seq</span>
 
+        <span class="c1"># ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, c.f. _read_opt_ip_dff.</span>
         <span class="k">return</span> <span class="n">Schema_IPDFFOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'ver'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
                 <span class="s1">'dup'</span><span class="p">:</span> <span class="n">dup</span><span class="p">,</span>
                 <span class="s1">'ret'</span><span class="p">:</span> <span class="n">ret</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
         <span class="p">)</span></div>

@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -508,8 +509,16 @@
     <span class="c1">#: length would have overrun what remained and the walk stopped instead</span>
     <span class="c1">#: of trusting it.</span>
     <span class="nb">next</span><span class="p">:</span> <span class="s1">'Optional[TransType]'</span>
+    <span class="c1">#: Next header as declared on the wire. Equal to :attr:`next` except on</span>
+    <span class="c1">#: an overrun, where :attr:`next` is :data:`None` but this keeps the</span>
+    <span class="c1">#: octet so that a rebuild reproduces it.</span>
+    <span class="n">declared_next</span><span class="p">:</span> <span class="s1">'TransType'</span>
+    <span class="c1">#: Raw ``Hdr Ext Len`` octet, as on the wire.</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Length of this extension header, in octets, actually consumed.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Header-specific content after the two fixed octets, as consumed.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Original parsing error, if this instance was reached as a</span>
     <span class="c1">#: :func:`~pcapkit.utilities.decorators.beholder` fallback rather than by</span>
     <span class="c1">#: direct dispatch.</span>

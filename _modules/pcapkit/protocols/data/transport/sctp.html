@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -523,6 +524,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">DATAChunkFlags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP DATA chunk flags."""</span>
 
+    <span class="c1">#: Reserved bits, kept as received.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: (I)mmediate bit, i.e., request a SACK chunk without delay.</span>
     <span class="n">I</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: (U)nordered bit, i.e., no stream sequence number is assigned.</span>
@@ -533,7 +536,7 @@
     <span class="n">E</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">I</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">U</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">I</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">U</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -544,11 +547,13 @@
 <span class="w">    </span><span class="sd">"""Data model for SCTP chunk flags carrying only the T bit, i.e., ABORT and</span>
 <span class="sd">    SHUTDOWN COMPLETE chunks."""</span>
 
+    <span class="c1">#: Reserved bits, kept as received.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: T bit, i.e., the verification tag has been reflected.</span>
     <span class="n">T</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -602,9 +607,11 @@
 
     <span class="c1">#: Stream identifier of the offending DATA chunk.</span>
     <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved field, kept as received.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'CauseCode'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'CauseCode'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -965,6 +972,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">INITChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP INIT chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Initiate tag.</span>
     <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Advertised receiver window credit.</span>
@@ -979,7 +988,7 @@
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -989,6 +998,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">INITACKChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP INIT ACK chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Initiate tag.</span>
     <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Advertised receiver window credit.</span>
@@ -1003,7 +1014,7 @@
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1013,6 +1024,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SACKChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP SACK chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Cumulative TSN ack.</span>
     <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Advertised receiver window credit.</span>
@@ -1027,7 +1040,7 @@
     <span class="n">dup_tsn</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num_gap_blocks</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num_dup_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">gap_blocks</span><span class="p">:</span> <span class="s1">'tuple[GapAckBlock, ...]'</span><span class="p">,</span> <span class="n">dup_tsn</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num_gap_blocks</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num_dup_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">gap_blocks</span><span class="p">:</span> <span class="s1">'tuple[GapAckBlock, ...]'</span><span class="p">,</span> <span class="n">dup_tsn</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1037,11 +1050,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HeartbeatChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP HEARTBEAT chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Heartbeat information parameters.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1051,11 +1066,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HeartbeatACKChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP HEARTBEAT ACK chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Heartbeat information parameters.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1081,11 +1098,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ShutdownChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP SHUTDOWN chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Cumulative TSN ack.</span>
     <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1095,8 +1114,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ShutdownACKChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP SHUTDOWN ACK chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1106,11 +1128,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ErrorChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP ERROR chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: One or more error causes.</span>
     <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1120,11 +1144,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CookieEchoChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP COOKIE ECHO chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: State cookie, as received in the INIT ACK chunk's state cookie parameter.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1134,8 +1160,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CookieACKChunk</span><span class="p">(</span><span class="n">Chunk</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP COOKIE ACK chunks."""</span>
 
+    <span class="c1">#: Raw chunk flags, kept as received.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

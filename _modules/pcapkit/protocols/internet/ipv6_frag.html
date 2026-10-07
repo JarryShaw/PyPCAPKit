@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -618,6 +619,7 @@
         <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">Data_IPv6_Frag</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">offset</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">])</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'mf'</span><span class="p">]),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="p">)</span>
@@ -635,6 +637,7 @@
              <span class="n">next_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">next_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
@@ -650,6 +653,7 @@
 <span class="sd">                Note that :attr:`Data_IPv6_Frag.offset</span>
 <span class="sd">                &lt;pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset&gt;` is in</span>
 <span class="sd">                octets, so it must be divided by 8 before being passed here.</span>
+<span class="sd">            reserved: Reserved bits (``Res``) between the offset and the M flag.</span>
 <span class="sd">            mf: More fragments flag.</span>
 <span class="sd">            id: Identification.</span>
 <span class="sd">            payload: Payload of current instance.</span>
@@ -666,6 +670,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'mf'</span><span class="p">:</span> <span class="n">mf</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
@@ -749,6 +754,7 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'mf'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>
             <span class="s1">'id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>

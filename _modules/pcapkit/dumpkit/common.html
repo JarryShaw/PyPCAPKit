@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -485,6 +486,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xml.sax.saxutils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -495,6 +498,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span><span class="p">,</span> <span class="n">NullType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -503,7 +507,7 @@
 
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span> <span class="k">as</span> <span class="n">ABCDumper</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -512,6 +516,16 @@
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1">#: re.Pattern: A character XML 1.0 does not allow anywhere in a document, not</span>
+<span class="c1">#: even as a character reference: every C0 control other than tab, LF and CR,</span>
+<span class="c1">#: the surrogates, and ``U+FFFE``/``U+FFFF`` (XML 1.0, production ``[2] Char``).</span>
+<span class="n">_XML_ILLEGAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">'[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]'</span><span class="p">)</span>
+
+<span class="c1">#: frozenset[str]: Characters :meth:`dictdumper.json.JSON._append_string`</span>
+<span class="c1">#: writes as themselves or through its escape table rather than as a</span>
+<span class="c1">#: ``\uXXXX`` escape.</span>
+<span class="n">_JSON_PRINTABLE</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="DumperBase">
@@ -702,6 +716,40 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_slots</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[str]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Yield the names of every slot ``value`` has an assigned value for.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Object to inspect.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        Each slot name declared anywhere in ``type(value).__mro__``, base classes</span>
+<span class="sd">        first and each name once, skipping ``__dict__``, ``__weakref__`` and</span>
+<span class="sd">        any slot that is unset on ``value``.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        ``__slots__`` on a class names only the slots *that* class adds, and</span>
+<span class="sd">        reading it from an instance finds the nearest class that declares one,</span>
+<span class="sd">        so a subclass declaring ``__slots__ = ()`` hides all of its bases'</span>
+<span class="sd">        slots. :class:`ipaddress.IPv6Network` is such a class.</span>
+
+<span class="sd">    """</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[str]</span>
+    <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__slots__'</span><span class="p">,</span> <span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">(</span><span class="n">names</span><span class="p">,)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__dict__'</span><span class="p">,</span> <span class="s1">'__weakref__'</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">name</span>
+
+
 <div class="viewcode-block" id="make_dumper">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">:</span>
@@ -736,6 +784,12 @@
     <span class="c1"># worked around here.</span>
     <span class="n">escape_json_keys</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
     <span class="n">escape_keys</span> <span class="o">=</span> <span class="n">escape_strings</span> <span class="ow">or</span> <span class="n">escape_json_keys</span>
+    <span class="c1"># NOTE: :meth:`~dictdumper.plist.PLIST._append_dict` and</span>
+    <span class="c1"># :meth:`~dictdumper.plist.PLIST._append_array` skip every :data:`None`</span>
+    <span class="c1"># value and item outright, so a ``plist`` report lacks keys the ``json``</span>
+    <span class="c1"># report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it</span>
+    <span class="c1"># is worked around here.</span>
+    <span class="n">keep_none</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Escape a mapping key on its way to the writer.</span>
@@ -808,7 +862,10 @@
 <span class="sd">                them, so both branches that hand the writer a mapping -- a</span>
 <span class="sd">                :class:`~pcapkit.corekit.multidict.MultiDict` and a plain</span>
 <span class="sd">                :class:`dict` -- escape their own keys through</span>
-<span class="sd">                :func:`escape_key` instead.</span>
+<span class="sd">                :func:`escape_key` instead. An</span>
+<span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a</span>
+<span class="sd">                :class:`list` of single-key :class:`dict` objects, each of</span>
+<span class="sd">                which comes back through the :class:`dict` branch.</span>
 
 <span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
@@ -817,9 +874,29 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">,</span>
+                                <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Network</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Network</span><span class="p">)):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">)):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">NullType</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="s1">'&lt;NULL&gt;'</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="s1">'&lt;NO_VALUE&gt;'</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
+                <span class="c1"># NOTE: one single-key mapping per entry, in insertion order --</span>
+                <span class="c1"># i.e. wire order for the option lists -- since a mapping keyed</span>
+                <span class="c1"># by name could only gather the repeats of a key under its first</span>
+                <span class="c1"># occurrence (GitHub issue #1263). The keys are escaped when the</span>
+                <span class="c1"># writer hands each mapping back to this hook, through the</span>
+                <span class="c1"># :class:`dict` branch below.</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+                <span class="c1"># NOTE: a :class:`MultiDict` keeps no order across keys, only</span>
+                <span class="c1"># among the values of each, so grouping by key loses nothing.</span>
                 <span class="n">temp</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># type: DefaultDict[str, list[Any]]</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
@@ -847,8 +924,75 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">escape_strings</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># NOTE: XML 1.0 has no spelling at all for some characters, not</span>
+                <span class="c1"># even a character reference, so a string holding one is written</span>
+                <span class="c1"># as ``&lt;data&gt;``, the way :class:`bytes` already is (GitHub issue</span>
+                <span class="c1"># #1262).</span>
+                <span class="k">if</span> <span class="n">_XML_ILLEGAL</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">,</span> <span class="s1">'surrogatepass'</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">if</span> <span class="n">keep_none</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'dict[Any, Any]'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write dict contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    Each :data:`None` value is first converted through</span>
+<span class="sd">                    :meth:`~dictdumper.plist.PLIST._encode_value`, whose own</span>
+<span class="sd">                    rendering of it is ``{'type': 'NoneType', 'value': 'None'}``,</span>
+<span class="sd">                    so that the writer no longer skips it.</span>
+
+<span class="sd">                """</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_value</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_dict</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'list[Any]'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write array contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    As :meth:`_append_dict`, for each :data:`None` item.</span>
+
+<span class="sd">                """</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_encode_value</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">escape_json_keys</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write string contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    :meth:`dictdumper.json.JSON._append_string` writes every</span>
+<span class="sd">                    other character as ``'\\u{0:04x}'.format(ord(char))``, which</span>
+<span class="sd">                    for a code point above ``U+FFFF`` yields five or six hex</span>
+<span class="sd">                    digits that a reader takes as one escape and literal text</span>
+<span class="sd">                    (GitHub issue #1261). This writes such a character as a</span>
+<span class="sd">                    UTF-16 surrogate pair instead, as :func:`json.dumps` does, and</span>
+<span class="sd">                    every other character exactly as the upstream writer does.</span>
+
+<span class="sd">                """</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+                <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">_JSON_PRINTABLE</span><span class="p">:</span>
+                        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">ESCAPE_DCT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">char</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'</span><span class="se">\\</span><span class="s1">u</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="si">:</span><span class="s1">04x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'"'</span> <span class="o">+</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'"'</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["fallback"]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">            </span><span class="sd">"""Check content type for function call.</span>
@@ -884,14 +1028,16 @@
 <span class="sd">                ``default`` for use.</span>
 
 <span class="sd">            """</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__slots__'</span><span class="p">):</span>
-                <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">}</span>
-            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">):</span>
-                <span class="n">new_value</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_iter_slots</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">):</span>
+                <span class="n">new_value</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">'unsupported object type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="n">new_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
 
+            <span class="c1"># NOTE: through :meth:`object_hook` as every other value is, so that</span>
+            <span class="c1"># the keys and strings built here are escaped like theirs.</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
             <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_func</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
             <span class="n">func</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 

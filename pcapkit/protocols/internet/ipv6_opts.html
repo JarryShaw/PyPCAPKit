@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -837,7 +838,8 @@ enforced by
 itself, which sizes both the length octet and the padding data from
 the option type; <code class="docutils literal notranslate"><span class="pre">clen</span></code> is therefore always <code class="docutils literal notranslate"><span class="pre">0</span></code> here for a
 parsed <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>, and the check below only guards a schema built by
-hand.</p>
+hand. A <code class="docutils literal notranslate"><span class="pre">PadN</span></code> whose <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> is a valid
+two-octet padding option [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>].</p>
 </div>
 </dd></dl>
 
@@ -845,7 +847,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun">
 <span class="sig-name descname"><span class="pre">_read_opt_tun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_tun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Tunnel Encapsulation Limit option.</p>
-<p>Structure of IPv6-Opts Tunnel Encapsulation Limit option [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>]:</p>
+<p>Structure of IPv6-Opts Tunnel Encapsulation Limit option [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   Option Type     Opt Data Len   Opt Data Len
  0 1 2 3 4 5 6 7
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -876,7 +878,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra">
 <span class="sig-name descname"><span class="pre">_read_opt_ra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Router Alert option.</p>
-<p>Structure of IPv6-Opts Router Alert option [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2711.html"><strong>RFC 2711</strong></a>]:</p>
+<p>Structure of IPv6-Opts Router Alert option [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2711.html"><strong>RFC 2711</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -905,7 +907,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso">
 <span class="sig-name descname"><span class="pre">_read_opt_calipso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_calipso"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.</p>
-<p>Structure of IPv6-Opts CALIPSO option [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html"><strong>RFC 5570</strong></a>]:</p>
+<p>Structure of IPv6-Opts CALIPSO option [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html"><strong>RFC 5570</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>------------------------------------------------------------
 | Next Header | Hdr Ext Len   | Option Type | Option Length|
 +-------------+---------------+-------------+--------------+
@@ -940,7 +942,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd">
 <span class="sig-name descname"><span class="pre">_read_opt_smf_dpd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_smf_dpd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (<code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code>) option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]:</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]:</p>
 <ul>
 <li><p>IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in <strong>I-DPD</strong> (Identification-Based DPD) mode</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
@@ -990,7 +992,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm">
 <span class="sig-name descname"><span class="pre">_read_opt_pdm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_pdm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Performance and Diagnostic Metrics (PDM) option.</p>
-<p>Structure of IPv6-Opts PDM option [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8250.html"><strong>RFC 8250</strong></a>]:</p>
+<p>Structure of IPv6-Opts PDM option [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8250.html"><strong>RFC 8250</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1025,7 +1027,7 @@ hand.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs">
 <span class="sig-name descname"><span class="pre">_read_opt_qs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_qs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Quick Start option.</p>
-<p>Structure of IPv6-Opts Quick-Start option [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>]:</p>
+<p>Structure of IPv6-Opts Quick-Start option [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>]:</p>
 <ul>
 <li><p>A Quick-Start Request:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
@@ -1069,13 +1071,19 @@ hand.</p>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is malformed.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An option whose QS function is neither of the two above has no
+defined layout, so the schema keeps it as an unassigned option and
+it is parsed as one, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_none" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_none"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_none()</span></code></a>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl">
 <span class="sig-name descname"><span class="pre">_read_opt_rpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_rpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.</p>
-<p>Structure of IPv6-Opts RPL option [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html"><strong>RFC 6553</strong></a>]:</p>
+<p>Structure of IPv6-Opts RPL option [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html"><strong>RFC 6553</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1087,7 +1095,7 @@ hand.</p>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </pre></div>
 </div>
-<p>The sub-TLVs, which <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a> says MUST be skipped when
+<p>The sub-TLVs, which <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a> says MUST be skipped when
 unrecognised, are kept as raw octets in <code class="docutils literal notranslate"><span class="pre">sub_tlvs</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1112,7 +1120,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl">
 <span class="sig-name descname"><span class="pre">_read_opt_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option.</p>
-<p>Structure of IPv6-Opts MPL option [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7731.html"><strong>RFC 7731</strong></a>]:</p>
+<p>Structure of IPv6-Opts MPL option [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7731.html"><strong>RFC 7731</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1145,7 +1153,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp">
 <span class="sig-name descname"><span class="pre">_read_opt_ilnp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ilnp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option.</p>
-<p>Structure of IPv6-Opts ILNP Nonce option [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a>]:</p>
+<p>Structure of IPv6-Opts ILNP Nonce option [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1175,7 +1183,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio">
 <span class="sig-name descname"><span class="pre">_read_opt_lio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_lio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Line-Identification option.</p>
-<p>Structure of IPv6-Opts Line-Identification option [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6788.html"><strong>RFC 6788</strong></a>]:</p>
+<p>Structure of IPv6-Opts Line-Identification option [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6788.html"><strong>RFC 6788</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1205,7 +1213,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo">
 <span class="sig-name descname"><span class="pre">_read_opt_jumbo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_jumbo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Jumbo Payload option.</p>
-<p>Structure of IPv6-Opts Jumbo Payload option [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>]:</p>
+<p>Structure of IPv6-Opts Jumbo Payload option [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                 |  Option Type  |  Opt Data Len |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1236,7 +1244,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home">
 <span class="sig-name descname"><span class="pre">_read_opt_home</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_home"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Home Address option.</p>
-<p>Structure of IPv6-Opts Home Address option [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of IPv6-Opts Home Address option [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1275,7 +1283,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff">
 <span class="sig-name descname"><span class="pre">_read_opt_ip_dff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ip_dff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Opts Depth-First Forwarding (<code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code>) option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6971.html"><strong>RFC 6971</strong></a>]:</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6971.html"><strong>RFC 6971</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1285,6 +1293,8 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">OptDataLenDFF</span></code> is <code class="docutils literal notranslate"><span class="pre">3</span></code>, the flags octet and the sequence number,
+as corrected by <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6971.html"><strong>RFC 6971</strong></a> Errata ID 3937; the RFC text says <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1299,7 +1309,7 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema.len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1321,6 +1331,12 @@ unrecognised, are kept as raw octets in <code class="docutils literal notranslat
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p>Options given as a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> are fresh input: padding options in
+it are dropped, and padding is inserted after each option to align
+the header. Options given as an
+<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>, i.e. parsed
+data, are emitted in order with their own padding options kept, and
+padding is added only at the end if the header is not aligned.</p>
 <p>The returned length is that of the options area alone, so it is the
 value <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> needs for <code class="docutils literal notranslate"><span class="pre">hdr_ext_len</span></code>. Since the two octets
 of the fixed header precede it, an options area is well formed only
@@ -1379,7 +1395,8 @@ padding octets <em>after</em> the two octets of the option header</p></li>
 the <em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.len</span></code> is the
 <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field: two octets fewer, and absent altogether for a
 <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. <code class="docutils literal notranslate"><span class="pre">opt</span></code> is honoured so that re-making a parsed padding
-option keeps its size instead of collapsing to a single <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.</p>
+option keeps its type and size. A <code class="docutils literal notranslate"><span class="pre">PadN</span></code> with <code class="docutils literal notranslate"><span class="pre">length</span></code> <code class="docutils literal notranslate"><span class="pre">0</span></code> is
+a valid two-octet option [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>] and is kept.</p>
 </div>
 </dd></dl>
 
@@ -1442,7 +1459,9 @@ option keeps its size instead of collapsing to a single <code class="docutils li
 <li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – CALIPSO domain of interpretation</p></li>
 <li><p><strong>level</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – sensitivity level</p></li>
 <li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – checksum of the option</p></li>
-<li><p><strong>bitmap</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – compartment bitmap</p></li>
+<li><p><strong>bitmap</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – compartment bitmap, as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> or as the
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of octets the reader stores; its length must be a
+multiple of 4 octets</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
@@ -1452,7 +1471,15 @@ option keeps its size instead of collapsing to a single <code class="docutils li
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the bitmap is not a whole number of 32-bit words.</p>
+</dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">Cmpt</span> <span class="pre">Length</span></code> on the wire counts 32-bit words [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html#section-5.1"><strong>RFC 5570 Section 5.1</strong></a>],
+whereas the bitmap here is sized in octets.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1495,7 +1522,7 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pdm">
-<span class="sig-name descname"><span class="pre">_make_opt_pdm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">psntp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psnlr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deltatlr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deltatls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_pdm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pdm" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_opt_pdm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">psntp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psnlr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deltatlr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deltatls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaledtlr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaledtls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_pdm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pdm" title="Link to this definition">¶</a></dt>
 <dd><p>Make IPv6-Opts PDM option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1506,6 +1533,10 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 <li><p><strong>psnlr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – packet sequence number (PSN) last received</p></li>
 <li><p><strong>deltatlr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – delta time last received (in attoseconds)</p></li>
 <li><p><strong>deltatls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – delta time last sent (in attoseconds)</p></li>
+<li><p><strong>scaledtlr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – scale of delta time last received; derived from
+<code class="docutils literal notranslate"><span class="pre">deltatlr</span></code> if not given</p></li>
+<li><p><strong>scaledtls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – scale of delta time last sent; derived from
+<code class="docutils literal notranslate"><span class="pre">deltatls</span></code> if not given</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
@@ -1520,13 +1551,13 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_qs">
-<span class="sig-name descname"><span class="pre">_make_opt_qs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;QSFunction.Quick_Start_Request:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_qs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_qs" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_opt_qs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;QSFunction.Quick_Start_Request:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_qs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_qs" title="Link to this definition">¶</a></dt>
 <dd><p>Make IPv6-Opts QS option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></span>) – option type value</p></li>
-<li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.data.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
 <li><p><strong>func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.qs_function.QSFunction" title="pcapkit.const.ipv6.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – QS function type</p></li>
 <li><p><strong>func_default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – default value for QS function type</p></li>
 <li><p><strong>func_namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – namespace for QS function type</p></li>
@@ -1534,14 +1565,16 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 <li><p><strong>rate</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – rate (in kbps)</p></li>
 <li><p><strong>ttl</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – time to live (in seconds)</p></li>
 <li><p><strong>nonce</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – nonce value</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits (<code class="docutils literal notranslate"><span class="pre">R</span></code>) after the nonce</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Constructed option schema.</p>
+<dd class="field-odd"><p>Constructed option schema; an unassigned option schema if <code class="docutils literal notranslate"><span class="pre">opt</span></code>
+is a Quick-Start option parsed as unassigned, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1580,7 +1613,7 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_mpl">
-<span class="sig-name descname"><span class="pre">_make_opt_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_mpl" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_opt_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_type_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_mpl" title="Link to this definition">¶</a></dt>
 <dd><p>Make IPv6-Opts MPL option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1593,6 +1626,8 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 <li><p><strong>seed_type_reversed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – reversed flag of seed-id type</p></li>
 <li><p><strong>max</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – maximum sequence number flag</p></li>
 <li><p><strong>drop</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – drop packet flag</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits (<code class="docutils literal notranslate"><span class="pre">rsv</span></code>), i.e. the low four bits of the
+flags octet</p></li>
 <li><p><strong>seq</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – MPL sequence number</p></li>
 <li><p><strong>seed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – MPL seed ID, ignored when the seed-id type is
 <a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS" title="pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPV6_SOURCE_ADDRESS</span></code></a>,
@@ -1702,7 +1737,7 @@ as the seed is then the IPv6 source address</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_ip_dff">
-<span class="sig-name descname"><span class="pre">_make_opt_ip_dff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_ip_dff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_ip_dff" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_opt_ip_dff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._make_opt_ip_dff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_ip_dff" title="Link to this definition">¶</a></dt>
 <dd><p>Make IPv6-Opts IP DFF option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1712,6 +1747,7 @@ as the seed is then the IPv6 source address</p></li>
 <li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – DFF version</p></li>
 <li><p><strong>dup</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – duplicate packet flag</p></li>
 <li><p><strong>ret</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – return packet flag</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits, i.e. the low four bits of the flags octet</p></li>
 <li><p><strong>seq</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – DFF sequence number</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
@@ -1872,7 +1908,7 @@ value is a <code class="docutils literal notranslate"><span class="pre">(parser,
 <p>Header schema for IPv6-Opts padding options.</p>
 <p>The two padding options do <strong>not</strong> share a wire shape: a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is
 a lone type octet, whereas a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option is a type octet, an
-<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> octet, and that many padding octets [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>].
+<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> octet, and that many padding octets [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>].
 Both the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> octet (<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a>) and the padding data
 (<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.PadOption.pad" title="pcapkit.protocols.schema.internet.ipv6_opts.PadOption.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.pad</span></code></a>) are therefore sized from the option type,
 so that a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option consumes exactly one octet.</p>
@@ -2300,6 +2336,12 @@ number that was received from the MPL Seed.</p>
 conforms to this specification.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits (<code class="docutils literal notranslate"><span class="pre">rsv</span></code>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -2400,6 +2442,12 @@ conforms to this specification.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags.ret">
 <span class="sig-name descname"><span class="pre">ret</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags.ret" title="Link to this definition">¶</a></dt>
 <dd><p>Retune flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2508,6 +2556,12 @@ number that was received from the MPL Seed.</p>
 conforms to this specification.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></dt>
+<dd><p>Reserved bits (<code class="docutils literal notranslate"><span class="pre">rsv</span></code>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -2531,6 +2585,12 @@ conforms to this specification.</p>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">ret</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></dt>
 <dd><p>Retune flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></dt>
+<dd><p>Reserved bits.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2560,6 +2620,12 @@ conforms to this specification.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
 <p>Quick start test flag.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags.len">
+<span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags.len" title="Link to this definition">¶</a></dt>
+<dd><p>Option length.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags.func">
 <span class="sig-name descname"><span class="pre">func</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags.func" title="Link to this definition">¶</a></dt>
 <dd><p>QS function.</p>
@@ -2576,6 +2642,12 @@ conforms to this specification.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.QSNonce.nonce">
 <span class="sig-name descname"><span class="pre">nonce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.QSNonce.nonce" title="Link to this definition">¶</a></dt>
 <dd><p>Nonce.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.QSNonce.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.QSNonce.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits (<code class="docutils literal notranslate"><span class="pre">R</span></code>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -2620,7 +2692,7 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
-field nor any option data (c.f. <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
+field nor any option data (c.f. <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> is declared as a
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
 for it. A skipped conditional field is <em>recorded</em> in the packet data as
@@ -2706,7 +2778,7 @@ instance.</p></li>
 <p class="admonition-title">Note</p>
 <p>The field is sized <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span> <span class="pre">+</span> <span class="pre">2</span></code> rather than <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>.
 <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> counts only what follows the option header
-[<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>], while both schemas this may return inherit
+[<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>], while both schemas this may return inherit
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.type" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.type</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> and so parse those two octets
 themselves. Sizing the field at <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> would hand them an area two
 octets short of the option they read, which
@@ -2782,6 +2854,9 @@ instance.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">func</span></code> is <code class="docutils literal notranslate"><span class="pre">8</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
 wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartReportOption</span></code></a>
 instance.</p></li>
+<li><p>Otherwise, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
+wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a>
+instance, sized by the option’s own <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>.</p></li>
 </ul>
 </p>
 </dd>
@@ -3076,7 +3151,7 @@ instance.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs">
 <span class="sig-name descname"><span class="pre">sub_tlvs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs" title="Link to this definition">¶</a></dt>
-<dd><p>Sub-TLVs [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
+<dd><p>Sub-TLVs [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3158,6 +3233,12 @@ instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.MPLFlags.drop">
 <span class="sig-name descname"><span class="pre">drop</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.MPLFlags.drop" title="Link to this definition">¶</a></dt>
 <dd><p>Non-conformation flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.MPLFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.MPLFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits (<code class="docutils literal notranslate"><span class="pre">rsv</span></code>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -3260,6 +3341,12 @@ instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.DFFFlags.ret">
 <span class="sig-name descname"><span class="pre">ret</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.DFFFlags.ret" title="Link to this definition">¶</a></dt>
 <dd><p>Return flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.DFFFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.DFFFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits, i.e. the low four bits of the flags octet.</p>
 </dd></dl>
 
 </dd></dl>

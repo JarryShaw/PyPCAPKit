@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -594,6 +595,7 @@
              <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">src</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
@@ -607,6 +609,8 @@
 <span class="sd">            type_default: Default value for undefined packet type.</span>
 <span class="sd">            type_namespace: Namespace for packet type.</span>
 <span class="sd">            type_reversed: Reverse namespace for packet type.</span>
+<span class="sd">            total_length: Packet length (header includes); computed as ``30`` plus</span>
+<span class="sd">                the payload length when not given.</span>
 <span class="sd">            dst: Destination Address.</span>
 <span class="sd">            src: Source Address.</span>
 <span class="sd">            payload: Payload data.</span>
@@ -618,10 +622,12 @@
 <span class="sd">        """</span>
         <span class="n">type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
                                     <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_length</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IPX</span><span class="p">(</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">chksum</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">30</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
             <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
@@ -674,11 +680,28 @@
             <span class="s1">'chksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">'count'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">'dst'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
-            <span class="s1">'src'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
+            <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+            <span class="s1">'dst'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_ipx_address</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
+            <span class="s1">'src'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_ipx_address</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ipx_address</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="s1">'Data_Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPX address field.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            addr: Parsed IPX address field.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The 12-octet IPX address: network number, node number and</span>
+<span class="sd">            socket number.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
+                <span class="o">+</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
+                <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">socket</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ipx_address</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Address'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read IPX address field.</span>

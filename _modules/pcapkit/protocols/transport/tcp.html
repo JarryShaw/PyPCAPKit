@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -2107,6 +2108,8 @@
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_MPTCPCapableFlag</span><span class="p">(</span>
                 <span class="n">req</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'req'</span><span class="p">]),</span>
                 <span class="n">ext</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'ext'</span><span class="p">]),</span>
+                <span class="n">deny_join</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'deny_join'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                 <span class="n">hsa</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'hsa'</span><span class="p">]),</span>
             <span class="p">),</span>
             <span class="n">skey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">skey</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -2180,6 +2183,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="n">Enum_Flags</span><span class="o">.</span><span class="n">SYN</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'backup'</span><span class="p">]),</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_id</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
@@ -2235,6 +2239,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="n">Enum_Flags</span><span class="o">.</span><span class="n">SYN</span> <span class="o">|</span> <span class="n">Enum_Flags</span><span class="o">.</span><span class="n">ACK</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'backup'</span><span class="p">]),</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_id</span><span class="p">,</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
@@ -2283,6 +2288,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="n">Enum_Flags</span><span class="o">.</span><span class="n">ACK</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2322,13 +2328,22 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed option data.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            The reserved field spans the 4 low bits of the subtype octet and the</span>
+<span class="sd">            3 high bits of the flags octet; it is kept as one 7-bit value. The</span>
+<span class="sd">            checksum is absent when the option length leaves no room for it,</span>
+<span class="sd">            i.e., when checksums were not negotiated.</span>
+
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPDSS</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">data_fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]),</span>
+            <span class="n">ack_wide</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'a'</span><span class="p">]),</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>
+            <span class="n">dsn_wide</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'m'</span><span class="p">]),</span>
             <span class="n">dsn</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dsn</span><span class="p">,</span>
             <span class="n">ssn</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ssn</span><span class="p">,</span>
             <span class="n">dl_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dl_len</span><span class="p">,</span>
@@ -2342,18 +2357,22 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_mptcp_addaddr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPTCPAddAddress'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPTCPAddAddress'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read Add Address option.</span>
 
-<span class="sd">        Structure of ``ADD_ADDR`` [:rfc:`6824`]:</span>
+<span class="sd">        Structure of ``ADD_ADDR`` [:rfc:`8684`, section 3.4.1, figure 12]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
 <span class="sd">                                1                   2                   3</span>
 <span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
 <span class="sd">           +---------------+---------------+-------+-------+---------------+</span>
-<span class="sd">           |     Kind      |     Length    |Subtype| IPVer |  Address ID   |</span>
+<span class="sd">           |     Kind      |     Length    |Subtype|(rsv)|E|  Address ID   |</span>
 <span class="sd">           +---------------+---------------+-------+-------+---------------+</span>
-<span class="sd">           |         Address (IPv4 - 4 octets / IPv6 - 16 octets)          |</span>
+<span class="sd">           |           Address (IPv4: 4 octets / IPv6: 16 octets)          |</span>
 <span class="sd">           +-------------------------------+-------------------------------+</span>
-<span class="sd">           |   Port (2 octets, optional)   |</span>
+<span class="sd">           |   Port (2 octets, optional)   |                               |</span>
+<span class="sd">           +-------------------------------+                               |</span>
+<span class="sd">           |                Truncated HMAC (8 octets, if E=0)              |</span>
+<span class="sd">           |                               +-------------------------------+</span>
+<span class="sd">           |                               |</span>
 <span class="sd">           +-------------------------------+</span>
 
 <span class="sd">        Arguments:</span>
@@ -2364,20 +2383,29 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: Invalid IP version and/or addresses.</span>
+<span class="sd">            ProtocolError: If the length is not one of the :rfc:`8684` lengths.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The address family, the port and the HMAC all follow from the</span>
+<span class="sd">            option length, never from the ``E`` flag, so an :rfc:`6824`</span>
+<span class="sd">            option, whose ``IPVer`` nibble overlaps the reserved bits and</span>
+<span class="sd">            ``E``, parses the same way and round-trips unchanged.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid IP version'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPAddAddress</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
-            <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'version'</span><span class="p">],</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
+            <span class="n">echo</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'echo'</span><span class="p">]),</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_id</span><span class="p">,</span>
             <span class="n">addr</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -2429,6 +2457,7 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_id</span><span class="p">),</span>
         <span class="p">)</span>
 
@@ -2484,6 +2513,7 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'backup'</span><span class="p">]),</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_id</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2496,7 +2526,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPTCPFallback'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPTCPFallback'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read Fallback option.</span>
 
-<span class="sd">        Structure of ``MP_FAIL`` [:rfc:`6824`]:</span>
+<span class="sd">        Structure of ``MP_FAIL`` [:rfc:`8684`, section 3.7, figure 16]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -2528,6 +2558,7 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">dsn</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dsn</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2568,7 +2599,7 @@
 <span class="sd">            subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the</span>
 <span class="sd">            option receiver's key (64 bits, 8). The guard,</span>
 <span class="sd">            ``_make_mptcp_fastclose`` and the schema must all agree on 12, the</span>
-<span class="sd">            schema accounting for the reserved octet with a padding field.</span>
+<span class="sd">            schema reading the 12 reserved bits along with the subtype.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
@@ -2578,6 +2609,7 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">rkey</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3397,6 +3429,8 @@
                             <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">flag_req</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">flag_ext</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">flag_deny_join</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">flag_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">flag_hsa</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">skey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                             <span class="n">rkey</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -3415,6 +3449,9 @@
 <span class="sd">            version: MPTCP version</span>
 <span class="sd">            flag_req: checksum required flag</span>
 <span class="sd">            flag_ext: extensibility flag</span>
+<span class="sd">            flag_deny_join: flag for not establishing new subflows to the</span>
+<span class="sd">                source address</span>
+<span class="sd">            flag_reserved: reserved flags (``D`` to ``G``)</span>
 <span class="sd">            flag_hsa: use of HMAC-SHA1 flag</span>
 <span class="sd">            skey: option sender's key</span>
 <span class="sd">            rkey: option receiver's key</span>
@@ -3433,6 +3470,8 @@
             <span class="n">version</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">version</span>
             <span class="n">flag_req</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">req</span>
             <span class="n">flag_ext</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ext</span>
+            <span class="n">flag_deny_join</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">deny_join</span>
+            <span class="n">flag_reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">flag_hsa</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">hsa</span>
             <span class="n">skey</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">skey</span>
             <span class="n">rkey</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rkey</span>
@@ -3456,6 +3495,8 @@
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'req'</span><span class="p">:</span> <span class="n">flag_req</span><span class="p">,</span>
                 <span class="s1">'ext'</span><span class="p">:</span> <span class="n">flag_ext</span><span class="p">,</span>
+                <span class="s1">'deny_join'</span><span class="p">:</span> <span class="n">flag_deny_join</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">flag_reserved</span><span class="p">,</span>
                 <span class="s1">'hsa'</span><span class="p">:</span> <span class="n">flag_hsa</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">skey</span><span class="o">=</span><span class="n">skey</span><span class="p">,</span>
@@ -3491,6 +3532,7 @@
 <div class="viewcode-block" id="TCP._make_join_syn">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_join_syn">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_join_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPJoinSYN]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                        <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                        <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                        <span class="n">token</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -3501,6 +3543,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            backup: backup flag</span>
 <span class="sd">            addr_id: address ID</span>
 <span class="sd">            token: receiver's token</span>
@@ -3512,6 +3555,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
             <span class="n">token</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">token</span>
@@ -3522,6 +3566,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'backup'</span><span class="p">:</span> <span class="n">backup</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">addr_id</span><span class="p">,</span>
@@ -3533,6 +3578,7 @@
 <div class="viewcode-block" id="TCP._make_join_synack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_join_synack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_join_synack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPJoinSYNACK]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                           <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span>
@@ -3543,6 +3589,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            backup: backup flag</span>
 <span class="sd">            addr_id: address ID</span>
 <span class="sd">            hmac: sender's truncated HMAC</span>
@@ -3554,6 +3601,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
             <span class="c1"># NOTE: ``hmac`` must be carried over here, or reconstructing a</span>
@@ -3572,6 +3620,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'backup'</span><span class="p">:</span> <span class="n">backup</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">addr_id</span><span class="p">,</span>
@@ -3583,6 +3632,7 @@
 <div class="viewcode-block" id="TCP._make_join_ack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_join_ack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_join_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPJoinACK]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                        <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPJoinACK'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP join ACK option.</span>
@@ -3590,6 +3640,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            hmac: sender's HMAC</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -3598,6 +3649,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinACK</span><span class="p">(</span>
@@ -3609,6 +3661,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -3617,8 +3670,11 @@
 <div class="viewcode-block" id="TCP._make_mptcp_dss">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_dss">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_dss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPDSS]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                         <span class="n">data_fin</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">ack_wide</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">ack</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">dsn_wide</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">dsn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">ssn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3629,53 +3685,70 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits (7 bits)</span>
 <span class="sd">            data_fin: ``DATA_FIN`` flag</span>
+<span class="sd">            ack_wide: whether Data ACK is 8 octets; if not given, it is 8 octets</span>
+<span class="sd">                only when ``ack`` does not fit in 4</span>
 <span class="sd">            ack: Data ACK</span>
+<span class="sd">            dsn_wide: whether data sequence number is 8 octets; if not given, it</span>
+<span class="sd">                is 8 octets only when ``dsn`` does not fit in 4</span>
 <span class="sd">            dsn: data sequence number</span>
 <span class="sd">            ssn: subflow sequence number</span>
 <span class="sd">            dl_len: data-level length</span>
-<span class="sd">            checksum: checksum</span>
+<span class="sd">            checksum: checksum, or ``None`` if checksums were not negotiated</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the mapping fields are given only in part, or a</span>
+<span class="sd">                4-octet field is asked to hold a value wider than 32 bits.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">data_fin</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">data_fin</span>
+            <span class="n">ack_wide</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ack_wide</span>
             <span class="n">ack</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ack</span>
+            <span class="n">dsn_wide</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dsn_wide</span>
             <span class="n">dsn</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dsn</span>
             <span class="n">ssn</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ssn</span>
             <span class="n">dl_len</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dl_len</span>
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
 
         <span class="n">flag_A</span> <span class="o">=</span> <span class="n">ack</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">flag_a</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="n">flag_a</span> <span class="o">=</span> <span class="n">ack_wide</span> <span class="k">if</span> <span class="n">ack_wide</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">flag_A</span> <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">)</span>
 
         <span class="n">flag_M</span> <span class="o">=</span> <span class="n">dsn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">flag_m</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="n">flag_m</span> <span class="o">=</span> <span class="n">dsn_wide</span> <span class="k">if</span> <span class="n">dsn_wide</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">flag_M</span> <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">flag_M</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ssn</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dl_len</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">checksum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">flag_A</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">flag_a</span> <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="n">flag_M</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">flag_m</span> <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="si">}</span><span class="s1">: value too wide for 4 octets'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flag_M</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ssn</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dl_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="si">}</span><span class="s1">: missing required fields'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">flag_M</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ssn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dl_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="si">}</span><span class="s1">: missing required fields'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPDSS</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9.</span>
-            <span class="c1"># Read it as a base plus a widening increment rather than</span>
-            <span class="c1"># as one term per field: 4 for ``Kind``/``Length``/subtype/flags, then</span>
-            <span class="c1"># ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 to make</span>
-            <span class="c1"># it 8; ``M`` contributes 12 (a 4-octet DSN, the 4-octet Subflow</span>
-            <span class="c1"># Sequence Number, the 2-octet Data-Level Length and the 2-octet</span>
-            <span class="c1"># Checksum) and ``m`` a further 4 to widen the DSN to 8. All flags set</span>
-            <span class="c1"># gives 4 + 4 + 4 + 12 + 4 = 28, which is the maximum the section</span>
-            <span class="c1"># states in prose.</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_a</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">12</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">flag_m</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="c1"># NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9:</span>
+            <span class="c1"># 4 for ``Kind``/``Length``/subtype/flags, then the Data ACK (4, or</span>
+            <span class="c1"># 8 with ``a``) when ``A`` is set, and the mapping when ``M`` is set</span>
+            <span class="c1"># -- the DSN (4, or 8 with ``m``), the 4-octet Subflow Sequence</span>
+            <span class="c1"># Number, the 2-octet Data-Level Length and, only if checksums were</span>
+            <span class="c1"># negotiated, the 2-octet Checksum. ``a`` and ``m`` widen a field</span>
+            <span class="c1"># only when it is present, so a stray flag on the wire still packs</span>
+            <span class="c1"># back without changing the length.</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">((</span><span class="mi">8</span> <span class="k">if</span> <span class="n">flag_a</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="o">+</span> <span class="p">((</span><span class="mi">8</span> <span class="k">if</span> <span class="n">flag_m</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span> <span class="o">&amp;</span> <span class="mb">0b111</span><span class="p">,</span>
                 <span class="s1">'F'</span><span class="p">:</span> <span class="n">data_fin</span><span class="p">,</span>
                 <span class="s1">'A'</span><span class="p">:</span> <span class="n">flag_A</span><span class="p">,</span>
                 <span class="s1">'a'</span><span class="p">:</span> <span class="n">flag_a</span><span class="p">,</span>
@@ -3693,55 +3766,88 @@
 <div class="viewcode-block" id="TCP._make_mptcp_addaddr">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_addaddr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPAddAddress]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">echo</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | int | bytes | str'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
                              <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">hmac</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPAddAddress'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP add address option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
+<span class="sd">            echo: echo flag</span>
 <span class="sd">            addr_id: address ID</span>
 <span class="sd">            addr: address</span>
 <span class="sd">            port: port number</span>
+<span class="sd">            hmac: truncated HMAC</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hmac`` is not 8 octets, or is given together</span>
+<span class="sd">                with ``echo`` set.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :rfc:`8684` section 3.4.1 allows an ADD_ADDR without the truncated</span>
+<span class="sd">            HMAC only as an echo (``E`` set). So when none of ``reserved``,</span>
+<span class="sd">            ``echo`` and ``hmac`` is given, the option is built in the</span>
+<span class="sd">            :rfc:`6824` layout instead, its ``IPVer`` nibble taking the place of</span>
+<span class="sd">            the reserved bits and ``E``; otherwise ``reserved`` defaults to 0 and</span>
+<span class="sd">            ``echo`` to whether ``hmac`` is absent. A parsed ``opt`` is rebuilt</span>
+<span class="sd">            as it was read, without those checks.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
+            <span class="n">echo</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">echo</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">port</span>
+            <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: Through ``parse_ip_address`` because the ``version`` sub-field</span>
-            <span class="c1"># and the option length below are both derived from the family here,</span>
-            <span class="c1"># ahead of the schema, so a bare ``ipaddress.ip_address`` would launder</span>
-            <span class="c1"># a ``bool`` into an ``IPv4Address`` that the schema's own guard can no</span>
-            <span class="c1"># longer tell from a real address: ``addr=True`` would reach</span>
-            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``.</span>
+            <span class="c1"># NOTE: Through ``parse_ip_address`` because the option length below</span>
+            <span class="c1"># is derived from the family here, ahead of the schema, so a bare</span>
+            <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` into an</span>
+            <span class="c1"># ``IPv4Address`` that the schema's own guard can no longer tell from</span>
+            <span class="c1"># a real address: ``addr=True`` would reach</span>
+            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with an IPv4 length.</span>
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>
+        <span class="k">if</span> <span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">echo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hmac</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span><span class="p">,</span> <span class="n">echo</span> <span class="o">=</span> <span class="n">version</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">version</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">echo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">echo</span> <span class="o">=</span> <span class="n">hmac</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hmac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">echo</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">hmac</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="si">}</span><span class="s1">: invalid HMAC'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPAddAddress</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="k">if</span> <span class="n">hmac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
+                <span class="s1">'echo'</span><span class="p">:</span> <span class="n">echo</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">addr_id</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">addr_val</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">hmac</span><span class="o">=</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TCP._make_mptcp_remove">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_remove">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPRemoveAddress]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'Optional[list[int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPRemoveAddress'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP remove address option.</span>
@@ -3749,6 +3855,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            addr_id: address ID list</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -3757,6 +3864,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">addr_id_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">addr_id_list</span> <span class="o">=</span> <span class="n">addr_id</span> <span class="k">if</span> <span class="n">addr_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
@@ -3772,6 +3880,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr_id_list</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">addr_id_list</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -3780,6 +3889,7 @@
 <div class="viewcode-block" id="TCP._make_mptcp_prio">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_prio">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_prio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPPriority]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                              <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPPriority'</span><span class="p">:</span>
@@ -3788,6 +3898,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            backup: backup flag</span>
 <span class="sd">            addr_id: address ID</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -3800,6 +3911,7 @@
             <span class="c1"># NOTE: ``backup`` must be carried over, or reconstructing a parsed</span>
             <span class="c1"># MP_PRIO would always write ``B=0``; the ``B`` flag is the entire</span>
             <span class="c1"># payload of this option.</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
 
@@ -3819,6 +3931,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="k">if</span> <span class="n">addr_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'backup'</span><span class="p">:</span> <span class="n">backup</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="n">addr_id</span><span class="p">,</span>
@@ -3828,6 +3941,7 @@
 <div class="viewcode-block" id="TCP._make_mptcp_fail">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fail">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPFallback]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPFallback'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP fail option.</span>
@@ -3835,6 +3949,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            dsn: data sequence number</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -3843,6 +3958,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">dsn</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dsn</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPFallback</span><span class="p">(</span>
@@ -3850,6 +3966,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">dsn</span><span class="o">=</span><span class="n">dsn</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -3858,6 +3975,7 @@
 <div class="viewcode-block" id="TCP._make_mptcp_fastclose">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mptcp_fastclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPTCPFastclose]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">key</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPTCPFastclose'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make multipath TCP fastclose option.</span>
@@ -3865,6 +3983,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            subtype: MPTCP subtype</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            reserved: reserved bits</span>
 <span class="sd">            key: option receiver's key</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -3873,6 +3992,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rkey</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPFastclose</span><span class="p">(</span>
@@ -3880,6 +4000,7 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
         <span class="p">)</span></div>

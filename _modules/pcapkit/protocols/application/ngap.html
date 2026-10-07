@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -881,8 +882,9 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If |pycrate|_ is not installed, or if the payload is</span>
-<span class="sd">                not a well formed aligned PER ``NGAP-PDU``.</span>
+<span class="sd">            ProtocolError: If |pycrate|_ is not installed, if the payload is</span>
+<span class="sd">                not a well formed aligned PER ``NGAP-PDU``, or if octets follow</span>
+<span class="sd">                the ``NGAP-PDU``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -902,7 +904,23 @@
                 <span class="c1"># some 700x the ~0.15 ms of the decode itself; and `from_aper()`</span>
                 <span class="c1"># overwrites the stored value outright, so it would buy nothing</span>
                 <span class="c1"># even if it were free.</span>
-                <span class="n">pdu</span><span class="o">.</span><span class="n">from_aper</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pycrate_core.charpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Charpy</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+                <span class="c1"># NOTE: decoded from a `Charpy` rather than from the bytes, so</span>
+                <span class="c1"># that what the decoder did not consume can be measured: a bare</span>
+                <span class="c1"># `from_aper(bytes)` ignores a suffix. SCTP preserves message</span>
+                <span class="c1"># boundaries: each user message occupies its own DATA chunk</span>
+                <span class="c1"># (RFC 9260 §1.3), and one with both B and E set is a complete,</span>
+                <span class="c1"># unfragmented message (§3.3.1). The outermost APER encoding is</span>
+                <span class="c1"># padded with zero to seven zero bits up to the next octet</span>
+                <span class="c1"># (X.691 (02/2021) §11.1.4), and the result is the complete</span>
+                <span class="c1"># encoding (§11.1.5). So a whole octet left over is not part of</span>
+                <span class="c1"># the NGAP-PDU.</span>
+                <span class="n">char</span> <span class="o">=</span> <span class="n">Charpy</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">pdu</span><span class="o">.</span><span class="n">from_aper</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+                <span class="n">trailing</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">len_byte</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">trailing</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'NGAP: </span><span class="si">{</span><span class="n">trailing</span><span class="si">}</span><span class="s1"> octet(s) after the NGAP-PDU'</span><span class="p">)</span>
                 <span class="n">kind</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">pdu</span><span class="o">.</span><span class="n">get_val</span><span class="p">()</span>
 
                 <span class="n">message</span><span class="p">,</span> <span class="n">message_body</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s1">'value'</span><span class="p">]</span>
@@ -932,9 +950,9 @@
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="c1"># NOTE: a ProtocolError raised inside this block is already</span>
-                <span class="c1"># specific about what went wrong, so it must not be caught below</span>
-                <span class="c1"># and relabelled "malformed NGAP-PDU". Nothing here raises one</span>
-                <span class="c1"># now; this keeps that true of the next edit.</span>
+                <span class="c1"># specific about what went wrong, such as the trailing-octet</span>
+                <span class="c1"># check above, so it must not be caught below and relabelled</span>
+                <span class="c1"># "malformed NGAP-PDU".</span>
                 <span class="k">raise</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="c1"># NOTE: `Exception` rather than something narrower on purpose.</span>

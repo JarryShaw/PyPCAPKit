@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -896,6 +897,30 @@
             <span class="n">next_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>  <span class="c1"># type: ignore[misc,call-arg,arg-type]</span>
             <span class="n">info</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span>
+
+            <span class="c1"># A layer with no ``next`` field cannot safely continue the walk.</span>
+            <span class="c1"># This is a *structural* check, not a fixed set of codes: every</span>
+            <span class="c1"># dedicated parser and</span>
+            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry</span>
+            <span class="c1"># ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no</span>
+            <span class="c1"># dedicated parser but is registered to ``IPv6_Ext`` directly --</span>
+            <span class="c1"># while every other code with no dedicated parser -- ``253``,</span>
+            <span class="c1"># ``254``, or whatever IANA assigns next -- resolves to plain</span>
+            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see</span>
+            <span class="c1"># :attr:`__generic_ext_codes__`). Reading ``info.next`` on that</span>
+            <span class="c1"># would raise ``AttributeError`` and let a further-out</span>
+            <span class="c1"># :func:`~pcapkit.utilities.decorators.beholder` degrade the</span>
+            <span class="c1"># *whole* packet.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Such a layer is not recorded as an extension header: it consumed</span>
+            <span class="c1"># nothing (``Raw.length`` is 0), so recording it would emit its</span>
+            <span class="c1"># octets twice on rebuild, once from ``__exthdr__`` and once more as</span>
+            <span class="c1"># the upper layer. Stopping here with ``proto`` unchanged instead</span>
+            <span class="c1"># hands the remaining octets to ``super()._decode_next_layer``</span>
+            <span class="c1"># below, which decodes them once, as the upper layer.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">):</span>
+                <span class="k">break</span>
+
             <span class="n">name</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                 <span class="n">name</span><span class="p">:</span> <span class="n">info</span><span class="p">,</span>
@@ -918,34 +943,6 @@
             <span class="c1"># this must happen before any exit from the loop, since the payload</span>
             <span class="c1"># is what gets handed to ``super()._decode_next_layer`` below</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">next_</span><span class="o">.</span><span class="n">length</span><span class="p">:]</span>
-
-            <span class="c1"># A layer with no ``next`` field cannot safely continue the walk.</span>
-            <span class="c1"># This is a *structural* check, not a fixed set of codes: every</span>
-            <span class="c1"># dedicated parser and</span>
-            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry</span>
-            <span class="c1"># ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no</span>
-            <span class="c1"># dedicated parser but is registered to ``IPv6_Ext`` directly --</span>
-            <span class="c1"># while every other code with no dedicated parser -- ``253``,</span>
-            <span class="c1"># ``254``, or whatever IANA assigns next -- resolves to plain</span>
-            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see</span>
-            <span class="c1"># :attr:`__generic_ext_codes__`). Reading</span>
-            <span class="c1"># ``info.next`` on that would raise ``AttributeError`` and let a</span>
-            <span class="c1"># further-out :func:`~pcapkit.utilities.decorators.beholder` degrade</span>
-            <span class="c1"># the *whole* packet. Stopping here instead keeps this layer's own</span>
-            <span class="c1"># fields (recorded above, in ``self._exthdr`` and in the packet</span>
-            <span class="c1"># dict) and reports no further next header, as on an overrun.</span>
-            <span class="c1">#</span>
-            <span class="c1"># This has to run -- and, on a hit, has to set ``proto`` --</span>
-            <span class="c1"># *before* the fragment-header special case below: IPv6-Frag</span>
-            <span class="c1"># always carries a real ``next`` (this ``hasattr`` check never</span>
-            <span class="c1"># fires for it), and that ``next`` is the real</span>
-            <span class="c1"># transport layer's code, which the fragment branch's own</span>
-            <span class="c1"># ``break`` must leave in ``proto`` for the final</span>
-            <span class="c1"># ``super()._decode_next_layer`` call below the loop to dispatch</span>
-            <span class="c1"># to correctly.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">):</span>
-                <span class="n">proto</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">break</span>
 
             <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">next</span>
 

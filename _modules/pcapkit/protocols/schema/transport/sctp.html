@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -530,6 +531,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">DATAChunkFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""SCTP DATA chunk flags."""</span>
 
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: (I)mmediate bit, i.e., request a SACK chunk without delay.</span>
         <span class="n">I</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: (U)nordered bit, i.e., no stream sequence number is assigned.</span>
@@ -546,6 +549,8 @@
 <span class="w">        </span><span class="sd">"""SCTP chunk flags carrying only the T bit, i.e., ABORT and</span>
 <span class="sd">        SHUTDOWN COMPLETE chunks."""</span>
 
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: T bit, i.e., the verification tag has been reflected.</span>
         <span class="n">T</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -642,9 +647,10 @@
 <span class="sd">      one shared ``packet`` mapping down into the nested schemas, and each</span>
 <span class="sd">      nested parameter overwrites ``packet['length']`` with *its* length, so a</span>
 <span class="sd">      trailing field would size itself from the last parameter rather than from</span>
-<span class="sd">      the chunk. Folding avoids the question: the constructors always declare a</span>
-<span class="sd">      chunk length that already covers every parameter's padding, hence a</span>
-<span class="sd">      multiple of four, hence no chunk-level padding to emit.</span>
+<span class="sd">      the chunk. Folding avoids the question: every nested parameter packs its</span>
+<span class="sd">      own padding, the last one's included, so the list already ends on a</span>
+<span class="sd">      four-byte boundary whether or not the chunk length counts that final</span>
+<span class="sd">      padding.</span>
 
 <span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -765,12 +771,13 @@
     <span class="c1">#: Stream identifier of the offending DATA chunk.</span>
     <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Reserved.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">padding_length</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1187,6 +1194,7 @@
 
     <span class="c1">#: Chunk flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'DATAChunkFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'I'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'B'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -1367,6 +1375,7 @@
 
     <span class="c1">#: Chunk flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'TBitFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
         <span class="s1">'T'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Zero or more error causes, including the chunk's own trailing padding;</span>
@@ -1475,6 +1484,7 @@
 
     <span class="c1">#: Chunk flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'TBitFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
         <span class="s1">'T'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Padding.</span>

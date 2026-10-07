@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -510,7 +511,7 @@
 <span class="s1">from collections import defaultdict</span>
 <span class="s1">from typing import TYPE_CHECKING</span>
 
-<span class="s1">from aenum import StrEnum</span>
+<span class="s1">from aenum import StrEnum, extend_enum</span>
 
 <span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
 
@@ -613,6 +614,50 @@
 
 <span class="s1">        return obj</span>
 
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Register a new option code ``value`` under ``name``.</span>
+
+<span class="s1">        Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register` because</span>
+<span class="s1">        of this registry's own :meth:`__new__`:</span>
+
+<span class="s1">        * :meth:`__new__` takes the option name as its second argument and</span>
+<span class="s1">          files the member under the namespace that name's prefix gives</span>
+<span class="s1">          (``if_rtaudit`` goes under ``if``), so ``name`` is passed through</span>
+<span class="s1">          to it as well as used as the member's attribute name.</span>
+<span class="s1">        * :attr:`~aenum.Enum._value_` is the formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``</span>
+<span class="s1">          string, so the base's duplicate check against</span>
+<span class="s1">          :attr:`~aenum.Enum._value2member_map_` can never match an</span>
+<span class="s1">          :class:`int` code. The check runs against :attr:`__members_ns__`</span>
+<span class="s1">          instead, the table :meth:`get` resolves codes through: both</span>
+<span class="s1">          ``name``'s own namespace and ``opt``, whose codes are common to</span>
+<span class="s1">          every block and which :meth:`get` overlays the namespace on.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Option code of the new member.</span>
+<span class="s1">            name: Name of the new member, led by its namespace, e.g.</span>
+<span class="s1">                ``if_rtaudit``.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The newly registered member.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If ``value`` is already assigned in ``name``'s</span>
+<span class="s1">                namespace or in ``opt``, or if ``name`` is already taken.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        namespace = name.split('_', maxsplit=1)[0]</span>
+<span class="s1">        for space in ('opt', namespace):</span>
+<span class="s1">            existing = cls.__members_ns__.get(space, </span><span class="se">{{}}</span><span class="s1">).get(value)</span>
+<span class="s1">            if existing is not None:</span>
+<span class="s1">                raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is already registered on </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> as '</span>
+<span class="s1">                                 f'</span><span class="se">{{</span><span class="s1">existing.name!r</span><span class="se">}}</span><span class="s1"> in namespace </span><span class="se">{{</span><span class="s1">space!r</span><span class="se">}}</span><span class="s1">')</span>
+<span class="s1">        cls._validate_value(value)</span>
+<span class="s1">        try:</span>
+<span class="s1">            return extend_enum(cls, name, value, name)</span>
+<span class="s1">        except TypeError as error:</span>
+<span class="s1">            raise ValueError(str(error)) from error</span>
+
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>
@@ -641,6 +686,10 @@
 <span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(key, '%s_unknown' % namespace)</span>
 <span class="s1">        if key in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members__:</span>
 <span class="s1">            return getattr(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key)</span>
+<span class="s1">        # NOTE: a member's value is its formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``</span>
+<span class="s1">        # string, so ``get(member.value)`` resolves it as ``cls(value)`` would.</span>
+<span class="s1">        if key in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._value2member_map_:  # type: ignore[misc]</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._value2member_map_[key]  # type: ignore[misc,return-value]</span>
 <span class="s1">        # NOTE: same ruling, the str-keyed path: this used to mint ``key``</span>
 <span class="s1">        # itself as the member's name with ``default`` as its value. Neither</span>
 <span class="s1">        # ``get`` nor ``_missing_`` has enough information to register one</span>

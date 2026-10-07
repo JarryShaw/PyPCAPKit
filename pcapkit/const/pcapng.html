@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
@@ -1064,6 +1065,46 @@ mint/unmint criterion.</p></li>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/option_type.html#OptionType.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.register" title="Link to this definition">¶</a></dt>
+<dd><p>Register a new option code <code class="docutils literal notranslate"><span class="pre">value</span></code> under <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> because
+of this registry’s own <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>:</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> takes the option name as its second argument and
+files the member under the namespace that name’s prefix gives
+(<code class="docutils literal notranslate"><span class="pre">if_rtaudit</span></code> goes under <code class="docutils literal notranslate"><span class="pre">if</span></code>), so <code class="docutils literal notranslate"><span class="pre">name</span></code> is passed through
+to it as well as used as the member’s attribute name.</p></li>
+<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">_value_</span></code> is the formatted <code class="docutils literal notranslate"><span class="pre">'{name}</span> <span class="pre">[{value}]'</span></code>
+string, so the base’s duplicate check against
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">_value2member_map_</span></code> can never match an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code. The check runs against <code class="xref py py-attr docutils literal notranslate"><span class="pre">__members_ns__</span></code>
+instead, the table <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> resolves codes through: both
+<code class="docutils literal notranslate"><span class="pre">name</span></code>’s own namespace and <code class="docutils literal notranslate"><span class="pre">opt</span></code>, whose codes are common to
+every block and which <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> overlays the namespace on.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Option code of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member, led by its namespace, e.g.
+<code class="docutils literal notranslate"><span class="pre">if_rtaudit</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is already assigned in <code class="docutils literal notranslate"><span class="pre">name</span></code>’s
+    namespace or in <code class="docutils literal notranslate"><span class="pre">opt</span></code>, or if <code class="docutils literal notranslate"><span class="pre">name</span></code> is already taken.</p>
 </dd>
 </dl>
 </dd></dl>

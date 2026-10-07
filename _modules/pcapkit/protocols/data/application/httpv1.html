@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -477,7 +478,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.method</span><span class="w"> </span><span class="kn">import</span> <span class="n">Method</span> <span class="k">as</span> <span class="n">Enum_Method</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
@@ -534,9 +535,11 @@
     <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: HTTP request version.</span>
     <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span>
+    <span class="c1">#: Charset to encode :attr:`uri` with, :obj:`None` for UTF-8.</span>
+    <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -554,9 +557,11 @@
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span>
     <span class="c1">#: HTTP response status message.</span>
     <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span>
+    <span class="c1">#: Charset to encode :attr:`message` with, :obj:`None` for UTF-8.</span>
+    <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

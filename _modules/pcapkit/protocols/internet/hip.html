@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -1059,6 +1060,7 @@
             <span class="n">chksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="n">control</span><span class="o">=</span><span class="n">Data_Control</span><span class="p">(</span>
                 <span class="n">anonymous</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">'anonymous'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="n">shit</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">shit</span><span class="p">,</span>
             <span class="n">rhit</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rhit</span><span class="p">,</span>
@@ -1094,6 +1096,7 @@
              <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
              <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">controls_anonymous</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">controls_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">shit</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">rhit</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -1113,6 +1116,7 @@
 <span class="sd">            version: HIP version.</span>
 <span class="sd">            checksum: Checksum.</span>
 <span class="sd">            controls_anonymous: If the sender is anonymous.</span>
+<span class="sd">            controls_reserved: The 15 reserved high-order bits of ``Controls``.</span>
 <span class="sd">            shit: Sender's host identity tag (HIT).</span>
 <span class="sd">            rhit: Receiver's host identity tag (HIT).</span>
 <span class="sd">            parameters: HIP parameters.</span>
@@ -1130,7 +1134,9 @@
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hip_param</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">total_length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">4</span>
+            <span class="c1"># Ceiling division, so that Header Length never declares fewer</span>
+            <span class="c1"># octets than are packed.</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">total_length</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: Header Length excludes the first 8 octets but always</span>
             <span class="c1"># counts the two 16-octet HITs, hence the minimum of 4.</span>
@@ -1149,6 +1155,7 @@
             <span class="p">},</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
             <span class="n">control</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">controls_reserved</span><span class="p">,</span>
                 <span class="s1">'anonymous'</span><span class="p">:</span> <span class="n">controls_anonymous</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">shit</span><span class="o">=</span><span class="n">shit</span><span class="p">,</span>
@@ -1250,9 +1257,11 @@
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">'controls_anonymous'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">anonymous</span><span class="p">,</span>
+            <span class="s1">'controls_reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'shit'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">shit</span><span class="p">,</span>
             <span class="s1">'rhit'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">rhit</span><span class="p">,</span>
-            <span class="s1">'parameters'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="c1"># ``read`` sets ``parameters`` only when the packet carries some.</span>
+            <span class="s1">'parameters'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'parameters'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
@@ -1378,6 +1387,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
             <span class="n">old_spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">old_spi</span><span class="p">,</span>
             <span class="n">new_spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">new_spi</span><span class="p">,</span>
@@ -1589,7 +1599,8 @@
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">_numk</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">_time</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)),</span>
+            <span class="n">lifetime_exponent</span><span class="o">=</span><span class="n">_time</span><span class="p">,</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_puzzle_lifetime</span><span class="p">(</span><span class="n">_time</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">_opak</span><span class="p">,</span>
             <span class="n">random</span><span class="o">=</span><span class="n">_rand</span><span class="p">,</span>
             <span class="c1"># Keep the field's on-wire width, which ``_rand`` alone cannot carry:</span>
@@ -1600,6 +1611,28 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">puzzle</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_puzzle_lifetime</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[timedelta]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.</span>
+
+<span class="sd">        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``</span>
+<span class="sd">        seconds. The result is informational only: :meth:`_make_param_puzzle`</span>
+<span class="sd">        writes back the octet itself, since :class:`~datetime.timedelta` rounds</span>
+<span class="sd">        octets below ``12`` to zero and cannot hold those of ``79`` and above.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            octet: the ``Lifetime`` octet</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The lifetime, or :obj:`None` if it exceeds</span>
+<span class="sd">            :attr:`datetime.timedelta.max`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">octet</span> <span class="o">-</span> <span class="mi">32</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="HIP._read_param_solution">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_solution">[docs]</a>
@@ -3610,6 +3643,10 @@
             <span class="n">parameters_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Parameter | bytes]</span>
             <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                    <span class="c1"># :rfc:`7401#section-5.2.1` pads every parameter to a</span>
+                    <span class="c1"># multiple of 8 octets, and Header Length counts in those</span>
+                    <span class="c1"># units; a raw parameter is taken to omit its padding.</span>
+                    <span class="n">schema</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
                     <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
                     <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
@@ -3685,6 +3722,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_esp_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_esp_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_ESPInfoParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">old_spi</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">new_spi</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -3695,6 +3733,7 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
+<span class="sd">            reserved: reserved octets, zero when sent (:rfc:`7402#section-5.1.1`)</span>
 <span class="sd">            index: KEYMAT index</span>
 <span class="sd">            old_spi: old SPI</span>
 <span class="sd">            new_spi: new SPI</span>
@@ -3705,6 +3744,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">index</span>
             <span class="n">old_spi</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">old_spi</span>
             <span class="n">new_spi</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">new_spi</span>
@@ -3712,6 +3752,7 @@
         <span class="k">return</span> <span class="n">Schema_ESPInfoParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
             <span class="n">old_spi</span><span class="o">=</span><span class="n">old_spi</span><span class="p">,</span>
             <span class="n">new_spi</span><span class="o">=</span><span class="n">new_spi</span><span class="p">,</span>
@@ -3905,10 +3946,7 @@
         <span class="c1"># ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is</span>
         <span class="c1"># not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it would</span>
         <span class="c1"># escape the library's error handling with a message naming neither HIP</span>
-        <span class="c1"># nor the field. Conformant input reaches it: a ``Lifetime`` octet of</span>
-        <span class="c1"># ``0x00`` means ``2^-32`` seconds, below</span>
-        <span class="c1"># :class:`~datetime.timedelta`'s microsecond resolution, so parsing one</span>
-        <span class="c1"># yields ``timedelta(0)`` and re-serialising it lands here.</span>
+        <span class="c1"># nor the field.</span>
         <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> is not a positive number of seconds'</span><span class="p">)</span>
@@ -4006,6 +4044,7 @@
                            <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                            <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                            <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4017,7 +4056,10 @@
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
 <span class="sd">            index: #K index</span>
-<span class="sd">            lifetime: lifetime</span>
+<span class="sd">            lifetime: lifetime, encoded to the nearest lower ``Lifetime`` octet;</span>
+<span class="sd">                ignored when ``lifetime_exponent`` is given</span>
+<span class="sd">            lifetime_exponent: the ``Lifetime`` octet itself, ``value`` in</span>
+<span class="sd">                :rfc:`7401#section-5.2.4`'s ``2^(value - 32)`` seconds</span>
 <span class="sd">            opaque: opaque data</span>
 <span class="sd">            random: random #I value</span>
 <span class="sd">            rhash_len: on-wire width of ``Random #I``, in bits; defaults to the</span>
@@ -4028,16 +4070,24 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or</span>
+<span class="sd">                ``lifetime`` cannot be encoded; see :meth:`_make_puzzle_lifetime`.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">index</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">lifetime</span><span class="p">)</span>
+            <span class="n">lifetime_exponent</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">lifetime_exponent</span>
             <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
             <span class="n">random</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">random</span>
             <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">rhash_len</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">rhash_len</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">lifetime_exponent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lifetime_exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">lifetime_exponent</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">lifetime_exponent</span><span class="si">}</span><span class="s1"> is outside the one-octet Lifetime field'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_PuzzleParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -4046,7 +4096,7 @@
             <span class="c1"># spells the same quantity ``4 + RHASH_len / 8``.</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">,</span> <span class="n">random</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime</span><span class="p">,</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime_exponent</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
             <span class="n">random</span><span class="o">=</span><span class="n">random</span><span class="p">,</span>
         <span class="p">)</span></div>

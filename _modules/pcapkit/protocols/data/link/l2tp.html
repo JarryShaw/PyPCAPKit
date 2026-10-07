@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -500,9 +501,14 @@
     <span class="n">offset</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Priority.</span>
     <span class="n">prio</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits 2, 3, 5 and 8-11 of the flags word, in their on-wire</span>
+    <span class="c1">#: positions (i.e. masked by ``0x34F0``). :rfc:`2661` §3.1 has them "set</span>
+    <span class="c1">#: to 0 on outgoing messages and ignored on incoming messages"; they are</span>
+    <span class="c1">#: carried verbatim so that a rebuild reproduces the word as it arrived.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Type'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">prio</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Type'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">prio</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long</span></div>
 
 
 

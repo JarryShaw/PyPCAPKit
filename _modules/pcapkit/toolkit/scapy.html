@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -574,7 +575,11 @@
 <span class="sd">        packet: Scapy packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A :obj:`dict` mapping of packet data.</span>
+<span class="sd">        A :obj:`dict` mapping of packet data. Each layer carries only the fields</span>
+<span class="sd">        set on it (for a dissected packet, those read from the wire, with no</span>
+<span class="sd">        defaults filled in). Field values that are themselves</span>
+<span class="sd">        Scapy packets (e.g. IP options, DNS records), including those inside</span>
+<span class="sd">        lists, are converted recursively. The ``packet`` itself is not modified.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ModuleNotFound: If `Scapy`_ is not installed.</span>
@@ -582,10 +587,20 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">scapy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ModuleNotFound</span><span class="p">(</span><span class="s2">"No module named 'scapy'"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">)</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span><span class="p">,</span> <span class="n">Packet</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Packet</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">convert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">convert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
-        <span class="n">dict_</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">fields</span>
+        <span class="c1"># copy, so the payload names are not written into ``packet.fields``</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">convert</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">payload</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">NoPayload</span><span class="p">):</span>
             <span class="n">dict_</span><span class="p">[</span><span class="n">payload</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>

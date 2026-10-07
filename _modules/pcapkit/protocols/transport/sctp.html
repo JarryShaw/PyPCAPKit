@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -630,7 +631,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -1597,6 +1598,34 @@
         <span class="k">return</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_nested_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="s1">'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                            <span class="n">declared</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute the length of a chunk carrying a nested parameter or error</span>
+<span class="sd">        cause list.</span>
+
+<span class="sd">        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of</span>
+<span class="sd">        every nested item except the last. The RFC also asks receivers to</span>
+<span class="sd">        accept a length that counts the last item's padding too, so a parsed</span>
+<span class="sd">        chunk declaring that longer form keeps it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base: size of the chunk's fixed-length fields, including the</span>
+<span class="sd">                four-byte chunk header</span>
+<span class="sd">            items: constructed nested items; a raw :obj:`bytes` item is</span>
+<span class="sd">                counted as given</span>
+<span class="sd">            declared: chunk length declared by the parsed chunk being</span>
+<span class="sd">                rebuilt, if any</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Chunk length.</span>
+
+<span class="sd">        """</span>
+        <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+        <span class="n">padded</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">declared</span> <span class="o">==</span> <span class="n">padded</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">padded</span>
+        <span class="k">return</span> <span class="n">padded</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
 <div class="viewcode-block" id="SCTP._read_chunk_donone">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._read_chunk_donone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_chunk_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownChunk'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">chunks</span><span class="p">:</span> <span class="s1">'Chunks'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownChunk'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -1669,6 +1698,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_DATAChunkFlags</span><span class="p">(</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                 <span class="n">I</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'I'</span><span class="p">]),</span>
                 <span class="n">U</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
                 <span class="n">B</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'B'</span><span class="p">]),</span>
@@ -1719,10 +1749,6 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``20``.</span>
 
-<span class="sd">        Note:</span>
-<span class="sd">            The chunk flags are reserved by :rfc:`9260#section-3.3.2` and are</span>
-<span class="sd">            therefore not exposed on the data model.</span>
-
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
@@ -1730,6 +1756,7 @@
         <span class="k">return</span> <span class="n">Data_INITChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">init_tag</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">init_tag</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">a_rwnd</span><span class="p">,</span>
             <span class="n">outbound_streams</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">outbound_streams</span><span class="p">,</span>
@@ -1783,6 +1810,7 @@
         <span class="k">return</span> <span class="n">Data_INITACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">init_tag</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">init_tag</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">a_rwnd</span><span class="p">,</span>
             <span class="n">outbound_streams</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">outbound_streams</span><span class="p">,</span>
@@ -1839,6 +1867,7 @@
         <span class="k">return</span> <span class="n">Data_SACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">cum_tsn_ack</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cum_tsn_ack</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">a_rwnd</span><span class="p">,</span>
             <span class="n">num_gap_blocks</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">num_gap_blocks</span><span class="p">,</span>
@@ -1894,6 +1923,7 @@
         <span class="k">return</span> <span class="n">Data_HeartbeatChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_parameters</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -1934,6 +1964,7 @@
         <span class="k">return</span> <span class="n">Data_HeartbeatACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_parameters</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -1975,6 +2006,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_TBitFlags</span><span class="p">(</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                 <span class="n">T</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'T'</span><span class="p">]),</span>
             <span class="p">),</span>
             <span class="n">error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_causes</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">error</span><span class="p">),</span>
@@ -2015,6 +2047,7 @@
         <span class="k">return</span> <span class="n">Data_ShutdownChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">cum_tsn_ack</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cum_tsn_ack</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -2051,6 +2084,7 @@
         <span class="k">return</span> <span class="n">Data_ShutdownACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2090,6 +2124,7 @@
         <span class="k">return</span> <span class="n">Data_ErrorChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_causes</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">error</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -2135,6 +2170,7 @@
         <span class="k">return</span> <span class="n">Data_CookieEchoChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -2171,6 +2207,7 @@
         <span class="k">return</span> <span class="n">Data_CookieACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2207,6 +2244,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_TBitFlags</span><span class="p">(</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                 <span class="n">T</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'T'</span><span class="p">]),</span>
             <span class="p">),</span>
         <span class="p">)</span></div>
@@ -2252,6 +2290,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_DATAChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">I</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># noqa: E741</span>
                          <span class="n">U</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                          <span class="n">B</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -2267,6 +2306,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            reserved: reserved flag bits</span>
 <span class="sd">            I: immediate bit</span>
 <span class="sd">            U: unordered bit</span>
 <span class="sd">            B: beginning fragment bit</span>
@@ -2287,6 +2327,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">I</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">I</span>  <span class="c1"># noqa: E741</span>
             <span class="n">U</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">U</span>
             <span class="n">B</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">B</span>
@@ -2303,6 +2344,7 @@
         <span class="k">return</span> <span class="n">Schema_DATAChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'I'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">I</span><span class="p">),</span>
                 <span class="s1">'U'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">U</span><span class="p">),</span>
                 <span class="s1">'B'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">B</span><span class="p">),</span>
@@ -2320,6 +2362,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_init">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_init">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_INITChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>  <span class="c1"># minimum permitted by [RFC 9260]</span>
                          <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -2332,6 +2375,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            init_tag: initiate tag</span>
 <span class="sd">            a_rwnd: advertised receiver window credit</span>
 <span class="sd">            outbound_streams: number of outbound streams</span>
@@ -2343,12 +2387,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        Note:</span>
-<span class="sd">            The chunk flags are reserved by :rfc:`9260#section-3.3.2` and are</span>
-<span class="sd">            always emitted as zero.</span>
+<span class="sd">            The chunk flags are reserved by :rfc:`9260#section-3.3.2`, so they</span>
+<span class="sd">            default to zero; a parsed chunk's flags are kept as received.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">init_tag</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">init_tag</span>
             <span class="n">a_rwnd</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">a_rwnd</span>
             <span class="n">outbound_streams</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">outbound_streams</span>
@@ -2356,16 +2404,19 @@
             <span class="n">init_tsn</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">init_tsn</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                          <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">parameters_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_INITChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">init_tag</span><span class="o">=</span><span class="n">init_tag</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">a_rwnd</span><span class="p">,</span>
@@ -2379,6 +2430,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_init_ack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_init_ack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_init_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_INITACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                              <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>  <span class="c1"># minimum permitted by [RFC 9260]</span>
                              <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -2391,6 +2443,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            init_tag: initiate tag</span>
 <span class="sd">            a_rwnd: advertised receiver window credit</span>
 <span class="sd">            outbound_streams: number of outbound streams</span>
@@ -2402,8 +2455,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">init_tag</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">init_tag</span>
             <span class="n">a_rwnd</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">a_rwnd</span>
             <span class="n">outbound_streams</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">outbound_streams</span>
@@ -2411,16 +2468,19 @@
             <span class="n">init_tsn</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">init_tsn</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                          <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">parameters_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_INITACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">init_tag</span><span class="o">=</span><span class="n">init_tag</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">a_rwnd</span><span class="p">,</span>
@@ -2434,6 +2494,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_sack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_sack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_sack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_SACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>  <span class="c1"># minimum permitted by [RFC 9260]</span>
                          <span class="n">gap_blocks</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_GapAckBlock | Data_GapAckBlock | tuple[int, int]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2444,6 +2505,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            cum_tsn_ack: cumulative TSN ack</span>
 <span class="sd">            a_rwnd: advertised receiver window credit</span>
 <span class="sd">            gap_blocks: gap ack blocks, each as a schema, a data model or a</span>
@@ -2454,6 +2516,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            The counts of gap ack blocks and duplicate TSNs are derived from the</span>
 <span class="sd">            supplied lists rather than taken as arguments, so that they cannot</span>
@@ -2461,10 +2526,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">cum_tsn_ack</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cum_tsn_ack</span>
             <span class="n">a_rwnd</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">a_rwnd</span>
             <span class="n">gap_blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">gap_blocks</span><span class="p">)</span>
             <span class="n">dup_tsn</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">dup_tsn</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_GapAckBlock]</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">gap_blocks</span> <span class="ow">or</span> <span class="p">[]:</span>
@@ -2479,7 +2548,7 @@
 
         <span class="k">return</span> <span class="n">Schema_SACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tsn_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">cum_tsn_ack</span><span class="o">=</span><span class="n">cum_tsn_ack</span><span class="p">,</span>
             <span class="n">a_rwnd</span><span class="o">=</span><span class="n">a_rwnd</span><span class="p">,</span>
@@ -2493,6 +2562,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_heartbeat">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_heartbeat">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_HeartbeatChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HeartbeatChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP HEARTBEAT chunk.</span>
@@ -2500,26 +2570,34 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            parameters: heartbeat information parameters</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">parameters_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_HeartbeatChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters_value</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -2528,6 +2606,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_heartbeat_ack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_heartbeat_ack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_heartbeat_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_HeartbeatACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                  <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                   <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HeartbeatACKChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP HEARTBEAT ACK chunk.</span>
@@ -2535,26 +2614,34 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            parameters: heartbeat information parameters</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">parameters_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_HeartbeatACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters_value</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -2563,6 +2650,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_abort">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_abort">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_abort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_AbortChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">T</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                           <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_AbortChunk'</span><span class="p">:</span>
@@ -2571,6 +2659,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            reserved: reserved flag bits</span>
 <span class="sd">            T: whether the verification tag has been reflected</span>
 <span class="sd">            error: zero or more error causes</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -2580,6 +2669,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">T</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">error</span>
 
@@ -2587,12 +2677,13 @@
             <span class="n">error_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_causes</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cause</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">cause</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                         <span class="k">for</span> <span class="n">cause</span> <span class="ow">in</span> <span class="n">error_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">error_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_AbortChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'T'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
             <span class="p">},</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -2603,6 +2694,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_shutdown">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_ShutdownChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                              <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ShutdownChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP SHUTDOWN chunk.</span>
@@ -2610,19 +2702,27 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            cum_tsn_ack: cumulative TSN ack</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">cum_tsn_ack</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cum_tsn_ack</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ShutdownChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">cum_tsn_ack</span><span class="o">=</span><span class="n">cum_tsn_ack</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -2630,22 +2730,33 @@
 
 <div class="viewcode-block" id="SCTP._make_chunk_shutdown_ack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_shutdown_ack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_shutdown_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_ShutdownACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_shutdown_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_ShutdownACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                 <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ShutdownACKChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP SHUTDOWN ACK chunk.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_ShutdownACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -2653,6 +2764,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_error">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_error">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_ErrorChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                           <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ErrorChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP ERROR chunk.</span>
@@ -2660,26 +2772,34 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            error: one or more error causes</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">error</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">error_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_causes</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error_value</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cause</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">cause</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-                         <span class="k">for</span> <span class="n">cause</span> <span class="ow">in</span> <span class="n">error_value</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">error_value</span><span class="p">,</span>
+                                          <span class="kc">None</span> <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ErrorChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">error</span><span class="o">=</span><span class="n">error_value</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -2688,6 +2808,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_cookie_echo">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_cookie_echo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_cookie_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_CookieEchoChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                 <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CookieEchoChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP COOKIE ECHO chunk.</span>
@@ -2695,6 +2816,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            cookie: state cookie, as received in the INIT ACK chunk's state</span>
 <span class="sd">                cookie parameter</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -2702,13 +2824,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
             <span class="n">cookie</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cookie</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CookieEchoChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cookie</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -2716,22 +2845,33 @@
 
 <div class="viewcode-block" id="SCTP._make_chunk_cookie_ack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_cookie_ack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_cookie_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_CookieACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_cookie_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_CookieACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                               <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CookieACKChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP COOKIE ACK chunk.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            flags: raw chunk flags, as a single byte</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed chunk schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flags`` is **NOT** exactly one byte.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_CookieACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -2739,6 +2879,7 @@
 <div class="viewcode-block" id="SCTP._make_chunk_shutdown_complete">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_chunk_shutdown_complete">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_shutdown_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_ShutdownCompleteChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                       <span class="n">T</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ShutdownCompleteChunk'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP SHUTDOWN COMPLETE chunk.</span>
@@ -2746,6 +2887,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            code: chunk type</span>
 <span class="sd">            chunk: chunk data</span>
+<span class="sd">            reserved: reserved flag bits</span>
 <span class="sd">            T: whether the verification tag has been reflected</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -2754,11 +2896,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">return</span> <span class="n">Schema_ShutdownCompleteChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'T'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
             <span class="p">},</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
@@ -3428,6 +3572,7 @@
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">stream_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_id</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -3919,6 +4064,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_cause_invalid_stream">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_cause_invalid_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span><span class="p">,</span> <span class="n">cause</span><span class="p">:</span> <span class="s1">'Optional[Data_InvalidStreamIdentifierCause]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                    <span class="n">stream_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                   <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_InvalidStreamIdentifierCause'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make SCTP invalid stream identifier error cause.</span>
 
@@ -3926,19 +4072,28 @@
 <span class="sd">            code: error cause code</span>
 <span class="sd">            cause: error cause data</span>
 <span class="sd">            stream_id: stream identifier of the offending DATA chunk</span>
+<span class="sd">            reserved: reserved field, as two bytes</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed error cause schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``reserved`` is **NOT** exactly two bytes.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cause</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stream_id</span> <span class="o">=</span> <span class="n">cause</span><span class="o">.</span><span class="n">stream_id</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">cause</span><span class="o">.</span><span class="n">reserved</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reserved</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_InvalidStreamIdentifierCause</span><span class="p">(</span>
             <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">stream_id</span><span class="o">=</span><span class="n">stream_id</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

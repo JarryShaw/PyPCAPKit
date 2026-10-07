@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -737,7 +738,7 @@ still takes it explicitly.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TransType.UDP:</span> <span class="pre">17&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext.html#IPv6_Ext.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TransType.UDP:</span> <span class="pre">17&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext.html#IPv6_Ext.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -746,6 +747,8 @@ still takes it explicitly.</p>
 <li><p><strong>len</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Raw <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet to emit. The caller must size it,
 since this class cannot know at construction time which
 per-protocol rule (see the module docstring) it must satisfy.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Header-specific content after the two fixed octets, emitted
+verbatim ahead of <code class="docutils literal notranslate"><span class="pre">payload</span></code>.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Payload of current instance.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -760,11 +763,11 @@ per-protocol rule (see the module docstring) it must satisfy.</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Keyword-only</strong>, for two reasons.</p>
-<p>The three stay <em>declared</em>, unlike <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>’s own keywords,
+<p>The four stay <em>declared</em>, unlike <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>’s own keywords,
 because <code class="xref py py-func docutils literal notranslate"><span class="pre">_check_construction_keywords()</span></code>
 builds its allowlist from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> of <code class="docutils literal notranslate"><span class="pre">make</span></code>.
 Hiding them in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> <strong>breaks construction</strong>: a plain
-<code class="docutils literal notranslate"><span class="pre">IPv6_Ext(next=...,</span> <span class="pre">len=...,</span> <span class="pre">payload=...)</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">IPv6_Ext(next=...,</span> <span class="pre">len=...,</span> <span class="pre">data=...,</span> <span class="pre">payload=...)</span></code> raises
 <code class="docutils literal notranslate"><span class="pre">UnsupportedCall:</span> <span class="pre">IPv6_Ext:</span> <span class="pre">unexpected</span> <span class="pre">keyword(s)</span></code>. The
 <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that, but it is unioned
 down the MRO, so it would widen the allowlist, and weaken that
@@ -789,12 +792,10 @@ check.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext.html#IPv6_Ext._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext._make_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
-<p>Inverts whichever per-protocol length rule <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> applied,
-using <code class="docutils literal notranslate"><span class="pre">data.protocol</span></code> – the extension header this instance stood
-in for – to pick the same rule back. Round-tripping a <code class="docutils literal notranslate"><span class="pre">data.next</span></code>
-of <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the overrun case) is not supported: there is no
-octet value that both satisfies the rule and still fits, which is
-exactly why <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> stopped rather than clipped.</p>
+<p>Emits the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet and the body as they were read, so
+the rebuild is byte-exact whichever per-protocol length rule
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> applied, and also for an overrun, where <code class="docutils literal notranslate"><span class="pre">data.next</span></code> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">data.declared_next</span></code> keeps the octet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a></span>) – protocol data</p>
@@ -960,9 +961,29 @@ of trusting it.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.declared_next">
+<span class="sig-name descname"><span class="pre">declared_next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.declared_next" title="Link to this definition">¶</a></dt>
+<dd><p>Next header as declared on the wire. Equal to <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.next" title="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.next"><code class="xref py py-attr docutils literal notranslate"><span class="pre">next</span></code></a> except on
+an overrun, where <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.next" title="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.next"><code class="xref py py-attr docutils literal notranslate"><span class="pre">next</span></code></a> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> but this keeps the
+octet so that a rebuild reproduces it.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.len">
+<span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.len" title="Link to this definition">¶</a></dt>
+<dd><p>Raw <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet, as on the wire.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.length">
 <span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.length" title="Link to this definition">¶</a></dt>
 <dd><p>Length of this extension header, in octets, actually consumed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.data" title="Link to this definition">¶</a></dt>
+<dd><p>Header-specific content after the two fixed octets, as consumed.</p>
 </dd></dl>
 
 <dl class="py attribute">

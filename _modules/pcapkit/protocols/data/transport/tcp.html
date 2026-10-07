@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -945,11 +946,15 @@
     <span class="n">req</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Extensibility flag.</span>
     <span class="n">ext</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Flag for not establishing new subflows to the source address (``C``).</span>
+    <span class="n">deny_join</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved flags (``D`` to ``G``).</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: HMAC-SHA1 flag.</span>
     <span class="n">hsa</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">hsa</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">deny_join</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">hsa</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
 
 <div class="viewcode-block" id="MPTCPCapable">
@@ -992,6 +997,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPJoinSYN</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_JOIN-SYN`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Backup path flag.</span>
     <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Address ID.</span>
@@ -1002,7 +1009,7 @@
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1012,6 +1019,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPJoinSYNACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_JOIN-SYNACK`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Backup path flag.</span>
     <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Address ID.</span>
@@ -1022,7 +1031,7 @@
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1032,11 +1041,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPJoinACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_JOIN-ACK`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: HMAC value.</span>
     <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">'TCP_Flags'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1046,10 +1057,16 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPDSS</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``DSS`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: ``DATA_FIN`` flag.</span>
     <span class="n">data_fin</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Data ACK is 8 octets (``a`` flag).</span>
+    <span class="n">ack_wide</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Data ACK.</span>
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+    <span class="c1">#: Data sequence number is 8 octets (``m`` flag).</span>
+    <span class="n">dsn_wide</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Data sequence number.</span>
     <span class="n">dsn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
     <span class="c1">#: Subflow sequence number.</span>
@@ -1060,7 +1077,7 @@
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">data_fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">ssn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data_fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ack_wide</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dsn_wide</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">ssn</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1072,15 +1089,21 @@
 
     <span class="c1">#: IP version.</span>
     <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Echo flag.</span>
+    <span class="n">echo</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Address.</span>
     <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPAddress'</span>
     <span class="c1">#: Port number.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+    <span class="c1">#: Truncated HMAC.</span>
+    <span class="n">hmac</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPAddress'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">echo</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPAddress'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1090,11 +1113,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPRemoveAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``REMOVE_ADDR`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1104,13 +1129,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPPriority</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_PRIO`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Backup path flag.</span>
     <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1120,11 +1147,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPFallback</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_FAIL`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Data sequence number.</span>
     <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -1134,11 +1163,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPFastclose</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for TCP ``MP_FASTCLOSE`` option."""</span>
 
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Option receiver's key.</span>
     <span class="n">rkey</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'MPTCPOption'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

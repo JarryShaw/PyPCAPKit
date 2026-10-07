@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -616,8 +617,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Data_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Schema_IPv6_Ext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -627,7 +629,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_NextHeaderData</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The one field every IPv6 extension header's data model carries.</span>
@@ -915,16 +916,23 @@
             <span class="n">ext_len</span> <span class="o">=</span> <span class="n">nominal</span>
             <span class="n">next_header</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span>
 
+        <span class="c1"># NOTE: The schema's payload holds every octet after the two fixed</span>
+        <span class="c1"># ones; the first ``ext_len - 2`` of them are this header's own body.</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
         <span class="n">generic_ext</span> <span class="o">=</span> <span class="n">Data_IPv6_Ext</span><span class="p">(</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">ext_code</span><span class="p">,</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_header</span><span class="p">,</span>
+            <span class="n">declared_next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">ext_len</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">rest</span><span class="p">[:</span><span class="nb">max</span><span class="p">(</span><span class="n">ext_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
             <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">),</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">),</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">,</span>
+                                       <span class="n">payload</span><span class="o">=</span><span class="n">rest</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">ext_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):])</span></div>
 
 
 <div class="viewcode-block" id="IPv6_Ext.make">
@@ -932,6 +940,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
              <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType | int'</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
              <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+             <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Any'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -941,6 +950,8 @@
 <span class="sd">            len: Raw ``Hdr Ext Len`` octet to emit. The caller must size it,</span>
 <span class="sd">                since this class cannot know at construction time which</span>
 <span class="sd">                per-protocol rule (see the module docstring) it must satisfy.</span>
+<span class="sd">            data: Header-specific content after the two fixed octets, emitted</span>
+<span class="sd">                verbatim ahead of ``payload``.</span>
 <span class="sd">            payload: Payload of current instance.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -950,11 +961,11 @@
 <span class="sd">        Note:</span>
 <span class="sd">            **Keyword-only**, for two reasons.</span>
 
-<span class="sd">            The three stay *declared*, unlike :meth:`read`'s own keywords,</span>
+<span class="sd">            The four stay *declared*, unlike :meth:`read`'s own keywords,</span>
 <span class="sd">            because :func:`~pcapkit.protocols.protocol._check_construction_keywords`</span>
 <span class="sd">            builds its allowlist from :func:`inspect.signature` of ``make``.</span>
 <span class="sd">            Hiding them in ``**kwargs`` **breaks construction**: a plain</span>
-<span class="sd">            ``IPv6_Ext(next=..., len=..., payload=...)`` raises</span>
+<span class="sd">            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises</span>
 <span class="sd">            ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The</span>
 <span class="sd">            ``__keywords__`` escape hatch would cover that, but it is unioned</span>
 <span class="sd">            down the MRO, so it would widen the allowlist, and weaken that</span>
@@ -976,6 +987,15 @@
 <span class="sd">            check.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: The schema keeps everything after the two fixed octets as one</span>
+        <span class="c1"># opaque payload, so the body is packed in front of the upper layer.</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span> <span class="o">+</span> <span class="n">payload</span>
+
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">Schema_IPv6_Ext</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="nb">next</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span>
@@ -1102,12 +1122,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6_Ext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
-<span class="sd">        Inverts whichever per-protocol length rule :meth:`read` applied,</span>
-<span class="sd">        using ``data.protocol`` -- the extension header this instance stood</span>
-<span class="sd">        in for -- to pick the same rule back. Round-tripping a ``data.next``</span>
-<span class="sd">        of :data:`None` (the overrun case) is not supported: there is no</span>
-<span class="sd">        octet value that both satisfies the rule and still fits, which is</span>
-<span class="sd">        exactly why :meth:`read` stopped rather than clipped.</span>
+<span class="sd">        Emits the ``Hdr Ext Len`` octet and the body as they were read, so</span>
+<span class="sd">        the rebuild is byte-exact whichever per-protocol length rule</span>
+<span class="sd">        :meth:`read` applied, and also for an overrun, where ``data.next`` is</span>
+<span class="sd">        :data:`None` and ``data.declared_next`` keeps the octet.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -1116,16 +1134,10 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
-            <span class="n">len_octet</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># constant length; the octet itself is Reserved</span>
-        <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
-            <span class="n">len_octet</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">len_octet</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span>
-
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="s1">'len'</span><span class="p">:</span> <span class="n">len_octet</span><span class="p">,</span>
+            <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">declared_next</span><span class="p">,</span>
+            <span class="s1">'len'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+            <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>

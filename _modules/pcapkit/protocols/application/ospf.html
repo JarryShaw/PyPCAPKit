@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -673,6 +674,7 @@
              <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">packet_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | bytearray'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
              <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | bytearray'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
              <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
@@ -691,6 +693,12 @@
 <span class="sd">            type_default: Default value for ``type`` if not specified.</span>
 <span class="sd">            type_namespace: Namespace for ``type``.</span>
 <span class="sd">            type_reversed: Reverse namespace for ``type``.</span>
+<span class="sd">            packet_length: Packet length (header included). If not given, it is</span>
+<span class="sd">                computed as 24 plus the length of ``payload``. Give it</span>
+<span class="sd">                explicitly when ``payload`` carries octets outside the OSPF</span>
+<span class="sd">                packet, such as the message digest appended under</span>
+<span class="sd">                cryptographic authentication (:rfc:`2328#appendix-D.4.3`),</span>
+<span class="sd">                which Packet Length does not count.</span>
 <span class="sd">            router_id: Router ID.</span>
 <span class="sd">            area_id: Area ID.</span>
 <span class="sd">            checksum: Checksum.</span>
@@ -705,23 +713,37 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, or is</span>
+<span class="sd">                :obj:`bytes` that are not exactly 8 octets long; or if</span>
+<span class="sd">                ``packet_length`` is not an :obj:`int` in ``0..65535``.</span>
+
 <span class="sd">        """</span>
         <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">auth_type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">auth_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">auth_type_namespace</span><span class="p">,</span>
                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">auth_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CryptographicAuthentication'</span>
         <span class="k">if</span> <span class="n">auth_type_</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_encrypt_auth</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: invalid type for authentication data: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: authentication data must be 8 octets: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">auth_data</span>
+
+        <span class="k">if</span> <span class="n">packet_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">packet_length</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">packet_length</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">packet_length</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+              <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">packet_length</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: invalid packet length: </span><span class="si">{</span><span class="n">packet_length</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_OSPF</span><span class="p">(</span>
             <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">24</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">packet_length</span><span class="p">,</span>
             <span class="n">router_id</span><span class="o">=</span><span class="n">router_id</span><span class="p">,</span>
             <span class="n">area_id</span><span class="o">=</span><span class="n">area_id</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
@@ -774,6 +796,7 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'packet_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">),</span>
             <span class="s1">'router_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">router_id</span><span class="p">,</span>
             <span class="s1">'area_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">area_id</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -866,18 +889,26 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF._make_encrypt_auth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                            <span class="n">auth_data</span><span class="p">:</span> <span class="s1">'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | Schema_CryptographicAuthentication'</span><span class="p">:</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CryptographicAuthentication'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make Authentication field when Cryptographic Authentication is employed.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            auth_data: Authentication data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Authentication bytes.</span>
+<span class="sd">            Authentication schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, or is</span>
+<span class="sd">                :obj:`bytes` that are not exactly 8 octets long.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="p">(</span><span class="n">Schema_CryptographicAuthentication</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">auth_data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: authentication data must be 8 octets: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Data_CryptographicAuthentication</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">(</span>
                 <span class="n">key_id</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>

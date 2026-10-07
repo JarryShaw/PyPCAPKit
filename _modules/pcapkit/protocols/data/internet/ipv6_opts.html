@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -713,10 +714,12 @@
     <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits (``R``) after the nonce.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">change</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
-                     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span>
+                     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span>
 
 
 <span class="nd">@info_final</span>
@@ -725,9 +728,11 @@
 
     <span class="c1">#: Nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits (``R``) after the nonce.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">change</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">change</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
             <span class="o">...</span>
 
 
@@ -783,9 +788,11 @@
     <span class="nb">max</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Non-conformation flag.</span>
     <span class="n">drop</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits (``rsv``).</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">max</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">drop</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">max</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">drop</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span></div>
 
 
 
@@ -882,9 +889,11 @@
     <span class="n">dup</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Return flag.</span>
     <span class="n">ret</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the low four bits of the flags octet.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dup</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span></div>
 
 
 

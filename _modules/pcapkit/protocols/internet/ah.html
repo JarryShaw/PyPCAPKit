@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -650,6 +651,7 @@
         <span class="n">ah</span> <span class="o">=</span> <span class="n">Data_AH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">icv</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">icv</span><span class="p">,</span>
@@ -667,6 +669,7 @@
              <span class="n">next_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">next_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">next_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">spi</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">icv</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
@@ -679,6 +682,8 @@
 <span class="sd">            next_default: Default value of next header type.</span>
 <span class="sd">            next_namespace: Namespace of next header type.</span>
 <span class="sd">            next_reversed: If the namespace is reversed.</span>
+<span class="sd">            reserved: Reserved field; zero on send per :rfc:`4302#section-2.3`,</span>
+<span class="sd">                but written as given so that a parsed header rebuilds unchanged.</span>
 <span class="sd">            spi: Security Parameters Index.</span>
 <span class="sd">            seq: Sequence Number Field.</span>
 <span class="sd">            icv: Integrity Check Value-ICV.</span>
@@ -696,6 +701,7 @@
         <span class="k">return</span> <span class="n">Schema_AH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_value</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">spi</span><span class="o">=</span><span class="n">spi</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">icv</span><span class="o">=</span><span class="n">icv</span><span class="p">,</span>
@@ -790,6 +796,7 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'spi'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
             <span class="s1">'seq'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="s1">'icv'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">icv</span><span class="p">,</span>

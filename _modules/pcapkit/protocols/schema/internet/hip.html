@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -566,7 +567,9 @@
 <span class="w">        </span><span class="sd">"""Controls type."""</span>
 
         <span class="c1">#: Anonymous.</span>
-        <span class="n">anonymous</span><span class="p">:</span> <span class="nb">bool</span></div>
+        <span class="n">anonymous</span><span class="p">:</span> <span class="nb">bool</span>
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="LocatorFlags">
@@ -1045,8 +1048,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ESPInfoParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ESP_INFO</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for HIP ``ESP_INFO`` parameters."""</span>
 
-    <span class="c1">#: Reserved.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Reserved, "zero when sent, ignored when received" (:rfc:`7402#section-5.1.1`).</span>
+    <span class="c1">#: Read as a value rather than as padding, so that re-serialising a parsed</span>
+    <span class="c1">#: parameter reproduces the octets it arrived with.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Key management index.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Old SPI.</span>
@@ -1057,7 +1062,7 @@
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">parameter_padding_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">old_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">new_spi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2263,6 +2268,7 @@
     <span class="n">control</span><span class="p">:</span> <span class="s1">'ControlsType'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
             <span class="s1">'anonymous'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>

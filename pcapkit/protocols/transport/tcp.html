@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -1773,21 +1774,32 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The reserved field spans the 4 low bits of the subtype octet and the
+3 high bits of the flags octet; it is kept as one 7-bit value. The
+checksum is absent when the option length leaves no room for it,
+i.e., when checksums were not negotiated.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr">
 <span class="sig-name descname"><span class="pre">_read_mptcp_addaddr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_addaddr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr" title="Link to this definition">¶</a></dt>
 <dd><p>Read Add Address option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code> [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code> [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.4.1, figure 12]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-------+---------------+
-|     Kind      |     Length    |Subtype| IPVer |  Address ID   |
+|     Kind      |     Length    |Subtype|(rsv)|E|  Address ID   |
 +---------------+---------------+-------+-------+---------------+
-|         Address (IPv4 - 4 octets / IPv6 - 16 octets)          |
+|           Address (IPv4: 4 octets / IPv6: 16 octets)          |
 +-------------------------------+-------------------------------+
-|   Port (2 octets, optional)   |
+|   Port (2 octets, optional)   |                               |
++-------------------------------+                               |
+|                Truncated HMAC (8 octets, if E=0)              |
+|                               +-------------------------------+
+|                               |
 +-------------------------------+
 </pre></div>
 </div>
@@ -1805,16 +1817,23 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – Invalid IP version and/or addresses.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is not one of the <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> lengths.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The address family, the port and the HMAC all follow from the
+option length, never from the <code class="docutils literal notranslate"><span class="pre">E</span></code> flag, so an <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>
+option, whose <code class="docutils literal notranslate"><span class="pre">IPVer</span></code> nibble overlaps the reserved bits and
+<code class="docutils literal notranslate"><span class="pre">E</span></code>, parses the same way and round-trips unchanged.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">
 <span class="sig-name descname"><span class="pre">_read_mptcp_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove" title="Link to this definition">¶</a></dt>
 <dd><p>Read Remove Address option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.4.2, figure 13]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.4.2, figure 13]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-------+---------------+
@@ -1859,7 +1878,7 @@ honestly, and rejecting an empty list would be a behaviour change.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">
 <span class="sig-name descname"><span class="pre">_read_mptcp_prio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_prio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio" title="Link to this definition">¶</a></dt>
 <dd><p>Read Change Subflow Priority option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>, section 3.3.8, figure 11]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>, section 3.3.8, figure 11]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                      1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+--------------+
@@ -1886,14 +1905,14 @@ honestly, and rejecting an empty list would be a behaviour change.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The figure above is <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>’s, deliberately, because it is the one
+<p>The figure above is <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>’s, deliberately, because it is the one
 with an Address ID in it and this method accepts both forms.
-<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3.8 figure 11 draws MP_PRIO as <strong>3</strong> octets and
+<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3.8 figure 11 draws MP_PRIO as <strong>3</strong> octets and
 nothing more – <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype/reserved/<code class="docutils literal notranslate"><span class="pre">B</span></code>
 (1) – since section 5 of that document “specifies the removal of the
 AddrID field [RFC6824] in the MP_PRIO option”, closing a theoretical
 attack in which a subflow could be forced into backup mode. The
-4-octet <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> form is therefore legacy, and the guard stays
+4-octet <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> form is therefore legacy, and the guard stays
 permissive so that traffic carrying it still parses.</p>
 <p>On the construction side,
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPPriority" title="pcapkit.protocols.schema.transport.tcp.MPTCPPriority"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPPriority</span></code></a>’s
@@ -1906,7 +1925,7 @@ to follow whether the caller supplied an Address ID.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">
 <span class="sig-name descname"><span class="pre">_read_mptcp_fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_fail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail" title="Link to this definition">¶</a></dt>
 <dd><p>Read Fallback option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.7, figure 16]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+----------------------+
@@ -1941,7 +1960,7 @@ to follow whether the caller supplied an Address ID.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">
 <span class="sig-name descname"><span class="pre">_read_mptcp_fastclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_fastclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose" title="Link to this definition">¶</a></dt>
 <dd><p>Read Fast Close option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.5, figure 14]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.5, figure 14]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----------------------+
@@ -1972,12 +1991,12 @@ to follow whether the caller supplied an Address ID.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The figure above is <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14, and the option
+<p>The figure above is <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14, and the option
 it draws is <strong>12</strong> octets: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) +
 subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
 option receiver’s key (64 bits, 8). The guard,
 <code class="docutils literal notranslate"><span class="pre">_make_mptcp_fastclose</span></code> and the schema must all agree on 12, the
-schema accounting for the reserved octet with a padding field.</p>
+schema reading the 12 reserved bits along with the subtype.</p>
 </div>
 </dd></dl>
 
@@ -1985,7 +2004,7 @@ schema accounting for the reserved octet with a padding field.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_syn">
 <span class="sig-name descname"><span class="pre">_read_join_syn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_syn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_syn" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Initial SYN.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 5]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 5]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+---------------+
@@ -2020,7 +2039,7 @@ schema accounting for the reserved octet with a padding field.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_synack">
 <span class="sig-name descname"><span class="pre">_read_join_synack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_synack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_synack" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Responding SYN/ACK.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 6]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 6]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+---------------+
@@ -2053,7 +2072,7 @@ schema accounting for the reserved octet with a padding field.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The accepted length is <code class="docutils literal notranslate"><span class="pre">16</span></code>, as in the figure above (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>
+<p>The accepted length is <code class="docutils literal notranslate"><span class="pre">16</span></code>, as in the figure above (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>
 section 3.2 figure 6) and in what
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYNACK</span></code></a>
 packs and unpacks: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype/flags (1)
@@ -2065,7 +2084,7 @@ packs and unpacks: <code class="docutils literal notranslate"><span class="pre">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_ack">
 <span class="sig-name descname"><span class="pre">_read_join_ack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_ack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_ack" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Third ACK.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 7]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 7]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----------------------+
@@ -2661,10 +2680,10 @@ ends with <code class="docutils literal notranslate"><span class="pre">EOOL</spa
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_capable">
-<span class="sig-name descname"><span class="pre">_make_mptcp_capable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_req</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_hsa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_capable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_capable" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_capable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_req</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_deny_join</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_hsa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_capable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_capable" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP capable option.</p>
 <p>Each field is present only if every field before it is, which selects
-one of the five <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 lengths: 4 (<code class="docutils literal notranslate"><span class="pre">skey=None</span></code>), 12
+one of the five <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 lengths: 4 (<code class="docutils literal notranslate"><span class="pre">skey=None</span></code>), 12
 (<code class="docutils literal notranslate"><span class="pre">rkey=None</span></code>), 20 (<code class="docutils literal notranslate"><span class="pre">dl_len=None</span></code>), 22 (<code class="docutils literal notranslate"><span class="pre">checksum=None</span></code>) or 24.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2674,6 +2693,9 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 <li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – MPTCP version</p></li>
 <li><p><strong>flag_req</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – checksum required flag</p></li>
 <li><p><strong>flag_ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – extensibility flag</p></li>
+<li><p><strong>flag_deny_join</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – flag for not establishing new subflows to the
+source address</p></li>
+<li><p><strong>flag_reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved flags (<code class="docutils literal notranslate"><span class="pre">D</span></code> to <code class="docutils literal notranslate"><span class="pre">G</span></code>)</p></li>
 <li><p><strong>flag_hsa</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – use of HMAC-SHA1 flag</p></li>
 <li><p><strong>skey</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option sender’s key</p></li>
 <li><p><strong>rkey</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option receiver’s key</p></li>
@@ -2717,19 +2739,24 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_dss">
-<span class="sig-name descname"><span class="pre">_make_mptcp_dss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_dss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_dss" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_dss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack_wide</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsn_wide</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_dss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_dss" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP DSS option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS" title="pcapkit.protocols.data.transport.tcp.MPTCPDSS"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPDSS</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits (7 bits)</p></li>
 <li><p><strong>data_fin</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">DATA_FIN</span></code> flag</p></li>
+<li><p><strong>ack_wide</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – whether Data ACK is 8 octets; if not given, it is 8 octets
+only when <code class="docutils literal notranslate"><span class="pre">ack</span></code> does not fit in 4</p></li>
 <li><p><strong>ack</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Data ACK</p></li>
+<li><p><strong>dsn_wide</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – whether data sequence number is 8 octets; if not given, it
+is 8 octets only when <code class="docutils literal notranslate"><span class="pre">dsn</span></code> does not fit in 4</p></li>
 <li><p><strong>dsn</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – data sequence number</p></li>
 <li><p><strong>ssn</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – subflow sequence number</p></li>
 <li><p><strong>dl_len</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – data-level length</p></li>
-<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – checksum</p></li>
+<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – checksum, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if checksums were not negotiated</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
@@ -2739,21 +2766,28 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the mapping fields are given only in part, or a
+    4-octet field is asked to hold a value wider than 32 bits.</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr">
-<span class="sig-name descname"><span class="pre">_make_mptcp_addaddr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_addaddr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_addaddr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_addaddr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP add address option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress" title="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPAddAddress</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – reserved bits</p></li>
+<li><p><strong>echo</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – echo flag</p></li>
 <li><p><strong>addr_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – address ID</p></li>
 <li><p><strong>addr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – address</p></li>
 <li><p><strong>port</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – port number</p></li>
+<li><p><strong>hmac</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – truncated HMAC</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
@@ -2763,18 +2797,33 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">hmac</span></code> is not 8 octets, or is given together
+    with <code class="docutils literal notranslate"><span class="pre">echo</span></code> set.</p>
+</dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.4.1 allows an ADD_ADDR without the truncated
+HMAC only as an echo (<code class="docutils literal notranslate"><span class="pre">E</span></code> set). So when none of <code class="docutils literal notranslate"><span class="pre">reserved</span></code>,
+<code class="docutils literal notranslate"><span class="pre">echo</span></code> and <code class="docutils literal notranslate"><span class="pre">hmac</span></code> is given, the option is built in the
+<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> layout instead, its <code class="docutils literal notranslate"><span class="pre">IPVer</span></code> nibble taking the place of
+the reserved bits and <code class="docutils literal notranslate"><span class="pre">E</span></code>; otherwise <code class="docutils literal notranslate"><span class="pre">reserved</span></code> defaults to 0 and
+<code class="docutils literal notranslate"><span class="pre">echo</span></code> to whether <code class="docutils literal notranslate"><span class="pre">hmac</span></code> is absent. A parsed <code class="docutils literal notranslate"><span class="pre">opt</span></code> is rebuilt
+as it was read, without those checks.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_remove">
-<span class="sig-name descname"><span class="pre">_make_mptcp_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_remove" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_remove" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP remove address option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress" title="pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPRemoveAddress</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>addr_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – address ID list</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
@@ -2790,13 +2839,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_prio">
-<span class="sig-name descname"><span class="pre">_make_mptcp_prio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_prio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_prio" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_prio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_prio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_prio" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP priority option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority" title="pcapkit.protocols.data.transport.tcp.MPTCPPriority"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPPriority</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>backup</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – backup flag</p></li>
 <li><p><strong>addr_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – address ID</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
@@ -2813,13 +2863,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_fail">
-<span class="sig-name descname"><span class="pre">_make_mptcp_fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_fail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fail" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_fail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fail" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP fail option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPFallback" title="pcapkit.protocols.data.transport.tcp.MPTCPFallback"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPFallback</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>dsn</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – data sequence number</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
@@ -2835,13 +2886,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose">
-<span class="sig-name descname"><span class="pre">_make_mptcp_fastclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_fastclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_mptcp_fastclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_mptcp_fastclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP fastclose option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose" title="pcapkit.protocols.data.transport.tcp.MPTCPFastclose"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPFastclose</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – option receiver’s key</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
@@ -2857,13 +2909,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_join_syn">
-<span class="sig-name descname"><span class="pre">_make_join_syn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_syn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_syn" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_join_syn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_syn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_syn" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP join SYN option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN" title="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYN</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>backup</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – backup flag</p></li>
 <li><p><strong>addr_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – address ID</p></li>
 <li><p><strong>token</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – receiver’s token</p></li>
@@ -2882,13 +2935,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_join_synack">
-<span class="sig-name descname"><span class="pre">_make_join_synack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_synack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_synack" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_join_synack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_synack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_synack" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP join SYN/ACK option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK" title="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYNACK</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>backup</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – backup flag</p></li>
 <li><p><strong>addr_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – address ID</p></li>
 <li><p><strong>hmac</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – sender’s truncated HMAC</p></li>
@@ -2907,13 +2961,14 @@ one of the five <span class="target" id="index-42"></span><a class="rfc referenc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._make_join_ack">
-<span class="sig-name descname"><span class="pre">_make_join_ack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_ack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_ack" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_make_join_ack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._make_join_ack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._make_join_ack" title="Link to this definition">¶</a></dt>
 <dd><p>Make multipath TCP join ACK option.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subtype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a></span>) – MPTCP subtype</p></li>
 <li><p><strong>opt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK" title="pcapkit.protocols.data.transport.tcp.MPTCPJoinACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinACK</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – option data</p></li>
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – reserved bits</p></li>
 <li><p><strong>hmac</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – sender’s HMAC</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
 </ul>
@@ -3616,13 +3671,7 @@ then be a method that can parse the option by itself.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK.reserved">
-<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK.reserved" title="Link to this definition">¶</a></dt>
-<dd><p>Reserved.</p>
+<dd><p>Subtype and reserved.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3641,7 +3690,7 @@ then be a method that can parse the option by itself.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype and flags.</p>
+<dd><p>Subtype and reserved.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3655,7 +3704,7 @@ then be a method that can parse the option by itself.</p>
 <span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">ack&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack" title="Link to this definition">¶</a></dt>
 <dd><p>Data ACK.</p>
 <p>4 octets when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">a</span></code> is set as well, absent otherwise –
-<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. Both the presence test and the width live
+<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. Both the presence test and the width live
 in <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, whose note explains why the switch form
 is used.</p>
 </dd></dl>
@@ -3665,7 +3714,7 @@ is used.</p>
 <span class="sig-name descname"><span class="pre">dsn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">dsn&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn" title="Link to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
 <p>4 octets when <code class="docutils literal notranslate"><span class="pre">M</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">m</span></code> is set as well, absent otherwise –
-<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. C.f. <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_dsn_selector()</span></code></a>.</p>
+<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. C.f. <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_dsn_selector()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3683,7 +3732,7 @@ is used.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum">
 <span class="sig-name descname"><span class="pre">checksum</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">checksum&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum" title="Link to this definition">¶</a></dt>
-<dd><p>Checksum.</p>
+<dd><p>Checksum (if negotiated, c.f. <code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_checksum()</span></code>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -3696,7 +3745,7 @@ is used.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress"><span class="pre">MPTCPSubtypeAddAddress</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype and IP version.</p>
+<dd><p>Subtype and flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3717,6 +3766,12 @@ is used.</p>
 <dd><p>Port.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress.hmac">
+<span class="sig-name descname"><span class="pre">hmac</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">hmac&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress.hmac" title="Link to this definition">¶</a></dt>
+<dd><p>Truncated HMAC.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3727,7 +3782,7 @@ is used.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype.</p>
+<dd><p>Subtype and reserved.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3765,7 +3820,10 @@ is used.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPFallback.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPFallback.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype.</p>
+<dd><p>Subtype and reserved.</p>
+<p><span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.7 figure 16 follows the subtype’s 4 bits with
+<strong>12</strong> reserved bits, so the Data Sequence Number starts at the fifth
+octet of the 12-octet option.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3784,20 +3842,11 @@ is used.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.test" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.reserved">
-<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.reserved" title="Link to this definition">¶</a></dt>
-<dd><p>Reserved.</p>
-<p><span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14 spends a whole 32-bit row on
+<dd><p>Subtype and reserved.</p>
+<p><span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14 spends a whole 32-bit row on
 <code class="docutils literal notranslate"><span class="pre">Kind</span></code>/<code class="docutils literal notranslate"><span class="pre">Length</span></code>/<code class="docutils literal notranslate"><span class="pre">Subtype</span></code>/<code class="docutils literal notranslate"><span class="pre">(reserved)</span></code>, i.e. the subtype’s 4 bits
 are followed by <strong>12</strong> reserved bits, not 4 – so the subtype-and-reserved
-part is 2 octets and the option is 12 octets in total. Declared the same
-way <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinACK</span></code></a> declares its own reserved octet, for the same
-reason: a wider <code class="docutils literal notranslate"><span class="pre">test</span></code> would make the reserved bits look like part of
-the subtype namespace.</p>
+part is 2 octets and the option is 12 octets in total.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4023,6 +4072,18 @@ the subtype namespace.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.deny_join">
+<span class="sig-name descname"><span class="pre">deny_join</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.deny_join" title="Link to this definition">¶</a></dt>
+<dd><p>Do not establish new subflows to the source address.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved flags (<code class="docutils literal notranslate"><span class="pre">D</span></code> to <code class="docutils literal notranslate"><span class="pre">G</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.hsa">
 <span class="sig-name descname"><span class="pre">hsa</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags.hsa" title="Link to this definition">¶</a></dt>
 <dd><p>Use of HMAC-SHA1.</p>
@@ -4039,6 +4100,12 @@ the subtype namespace.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin.subtype">
 <span class="sig-name descname"><span class="pre">subtype</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin.subtype" title="Link to this definition">¶</a></dt>
 <dd><p>Subtype.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4060,6 +4127,12 @@ the subtype namespace.</p>
 <dd><p>Subtype.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -4067,6 +4140,12 @@ the subtype namespace.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCPDSSFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#MPTCPDSSFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
 <p>MPTCP-DSS flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags.F">
 <span class="sig-name descname"><span class="pre">F</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags.F" title="Link to this definition">¶</a></dt>
@@ -4112,9 +4191,15 @@ Length, and Checksum present.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.version">
-<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.version" title="Link to this definition">¶</a></dt>
-<dd><p>IP version.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.echo">
+<span class="sig-name descname"><span class="pre">echo</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress.echo" title="Link to this definition">¶</a></dt>
+<dd><p>Echo flag.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4128,6 +4213,12 @@ Length, and Checksum present.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority.subtype">
 <span class="sig-name descname"><span class="pre">subtype</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority.subtype" title="Link to this definition">¶</a></dt>
 <dd><p>Subtype.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4173,21 +4264,30 @@ instance.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
-<li><p>If IP version is 4, a <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField" title="pcapkit.corekit.fields.ipaddress.IPv4AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4AddressField</span></code></a>
-instance.</p></li>
-<li><p>If IP version is 6, a <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField" title="pcapkit.corekit.fields.ipaddress.IPv6AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressField</span></code></a>
-instance.</p></li>
+<li><p>If the option length is one of the IPv4 lengths, a
+<a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField" title="pcapkit.corekit.fields.ipaddress.IPv4AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4AddressField</span></code></a> instance.</p></li>
+<li><p>If the option length is one of the IPv6 lengths, a
+<a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField" title="pcapkit.corekit.fields.ipaddress.IPv6AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressField</span></code></a> instance.</p></li>
 </ul>
 </p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.4.1 figure 12 has no IP version field: the
+address family follows from the option length, which is 8 or 20 for
+an IPv4 or IPv6 address, plus 2 with the port, plus 8 with the
+truncated HMAC. The <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> <code class="docutils literal notranslate"><span class="pre">IPVer</span></code> nibble occupies the bits
+<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> reserves and spends on <code class="docutils literal notranslate"><span class="pre">E</span></code>, and its lengths are the
+HMAC-less ones, so both layouts are read the same way.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_dss_ack_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#mptcp_dss_ack_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ack</span></code></a> field.</p>
-<p><span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data ACK as “4 or 8 octets,
+<p><span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data ACK as “4 or 8 octets,
 depending on flags”: present only when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, and 8 octets wide only
 when <code class="docutils literal notranslate"><span class="pre">a</span></code> is <em>also</em> set – “a = Data ACK is 8 octets (if not set, Data ACK
 is 4 octets)”.</p>
@@ -4222,7 +4322,8 @@ callable-length <code class="docutils literal notranslate"><span class="pre">Num
 8-octet form, and wire <em>absence</em> is no obstacle:
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ssn</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dl_len</span></code></a> and
 <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.checksum</span></code></a> are each a <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> on the sibling
-<code class="docutils literal notranslate"><span class="pre">M</span></code> flag. The <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept for a narrower reason about
+<code class="docutils literal notranslate"><span class="pre">M</span></code> flag (the checksum on the option length as well). The
+<code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept for a narrower reason about
 composition. A
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">length</span></code>
 forwards to the wrapped field unconditionally, never consulting the
@@ -4243,7 +4344,7 @@ behaviour change, not a tidy-up.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_dss_dsn_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#mptcp_dss_dsn_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dsn</span></code></a> field.</p>
-<p><span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data Sequence Number as “4 or 8
+<p><span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data Sequence Number as “4 or 8
 octets, depending on flags”: present only when <code class="docutils literal notranslate"><span class="pre">M</span></code> is set, and 8 octets
 wide only when <code class="docutils literal notranslate"><span class="pre">m</span></code> is <em>also</em> set – “m = Data Sequence Number is 8 octets
 (if not set, DSN is 4 octets)”.</p>
@@ -4817,6 +4918,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoin" title="pcapkit.protocols.data.transport.tcp.MPTCPJoin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoin</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> option.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.backup">
 <span class="sig-name descname"><span class="pre">backup</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.backup" title="Link to this definition">¶</a></dt>
 <dd><p>Backup path flag.</p>
@@ -4847,6 +4954,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCPJoinSYNACK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#MPTCPJoinSYNACK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoin" title="pcapkit.protocols.data.transport.tcp.MPTCPJoin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoin</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYNACK</span></code> option.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.backup">
 <span class="sig-name descname"><span class="pre">backup</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.backup" title="Link to this definition">¶</a></dt>
@@ -4879,6 +4992,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoin" title="pcapkit.protocols.data.transport.tcp.MPTCPJoin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoin</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> option.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.hmac">
 <span class="sig-name descname"><span class="pre">hmac</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.hmac" title="Link to this definition">¶</a></dt>
 <dd><p>HMAC value.</p>
@@ -4892,15 +5011,33 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCP" title="pcapkit.protocols.data.transport.tcp.MPTCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCP</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">DSS</span></code> option.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.data_fin">
 <span class="sig-name descname"><span class="pre">data_fin</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.data_fin" title="Link to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">DATA_FIN</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack_wide">
+<span class="sig-name descname"><span class="pre">ack_wide</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack_wide" title="Link to this definition">¶</a></dt>
+<dd><p>Data ACK is 8 octets (<code class="docutils literal notranslate"><span class="pre">a</span></code> flag).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack">
 <span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack" title="Link to this definition">¶</a></dt>
 <dd><p>Data ACK.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.dsn_wide">
+<span class="sig-name descname"><span class="pre">dsn_wide</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.dsn_wide" title="Link to this definition">¶</a></dt>
+<dd><p>Data sequence number is 8 octets (<code class="docutils literal notranslate"><span class="pre">m</span></code> flag).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4941,6 +5078,18 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.echo">
+<span class="sig-name descname"><span class="pre">echo</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.echo" title="Link to this definition">¶</a></dt>
+<dd><p>Echo flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.addr_id">
 <span class="sig-name descname"><span class="pre">addr_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.addr_id" title="Link to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
@@ -4958,6 +5107,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dd><p>Port number.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.hmac">
+<span class="sig-name descname"><span class="pre">hmac</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.hmac" title="Link to this definition">¶</a></dt>
+<dd><p>Truncated HMAC.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -4965,6 +5120,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCPRemoveAddress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#MPTCPRemoveAddress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCP" title="pcapkit.protocols.data.transport.tcp.MPTCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCP</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> option.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.addr_id">
 <span class="sig-name descname"><span class="pre">addr_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.addr_id" title="Link to this definition">¶</a></dt>
@@ -4978,6 +5139,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCPPriority</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#MPTCPPriority"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCP" title="pcapkit.protocols.data.transport.tcp.MPTCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCP</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> option.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPPriority.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPPriority.backup">
 <span class="sig-name descname"><span class="pre">backup</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.backup" title="Link to this definition">¶</a></dt>
@@ -4998,6 +5165,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCP" title="pcapkit.protocols.data.transport.tcp.MPTCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCP</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> option.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFallback.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFallback.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFallback.dsn">
 <span class="sig-name descname"><span class="pre">dsn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFallback.dsn" title="Link to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
@@ -5010,6 +5183,12 @@ note for why a <code class="docutils literal notranslate"><span class="pre">Swit
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MPTCPFastclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/transport/tcp.html#MPTCPFastclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCP" title="pcapkit.protocols.data.transport.tcp.MPTCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCP</span></code></a></p>
 <p>Data model for TCP <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> option.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFastclose.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFastclose.rkey">
 <span class="sig-name descname"><span class="pre">rkey</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose.rkey" title="Link to this definition">¶</a></dt>

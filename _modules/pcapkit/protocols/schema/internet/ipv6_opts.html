@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -568,7 +569,9 @@
         <span class="nb">max</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Verification flag. ``0`` indicates that the MPL Option</span>
         <span class="c1">#: conforms to this specification.</span>
-        <span class="n">drop</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">drop</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits (``rsv``).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="DFFFlags">
@@ -581,7 +584,9 @@
         <span class="c1">#: Duplicate flag.</span>
         <span class="n">dup</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Retune flag.</span>
-        <span class="n">ret</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">ret</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="SMFDPDTestFlag">
@@ -600,6 +605,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">QSTestFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Quick start test flag."""</span>
 
+        <span class="c1">#: Option length.</span>
+        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: QS function.</span>
         <span class="n">func</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -610,7 +617,9 @@
 <span class="w">        </span><span class="sd">"""Quick start nonce."""</span>
 
         <span class="c1">#: Nonce.</span>
-        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits (``R``).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 
@@ -705,6 +714,11 @@
 <span class="sd">        mis-count against the option area.</span>
 
 <span class="sd">    """</span>
+    <span class="c1"># NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode</span>
+    <span class="c1"># bit forward-matched above belongs to whatever follows the option.</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'IPv6-Opts: invalid SMF DPD option length: 0'</span><span class="p">)</span>
+
     <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">SMFDPDOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -768,6 +782,9 @@
 <span class="sd">        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption`</span>
 <span class="sd">          instance.</span>
+<span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
+<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption`</span>
+<span class="sd">          instance, sized by the option's own ``Opt Data Len``.</span>
 
 <span class="sd">    """</span>
     <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
@@ -775,7 +792,9 @@
 
     <span class="n">schema</span> <span class="o">=</span> <span class="n">QuickStartOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="c1"># An unassigned function has no defined layout, so the option is kept</span>
+        <span class="c1"># as raw data, sized by its own ``Opt Data Len``.</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnassignedOption</span><span class="p">)</span>
 
     <span class="c1"># NOTE: The suboption schemas carry the option's own ``type`` and ``len``</span>
     <span class="c1"># octets, so this is the width of the whole option: the two header octets</span>
@@ -1159,6 +1178,7 @@
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'QSTestFlags'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
         <span class="s1">'func'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: QS data.</span>
@@ -1179,7 +1199,8 @@
 
 <span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">QuickStartOption</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 </div>
 
@@ -1223,6 +1244,7 @@
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1242,6 +1264,7 @@
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1288,6 +1311,7 @@
         <span class="s1">'type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
         <span class="s1">'max'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'drop'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: MPL sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
@@ -1391,6 +1415,7 @@
         <span class="s1">'ver'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
         <span class="s1">'dup'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'ret'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>

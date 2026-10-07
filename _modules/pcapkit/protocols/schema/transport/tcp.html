@@ -429,6 +429,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -634,6 +635,10 @@
         <span class="n">req</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Extensibility flag.</span>
         <span class="n">ext</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Do not establish new subflows to the source address.</span>
+        <span class="n">deny_join</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved flags (``D`` to ``G``).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Use of HMAC-SHA1.</span>
         <span class="n">hsa</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -645,6 +650,8 @@
 
         <span class="c1">#: Subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Backup flag.</span>
         <span class="n">backup</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -655,7 +662,9 @@
 <span class="w">        </span><span class="sd">"""MPTCP subtype field."""</span>
 
         <span class="c1">#: Subtype.</span>
-        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="MPTCPDSSFlags">
@@ -663,6 +672,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPDSSFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""MPTCP-DSS flags."""</span>
 
+        <span class="c1">#: Reserved.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: ``DATA_FIN`` flag.</span>
         <span class="n">F</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Data sequence number is 8 octets (if not set, DSN is 4 octets).</span>
@@ -683,8 +694,10 @@
 
         <span class="c1">#: Subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: IP version.</span>
-        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="c1">#: Reserved.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Echo flag.</span>
+        <span class="n">echo</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="MPTCPSubtypePriority">
@@ -694,6 +707,8 @@
 
         <span class="c1">#: Subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Backup flag.</span>
         <span class="n">backup</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -739,18 +754,48 @@
 <span class="sd">        pkt: Packet data.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        * If IP version is 4, a :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If IP version is 6, a :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`</span>
-<span class="sd">          instance.</span>
+<span class="sd">        * If the option length is one of the IPv4 lengths, a</span>
+<span class="sd">          :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField` instance.</span>
+<span class="sd">        * If the option length is one of the IPv6 lengths, a</span>
+<span class="sd">          :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        :rfc:`8684` section 3.4.1 figure 12 has no IP version field: the</span>
+<span class="sd">        address family follows from the option length, which is 8 or 20 for</span>
+<span class="sd">        an IPv4 or IPv6 address, plus 2 with the port, plus 8 with the</span>
+<span class="sd">        truncated HMAC. The :rfc:`6824` ``IPVer`` nibble occupies the bits</span>
+<span class="sd">        :rfc:`8684` reserves and spends on ``E``, and its lengths are the</span>
+<span class="sd">        HMAC-less ones, so both layouts are read the same way.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
-    <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="si">}</span><span class="s1"> invalid IP version'</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="si">}</span><span class="s1"> invalid length'</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mptcp_dss_checksum</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Condition function for :attr:`MPTCPDSS.checksum` field.</span>
+
+<span class="sd">    :rfc:`8684` section 3.3 makes the checksum part of the mapping only when</span>
+<span class="sd">    checksums were negotiated, so a mapping without one is 2 octets shorter</span>
+<span class="sd">    and only the option length tells the two forms apart.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether the option length leaves room for the checksum after the</span>
+<span class="sd">        Data ACK and the mapping.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">((</span><span class="mi">8</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'a'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'A'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> \
+        <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'m'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span>
+    <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">2</span>
 
 
 <div class="viewcode-block" id="mptcp_dss_ack_selector">
@@ -786,7 +831,8 @@
 <span class="sd">        8-octet form, and wire *absence* is no obstacle:</span>
 <span class="sd">        :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len` and</span>
 <span class="sd">        :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the sibling</span>
-<span class="sd">        ``M`` flag. The ``SwitchField`` form is kept for a narrower reason about</span>
+<span class="sd">        ``M`` flag (the checksum on the option length as well). The</span>
+<span class="sd">        ``SwitchField`` form is kept for a narrower reason about</span>
 <span class="sd">        composition. A</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``</span>
 <span class="sd">        forwards to the wrapped field unconditionally, never consulting the</span>
@@ -1423,7 +1469,7 @@
         <span class="s1">'data'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeUnknown'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1445,6 +1491,8 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPCapableFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'req'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'ext'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'deny_join'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'hsa'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1"># NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --</span>
@@ -1493,6 +1541,7 @@
     <span class="c1">#: Subtype and flags.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeJoin'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="s1">'backup'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
@@ -1516,6 +1565,7 @@
     <span class="c1">#: Subtype and flags.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeJoin'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="s1">'backup'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
@@ -1536,12 +1586,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPJoinACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP join option for ``ACK`` connection."""</span>
 
-    <span class="c1">#: Subtype.</span>
-    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+    <span class="c1">#: Subtype and reserved.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1">#: Reserved.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: Sender's HMAC.</span>
     <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
@@ -1556,12 +1605,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPDSS</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">DSS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP DSS option."""</span>
 
-    <span class="c1">#: Subtype and flags.</span>
+    <span class="c1">#: Subtype and reserved.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'MPTCPDSSFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'m'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'M'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -1594,10 +1645,10 @@
         <span class="n">UInt16Field</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">],</span>
     <span class="p">)</span>
-    <span class="c1">#: Checksum.</span>
+    <span class="c1">#: Checksum (if negotiated, c.f. :func:`mptcp_dss_checksum`).</span>
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">],</span>
+        <span class="n">mptcp_dss_checksum</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1611,10 +1662,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPAddAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP add address option."""</span>
 
-    <span class="c1">#: Subtype and IP version.</span>
+    <span class="c1">#: Subtype and flags.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeAddAddress'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-        <span class="s1">'version'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">'echo'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
@@ -1625,11 +1677,16 @@
     <span class="c1">#: Port.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="c1">#: Truncated HMAC.</span>
+    <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeAddAddress'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeAddAddress'</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1639,9 +1696,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPRemoveAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP remove address option."""</span>
 
-    <span class="c1">#: Subtype.</span>
+    <span class="c1">#: Subtype and reserved.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'list[int]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
@@ -1663,6 +1721,7 @@
     <span class="c1">#: Subtype.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypePriority'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="s1">'backup'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
@@ -1682,9 +1741,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPFallback</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FAIL</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP fallback option."""</span>
 
-    <span class="c1">#: Subtype.</span>
-    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+    <span class="c1">#: Subtype and reserved.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`8684` section 3.7 figure 16 follows the subtype's 4 bits with</span>
+    <span class="c1">#: **12** reserved bits, so the Data Sequence Number starts at the fifth</span>
+    <span class="c1">#: octet of the 12-octet option.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Data sequence number.</span>
     <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
@@ -1700,20 +1764,16 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MPTCPFastclose</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FASTCLOSE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP fastclose option."""</span>
 
-    <span class="c1">#: Subtype.</span>
-    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-    <span class="p">})</span>
-    <span class="c1">#: Reserved.</span>
+    <span class="c1">#: Subtype and reserved.</span>
     <span class="c1">#:</span>
     <span class="c1">#: :rfc:`8684` section 3.5 figure 14 spends a whole 32-bit row on</span>
     <span class="c1">#: ``Kind``/``Length``/``Subtype``/``(reserved)``, i.e. the subtype's 4 bits</span>
     <span class="c1">#: are followed by **12** reserved bits, not 4 -- so the subtype-and-reserved</span>
-    <span class="c1">#: part is 2 octets and the option is 12 octets in total. Declared the same</span>
-    <span class="c1">#: way :class:`MPTCPJoinACK` declares its own reserved octet, for the same</span>
-    <span class="c1">#: reason: a wider ``test`` would make the reserved bits look like part of</span>
-    <span class="c1">#: the subtype namespace.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#: part is 2 octets and the option is 12 octets in total.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtype'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+    <span class="p">})</span>
     <span class="c1">#: Option receiver's key.</span>
     <span class="n">key</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
 

@@ -436,6 +436,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
@@ -1054,6 +1055,18 @@ module and class, or a <a class="reference internal" href="#pcapkit.protocols.pr
     and <code class="docutils literal notranslate"><span class="pre">default</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">name</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>,
+the namespace is inferred from the calling <code class="docutils literal notranslate"><span class="pre">make</span></code> method: it
+is the enumeration class of the default value of the argument
+that <code class="docutils literal notranslate"><span class="pre">name</span></code> was passed as. If several arguments were given the
+same name, every one of their enumerations must have the name
+and map it to the same value; otherwise
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented" title="pcapkit.utilities.exceptions.ProtocolNotImplemented"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolNotImplemented</span></code></a> is
+raised, asking for an explicit <code class="docutils literal notranslate"><span class="pre">*_namespace</span></code> (see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index_namespace()</span></code>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
