@@ -407,9 +407,14 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         # call super __post_init__
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self) -> 'Literal[2]':
-        """Return an estimated length for the object."""
-        return 2
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object.
+
+        Eight octets: the two fixed ones and the options that
+        :rfc:`8200#section-4.6` counts in the first 8-octet unit.
+
+        """
+        return 8
 
     @classmethod
     def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned

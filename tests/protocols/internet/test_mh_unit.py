@@ -37,7 +37,7 @@ class MHUnitTests(unittest.TestCase):
         proto = object.__new__(MH)
 
         self.assertEqual(MH.__index__(), TransType.Mobility_Header)
-        self.assertEqual(proto.__length_hint__(), 6)
+        self.assertEqual(proto.__length_hint__(), 8)
         values = MH._make_data(data)
         self.assertEqual(values['next'], TransType.UDP)
         self.assertEqual(values['type'], Packet.Binding_Refresh_Request)
