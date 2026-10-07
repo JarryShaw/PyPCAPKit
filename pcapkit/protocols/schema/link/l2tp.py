@@ -33,6 +33,12 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         offset: int
         #: Priority of L2TP packet.
         prio: int
+        #: Reserved bits 2 and 3 of L2TP packet.
+        reserved_1: int
+        #: Reserved bit 5 of L2TP packet.
+        reserved_2: int
+        #: Reserved bits 8 to 11 of L2TP packet.
+        reserved_3: int
         #: Version of L2TP packet.
         version: Literal[2]
 
@@ -45,9 +51,12 @@ class L2TP(Schema):
     flags: 'FlagsType' = BitField(length=2, namespace={
         'type': (0, 1),
         'len': (1, 1),
+        'reserved_1': (2, 2),
         'seq': (4, 1),
+        'reserved_2': (5, 1),
         'offset': (6, 1),
         'prio': (7, 1),
+        'reserved_3': (8, 4),
         'version': (12, 4),
     })
     #: Length of L2TP packet.
