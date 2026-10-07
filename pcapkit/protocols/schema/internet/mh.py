@@ -156,11 +156,27 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         H: 'int'
         L: 'int'
         K: 'int'
+        M: 'int'
+        R: 'int'
+        P: 'int'
+        F: 'int'
+        T: 'int'
+        B: 'int'
+        S: 'int'
+        D: 'int'
+        reserved: 'int'
 
     class BindingAcknowledgementMessageFlags(TypedDict):
         """Flags for :attr:`BindingAcknowledgementMessage.flags`."""
 
         K: 'int'
+        R: 'int'
+        P: 'int'
+        T: 'int'
+        B: 'int'
+        S: 'int'
+        D: 'int'
+        reserved: 'int'
 
     class FastBindingUpdateMessageFlags(TypedDict):
         """Flags for :attr:`FastBindingUpdateMessage.flags`."""
@@ -240,6 +256,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         prefix_length: 'int'
         P: 'int'
+        reserved: 'int'
 
     class PrefixLengthOnly(TypedDict):
         """Prefix length packed alone in its own word, as in
@@ -298,6 +315,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """Flags for :attr:`ANINetworkIdentifierSuboption.flags`."""
 
         E: 'int'
+        reserved: 'int'
 
     class GeoLocationDegrees(TypedDict):
         """Latitude and longitude of :attr:`ANIGeoLocationSuboption.location`."""
@@ -562,7 +580,7 @@ class MH(Schema):
     #: MH type.
     type: 'Enum_Packet' = EnumField(length=1, namespace=Enum_Packet)
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=1)
+    reserved: 'int' = UInt8Field(default=0)
     #: Checksum.
     chksum: 'bytes' = BytesField(length=2)
     #: Message data.
@@ -572,7 +590,8 @@ class MH(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'Enum_TransType | int', length: 'int', type: 'Enum_Packet | int',
-                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     reserved: 'int', chksum: 'bytes', data: 'Packet | bytes',
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
 
 
 class Option(EnumSchema[Enum_Option]):
@@ -1084,12 +1103,12 @@ class HandoffIndicatorOption(Option, code=Enum_Option.Handoff_Indicator_Option):
     """Header schema for MH Handoff Indicator options."""
 
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=1)
+    reserved: 'int' = UInt8Field(default=0)
     #: Handoff indicator.
     hi: 'Enum_HandoffType' = EnumField(length=1, namespace=Enum_HandoffType)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', hi: 'Enum_HandoffType') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'int', hi: 'Enum_HandoffType') -> 'None': ...
 
 
 @schema_final
@@ -1179,6 +1198,7 @@ class IPv4HomeAddressOption(Option, code=Enum_Option.IPv4_Home_Address):
     flags: 'IPv4HomeAddressOptionFlags' = BitField(length=2, namespace={
         'prefix_length': (0, 6),
         'P': (6, 1),
+        'reserved': (7, 9),
     })
     #: IPv4 home address.
     address: 'IPv4Address' = IPv4AddressField()
@@ -1771,6 +1791,7 @@ class ANINetworkIdentifierSuboption(ANISuboption, code=Enum_ANISuboption.Network
     #: Flags.
     flags: 'ANINetworkIdentifierFlags' = BitField(length=1, namespace={
         'E': (0, 1),
+        'reserved': (1, 7),
     })
     #: Network name length.
     net_name_len: 'int' = UInt8Field()
@@ -2495,7 +2516,7 @@ class BindingRefreshRequestMessage(Packet, code=Enum_Packet.Binding_Refresh_Requ
     """Header schema for MH Binding Refresh Request (BRR) message."""
 
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=2)
+    reserved: 'int' = UInt16Field(default=0)
     #: Mobility options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['__length__'],
@@ -2506,7 +2527,7 @@ class BindingRefreshRequestMessage(Packet, code=Enum_Packet.Binding_Refresh_Requ
     )
 
     if TYPE_CHECKING:
-        def __init__(self, options: 'list[Option | bytes]') -> 'None': ...
+        def __init__(self, reserved: 'int', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -2611,6 +2632,17 @@ class BindingUpdateMessage(Packet, code=Enum_Packet.Binding_Update):
         'H': (1, 1),
         'L': (2, 1),
         'K': (3, 1),
+        'M': (4, 1),
+        'R': (5, 1),
+        'P': (6, 1),
+        'F': (7, 1),
+        'T': (8, 1),
+        'B': (9, 1),
+        # NOTE: RFC 7161 draws ``S`` at bit 7, colliding with RFC 5555's ``F``;
+        # this follows IANA and RFC 8885, which place it at bit 10 (0x0020).
+        'S': (10, 1),
+        'D': (11, 1),
+        'reserved': (12, 4),
     })
     #: Lifetime. One time unit is 4 seconds.
     lifetime: 'int' = UInt16Field()
@@ -2637,6 +2669,13 @@ class BindingAcknowledgementMessage(Packet, code=Enum_Packet.Binding_Acknowledge
     #: Flags.
     flags: 'BindingAcknowledgementMessageFlags' = BitField(length=1, namespace={
         'K': (0, 1),
+        'R': (1, 1),
+        'P': (2, 1),
+        'T': (3, 1),
+        'B': (4, 1),
+        'S': (5, 1),
+        'D': (6, 1),
+        'reserved': (7, 1),
     })
     #: Sequence number.
     seq: 'int' = UInt16Field()
