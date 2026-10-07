@@ -549,7 +549,9 @@
         <span class="c1">#: Rank error flag.</span>
         <span class="n">rank_err</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Forwarding error flag.</span>
-        <span class="n">fwd_err</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">fwd_err</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved flag bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="MPLFlags">
@@ -610,6 +612,21 @@
         <span class="c1">#: Nonce.</span>
         <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rpl_opt_sub_tlv_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return RPL option sub-TLV length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: RPL option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        RPL option sub-TLV length, i.e. ``Opt Data Len`` less the four octets</span>
+<span class="sd">        of the fixed fields. An ``Opt Data Len`` below ``4`` gives ``0``, and</span>
+<span class="sd">        the reader then rejects the option.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="mpl_opt_seed_id_len">
@@ -1240,15 +1257,18 @@
         <span class="s1">'down'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'rank_err'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'fwd_err'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: RPL instance ID.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Sender rank.</span>
     <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Sub-TLVs, kept as raw octets.</span>
+    <span class="n">sub_tlvs</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">rpl_opt_sub_tlv_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'RPLFlags'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sub_tlvs</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

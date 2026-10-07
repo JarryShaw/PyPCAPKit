@@ -1510,6 +1510,9 @@
 <span class="sd">           |                         (sub-TLVs)                            |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
+<span class="sd">        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when</span>
+<span class="sd">        unrecognised, are kept as raw octets in ``sub_tlvs``.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: parsed parameter schema</span>
 <span class="sd">            options: extracted HOPOPT options</span>
@@ -1518,10 +1521,10 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``4``.</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is less than ``4``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_RPLOption</span><span class="p">(</span>
@@ -1533,9 +1536,11 @@
                 <span class="n">down</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'down'</span><span class="p">]),</span>
                 <span class="n">rank_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'rank_err'</span><span class="p">]),</span>
                 <span class="n">fwd_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fwd_err'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">rank</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sub_tlvs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -2381,6 +2386,8 @@
                       <span class="n">fwd_err</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">sub_tlvs</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPLOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT RPL option.</span>
 
@@ -2392,29 +2399,44 @@
 <span class="sd">            fwd_err: forwarding error flag</span>
 <span class="sd">            id: RPL instance ID</span>
 <span class="sd">            rank: sender rank</span>
+<span class="sd">            reserved: reserved flag bits, i.e. the low five bits of the flags octet</span>
+<span class="sd">            sub_tlvs: sub-TLVs, as raw octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``reserved`` does not fit in five bits, or</span>
+<span class="sd">                ``sub_tlvs`` does not fit in the option.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">down</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">down</span>
             <span class="n">rank_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rank_err</span>
             <span class="n">fwd_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fwd_err</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">id</span>
             <span class="n">rank</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rank</span>
+            <span class="n">sub_tlvs</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">sub_tlvs</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">reserved</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid RPL reserved flags: </span><span class="si">{</span><span class="n">reserved</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">251</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too long RPL sub-TLVs: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_RPLOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">),</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'down'</span><span class="p">:</span> <span class="n">down</span><span class="p">,</span>
                 <span class="s1">'rank_err'</span><span class="p">:</span> <span class="n">rank_err</span><span class="p">,</span>
                 <span class="s1">'fwd_err'</span><span class="p">:</span> <span class="n">fwd_err</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">sub_tlvs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
