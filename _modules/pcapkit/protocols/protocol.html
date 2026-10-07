@@ -2294,16 +2294,59 @@
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
 
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
-                         <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
-                         <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
+                                      <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
+                                      <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">file_</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Parse the next layer, or keep it as raw octets if its header was not captured.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            klass: next layer protocol class</span>
+<span class="sd">            file\_: payload of the current layer</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+<span class="sd">            **kwargs: keyword arguments for the next layer's constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            when fewer octets were captured than its header needs.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">            zero-fills a field the stream ends inside, so a header parsed from</span>
+<span class="sd">            too few octets is filled with values that were never on the wire, and</span>
+<span class="sd">            :meth:`from_data &lt;ProtocolBase.from_data&gt;` rebuilds them (:issue:`1170`).</span>
+<span class="sd">            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            instead, as an unparseable one is.</span>
+
+<span class="sd">            The captured octets are what ``file_`` holds, which may be fewer than</span>
+<span class="sd">            the ``length`` the current header declares. They are short of the</span>
+<span class="sd">            header when there are fewer than the next layer's</span>
+<span class="sd">            :meth:`__length_hint__ &lt;ProtocolBase.__length_hint__&gt;`, unless the</span>
+<span class="sd">            header it parsed, :attr:`length &lt;ProtocolBase.length&gt;` octets long, fits</span>
+<span class="sd">            in them anyway: for a variable-length header such as</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` the hint is the longest</span>
+<span class="sd">            form rather than the shortest. A next layer that reports no hint is</span>
+<span class="sd">            kept as parsed.</span>
+
+<span class="sd">        """</span>
+        <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+
+        <span class="n">captured</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span>
+        <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
