@@ -12,6 +12,7 @@ cannot be used for it.
 .. _DPKT: https://dpkt.readthedocs.io
 
 """
+import copy
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
@@ -19,7 +20,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -33,7 +34,8 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
-    'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'packet2chain', 'packet2dict',
+    'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'attach_buffer', 'packet2bytes',
+    'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
 ]
 
@@ -52,6 +54,19 @@ __all__ = [
 #:
 #: .. _DPKT: https://dpkt.readthedocs.io
 TIMESTAMP_ATTR = '__pcapkit_timestamp__'
+
+#: Attribute a frame's record octets are stashed under.
+#:
+#: A `DPKT`_ packet keeps no copy of the octets it was parsed from, and
+#: serialising it again is not the same thing: :meth:`dpkt.ip.IP.__bytes__`
+#: recomputes a zeroed checksum and length and writes them back into the
+#: packet, as do the transport layers beneath it. So the adapters below slice
+#: the wire octets out of this buffer instead, which
+#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches alongside
+#: :data:`TIMESTAMP_ATTR`.
+#:
+#: .. _DPKT: https://dpkt.readthedocs.io
+BUFFER_ATTR = '__pcapkit_buffer__'
 
 
 def attach_timestamp(packet: 'Packet', timestamp: 'float') -> 'None':
@@ -94,6 +109,147 @@ def packet2timestamp(packet: 'Packet') -> 'float':
     return cast('float', timestamp)
 
 
+def attach_buffer(packet: 'Packet', buffer: 'bytes') -> 'None':
+    """Stash a frame's record octets on the frame.
+
+    Args:
+        packet: DPKT packet.
+        buffer: Octets of the record the packet was parsed from, as `DPKT`_'s
+            reader yielded them.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    setattr(packet, BUFFER_ATTR, bytes(buffer))
+
+
+def packet2bytes(packet: 'Packet') -> 'bytes':
+    """Fetch the octets of a DPKT packet without modifying it.
+
+    Args:
+        packet: DPKT packet.
+
+    Returns:
+        The record octets attached by :func:`attach_buffer`, i.e. the frame as
+        it was captured. A packet that carries none -- one built by hand rather
+        than read by :class:`~pcapkit.foundation.engines.dpkt.DPKT` -- is
+        serialised from a copy instead, so that `DPKT`_'s checksum and length
+        recomputation never reaches the packet itself.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    buffer = getattr(packet, BUFFER_ATTR, None)
+    if buffer is not None:
+        return cast('bytes', buffer)
+    return cast('bytes', copy.deepcopy(packet).pack())
+
+
+def _ipv6_ext_hdrs(ipv6: 'IP6') -> 'list[Any]':
+    """Fetch an IPv6 packet's extension headers, in the order they were parsed.
+
+    Args:
+        ipv6: DPKT IPv6 packet.
+
+    Returns:
+        :attr:`dpkt.ip6.IP6.all_extension_headers` where `DPKT`_ recorded it,
+        which keeps the on-wire order and any header type that occurs twice;
+        otherwise the values of :attr:`~dpkt.ip6.IP6.extension_hdrs`, which
+        :meth:`dpkt.ip6.IP6.__len__` falls back to in the same way.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    ext_hdrs = getattr(ipv6, 'all_extension_headers', None)
+    if ext_hdrs:
+        return list(ext_hdrs)
+    return list(getattr(ipv6, 'extension_hdrs', {}).values())
+
+
+def _wire_hdr_len(packet: 'Packet', payload: 'Packet') -> 'int':
+    """Calculate the octets a layer occupies before its payload begins.
+
+    Args:
+        packet: DPKT packet, i.e. one layer of a frame.
+        payload: That layer's payload, i.e. :attr:`packet.data <dpkt.dpkt.Packet.data>`.
+
+    Returns:
+        The advance :meth:`~dpkt.dpkt.Packet.unpack` itself made to reach the
+        payload.
+
+        For IPv6 that is the fixed header plus each extension header's
+        :attr:`~dpkt.ip6.IP6ExtensionHeader.length`, which is what
+        :meth:`dpkt.ip6.IP6.unpack` walks the buffer by. It cannot be taken from
+        ``len()``: :meth:`dpkt.ip6.IP6.__len__` sums ``len()`` of the extension
+        headers instead, and that is 12 octets plus the *rest of the frame* for
+        an Authentication header -- :class:`dpkt.ip6.IP6AHHeader` trims only into
+        :attr:`~dpkt.ip6.IP6AHHeader.auth_data` and leaves
+        :attr:`~dpkt.dpkt.Packet.data` running to the end of the buffer -- and 8
+        octets short of the wire for a Routing header whose Hdr Ext Len is odd
+        (:class:`dpkt.ip6.IP6RoutingHeader` keeps whole addresses only).
+
+        Every other layer's ``len()`` does bound its payload, so the difference
+        of the two is used there. For IPv4 that difference is the Internet
+        Header Length, options included.
+
+    """
+    if hasattr(packet, 'extension_hdrs'):
+        return packet.__hdr_len__ + sum(
+            ext_hdr.length for ext_hdr in _ipv6_ext_hdrs(cast('IP6', packet))
+        )
+    return len(packet) - len(payload)
+
+
+def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
+    """Fetch the octets of a layer of a DPKT packet, from its first octet on.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+        layer: A layer nested within ``packet``.
+
+    Returns:
+        The octets, and whether they are the captured ones. With a buffer
+        attached by :func:`attach_buffer` they are the record octets from the
+        layer's offset to the end of the frame, so any link-layer trailer is
+        still there for the caller to trim; otherwise they are the layer alone,
+        serialised from a copy (see :func:`packet2bytes`).
+
+    Raises:
+        ProtocolError: If the buffer does not carry the layer's own header where
+            the walk above placed it. `DPKT`_ unpacks a header field by field and
+            :meth:`~dpkt.dpkt.Packet.pack_hdr` packs those fields back without
+            recomputing any of them, so the two agree octet for octet wherever
+            the offset is right -- which makes this an exact check rather than a
+            plausibility one. It is raised rather than worked around because a
+            misplaced slice reaches the reassembler as a believable datagram and
+            so is invisible in its output.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    buffer = getattr(packet, BUFFER_ATTR, None)
+    if buffer is not None:
+        offset = 0
+        current = packet
+        while current is not layer:
+            payload = getattr(current, 'data', None)
+            if payload is None or isinstance(payload, (bytes, bytearray)):
+                break
+            offset += _wire_hdr_len(current, payload)
+            current = payload
+        else:
+            wire = cast('bytes', buffer)[offset:]
+            hdr_len = getattr(layer, '__hdr_len__', 0)
+            if hdr_len and wire[:hdr_len] != layer.pack_hdr():
+                raise ProtocolError(
+                    f'{type(layer).__name__} header not found at offset {offset} of the '
+                    f'{len(cast("bytes", buffer))}-octet record; the frame cannot be '
+                    'sliced without re-serialising it'
+                )
+            return wire, True
+    return packet2bytes(layer), False
+
+
 def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
     """Calculate length of headers before IPv6 Fragment header.
 
@@ -104,18 +260,22 @@ def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
         Length of headers before IPv6 Fragment header
         :class:`dpkt.ip6.IP6FragmentHeader` (:rfc:`2460#section-4.5`).
 
-    As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)
-    includes Hop-by-Hop Options header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`),
-    Destination Options header :class:`dpkt.ip6.IP6DstOptHeader` (:rfc:`2460#section-4.6`) and
-    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`).
+    As specified in :rfc:`2460#section-4.1`, such a header may be a Hop-by-Hop Options
+    header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`), a Destination
+    Options header :class:`dpkt.ip6.IP6DstOptsHeader` (:rfc:`2460#section-4.6`) or a
+    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`). An
+    Authentication header (:rfc:`4302`) reaches here as well, though, so the headers are
+    walked in the order they were parsed rather than looked up by a fixed list of types.
+    Walking them is also what counts a header type occurring twice twice, and what leaves
+    out one that sits *after* the Fragment header rather than before it.
 
     """
+    frag = ipv6.extension_hdrs.get(44)
     hdr_len = ipv6.__hdr_len__
-    # IP6HopOptsHeader / IP6DstOptHeader / IP6RoutingHeader
-    for code in (0, 60, 43):
-        ext_hdr = ipv6.extension_hdrs.get(code)
-        if ext_hdr is not None:
-            hdr_len += ext_hdr.length
+    for ext_hdr in _ipv6_ext_hdrs(ipv6):
+        if ext_hdr is frag:
+            break
+        hdr_len += ext_hdr.length
     return hdr_len
 
 
@@ -161,7 +321,7 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
 
     return {
         'timestamp': timestamp,
-        'packet': packet.pack(),
+        'packet': packet2bytes(packet),
         data_link.name: wrapper(packet),
     }
 
@@ -189,6 +349,15 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Note:
+        The header and payload are sliced out of the record octets
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
+        they are the captured ones. A packet built by hand carries no such
+        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        which a zeroed checksum or length comes back recomputed --
+        :func:`attach_buffer` is what makes them the wire's again. The packet
+        itself is left untouched either way.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
@@ -201,6 +370,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         # covers any IP options, whereas ``IP.__hdr_len__`` is the fixed 20-octet
         # struct size and would leave option octets at the head of the payload
         ihl = ipv4.hl * 4
+        wire, captured = _layer2bytes(packet, ipv4)
+        # a zero Total Length is what TCP segmentation offload leaves behind, in
+        # which case the datagram runs to the end of the frame, as with DPKT
+        if captured and ipv4.len:
+            wire = wire[:ipv4.len]
 
         data = IP_Packet(
             bufid=(
@@ -216,8 +390,8 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             ihl=ihl,                                            # internet header length
             mf=bool(ipv4.mf),                                   # more fragment flag
             tl=ipv4.len,                                        # total length, header includes
-            header=ipv4.pack()[:ihl],                           # raw bytes type header
-            payload=bytearray(ipv4.pack()[ihl:]),               # raw bytearray type payload
+            header=wire[:ihl],                                  # raw bytes type header
+            payload=bytearray(wire[ihl:]),                      # raw bytearray type payload
             timestamp=timestamp,                                # capture timestamp
         )
         return data
@@ -243,6 +417,15 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Note:
+        The header and payload are sliced out of the record octets
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
+        they are the captured ones. A packet built by hand carries no such
+        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        which a zeroed checksum or length comes back recomputed --
+        :func:`attach_buffer` is what makes them the wire's again. The packet
+        itself is left untouched either way.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
@@ -253,8 +436,13 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         if ipv6_frag is None:       # dismiss not fragmented packet
             return None
         hdr_len = ipv6_hdr_len(ipv6)
+        wire, captured = _layer2bytes(packet, ipv6)
+        # a zero Payload Length is a jumbogram or TCP segmentation offload, in
+        # which case the datagram runs to the end of the frame, as with DPKT
+        if captured and ipv6.plen:
+            wire = wire[:ipv6.__hdr_len__ + ipv6.plen]
         # payload following the IPv6 Fragment header
-        payload = ipv6.pack()[hdr_len + ipv6_frag.__hdr_len__:]
+        payload = wire[hdr_len + ipv6_frag.__hdr_len__:]
 
         data = IP_Packet(
             bufid=(
@@ -283,7 +471,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
             ihl=hdr_len,                                         # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m_flag),                           # more fragment flag
             tl=hdr_len + len(payload),                           # total length, header includes
-            header=ipv6.pack()[:hdr_len],                        # raw bytes type header before IPv6-Frag
+            header=wire[:hdr_len],                               # raw bytes type header before IPv6-Frag
             payload=bytearray(payload),                          # raw bytearray type payload after IPv6-Frag
             timestamp=timestamp,                                 # capture timestamp
         )
@@ -309,6 +497,15 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Note:
+        The header and payload are sliced out of the record octets
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
+        they are the captured ones. A packet built by hand carries no such
+        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        which a zeroed checksum or length comes back recomputed --
+        :func:`attach_buffer` is what makes them the wire's again. The packet
+        itself is left untouched either way.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
@@ -325,6 +522,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         tcp = cast('TCP', ip.data)
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
+        wire, _ = _layer2bytes(packet, tcp)
         raw_len = len(tcp.data)                                 # payload length, header excludes
 
         data = TCP_Packet(
@@ -340,7 +538,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
             rst=bool(int(flags[5])),                            # reset connection flag
             syn=bool(int(flags[6])),                            # synchronise flag
             fin=bool(int(flags[7])),                            # finish flag
-            header=tcp.pack()[:tcp.off * 4],                    # raw bytes type header
+            header=wire[:tcp.off * 4],                          # raw bytes type header
             payload=bytearray(bytes(tcp.data)),                 # raw bytearray type payload
             first=tcp.seq,                                      # first sequence number of payload
             last=tcp.seq + raw_len - 1,                         # last sequence number of payload
@@ -369,6 +567,15 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Note:
+        The header and payload are sliced out of the record octets
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
+        they are the captured ones. A packet built by hand carries no such
+        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        which a zeroed checksum or length comes back recomputed --
+        :func:`attach_buffer` is what makes them the wire's again. The packet
+        itself is left untouched either way.
+
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
@@ -385,6 +592,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         tcp = cast('TCP', ip.data)
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
+        wire, _ = _layer2bytes(packet, tcp)
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                                         # data link type from global header
@@ -400,7 +608,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             timestamp=timestamp,                                        # timestamp
             seq=tcp.seq,                                                # TCP sequence number
             ack=tcp.ack,                                                # TCP acknowledgement number
-            header=tcp.pack()[:tcp.off * 4],                            # raw bytes type header
+            header=wire[:tcp.off * 4],                                  # raw bytes type header
             payload=bytearray(bytes(tcp.data)),                         # raw bytearray type payload
         )
         return data
