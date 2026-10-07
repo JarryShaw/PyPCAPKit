@@ -224,10 +224,10 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         l2tp.__update__([
             ('hdr_len', hdr_len),
+            ('padding', schema.padding if flags.offset else None),
         ])
         if _size:
             self._read_fileng(_size)
-            # l2tp['padding'] = self._read_fileng(_size)
 
         length = schema.length if flags.len else (length or len(self))
         # L2TP carries no next-protocol field -- the payload is a PPP frame,
@@ -246,11 +246,13 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              type_reversed: 'bool' = False,
              priority: 'bool' = False,
              total_length: 'Optional[int]' = None,
+             length_flag: 'Optional[bool]' = None,
              tunnel_id: 'int' = 0,
              session_id: 'int' = 0,
              ns: 'Optional[int]' = None,
              nr: 'Optional[int]' = None,
              offset: 'Optional[int]' = None,
+             padding: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_L2TP':  # pylint: disable=unused-argument
         """Make (construct) packet data.
@@ -262,28 +264,52 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             type_namespace: Namespace of type.
             type_reversed: Reversed namespace of type.
             priority: Priority flag.
-            total_length: Length of the datagram, header included; the Length
-                field and its ``L`` flag are omitted when this is :data:`None`.
+            total_length: Length of the datagram, header included, written as
+                given; the real header-plus-payload length when :data:`None`
+                and the Length field is present.
+            length_flag: Whether the Length field and its ``L`` flag are
+                present. When :data:`None`, they are present if
+                ``total_length`` is given, or for a control message, which
+                :rfc:`2661` §3.1 requires to set ``L``.
             tunnel_id: Tunnel ID.
             session_id: Session ID.
             ns: Sequence number.
             nr: Acknowledgement number.
             offset: Offset size.
+            padding: Offset pad, zero-filled or truncated to ``offset`` octets;
+                all zeros when :data:`None`.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``total_length`` is given with ``length_flag``
+                set to :data:`False`.
+
         """
         type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
+        seq = ns is not None and nr is not None
+
+        if length_flag is None:
+            length_flag = total_length is not None or type_ == Enum_Type.Control
+        elif not length_flag and total_length is not None:
+            raise ProtocolError(f'{self.alias}: total_length given without the Length field')
+
+        # NOTE: An explicit ``total_length`` is not checked against the octets
+        # at hand, so that a ``from_data`` rebuild of a capture truncated by
+        # snaplen keeps the length the sender declared, as UDP does
+        # (:issue:`1155`).
+        if length_flag and total_length is None:
+            total_length = 6 + 2 * (1 + 2 * seq + (offset is not None)) + (offset or 0) + len(payload)
 
         return Schema_L2TP(
             flags={
                 'type': type_,
-                'len': total_length is not None,
-                'seq': ns is not None and nr is not None,
+                'len': length_flag,
+                'seq': seq,
                 'offset': offset is not None,
                 'prio': priority,
                 'version': version,
@@ -294,6 +320,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             ns=ns,
             nr=nr,
             offset=offset,
+            padding=b'' if padding is None else padding,
             payload=payload,
         )
 
@@ -370,10 +397,15 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             # under that key it never reached :meth:`make`, and the rebuild
             # dropped both the Length field and the ``L`` flag (:issue:`1172`).
             'total_length': data.length,
+            # NOTE: Passed so that a control message captured without ``L``
+            # rebuilds as captured, rather than gaining the Length field
+            # :meth:`make` would give it by default.
+            'length_flag': data.flags.len,
             'tunnel_id': data.tunnelid,
             'session_id': data.sessionid,
             'ns': data.ns,
             'nr': data.nr,
             'offset': data.offset,
+            'padding': data.get('padding'),
             'payload': cls._make_payload(data),
         }
