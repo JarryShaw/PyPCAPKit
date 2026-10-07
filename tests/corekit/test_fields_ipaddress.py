@@ -518,8 +518,8 @@ class IPAddressFieldTests(unittest.TestCase):
         backed by a :class:`~pcapkit.corekit.fields.misc.SwitchField`, and both
         makers derive the wire form from the address family before the schema
         exists. Measured before the fix: ``ip=True`` packed a locator of ``::1``
-        with no error at all, and ``addr=True`` gave
-        ``MPTCPAddAddress(test={'version': 4}, address=IPv4Address('0.0.0.1'))``.
+        with no error at all, and ``addr=True`` gave an IPv4 ``MPTCPAddAddress``
+        with ``address=IPv4Address('0.0.0.1')``.
 
         The five ``mh`` sites are covered next to the rest of that module, in
         ``MHUnitTests.test_mh_length_derived_addresses_reject_a_bool``.

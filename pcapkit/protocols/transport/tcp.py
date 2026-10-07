@@ -1544,6 +1544,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flags=Data_MPTCPCapableFlag(
                 req=bool(schema.flags['req']),
                 ext=bool(schema.flags['ext']),
+                deny_join=bool(schema.flags['deny_join']),
+                reserved=schema.flags['reserved'],
                 hsa=bool(schema.flags['hsa']),
             ),
             skey=schema.skey if schema.length > 4 else None,
@@ -1611,6 +1613,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=schema.length,
             subtype=schema.subtype,
             connection=Enum_Flags.SYN,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             token=schema.token,
@@ -1663,6 +1666,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=schema.length,
             subtype=schema.subtype,
             connection=Enum_Flags.SYN | Enum_Flags.ACK,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             hmac=schema.hmac,
@@ -1708,6 +1712,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=schema.length,
             subtype=schema.subtype,
             connection=Enum_Flags.ACK,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
             hmac=schema.hmac,
         )
         return data
@@ -1744,13 +1749,22 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Parsed option data.
 
+        Note:
+            The reserved field spans the 4 low bits of the subtype octet and the
+            3 high bits of the flags octet; it is kept as one 7-bit value. The
+            checksum is absent when the option length leaves no room for it,
+            i.e., when checksums were not negotiated.
+
         """
         data = Data_MPTCPDSS(
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
+            reserved=(schema.test['reserved'] << 3) | schema.flags['reserved'],
             data_fin=bool(schema.flags['F']),
+            ack_wide=bool(schema.flags['a']),
             ack=schema.ack,
+            dsn_wide=bool(schema.flags['m']),
             dsn=schema.dsn,
             ssn=schema.ssn,
             dl_len=schema.dl_len,
@@ -1761,18 +1775,22 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_addaddr(self, schema: 'Schema_MPTCPAddAddress', *, options: 'Option') -> 'Data_MPTCPAddAddress':  # pylint: disable=unused-argument
         """Read Add Address option.
 
-        Structure of ``ADD_ADDR`` [:rfc:`6824`]:
+        Structure of ``ADD_ADDR`` [:rfc:`8684`, section 3.4.1, figure 12]:
 
         .. code-block:: text
 
                                 1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +---------------+---------------+-------+-------+---------------+
-           |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
+           |     Kind      |     Length    |Subtype|(rsv)|E|  Address ID   |
            +---------------+---------------+-------+-------+---------------+
-           |         Address (IPv4 - 4 octets / IPv6 - 16 octets)          |
+           |           Address (IPv4: 4 octets / IPv6: 16 octets)          |
            +-------------------------------+-------------------------------+
-           |   Port (2 octets, optional)   |
+           |   Port (2 octets, optional)   |                               |
+           +-------------------------------+                               |
+           |                Truncated HMAC (8 octets, if E=0)              |
+           |                               +-------------------------------+
+           |                               |
            +-------------------------------+
 
         Arguments:
@@ -1783,20 +1801,29 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: Invalid IP version and/or addresses.
+            ProtocolError: If the length is not one of the :rfc:`8684` lengths.
+
+        Note:
+            The address family, the port and the HMAC all follow from the
+            option length, never from the ``E`` flag, so an :rfc:`6824`
+            option, whose ``IPVer`` nibble overlaps the reserved bits and
+            ``E``, parses the same way and round-trips unchanged.
 
         """
-        if schema.test['version'] not in (4, 6):
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid IP version')
+        if schema.length not in (8, 10, 16, 18, 20, 22, 28, 30):
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
         data = Data_MPTCPAddAddress(
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            version=schema.test['version'],
+            version=schema.address.version,
+            reserved=schema.test['reserved'],
+            echo=bool(schema.test['echo']),
             addr_id=schema.addr_id,
             addr=schema.address,
             port=schema.port,
+            hmac=schema.hmac,
         )
         return data
 
@@ -1845,6 +1872,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
+            reserved=schema.test['reserved'],
             addr_id=tuple(schema.addr_id),
         )
 
@@ -1897,6 +1925,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
+            reserved=schema.test['reserved'],
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
         )
@@ -1906,7 +1935,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_fail(self, schema: 'Schema_MPTCPFallback', *, options: 'Option') -> 'Data_MPTCPFallback':  # pylint: disable=unused-argument
         """Read Fallback option.
 
-        Structure of ``MP_FAIL`` [:rfc:`6824`]:
+        Structure of ``MP_FAIL`` [:rfc:`8684`, section 3.7, figure 16]:
 
         .. code-block:: text
 
@@ -1938,6 +1967,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
+            reserved=schema.test['reserved'],
             dsn=schema.dsn,
         )
         return data
@@ -1975,7 +2005,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
             option receiver's key (64 bits, 8). The guard,
             ``_make_mptcp_fastclose`` and the schema must all agree on 12, the
-            schema accounting for the reserved octet with a padding field.
+            schema reading the 12 reserved bits along with the subtype.
 
         """
         if schema.length != 12:
@@ -1985,6 +2015,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
+            reserved=schema.test['reserved'],
             rkey=schema.key,
         )
         return data
@@ -2726,6 +2757,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                             version: 'int' = 0,
                             flag_req: 'bool' = False,
                             flag_ext: 'bool' = False,
+                            flag_deny_join: 'bool' = False,
+                            flag_reserved: 'int' = 0,
                             flag_hsa: 'bool' = False,
                             skey: 'Optional[int]' = 0,
                             rkey: 'Optional[int]' = 0,
@@ -2744,6 +2777,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             version: MPTCP version
             flag_req: checksum required flag
             flag_ext: extensibility flag
+            flag_deny_join: flag for not establishing new subflows to the
+                source address
+            flag_reserved: reserved flags (``D`` to ``G``)
             flag_hsa: use of HMAC-SHA1 flag
             skey: option sender's key
             rkey: option receiver's key
@@ -2762,6 +2798,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             version = opt.version
             flag_req = opt.flags.req
             flag_ext = opt.flags.ext
+            flag_deny_join = opt.flags.deny_join
+            flag_reserved = opt.flags.reserved
             flag_hsa = opt.flags.hsa
             skey = opt.skey
             rkey = opt.rkey
@@ -2785,6 +2823,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flags={
                 'req': flag_req,
                 'ext': flag_ext,
+                'deny_join': flag_deny_join,
+                'reserved': flag_reserved,
                 'hsa': flag_hsa,
             },
             skey=skey,
@@ -2814,6 +2854,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid flags combination')
 
     def _make_join_syn(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYN]' = None, *,
+                       reserved: 'int' = 0,
                        backup: 'bool' = False,
                        addr_id: 'int' = 0,
                        token: 'int' = 0,
@@ -2824,6 +2865,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             backup: backup flag
             addr_id: address ID
             token: receiver's token
@@ -2835,6 +2877,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             backup = opt.backup
             addr_id = opt.addr_id
             token = opt.token
@@ -2845,6 +2888,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=12,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
                 'backup': backup,
             },
             addr_id=addr_id,
@@ -2853,6 +2897,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
     def _make_join_synack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYNACK]' = None, *,
+                          reserved: 'int' = 0,
                           backup: 'bool' = False,
                           addr_id: 'int' = 0,
                           hmac: 'bytes' = bytes(8),
@@ -2863,6 +2908,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             backup: backup flag
             addr_id: address ID
             hmac: sender's truncated HMAC
@@ -2874,6 +2920,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             backup = opt.backup
             addr_id = opt.addr_id
             # NOTE: ``hmac`` must be carried over here, or reconstructing a
@@ -2892,6 +2939,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=16,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
                 'backup': backup,
             },
             addr_id=addr_id,
@@ -2900,6 +2948,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
     def _make_join_ack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinACK]' = None, *,
+                       reserved: 'int' = 0,
                        hmac: 'bytes' = bytes(20),
                        **kwargs: 'Any') -> 'Schema_MPTCPJoinACK':
         """Make multipath TCP join ACK option.
@@ -2907,6 +2956,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             hmac: sender's HMAC
             **kwargs: arbitrary keyword arguments
 
@@ -2915,6 +2965,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             hmac = opt.hmac
 
         return Schema_MPTCPJoinACK(
@@ -2926,13 +2977,17 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=24,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
             },
             hmac=hmac,
         )
 
     def _make_mptcp_dss(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPDSS]' = None, *,
+                        reserved: 'int' = 0,
                         data_fin: 'bool' = False,
+                        ack_wide: 'Optional[bool]' = None,
                         ack: 'Optional[int]' = None,
+                        dsn_wide: 'Optional[bool]' = None,
                         dsn: 'Optional[int]' = None,
                         ssn: 'Optional[int]' = None,
                         dl_len: 'Optional[int]' = None,
@@ -2943,53 +2998,70 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits (7 bits)
             data_fin: ``DATA_FIN`` flag
+            ack_wide: whether Data ACK is 8 octets; if not given, it is 8 octets
+                only when ``ack`` does not fit in 4
             ack: Data ACK
+            dsn_wide: whether data sequence number is 8 octets; if not given, it
+                is 8 octets only when ``dsn`` does not fit in 4
             dsn: data sequence number
             ssn: subflow sequence number
             dl_len: data-level length
-            checksum: checksum
+            checksum: checksum, or ``None`` if checksums were not negotiated
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the mapping fields are given only in part, or a
+                4-octet field is asked to hold a value wider than 32 bits.
+
         """
         if opt is not None:
+            reserved = opt.reserved
             data_fin = opt.data_fin
+            ack_wide = opt.ack_wide
             ack = opt.ack
+            dsn_wide = opt.dsn_wide
             dsn = opt.dsn
             ssn = opt.ssn
             dl_len = opt.dl_len
             checksum = opt.checksum
 
         flag_A = ack is not None
-        flag_a = cast('int', ack).bit_length() > 32 if flag_A else False
+        flag_a = ack_wide if ack_wide is not None else (flag_A and cast('int', ack).bit_length() > 32)
 
         flag_M = dsn is not None
-        flag_m = cast('int', dsn).bit_length() > 32 if flag_M else False
+        flag_m = dsn_wide if dsn_wide is not None else (flag_M and cast('int', dsn).bit_length() > 32)
 
-        if flag_M and (ssn is None or dl_len is None or checksum is None):
+        if (flag_A and not flag_a and cast('int', ack).bit_length() > 32) or \
+                (flag_M and not flag_m and cast('int', dsn).bit_length() > 32):
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: value too wide for 4 octets')
+        if flag_M and (ssn is None or dl_len is None):
             raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
         if not flag_M and (ssn is not None or dl_len is not None or checksum is not None):
             raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
 
         return Schema_MPTCPDSS(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9.
-            # Read it as a base plus a widening increment rather than
-            # as one term per field: 4 for ``Kind``/``Length``/subtype/flags, then
-            # ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 to make
-            # it 8; ``M`` contributes 12 (a 4-octet DSN, the 4-octet Subflow
-            # Sequence Number, the 2-octet Data-Level Length and the 2-octet
-            # Checksum) and ``m`` a further 4 to widen the DSN to 8. All flags set
-            # gives 4 + 4 + 4 + 12 + 4 = 28, which is the maximum the section
-            # states in prose.
-            length=4 + (4 if flag_A else 0) + (4 if flag_a else 0) + (12 if flag_M else 0) + (4 if flag_m else 0),
+            # NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9:
+            # 4 for ``Kind``/``Length``/subtype/flags, then the Data ACK (4, or
+            # 8 with ``a``) when ``A`` is set, and the mapping when ``M`` is set
+            # -- the DSN (4, or 8 with ``m``), the 4-octet Subflow Sequence
+            # Number, the 2-octet Data-Level Length and, only if checksums were
+            # negotiated, the 2-octet Checksum. ``a`` and ``m`` widen a field
+            # only when it is present, so a stray flag on the wire still packs
+            # back without changing the length.
+            length=4 + ((8 if flag_a else 4) if flag_A else 0)
+            + ((8 if flag_m else 4) + 6 + (2 if checksum is not None else 0) if flag_M else 0),
             test={
                 'subtype': subtype.value,
+                'reserved': reserved >> 3,
             },
             flags={
+                'reserved': reserved & 0b111,
                 'F': data_fin,
                 'A': flag_A,
                 'a': flag_a,
@@ -3004,52 +3076,85 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
     def _make_mptcp_addaddr(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPAddAddress]' = None, *,
+                             reserved: 'Optional[int]' = None,
+                             echo: 'Optional[bool]' = None,
                              addr_id: 'int' = 0,
                              addr: 'IPv4Address | IPv6Address | int | bytes | str' = '0.0.0.0',  # nosec: B104
                              port: 'Optional[int]' = None,
+                             hmac: 'Optional[bytes]' = None,
                              **kwargs: 'Any') -> 'Schema_MPTCPAddAddress':
         """Make multipath TCP add address option.
 
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
+            echo: echo flag
             addr_id: address ID
             addr: address
             port: port number
+            hmac: truncated HMAC
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``hmac`` is not 8 octets, or is given together
+                with ``echo`` set.
+
+        Note:
+            :rfc:`8684` section 3.4.1 allows an ADD_ADDR without the truncated
+            HMAC only as an echo (``E`` set). So when none of ``reserved``,
+            ``echo`` and ``hmac`` is given, the option is built in the
+            :rfc:`6824` layout instead, its ``IPVer`` nibble taking the place of
+            the reserved bits and ``E``; otherwise ``reserved`` defaults to 0 and
+            ``echo`` to whether ``hmac`` is absent. A parsed ``opt`` is rebuilt
+            as it was read, without those checks.
+
         """
         if opt is not None:
+            reserved = opt.reserved
+            echo = opt.echo
             addr_id = opt.addr_id
             addr_val = opt.addr
             port = opt.port
+            hmac = opt.hmac
         else:
-            # NOTE: Through ``parse_ip_address`` because the ``version`` sub-field
-            # and the option length below are both derived from the family here,
-            # ahead of the schema, so a bare ``ipaddress.ip_address`` would launder
-            # a ``bool`` into an ``IPv4Address`` that the schema's own guard can no
-            # longer tell from a real address: ``addr=True`` would reach
-            # ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``.
+            # NOTE: Through ``parse_ip_address`` because the option length below
+            # is derived from the family here, ahead of the schema, so a bare
+            # ``ipaddress.ip_address`` would launder a ``bool`` into an
+            # ``IPv4Address`` that the schema's own guard can no longer tell from
+            # a real address: ``addr=True`` would reach
+            # ``mptcp_add_address_selector`` as ``0.0.0.1`` with an IPv4 length.
             addr_val = parse_ip_address(
                 addr, f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid address')
         version = addr_val.version
+        if reserved is None and echo is None and hmac is None:
+            reserved, echo = version >> 1, bool(version & 1)
+        if reserved is None:
+            reserved = 0
+        if echo is None:
+            echo = hmac is None
+        if opt is None and hmac is not None and (echo or len(hmac) != 8):
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid HMAC')
 
         return Schema_MPTCPAddAddress(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=4 + (4 if version == 4 else 16) + (2 if port is not None else 0),
+            length=4 + (4 if version == 4 else 16) + (2 if port is not None else 0) + (8 if hmac is not None else 0),
             test={
                 'subtype': subtype.value,
-                'version': version,
+                'reserved': reserved,
+                'echo': echo,
             },
             addr_id=addr_id,
             address=addr_val,
             port=port,
+            hmac=hmac,
         )
 
     def _make_mptcp_remove(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPRemoveAddress]' = None, *,
+                           reserved: 'int' = 0,
                            addr_id: 'Optional[list[int]]' = None,
                            **kwargs: 'Any') -> 'Schema_MPTCPRemoveAddress':
         """Make multipath TCP remove address option.
@@ -3057,6 +3162,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             addr_id: address ID list
             **kwargs: arbitrary keyword arguments
 
@@ -3065,6 +3171,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             addr_id_list = cast('list[int]', opt.addr_id)
         else:
             addr_id_list = addr_id if addr_id is not None else []
@@ -3080,11 +3187,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=3 + len(addr_id_list),
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
             },
             addr_id=addr_id_list,
         )
 
     def _make_mptcp_prio(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPPriority]' = None, *,
+                             reserved: 'int' = 0,
                              backup: 'bool' = False,
                              addr_id: 'Optional[int]' = None,
                              **kwargs: 'Any') -> 'Schema_MPTCPPriority':
@@ -3093,6 +3202,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             backup: backup flag
             addr_id: address ID
             **kwargs: arbitrary keyword arguments
@@ -3105,6 +3215,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # NOTE: ``backup`` must be carried over, or reconstructing a parsed
             # MP_PRIO would always write ``B=0``; the ``B`` flag is the entire
             # payload of this option.
+            reserved = opt.reserved
             backup = opt.backup
             addr_id = opt.addr_id
 
@@ -3124,12 +3235,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=3 if addr_id is None else 4,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
                 'backup': backup,
             },
             addr_id=addr_id,
         )
 
     def _make_mptcp_fail(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPFallback]' = None, *,
+                         reserved: 'int' = 0,
                          dsn: 'int' = 0,
                          **kwargs: 'Any') -> 'Schema_MPTCPFallback':
         """Make multipath TCP fail option.
@@ -3137,6 +3250,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             dsn: data sequence number
             **kwargs: arbitrary keyword arguments
 
@@ -3145,6 +3259,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             dsn = opt.dsn
 
         return Schema_MPTCPFallback(
@@ -3152,11 +3267,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=12,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
             },
             dsn=dsn,
         )
 
     def _make_mptcp_fastclose(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPFastclose]' = None, *,
+                              reserved: 'int' = 0,
                               key: 'int' = 0,
                               **kwargs: 'Any') -> 'Schema_MPTCPFastclose':
         """Make multipath TCP fastclose option.
@@ -3164,6 +3281,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
+            reserved: reserved bits
             key: option receiver's key
             **kwargs: arbitrary keyword arguments
 
@@ -3172,6 +3290,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            reserved = opt.reserved
             key = opt.rkey
 
         return Schema_MPTCPFastclose(
@@ -3179,6 +3298,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=12,
             test={
                 'subtype': subtype.value,
+                'reserved': reserved,
             },
             key=key,
         )

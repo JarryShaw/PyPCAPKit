@@ -551,6 +551,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             length=12,
             subtype=MPTCPOption.MP_JOIN,
             connection=Flags.SYN,
+            reserved=0,
             backup=True,
             addr_id=1,
             token=2,
@@ -563,6 +564,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             length=20,
             subtype=MPTCPOption.MP_JOIN,
             connection=Flags.SYN | Flags.ACK,
+            reserved=0,
             backup=True,
             addr_id=2,
             hmac=b'12345678',
@@ -575,6 +577,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             length=24,
             subtype=MPTCPOption.MP_JOIN,
             connection=Flags.ACK,
+            reserved=0,
             hmac=b'1' * 20,
         )
         self.assertEqual(mptcp_option(join_ack, ack=True).hmac, b'1' * 20)
@@ -584,7 +587,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             length=32,
             subtype=MPTCPOption.MP_CAPABLE,
             version=0,
-            flags=tcp_data.MPTCPCapableFlag(req=True, ext=False, hsa=True),
+            flags=tcp_data.MPTCPCapableFlag(req=True, ext=False, deny_join=False, reserved=0, hsa=True),
             skey=1,
             rkey=2,
             dl_len=None,
@@ -603,8 +606,11 @@ class TCPUDPUnitTests(unittest.TestCase):
             tcp_data.MPTCPDSS(kind=Option.Multipath_TCP,
                               length=18,
                               subtype=MPTCPOption.DSS,
+                              reserved=0,
                               data_fin=True,
+                              ack_wide=True,
                               ack=(1 << 33),
+                              dsn_wide=True,
                               dsn=(1 << 33),
                               ssn=2,
                               dl_len=3,
@@ -618,15 +624,19 @@ class TCPUDPUnitTests(unittest.TestCase):
                                      length=10,
                                      subtype=MPTCPOption.ADD_ADDR,
                                      version=4,
+                                     reserved=0,
+                                     echo=True,
                                      addr_id=1,
                                      addr=ipaddress.ip_address('192.0.2.1'),
-                                     port=None),
+                                     port=None,
+                                     hmac=None),
         ).address), '192.0.2.1')
         self.assertEqual(proto._make_mptcp_remove(
             MPTCPOption.REMOVE_ADDR,
             tcp_data.MPTCPRemoveAddress(kind=Option.Multipath_TCP,
                                         length=4,
                                         subtype=MPTCPOption.REMOVE_ADDR,
+                                        reserved=0,
                                         addr_id=(1, 2)),
         ).addr_id, (1, 2))
         self.assertEqual(proto._make_mptcp_prio(
@@ -634,6 +644,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             tcp_data.MPTCPPriority(kind=Option.Multipath_TCP,
                                    length=4,
                                    subtype=MPTCPOption.MP_PRIO,
+                                   reserved=0,
                                    backup=True,
                                    addr_id=5),
         ).addr_id, 5)
@@ -642,6 +653,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             tcp_data.MPTCPFallback(kind=Option.Multipath_TCP,
                                    length=12,
                                    subtype=MPTCPOption.MP_FAIL,
+                                   reserved=0,
                                    dsn=99),
         ).dsn, 99)
         self.assertEqual(proto._make_mptcp_fastclose(
@@ -649,6 +661,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             tcp_data.MPTCPFastclose(kind=Option.Multipath_TCP,
                                     length=12,
                                     subtype=MPTCPOption.MP_FASTCLOSE,
+                                    reserved=0,
                                     rkey=123),
         ).key, 123)
 
@@ -971,7 +984,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         # or the new split, so it stays a genuine rejection.
         capable_no_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
-                         flags={'req': 1, 'ext': 0, 'hsa': 1}, skey=1, rkey=2),
+                         flags={'req': 1, 'ext': 0, 'deny_join': 0, 'reserved': 0, 'hsa': 1}, skey=1, rkey=2),
             12,
             MPTCPOption.MP_CAPABLE,
         )
@@ -982,7 +995,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         capable_with_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
-                         flags={'req': 0, 'ext': 1, 'hsa': 0}, skey=1, rkey=2),
+                         flags={'req': 0, 'ext': 1, 'deny_join': 0, 'reserved': 0, 'hsa': 0}, skey=1, rkey=2),
             20,
             MPTCPOption.MP_CAPABLE,
         )
@@ -990,7 +1003,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
                 MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
-                             flags={'req': 0, 'ext': 0, 'hsa': 0}, skey=1, rkey=None),
+                             flags={'req': 0, 'ext': 0, 'deny_join': 0, 'reserved': 0, 'hsa': 0}, skey=1, rkey=None),
                 32,
                 MPTCPOption.MP_CAPABLE,
             ), options=options)
@@ -1013,7 +1026,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         # halves against real segments.
         proto.make(syn=True)
         join_syn = mark(
-            MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 1},
+            MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 1},
                          addr_id=1, token=2, nonce=3),
             12,
             MPTCPOption.MP_JOIN,
@@ -1021,7 +1034,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertTrue(proto._read_mode_mp(join_syn, options=options).backup)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
+                MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 0},
                              addr_id=1, token=2, nonce=3),
                 11,
                 MPTCPOption.MP_JOIN,
@@ -1037,7 +1050,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         # genuine rejection rather than an off-by-one near the correct length.
         proto.make(syn=True, ack=True)
         join_synack = mark(
-            MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
+            MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 0},
                             addr_id=1, hmac=b'12345678', nonce=3),
             16,
             MPTCPOption.MP_JOIN,
@@ -1045,7 +1058,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(proto._read_mode_mp(join_synack, options=options).hmac, b'12345678')
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
+                MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 0},
                                 addr_id=1, hmac=b'12345678', nonce=3),
                 20,
                 MPTCPOption.MP_JOIN,
@@ -1053,14 +1066,14 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         proto.make(ack=True)
         join_ack = mark(
-            MPTCPJoinACK(test={'subtype': MPTCPOption.MP_JOIN.value}, hmac=b'1' * 20),
+            MPTCPJoinACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0}, hmac=b'1' * 20),
             24,
             MPTCPOption.MP_JOIN,
         )
         self.assertEqual(proto._read_mode_mp(join_ack, options=options).hmac, b'1' * 20)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPJoinACK(test={'subtype': MPTCPOption.MP_JOIN.value}, hmac=b'1' * 20),
+                MPTCPJoinACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0}, hmac=b'1' * 20),
                 23,
                 MPTCPOption.MP_JOIN,
             ), options=options)
@@ -1069,8 +1082,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             proto._read_mode_mp(join_syn, options=options)
 
         dss = mark(
-            MPTCPDSS(test={'subtype': MPTCPOption.DSS.value},
-                     flags={'F': 1, 'm': 0, 'M': 1, 'a': 0, 'A': 1},
+            MPTCPDSS(test={'subtype': MPTCPOption.DSS.value, 'reserved': 0},
+                     flags={'reserved': 0, 'F': 1, 'm': 0, 'M': 1, 'a': 0, 'A': 1},
                      ack=1, dsn=2, ssn=3, dl_len=4, checksum=b'\x00\x01'),
             18,
             MPTCPOption.DSS,
@@ -1080,7 +1093,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(dss_data.checksum, b'\x00\x01')
 
         addaddr = mark(
-            MPTCPAddAddress(test={'subtype': MPTCPOption.ADD_ADDR.value, 'version': 4},
+            MPTCPAddAddress(test={'subtype': MPTCPOption.ADD_ADDR.value, 'reserved': 2, 'echo': 0},
                             addr_id=1, address=ipaddress.ip_address('192.0.2.1'), port=443),
             10,
             MPTCPOption.ADD_ADDR,
@@ -1088,9 +1101,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(str(proto._read_mode_mp(addaddr, options=options).addr), '192.0.2.1')
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPAddAddress(test={'subtype': MPTCPOption.ADD_ADDR.value, 'version': 5},
+                MPTCPAddAddress(test={'subtype': MPTCPOption.ADD_ADDR.value, 'reserved': 2, 'echo': 1},
                                 addr_id=1, address=ipaddress.ip_address('192.0.2.1'), port=None),
-                8,
+                9,
                 MPTCPOption.ADD_ADDR,
             ), options=options)
 
@@ -1101,45 +1114,45 @@ class TCPUDPUnitTests(unittest.TestCase):
         # removed from ``_make_mptcp_remove``, which is worth not leaving in a
         # test as though it were correct.
         remove = mark(
-            MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value}, addr_id=[1, 2]),
+            MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value, 'reserved': 0}, addr_id=[1, 2]),
             5,
             MPTCPOption.REMOVE_ADDR,
         )
         self.assertEqual(proto._read_mode_mp(remove, options=options).addr_id, (1, 2))
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value}, addr_id=[]),
+                MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value, 'reserved': 0}, addr_id=[]),
                 2,
                 MPTCPOption.REMOVE_ADDR,
             ), options=options)
 
         prio = mark(
-            MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'backup': 1}, addr_id=9),
+            MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'reserved': 0, 'backup': 1}, addr_id=9),
             4,
             MPTCPOption.MP_PRIO,
         )
         self.assertTrue(proto._read_mode_mp(prio, options=options).backup)
         self.assertIsNone(proto._read_mode_mp(mark(
-            MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'backup': 0}, addr_id=None),
+            MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'reserved': 0, 'backup': 0}, addr_id=None),
             3,
             MPTCPOption.MP_PRIO,
         ), options=options).addr_id)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'backup': 0}, addr_id=None),
+                MPTCPPriority(test={'subtype': MPTCPOption.MP_PRIO.value, 'reserved': 0, 'backup': 0}, addr_id=None),
                 5,
                 MPTCPOption.MP_PRIO,
             ), options=options)
 
         fallback = mark(
-            MPTCPFallback(test={'subtype': MPTCPOption.MP_FAIL.value}, dsn=99),
+            MPTCPFallback(test={'subtype': MPTCPOption.MP_FAIL.value, 'reserved': 0}, dsn=99),
             12,
             MPTCPOption.MP_FAIL,
         )
         self.assertEqual(proto._read_mode_mp(fallback, options=options).dsn, 99)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPFallback(test={'subtype': MPTCPOption.MP_FAIL.value}, dsn=99),
+                MPTCPFallback(test={'subtype': MPTCPOption.MP_FAIL.value, 'reserved': 0}, dsn=99),
                 11,
                 MPTCPOption.MP_FAIL,
             ), options=options)
@@ -1152,14 +1165,14 @@ class TCPUDPUnitTests(unittest.TestCase):
         # value the guard used to require and that the RFC never produces for this
         # option.
         fastclose = mark(
-            MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value}, key=123),
+            MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value, 'reserved': 0}, key=123),
             12,
             MPTCPOption.MP_FASTCLOSE,
         )
         self.assertEqual(proto._read_mode_mp(fastclose, options=options).rkey, 123)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
-                MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value}, key=123),
+                MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value, 'reserved': 0}, key=123),
                 16,
                 MPTCPOption.MP_FASTCLOSE,
             ), options=options)
@@ -1215,13 +1228,13 @@ class TCPUDPUnitTests(unittest.TestCase):
             })
 
         self.assertEqual(type(tcp_schema.mptcp_add_address_selector({
-            'test': {'version': 4},
+            'length': 8,
         })).__name__, 'IPv4AddressField')
         self.assertEqual(type(tcp_schema.mptcp_add_address_selector({
-            'test': {'version': 6},
+            'length': 20,
         })).__name__, 'IPv6AddressField')
         with self.assertRaises(FieldError):
-            tcp_schema.mptcp_add_address_selector({'test': {'version': 5}})
+            tcp_schema.mptcp_add_address_selector({'length': 9})
 
         inner = tcp_schema.MPTCPUnknown(
             test={'subtype': MPTCPOption.Reserved_for_Private_Use.value, 'data': 1},
