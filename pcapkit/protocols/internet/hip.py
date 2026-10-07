@@ -1236,7 +1236,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return ack
 
-    def _read_param_dh_group_list(self, schema: 'Schema_DHGroupListParameter', *, version: 'int',  # pylint: disable=unused-argument
+    def _read_param_dh_group_list(self, schema: 'Schema_DHGroupListParameter', *, version: 'int',
                                   options: 'Parameter') -> 'Data_DHGroupListParameter':  # pylint: disable=unused-argument
         """Read HIP ``DH_GROUP_LIST`` parameter.
 
@@ -1262,7 +1262,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             Parsed parameter data.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+
         dh_group_list = Data_DHGroupListParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
@@ -1380,9 +1386,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** a ``2`` modulo.
+            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
+                **NOT** a ``2`` modulo.
 
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
         if schema.len % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
@@ -1596,7 +1605,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return host_id
 
-    def _read_param_hit_suite_list(self, schema: 'Schema_HITSuiteListParameter', *, version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hit_suite_list(self, schema: 'Schema_HITSuiteListParameter', *, version: 'int',
                                    options: 'Parameter') -> 'Data_HITSuiteListParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIT_SUITE_LIST`` parameter.
 
@@ -1622,7 +1631,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             Parsed parameter data.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+
         hit_suite_list = Data_HITSuiteListParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
@@ -2005,9 +2020,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
+            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
+                **NOT** ``2`` modulo.
 
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
         if schema.len % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
@@ -3512,7 +3530,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
         if param is not None:
             group_id = cast('list[Enum_Group]', param.group_id)
         else:
@@ -3634,7 +3658,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
         if param is not None:
             cipher_id = cast('list[Enum_Cipher]', param.cipher_id)
         else:
@@ -3917,7 +3947,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
         if param is not None:
             suite_id = cast('list[Enum_HITSuite]', param.suite_id)
         else:
@@ -4339,7 +4375,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
         """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
         if param is not None:
             tf_type = cast('list[Enum_Parameter]', param.tf_type)
         else:
