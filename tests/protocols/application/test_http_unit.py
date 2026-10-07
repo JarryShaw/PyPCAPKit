@@ -363,18 +363,22 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertIsNone(ctx.exception.__cause__)
 
     def test_http_make_data_delegates_to_httpv1(self) -> None:
-        from pcapkit.const.http.method import Method
-        from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.http import HTTP
+        """The version comes from the class of the parsed data (#1154).
 
-        data = DummyData(
-            version=1,
-            receipt=SimpleNamespace(version='1.1', method=Method.GET, uri='/index.html'),
-            header=OrderedMultiDict([('Host', 'example.test')]),
-            body=b'body',
-        )
+        This used to drive ``_make_data`` with a stand-in carrying a ``version``
+        key, which no parsed HTTP/1.* data has, so it pinned the lookup that made
+        every real ``from_data`` raise ``invalid HTTP version: 0``.
+
+        """
+        from pcapkit.const.http.method import Method
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        wire = b'GET /index.html HTTP/1.1\r\nHost: example.test\r\n\r\nbody'
+        data = HTTPv1(wire, len(wire)).info
 
         values = HTTP._make_data(data)
+        self.assertEqual(values['version'], 1)
         self.assertEqual(values['http_version'], '1.1')
         self.assertEqual(values['method'], Method.GET)
         self.assertEqual(values['uri'], '/index.html')
@@ -382,21 +386,17 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(values['body'], b'body')
 
     def test_http_make_data_delegates_to_httpv2(self) -> None:
+        """As for HTTP/1.*, from parsed data, and with no ``length`` (#1154)."""
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 
-        flags = SimpleNamespace(__value__=0x01)
-        data = DummyData(
-            version=2,
-            length=13,
-            type=Frame.DATA,
-            flags=flags,
-            sid=1,
-            __next_type__=None,
-        )
+        wire = bytes.fromhex('00000400010000000162796520')
+        data = HTTPv2(wire, len(wire)).info
 
         values = HTTP._make_data(data)
-        self.assertEqual(values['length'], 13)
+        self.assertEqual(values['version'], 2)
+        self.assertNotIn('length', values)
         self.assertEqual(values['type'], Frame.DATA)
         self.assertEqual(values['flags'], 0x01)
         self.assertEqual(values['sid'], 1)
