@@ -583,6 +583,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             chksum=schema.checksum,
             control=Data_Control(
                 anonymous=bool(schema.control['anonymous']),
+                reserved=schema.control['reserved'],
             ),
             shit=schema.shit,
             rhit=schema.rhit,
@@ -615,6 +616,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              version: 'int' = 2,
              checksum: 'bytes' = b'\x00\x00',
              controls_anonymous: 'bool' = False,
+             controls_reserved: 'int' = 0,
              shit: 'int' = 0,
              rhit: 'int' = 0,
              parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
@@ -634,6 +636,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP version.
             checksum: Checksum.
             controls_anonymous: If the sender is anonymous.
+            controls_reserved: The 15 reserved high-order bits of ``Controls``.
             shit: Sender's host identity tag (HIT).
             rhit: Receiver's host identity tag (HIT).
             parameters: HIP parameters.
@@ -651,7 +654,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         if parameters is not None:
             parameters_value, total_length = self._make_hip_param(parameters, version=version)
-            length = total_length // 8 + 4
+            # Ceiling division, so that Header Length never declares fewer
+            # octets than are packed.
+            length = -(-total_length // 8) + 4
         else:
             # NOTE: Header Length excludes the first 8 octets but always
             # counts the two 16-octet HITs, hence the minimum of 4.
@@ -670,6 +675,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             },
             checksum=checksum,
             control = {
+                'reserved': controls_reserved,
                 'anonymous': controls_anonymous,
             },
             shit=shit,
@@ -759,9 +765,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             'version': data.version,
             'checksum': data.chksum,
             'controls_anonymous': data.control.anonymous,
+            'controls_reserved': data.control.reserved,
             'shit': data.shit,
             'rhit': data.rhit,
-            'parameters': data.parameters,
+            # ``read`` sets ``parameters`` only when the packet carries some.
+            'parameters': getattr(data, 'parameters', None),
             'payload': cls._make_payload(data),
         }
 
@@ -878,6 +886,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             index=schema.index,
             old_spi=schema.old_spi,
             new_spi=schema.new_spi,
@@ -1080,7 +1089,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
             index=_numk,
-            lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
+            lifetime_exponent=_time,
+            lifetime=self._read_puzzle_lifetime(_time),
             opaque=_opak,
             random=_rand,
             # Keep the field's on-wire width, which ``_rand`` alone cannot carry:
@@ -1090,6 +1100,28 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             rhash_len=(schema.len - 4) * 8,
         )
         return puzzle
+
+    @staticmethod
+    def _read_puzzle_lifetime(octet: 'int') -> 'Optional[timedelta]':
+        """Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.
+
+        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``
+        seconds. The result is informational only: :meth:`_make_param_puzzle`
+        writes back the octet itself, since :class:`~datetime.timedelta` rounds
+        octets below ``12`` to zero and cannot hold those of ``79`` and above.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime, or :obj:`None` if it exceeds
+            :attr:`datetime.timedelta.max`.
+
+        """
+        try:
+            return datetime.timedelta(seconds=2 ** (octet - 32))
+        except OverflowError:
+            return None
 
     def _read_param_solution(self, schema: 'Schema_SolutionParameter', *, version: 'int',
                              options: 'Parameter') -> 'Data_SolutionParameter':  # pylint: disable=unused-argument
@@ -2966,6 +2998,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_list = []  # type: list[Schema_Parameter | bytes]
             for schema in parameters:
                 if isinstance(schema, bytes):
+                    # :rfc:`7401#section-5.2.1` pads every parameter to a
+                    # multiple of 8 octets, and Header Length counts in those
+                    # units; a raw parameter is taken to omit its padding.
+                    schema += bytes(-len(schema) % 8)
                     parameters_list.append(schema)
                     total_length += len(schema)
                 elif isinstance(schema, Schema):
@@ -3035,6 +3071,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_esp_info(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPInfoParameter]' = None, *,  # pylint: disable=unused-argument
                              version: 'int',
+                             reserved: 'int' = 0,
                              index: 'int' = 0,
                              old_spi: 'int' = 0,
                              new_spi: 'int' = 0,
@@ -3045,6 +3082,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            reserved: reserved octets, zero when sent (:rfc:`7402#section-5.1.1`)
             index: KEYMAT index
             old_spi: old SPI
             new_spi: new SPI
@@ -3055,6 +3093,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = param.reserved
             index = param.index
             old_spi = param.old_spi
             new_spi = param.new_spi
@@ -3062,6 +3101,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_ESPInfoParameter(
             type=code,
             len=12,
+            reserved=reserved,
             index=index,
             old_spi=old_spi,
             new_spi=new_spi,
@@ -3248,10 +3288,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         # ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is
         # not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it would
         # escape the library's error handling with a message naming neither HIP
-        # nor the field. Conformant input reaches it: a ``Lifetime`` octet of
-        # ``0x00`` means ``2^-32`` seconds, below
-        # :class:`~datetime.timedelta`'s microsecond resolution, so parsing one
-        # yields ``timedelta(0)`` and re-serialising it lands here.
+        # nor the field.
         if seconds <= 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
                                 f'{seconds} is not a positive number of seconds')
@@ -3347,6 +3384,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                            version: 'int',
                            index: 'int' = 0,
                            lifetime: 'timedelta | int' = 0,
+                           lifetime_exponent: 'Optional[int]' = None,
                            opaque: 'bytes' = b'',
                            random: 'int' = 0,
                            rhash_len: 'Optional[int]' = None,
@@ -3358,7 +3396,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             index: #K index
-            lifetime: lifetime
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime`` octet;
+                ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``value`` in
+                :rfc:`7401#section-5.2.4`'s ``2^(value - 32)`` seconds
             opaque: opaque data
             random: random #I value
             rhash_len: on-wire width of ``Random #I``, in bits; defaults to the
@@ -3369,16 +3410,24 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded; see :meth:`_make_puzzle_lifetime`.
+
         """
         if param is not None:
             index = param.index
-            lifetime = self._make_puzzle_lifetime(code, version, param.lifetime)
+            lifetime_exponent = param.lifetime_exponent
             opaque = param.opaque
             random = param.random
             if rhash_len is None:
                 rhash_len = param.rhash_len
-        else:
-            lifetime = self._make_puzzle_lifetime(code, version, lifetime)
+
+        if lifetime_exponent is None:
+            lifetime_exponent = self._make_puzzle_lifetime(code, version, lifetime)
+        elif not 0 <= lifetime_exponent <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{lifetime_exponent} is outside the one-octet Lifetime field')
 
         return Schema_PuzzleParameter(
             type=code,
@@ -3387,7 +3436,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # spells the same quantity ``4 + RHASH_len / 8``.
             len=4 + self._make_puzzle_field_width(code, version, rhash_len, random),
             index=index,
-            lifetime=lifetime,
+            lifetime=lifetime_exponent,
             opaque=opaque,
             random=random,
         )
