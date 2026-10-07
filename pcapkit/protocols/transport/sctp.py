@@ -161,7 +161,7 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Sequence, Type
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
@@ -1060,6 +1060,34 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             meth = name[1]
         return meth(code, cause, **kwargs)
 
+    def _make_nested_length(self, base: 'int', items: 'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]',  # pylint: disable=line-too-long
+                            declared: 'Optional[int]' = None) -> 'int':
+        """Compute the length of a chunk carrying a nested parameter or error
+        cause list.
+
+        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of
+        every nested item except the last. The RFC also asks receivers to
+        accept a length that counts the last item's padding too, so a parsed
+        chunk declaring that longer form keeps it.
+
+        Args:
+            base: size of the chunk's fixed-length fields, including the
+                four-byte chunk header
+            items: constructed nested items; a raw :obj:`bytes` item is
+                counted as given
+            declared: chunk length declared by the parsed chunk being
+                rebuilt, if any
+
+        Returns:
+            Chunk length.
+
+        """
+        sizes = [len(item) if isinstance(item, bytes) else len(item.pack()) for item in items]
+        padded = base + sum(sizes)
+        if not items or isinstance(items[-1], bytes) or declared == padded:
+            return padded
+        return padded - max(sizes[-1] - items[-1].length, 0)
+
     def _read_chunk_donone(self, schema: 'Schema_UnknownChunk', *, chunks: 'Chunks') -> 'Data_UnknownChunk':  # pylint: disable=unused-argument
         """Read SCTP chunk of an unsupported type.
 
@@ -1127,6 +1155,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=schema.type,
             length=schema.length,
             flags=Data_DATAChunkFlags(
+                reserved=schema.flags['reserved'],
                 I=bool(schema.flags['I']),
                 U=bool(schema.flags['U']),
                 B=bool(schema.flags['B']),
@@ -1174,10 +1203,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Raises:
             ProtocolError: If ``length`` is **NOT** at least ``20``.
 
-        Note:
-            The chunk flags are reserved by :rfc:`9260#section-3.3.2` and are
-            therefore not exposed on the data model.
-
         """
         if schema.length < 20:
             raise ProtocolError(f'{self.alias}: [Chunk {schema.type}] invalid format')
@@ -1185,6 +1210,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_INITChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             init_tag=schema.init_tag,
             a_rwnd=schema.a_rwnd,
             outbound_streams=schema.outbound_streams,
@@ -1235,6 +1261,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_INITACKChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             init_tag=schema.init_tag,
             a_rwnd=schema.a_rwnd,
             outbound_streams=schema.outbound_streams,
@@ -1288,6 +1315,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_SACKChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             cum_tsn_ack=schema.cum_tsn_ack,
             a_rwnd=schema.a_rwnd,
             num_gap_blocks=schema.num_gap_blocks,
@@ -1340,6 +1368,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_HeartbeatChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             parameters=self._read_sctp_parameters(schema.parameters),
         )
 
@@ -1377,6 +1406,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_HeartbeatACKChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             parameters=self._read_sctp_parameters(schema.parameters),
         )
 
@@ -1415,6 +1445,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=schema.type,
             length=schema.length,
             flags=Data_TBitFlags(
+                reserved=schema.flags['reserved'],
                 T=bool(schema.flags['T']),
             ),
             error=self._read_sctp_causes(schema.error),
@@ -1452,6 +1483,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_ShutdownChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             cum_tsn_ack=schema.cum_tsn_ack,
         )
 
@@ -1485,6 +1517,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_ShutdownACKChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
         )
 
     def _read_chunk_error(self, schema: 'Schema_ErrorChunk', *, chunks: 'Chunks') -> 'Data_ErrorChunk':  # pylint: disable=unused-argument
@@ -1521,6 +1554,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_ErrorChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             error=self._read_sctp_causes(schema.error),
         )
 
@@ -1563,6 +1597,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_CookieEchoChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
             cookie=schema.cookie,
         )
 
@@ -1596,6 +1631,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Data_CookieACKChunk(
             type=schema.type,
             length=schema.length,
+            flags=schema.flags,
         )
 
     def _read_chunk_shutdown_complete(self, schema: 'Schema_ShutdownCompleteChunk', *, chunks: 'Chunks') -> 'Data_ShutdownCompleteChunk':  # pylint: disable=unused-argument
@@ -1629,6 +1665,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=schema.type,
             length=schema.length,
             flags=Data_TBitFlags(
+                reserved=schema.flags['reserved'],
                 T=bool(schema.flags['T']),
             ),
         )
@@ -1668,6 +1705,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_data(self, code: 'Enum_Chunk', chunk: 'Optional[Data_DATAChunk]' = None, *,
+                         reserved: 'int' = 0,
                          I: 'bool' = False,  # noqa: E741
                          U: 'bool' = False,
                          B: 'bool' = True,
@@ -1683,6 +1721,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            reserved: reserved flag bits
             I: immediate bit
             U: unordered bit
             B: beginning fragment bit
@@ -1703,6 +1742,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         """
         if chunk is not None:
+            reserved = chunk.flags.reserved
             I = chunk.flags.I  # noqa: E741
             U = chunk.flags.U
             B = chunk.flags.B
@@ -1719,6 +1759,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_DATAChunk(
             type=code,
             flags={
+                'reserved': reserved,
                 'I': int(I),
                 'U': int(U),
                 'B': int(B),
@@ -1733,6 +1774,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_init(self, code: 'Enum_Chunk', chunk: 'Optional[Data_INITChunk]' = None, *,
+                         flags: 'bytes' = b'\x00',
                          init_tag: 'int' = 0,
                          a_rwnd: 'int' = 1500,  # minimum permitted by [RFC 9260]
                          outbound_streams: 'int' = 1,
@@ -1745,6 +1787,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             init_tag: initiate tag
             a_rwnd: advertised receiver window credit
             outbound_streams: number of outbound streams
@@ -1756,12 +1799,16 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         Note:
-            The chunk flags are reserved by :rfc:`9260#section-3.3.2` and are
-            always emitted as zero.
+            The chunk flags are reserved by :rfc:`9260#section-3.3.2`, so they
+            default to zero; a parsed chunk's flags are kept as received.
 
         """
         if chunk is not None:
+            flags = chunk.flags
             init_tag = chunk.init_tag
             a_rwnd = chunk.a_rwnd
             outbound_streams = chunk.outbound_streams
@@ -1769,16 +1816,19 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             init_tsn = chunk.init_tsn
             parameters = chunk.parameters
 
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
         else:
             parameters_value = []
-        length = 20 + sum(len(param) if isinstance(param, bytes) else len(param.pack())
-                          for param in parameters_value)
+        length = self._make_nested_length(20, parameters_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_INITChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=length,
             init_tag=init_tag,
             a_rwnd=a_rwnd,
@@ -1789,6 +1839,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_init_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_INITACKChunk]' = None, *,
+                             flags: 'bytes' = b'\x00',
                              init_tag: 'int' = 0,
                              a_rwnd: 'int' = 1500,  # minimum permitted by [RFC 9260]
                              outbound_streams: 'int' = 1,
@@ -1801,6 +1852,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             init_tag: initiate tag
             a_rwnd: advertised receiver window credit
             outbound_streams: number of outbound streams
@@ -1812,8 +1864,12 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             init_tag = chunk.init_tag
             a_rwnd = chunk.a_rwnd
             outbound_streams = chunk.outbound_streams
@@ -1821,16 +1877,19 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             init_tsn = chunk.init_tsn
             parameters = chunk.parameters
 
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
         else:
             parameters_value = []
-        length = 20 + sum(len(param) if isinstance(param, bytes) else len(param.pack())
-                          for param in parameters_value)
+        length = self._make_nested_length(20, parameters_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_INITACKChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=length,
             init_tag=init_tag,
             a_rwnd=a_rwnd,
@@ -1841,6 +1900,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_sack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_SACKChunk]' = None, *,
+                         flags: 'bytes' = b'\x00',
                          cum_tsn_ack: 'int' = 0,
                          a_rwnd: 'int' = 1500,  # minimum permitted by [RFC 9260]
                          gap_blocks: 'Optional[list[Schema_GapAckBlock | Data_GapAckBlock | tuple[int, int]]]' = None,  # pylint: disable=line-too-long
@@ -1851,6 +1911,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             cum_tsn_ack: cumulative TSN ack
             a_rwnd: advertised receiver window credit
             gap_blocks: gap ack blocks, each as a schema, a data model or a
@@ -1861,6 +1922,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         Note:
             The counts of gap ack blocks and duplicate TSNs are derived from the
             supplied lists rather than taken as arguments, so that they cannot
@@ -1868,10 +1932,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         """
         if chunk is not None:
+            flags = chunk.flags
             cum_tsn_ack = chunk.cum_tsn_ack
             a_rwnd = chunk.a_rwnd
             gap_blocks = list(chunk.gap_blocks)
             dup_tsn = list(chunk.dup_tsn)
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         blocks = []  # type: list[Schema_GapAckBlock]
         for block in gap_blocks or []:
@@ -1886,7 +1954,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_SACKChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=16 + len(blocks) * 4 + len(tsn_list) * 4,
             cum_tsn_ack=cum_tsn_ack,
             a_rwnd=a_rwnd,
@@ -1897,6 +1965,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_heartbeat(self, code: 'Enum_Chunk', chunk: 'Optional[Data_HeartbeatChunk]' = None, *,
+                              flags: 'bytes' = b'\x00',
                               parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                               **kwargs: 'Any') -> 'Schema_HeartbeatChunk':
         """Make SCTP HEARTBEAT chunk.
@@ -1904,31 +1973,40 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             parameters: heartbeat information parameters
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             parameters = chunk.parameters
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
         else:
             parameters_value = []
-        length = 4 + sum(len(param) if isinstance(param, bytes) else len(param.pack())
-                         for param in parameters_value)
+        length = self._make_nested_length(4, parameters_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_HeartbeatChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=length,
             parameters=parameters_value,
         )
 
     def _make_chunk_heartbeat_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_HeartbeatACKChunk]' = None, *,
+                                  flags: 'bytes' = b'\x00',
                                   parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                                   **kwargs: 'Any') -> 'Schema_HeartbeatACKChunk':
         """Make SCTP HEARTBEAT ACK chunk.
@@ -1936,31 +2014,40 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             parameters: heartbeat information parameters
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             parameters = chunk.parameters
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
         else:
             parameters_value = []
-        length = 4 + sum(len(param) if isinstance(param, bytes) else len(param.pack())
-                         for param in parameters_value)
+        length = self._make_nested_length(4, parameters_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_HeartbeatACKChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=length,
             parameters=parameters_value,
         )
 
     def _make_chunk_abort(self, code: 'Enum_Chunk', chunk: 'Optional[Data_AbortChunk]' = None, *,
+                          reserved: 'int' = 0,
                           T: 'bool' = False,
                           error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
                           **kwargs: 'Any') -> 'Schema_AbortChunk':
@@ -1969,6 +2056,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            reserved: reserved flag bits
             T: whether the verification tag has been reflected
             error: zero or more error causes
             **kwargs: arbitrary keyword arguments
@@ -1978,6 +2066,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         """
         if chunk is not None:
+            reserved = chunk.flags.reserved
             T = chunk.flags.T
             error = chunk.error
 
@@ -1985,12 +2074,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             error_value = self._make_sctp_causes(error)
         else:
             error_value = []
-        length = 4 + sum(len(cause) if isinstance(cause, bytes) else len(cause.pack())
-                         for cause in error_value)
+        length = self._make_nested_length(4, error_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_AbortChunk(
             type=code,
             flags={
+                'reserved': reserved,
                 'T': int(T),
             },
             length=length,
@@ -1998,6 +2088,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         )
 
     def _make_chunk_shutdown(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ShutdownChunk]' = None, *,
+                             flags: 'bytes' = b'\x00',
                              cum_tsn_ack: 'int' = 0,
                              **kwargs: 'Any') -> 'Schema_ShutdownChunk':
         """Make SCTP SHUTDOWN chunk.
@@ -2005,43 +2096,63 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             cum_tsn_ack: cumulative TSN ack
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             cum_tsn_ack = chunk.cum_tsn_ack
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         return Schema_ShutdownChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=8,
             cum_tsn_ack=cum_tsn_ack,
         )
 
-    def _make_chunk_shutdown_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ShutdownACKChunk]' = None,
+    def _make_chunk_shutdown_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ShutdownACKChunk]' = None, *,
+                                 flags: 'bytes' = b'\x00',
                                  **kwargs: 'Any') -> 'Schema_ShutdownACKChunk':
         """Make SCTP SHUTDOWN ACK chunk.
 
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
+        if chunk is not None:
+            flags = chunk.flags
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+
         return Schema_ShutdownACKChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=4,
         )
 
     def _make_chunk_error(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ErrorChunk]' = None, *,
+                          flags: 'bytes' = b'\x00',
                           error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
                           **kwargs: 'Any') -> 'Schema_ErrorChunk':
         """Make SCTP ERROR chunk.
@@ -2049,31 +2160,40 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             error: one or more error causes
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             error = chunk.error
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         if error is not None:
             error_value = self._make_sctp_causes(error)
         else:
             error_value = []
-        length = 4 + sum(len(cause) if isinstance(cause, bytes) else len(cause.pack())
-                         for cause in error_value)
+        length = self._make_nested_length(4, error_value,
+                                          None if chunk is None else chunk.length)
 
         return Schema_ErrorChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=length,
             error=error_value,
         )
 
     def _make_chunk_cookie_echo(self, code: 'Enum_Chunk', chunk: 'Optional[Data_CookieEchoChunk]' = None, *,
+                                flags: 'bytes' = b'\x00',
                                 cookie: 'bytes' = b'',
                                 **kwargs: 'Any') -> 'Schema_CookieEchoChunk':
         """Make SCTP COOKIE ECHO chunk.
@@ -2081,6 +2201,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             cookie: state cookie, as received in the INIT ACK chunk's state
                 cookie parameter
             **kwargs: arbitrary keyword arguments
@@ -2088,37 +2209,56 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
         if chunk is not None:
+            flags = chunk.flags
             cookie = chunk.cookie
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
 
         return Schema_CookieEchoChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=len(cookie) + 4,
             cookie=cookie,
         )
 
-    def _make_chunk_cookie_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_CookieACKChunk]' = None,
+    def _make_chunk_cookie_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_CookieACKChunk]' = None, *,
+                               flags: 'bytes' = b'\x00',
                                **kwargs: 'Any') -> 'Schema_CookieACKChunk':
         """Make SCTP COOKIE ACK chunk.
 
         Args:
             code: chunk type
             chunk: chunk data
+            flags: raw chunk flags, as a single byte
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+
         """
+        if chunk is not None:
+            flags = chunk.flags
+
+        if len(flags) != 1:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+
         return Schema_CookieACKChunk(
             type=code,
-            flags=b'\x00',
+            flags=flags,
             length=4,
         )
 
     def _make_chunk_shutdown_complete(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ShutdownCompleteChunk]' = None, *,
+                                      reserved: 'int' = 0,
                                       T: 'bool' = False,
                                       **kwargs: 'Any') -> 'Schema_ShutdownCompleteChunk':
         """Make SCTP SHUTDOWN COMPLETE chunk.
@@ -2126,6 +2266,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: chunk type
             chunk: chunk data
+            reserved: reserved flag bits
             T: whether the verification tag has been reflected
             **kwargs: arbitrary keyword arguments
 
@@ -2134,11 +2275,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         """
         if chunk is not None:
+            reserved = chunk.flags.reserved
             T = chunk.flags.T
 
         return Schema_ShutdownCompleteChunk(
             type=code,
             flags={
+                'reserved': reserved,
                 'T': int(T),
             },
             length=4,
@@ -2748,6 +2891,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code=schema.code,
             length=schema.length,
             stream_id=schema.stream_id,
+            reserved=schema.reserved,
         )
 
     def _read_cause_missing_param(self, schema: 'Schema_MissingMandatoryParameterCause', *, causes: 'Causes') -> 'Data_MissingMandatoryParameterCause':  # pylint: disable=unused-argument
@@ -3197,6 +3341,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     def _make_cause_invalid_stream(self, code: 'Enum_CauseCode', cause: 'Optional[Data_InvalidStreamIdentifierCause]' = None, *,
                                    stream_id: 'int' = 0,
+                                   reserved: 'bytes' = b'\x00\x00',
                                    **kwargs: 'Any') -> 'Schema_InvalidStreamIdentifierCause':
         """Make SCTP invalid stream identifier error cause.
 
@@ -3204,19 +3349,28 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: error cause code
             cause: error cause data
             stream_id: stream identifier of the offending DATA chunk
+            reserved: reserved field, as two bytes
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed error cause schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` is **NOT** exactly two bytes.
+
         """
         if cause is not None:
             stream_id = cause.stream_id
+            reserved = cause.reserved
+
+        if len(reserved) != 2:
+            raise ProtocolError(f'{self.alias}: [Cause {code}] invalid format')
 
         return Schema_InvalidStreamIdentifierCause(
             code=code,
             length=8,
             stream_id=stream_id,
+            reserved=reserved,
         )
 
     def _make_cause_missing_param(self, code: 'Enum_CauseCode', cause: 'Optional[Data_MissingMandatoryParameterCause]' = None, *,

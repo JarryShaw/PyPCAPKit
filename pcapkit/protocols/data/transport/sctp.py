@@ -52,6 +52,8 @@ __all__ = [
 class DATAChunkFlags(Data):
     """Data model for SCTP DATA chunk flags."""
 
+    #: Reserved bits, kept as received.
+    reserved: 'int'
     #: (I)mmediate bit, i.e., request a SACK chunk without delay.
     I: 'bool'
     #: (U)nordered bit, i.e., no stream sequence number is assigned.
@@ -62,7 +64,7 @@ class DATAChunkFlags(Data):
     E: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, I: 'bool', U: 'bool', B: 'bool', E: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, reserved: 'int', I: 'bool', U: 'bool', B: 'bool', E: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -70,11 +72,13 @@ class TBitFlags(Data):
     """Data model for SCTP chunk flags carrying only the T bit, i.e., ABORT and
     SHUTDOWN COMPLETE chunks."""
 
+    #: Reserved bits, kept as received.
+    reserved: 'int'
     #: T bit, i.e., the verification tag has been reflected.
     T: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, T: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, reserved: 'int', T: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -116,9 +120,11 @@ class InvalidStreamIdentifierCause(ErrorCause):
 
     #: Stream identifier of the offending DATA chunk.
     stream_id: 'int'
+    #: Reserved field, kept as received.
+    reserved: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'CauseCode', length: 'int', stream_id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'CauseCode', length: 'int', stream_id: 'int', reserved: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -401,6 +407,8 @@ class DATAChunk(Chunk):
 class INITChunk(Chunk):
     """Data model for SCTP INIT chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Initiate tag.
     init_tag: 'int'
     #: Advertised receiver window credit.
@@ -415,13 +423,15 @@ class INITChunk(Chunk):
     parameters: 'OrderedMultiDict[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class INITACKChunk(Chunk):
     """Data model for SCTP INIT ACK chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Initiate tag.
     init_tag: 'int'
     #: Advertised receiver window credit.
@@ -436,13 +446,15 @@ class INITACKChunk(Chunk):
     parameters: 'OrderedMultiDict[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class SACKChunk(Chunk):
     """Data model for SCTP SACK chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Cumulative TSN ack.
     cum_tsn_ack: 'int'
     #: Advertised receiver window credit.
@@ -457,29 +469,33 @@ class SACKChunk(Chunk):
     dup_tsn: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', cum_tsn_ack: 'int', a_rwnd: 'int', num_gap_blocks: 'int', num_dup_tsn: 'int', gap_blocks: 'tuple[GapAckBlock, ...]', dup_tsn: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', cum_tsn_ack: 'int', a_rwnd: 'int', num_gap_blocks: 'int', num_dup_tsn: 'int', gap_blocks: 'tuple[GapAckBlock, ...]', dup_tsn: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class HeartbeatChunk(Chunk):
     """Data model for SCTP HEARTBEAT chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Heartbeat information parameters.
     parameters: 'OrderedMultiDict[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class HeartbeatACKChunk(Chunk):
     """Data model for SCTP HEARTBEAT ACK chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Heartbeat information parameters.
     parameters: 'OrderedMultiDict[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -499,49 +515,61 @@ class AbortChunk(Chunk):
 class ShutdownChunk(Chunk):
     """Data model for SCTP SHUTDOWN chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: Cumulative TSN ack.
     cum_tsn_ack: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', cum_tsn_ack: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', cum_tsn_ack: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class ShutdownACKChunk(Chunk):
     """Data model for SCTP SHUTDOWN ACK chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
+
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class ErrorChunk(Chunk):
     """Data model for SCTP ERROR chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: One or more error causes.
     error: 'OrderedMultiDict[CauseCode, ErrorCause]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', error: 'OrderedMultiDict[CauseCode, ErrorCause]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', error: 'OrderedMultiDict[CauseCode, ErrorCause]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class CookieEchoChunk(Chunk):
     """Data model for SCTP COOKIE ECHO chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
     #: State cookie, as received in the INIT ACK chunk's state cookie parameter.
     cookie: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int', cookie: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', cookie: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
 class CookieACKChunk(Chunk):
     """Data model for SCTP COOKIE ACK chunks."""
 
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
+
     if TYPE_CHECKING:
-        def __init__(self, type: 'ChunkType', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

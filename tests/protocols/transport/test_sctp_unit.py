@@ -267,7 +267,8 @@ class SCTPUnitTests(unittest.TestCase):
              dict(init_tag=0x99AABBCC, a_rwnd=4660, outbound_streams=3,
                   inbound_streams=4, init_tsn=7,
                   parameters=[(Parameter.State_Cookie, {'cookie': b'\xde\xad\xbe\xef\x01'})]),
-             dict(length=32, init_tag=0x99AABBCC, a_rwnd=4660, outbound_streams=3,
+             # RFC 9260 section 3.2: the final parameter's padding is not counted.
+             dict(length=29, init_tag=0x99AABBCC, a_rwnd=4660, outbound_streams=3,
                   inbound_streams=4, init_tsn=7)),
             (Chunk.Selective_Acknowledgement,
              dict(cum_tsn_ack=12, a_rwnd=4660, gap_blocks=[(2, 3), (5, 5)],
@@ -282,7 +283,7 @@ class SCTPUnitTests(unittest.TestCase):
              dict(length=12)),
             (Chunk.Abort,
              dict(T=True, error=[(CauseCode.User_Initiated_Abort, {'info': b'bye'})]),
-             dict(length=12)),
+             dict(length=11)),
             (Chunk.Shutdown,
              dict(cum_tsn_ack=0x0A0B0C10),
              dict(length=8, cum_tsn_ack=0x0A0B0C10)),
