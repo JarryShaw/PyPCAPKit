@@ -1046,6 +1046,10 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">ver</span><span class="p">[</span><span class="s1">'bit_1'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid format'</span><span class="p">)</span>
+        <span class="c1"># Header Length below 4 cannot cover the two HITs, and would leave a</span>
+        <span class="c1"># negative parameter length below.</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid header length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">hip</span> <span class="o">=</span> <span class="n">Data_HIP</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -1128,7 +1132,9 @@
             <span class="n">parameters_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hip_param</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">total_length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">parameters_value</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
+            <span class="c1"># NOTE: Header Length excludes the first 8 octets but always</span>
+            <span class="c1"># counts the two 16-octet HITs, hence the minimum of 4.</span>
+            <span class="n">parameters_value</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">4</span>
 
         <span class="k">return</span> <span class="n">Schema_HIP</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_value</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>

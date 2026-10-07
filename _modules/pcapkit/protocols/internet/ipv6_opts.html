@@ -2126,6 +2126,10 @@
                           <span class="n">mode_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">mode_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                           <span class="n">mode_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">tid_type</span><span class="p">:</span> <span class="s1">'Optional[Enum_TaggerID | StdlibEnum | AenumEnum | str | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">tid_type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">tid_type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                          <span class="n">tid_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                           <span class="n">tid</span><span class="p">:</span> <span class="s1">'Optional[bytes | IPv4Address | IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                           <span class="n">hav</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
@@ -2139,6 +2143,11 @@
 <span class="sd">            mode_default: default value of DPD mode</span>
 <span class="sd">            mode_namespace: namespace of DPD mode</span>
 <span class="sd">            mode_reversed: reversed flag of DPD mode</span>
+<span class="sd">            tid_type: TaggerID type (``TidTy`` field); inferred from the</span>
+<span class="sd">                length of ``tid`` if not given</span>
+<span class="sd">            tid_type_default: default value of TaggerID type</span>
+<span class="sd">            tid_type_namespace: namespace of TaggerID type</span>
+<span class="sd">            tid_type_reversed: reversed flag of TaggerID type</span>
 <span class="sd">            tid: Tagger ID</span>
 <span class="sd">            id: identifier</span>
 <span class="sd">            hav: hash assist value (HAV)</span>
@@ -2147,78 +2156,68 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the DPD mode is invalid, or the Tagger ID does</span>
+<span class="sd">                not fit the TaggerID type.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dpd_type</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dpd_type</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">dpd_type</span>
+            <span class="n">tid_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'tid_type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">tid</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'tid'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'id'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
             <span class="n">hav</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'hav'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
-        <span class="n">dpd_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">mode_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">mode_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="n">dpd_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">mode_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">mode_namespace</span><span class="p">,</span>
                                     <span class="nb">reversed</span><span class="o">=</span><span class="n">mode_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dpd_type</span> <span class="o">==</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="nb">len</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
-                    <span class="n">info</span><span class="o">=</span><span class="p">{</span>
-                        <span class="s1">'mode'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="s1">'type'</span><span class="p">:</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span>
-                        <span class="s1">'len'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                    <span class="p">},</span>
-                    <span class="n">tid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
-                <span class="p">)</span>  <span class="c1"># type: Schema_SMFDPDOption</span>
+                <span class="n">tid_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-                <span class="n">tid_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">tid_ip_ver</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span><span class="o">.</span><span class="n">version</span>
-                        <span class="k">if</span> <span class="n">tid_ip_ver</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                            <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span>
-                        <span class="k">elif</span> <span class="n">tid_ip_ver</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-                            <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">DEFAULT</span>  <span class="c1"># type: ignore[unreachable]</span>
-                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                        <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">DEFAULT</span>
-
-                <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="nb">len</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tid_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
-                    <span class="n">info</span><span class="o">=</span><span class="p">{</span>
-                        <span class="s1">'mode'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="s1">'type'</span><span class="p">:</span> <span class="n">tid_type</span><span class="p">,</span>
-                        <span class="s1">'len'</span><span class="p">:</span> <span class="n">tid_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="p">},</span>
-                    <span class="n">tid</span><span class="o">=</span><span class="n">tid</span><span class="p">,</span>
-                    <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="n">tid_bytes</span> <span class="o">=</span> <span class="n">tid</span>
+            <span class="k">elif</span> <span class="n">tid</span><span class="o">.</span><span class="n">version</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+                <span class="n">tid_bytes</span> <span class="o">=</span> <span class="n">tid</span><span class="o">.</span><span class="n">packed</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">tid_ver</span> <span class="o">=</span> <span class="n">tid</span><span class="o">.</span><span class="n">version</span>
-                <span class="k">if</span> <span class="n">tid_ver</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span>
-                    <span class="n">tid_len</span> <span class="o">=</span> <span class="mi">4</span>
-                <span class="k">elif</span> <span class="n">tid_ver</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-                    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span>
-                    <span class="n">tid_len</span> <span class="o">=</span> <span class="mi">16</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid TaggerID version: </span><span class="si">{</span><span class="n">tid_ver</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid TaggerID version: </span><span class="si">{</span><span class="n">tid</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">tid_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tid_bytes</span><span class="p">)</span>
 
-                <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="nb">len</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tid_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
-                    <span class="n">info</span><span class="o">=</span><span class="p">{</span>
-                        <span class="s1">'mode'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="s1">'type'</span><span class="p">:</span> <span class="n">tid_type</span><span class="p">,</span>
-                        <span class="s1">'len'</span><span class="p">:</span> <span class="n">tid_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="p">},</span>
-                    <span class="n">tid</span><span class="o">=</span><span class="n">tid</span><span class="o">.</span><span class="n">packed</span><span class="p">,</span>
-                    <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">tid_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">tid_type</span><span class="p">,</span> <span class="n">tid_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">tid_type_namespace</span><span class="p">,</span>
+                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">tid_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span>
+            <span class="k">elif</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span>
+            <span class="k">elif</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">DEFAULT</span>
+
+            <span class="k">if</span> <span class="n">tid_kind</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
+                <span class="n">tid_ok</span> <span class="o">=</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">tid_kind</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
+                <span class="n">tid_ok</span> <span class="o">=</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">4</span>
+            <span class="k">elif</span> <span class="n">tid_kind</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
+                <span class="n">tid_ok</span> <span class="o">=</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">16</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># TidLen is 4 bits and holds the length minus one.</span>
+                <span class="n">tid_ok</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">tid_len</span> <span class="o">&lt;=</span> <span class="mi">16</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tid_ok</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid TaggerID length </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1"> '</span>
+                                    <span class="sa">f</span><span class="s1">'for type </span><span class="si">{</span><span class="n">tid_kind</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+                <span class="nb">len</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tid_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
+                <span class="n">info</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">'mode'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s1">'type'</span><span class="p">:</span> <span class="n">tid_kind</span><span class="p">,</span>
+                    <span class="s1">'len'</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">tid_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="n">tid</span><span class="o">=</span><span class="n">tid_bytes</span> <span class="k">if</span> <span class="n">tid_len</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># type: Schema_SMFDPDOption</span>
         <span class="k">elif</span> <span class="n">dpd_type</span> <span class="o">==</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span><span class="p">:</span>
             <span class="n">hav_ba</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">hav</span><span class="p">)</span>
             <span class="n">hav_ba</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hav</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">|</span> <span class="mh">0x80</span>
