@@ -14,6 +14,9 @@ import abc
 import collections.abc
 import enum
 import itertools
+import sys
+import types
+import typing
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
@@ -507,7 +510,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         return f'<{type(self).__name__} {args}>'
 
     def __len__(self) -> 'int':
-        return len(self.__dict__)
+        # NOTE: count exactly the keys :meth:`__iter__` yields, so the
+        # bookkeeping attributes in ``__excluded__`` are not counted.
+        return sum(1 for key in self.__dict__ if key not in self.__excluded__)
 
     def __iter__(self) -> 'Iterator[str]':
         for key in self.__dict__:
@@ -537,6 +542,19 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         * If ``dict_`` is not present, then does:
           ``for k, v in kwargs.items(): self[k] = v``.
 
+        A mapping given for a key whose type annotation resolves at runtime to
+        an :class:`Info` subclass (or to :data:`~typing.Optional` of one) is
+        rebuilt into that class, so ``cls.from_dict(info.to_dict())`` restores
+        such nested values. A key without such an annotation keeps the mapping
+        as is -- see :meth:`to_dict`.
+
+        The rebuild is as unchecked as the rest of this method: a mapping whose
+        keys are not the nested class's own is accepted and becomes an instance
+        carrying those keys, exactly as a direct call to the nested class's own
+        :meth:`from_dict` would. Validating it here would reject data that
+        ``Info(**kwargs)`` has always accepted, so the shape of the mapping
+        stays the caller's responsibility.
+
         Args:
             dict\_: Source data.
             **kwargs: Arbitrary keyword arguments.
@@ -544,6 +562,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         """
         self = cls.__new__(cls)
         self.__update__(dict_, **kwargs)
+
+        for (name, info_cls) in _nested_info_types(cls).items():
+            key = self.__map__.get(name, name)
+            value = self.__dict__.get(key)
+            if isinstance(value, Mapping) and not isinstance(value, Info):
+                self.__dict__[key] = info_cls.from_dict(value)
         return self
 
     def to_dict(self) -> 'dict[str, VT]':
@@ -555,6 +579,14 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             Should such :class:`Info` objects be nested within other data,
             types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
             shall not convert them into :obj:`dict` and remain them intact.
+
+        Note:
+            :meth:`from_dict` reverses the flattening only for keys whose type
+            annotation resolves at runtime to an :class:`Info` subclass. For
+            any other key -- every key of a bare :class:`Info`, and annotations
+            naming a type imported only under :data:`~typing.TYPE_CHECKING` --
+            the conversion is one-way, and the nested value comes back as a
+            plain :obj:`dict`.
 
         """
         dict_ = {}  # type: dict[str, Any]
@@ -578,3 +610,126 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             else:
                 dict_[out_key] = value
         return dict_
+
+
+#: Name of the per-class attribute :func:`_nested_info_types` caches its answer in.
+_NESTED_INFO_CACHE = '__nested_info_types__'
+
+#: :pep:`604` union type, i.e. the origin of ``int | None``. It is absent below
+#: Python 3.10, where only :data:`typing.Optional` spells a union, and is the
+#: same object as :data:`typing.Union` from 3.14 on.
+_UNION_TYPE = getattr(types, 'UnionType', None)
+
+#: Type of :data:`None`, i.e. the member ``Optional`` adds to a union.
+_NONE_TYPE = type(None)
+
+
+def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
+    """Return the :class:`Info` subclass a resolved annotation names, if any.
+
+    :data:`~typing.Optional` of a single :class:`Info` subclass counts as that
+    subclass. A parametrised generic such as ``list[Packet]`` does not: the
+    value it describes is a container, and :meth:`Info.from_dict` has nothing
+    to rebuild it from.
+
+    Args:
+        hint: Resolved type annotation.
+
+    Returns:
+        The :class:`Info` subclass the annotation names, or :data:`None`.
+
+    Note:
+        Both guards below are load-bearing on Python 3.9 and 3.10, where a
+        :class:`types.GenericAlias` such as ``list[Packet]`` satisfies
+        ``isinstance(hint, type)`` while :func:`issubclass` still refuses it
+        with :exc:`TypeError` -- which would otherwise escape
+        :meth:`Info.from_dict` for the 26 of 487 :class:`Info` classes that
+        carry such an annotation. From 3.11 on the ``isinstance`` is already
+        :data:`False`, so only the older interpreters reach the
+        :exc:`TypeError`; ``NestedTypeResolverTests`` in
+        :file:`tests/corekit/test_from_dict_roundtrip_unit.py` pins the shape
+        on every version by handing this function an object that mimics it.
+
+    """
+    origin = typing.get_origin(hint)
+    if origin is not None or not isinstance(hint, type):
+        # NOTE: a union of exactly one non-``None`` member is ``Optional`` of
+        # that member, so it unwraps to it; anything else is not an ``Info``.
+        args = [arg for arg in getattr(hint, '__args__', ()) if arg is not _NONE_TYPE]
+        is_union = origin is typing.Union or (_UNION_TYPE is not None and origin is _UNION_TYPE)
+        hint = args[0] if is_union and len(args) == 1 else None
+
+    if not isinstance(hint, type):
+        return None
+
+    try:
+        return hint if issubclass(hint, Info) else None
+    except TypeError:
+        return None
+
+
+def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
+    """Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.
+
+    Each annotation is resolved on its own, in the namespace of the module and
+    the class that declared it, so one that cannot be resolved at runtime (e.g.
+    a name imported only under :data:`~typing.TYPE_CHECKING`) is skipped rather
+    than spoiling the rest.
+
+    Args:
+        cls: Info class.
+
+    Returns:
+        Mapping of key names to the :class:`Info` subclass annotated for them.
+
+    Note:
+        The answer is cached in ``cls``'s own ``__dict__``, read back from
+        there rather than through :func:`getattr` so a subclass never inherits
+        its parent's map. The cache is deliberately kept on the class rather
+        than in a module-level :class:`weakref.WeakKeyDictionary`: such a map
+        would pin every self-referential class forever, since the cached value
+        strongly references the class the weak key points at, whereas the
+        reference cycle a class attribute creates is collectable.
+
+        An unresolvable annotation is cached as "skip" alongside the rest, so a
+        forward reference whose target is defined only *after* the first
+        :meth:`Info.from_dict` call stays one-way for the life of the process.
+        That is accepted rather than fixed: :meth:`Info.from_dict` runs per
+        parsed packet (see :meth:`IPv4._read_ipv4_options
+        <pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options>`), and
+        re-resolving the annotations on every call to catch a case that does
+        not arise in this package costs far more than it saves.
+
+    """
+    cached = cls.__dict__.get(_NESTED_INFO_CACHE)
+    if cached is not None:
+        return cached
+
+    nested = {}  # type: dict[str, Type[Info]]
+    seen = set()  # type: set[str]
+    for cls_ in cls.mro():  # pragma: no branch
+        # NOTE: same walk as :func:`info_final`, which builds ``__init__``
+        # from these annotations; the most derived declaration of a key wins.
+        if cls_ is Info:
+            break
+
+        module = sys.modules.get(cls_.__module__)
+        globalns = dict(vars(module)) if module is not None else {}
+        localns = dict(vars(cls_))
+        for (key, ann) in cls_.__dict__.get('__annotations__', getattr(cls_, '__annotations__', {})).items():
+            if key in seen:
+                continue
+            seen.add(key)
+
+            try:
+                hint = typing.get_type_hints(types.SimpleNamespace(__annotations__={key: ann}),
+                                             globalns, localns)[key]
+            except Exception:  # pylint: disable=broad-except
+                continue
+
+            info_cls = _as_info_type(hint)
+            if info_cls is not None:
+                nested[key] = info_cls
+
+    setattr(cls, _NESTED_INFO_CACHE, nested)
+    return nested
