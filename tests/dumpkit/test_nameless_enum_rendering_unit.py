@@ -212,7 +212,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         ordered = OrderedMultiDict()
         ordered.add(Flags(0), 'first')
         ordered.add(Flags(0), 'second')
-        self.assertEqual(dumper.object_hook(ordered)['Flags::0 [0]'], ['first', 'second'])
+        self.assertEqual(dumper.object_hook(ordered), [{'Flags::0 [0]': 'first'}, {'Flags::0 [0]': 'second'}])
 
     def test_addon_branch_renders_a_nameless_member(self) -> None:
         """The third interpolation -- the ``'enum'`` key of the ``addon`` mapping.

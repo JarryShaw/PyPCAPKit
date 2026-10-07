@@ -16,6 +16,8 @@ import decimal
 import enum
 import ipaddress
 import json
+import re
+import string
 import xml.sax.saxutils
 from typing import TYPE_CHECKING
 
@@ -26,6 +28,7 @@ import dictdumper.plist
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.logging import get_logger
@@ -34,7 +37,7 @@ __all__ = ['make_dumper']
 
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, TextIO, Type
+    from typing import Any, DefaultDict, Iterator, Optional, TextIO, Type
 
     from dictdumper.dumper import Dumper as ABCDumper
     from typing_extensions import Literal
@@ -43,6 +46,16 @@ if TYPE_CHECKING:
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+#: re.Pattern: A character XML 1.0 does not allow anywhere in a document, not
+#: even as a character reference: every C0 control other than tab, LF and CR,
+#: the surrogates, and ``U+FFFE``/``U+FFFF`` (XML 1.0, production ``[2] Char``).
+_XML_ILLEGAL = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]')
+
+#: frozenset[str]: Characters :meth:`dictdumper.json.JSON._append_string`
+#: writes as themselves or through its escape table rather than as a
+#: ``\uXXXX`` escape.
+_JSON_PRINTABLE = frozenset(string.printable)
 
 
 class DumperBase(dictdumper.dumper.Dumper):
@@ -221,6 +234,40 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
     return f'{type(o).__name__}::{name} [{o.value}]'
 
 
+def _iter_slots(value: 'Any') -> 'Iterator[str]':
+    """Yield the names of every slot ``value`` has an assigned value for.
+
+    Args:
+        value: Object to inspect.
+
+    Yields:
+        Each slot name declared anywhere in ``type(value).__mro__``, base classes
+        first and each name once, skipping ``__dict__``, ``__weakref__`` and
+        any slot that is unset on ``value``.
+
+    Note:
+        ``__slots__`` on a class names only the slots *that* class adds, and
+        reading it from an instance finds the nearest class that declares one,
+        so a subclass declaring ``__slots__ = ()`` hides all of its bases'
+        slots. :class:`ipaddress.IPv6Network` is such a class.
+
+    """
+    seen = set()  # type: set[str]
+    for klass in reversed(type(value).__mro__):
+        names = klass.__dict__.get('__slots__', ())
+        if isinstance(names, str):
+            names = (names,)
+        for name in names:
+            if name in seen or name in ('__dict__', '__weakref__'):
+                continue
+            seen.add(name)
+            try:
+                getattr(value, name)
+            except AttributeError:
+                continue
+            yield name
+
+
 def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     """Create a customised :class:`~dictdumper.dumper.Dumper` object.
 
@@ -253,6 +300,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # worked around here.
     escape_json_keys = issubclass(output, dictdumper.json.JSON)
     escape_keys = escape_strings or escape_json_keys
+    # NOTE: :meth:`~dictdumper.plist.PLIST._append_dict` and
+    # :meth:`~dictdumper.plist.PLIST._append_array` skip every :data:`None`
+    # value and item outright, so a ``plist`` report lacks keys the ``json``
+    # report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it
+    # is worked around here.
+    keep_none = issubclass(output, dictdumper.plist.PLIST)
 
     def escape_key(key: 'Any') -> 'Any':
         """Escape a mapping key on its way to the writer.
@@ -325,7 +378,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 them, so both branches that hand the writer a mapping -- a
                 :class:`~pcapkit.corekit.multidict.MultiDict` and a plain
                 :class:`dict` -- escape their own keys through
-                :func:`escape_key` instead.
+                :func:`escape_key` instead. An
+                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a
+                :class:`list` of single-key :class:`dict` objects, each of
+                which comes back through the :class:`dict` branch.
 
             """
             if isinstance(o, decimal.Decimal):
@@ -334,9 +390,29 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 result = o.total_seconds()
             elif isinstance(o, (Info, Schema)):
                 result = o.to_dict()
-            elif isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+            elif isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address,
+                                ipaddress.IPv4Network, ipaddress.IPv6Network)):
                 result = str(o)
-            elif isinstance(o, (MultiDict, OrderedMultiDict)):
+            elif isinstance(o, datetime.timezone):
+                result = o.utcoffset(None).total_seconds()
+            elif isinstance(o, NullType):
+                result = '<NULL>'
+            elif isinstance(o, NoValueType):
+                result = '<NO_VALUE>'
+            elif isinstance(o, OrderedMultiDict):
+                # NOTE: one single-key mapping per entry, in insertion order --
+                # i.e. wire order for the option lists -- since a mapping keyed
+                # by name could only gather the repeats of a key under its first
+                # occurrence (GitHub issue #1263). The keys are escaped when the
+                # writer hands each mapping back to this hook, through the
+                # :class:`dict` branch below.
+                result = [
+                    {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}
+                    for key, val in o.items(multi=True)
+                ]
+            elif isinstance(o, MultiDict):
+                # NOTE: a :class:`MultiDict` keeps no order across keys, only
+                # among the values of each, so grouping by key loses nothing.
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
                 for key, val in o.items(multi=True):
                     if isinstance(key, (enum.Enum, aenum.Enum)):
@@ -364,8 +440,75 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 result = super(type(self), self).object_hook(o)
 
             if escape_strings and isinstance(result, str):
+                # NOTE: XML 1.0 has no spelling at all for some characters, not
+                # even a character reference, so a string holding one is written
+                # as ``<data>``, the way :class:`bytes` already is (GitHub issue
+                # #1262).
+                if _XML_ILLEGAL.search(result) is not None:
+                    return result.encode('utf-8', 'surrogatepass')
                 return xml.sax.saxutils.escape(result)
             return result
+
+        if keep_none:
+            def _append_dict(self, value: 'dict[Any, Any]', file: 'TextIO') -> 'None':
+                """Call this function to write dict contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    Each :data:`None` value is first converted through
+                    :meth:`~dictdumper.plist.PLIST._encode_value`, whose own
+                    rendering of it is ``{'type': 'NoneType', 'value': 'None'}``,
+                    so that the writer no longer skips it.
+
+                """
+                value = {key: self._encode_value(val) if val is None else val for key, val in value.items()}
+                super()._append_dict(value, file)
+
+            def _append_array(self, value: 'list[Any]', file: 'TextIO') -> 'None':
+                """Call this function to write array contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    As :meth:`_append_dict`, for each :data:`None` item.
+
+                """
+                value = [self._encode_value(item) if item is None else item for item in value]
+                super()._append_array(value, file)
+
+        if escape_json_keys:
+            def _append_string(self, value: 'str', file: 'TextIO') -> 'None':
+                """Call this function to write string contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    :meth:`dictdumper.json.JSON._append_string` writes every
+                    other character as ``'\\u{0:04x}'.format(ord(char))``, which
+                    for a code point above ``U+FFFF`` yields five or six hex
+                    digits that a reader takes as one escape and literal text
+                    (GitHub issue #1261). This writes such a character as a
+                    UTF-16 surrogate pair instead, as :func:`json.dumps` does, and
+                    every other character exactly as the upstream writer does.
+
+                """
+                text = []  # type: list[str]
+                for char in value:
+                    if char in _JSON_PRINTABLE:
+                        text.append(dictdumper.json.ESCAPE_DCT.get(char, char))
+                    else:
+                        text.append(json.dumps(char)[1:-1] if ord(char) > 0xFFFF else f'\\u{ord(char):04x}')
+                file.write('"' + ''.join(text) + '"')
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
             """Check content type for function call.
@@ -401,14 +544,16 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 ``default`` for use.
 
             """
-            if hasattr(value, '__slots__'):
-                new_value = {key: getattr(value, key) for key in value.__slots__}
-            elif hasattr(value, '__dict__'):
-                new_value = vars(value)
-            else:
+            new_value = {key: getattr(value, key) for key in _iter_slots(value)}
+            if hasattr(value, '__dict__'):
+                new_value.update(vars(value))
+            if not new_value:
                 logger.warning('unsupported object type: %s', type(value))
                 new_value = str(value)  # type: ignore[assignment]
 
+            # NOTE: through :meth:`object_hook` as every other value is, so that
+            # the keys and strings built here are escaped like theirs.
+            new_value = self.object_hook(new_value)
             func = self._encode_func(new_value)
             func(new_value, file)
 

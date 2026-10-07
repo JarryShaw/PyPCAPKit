@@ -59,7 +59,7 @@ class JSONKeyEscapingTests(unittest.TestCase):
         report = json.loads(self.dump('json', entries).read_text(encoding='utf-8'))
 
         self.assertEqual(report['Frame 1']['entries'],
-                         {format(key, ''): [index] for index, key in enumerate(AWKWARD_KEYS)})
+                         [{format(key, ''): index} for index, key in enumerate(AWKWARD_KEYS)])
 
     def test_a_plain_dict_with_awkward_keys_parses(self) -> None:
         """A plain :class:`dict` goes through a separate branch of the hook."""
