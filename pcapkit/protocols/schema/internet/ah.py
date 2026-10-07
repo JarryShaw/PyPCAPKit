@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt32Field
-from pcapkit.corekit.fields.strings import BytesField, PaddingField
+from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
+from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['AH']
@@ -25,7 +25,7 @@ class AH(Schema):
     #: Payload length.
     len: 'int' = UInt8Field()
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=2)
+    reserved: 'int' = UInt16Field()
     #: Security parameters index.
     spi: 'int' = UInt32Field()
     #: Sequence number field.
@@ -36,5 +36,6 @@ class AH(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', len: 'int', spi: 'int', seq: 'int',
-                     icv: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+        def __init__(self, next: 'Enum_TransType', len: 'int', reserved: 'int', spi: 'int',
+                     seq: 'int', icv: 'bytes',
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

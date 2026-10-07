@@ -177,6 +177,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         ah = Data_AH(
             next=schema.next,
             length=(schema.len + 2) * 4,
+            reserved=schema.reserved,
             spi=schema.spi,
             seq=schema.seq,
             icv=schema.icv,
@@ -191,6 +192,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
              next_default: 'Optional[int]' = None,
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              next_reversed: 'bool' = False,
+             reserved: 'int' = 0,
              spi: 'int' = 0,
              seq: 'int' = 0,
              icv: 'bytes' = b'',
@@ -203,6 +205,8 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             next_default: Default value of next header type.
             next_namespace: Namespace of next header type.
             next_reversed: If the namespace is reversed.
+            reserved: Reserved field; zero on send per :rfc:`4302#section-2.3`,
+                but written as given so that a parsed header rebuilds unchanged.
             spi: Security Parameters Index.
             seq: Sequence Number Field.
             icv: Integrity Check Value-ICV.
@@ -220,6 +224,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         return Schema_AH(
             next=next_value,  # type: ignore[arg-type]
             len=length,
+            reserved=reserved,
             spi=spi,
             seq=seq,
             icv=icv,
@@ -302,6 +307,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         """
         return {
             'next': data.next,
+            'reserved': data.reserved,
             'spi': data.spi,
             'seq': data.seq,
             'icv': data.icv,
