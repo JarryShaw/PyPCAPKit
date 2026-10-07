@@ -79,7 +79,8 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         udp = object.__new__(UDP)
         schema = UDP.make(udp, srcport=53, dstport=5353, checksum=b'\x12\x34', payload=b'data')
-        data = DummyData(srcport=53, dstport=5353, checksum=b'\xab\xcd', __next_type__=None)
+        data = DummyData(srcport=53, dstport=5353, len=0x048e, checksum=b'\xab\xcd',
+                         __next_type__=None)
 
         self.assertEqual(UDP.__index__(), TransType.UDP)
         self.assertEqual(schema.srcport, 53)
@@ -91,6 +92,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(values['srcport'], 53)
         self.assertEqual(values['dstport'], 5353)
         self.assertEqual(values['checksum'], b'\xab\xcd')
+        self.assertEqual(values['total_length'], 0x048e)
         self.assertIn('payload', values)
 
         udp._info = DummyData(srcport=AppType.get(53, proto=TransportProtocol.udp),

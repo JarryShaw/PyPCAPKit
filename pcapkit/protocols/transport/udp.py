@@ -179,6 +179,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
              srcport: 'Enum_AppType | int' = 0,
              dstport: 'Enum_AppType | int' = 0,
              checksum: 'bytes' = b'\x00\x00',
+             total_length: 'Optional[int]' = None,
              payload: 'bytes | Schema | ProtocolBase' = b'',
              **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
@@ -187,6 +188,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             srcport: Source port.
             dstport: Destination port.
             checksum: Checksum.
+            total_length: Length of the datagram, header included; computed from
+                the header and the payload when omitted.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -194,10 +197,18 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             Constructed packet data.
 
         """
+        # NOTE: An explicit ``total_length`` is written as given, so that a
+        # ``from_data`` rebuild of a capture truncated by snaplen keeps the
+        # length the sender declared instead of the one that was recorded
+        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # what a plain ``UDP(payload=...)`` wants.
+        if total_length is None:
+            total_length = 8 + len(payload)
+
         return Schema_UDP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.udp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.udp),
-            len=8 + len(payload),
+            len=total_length,
             checksum=checksum,
             payload=payload,
         )
@@ -241,5 +252,9 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             'srcport': data.srcport,
             'dstport': data.dstport,
             'checksum': data.checksum,
+            # NOTE: The parsed length is passed through rather than left to
+            # ``make`` to recompute, so that a truncated capture rebuilds with
+            # the length that was on the wire (:issue:`1155`).
+            'total_length': data.len,
             'payload': cls._make_payload(data),
         }
