@@ -453,17 +453,17 @@ jobs:
       # passed` -- an unrelated mirror turning a green PR red. Stalls in
       # `apt-get update` have had the same all-or-nothing shape.
       #
-      # 5 minutes, with one retry inside it. Across 6 runs (120 non-zero
-      # observations of this step and `pypcap-parity`'s) the slowest was 34s,
-      # p99 33s, all on PyShark cells. A stall is therefore distinguishable
-      # from a slow mirror well inside a short per-attempt bound, which makes
-      # retrying worth it -- 45s for
-      # `apt-get update` and 90s for `apt-get install`, two attempts, 270s in
-      # the worst case, under the 5-minute step cap that still holds however
-      # the hang is caused. The step cap stays well under the 30-minute job
-      # budget, so a hang reports as this named step timing out rather than as
-      # an opaque job cancellation. `dpkg --configure -a` before the second
-      # attempt recovers an install killed mid-configure.
+      # 10 minutes, with one retry inside it. These are whole-step wall times,
+      # both attempts included, so they bound no single attempt. On 2026-10-07
+      # this step failed at 141s (job 112943258387, #1306, PyShark,
+      # 18:17:51Z-18:20:12Z) and the parity one at 155s (job 112948578234,
+      # #1307, 18:31:41Z-18:34:16Z, 27.9 MB of archives with
+      # `azure.archive.ubuntu.com` logging `Ign:` every 30s). Across the runs
+      # sampled, failures ran 91s to 194s, most at 187-194s: the band the old
+      # 45s/90s bounds cut off. So 60s update, 180s install (~27 MB at >=0.15
+      # MB/s), two attempts, 480s worst case -- only 120s under the 600s step
+      # cap, and steps past 200s are on record, so the cap rather than that
+      # margin is the hang detector. `dpkg --configure -a` precedes the retry.
       #
       # Deliberately *not* passing `-o Acquire::Retries=3 -o
       # Acquire::http::Timeout=30`, which #974 proposed: both are already the
@@ -474,13 +474,13 @@ jobs:
       # something apt's per-`select()` data timeout governs, which is why the
       # bound here is `timeout(1)` around the whole command.
       - name: Install this engine's system packages
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           set -eu
           apt_install() {
             for attempt in 1 2; do
-              if sudo timeout 45 apt-get update \
-                 && sudo DEBIAN_FRONTEND=noninteractive timeout 90 apt-get install -y --no-install-recommends "$@"; then
+              if sudo timeout 60 apt-get update \
+                 && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends "$@"; then
                 return 0
               fi
               echo "::warning title=apt attempt $attempt of 2 failed (${ENGINE})::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
@@ -736,18 +736,18 @@ jobs:
       #
       # `timeout-minutes` and the retry for the reason given on `engine-tests`'s
       # own install step -- see the note there, which this step shares
-      # wholesale, including the 5-minute cap and per-attempt
-      # bounds. It was never the leg that stalled, but it installs the union of
-      # the packages that one does from the same mirrors, so the hazard is
-      # identical; its observations are in the 120-sample figure quoted there.
+      # wholesale, including the 10-minute cap (under this job's 45) and the
+      # 60s/180s bounds. It was not the leg that stalled in #974, but it has
+      # since failed the same way, at 155s, on 2026-10-07: #1307's job
+      # 112948578234, the second instance cited in that note.
       - name: Install libpcap headers, a C toolchain, and tshark
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           set -eu
           echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
           for attempt in 1 2; do
-            if sudo timeout 45 apt-get update \
-               && sudo DEBIAN_FRONTEND=noninteractive timeout 90 apt-get install -y --no-install-recommends build-essential libpcap-dev tshark; then
+            if sudo timeout 60 apt-get update \
+               && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends build-essential libpcap-dev tshark; then
               exit 0
             fi
             echo "::warning title=apt attempt $attempt of 2 failed::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
