@@ -630,6 +630,9 @@
 <span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Quick_Start`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_qs`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x23`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_rpl`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x63`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_rpl`</span>
@@ -675,6 +678,7 @@
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SMF_DPD</span><span class="p">:</span>                    <span class="s1">'smf_dpd'</span><span class="p">,</span>  <span class="c1"># [RFC 6621]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PDM</span><span class="p">:</span>                        <span class="s1">'pdm'</span><span class="p">,</span>      <span class="c1"># [RFC 8250] 10</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start</span><span class="p">:</span>                <span class="s1">'qs'</span><span class="p">,</span>       <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x23</span><span class="p">:</span>            <span class="s1">'rpl'</span><span class="p">,</span>      <span class="c1"># [RFC 9008]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x63</span><span class="p">:</span>            <span class="s1">'rpl'</span><span class="p">,</span>      <span class="c1"># [RFC 6553]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPL_Option</span><span class="p">:</span>                 <span class="s1">'mpl'</span><span class="p">,</span>      <span class="c1"># [RFC 7731]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">ILNP_Nonce</span><span class="p">:</span>                 <span class="s1">'ilnp'</span><span class="p">,</span>     <span class="c1"># [RFC 6744]</span>
