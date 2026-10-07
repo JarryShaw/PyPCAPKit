@@ -490,7 +490,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
@@ -1750,6 +1749,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: The block just built is parsed again below on this same</span>
+            <span class="c1"># instance, and the parse counts each option afresh against its</span>
+            <span class="c1"># "only one" guard -- so the count left by the make pass must not</span>
+            <span class="c1"># carry over into it.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_read</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
@@ -2094,6 +2099,34 @@
             <span class="s1">'block'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_packet_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_PCAPNG'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the packet data of an EPB, SPB or PB from its data model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block: Block data model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The captured packet octets the block was parsed from, as</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.protocol.Protocol.packet` holds them,</span>
+<span class="sd">            cut to the block's ``captured_len``; or, for a data model that</span>
+<span class="sd">            carries none, the payload rebuilt from its decoded next layer.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The cut is what keeps a block with ``captured_len`` of zero intact:</span>
+<span class="sd">            its ``packet`` can hold octets past the payload (:issue:`1275`), and</span>
+<span class="sd">            writing those back would grow the block.</span>
+
+<span class="sd">            The fallback is lossy. A next layer rebuilt from its own data model</span>
+<span class="sd">            drops anything it did not decode, such as Ethernet pad octets, so</span>
+<span class="sd">            the block it yields can be shorter than its ``captured_len`` says.</span>
+
+<span class="sd">        """</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">packet</span><span class="p">[:</span><span class="n">block</span><span class="o">.</span><span class="n">captured_len</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[float | Decimal | dt_type | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int]'</span><span class="p">:</span>
@@ -4188,6 +4221,10 @@
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_TLSKeyLog</span><span class="p">(</span>
             <span class="n">entries</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
+        <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
+        <span class="c1"># it back verbatim.</span>
+        <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
 
@@ -4208,6 +4245,10 @@
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_WireGuardKeyLog</span><span class="p">(</span>
             <span class="n">entries</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
+        <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
+        <span class="c1"># it back verbatim.</span>
+        <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
 
@@ -4474,6 +4515,7 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span>
             <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
+            <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
@@ -4525,6 +4567,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
+            <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
@@ -4604,6 +4647,9 @@
             <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
+        <span class="c1"># NOTE: ``isb_starttime`` and ``isb_endtime`` are scaled by the</span>
+        <span class="c1"># resolution of this block's interface, as on the parse path.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isb_interface_id</span> <span class="o">=</span> <span class="n">interface_id</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'isb'</span><span class="p">)</span>
@@ -4832,6 +4878,7 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span>
             <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
+            <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
@@ -5192,7 +5239,7 @@
 
         <span class="k">return</span> <span class="n">Schema_IF_IPv6AddrOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
             <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -6650,7 +6697,10 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Secrets type.</span>
-<span class="sd">            secrets: Secrets data model.</span>
+<span class="sd">            secrets: Secrets data model. The key log text it was parsed from,</span>
+<span class="sd">                if any, is written back verbatim; otherwise its entries are.</span>
+<span class="sd">                On a parsed model the text wins, so an edit to its</span>
+<span class="sd">                ``entries`` alone is silently ignored.</span>
 <span class="sd">            entries: TLS Key Log entries.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -6661,15 +6711,20 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
@@ -6685,7 +6740,10 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Secrets type.</span>
-<span class="sd">            secrets: Secrets data model.</span>
+<span class="sd">            secrets: Secrets data model. The key log text it was parsed from,</span>
+<span class="sd">                if any, is written back verbatim; otherwise its entries are.</span>
+<span class="sd">                On a parsed model the text wins, so an edit to its</span>
+<span class="sd">                ``entries`` alone is silently ignored.</span>
 <span class="sd">            entries: WireGuard Key Log entries.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -6696,14 +6754,19 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>

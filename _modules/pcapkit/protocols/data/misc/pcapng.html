@@ -1406,6 +1406,10 @@
     <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: TLS key log text as the block carries it, comments and line order</span>
+        <span class="c1">#: included. Set on parsing only, and written back verbatim on rebuild.</span>
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'str'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1420,6 +1424,10 @@
     <span class="n">entries</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[WireGuardKeyLabel, bytes]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: WireGuard key log text as the block carries it, comments included.</span>
+        <span class="c1">#: Set on parsing only, and written back verbatim on rebuild.</span>
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'str'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[WireGuardKeyLabel, bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 

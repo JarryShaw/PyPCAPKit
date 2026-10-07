@@ -1154,6 +1154,14 @@ issue <a class="extlink-issue reference external" href="https://github.com/Jarry
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Masking against <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._bit_mask</span></code></a>
+yields the unsigned pattern, so a signed field maps it back into
+its signed range afterwards, mirroring <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a>. A
+resolved signed field therefore decodes <code class="docutils literal notranslate"><span class="pre">ffffffff</span></code> as <code class="docutils literal notranslate"><span class="pre">-1</span></code>
+rather than <code class="docutils literal notranslate"><span class="pre">4294967295</span></code>. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1274">#1274</a>.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

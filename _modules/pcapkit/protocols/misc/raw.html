@@ -617,6 +617,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_data</span>
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: The buffer above is all there is to parse, so its size is</span>
+        <span class="c1"># declared rather than left for :func:`~pcapkit.utilities.decorators.prepare`</span>
+        <span class="c1"># to derive: a derived zero is read as the end of the stream, whereas</span>
+        <span class="c1"># an empty raw payload is a payload all the same (:issue:`1285`).</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
         <span class="c1">#: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

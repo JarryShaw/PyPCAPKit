@@ -482,6 +482,7 @@
 <span class="sd">.. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -489,7 +490,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -503,7 +504,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'attach_timestamp'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'attach_timestamp'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'attach_buffer'</span><span class="p">,</span> <span class="s1">'packet2bytes'</span><span class="p">,</span>
+    <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span>
 <span class="p">]</span>
 
@@ -522,6 +524,19 @@
 <span class="c1">#:</span>
 <span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
 <span class="n">TIMESTAMP_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_timestamp__'</span>
+
+<span class="c1">#: Attribute a frame's record octets are stashed under.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A `DPKT`_ packet keeps no copy of the octets it was parsed from, and</span>
+<span class="c1">#: serialising it again is not the same thing: :meth:`dpkt.ip.IP.__bytes__`</span>
+<span class="c1">#: recomputes a zeroed checksum and length and writes them back into the</span>
+<span class="c1">#: packet, as do the transport layers beneath it. So the adapters below slice</span>
+<span class="c1">#: the wire octets out of this buffer instead, which</span>
+<span class="c1">#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches alongside</span>
+<span class="c1">#: :data:`TIMESTAMP_ATTR`.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
+<span class="n">BUFFER_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_buffer__'</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">attach_timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -564,6 +579,147 @@
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'float'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">attach_buffer</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stash a frame's record octets on the frame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        buffer: Octets of the record the packet was parsed from, as `DPKT`_'s</span>
+<span class="sd">            reader yielded them.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">buffer</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the octets of a DPKT packet without modifying it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The record octets attached by :func:`attach_buffer`, i.e. the frame as</span>
+<span class="sd">        it was captured. A packet that carries none -- one built by hand rather</span>
+<span class="sd">        than read by :class:`~pcapkit.foundation.engines.dpkt.DPKT` -- is</span>
+<span class="sd">        serialised from a copy instead, so that `DPKT`_'s checksum and length</span>
+<span class="sd">        recomputation never reaches the packet itself.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_ext_hdrs</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IP6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch an IPv6 packet's extension headers, in the order they were parsed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv6: DPKT IPv6 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :attr:`dpkt.ip6.IP6.all_extension_headers` where `DPKT`_ recorded it,</span>
+<span class="sd">        which keeps the on-wire order and any header type that occurs twice;</span>
+<span class="sd">        otherwise the values of :attr:`~dpkt.ip6.IP6.extension_hdrs`, which</span>
+<span class="sd">        :meth:`dpkt.ip6.IP6.__len__` falls back to in the same way.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="n">ext_hdrs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="s1">'all_extension_headers'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ext_hdrs</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ext_hdrs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wire_hdr_len</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate the octets a layer occupies before its payload begins.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, i.e. one layer of a frame.</span>
+<span class="sd">        payload: That layer's payload, i.e. :attr:`packet.data &lt;dpkt.dpkt.Packet.data&gt;`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The advance :meth:`~dpkt.dpkt.Packet.unpack` itself made to reach the</span>
+<span class="sd">        payload.</span>
+
+<span class="sd">        For IPv6 that is the fixed header plus each extension header's</span>
+<span class="sd">        :attr:`~dpkt.ip6.IP6ExtensionHeader.length`, which is what</span>
+<span class="sd">        :meth:`dpkt.ip6.IP6.unpack` walks the buffer by. It cannot be taken from</span>
+<span class="sd">        ``len()``: :meth:`dpkt.ip6.IP6.__len__` sums ``len()`` of the extension</span>
+<span class="sd">        headers instead, and that is 12 octets plus the *rest of the frame* for</span>
+<span class="sd">        an Authentication header -- :class:`dpkt.ip6.IP6AHHeader` trims only into</span>
+<span class="sd">        :attr:`~dpkt.ip6.IP6AHHeader.auth_data` and leaves</span>
+<span class="sd">        :attr:`~dpkt.dpkt.Packet.data` running to the end of the buffer -- and 8</span>
+<span class="sd">        octets short of the wire for a Routing header whose Hdr Ext Len is odd</span>
+<span class="sd">        (:class:`dpkt.ip6.IP6RoutingHeader` keeps whole addresses only).</span>
+
+<span class="sd">        Every other layer's ``len()`` does bound its payload, so the difference</span>
+<span class="sd">        of the two is used there. For IPv4 that difference is the Internet</span>
+<span class="sd">        Header Length, options included.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">__hdr_len__</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span>
+            <span class="n">ext_hdr</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">ext_hdr</span> <span class="ow">in</span> <span class="n">_ipv6_ext_hdrs</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, bool]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the octets of a layer of a DPKT packet, from its first octet on.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, i.e. the outermost layer.</span>
+<span class="sd">        layer: A layer nested within ``packet``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The octets, and whether they are the captured ones. With a buffer</span>
+<span class="sd">        attached by :func:`attach_buffer` they are the record octets from the</span>
+<span class="sd">        layer's offset to the end of the frame, so any link-layer trailer is</span>
+<span class="sd">        still there for the caller to trim; otherwise they are the layer alone,</span>
+<span class="sd">        serialised from a copy (see :func:`packet2bytes`).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the buffer does not carry the layer's own header where</span>
+<span class="sd">            the walk above placed it. `DPKT`_ unpacks a header field by field and</span>
+<span class="sd">            :meth:`~dpkt.dpkt.Packet.pack_hdr` packs those fields back without</span>
+<span class="sd">            recomputing any of them, so the two agree octet for octet wherever</span>
+<span class="sd">            the offset is right -- which makes this an exact check rather than a</span>
+<span class="sd">            plausibility one. It is raised rather than worked around because a</span>
+<span class="sd">            misplaced slice reaches the reassembler as a believable datagram and</span>
+<span class="sd">            so is invisible in its output.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">packet</span>
+        <span class="k">while</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">layer</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+                <span class="k">break</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">_wire_hdr_len</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">payload</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wire</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)[</span><span class="n">offset</span><span class="p">:]</span>
+            <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'__hdr_len__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hdr_len</span> <span class="ow">and</span> <span class="n">wire</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">]</span> <span class="o">!=</span> <span class="n">layer</span><span class="o">.</span><span class="n">pack_hdr</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> header not found at offset </span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s1"> of the '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"bytes"</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">))</span><span class="si">}</span><span class="s1">-octet record; the frame cannot be '</span>
+                    <span class="s1">'sliced without re-serialising it'</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">wire</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">packet2bytes</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span> <span class="kc">False</span>
+
+
 <div class="viewcode-block" id="ipv6_hdr_len">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv6_hdr_len">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IP6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -576,18 +732,22 @@
 <span class="sd">        Length of headers before IPv6 Fragment header</span>
 <span class="sd">        :class:`dpkt.ip6.IP6FragmentHeader` (:rfc:`2460#section-4.5`).</span>
 
-<span class="sd">    As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)</span>
-<span class="sd">    includes Hop-by-Hop Options header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`),</span>
-<span class="sd">    Destination Options header :class:`dpkt.ip6.IP6DstOptHeader` (:rfc:`2460#section-4.6`) and</span>
-<span class="sd">    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`).</span>
+<span class="sd">    As specified in :rfc:`2460#section-4.1`, such a header may be a Hop-by-Hop Options</span>
+<span class="sd">    header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`), a Destination</span>
+<span class="sd">    Options header :class:`dpkt.ip6.IP6DstOptsHeader` (:rfc:`2460#section-4.6`) or a</span>
+<span class="sd">    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`). An</span>
+<span class="sd">    Authentication header (:rfc:`4302`) reaches here as well, though, so the headers are</span>
+<span class="sd">    walked in the order they were parsed rather than looked up by a fixed list of types.</span>
+<span class="sd">    Walking them is also what counts a header type occurring twice twice, and what leaves</span>
+<span class="sd">    out one that sits *after* the Fragment header rather than before it.</span>
 
 <span class="sd">    """</span>
+    <span class="n">frag</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span>
     <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">__hdr_len__</span>
-    <span class="c1"># IP6HopOptsHeader / IP6DstOptHeader / IP6RoutingHeader</span>
-    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">43</span><span class="p">):</span>
-        <span class="n">ext_hdr</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ext_hdr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">hdr_len</span> <span class="o">+=</span> <span class="n">ext_hdr</span><span class="o">.</span><span class="n">length</span>
+    <span class="k">for</span> <span class="n">ext_hdr</span> <span class="ow">in</span> <span class="n">_ipv6_ext_hdrs</span><span class="p">(</span><span class="n">ipv6</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ext_hdr</span> <span class="ow">is</span> <span class="n">frag</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">hdr_len</span> <span class="o">+=</span> <span class="n">ext_hdr</span><span class="o">.</span><span class="n">length</span>
     <span class="k">return</span> <span class="n">hdr_len</span></div>
 
 
@@ -639,7 +799,7 @@
 
     <span class="k">return</span> <span class="p">{</span>
         <span class="s1">'timestamp'</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span>
-        <span class="s1">'packet'</span><span class="p">:</span> <span class="n">packet</span><span class="o">.</span><span class="n">pack</span><span class="p">(),</span>
+        <span class="s1">'packet'</span><span class="p">:</span> <span class="n">packet2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
         <span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
     <span class="p">}</span></div>
 
@@ -670,6 +830,15 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
+<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
+<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. The packet</span>
+<span class="sd">        itself is left untouched either way.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
@@ -682,6 +851,11 @@
         <span class="c1"># covers any IP options, whereas ``IP.__hdr_len__`` is the fixed 20-octet</span>
         <span class="c1"># struct size and would leave option octets at the head of the payload</span>
         <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">wire</span><span class="p">,</span> <span class="n">captured</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">)</span>
+        <span class="c1"># a zero Total Length is what TCP segmentation offload leaves behind, in</span>
+        <span class="c1"># which case the datagram runs to the end of the frame, as with DPKT</span>
+        <span class="k">if</span> <span class="n">captured</span> <span class="ow">and</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">:</span>
+            <span class="n">wire</span> <span class="o">=</span> <span class="n">wire</span><span class="p">[:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">]</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
@@ -697,8 +871,8 @@
             <span class="n">ihl</span><span class="o">=</span><span class="n">ihl</span><span class="p">,</span>                                            <span class="c1"># internet header length</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">mf</span><span class="p">),</span>                                   <span class="c1"># more fragment flag</span>
             <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                        <span class="c1"># total length, header includes</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">ihl</span><span class="p">],</span>                           <span class="c1"># raw bytes type header</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">ihl</span><span class="p">:]),</span>               <span class="c1"># raw bytearray type payload</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">ihl</span><span class="p">],</span>                                  <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">wire</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]),</span>                      <span class="c1"># raw bytearray type payload</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
@@ -727,6 +901,15 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6</span>
 <span class="sd">          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
+<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
+<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. The packet</span>
+<span class="sd">        itself is left untouched either way.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`</span>
 
@@ -737,8 +920,13 @@
         <span class="k">if</span> <span class="n">ipv6_frag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span>
+        <span class="n">wire</span><span class="p">,</span> <span class="n">captured</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">)</span>
+        <span class="c1"># a zero Payload Length is a jumbogram or TCP segmentation offload, in</span>
+        <span class="c1"># which case the datagram runs to the end of the frame, as with DPKT</span>
+        <span class="k">if</span> <span class="n">captured</span> <span class="ow">and</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">plen</span><span class="p">:</span>
+            <span class="n">wire</span> <span class="o">=</span> <span class="n">wire</span><span class="p">[:</span><span class="n">ipv6</span><span class="o">.</span><span class="n">__hdr_len__</span> <span class="o">+</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">plen</span><span class="p">]</span>
         <span class="c1"># payload following the IPv6 Fragment header</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">:]</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">wire</span><span class="p">[</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">:]</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
@@ -767,7 +955,7 @@
             <span class="n">ihl</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span>                                         <span class="c1"># header length, only headers before IPv6-Frag</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">m_flag</span><span class="p">),</span>                           <span class="c1"># more fragment flag</span>
             <span class="n">tl</span><span class="o">=</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                           <span class="c1"># total length, header includes</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">ipv6</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">hdr_len</span><span class="p">],</span>                        <span class="c1"># raw bytes type header before IPv6-Frag</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>                               <span class="c1"># raw bytes type header before IPv6-Frag</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                          <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                 <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
@@ -796,6 +984,15 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
+<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
+<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. The packet</span>
+<span class="sd">        itself is left untouched either way.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
@@ -812,6 +1009,7 @@
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">wire</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tcp</span><span class="p">)</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>                                 <span class="c1"># payload length, header excludes</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TCP_Packet</span><span class="p">(</span>
@@ -827,7 +1025,7 @@
             <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">5</span><span class="p">])),</span>                            <span class="c1"># reset connection flag</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>                            <span class="c1"># synchronise flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>                            <span class="c1"># finish flag</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                    <span class="c1"># raw bytes type header</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                          <span class="c1"># raw bytes type header</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)),</span>                 <span class="c1"># raw bytearray type payload</span>
             <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                      <span class="c1"># first sequence number of payload</span>
             <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>                         <span class="c1"># last sequence number of payload</span>
@@ -859,6 +1057,15 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
+<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
+<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. The packet</span>
+<span class="sd">        itself is left untouched either way.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
@@ -875,6 +1082,7 @@
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">wire</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tcp</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                         <span class="c1"># data link type from global header</span>
@@ -890,7 +1098,7 @@
             <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                        <span class="c1"># timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                                <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                                <span class="c1"># TCP acknowledgement number</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                            <span class="c1"># raw bytes type header</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                                  <span class="c1"># raw bytes type header</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)),</span>                         <span class="c1"># raw bytearray type payload</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>

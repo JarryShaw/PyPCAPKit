@@ -1424,10 +1424,15 @@
             <span class="c1"># NOTE: ``Field.length`` recomputes struct.calcsize() on every read,</span>
             <span class="c1"># so it is read once per field here rather than at each use.</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
+                <span class="c1"># NOTE: A negative length is the unset default and takes what</span>
+                <span class="c1"># the declared length leaves, never less than nothing; a</span>
+                <span class="c1"># computed zero is an empty payload, not an unset one, or it</span>
+                <span class="c1"># would swallow the fields after it (:issue:`1275`).</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
-                <span class="n">payload_length</span> <span class="o">=</span> <span class="n">length</span> <span class="ow">or</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
 
-                <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">payload_length</span><span class="p">)</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>

@@ -627,8 +627,9 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_timestamp</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span>
-                                          <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_buffer</span><span class="p">,</span> <span class="n">attach_timestamp</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span>
+                                          <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span>
+                                          <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
@@ -644,6 +645,10 @@
         <span class="c1"># captured -- and anything reading a *stored* frame after this loop has</span>
         <span class="c1"># moved on could not find out. Keep the two together from the start.</span>
         <span class="n">attach_timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="c1"># Nor does the packet keep the octets it was parsed from, and serialising</span>
+        <span class="c1"># it again recomputes zeroed checksums and lengths into it, so keep those</span>
+        <span class="c1"># too for the adapters to slice the wire octets out of.</span>
+        <span class="n">attach_buffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">pkt</span><span class="p">)</span>
 
         <span class="c1"># verbose output</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>

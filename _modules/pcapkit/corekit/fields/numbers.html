@@ -789,12 +789,23 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            Masking against :attr:`self._bit_mask &lt;NumberField.bit_length&gt;`</span>
+<span class="sd">            yields the unsigned pattern, so a signed field maps it back into</span>
+<span class="sd">            its signed range afterwards, mirroring :meth:`pre_process`. A</span>
+<span class="sd">            resolved signed field therefore decodes ``ffffffff`` as ``-1``</span>
+<span class="sd">            rather than ``4294967295``. See GitHub issue :issue:`1274`.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
-        <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span>
-            <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
-        <span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span></div>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
+            <span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">value</span></div>
 </div>
 
 

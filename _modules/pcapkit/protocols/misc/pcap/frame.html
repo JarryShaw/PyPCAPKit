@@ -507,7 +507,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Schema_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">localcontext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -693,6 +693,11 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema_Frame]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
+
+            <span class="c1"># NOTE: Reached on the parsing path only; the construction path</span>
+            <span class="c1"># sets ``__header__`` before unpacking its own buffer.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_record_floor</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
             <span class="n">packet</span><span class="p">[</span><span class="s1">'byteorder'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">byteorder</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_Frame'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -918,6 +923,35 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">16</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_record_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse a tail too short to hold a record header.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data, as the caller declared it, or</span>
+<span class="sd">                :obj:`None` to measure what is left in</span>
+<span class="sd">                :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            StreamEOFError: If fewer than sixteen octets are left to read.</span>
+
+<span class="sd">        A PCAP record header is sixteen octets, which is what</span>
+<span class="sd">        :meth:`__length_hint__` reports. A shorter tail is not a record, so</span>
+<span class="sd">        parsing one would only invent fields from zero padding. Reporting the</span>
+<span class="sd">        end of the stream instead lets :meth:`Extractor.record_frames</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` stop with the</span>
+<span class="sd">        frames read so far, as the PCAP-NG reader does for a truncated block</span>
+<span class="sd">        (:issue:`678`). See GitHub issue :issue:`1265`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: record truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
+                                 <span class="s1">'fewer than the 16 a record header needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># NOTE: This is a hack to make the ``__index__`` method work both as a</span>
     <span class="c1"># class method and an instance method.</span>

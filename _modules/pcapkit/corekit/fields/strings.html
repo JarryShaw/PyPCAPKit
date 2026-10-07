@@ -482,6 +482,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'_TextField'</span><span class="p">,</span>
     <span class="s1">'StringField'</span><span class="p">,</span>
+    <span class="s1">'DecodedString'</span><span class="p">,</span>
     <span class="s1">'BitField'</span><span class="p">,</span>
     <span class="s1">'PaddingField'</span><span class="p">,</span>
 <span class="p">]</span>
@@ -585,19 +586,33 @@
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
 <span class="sd">            an integer value and accept the current packet as its only argument.</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        encoding: The encoding with which to decode the :obj:`bytes`.</span>
-<span class="sd">            If not provided, :mod:`pcapkit` will first try detecting its encoding</span>
-<span class="sd">            using |chardet|_. The fallback encoding is **UTF-8**.</span>
+<span class="sd">        encoding: The encoding with which to decode the :obj:`bytes`, and with which</span>
+<span class="sd">            a :obj:`str` is encoded when packing. If not provided, :mod:`pcapkit`</span>
+<span class="sd">            will first try detecting its encoding using |chardet|_. The fallback</span>
+<span class="sd">            encoding is **UTF-8**.</span>
 <span class="sd">        errors: The error handling scheme to use for the handling of decoding errors.</span>
-<span class="sd">            The default is ``'strict'`` meaning that decoding errors raise a</span>
-<span class="sd">            :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``</span>
-<span class="sd">            as well as any other name registered with :func:`codecs.register_error` that</span>
-<span class="sd">            can handle :exc:`UnicodeDecodeError`.</span>
+<span class="sd">            The default is ``'strict'``. Should decoding fail under it, the field</span>
+<span class="sd">            retries with ``'replace'`` rather than raising, so an octet the charset</span>
+<span class="sd">            cannot decode reads as U+FFFD -- the octets themselves are not lost,</span>
+<span class="sd">            see below. A codec that supports no error handler at all still raises:</span>
+<span class="sd">            ``idna`` reports ``Unsupported error handling: replace``, measured.</span>
+<span class="sd">            Other possible values are ``'ignore'`` and ``'replace'`` as well as any</span>
+<span class="sd">            other name registered with :func:`codecs.register_error` that can handle</span>
+<span class="sd">            :exc:`UnicodeDecodeError`.</span>
 <span class="sd">        unquote: Whether to unquote the decoded string as a URL. Should decoding fail,</span>
 <span class="sd">            the method will try again replacing ``'%'`` with ``'\x'`` then decoding the</span>
 <span class="sd">            ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Unpacking is lossless. Where re-encoding the decoded :obj:`str` would not</span>
+<span class="sd">    reproduce the octets it came from -- a detected charset other than UTF-8, an</span>
+<span class="sd">    octet the charset cannot decode, a lossy ``errors`` scheme, or a URL quoting</span>
+<span class="sd">    that differs from the original -- the field returns a :class:`DecodedString`,</span>
+<span class="sd">    which remembers those octets and packs back as exactly them. The decoded</span>
+<span class="sd">    *text* is whatever it has always been, U+FFFD and all: a consumer that only</span>
+<span class="sd">    reads the text, such as a dumper writing it back out as UTF-8, sees no</span>
+<span class="sd">    change. A length of ``-1`` is resolved to the number of *encoded* octets.</span>
 
 <span class="sd">    .. |chardet| replace:: ``chardet``</span>
 <span class="sd">    .. _chardet: https://chardet.readthedocs.io</span>
@@ -615,6 +630,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="n">errors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unquote</span> <span class="o">=</span> <span class="n">unquote</span>
 
+<div class="viewcode-block" id="StringField._encode">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField._encode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a :obj:`str` value the way :meth:`pre_process` packs it.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            value: Field value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Encoded field value.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unquote</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">urllib_parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="StringField.pre_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField.pre_process">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -628,13 +660,18 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unquote</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">urllib_parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span>
+        <span class="c1"># NOTE: The octets a DecodedString was decoded from are used verbatim,</span>
+        <span class="c1"># since re-encoding its text is exactly what would not reproduce them.</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">raw</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DecodedString</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: A negative length is resolved from the *encoded* octets, not from</span>
+        <span class="c1"># the character count -- the ``Ns`` template counts octets, so counting</span>
+        <span class="c1"># characters truncated any text that does not encode one octet per</span>
+        <span class="c1"># character.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span>
-        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">buffer</span></div>
 
 
 <div class="viewcode-block" id="StringField.post_process">
@@ -647,7 +684,8 @@
 <span class="sd">            packet: Packet data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Processed field value.</span>
+<span class="sd">            Processed field value; a :class:`DecodedString` carrying ``value``</span>
+<span class="sd">            where :meth:`pre_process` would not otherwise reproduce it.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unquote</span><span class="p">:</span>
@@ -661,9 +699,53 @@
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">,</span> <span class="s1">'replace'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+
+        <span class="c1"># NOTE: Encoding may itself fail -- ``errors='strict'`` over text that</span>
+        <span class="c1"># decoded under a lone-surrogate scheme, for one -- which is as much a</span>
+        <span class="c1"># failure to reproduce the octets as a mismatch is.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lossless</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span>
+        <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
+            <span class="n">lossless</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">lossless</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">DecodedString</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 </div>
 
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DecodedString</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Decoded :class:`StringField` value that remembers its octets.</span>
+
+<span class="sd">    :class:`StringField` returns one where encoding the decoded text would not</span>
+<span class="sd">    reproduce the octets it was decoded from, so that the field packs it back as</span>
+<span class="sd">    exactly those octets. It is otherwise an ordinary :obj:`str`, and deliberately</span>
+<span class="sd">    so: it compares and hashes as its text, since the text is the value and</span>
+<span class="sd">    :attr:`raw` is provenance. Two of them with the same text and different octets</span>
+<span class="sd">    therefore compare equal -- the alternative, mixing :attr:`raw` into</span>
+<span class="sd">    :meth:`~object.__eq__`, would make ``info.comment == 'café'`` false against a</span>
+<span class="sd">    plain :obj:`str` literal, which is the comparison callers actually write.</span>
+
+<span class="sd">    Any string operation on one returns a plain :obj:`str`, which a field then</span>
+<span class="sd">    packs with its own encoding; that is intended, as an edited value is no longer</span>
+<span class="sd">    the text those octets held.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Decoded text.</span>
+<span class="sd">        raw: Octets ``value`` was decoded from.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Octets the string was decoded from.</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">raw</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getnewargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, bytes]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span>
 
 
 <div class="viewcode-block" id="BitField">

@@ -3978,7 +3978,10 @@ protocol chain of the current packet (frame).</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></span>) – Secrets type.</p></li>
-<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog" title="pcapkit.protocols.data.misc.pcapng.TLSKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLog</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Secrets data model.</p></li>
+<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog" title="pcapkit.protocols.data.misc.pcapng.TLSKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLog</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Secrets data model. The key log text it was parsed from,
+if any, is written back verbatim; otherwise its entries are.
+On a parsed model the text wins, so an edit to its
+<code class="docutils literal notranslate"><span class="pre">entries</span></code> alone is silently ignored.</p></li>
 <li><p><strong>entries</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>, <a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – TLS Key Log entries.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -4000,7 +4003,10 @@ protocol chain of the current packet (frame).</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></span>) – Secrets type.</p></li>
-<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog" title="pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">WireGuardKeyLog</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Secrets data model.</p></li>
+<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog" title="pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">WireGuardKeyLog</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Secrets data model. The key log text it was parsed from,
+if any, is written back verbatim; otherwise its entries are.
+On a parsed model the text wins, so an edit to its
+<code class="docutils literal notranslate"><span class="pre">entries</span></code> alone is silently ignored.</p></li>
 <li><p><strong>entries</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel" title="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WireGuardKeyLabel</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – WireGuard Key Log entries.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -7811,6 +7817,13 @@ subclass instance.</p></li>
 <dd><p>TLS key log entries.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.TLSKeyLog.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.data" title="Link to this definition">¶</a></dt>
+<dd><p>TLS key log text as the block carries it, comments and line order
+included. Set on parsing only, and written back verbatim on rebuild.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -7822,6 +7835,13 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog.entries">
 <span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel" title="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel"><span class="pre">WireGuardKeyLabel</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog.entries" title="Link to this definition">¶</a></dt>
 <dd><p>WireGuard Key Log entries.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog.data" title="Link to this definition">¶</a></dt>
+<dd><p>WireGuard key log text as the block carries it, comments included.
+Set on parsing only, and written back verbatim on rebuild.</p>
 </dd></dl>
 
 </dd></dl>
