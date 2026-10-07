@@ -145,6 +145,8 @@ class MH(Protocol):
     length: 'int'
     #: Mobility header type.
     type: 'Packet'
+    #: Reserved octet after the MH type.
+    reserved: 'int'
     #: Checksum.
     chksum: 'bytes'
 
@@ -157,19 +159,22 @@ class UnknownMessage(MH):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final
 class BindingRefreshRequestMessage(MH):
     """Data model for MH Binding Refresh Request (BRR) message type."""
 
+    #: Reserved field of the message body, before the mobility options. Named
+    #: apart from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'int'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
+                     msg_reserved: 'int', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final
@@ -182,7 +187,7 @@ class HomeTestInitMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -196,7 +201,7 @@ class CareofTestInitMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -214,7 +219,7 @@ class HomeTestMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      nonce_index: 'int', cookie: 'bytes', token: 'bytes',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -233,7 +238,7 @@ class CareofTestMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      nonce_index: 'int', cookie: 'bytes', token: 'bytes',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -252,15 +257,36 @@ class BindingUpdateMessage(MH):
     lla_compat: 'bool'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
+    #: MAP registration flag (``M``) [:rfc:`4140`].
+    map_reg: 'bool'
+    #: Mobile router flag (``R``) [:rfc:`3963`].
+    mobile_router: 'bool'
+    #: Proxy registration flag (``P``) [:rfc:`5213`].
+    proxy_reg: 'bool'
+    #: Forcing UDP encapsulation flag (``F``) [:rfc:`5555`].
+    udp_encap: 'bool'
+    #: TLV-header format flag (``T``) [:rfc:`5845`].
+    tlv_format: 'bool'
+    #: Bulk binding update flag (``B``) [:rfc:`6602`].
+    bulk_binding: 'bool'
+    #: Multicast signaling flag (``S``) [:rfc:`7161`].
+    multicast: 'bool'
+    #: DMM flag (``D``) [:rfc:`8885`].
+    dmm: 'bool'
+    #: Reserved bits, i.e. the low four bits of the flags word.
+    flags_reserved: 'int'
     #: Lifetime.
     lifetime: 'timedelta'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
-                     lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     map_reg: 'bool', mobile_router: 'bool', proxy_reg: 'bool', udp_encap: 'bool',
+                     tlv_format: 'bool', bulk_binding: 'bool', multicast: 'bool', dmm: 'bool',
+                     flags_reserved: 'int', lifetime: 'timedelta',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -271,6 +297,20 @@ class BindingAcknowledgementMessage(MH):
     status: 'Enum_StatusCode'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
+    #: Mobile router flag (``R``) [:rfc:`3963`].
+    mobile_router: 'bool'
+    #: Proxy registration flag (``P``) [:rfc:`5213`].
+    proxy_reg: 'bool'
+    #: TLV-header format flag (``T``) [:rfc:`5845`].
+    tlv_format: 'bool'
+    #: Bulk binding update flag (``B``) [:rfc:`6602`].
+    bulk_binding: 'bool'
+    #: Multicast signaling flag (``S``) [:rfc:`7161`].
+    multicast: 'bool'
+    #: DMM flag (``D``) [:rfc:`8885`].
+    dmm: 'bool'
+    #: Reserved bit, i.e. the lowest bit of the flags octet.
+    flags_reserved: 'int'
     #: Sequence number.
     seq: 'int'
     #: Lifetime.
@@ -279,8 +319,10 @@ class BindingAcknowledgementMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
-                     status: 'Enum_StatusCode', key_mngt: 'bool', seq: 'int', lifetime: 'timedelta',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
+                     status: 'Enum_StatusCode', key_mngt: 'bool', mobile_router: 'bool',
+                     proxy_reg: 'bool', tlv_format: 'bool', bulk_binding: 'bool', multicast: 'bool',
+                     dmm: 'bool', flags_reserved: 'int', seq: 'int', lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -296,7 +338,7 @@ class BindingErrorMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      status: 'Enum_BindingError', home: 'IPv6Address',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -322,7 +364,7 @@ class FastBindingUpdateMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
                      lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -348,7 +390,7 @@ class FastBindingAcknowledgmentMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      status: 'FastBindingAcknowledgmentStatus', key_mngt: 'bool', seq: 'int',
                      lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
@@ -362,7 +404,7 @@ class FastNeighborAdvertisementMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -374,7 +416,7 @@ class ExperimentalMessage(MH):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      data: 'bytes') -> 'None': ...
 
 
@@ -398,7 +440,7 @@ class HandoverInitiateMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', assign: 'bool', buffer: 'bool', proxy: 'bool', forward: 'bool',
                      code: 'Enum_HandoverInitiateStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
@@ -422,7 +464,7 @@ class HandoverAcknowledgeMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', buffer: 'bool', proxy: 'bool', forward: 'bool',
                      code: 'Enum_HandoverACKStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
@@ -443,7 +485,7 @@ class HeartbeatMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      unsolicited: 'bool', response: 'bool', seq: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -459,7 +501,7 @@ class HomeAgentSwitchMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      addresses: 'tuple[IPv6Address, ...]',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -492,7 +534,7 @@ class BindingRevocationMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      br_type: 'Enum_BindingRevocation',
                      code: 'Enum_RevocationTrigger | Enum_RevocationStatusCode', seq: 'int',
                      proxy: 'bool', ipv4_hoa: 'bool', global_revocation: 'bool',
@@ -512,7 +554,7 @@ class LocalizedRoutingInitiationMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -536,7 +578,7 @@ class LocalizedRoutingAcknowledgmentMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', unsolicited: 'bool', status: 'LocalizedRoutingStatus',
                      lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
@@ -558,7 +600,7 @@ class UpdateNotificationMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', reason: 'Enum_UpdateNotificationReason', ack: 'bool',
                      retransmit: 'bool',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
@@ -576,7 +618,7 @@ class UpdateNotificationAcknowledgementMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', status: 'Enum_UpdateNotificationACKStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -604,7 +646,7 @@ class FlowBindingMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      fb_type: 'Enum_FlowBindingType', seq: 'int',
                      code: 'Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus',
                      ack: 'bool',
@@ -621,7 +663,7 @@ class SubscriptionQueryMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -639,7 +681,7 @@ class SubscriptionResponseMessage(MH):
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', info: 'bool',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -985,11 +1027,13 @@ class HomeNetworkPrefixOption(Option):
 class HandoffIndicatorOption(Option):
     """Data model for MH Handoff Indicator option."""
 
+    #: Reserved octet before the handoff indicator.
+    reserved: 'int'
     #: Handoff indicator.
     hi: 'Enum_HandoffType'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', hi: 'Enum_HandoffType') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'int', hi: 'Enum_HandoffType') -> 'None': ...
 
 
 @info_final
@@ -1111,10 +1155,12 @@ class IPv4HomeAddressOption(Option):
     address: 'IPv4Address'
     #: Mobile network prefix request flag.
     request_prefix: 'bool'
+    #: Reserved bits, i.e. the nine bits after the ``P`` flag.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
-                     address: 'IPv4Address', request_prefix: 'bool') -> 'None': ...
+                     address: 'IPv4Address', request_prefix: 'bool', reserved: 'int') -> 'None': ...
 
 
 @info_final
@@ -1542,13 +1588,15 @@ class ANINetworkIdentifierSuboption(ANISuboption):
 
     #: UTF-8 encoding flag for :attr:`net_name`.
     utf8: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``E`` flag.
+    reserved: 'int'
     #: Network name, e.g. an SSID or a PLMN identifier.
     net_name: 'bytes'
     #: Access-point name.
     ap_name: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_ANISuboption', length: 'int', utf8: 'bool',
+        def __init__(self, type: 'Enum_ANISuboption', length: 'int', utf8: 'bool', reserved: 'int',
                      net_name: 'bytes', ap_name: 'bytes') -> 'None': ...
 
 

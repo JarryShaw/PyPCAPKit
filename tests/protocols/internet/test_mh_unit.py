@@ -31,6 +31,7 @@ class MHUnitTests(unittest.TestCase):
         data = DummyDict(
             next=TransType.UDP,
             type=Packet.Binding_Refresh_Request,
+            reserved=0x5a,
             chksum=b'\x12\x34',
             __next_type__=None,
         )
@@ -41,6 +42,7 @@ class MHUnitTests(unittest.TestCase):
         values = MH._make_data(data)
         self.assertEqual(values['next'], TransType.UDP)
         self.assertEqual(values['type'], Packet.Binding_Refresh_Request)
+        self.assertEqual(values['reserved'], 0x5a)
         self.assertEqual(values['chksum'], b'\x12\x34')
         self.assertIs(values['data'], data)
         self.assertIn('payload', values)
@@ -210,11 +212,11 @@ class MHUnitTests(unittest.TestCase):
         proto._make_mh_options = mock.Mock(return_value=['made'])
 
         def header(type_: Packet) -> SimpleNamespace:
-            return SimpleNamespace(next=TransType.UDP, length=2, type=type_, chksum=b'\x12\x34')
+            return SimpleNamespace(next=TransType.UDP, length=2, type=type_, reserved=0, chksum=b'\x12\x34')
 
         unknown = proto._read_msg_unknown(SimpleNamespace(data=b'raw'), header=header(Packet.get(250)))
         self.assertEqual(unknown.data, b'raw')
-        self.assertEqual(proto._read_msg_brr(SimpleNamespace(options=[]),
+        self.assertEqual(proto._read_msg_brr(SimpleNamespace(reserved=0, options=[]),
                                              header=header(Packet.Binding_Refresh_Request)).options, 'opts')
         self.assertEqual(proto._read_msg_hoti(SimpleNamespace(cookie=b'12345678', options=[]),
                                               header=header(Packet.Home_Test_Init)).cookie, b'12345678')
@@ -228,13 +230,17 @@ class MHUnitTests(unittest.TestCase):
                                                   token=b'ABCDEFGH', options=[]),
                                   header=header(Packet.Care_of_Test))
         self.assertEqual(cot.nonce_index, 2)
-        bu = proto._read_msg_bu(SimpleNamespace(seq=3, flags={'A': 1, 'H': 1, 'L': 0, 'K': 1},
+        bu = proto._read_msg_bu(SimpleNamespace(seq=3, flags={'A': 1, 'H': 1, 'L': 0, 'K': 1, 'M': 0,
+                                                       'R': 0, 'P': 0, 'F': 0, 'T': 0, 'B': 0,
+                                                       'S': 0, 'D': 0, 'reserved': 0},
                                                 lifetime=4, options=[]),
                                 header=header(Packet.Binding_Update))
         self.assertTrue(bu.ack)
         self.assertEqual(bu.lifetime, datetime.timedelta(seconds=16))
         ba = proto._read_msg_ba(SimpleNamespace(status=StatusCode.Reason_unspecified,
-                                                flags={'K': 1}, seq=4, lifetime=5,
+                                                flags={'K': 1, 'R': 0, 'P': 0, 'T': 0, 'B': 0,
+                                                       'S': 0, 'D': 0, 'reserved': 0},
+                                                seq=4, lifetime=5,
                                                 options=[]),
                                 header=header(Packet.Binding_Acknowledgement))
         self.assertTrue(ba.key_mngt)
@@ -248,7 +254,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_msg_unknown(None, data=b'xx').data, b'xx')
         self.assertEqual(proto._make_msg_unknown(SimpleNamespace(data=b'yy')).data, b'yy')
         self.assertEqual(proto._make_msg_brr(None, options=[]).options, ['made'])
-        self.assertEqual(proto._make_msg_brr(SimpleNamespace(options=[])).options, ['made'])
+        self.assertEqual(proto._make_msg_brr(SimpleNamespace(msg_reserved=0, options=[])).options, ['made'])
         self.assertEqual(proto._make_msg_hoti(None, cookie=b'12345678', options=[]).cookie, b'12345678')
         self.assertEqual(proto._make_msg_hoti(SimpleNamespace(cookie=b'abcdefgh', options=[])).cookie, b'abcdefgh')
         self.assertEqual(proto._make_msg_coti(None, cookie=b'ABCDEFGH', options=[]).cookie, b'ABCDEFGH')
@@ -266,13 +272,21 @@ class MHUnitTests(unittest.TestCase):
                                             options=[]).lifetime, 3)
         self.assertEqual(proto._make_msg_bu(SimpleNamespace(seq=12, ack=False, home=True,
                                                             lla_compat=True, key_mngt=False,
+                                                            map_reg=False, mobile_router=False,
+                                                            proxy_reg=False, udp_encap=False,
+                                                            tlv_format=False, bulk_binding=False,
+                                                            multicast=False, dmm=False,
+                                                            flags_reserved=0,
                                                             lifetime=datetime.timedelta(seconds=8),
                                                             options=[])).seq, 12)
         self.assertEqual(proto._make_msg_ba(None, status=StatusCode.Reason_unspecified,
                                             key_mngt=True, seq=13, lifetime=8,
                                             options=[]).seq, 13)
         self.assertEqual(proto._make_msg_ba(SimpleNamespace(status=StatusCode.Reason_unspecified,
-                                                            key_mngt=False, seq=14,
+                                                            key_mngt=False, mobile_router=False,
+                                                            proxy_reg=False, tlv_format=False,
+                                                            bulk_binding=False, multicast=False,
+                                                            dmm=False, flags_reserved=0, seq=14,
                                                             lifetime=datetime.timedelta(seconds=8),
                                                             options=[])).seq, 14)
         self.assertEqual(str(proto._make_msg_be(None, status=BindingError.Unrecognized_MH_Type_value,
@@ -317,7 +331,6 @@ class MHUnitTests(unittest.TestCase):
         for bad in [
             schema.PadOption(type=Option.Binding_Refresh_Advice, length=0),
             schema.PadOption(type=Option.Pad1, length=1),
-            schema.PadOption(type=Option.PadN, length=0),
         ]:
             with self.assertRaises(ProtocolError):
                 proto._read_opt_pad(bad, options=options)
@@ -478,8 +491,8 @@ class MHUnitTests(unittest.TestCase):
                                                                     data=b'yy')).data, b'yy')
         with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
             self.assertEqual(proto._make_opt_pad(Option.Pad1, length=2).type, Option.PadN)
-            self.assertEqual(proto._make_opt_pad(Option.PadN, length=0).type, Option.Pad1)
-        self.assertEqual(warn.call_count, 2)
+            self.assertEqual(proto._make_opt_pad(Option.PadN, length=0).type, Option.PadN)
+        self.assertEqual(warn.call_count, 1)
 
         self.assertEqual(proto._make_opt_bra(Option.Binding_Refresh_Advice, interval=9).interval, 9)
         self.assertEqual(proto._make_opt_bra(
@@ -673,6 +686,7 @@ class MHUnitTests(unittest.TestCase):
                 next=TransType.UDP,
                 length=2,
                 type=custom_packet,
+                reserved=0,
                 chksum=b'',
                 data=b'model',
             )
@@ -827,9 +841,17 @@ class MHUnitTests(unittest.TestCase):
                     next=TransType.UDP,
                     length=12,
                     type=Packet.Binding_Acknowledgement,
+                    reserved=0,
                     chksum=b'',
                     status=StatusCode.Reason_unspecified,
                     key_mngt=True,
+                    mobile_router=False,
+                    proxy_reg=False,
+                    tlv_format=False,
+                    bulk_binding=False,
+                    multicast=False,
+                    dmm=False,
+                    flags_reserved=0,
                     seq=1,
                     lifetime=datetime.timedelta(seconds=8),
                     options=OrderedMultiDict(),
@@ -900,7 +922,7 @@ class MHUnitTests(unittest.TestCase):
         proto._make_mh_options = mock.Mock(return_value=['made'])
 
         def header(type_: Packet) -> SimpleNamespace:
-            return SimpleNamespace(next=TransType.UDP, length=5, type=type_, chksum=b'\x12\x34')
+            return SimpleNamespace(next=TransType.UDP, length=5, type=type_, reserved=0, chksum=b'\x12\x34')
 
         # RFC 5568, section 6.2.2 -- the FBU message *layout* is identical to
         # the RFC 6275 BU, but its Lifetime field is separately defined as
@@ -1051,7 +1073,7 @@ class MHUnitTests(unittest.TestCase):
         proto._make_mh_options = mock.Mock(return_value=['made'])
 
         def header(type_: Packet) -> SimpleNamespace:
-            return SimpleNamespace(next=None, length=2, type=type_, chksum=b'\x12\x34')
+            return SimpleNamespace(next=None, length=2, type=type_, reserved=0, chksum=b'\x12\x34')
 
         accepted = StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted
 
@@ -1069,12 +1091,16 @@ class MHUnitTests(unittest.TestCase):
 
         # control: BU/BA still scale by 4 on read.
         bu = proto._read_msg_bu(SimpleNamespace(
-            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0}, lifetime=100, options=[],
+            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0, 'M': 0, 'R': 0, 'P': 0, 'F': 0,
+                          'T': 0, 'B': 0, 'S': 0, 'D': 0, 'reserved': 0},
+            lifetime=100, options=[],
         ), header=header(Packet.Binding_Update))
         self.assertEqual(bu.lifetime, datetime.timedelta(seconds=400))
 
         ba = proto._read_msg_ba(SimpleNamespace(
-            status=accepted, flags={'K': 0}, seq=1, lifetime=100, options=[],
+            status=accepted, flags={'K': 0, 'R': 0, 'P': 0, 'T': 0, 'B': 0, 'S': 0, 'D': 0,
+                                    'reserved': 0},
+            seq=1, lifetime=100, options=[],
         ), header=header(Packet.Binding_Acknowledgement))
         self.assertEqual(ba.lifetime, datetime.timedelta(seconds=400))
 

@@ -1444,6 +1444,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
              type_default: 'Optional[int]' = None,
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
+             reserved: 'int' = 0,
              chksum: 'bytes' = b'',
              data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
              payload: 'ProtocolBase | Schema | bytes' = b'',
@@ -1459,6 +1460,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type_default: Default value for Mobility Header type field.
             type_namespace: Namespace of Mobility Header type field.
             type_reversed: Whether the bits of Mobility Header type field is reversed.
+            reserved: Reserved octet after the MH type.
             chksum: Checksum.
             data: Message data.
             payload: Payload of next layer protocol.
@@ -1504,6 +1506,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=next_val,
             length=(len(data_val) + 6) // 8 - 1,
             type=type_val,
+            reserved=reserved,
             chksum=chksum,
             data=data_val,
             payload=payload,
@@ -1618,6 +1621,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return {
             'next': data.next,
             'type': data.type,
+            'reserved': data.reserved,
             'chksum': data.chksum,
             'data': data,
             'payload': cls._make_payload(data),
@@ -1639,6 +1643,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             data=schema.data,
         )
@@ -1674,7 +1679,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
+            msg_reserved=schema.reserved,
             options=self._read_mh_options(schema.options)
         )
         return data
@@ -1713,6 +1720,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             cookie=schema.cookie,
             options=self._read_mh_options(schema.options)
@@ -1753,6 +1761,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             cookie=schema.cookie,
             options=self._read_mh_options(schema.options)
@@ -1797,6 +1806,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             nonce_index=schema.nonce_index,
             cookie=schema.cookie,
@@ -1843,6 +1853,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             nonce_index=schema.nonce_index,
             cookie=schema.cookie,
@@ -1871,6 +1882,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Later RFCs assign eight more of the flag bits, ``M``, ``R``, ``P``,
+        ``F``, ``T``, ``B``, ``S`` and ``D`` in that order (IANA *Binding
+        Update Flags*); the low four bits remain reserved.
+
         Args:
             schema: Parsed message type schema.
             header: Parsed MH header schema.
@@ -1883,12 +1898,22 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             ack=bool(schema.flags['A']),
             home=bool(schema.flags['H']),
             lla_compat=bool(schema.flags['L']),
             key_mngt=bool(schema.flags['K']),
+            map_reg=bool(schema.flags['M']),
+            mobile_router=bool(schema.flags['R']),
+            proxy_reg=bool(schema.flags['P']),
+            udp_encap=bool(schema.flags['F']),
+            tlv_format=bool(schema.flags['T']),
+            bulk_binding=bool(schema.flags['B']),
+            multicast=bool(schema.flags['S']),
+            dmm=bool(schema.flags['D']),
+            flags_reserved=schema.flags['reserved'],
             lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
             options=self._read_mh_options(schema.options),
         )
@@ -1914,6 +1939,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Later RFCs assign six more of the flag bits, ``R``, ``P``, ``T``,
+        ``B``, ``S`` and ``D`` in that order (IANA *Binding Acknowledgment
+        Flags*); the lowest bit remains reserved.
+
         Args:
             schema: Parsed message type schema.
             header: Parsed MH header schema.
@@ -1926,9 +1955,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             status=schema.status,
             key_mngt=bool(schema.flags['K']),
+            mobile_router=bool(schema.flags['R']),
+            proxy_reg=bool(schema.flags['P']),
+            tlv_format=bool(schema.flags['T']),
+            bulk_binding=bool(schema.flags['B']),
+            multicast=bool(schema.flags['S']),
+            dmm=bool(schema.flags['D']),
+            flags_reserved=schema.flags['reserved'],
             seq=schema.seq,
             lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
             options=self._read_mh_options(schema.options),
@@ -1972,6 +2009,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             status=schema.status,
             home=schema.home,
@@ -2019,6 +2057,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             ack=bool(schema.flags['A']),
@@ -2076,6 +2115,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             status=FastBindingAcknowledgmentStatus(schema.status),
             key_mngt=bool(schema.flags['K']),
@@ -2121,6 +2161,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             options=self._read_mh_options(schema.options),
         )
@@ -2164,6 +2205,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             data=schema.data,
         )
@@ -2207,6 +2249,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             assign=bool(schema.flags['S']),
@@ -2257,6 +2300,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             buffer=bool(schema.flags['U']),
@@ -2317,6 +2361,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             addresses=tuple(schema.addresses),
             options=self._read_mh_options(schema.options),
@@ -2361,6 +2406,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             unsolicited=bool(schema.flags['U']),
             response=bool(schema.flags['R']),
@@ -2428,6 +2474,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             br_type=schema.br_type,
             code=schema.code,
@@ -2477,6 +2524,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
@@ -2523,6 +2571,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             unsolicited=bool(schema.flags['U']),
@@ -2568,6 +2617,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             reason=schema.reason,
@@ -2610,6 +2660,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             status=schema.status,
@@ -2672,6 +2723,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             fb_type=schema.fb_type,
             seq=schema.seq,
@@ -2716,6 +2768,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             options=self._read_mh_options(schema.options),
@@ -2753,6 +2806,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next=header.next,
             length=self._mh_message_length(header.length),
             type=header.type,
+            reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
             info=bool(schema.flags['I']),
@@ -2899,7 +2953,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             which sizes both the length octet and the padding data from the
             option type [:rfc:`6275#section-6.2.5`]; ``clen`` is therefore
             always ``0`` here for a parsed ``Pad1``, and the check below only
-            guards a schema built by hand.
+            guards a schema built by hand. A ``PadN`` whose ``Option Length``
+            is ``0`` is a valid two-octet padding option
+            [:rfc:`6275#section-6.2.3`].
 
         """
         code, clen = schema.type, schema.length
@@ -2907,8 +2963,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if code not in (Enum_Option.Pad1, Enum_Option.PadN):
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         if code == Enum_Option.Pad1 and clen != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        if code == Enum_Option.PadN and clen == 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         if code == Enum_Option.Pad1:
@@ -3814,6 +3868,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_HandoffIndicatorOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             hi=schema.hi,
         )
         return data
@@ -4078,6 +4133,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length=prefix_length,
             address=schema.address,
             request_prefix=bool(schema.flags['P']),
+            reserved=schema.flags['reserved'],
         )
         return data
 
@@ -5132,6 +5188,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     type=code,
                     length=self._mh_option_length(net.length),
                     utf8=bool(net.flags['E']),
+                    reserved=net.flags['reserved'],
                     net_name=net.net_name,
                     ap_name=net.ap_name,
                 )  # type: Data_ANISuboption
@@ -6451,12 +6508,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_brr(self, message: 'Optional[Data_BindingRefreshRequestMessage]' = None, *,
+                      msg_reserved: 'int' = 0,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                       **kwargs: 'Any') -> 'Schema_BindingRefreshRequestMessage':
         """Make MH binding refresh request (BRR) message type.
 
         Args:
             message: Message data model.
+            msg_reserved: Reserved field before the mobility options.
             options: Mobility options.
             **kwargs: Arbitrary keyword arguments.
 
@@ -6465,11 +6524,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = message.msg_reserved
             options = message.options
         else:
             options = options or []
 
         return Schema_BindingRefreshRequestMessage(
+            reserved=msg_reserved,
             options=self._make_mh_options(options),
         )
 
@@ -6603,6 +6664,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      home: 'bool' = False,
                      lla_compat: 'bool' = False,
                      key_mngt: 'bool' = False,
+                     map_reg: 'bool' = False,
+                     mobile_router: 'bool' = False,
+                     proxy_reg: 'bool' = False,
+                     udp_encap: 'bool' = False,
+                     tlv_format: 'bool' = False,
+                     bulk_binding: 'bool' = False,
+                     multicast: 'bool' = False,
+                     dmm: 'bool' = False,
+                     flags_reserved: 'int' = 0,
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                      **kwargs: 'Any') -> 'Schema_BindingUpdateMessage':
@@ -6615,6 +6685,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             home: Home registration flag.
             lla_compat: LLA compatibility flag.
             key_mngt: Key management mobility option flag.
+            map_reg: MAP registration flag (``M``).
+            mobile_router: Mobile router flag (``R``).
+            proxy_reg: Proxy registration flag (``P``).
+            udp_encap: Forcing UDP encapsulation flag (``F``).
+            tlv_format: TLV-header format flag (``T``).
+            bulk_binding: Bulk binding update flag (``B``).
+            multicast: Multicast signaling flag (``S``).
+            dmm: DMM flag (``D``).
+            flags_reserved: Reserved bits, i.e. the low four bits of the flags
+                word.
             lifetime: Lifetime in seconds or timedelta.
             options: Mobility options.
             **kwargs: Arbitrary keyword arguments.
@@ -6629,6 +6709,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             home = message.home
             lla_compat = message.lla_compat
             key_mngt = message.key_mngt
+            map_reg = message.map_reg
+            mobile_router = message.mobile_router
+            proxy_reg = message.proxy_reg
+            udp_encap = message.udp_encap
+            tlv_format = message.tlv_format
+            bulk_binding = message.bulk_binding
+            multicast = message.multicast
+            dmm = message.dmm
+            flags_reserved = message.flags_reserved
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
         else:
@@ -6642,6 +6731,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'H': home,
                 'L': lla_compat,
                 'K': key_mngt,
+                'M': map_reg,
+                'R': mobile_router,
+                'P': proxy_reg,
+                'F': udp_encap,
+                'T': tlv_format,
+                'B': bulk_binding,
+                'S': multicast,
+                'D': dmm,
+                'reserved': flags_reserved,
             },
             lifetime=math.ceil(lifetime_val / 4),
             options=self._make_mh_options(options),
@@ -6653,6 +6751,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                      status_reversed: 'bool' = False,
                      key_mngt: 'bool' = False,
+                     mobile_router: 'bool' = False,
+                     proxy_reg: 'bool' = False,
+                     tlv_format: 'bool' = False,
+                     bulk_binding: 'bool' = False,
+                     multicast: 'bool' = False,
+                     dmm: 'bool' = False,
+                     flags_reserved: 'int' = 0,
                      seq: 'int' = 0,
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
@@ -6666,6 +6771,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_namespace: Status code namespace.
             status_reversed: Reverse status code namespace.
             key_mngt: Key management mobility option flag.
+            mobile_router: Mobile router flag (``R``).
+            proxy_reg: Proxy registration flag (``P``).
+            tlv_format: TLV-header format flag (``T``).
+            bulk_binding: Bulk binding update flag (``B``).
+            multicast: Multicast signaling flag (``S``).
+            dmm: DMM flag (``D``).
+            flags_reserved: Reserved bit, i.e. the lowest bit of the flags
+                octet.
             seq: Sequence number.
             lifetime: Lifetime in seconds or timedelta.
             options: Mobility options.
@@ -6678,6 +6791,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if message is not None:
             status_val = message.status
             key_mngt = message.key_mngt
+            mobile_router = message.mobile_router
+            proxy_reg = message.proxy_reg
+            tlv_format = message.tlv_format
+            bulk_binding = message.bulk_binding
+            multicast = message.multicast
+            dmm = message.dmm
+            flags_reserved = message.flags_reserved
             seq = message.seq
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
@@ -6691,6 +6811,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status=status_val,
             flags={
                 'K': key_mngt,
+                'R': mobile_router,
+                'P': proxy_reg,
+                'T': tlv_format,
+                'B': bulk_binding,
+                'S': multicast,
+                'D': dmm,
+                'reserved': flags_reserved,
             },
             seq=seq,
             lifetime=math.ceil(lifetime_val / 4),
@@ -7625,6 +7752,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             for a ``Pad1``. Copying one into the other unconverted would make a
             re-made parsed ``PadN`` come back two octets too long.
 
+            A ``PadN`` with ``length`` ``0`` is a valid two-octet option
+            [:rfc:`6275#section-6.2.3`] and is kept as one.
+
         """
         if option is not None:
             length = 0 if option.type == Enum_Option.Pad1 else option.length - 2
@@ -7633,10 +7763,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
             warn(f'{self.alias}: [OptNo {type}] invalid format', ProtocolWarning)
             type = Enum_Option.PadN  # type: ignore[assignment]
-        if type == Enum_Option.PadN and length == 0:
-            # raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
-            warn(f'{self.alias}: [OptNo {type}] invalid format', ProtocolWarning)
-            type = Enum_Option.Pad1  # type: ignore[assignment]
 
         return Schema_PadOption(
             type=type,
@@ -8522,6 +8648,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      hi_default: 'Optional[int]' = None,
                      hi_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                      hi_reversed: 'bool' = False,
+                     reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HandoffIndicatorOption':
         """Make MH handoff indicator option.
 
@@ -8532,6 +8659,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             hi_default: Default handoff indicator.
             hi_namespace: Handoff indicator namespace.
             hi_reversed: Reverse handoff indicator namespace.
+            reserved: Reserved octet before the handoff indicator.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8540,6 +8668,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             hi_val = option.hi  # type: Enum_HandoffType
+            reserved = option.reserved
         else:
             hi_val = self._make_index(hi, hi_default, namespace=hi_namespace,  # type: ignore[assignment]
                                       reversed=hi_reversed, pack=False)
@@ -8547,6 +8676,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_HandoffIndicatorOption(
             type=type,
             length=2,
+            reserved=reserved,
             hi=hi_val,
         )
 
@@ -8701,6 +8831,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                            prefix_length: 'int' = 32,
                            address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
                            request_prefix: 'bool' = False,
+                           reserved: 'int' = 0,
                            **kwargs: 'Any') -> 'Schema_IPv4HomeAddressOption':
         """Make MH IPv4 home address option.
 
@@ -8710,6 +8841,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length: Prefix length; ``32`` for a single address.
             address: IPv4 home address.
             request_prefix: Mobile network prefix request flag.
+            reserved: Reserved bits, i.e. the nine bits after the ``P`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8720,6 +8852,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             address = option.address
             request_prefix = option.request_prefix
+            reserved = option.reserved
 
         if prefix_length == 0 or prefix_length > 32:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
@@ -8730,6 +8863,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'prefix_length': prefix_length,
                 'P': int(request_prefix),
+                'reserved': reserved,
             },
             address=address,
         )
@@ -9669,13 +9803,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             if option is not None:
                 net = cast('Data_ANINetworkIdentifierSuboption', option)
                 utf8, net_name, ap_name = net.utf8, net.net_name, net.ap_name
+                reserved = net.reserved
             else:
                 utf8 = cast('bool', kwargs.get('utf8', False))
+                reserved = cast('int', kwargs.get('reserved', 0))
                 net_name = cast('bytes', kwargs.get('net_name', b''))
                 ap_name = cast('bytes', kwargs.get('ap_name', b''))
             return Schema_ANINetworkIdentifierSuboption(
                 type=code, length=3 + len(net_name) + len(ap_name),
-                flags={'E': int(utf8)}, net_name_len=len(net_name), net_name=net_name,
+                flags={'E': int(utf8), 'reserved': reserved}, net_name_len=len(net_name), net_name=net_name,
                 ap_name_len=len(ap_name), ap_name=ap_name)
 
         if code == Enum_ANISuboption.Geo_Location:
