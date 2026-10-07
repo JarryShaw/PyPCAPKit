@@ -1,6 +1,10 @@
 Testing
 =======
 
+What the suite has to prove, and what a change has to bring to it, is ruled on
+:ref:`test-coverage`. Check a change module by module as that page describes; the
+``make`` targets below run a whole tier.
+
 Running the Tests
 -----------------
 
