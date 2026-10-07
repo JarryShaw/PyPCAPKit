@@ -5,6 +5,7 @@ import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NO_VALUE, FieldBase
+from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -716,6 +717,15 @@ class SchemaField(FieldBase[_TS]):
 
         if isinstance(value, bytes):
             return value
+
+        # NOTE: :meth:`Schema.to_dict <pcapkit.protocols.schema.schema.Schema.to_dict>`
+        # flattens a nested schema into a plain mapping, so a schema rebuilt
+        # through ``from_dict`` hands that mapping back here; turn it into the
+        # declared schema before packing it.
+        from pcapkit.protocols.schema.schema import \
+            Schema  # pylint: disable=import-outside-top-level
+        if isinstance(value, Mapping) and not isinstance(value, Schema):
+            value = self._schema.from_dict(value)
 
         packet.update(self._packet)
         return value.pack(nested_packet_context(packet))

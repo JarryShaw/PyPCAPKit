@@ -59,7 +59,10 @@ class InfoClassTests(unittest.TestCase):
         bag = Bag({'items': 'conflict', 'visible': 1, 'hidden': 2}, extra=3)
         self.assertEqual(bag['items'], 'conflict')
         self.assertEqual(list(bag), ['items', 'visible', 'extra'])
-        self.assertEqual(len(bag), 6)
+        # NOTE: GitHub issue #1296 -- ``len`` counts exactly the keys
+        # iteration yields, so the ``__excluded__`` ``hidden`` key and the
+        # internal bookkeeping attributes are not counted.
+        self.assertEqual(len(bag), 3)
         self.assertEqual(str(bag), 'Bag(items=conflict, visible=1, extra=3)')
         self.assertIn('items=', repr(bag))
         self.assertEqual(bag.to_dict(), {'items': 'conflict', 'visible': 1, 'extra': 3})
