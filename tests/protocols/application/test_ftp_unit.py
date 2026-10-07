@@ -52,12 +52,14 @@ class FTPUnitTests(unittest.TestCase):
         self.assertEqual(request.cmmd, Command.USER)
         self.assertEqual(request.args, 'anonymous')
 
+        # GitHub issue #1240: the text of a multi-line reply follows the
+        # hyphen immediately (:rfc:`959#section-4`), so a SP there is text.
         ftp.__header__ = SimpleNamespace(data=b'220- Ready\r\n')
         response = ftp.read(length=12)
         self.assertEqual(response.type, Type.RESPONSE)
         self.assertEqual(response.code, ReturnCode.CODE_220)
         self.assertTrue(response.more)
-        self.assertEqual(response.args, 'Ready')
+        self.assertEqual(response.args, ' Ready')
 
         ftp.__header__ = SimpleNamespace(data=b'!!\r\n')
         with self.assertRaises(ProtocolError):
@@ -176,11 +178,13 @@ class FTPUnitTests(unittest.TestCase):
         response = ftp.make(code=ReturnCode.CODE_220, args='Ready', more=True)
         response_bytes = ftp.make(code=b'230', args=b'Logged in')
 
-        self.assertEqual(request.data, b'USER anonymous')
-        self.assertEqual(request_bytes.data, b'NOOP ')
-        self.assertEqual(request_value.data, b'PWD ')
-        self.assertEqual(response.data, b'220- Ready')
-        self.assertEqual(response_bytes.data, b'230 Logged in')
+        # GitHub issues #1238, #1239 and #1240: every line ends in CRLF, no
+        # separator is written without arguments, and none after a hyphen.
+        self.assertEqual(request.data, b'USER anonymous\r\n')
+        self.assertEqual(request_bytes.data, b'NOOP\r\n')
+        self.assertEqual(request_value.data, b'PWD\r\n')
+        self.assertEqual(response.data, b'220-Ready\r\n')
+        self.assertEqual(response_bytes.data, b'230 Logged in\r\n')
 
     def test_ftp_make_rejects_ambiguous_packet_type(self) -> None:
         from pcapkit.protocols.application.ftp import FTP
@@ -198,16 +202,18 @@ class FTPUnitTests(unittest.TestCase):
         from pcapkit.const.ftp.return_code import ReturnCode
         from pcapkit.protocols.application.ftp import FTP
 
-        request = DummyData(cmmd=Command.USER, code=None, args='anonymous', more=False)
-        response = DummyData(cmmd=None, code=ReturnCode.CODE_220, args='Ready', more=True)
+        request = DummyData(cmmd=Command.USER, code=None, args='anonymous', more=False, charset=None)
+        response = DummyData(cmmd=None, code=ReturnCode.CODE_220, args='Ready', more=True,
+                             charset='latin-1')
 
         self.assertEqual(
             FTP._make_data(request),
-            {'cmmd': Command.USER, 'code': None, 'args': 'anonymous', 'more': False},
+            {'cmmd': Command.USER, 'code': None, 'args': 'anonymous', 'more': False, 'charset': None},
         )
         self.assertEqual(
             FTP._make_data(response),
-            {'cmmd': None, 'code': ReturnCode.CODE_220, 'args': 'Ready', 'more': True},
+            {'cmmd': None, 'code': ReturnCode.CODE_220, 'args': 'Ready', 'more': True,
+             'charset': 'latin-1'},
         )
 
     def test_ftp_data_channel_name_is_stable(self) -> None:

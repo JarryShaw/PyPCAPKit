@@ -40,6 +40,7 @@ from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
 from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
+from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -259,6 +260,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
              message: 'Optional[str | bytes]' = None,
              headers: 'Optional[OrderedMultiDict[str, str]]' = None,
              body: 'bytes' = b'',
+             charset: 'Optional[str]' = None,
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
 
@@ -273,6 +275,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             message: HTTP status message.
             headers: HTTP headers.
             body: HTTP body.
+            charset: Encoding for a :obj:`str` request URI or status message,
+                **UTF-8** if not given.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -292,7 +296,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 meth = method.encode()
             else:
                 meth = method.value.encode()
-            uri_val = uri.encode() if isinstance(uri, str) else uri
+            uri_val = uri.encode(charset or 'utf-8') if isinstance(uri, str) else uri
 
             header_line = b'%s %s HTTP/%s\r\n' % (meth, uri_val, version)
         elif method is None and status is not None:
@@ -303,7 +307,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             if message is None:
                 msg = getattr(status, 'message', None) or getattr(status_code, 'message', b'') or b''
             else:
-                msg = message.encode() if isinstance(message, str) else message
+                msg = message.encode(charset or 'utf-8') if isinstance(message, str) else message
             if isinstance(msg, str):
                 msg = msg.encode()
 
@@ -357,7 +361,35 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             'message': getattr(data.receipt, 'message', None),
             'headers': data.header,
             'body': b'' if data.body is None else data.body,
+            'charset': getattr(data.receipt, 'charset', None),
         }
+
+    def _decode_text(self, text: 'bytes') -> 'tuple[str, Optional[str]]':
+        """Decode start-line text, recording how to encode it back.
+
+        The text is decoded by :meth:`self.decode
+        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
+        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by
+        default -- the detected charset is returned with it, or ``'latin-1'``
+        (decoding again) if that does not reproduce ``text`` either, so that the
+        original octets survive a rebuild.
+
+        Args:
+            text: Raw request URI or status message.
+
+        Returns:
+            The decoded text and the charset to encode it with, the latter
+            :obj:`None` for UTF-8.
+
+        """
+        value = self.decode(text)
+        for charset in (None, detect(text)):
+            try:
+                if value.encode(charset or 'utf-8') == text:
+                    return value, charset
+            except (LookupError, UnicodeError):
+                pass
+        return text.decode('latin-1'), 'latin-1'
 
     def _read_http_header(self, header: 'bytes') -> 'tuple[Data_Header, OrderedMultiDict[str, str]]':
         """Read HTTP/1.* header.
@@ -448,18 +480,22 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         match3 = re.match(_RE_VERSION, para1)
         match4 = re.match(_RE_STATUS, para2)
         if match1 and match2:
+            uri, charset = self._decode_text(para2)
             header_line = Data_RequestHeader(
                 type=Type.REQUEST,
                 method=Enum_Method.get(self.decode(match1.group('method'))),
-                uri=self.decode(para2),
+                uri=uri,
                 version=self.decode(match2.group('version')),
+                charset=charset,
             )
         elif match3 and match4:
+            message, charset = self._decode_text(para3)
             header_line = Data_ResponseHeader(
                 type=Type.RESPONSE,
                 version=self.decode(match3.group('version')),
                 status=Enum_StatusCode.get(int(para2)),
-                message=self.decode(para3),
+                message=message,
+                charset=charset,
             )
         else:
             raise ProtocolError('HTTP: invalid format')

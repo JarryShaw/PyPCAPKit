@@ -26,6 +26,7 @@ from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
+from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
@@ -36,9 +37,16 @@ if TYPE_CHECKING:
 
 __all__ = ['FTP', 'FTP_DATA']
 
-# regex for FTP
-FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})( +(?P<args>.*))?\r\n$', re.I)
-FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})(?P<more>\-)?( +(?P<args>.*))?\r\n$', re.I)
+# regex for FTP, per :rfc:`959#section-4` (replies) and :rfc:`959#section-5`
+# (commands): a command is ``<command> [<SP> <argument>] <CRLF>``, a reply line is
+# ``<code> [<SP> <text>] <CRLF>``, and the first line of a multi-line reply is
+# ``<code>-<text> <CRLF>`` with the text following the hyphen immediately. Only
+# the one separating SP is syntax; anything after it is the argument verbatim, so
+# that ``make`` writes back exactly the line that was read. ``\Z`` rather than
+# ``$``, which would also match before a trailing ``\n`` left outside the match.
+FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})(?: (?P<args>.*))?\r\n\Z', re.I)
+FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})'
+                          rb'(?:(?P<more>-)(?P<text>.*)|(?: (?P<args>.*))?)\r\n\Z', re.I)
 
 
 class Type(EnumLookup, StrEnum):
@@ -107,26 +115,28 @@ class FTP(Application[Data_FTP, Schema_FTP],
             args = match.group('args')
 
             cmmd_val = Enum_Command.get(cmmd)
-            args_val = self.decode(args)
+            args_val, charset = self._decode_args(args)
 
             ftp = Data_Request(
                 type=Type.REQUEST,
                 cmmd=cmmd_val,
                 args=args_val,
+                charset=charset,
             )  # type: Data_FTP
         elif (match := FTP_RESPONSE.match(data)) is not None:
             code = int(match.group('code'))
             more = bool(match.group('more'))
-            args = match.group('args')
+            args = match.group('text') if more else match.group('args')
 
             code_val = Enum_ReturnCode.get(code)
-            args_val = self.decode(args)
+            args_val, charset = self._decode_args(args)
 
             ftp = Data_Response(
                 type=Type.RESPONSE,
                 code=code_val,
                 more=more,
                 args=args_val,
+                charset=charset,
             )
         else:
             raise ProtocolError('FTP: invalid packet format')
@@ -137,14 +147,21 @@ class FTP(Application[Data_FTP, Schema_FTP],
              code: 'Optional[Enum_ReturnCode | int | str | bytes]' = None,
              args: 'Optional[str | bytes]' = None,
              more: 'bool' = False,
+             charset: 'Optional[str]' = None,
              **kwargs: 'Any') -> 'Schema_FTP':
         """Make (construct) packet data.
+
+        The line is terminated with CRLF. Arguments of :obj:`None` write no
+        argument and no separator; otherwise a single SP separates them from
+        the command or code, except after the hyphen of a multi-line reply,
+        which the text follows immediately (:rfc:`959#section-4`).
 
         Args:
             cmmd: FTP command.
             code: FTP status code.
             args: Optional FTP command arguments and/or status messages.
             more: More status messages to follow for response packets.
+            charset: Encoding for :obj:`str` arguments, **UTF-8** if not given.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -173,10 +190,12 @@ class FTP(Application[Data_FTP, Schema_FTP],
         elif isinstance(args, bytes):
             suffix = args
         else:
-            suffix = args.encode()
+            suffix = args.encode(charset or 'utf-8')
 
+        # the separating SP, absent with no arguments and after a hyphen
+        sep = b'' if args is None or mf else b' '
         return Schema_FTP(
-            data=b'%s%s %s' % (prefix, mf, suffix),
+            data=b'%s%s%s%s\r\n' % (prefix, mf, sep, suffix),
         )
 
     ##########################################################################
@@ -199,7 +218,37 @@ class FTP(Application[Data_FTP, Schema_FTP],
             'code': getattr(data, 'code', None),
             'args': getattr(data, 'args', None),
             'more': getattr(data, 'more', False),
+            'charset': getattr(data, 'charset', None),
         }
+
+    def _decode_args(self, args: 'Optional[bytes]') -> 'tuple[Optional[str], Optional[str]]':
+        """Decode arguments, recording how to encode them back.
+
+        The arguments are decoded by :meth:`self.decode
+        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
+        not encode back to ``args`` as UTF-8 -- which :meth:`make` uses by
+        default -- the detected charset is returned with it, or ``'latin-1'``
+        (decoding again) if that does not reproduce ``args`` either, so that the
+        original octets survive a rebuild.
+
+        Args:
+            args: Raw arguments, :obj:`None` if the line carries none.
+
+        Returns:
+            The decoded arguments and the charset to encode them with, the
+            latter :obj:`None` for UTF-8.
+
+        """
+        if args is None:
+            return None, None
+        value = self.decode(args)
+        for charset in (None, detect(args)):
+            try:
+                if value.encode(charset or 'utf-8') == args:
+                    return value, charset
+            except (LookupError, UnicodeError):
+                pass
+        return args.decode('latin-1'), 'latin-1'
 
 
 class FTP_DATA(Raw):
