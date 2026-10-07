@@ -475,9 +475,11 @@ class NGAPUnitTests(unittest.TestCase):
                 except ProtocolError as exc:
                     self.assertIn('NGAP:', str(exc))
                 else:
-                    # Decoding a prefix or ignoring a suffix is legitimate PER
-                    # behaviour; what matters is that it did not raise something
-                    # raw. Assert it produced a usable model.
+                    # Decoding a prefix is legitimate PER behaviour; what
+                    # matters is that it did not raise something raw. A suffix
+                    # is not: the chunk carries exactly one NGAP-PDU, so octets
+                    # after it are refused rather than dropped (#1252).
+                    self.assertNotEqual(label, 'trailing garbage')
                     self.assertIsNotNone(info.message)
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')

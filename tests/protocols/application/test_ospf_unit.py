@@ -141,7 +141,10 @@ class OSPFUnitTests(unittest.TestCase):
         )
         self.assertEqual(crypto_schema_from_data.auth_data.key_id, 2)
         self.assertIs(maker._make_encrypt_auth(crypto_schema), crypto_schema)
-        self.assertEqual(maker._make_encrypt_auth(b'\x02' * 8), b'\x02' * 8)
+        crypto_schema_from_bytes = maker._make_encrypt_auth(b'\x00\x00\x02\x14' + b'\x00\x00\x00\x64')
+        self.assertIsInstance(crypto_schema_from_bytes, SchemaCryptoAuth)
+        self.assertEqual((crypto_schema_from_bytes.key_id, crypto_schema_from_bytes.len,
+                          crypto_schema_from_bytes.seq), (2, 20, 100))
         self.assertEqual(maker._read_encrypt_auth(crypto_schema).len, 16)
         self.assertEqual(maker._read_id_numbers(b'\xc0\x00\x02\x04'), ip_address('192.0.2.4'))
         self.assertEqual(maker._make_id_numbers('192.0.2.5'), b'\xc0\x00\x02\x05')

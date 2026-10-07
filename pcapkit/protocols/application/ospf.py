@@ -197,6 +197,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
              type_default: 'Optional[int]' = None,
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
+             packet_length: 'Optional[int]' = None,
              router_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              area_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              checksum: 'bytes' = b'\x00\x00',
@@ -215,6 +216,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             type_default: Default value for ``type`` if not specified.
             type_namespace: Namespace for ``type``.
             type_reversed: Reverse namespace for ``type``.
+            packet_length: Packet length (header included). If not given, it is
+                computed as 24 plus the length of ``payload``. Give it
+                explicitly when ``payload`` carries octets outside the OSPF
+                packet, such as the message digest appended under
+                cryptographic authentication (:rfc:`2328#appendix-D.4.3`),
+                which Packet Length does not count.
             router_id: Router ID.
             area_id: Area ID.
             checksum: Checksum.
@@ -229,23 +236,37 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``auth_data`` is of an invalid type, or is
+                :obj:`bytes` that are not exactly 8 octets long; or if
+                ``packet_length`` is not an :obj:`int` in ``0..65535``.
+
         """
         type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
         auth_type_ = self._make_index(auth_type, auth_type_default, namespace=auth_type_namespace,
                                       reversed=auth_type_reversed, pack=False)
 
+        data: 'bytes | Schema_CryptographicAuthentication'
         if auth_type_ == Enum_Authentication.Cryptographic_authentication:
             data = self._make_encrypt_auth(auth_data)
         else:
             if not isinstance(auth_data, bytes):
                 raise ProtocolError(f'OSPF: invalid type for authentication data: {auth_data!r}')
+            if len(auth_data) != 8:
+                raise ProtocolError(f'OSPF: authentication data must be 8 octets: {auth_data!r}')
             data = auth_data
+
+        if packet_length is None:
+            packet_length = 24 + len(payload)
+        elif (not isinstance(packet_length, int) or isinstance(packet_length, bool)
+              or not 0 <= packet_length <= 0xFFFF):
+            raise ProtocolError(f'OSPF: invalid packet length: {packet_length!r}')
 
         return Schema_OSPF(
             version=version,
             type=type_,  # type: ignore[arg-type]
-            length=24 + len(payload),
+            length=packet_length,
             router_id=router_id,
             area_id=area_id,
             checksum=checksum,
@@ -292,6 +313,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         return {
             'version': data.version,
             'type': data.type,
+            'packet_length': data.get('len'),
             'router_id': data.router_id,
             'area_id': data.area_id,
             'checksum': data.chksum,
@@ -378,18 +400,26 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
     def _make_encrypt_auth(self,
                            auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'  # pylint: disable=line-too-long
-                           ) -> 'bytes | Schema_CryptographicAuthentication':
+                           ) -> 'Schema_CryptographicAuthentication':
         """Make Authentication field when Cryptographic Authentication is employed.
 
         Args:
             auth_data: Authentication data.
 
         Returns:
-            Authentication bytes.
+            Authentication schema.
+
+        Raises:
+            ProtocolError: If ``auth_data`` is of an invalid type, or is
+                :obj:`bytes` that are not exactly 8 octets long.
 
         """
-        if isinstance(auth_data, (Schema_CryptographicAuthentication, bytes)):
+        if isinstance(auth_data, Schema_CryptographicAuthentication):
             return auth_data
+        if isinstance(auth_data, bytes):
+            if len(auth_data) != 8:
+                raise ProtocolError(f'OSPF: authentication data must be 8 octets: {auth_data!r}')
+            return Schema_CryptographicAuthentication.unpack(auth_data)  # type: ignore[call-arg,misc]
         if isinstance(auth_data, Data_CryptographicAuthentication):
             return Schema_CryptographicAuthentication(
                 key_id=auth_data.key_id,
