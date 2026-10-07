@@ -394,9 +394,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         #
         # Identified means *committed*: a malformed HTTP/1 message is reported as
         # such instead of being handed to the HTTP/2 arm, which accepts any
-        # self-consistent buffer of nine octets or more. Retrying an identified
-        # HTTP/1 payload as HTTP/2 is how HTTP/1 traffic acquires a confident
-        # HTTP/2 mislabel.
+        # self-consistent buffer of nine octets or more whose header passes
+        # :func:`_test_http2_frame`. Retrying an identified HTTP/1 payload as
+        # HTTP/2 is how HTTP/1 traffic acquires a confident HTTP/2 mislabel.
         #
         # Nothing is suppressed on this arm, deliberately: it is not a candidate
         # to be declined, so there is nothing to decline *to*, and
@@ -430,12 +430,13 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*
         # :exc:`struct.error`, so suppressing it on a non-final arm swallows
         # pcapkit's own signal and hands the payload to the arm below, which
-        # accepts anything of at least nine octets. With a fault injected at arm
-        # 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP
-        # port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2
-        # mislabel of HTTP/1 traffic is worse than letting the error escape to
-        # ``beholder``, which turns it into ``Raw``; it would also erase
-        # ``StructError.eof``, which ``NoPayload`` handling reads.
+        # accepts any self-consistent buffer whose header passes
+        # :func:`_test_http2_frame`. With a fault injected at arm 1 and without
+        # that test, a *valid* HTTP/1.1 request came back ``version='2'``, and
+        # over UDP port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident
+        # HTTP/2 mislabel of HTTP/1 traffic is worse than letting the error
+        # escape to ``beholder``, which turns it into ``Raw``; it would also
+        # erase ``StructError.eof``, which ``NoPayload`` handling reads.
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._data, length, **kwargs)
 
