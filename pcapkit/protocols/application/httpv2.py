@@ -38,6 +38,7 @@ from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as Data_ContinuationFrameFlags
 from pcapkit.protocols.data.application.httpv2 import DataFrame as Data_DataFrame
 from pcapkit.protocols.data.application.httpv2 import DataFrameFlags as Data_DataFrameFlags
+from pcapkit.protocols.data.application.httpv2 import Flags as Data_Flags
 from pcapkit.protocols.data.application.httpv2 import GoawayFrame as Data_GoawayFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrame as Data_HeadersFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as Data_HeadersFrameFlags
@@ -48,6 +49,7 @@ from pcapkit.protocols.data.application.httpv2 import PushPromiseFrame as Data_P
 from pcapkit.protocols.data.application.httpv2 import \
     PushPromiseFrameFlags as Data_PushPromiseFrameFlags
 from pcapkit.protocols.data.application.httpv2 import RSTStreamFrame as Data_RSTStreamFrame
+from pcapkit.protocols.data.application.httpv2 import Settings as Data_Settings
 from pcapkit.protocols.data.application.httpv2 import SettingsFrame as Data_SettingsFrame
 from pcapkit.protocols.data.application.httpv2 import SettingsFrameFlags as Data_SettingsFrameFlags
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as Data_UnassignedFrame
@@ -79,6 +81,8 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import ProtocolBase
 
     Flags = Schema_FrameType.Flags
 
@@ -308,7 +312,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             meth = name[0]
         http = meth(schema.frame, header=schema)
 
-        return http
+        # The frame ends at its declared Length; whatever follows it in the
+        # buffer (e.g. the next frame) is the undissected remainder.
+        return self._decode_next_layer(http, -1, length - 9 - schema.length)
 
     def make(self,  # type: ignore[override]
              type: 'Enum_Frame | StdlibEnum | AenumEnum | str | int' = Enum_Frame.DATA,
@@ -316,8 +322,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              flags: 'Flags' = 0,  # type: ignore[assignment]
+             reserved: 'int' = 0,
              sid: 'int' = 0,
              frame: 'bytes | Data_HTTP | Schema_FrameType | dict[str, Any]' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
 
@@ -326,9 +334,12 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             type_default: Default frame type.
             type_namespace: Namespace of frame type.
             type_reversed: Whether to reverse the namespace.
-            flags: Flags of HTTP/2 frame.
+            flags: Flags of HTTP/2 frame, combined with those the frame
+                constructor derives from ``frame``.
+            reserved: Reserved bit of the frame header.
             sid: Stream ID of HTTP/2 frame.
             frame: Frame data of HTTP/2 frame.
+            payload: Octets after the frame, e.g. the next frame.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -351,9 +362,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 meth = name[1]
 
             if isinstance(frame, dict):
-                frame_val, flags = meth(**frame)
+                frame_val, frame_flags = meth(**frame)
             else:
-                frame_val, flags = meth(frame)
+                frame_val, frame_flags = meth(frame)
+            flags = cast('Flags', int(flags) | int(frame_flags))
         elif isinstance(frame, Schema):
             frame_val = frame
         else:
@@ -370,10 +382,33 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             type=type_val,
             flags=flags_val,  # type: ignore[arg-type]
             stream={
+                'reserved': reserved,
                 'sid': sid,
             },
             frame=frame_val,
+            payload=payload,
         )
+
+    def pack(self, **kwargs: 'Any') -> 'bytes':
+        """Pack (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Notes:
+            :meth:`make` takes the frame payload as raw octets or as a built
+            frame schema as well, and neither carries what the frame readers
+            need, e.g. ``__flags__``. So the header :meth:`make` returns is
+            dropped once packed, and :meth:`unpack` parses the packed octets
+            back with the frame type's own schema.
+
+        """
+        data = super().pack(**kwargs)
+        self.__header__ = None  # type: ignore[assignment]
+        return data
 
     @staticmethod
     def _make_http_length(frame: 'bytes | Schema_FrameType', flags: 'Flags') -> 'int':
@@ -390,12 +425,12 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if isinstance(frame, Schema_UnassignedFrame):
             return len(frame.data)
         if isinstance(frame, Schema_DataFrame):
-            pad_len = frame.pad_len if flags_int & int(Schema_DataFrame.Flags.PADDED) else 0
-            return len(frame.data) + (pad_len + 1 if pad_len else 0)
+            padded = flags_int & int(Schema_DataFrame.Flags.PADDED)
+            return len(frame.data) + ((frame.pad_len or 0) + 1 if padded else 0)
         if isinstance(frame, Schema_HeadersFrame):
-            pad_len = frame.pad_len if flags_int & int(Schema_HeadersFrame.Flags.PADDED) else 0
+            padded = flags_int & int(Schema_HeadersFrame.Flags.PADDED)
             priority_len = 5 if flags_int & int(Schema_HeadersFrame.Flags.PRIORITY) else 0
-            return len(frame.fragment) + priority_len + (pad_len + 1 if pad_len else 0)
+            return len(frame.fragment) + priority_len + ((frame.pad_len or 0) + 1 if padded else 0)
         if isinstance(frame, Schema_PriorityFrame):
             return 5
         if isinstance(frame, Schema_RSTStreamFrame):
@@ -406,8 +441,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 return len(settings)
             return len(frame.settings) * 6
         if isinstance(frame, Schema_PushPromiseFrame):
-            pad_len = frame.pad_len if flags_int & int(Schema_PushPromiseFrame.Flags.PADDED) else 0
-            return len(frame.fragment) + 4 + (pad_len + 1 if pad_len else 0)
+            padded = flags_int & int(Schema_PushPromiseFrame.Flags.PADDED)
+            return len(frame.fragment) + 4 + ((frame.pad_len or 0) + 1 if padded else 0)
         if isinstance(frame, Schema_PingFrame):
             return 8
         if isinstance(frame, Schema_GoawayFrame):
@@ -471,9 +506,28 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         return {
             'type': data.type,
             'flags': data.flags.__value__ if data.flags is not None else 0,
+            'reserved': data.reserved,
             'sid': data.sid,
             'frame': data,
+            'payload': cls._make_payload(data),
         }
+
+    @staticmethod
+    def _read_http_flags(schema: 'Schema_FrameType') -> 'Data_Flags':
+        """Read the flags of an HTTP/2 frame type that defines none.
+
+        Args:
+            schema: Parsed frame schema.
+
+        Returns:
+            Flags with the raw flags octet as ``__value__``.
+
+        """
+        flags = Data_Flags()
+        flags.__update__({
+            '__value__': schema.__flags__,
+        })
+        return flags
 
     def _read_http_none(self, schema: 'Schema_UnassignedFrame', *,
                         header: 'Schema_HTTP') -> 'Data_UnassignedFrame':
@@ -487,14 +541,15 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             Parsed packet data.
 
         """
-        if any(header.flags):
+        if any(header.flags.values()):
             #raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
             warn(f'HTTP/2: [Type {header.type}] invalid format', ProtocolWarning)
 
         data = Data_UnassignedFrame(
             length=header.length,
             type=header.type,
-            flags=None,
+            flags=self._read_http_flags(schema),
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             data=schema.data,
         )
@@ -543,6 +598,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             type=header.type,
             flags=flag,
             pad_len=schema.pad_len if flag.PADDED else 0,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             data=schema.data,
         )
@@ -597,6 +653,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             type=header.type,
             flags=flag,
             pad_len=schema.pad_len if flag.PADDED else 0,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             excl_dependency=bool(schema.stream_dep['exclusive']) if flag.PRIORITY else False,
             stream_dependency=schema.stream_dep['sid'] if flag.PRIORITY else 0,
@@ -642,7 +699,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         data = Data_PriorityFrame(
             length=header.length,
             type=header.type,
-            flags=None,
+            flags=self._read_http_flags(schema),
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             excl_dependency=bool(schema.stream['exclusive']),
             stream_dependency=schema.stream['sid'],
@@ -685,7 +743,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         data = Data_RSTStreamFrame(
             length=header.length,
             type=header.type,
-            flags=None,
+            flags=self._read_http_flags(schema),
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             error=schema.error,
         )
@@ -736,14 +795,18 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if flag.ACK and header.length != 0:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
-        sets = OrderedMultiDict()  # type: OrderedMultiDict[Enum_Setting, int]
+        sets = Data_Settings()
+        # ``add`` rather than item assignment: an identifier may repeat, and
+        # the values apply in order (:rfc:`9113#section-6.5.3`). ``Settings``
+        # keeps every entry, and answers an index with the last value.
         for setting in schema.settings:
-            sets[setting.id] = setting.value
+            sets.add(setting.id, setting.value)
 
         data = Data_SettingsFrame(
             length=header.length,
             type=header.type,
             flags=flag,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             settings=sets,
         )
@@ -799,8 +862,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             length=header.length,
             type=header.type,
             flags=flag,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             pad_len=schema.pad_len if flag.PADDED else 0,
+            promised_reserved=schema.stream['reserved'],
             promised_sid=schema.stream['sid'],
             fragment=schema.fragment,
         )
@@ -852,6 +917,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             length=header.length,
             type=header.type,
             flags=flag,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             data=schema.data,
         )
@@ -890,8 +956,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         data = Data_GoawayFrame(
             length=header.length,
             type=header.type,
-            flags=None,
+            flags=self._read_http_flags(schema),
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
+            last_reserved=schema.stream['reserved'],
             last_sid=schema.stream['sid'],
             error=schema.error,
             debug_data=schema.debug,
@@ -933,8 +1001,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         data = Data_WindowUpdateFrame(
             length=header.length,
             type=header.type,
-            flags=None,
+            flags=self._read_http_flags(schema),
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
+            increment_reserved=schema.size['reserved'],
             increment=schema.size['incr'],
         )
         return data
@@ -976,6 +1046,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             length=header.length,
             type=header.type,
             flags=flag,
+            reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             fragment=schema.fragment,
         )
@@ -1004,6 +1075,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
     def _make_http_data(self, frame: 'Optional[Data_DataFrame]' = None, *,
                         end_stream: 'bool' = False,
+                        padded: 'bool' = False,
                         pad_len: 'int' = 0,
                         data: 'bytes' = b'',
                         **kwargs: 'Any') -> 'tuple[Schema_DataFrame, Flags]':
@@ -1012,6 +1084,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             end_stream: End of stream flag.
+            padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
             data: Frame data.
             **kwargs: Arbitrary keyword arguments.
@@ -1022,6 +1095,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         """
         if frame is not None:
             end_stream = frame.flags.END_STREAM
+            padded = frame.flags.PADDED
 
             pad_len = frame.pad_len
             data = frame.data
@@ -1029,7 +1103,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         flags = Schema_DataFrame.Flags(0)
         if end_stream:
             flags |= Schema_DataFrame.Flags.END_STREAM
-        if pad_len:
+        if padded or pad_len:
             flags |= Schema_DataFrame.Flags.PADDED
 
         return Schema_DataFrame(
@@ -1040,6 +1114,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
     def _make_http_headers(self, frame: 'Optional[Data_HeadersFrame]' = None, *,
                            end_stream: 'bool' = False,
                            end_headers: 'bool' = False,
+                           padded: 'bool' = False,
                            pad_len: 'int' = 0,
                            excl_dep: 'bool' = False,
                            sid_dep: 'Optional[int]' = None,
@@ -1052,6 +1127,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             frame: Frame data model.
             end_stream: End of stream flag.
             end_headers: End of headers flag.
+            padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
             excl_dep: Exclusive dependency flag.
             sid_dep: Dependency stream identifier.
@@ -1067,6 +1143,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             priority = frame.flags.PRIORITY
             end_headers = frame.flags.END_HEADERS
             end_stream = frame.flags.END_STREAM
+            padded = frame.flags.PADDED
 
             pad_len = frame.pad_len
             excl_dep = frame.excl_dependency
@@ -1082,7 +1159,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             flags |= Schema_HeadersFrame.Flags.END_STREAM
         if end_headers:
             flags |= Schema_HeadersFrame.Flags.END_HEADERS
-        if pad_len:
+        if padded or pad_len:
             flags |= Schema_HeadersFrame.Flags.PADDED
         if priority:
             flags |= Schema_HeadersFrame.Flags.PRIORITY
@@ -1212,7 +1289,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
     def _make_http_push_promise(self, frame: 'Optional[Data_PushPromiseFrame]' = None, *,
                                 end_headers: 'bool' = False,
+                                padded: 'bool' = False,
                                 pad_len: 'int' = 0,
+                                promised_reserved: 'int' = 0,
                                 promised_sid: 'int' = 0,
                                 fragment: 'bytes' = b'',
                                 **kwargs: 'Any') -> 'tuple[Schema_PushPromiseFrame, Flags]':
@@ -1221,7 +1300,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             end_headers: End of headers flag.
+            padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
+            promised_reserved: Reserved bit of the promised stream identifier.
             promised_sid: Promised stream identifier.
             fragment: Header block fragment.
             **kwargs: Arbitrary keyword arguments.
@@ -1232,19 +1313,22 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         """
         if frame is not None:
             end_headers = frame.flags.END_HEADERS
+            padded = frame.flags.PADDED
             pad_len = frame.pad_len
+            promised_reserved = frame.promised_reserved
             promised_sid = frame.promised_sid
             fragment = frame.fragment
 
         flags = Schema_PushPromiseFrame.Flags(0)
         if end_headers:
             flags |= Schema_PushPromiseFrame.Flags.END_HEADERS
-        if pad_len:
+        if padded or pad_len:
             flags |= Schema_PushPromiseFrame.Flags.PADDED
 
         return Schema_PushPromiseFrame(
             pad_len=pad_len,
             stream={
+                'reserved': promised_reserved,
                 'sid': promised_sid,
             },
             fragment=fragment,
@@ -1252,23 +1336,29 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
     def _make_http_ping(self, frame: 'Optional[Data_PingFrame]' = None, *,
                         ack: 'bool' = False,
-                        opaque_data: 'bytes' = b'',
+                        opaque_data: 'bytes' = bytes(8),
                         **kwargs: 'Any') -> 'tuple[Schema_PingFrame, Flags]':
         """Make HTTP/2 ``PING`` frame.
 
         Args:
             frame: Frame data model.
             ack: Acknowledge flag.
-            opaque_data: Opaque data.
+            opaque_data: Opaque data, exactly 8 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
 
+        Raises:
+            ProtocolError: If ``opaque_data`` is not 8 octets long.
+
         """
         if frame is not None:
             ack = frame.flags.ACK
             opaque_data = frame.data
+        if len(opaque_data) != 8:
+            raise ProtocolError(f'HTTP/2: [Type {Enum_Frame.PING}] opaque data must be 8 octets, '
+                                f'not {len(opaque_data)}')
 
         flags = Schema_PingFrame.Flags(0)
         if ack:
@@ -1279,6 +1369,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         ), flags
 
     def _make_http_goaway(self, frame: 'Optional[Data_GoawayFrame]' = None, *,
+                          last_reserved: 'int' = 0,
                           last_sid: 'int' = 0,
                           error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.HTTP_1_1_REQUIRED,
                           error_default: 'Optional[int]' = None,
@@ -1290,6 +1381,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Args:
             frame: Frame data model.
+            last_reserved: Reserved bit of the last stream identifier.
             last_sid: Last stream identifier.
             error: Error code.
             error_default: Default value of error code.
@@ -1303,6 +1395,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if frame is not None:
+            last_reserved = frame.last_reserved
             last_sid = frame.last_sid
             error_val = frame.error
             debug = frame.debug_data
@@ -1313,6 +1406,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return Schema_GoawayFrame(
             stream={
+                'reserved': last_reserved,
                 'sid': last_sid,
             },
             error=error_val,
@@ -1320,12 +1414,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         ), cast('Flags', 0)
 
     def _make_http_window_update(self, frame: 'Optional[Data_WindowUpdateFrame]' = None, *,
+                                 incr_reserved: 'int' = 0,
                                  incr: 'int' = 0,
                                  **kwargs: 'Any') -> 'tuple[Schema_WindowUpdateFrame, Flags]':
         """Make HTTP/2 ``WINDOW_UPDATE`` frame.
 
         Args:
             frame: Frame data model.
+            incr_reserved: Reserved bit of the window size increment.
             incr: Window size increment.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1334,10 +1430,12 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if frame is not None:
+            incr_reserved = frame.increment_reserved
             incr = frame.increment
 
         return Schema_WindowUpdateFrame(
             size={
+                'reserved': incr_reserved,
                 'incr': incr,
             }
         ), cast('Flags', 0)

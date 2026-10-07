@@ -18,7 +18,9 @@ import contextlib
 import struct
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -167,22 +169,30 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         return ('HTTP', 'HTTPv1', 'HTTPv2')
 
     def read(self, length: 'Optional[int]' = None, *,
-             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> '_PT':
+             version: 'Optional[Literal[1, 2]]' = None,
+             preface: 'bool' = False,  # pylint: disable=unused-argument
+             **kwargs: 'Any') -> '_PT':
         """Read (parse) packet data.
 
         Args:
             length: Length of packet data.
             version: Version of HTTP.
+            preface: Construction keyword of :meth:`make`; whether a preface is
+                parsed is decided by the octets alone.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Parsed packet data.
+            Parsed packet data. When the payload opens with the HTTP/2
+            connection preface, its 24 octets are recorded as ``preface``.
 
         """
         if length is None:
             length = len(self)
 
-        if version is None:
+        # An explicit ``version=2`` -- what :meth:`_make_data` hands back for a
+        # rebuild -- may still open with the connection preface, and the
+        # identification in :meth:`_guess_version` is what skips it.
+        if version is None or (version == 2 and self._test_preface(length)):
             http = self._guess_version(length, **kwargs)
         else:
             if version == 1:
@@ -207,21 +217,44 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         self._version = http.version
         self._length = http.length + self._preface_length
         self._http = http
-        return http.info
+
+        info = http.info
+        if self._preface_length:
+            info.__update__({
+                'preface': _HTTP2_PREFACE,
+            })
+
+        # The versioned parser may have kept octets after its message as the
+        # next layer, e.g. the frames after an HTTP/2 frame.
+        next_ = getattr(http, '_next', None)
+        if next_ is not None and not isinstance(next_, NoPayload):
+            self._next = next_
+            self._protos = ProtoChain(self.__class__, self.alias, basis=next_.protochain)
+        return info
 
     def make(self,
-             version: 'Literal[1, 2]' = 1,
+             version: 'Literal[1, 2]' = 1, *,
+             preface: 'bool' = False,
              **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
 
         Args:
             version: Version of HTTP.
+            preface: Whether the HTTP/2 connection preface goes ahead of the
+                frame; :meth:`pack` writes it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             bytes: Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``version`` is unknown, or if ``preface`` is
+                requested for a version other than HTTP/2.
+
         """
+        if preface and version != 2:
+            raise ProtocolError(f'HTTP/{version}: connection preface is HTTP/2 only')
+
         if version == 1:
             from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         elif version == 2:
@@ -242,6 +275,22 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does); a
         # ``make`` override that did would need a different dispatch here.
         return protocol.__new__(protocol).make(**kwargs)  # type: ignore[return-value]
+
+    def pack(self, **kwargs: 'Any') -> 'bytes':
+        """Pack (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data, with the HTTP/2 connection preface ahead
+            of the frame if ``preface`` is set.
+
+        """
+        data = super().pack(**kwargs)
+        if kwargs.get('preface', False):
+            return _HTTP2_PREFACE + data
+        return data
 
     ##########################################################################
     # Utilities.
@@ -274,8 +323,21 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         if isinstance(data, Data_HTTPv1):
             return {'version': 1, **HTTPv1._make_data(data)}
         if isinstance(data, Data_HTTPv2):
-            return {'version': 2, **HTTPv2._make_data(data)}
+            return {'version': 2, 'preface': bool(data.get('preface')), **HTTPv2._make_data(data)}
         raise ProtocolError(f"invalid HTTP data: {type(data).__name__}")
+
+    def _test_preface(self, length: 'int') -> 'bool':
+        """Test whether the first ``length`` octets open with the HTTP/2 connection preface.
+
+        Args:
+            length: Length of packet data.
+
+        Returns:
+            :data:`True` if they do.
+
+        """
+        preface_len = len(_HTTP2_PREFACE)
+        return length >= preface_len and self._data[:preface_len] == _HTTP2_PREFACE
 
     def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'HTTP':
         """Identify the HTTP version of the payload, and parse it with that version.
@@ -344,7 +406,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # caller may hand this method fewer octets than the buffer holds, and a
         # preface must not be claimed out of octets outside this payload.
         preface_len = len(_HTTP2_PREFACE)
-        if length >= preface_len and self._data[:preface_len] == _HTTP2_PREFACE:
+        if self._test_preface(length):
             from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
             # The preface is not a frame -- the frames begin after it
