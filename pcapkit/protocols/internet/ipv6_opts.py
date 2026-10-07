@@ -1569,6 +1569,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                           mode_default: 'Optional[int]' = None,
                           mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                           mode_reversed: 'bool' = False,
+                          tid_type: 'Optional[Enum_TaggerID | StdlibEnum | AenumEnum | str | int]' = None,
+                          tid_type_default: 'Optional[int]' = None,
+                          tid_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                          tid_type_reversed: 'bool' = False,
                           tid: 'Optional[bytes | IPv4Address | IPv6Address]' = None,
                           id: 'bytes' = b'',
                           hav: 'bytes' = b'',
@@ -1582,6 +1586,11 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             mode_default: default value of DPD mode
             mode_namespace: namespace of DPD mode
             mode_reversed: reversed flag of DPD mode
+            tid_type: TaggerID type (``TidTy`` field); inferred from the
+                length of ``tid`` if not given
+            tid_type_default: default value of TaggerID type
+            tid_type_namespace: namespace of TaggerID type
+            tid_type_reversed: reversed flag of TaggerID type
             tid: Tagger ID
             id: identifier
             hav: hash assist value (HAV)
@@ -1590,78 +1599,68 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the DPD mode is invalid, or the Tagger ID does
+                not fit the TaggerID type.
+
         """
         if opt is not None:
-            dpd_type = opt.dpd_type
+            mode = opt.dpd_type
+            tid_type = getattr(opt, 'tid_type', None)
             tid = getattr(opt, 'tid', None)
             id = getattr(opt, 'id', b'')
             hav = getattr(opt, 'hav', b'')
 
-        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[assignment]
+        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,
                                     reversed=mode_reversed, pack=False)
 
         if dpd_type == Enum_SMFDPDMode.I_DPD:
             if tid is None:
-                schema = Schema_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    len=1 + len(id),
-                    info={
-                        'mode': 0,
-                        'type': Enum_TaggerID.NULL,
-                        'len': 0,
-                    },
-                    tid=None,
-                    id=id,
-                )  # type: Schema_SMFDPDOption
+                tid_bytes = b''
             elif isinstance(tid, bytes):
-                tid_len = len(tid)
-                if tid_len == 0:
-                    tid_type = Enum_TaggerID.NULL
-                else:
-                    try:
-                        tid_ip_ver = ipaddress.ip_address(tid).version
-                        if tid_ip_ver == 4:
-                            tid_type = Enum_TaggerID.IPv4
-                        elif tid_ip_ver == 6:
-                            tid_type = Enum_TaggerID.IPv6
-                        else:
-                            tid_type = Enum_TaggerID.DEFAULT  # type: ignore[unreachable]
-                    except ValueError:
-                        tid_type = Enum_TaggerID.DEFAULT
-
-                schema = Schema_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    len=1 + tid_len + len(id),
-                    info={
-                        'mode': 0,
-                        'type': tid_type,
-                        'len': tid_len - 1,
-                    },
-                    tid=tid,
-                    id=id,
-                )
+                tid_bytes = tid
+            elif tid.version in (4, 6):
+                tid_bytes = tid.packed
             else:
-                tid_ver = tid.version
-                if tid_ver == 4:
-                    tid_type = Enum_TaggerID.IPv4
-                    tid_len = 4
-                elif tid_ver == 6:
-                    tid_type = Enum_TaggerID.IPv6
-                    tid_len = 16
-                else:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggerID version: {tid_ver}')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggerID version: {tid.version}')
+            tid_len = len(tid_bytes)
 
-                schema = Schema_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    len=1 + tid_len + len(id),
-                    info={
-                        'mode': 0,
-                        'type': tid_type,
-                        'len': tid_len - 1,
-                    },
-                    tid=tid.packed,
-                    id=id,
-                )
+            if tid_type is not None:
+                tid_kind = self._make_index(tid_type, tid_type_default, namespace=tid_type_namespace,
+                                            reversed=tid_type_reversed, pack=False)
+            elif tid_len == 0:
+                tid_kind = Enum_TaggerID.NULL
+            elif tid_len == 4:
+                tid_kind = Enum_TaggerID.IPv4
+            elif tid_len == 16:
+                tid_kind = Enum_TaggerID.IPv6
+            else:
+                tid_kind = Enum_TaggerID.DEFAULT
+
+            if tid_kind == Enum_TaggerID.NULL:
+                tid_ok = tid_len == 0
+            elif tid_kind == Enum_TaggerID.IPv4:
+                tid_ok = tid_len == 4
+            elif tid_kind == Enum_TaggerID.IPv6:
+                tid_ok = tid_len == 16
+            else:
+                # TidLen is 4 bits and holds the length minus one.
+                tid_ok = 1 <= tid_len <= 16
+            if not tid_ok:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggerID length {tid_len} '
+                                    f'for type {tid_kind}')
+
+            schema = Schema_SMFIdentificationBasedDPDOption(
+                type=code,
+                len=1 + tid_len + len(id),
+                info={
+                    'mode': 0,
+                    'type': tid_kind,
+                    'len': max(tid_len - 1, 0),
+                },
+                tid=tid_bytes if tid_len else None,
+                id=id,
+            )  # type: Schema_SMFDPDOption
         elif dpd_type == Enum_SMFDPDMode.H_DPD:
             hav_ba = bytearray(hav)
             hav_ba[0] = hav[0] | 0x80
