@@ -348,7 +348,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         data = DummyData(
-            flags=DummyData(type=True, prio=False),
+            flags=DummyData(type=True, len=True, prio=False),
             version=2,
             length=32,
             tunnelid=3,

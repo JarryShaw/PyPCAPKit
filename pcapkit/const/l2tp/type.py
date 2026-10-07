@@ -20,9 +20,9 @@ __all__ = ['Type']
 class Type(EnumRegistry, IntEnum):
     """[Type] L2TP Type"""
 
-    Control = 0
+    Data = 0
 
-    Data = 1
+    Control = 1
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Type':

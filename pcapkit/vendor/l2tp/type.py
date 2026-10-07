@@ -20,10 +20,11 @@ if TYPE_CHECKING:
 
 __all__ = ['Type']
 
-#: L2TP packet types.
+#: L2TP packet types, i.e. the ``T`` bit: :rfc:`2661` §3.1 sets it "to 0 for
+#: a data message and 1 for a control message".
 DATA = {
-    0:  'Control',
-    1:  'Data',
+    0:  'Data',
+    1:  'Control',
 }  # type: dict[int, str]
 
 
