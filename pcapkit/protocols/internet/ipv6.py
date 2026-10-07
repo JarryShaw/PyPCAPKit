@@ -520,7 +520,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         if length is None:
             length = len(file_)
 
-        if length == 0:
+        if min(length, len(file_)) == 0:
             from pcapkit.protocols.misc.null import \
                 NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
@@ -530,9 +530,9 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
         try:
-            next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
-                             alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
-                             __context__=self._exctx)
+            next_ = self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
+                                           alias=proto, packet=packet, layer=self._exlayer,
+                                           protocol=self._exproto, __context__=self._exctx)
         except Exception as exc:
             from pcapkit.protocols.internet.ipv6_ext import \
                 IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel

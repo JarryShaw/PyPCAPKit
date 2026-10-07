@@ -3,11 +3,12 @@
 
 GitHub issue #1167. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
 handed the next layer the length the header declared even when the capture held
-none of its octets. ``test.pcapng`` frame 3 is cut inside the IPv4 header (18 of
-20 octets), so its UDP layer was parsed from an empty stream into an all-zero
-header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilt
-those 8 octets as if they had been on the wire. Such a payload is now a
-:class:`~pcapkit.protocols.misc.null.NoPayload`.
+none of its octets, so its UDP layer was parsed from an empty stream into an
+all-zero header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
+rebuilt those 8 octets as if they had been on the wire. Such a payload is now a
+:class:`~pcapkit.protocols.misc.null.NoPayload`. ``test.pcapng`` frame 3, cut
+inside the IPv4 header itself (18 of 20 octets), is kept as raw octets
+(:issue:`1170`).
 
 The capture case reads a generated sample, so this module belongs to the
 fixture-dependent tier. The in-memory cases need no capture.
@@ -36,24 +37,20 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
 
     def test_capture_cut_inside_the_header(self) -> None:
         from pcapkit.interface import extract
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
 
         extractor = extract(fin=sample_path('test.pcapng'), fout='/tmp/out', format='tree',
                             store=True, nofile=True)
         self.addCleanup(close_extractor, extractor)
-        parsed = list(extractor.frame)[2][IPv4]
+        parsed = list(extractor.frame)[2][Ethernet]
 
-        self.assertEqual(parsed.data, bytes.fromhex('4500012ca8370000fa11178a00000000ffff'))
-        self.assertIsInstance(parsed.payload, NoPayload)
-        self.assertEqual(str(parsed.protochain), 'IPv4')
-        self.assertNotIn('udp', parsed.info)
-
-        # The rebuild is the header alone: the 18 captured octets, then the two
-        # the parse already filled into ``dst``, and no UDP header after them.
-        rebuilt = IPv4.from_data(parsed.info)
-        self.assertEqual(rebuilt.data, parsed.data + b'\x00\x00')
-        self.assertEqual(rebuilt.info.len, 300)
+        # 18 octets are short of the 20-octet IPv4 header, so they are kept as
+        # raw octets (:issue:`1170`) rather than parsed into a ``dst`` whose low
+        # half is zero-filled, and the rebuild is exactly what was captured.
+        self.assertIsInstance(parsed.payload, Raw)
+        self.assertEqual(parsed.payload.data, bytes.fromhex('4500012ca8370000fa11178a00000000ffff'))
+        self.assertEqual(Ethernet.from_data(parsed.info).data, parsed.data)
 
     def test_header_without_payload_octets(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4
