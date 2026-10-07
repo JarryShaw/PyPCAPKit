@@ -32,7 +32,7 @@ class HIPUnitTests(unittest.TestCase):
             type=Packet.I1,
             version=2,
             chksum=b'\x12\x34',
-            control=DummyDict(anonymous=True),
+            control=DummyDict(anonymous=True, reserved=0),
             shit=b'source-hit',
             rhit=b'recv-hit',
             parameters=['param'],
@@ -88,7 +88,7 @@ class HIPUnitTests(unittest.TestCase):
             pkt={'bit_0': 0, 'type': Packet.I1},
             ver={'bit_1': 1, 'version': 2},
             checksum=b'\x12\x34',
-            control={'anonymous': 1},
+            control={'anonymous': 1, 'reserved': 0},
             shit=1,
             rhit=2,
             param=[],
@@ -178,6 +178,7 @@ class HIPUnitTests(unittest.TestCase):
                 type=Parameter.ESP_INFO,
                 critical=True,
                 length=16,
+                reserved=0,
                 index=8,
                 old_spi=9,
                 new_spi=10,
@@ -204,6 +205,7 @@ class HIPUnitTests(unittest.TestCase):
                 type=Parameter.ESP_INFO,
                 critical=True,
                 length=16,
+                reserved=0,
                 index=1,
                 old_spi=2,
                 new_spi=3,
@@ -215,7 +217,7 @@ class HIPUnitTests(unittest.TestCase):
             pkt={'bit_0': 0, 'type': Packet.I1},
             ver={'bit_1': 1, 'version': 2},
             checksum=b'\x12\x34',
-            control={'anonymous': 1},
+            control={'anonymous': 1, 'reserved': 0},
             shit=1,
             rhit=2,
             param=[],
@@ -1425,8 +1427,9 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_puzzle(
             Parameter.PUZZLE,
             hip_data.PuzzleParameter(type=Parameter.PUZZLE, critical=False,
-                                     length=16, index=1, lifetime=dt1,
-                                     opaque=b'op', random=5, rhash_len=64),
+                                     length=16, index=1, lifetime_exponent=32,
+                                     lifetime=dt1, opaque=b'op', random=5,
+                                     rhash_len=64),
             version=2,
         ).random, 5)
         self.assertEqual(proto._make_param_solution(
@@ -2837,10 +2840,10 @@ class HIPUnitTests(unittest.TestCase):
         :class:`~pcapkit.utilities.exceptions.EnumError` would not do: it is
         ``EnumError(BaseError, TypeError)``, so it would silently stop being caught.
 
-        Reachable from conformant input rather than only from a crafted one: a
-        ``Lifetime`` octet of ``0x00`` is a legal encoding of ``2^-32`` seconds,
-        which :class:`~datetime.timedelta` rounds to zero, so parsing an ordinary
-        PUZZLE and re-emitting it lands here.
+        A parsed PUZZLE no longer reaches the guard: its ``Lifetime`` octet is
+        kept as ``lifetime_exponent`` and written back as is (#1323), so an
+        octet of ``0x00`` -- ``2^-32`` seconds, which :class:`~datetime.timedelta`
+        rounds to zero -- re-serialises unchanged.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -2882,16 +2885,14 @@ class HIPUnitTests(unittest.TestCase):
         self.assertIn('invalid lifetime', str(caught.exception))
 
         # A PUZZLE whose Lifetime octet is 0x00, parsed then re-serialised: the
-        # conformant-input path. On the unfixed tree this was a bare ValueError.
+        # octet is carried, not re-encoded from the zero timedelta (#1323).
         wire = bytes.fromhex('0101' '000c' '01' '00' '6f70'
                              '8000000000000000' '00000000')
         parsed = proto._read_param_puzzle(
             hip_schema.PuzzleParameter.unpack(wire), version=2, options=options,
         )
         self.assertEqual(parsed.lifetime, datetime.timedelta(0))
-        with self.assertRaises(ProtocolError) as caught:
-            proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2)
-        self.assertIsInstance(caught.exception, BaseError)
+        self.assertEqual(proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2).lifetime, 0)
 
         # A positive lifetime still encodes exactly as it did before.
         self.assertEqual(proto._make_param_puzzle(

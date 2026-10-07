@@ -66,9 +66,12 @@ class Control(Data):
 
     #: Anonymous flag.
     anonymous: 'bool'
+    #: Reserved bits -- the 15 high-order bits of ``Controls``, carried
+    #: verbatim so that re-serialising reproduces them.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, anonymous: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
+        def __init__(self, anonymous: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
 
 
 class Parameter(Data):
@@ -125,6 +128,8 @@ class UnassignedParameter(Parameter):
 class ESPInfoParameter(Parameter):
     """Data model for HIP ``ESP_INFO`` parameter."""
 
+    #: Reserved octets, carried verbatim so that re-serialising reproduces them.
+    reserved: 'int'
     #: KEYMAT index.
     index: 'int'
     #: Old SDI.
@@ -133,7 +138,7 @@ class ESPInfoParameter(Parameter):
     new_spi: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -198,8 +203,16 @@ class PuzzleParameter(Parameter):
 
     #: Numeric index.
     index: 'int'
-    #: Lifetime.
-    lifetime: 'timedelta'
+    #: The ``Lifetime`` octet as it appears on the wire. :rfc:`7401#section-5.2.4`
+    #: defines the lifetime as ``2^(value - 32)`` seconds, and this is ``value``.
+    #: It is what re-serialising writes back, since most of the 256 octets have
+    #: no exact :class:`~datetime.timedelta`.
+    lifetime_exponent: 'int'
+    #: Lifetime, derived from :attr:`lifetime_exponent` to
+    #: :class:`~datetime.timedelta`'s microsecond resolution, so octets below
+    #: ``12`` read as ``timedelta(0)``. :obj:`None` for octets of ``79`` and above,
+    #: whose duration exceeds :attr:`datetime.timedelta.max`.
+    lifetime: 'Optional[timedelta]'
     #: Puzzle data.
     opaque: 'bytes'
     #: Random number.
@@ -213,7 +226,7 @@ class PuzzleParameter(Parameter):
     rhash_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime_exponent: 'int', lifetime: 'Optional[timedelta]', opaque: 'bytes', random: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final

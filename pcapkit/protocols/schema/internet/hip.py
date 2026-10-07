@@ -90,6 +90,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Anonymous.
         anonymous: bool
+        #: Reserved bits.
+        reserved: int
 
     class LocatorFlags(TypedDict):
         """Locator flags."""
@@ -517,8 +519,10 @@ class UnassignedParameter(Parameter):
 class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
     """Header schema for HIP ``ESP_INFO`` parameters."""
 
-    #: Reserved.
-    reserved: 'bytes' = PaddingField(length=2)
+    #: Reserved, "zero when sent, ignored when received" (:rfc:`7402#section-5.1.1`).
+    #: Read as a value rather than as padding, so that re-serialising a parsed
+    #: parameter reproduces the octets it arrived with.
+    reserved: 'int' = UInt16Field()
     #: Key management index.
     index: 'int' = UInt16Field()
     #: Old SPI.
@@ -529,7 +533,7 @@ class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int',
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'int', index: 'int',
                      old_spi: 'int', new_spi: 'int') -> 'None': ...
 
 
@@ -1567,6 +1571,7 @@ class HIP(Schema):
     control: 'ControlsType' = BitField(
         length=2,
         namespace={
+            'reserved': (0, 15),
             'anonymous': (15, 1),
         },
     )
