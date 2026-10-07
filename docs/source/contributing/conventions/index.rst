@@ -13,9 +13,10 @@ House Conventions
    arisen. :ref:`sentinel-convention` governs :mod:`pcapkit.corekit`,
    :ref:`extension-header-subclassing` a protocol class hierarchy,
    :ref:`protocol-layer-placement` which subpackage a dissector belongs in,
-   :ref:`process` the repository rather than any of its code, and
+   :ref:`process` the repository rather than any of its code,
    :ref:`documentation` the prose itself -- on these pages and in the API
-   reference -- rather than any code at all.
+   reference -- rather than any code at all, and :ref:`test-coverage` what the
+   test suite has to prove.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -35,3 +36,4 @@ House Conventions
    protocol-layer-placement
    process
    documentation
+   test-coverage
