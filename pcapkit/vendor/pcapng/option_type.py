@@ -188,6 +188,56 @@ class {NAME}(EnumRegistry, StrEnum):
         except TypeError as error:
             raise ValueError(str(error)) from error
 
+    @classmethod
+    def register_alias(cls, value: 'int', name: 'str') -> '{NAME}':
+        """Add ``name`` as a further name for the member at option code ``value``.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`
+        for the same reason as :meth:`register`: the base looks the
+        :class:`int` code up in :attr:`~aenum.Enum._value2member_map_`, whose
+        keys are the formatted ``'{{name}} [{{value}}]'`` strings, so it could
+        never find one.
+
+        The member is resolved as :meth:`get` resolves ``value`` with
+        ``namespace`` set to ``name``'s prefix: that namespace overlaid on
+        ``opt``. So ``register_alias(2, 'if_label')`` aliases ``if_name``,
+        while ``register_alias(1, 'if_note')`` aliases ``opt_comment``, since
+        ``if`` assigns no code 1 of its own. The alias adds a name only; the
+        member keeps its own name and namespace.
+
+        Args:
+            value: Option code of the existing member to alias.
+            name: Alias to add for it, led by the namespace to resolve
+                ``value`` in.
+
+        Returns:
+            The existing member, now reachable under ``name`` as well.
+
+        Raises:
+            ValueError: If neither ``name``'s namespace nor ``opt`` assigns
+                ``value``, or if ``name`` is already taken.
+
+        """
+        namespace = name.split('_', maxsplit=1)[0]
+        member = cls.__members_ns__.get(namespace, {{}}).get(value)
+        if member is None:
+            member = cls.__members_ns__.get('opt', {{}}).get(value)
+        if member is None:
+            raise ValueError(f'{{value!r}} is not a registered {{cls.__name__}} in namespace '
+                             f'{{namespace!r}} or opt; use {{cls.__name__}}.register() to mint one')
+
+        # NOTE: :func:`~aenum.extend_enum` builds a throwaway member through
+        # :meth:`__new__` to learn its value, and :meth:`__new__` files that
+        # throwaway in :attr:`__members_ns__` over ``member``. The alias
+        # resolves to ``member``, so ``member`` is put back.
+        member_ns = member.opt_name.split('_', maxsplit=1)[0]
+        try:
+            return extend_enum(cls, name, value, member.opt_name)
+        except TypeError as error:
+            raise ValueError(str(error)) from error
+        finally:
+            cls.__members_ns__[member_ns][value] = member
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -> '{NAME}':
         """Backport support for original codes.
