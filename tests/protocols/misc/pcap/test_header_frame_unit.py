@@ -146,8 +146,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
                          (b'\xa1\xb2\xc3\xd4', False))
         self.assertEqual(header._make_magic(lilendian=True, bigendian=False),
                          (b'\xd4\xc3\xb2\xa1', True))
-        self.assertEqual(header._make_magic(byteorder='big', lilendian='', bigendian=False),  # type: ignore[arg-type]
-                         (b'\xa1\xb2\xc3\xd4', False))
+        self.assertEqual(header._make_magic(byteorder='big', bigendian=False),
+                         (b'\xd4\xc3\xb2\xa1', True))
         with self.assertRaises(EndianError):
             header._make_magic(lilendian=True, bigendian=True)
         with self.assertRaises(EndianError):
