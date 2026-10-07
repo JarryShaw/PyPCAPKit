@@ -265,14 +265,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         if length is None:
             length = len(file_)
 
-        if length == 0:
+        if min(length, len(file_)) == 0:
             from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
-        next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
-                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
-                         __context__=self._exctx)
-        return next_
+        return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx)

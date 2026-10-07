@@ -1820,16 +1820,59 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if length is None:
             length = len(file_)
 
-        if length == 0:
+        if min(length, len(file_)) == 0:
             from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
-        next_ = protocol(file_, length, alias=proto, packet=packet,
-                         layer=self._exlayer, protocol=self._exproto,
-                         __context__=self._exctx)  # type: ignore[abstract]
+        return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
+                                      layer=self._exlayer, protocol=self._exproto,
+                                      __context__=self._exctx)
+
+    @staticmethod
+    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
+                          **kwargs: 'Any') -> 'ProtocolBase':
+        r"""Parse the next layer, or keep it as raw octets if its header was not captured.
+
+        Arguments:
+            klass: next layer protocol class
+            file\_: payload of the current layer
+            length: valid (*non-padding*) length
+            **kwargs: keyword arguments for the next layer's constructor
+
+        Returns:
+            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            when fewer octets were captured than its header needs.
+
+        Note:
+            :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+            zero-fills a field the stream ends inside, so a header parsed from
+            too few octets is filled with values that were never on the wire, and
+            :meth:`from_data <ProtocolBase.from_data>` rebuilds them (:issue:`1170`).
+            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`
+            instead, as an unparseable one is.
+
+            The captured octets are what ``file_`` holds, which may be fewer than
+            the ``length`` the current header declares. They are short of the
+            header when there are fewer than the next layer's
+            :meth:`__length_hint__ <ProtocolBase.__length_hint__>`, unless the
+            header it parsed, :attr:`length <ProtocolBase.length>` octets long, fits
+            in them anyway: for a variable-length header such as
+            :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` the hint is the longest
+            form rather than the shortest. A next layer that reports no hint is
+            kept as parsed.
+
+        """
+        next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+
+        captured = min(length, len(file_))
+        length_hint = getattr(next_, '__length_hint__', None)
+        hint = None if length_hint is None else length_hint()
+        if hint is not None and captured < hint and captured < next_.length:
+            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            next_ = Raw(file_, length, **kwargs)
         return next_
 
     def _check_term_threshold(self) -> bool:

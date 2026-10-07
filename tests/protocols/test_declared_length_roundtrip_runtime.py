@@ -98,20 +98,22 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
     def test_header_truncated_frame_keeps_its_total_length(self) -> None:
         """``test.pcapng`` frame 3 is cut inside the IPv4 header itself.
 
-        Only 18 of the 20 header octets were recorded, so the rebuild cannot be
-        byte for byte -- it writes a whole header. What it must not do is replace
-        the declared 300 with the 18 that were kept.
+        Only 18 of the 20 header octets were recorded, so they are kept as raw
+        octets rather than parsed into a header (:issue:`1170`). The rebuild is
+        then byte for byte, and keeps the declared 300 rather than the 18 that
+        were kept.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
 
-        parsed = self._frames('test.pcapng')[2][IPv4]
-        self.assertEqual(parsed.info.len, 300)
-        self.assertEqual(len(parsed.data), 18)
+        parsed = self._frames('test.pcapng')[2][Ethernet]
+        self.assertIsInstance(parsed.payload, Raw)
+        self.assertEqual(len(parsed.payload.data), 18)
+        self.assertEqual(parsed.payload.data[2:4], (300).to_bytes(2, 'big'))
 
-        rebuilt = IPv4.from_data(parsed.info)
-        self.assertEqual(rebuilt.info.len, 300)
-        self.assertEqual(rebuilt.data[:18], parsed.data)
+        rebuilt = Ethernet.from_data(parsed.info)
+        self.assertEqual(rebuilt.data, parsed.data)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
