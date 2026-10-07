@@ -483,6 +483,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -596,6 +597,9 @@
         <span class="n">_flag_f</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: No output file, i.e., no output file is to be generated.</span>
         <span class="n">_flag_q</span><span class="p">:</span> <span class="s1">'bool'</span>
+        <span class="c1">#: Output opened flag. It indicates if :meth:`~pcapkit.foundation.extraction.Extractor._open_output`</span>
+        <span class="c1">#: has replaced the writer class in :attr:`_ofile` with the writer.</span>
+        <span class="n">_flag_o</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Reassembly flag. It indicates if datagram reassembly is enabled.</span>
         <span class="c1">#: Every engine reads it to decide whether to feed</span>
         <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the</span>
@@ -1178,6 +1182,7 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'using engine </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">eng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
 
                 <span class="c1"># start iteration</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span>
@@ -1203,6 +1208,7 @@
 
         <span class="c1"># start engine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
 
         <span class="c1"># start iteration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
@@ -1346,7 +1352,16 @@
 
 <span class="sd">        Unless output is disabled, the engine also dumps the parsed header, under</span>
 <span class="sd">        the name of ``Global Header`` for PCAP and ``Section Header 1`` for</span>
-<span class="sd">        PCAP-NG.</span>
+<span class="sd">        PCAP-NG, and sets :attr:`self._offmt &lt;Extractor._offmt&gt;` to the output</span>
+<span class="sd">        format.</span>
+
+<span class="sd">        This is the shared global-header step of the third-party engines --</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT`,</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.scapy.Scapy` and</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.pyshark.PyShark` -- which call it at</span>
+<span class="sd">        setup, so their output opens with the same header record as the</span>
+<span class="sd">        built-in engines' and :attr:`format` is set even for a capture with no</span>
+<span class="sd">        frames.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the input is neither a PCAP nor a PCAP-NG file.</span>
@@ -1369,6 +1384,35 @@
 
         <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_open_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the output writer.</span>
+
+<span class="sd">        The engines call this at their global-header step, passing the header's</span>
+<span class="sd">        link type, byte order and timestamp resolution as ``protocol``,</span>
+<span class="sd">        ``byteorder`` and ``nanosecond``, and the PCAP engine also its</span>
+<span class="sd">        ``thiszone``, ``sigfigs`` and ``snaplen``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`</span>
+<span class="sd">        writes its own global header from them, and the other writers ignore</span>
+<span class="sd">        them. :meth:`run` calls it again, without arguments, after the engine</span>
+<span class="sd">        has started, for the engines that have no such step. Only the first</span>
+<span class="sd">        call has an effect.</span>
+
+<span class="sd">        Under split mode, i.e. :attr:`self._flag_f &lt;Extractor._flag_f&gt;` is</span>
+<span class="sd">        :data:`True`, :attr:`self._ofile &lt;Extractor._ofile&gt;` stays a factory,</span>
+<span class="sd">        with ``kwargs`` bound, that the engines call once per output file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Global header fields for the writer.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Extractor.record_frames">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>
@@ -1509,6 +1553,8 @@
 
 <span class="sd">                * If using PCAP output for TCP flow tracing while the extraction engine is</span>
 <span class="sd">                  DPKT, Scapy, PyShark or PyPCAPFile.</span>
+<span class="sd">                * If using PCAP output while the extraction engine is a third-party</span>
+<span class="sd">                  one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</span>
 <span class="sd">                * If output file format is not supported.</span>
 
 <span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
@@ -1522,6 +1568,17 @@
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'tree'</span>
 
+        <span class="c1"># NOTE: the third-party engines' adapters hand the output writer each</span>
+        <span class="c1"># frame as a plain :obj:`dict` built by ``packet2dict``, which carries</span>
+        <span class="c1"># neither the frame's octets nor its record header, so there is nothing</span>
+        <span class="c1"># for the PCAP writer to write. The flow tracer has the same limitation,</span>
+        <span class="c1"># and is given the same replacement below.</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">)):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
+                 <span class="s2">"using 'format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
+
         <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">oext</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_name</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">extension</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span> <span class="o">=</span> <span class="n">ifnm</span>  <span class="c1"># input file name</span>
@@ -1533,6 +1590,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># EOF flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="o">=</span> <span class="n">files</span>                 <span class="c1"># split file flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="o">=</span> <span class="n">nofile</span>                <span class="c1"># no output flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># output opened flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_r</span> <span class="o">=</span> <span class="n">reassembly</span>            <span class="c1"># reassembly flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="o">=</span> <span class="n">trace</span>                 <span class="c1"># trace flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># verbose flag</span>
@@ -1690,7 +1748,10 @@
             <span class="c1"># NOTE: make_dumper() names every subclass it builds 'DictDumper', so the</span>
             <span class="c1"># useful name is the output class it wraps.</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dumping </span><span class="si">%s</span><span class="s1"> output to </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">dumper</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="k">else</span> <span class="n">dumper</span><span class="p">(</span><span class="n">ofnm</span><span class="p">)</span>  <span class="c1"># output file</span>
+            <span class="c1"># NOTE: only the writer *class* is kept here. The writer itself is</span>
+            <span class="c1"># created by :meth:`_open_output` once the engine has read the global</span>
+            <span class="c1"># header, which the PCAP writer needs in order to write its own.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">dumper</span>  <span class="c1"># output file</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'file output disabled'</span><span class="p">)</span>
 

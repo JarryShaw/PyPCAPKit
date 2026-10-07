@@ -508,6 +508,65 @@
 <span class="c1">#: :meth:`HTTP._guess_version` tests it before attempting any parse.</span>
 <span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
 
+<span class="c1">#: What :rfc:`9113#section-6` allows a sender to put in the frame header of each</span>
+<span class="c1">#: frame type it defines: the flags that type defines, and the stream identifier</span>
+<span class="c1">#: it is sent on -- ``True`` for a non-zero stream, ``False`` for stream 0 and</span>
+<span class="c1">#: :obj:`None` for either. :meth:`HTTP._guess_version` checks a bare frame</span>
+<span class="c1">#: against this before its HTTP/2 trial parse; see :func:`_test_http2_frame`.</span>
+<span class="n">_HTTP2_FRAME_RULES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x0</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x09</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># DATA: END_STREAM, PADDED (Section 6.1)</span>
+    <span class="mh">0x1</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x2D</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># HEADERS: END_STREAM, END_HEADERS, PADDED, PRIORITY (Section 6.2)</span>
+    <span class="mh">0x2</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># PRIORITY (Section 6.3)</span>
+    <span class="mh">0x3</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># RST_STREAM (Section 6.4)</span>
+    <span class="mh">0x4</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x01</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># SETTINGS: ACK (Section 6.5)</span>
+    <span class="mh">0x5</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x0C</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># PUSH_PROMISE: END_HEADERS, PADDED (Section 6.6)</span>
+    <span class="mh">0x6</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x01</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># PING: ACK (Section 6.7)</span>
+    <span class="mh">0x7</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># GOAWAY (Section 6.8)</span>
+    <span class="mh">0x8</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>    <span class="c1"># WINDOW_UPDATE: either stream (Section 6.9)</span>
+    <span class="mh">0x9</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x04</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># CONTINUATION: END_HEADERS (Section 6.10)</span>
+<span class="p">}</span>  <span class="c1"># type: dict[int, tuple[int, Optional[bool]]]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_test_http2_frame</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test whether ``data`` opens with a frame header a conforming sender could write.</span>
+
+<span class="sd">    This is a plausibility test for :meth:`HTTP._guess_version`'s fall-through</span>
+<span class="sd">    only. ``httpv2.HTTP`` itself parses every frame :rfc:`9113` lets a receiver</span>
+<span class="sd">    accept, which includes frames this test turns down.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Payload, starting at the frame header.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if the nine-octet header carries a frame type defined by</span>
+<span class="sd">        :rfc:`9113#section-6`, sets no flag that type leaves undefined, leaves the</span>
+<span class="sd">        reserved bit clear, and names a stream that type may be sent on.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Undefined flags and the reserved bit "MUST be left unset (0x00) when</span>
+<span class="sd">        sending" (:rfc:`9113#section-4.1`), and each stream rule is one a</span>
+<span class="sd">        receiver "MUST treat as a connection error" when broken (e.g. ``DATA``</span>
+<span class="sd">        on stream 0, :rfc:`9113#section-6.1`), so no frame a conforming peer</span>
+<span class="sd">        sends fails here. Frame types outside the ten that :rfc:`9113` defines</span>
+<span class="sd">        are legal and ignored by a receiver (:rfc:`9113#section-5.5`), but on a</span>
+<span class="sd">        payload with no other evidence they are what arbitrary binary looks</span>
+<span class="sd">        like most of the time, so they are not guessed.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">_HTTP2_FRAME_RULES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">rules</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">flags</span><span class="p">,</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">rules</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">flags</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span> <span class="ow">is</span> <span class="n">stream</span>
+
 
 <div class="viewcode-block" id="HTTP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP">[docs]</a>
@@ -678,17 +737,27 @@
 <span class="sd">            data: protocol data</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Key-value pairs for protocol construction.</span>
+<span class="sd">            Key-value pairs for protocol construction, including the ``version``</span>
+<span class="sd">            that :meth:`make` dispatches on.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is neither HTTP/1.* nor HTTP/2 data.</span>
 
 <span class="sd">        """</span>
-        <span class="n">version</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'version'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>
-        <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP version: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
+        <span class="c1"># NOTE: Neither versioned data class carries a ``version`` field --</span>
+        <span class="c1"># HTTP/1.*'s lives in ``receipt`` as the start line's string, and HTTP/2</span>
+        <span class="c1"># has none -- so the version is the class of ``data`` that :meth:`read`</span>
+        <span class="c1"># returned from the versioned parser.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv1</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv2</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP data: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP._guess_version">
@@ -738,14 +807,16 @@
 <span class="sd">              preface ahead of it, or an opaque HTTP/1 message body -- is</span>
 <span class="sd">              genuinely undecidable from one payload, and the honest answer is</span>
 <span class="sd">              the ``Raw`` that an escaping ``ProtocolError`` becomes under</span>
-<span class="sd">              :func:`~pcapkit.protocols.misc.raw.beholder`. In particular there</span>
-<span class="sd">              is deliberately *no* heuristic on the nine-octet frame header</span>
-<span class="sd">              ("type at most 9, reserved bit clear"): that misfires on binary</span>
-<span class="sd">              HTTP/1 bodies, which is precisely how garbage text was classified</span>
-<span class="sd">              HTTP/2 to begin with. A self-consistent bare frame is still parsed</span>
-<span class="sd">              as HTTP/2, but by the fall-through below -- on the parser's own</span>
-<span class="sd">              length/type consistency rules -- rather than by a guess dressed up</span>
-<span class="sd">              as identification.</span>
+<span class="sd">              :func:`~pcapkit.protocols.misc.raw.beholder`. The nine-octet frame</span>
+<span class="sd">              header is therefore never used to *identify* HTTP/2 ahead of</span>
+<span class="sd">              HTTP/1: as identification it misfires on binary HTTP/1 bodies,</span>
+<span class="sd">              which is precisely how garbage text was classified HTTP/2 to begin</span>
+<span class="sd">              with. A bare frame is parsed as HTTP/2 only by the fall-through</span>
+<span class="sd">              below, and only if its header is one a conforming sender could</span>
+<span class="sd">              write (see :func:`_test_http2_frame`): a frame type :rfc:`9113`</span>
+<span class="sd">              defines, no undefined flag, and a stream that type may be sent on.</span>
+<span class="sd">              Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error</span>
+<span class="sd">              under :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: Positive identification, before any parse attempt. The preface is</span>
@@ -852,6 +923,16 @@
         <span class="c1"># ``StructError.eof``, which ``NoPayload`` handling reads.</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: The HTTP/2 trial runs only on a header that passes</span>
+        <span class="c1"># :func:`_test_http2_frame`. Since a frame's Length counts the payload</span>
+        <span class="c1"># alone (:rfc:`9113#section-4.1`), any nine octets with a small enough</span>
+        <span class="c1"># Length are self-consistent, so the parser's own checks accept most</span>
+        <span class="c1"># zero-heavy binary as a ``DATA`` frame or a frame of unknown type. The</span>
+        <span class="c1"># test rejects only headers that no conforming sender writes, and it</span>
+        <span class="c1"># gates this guess alone: an explicit ``version=2`` is not affected.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_test_http2_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">"unknown HTTP version"</span><span class="p">)</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>

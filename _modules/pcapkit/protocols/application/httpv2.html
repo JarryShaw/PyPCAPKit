@@ -949,8 +949,11 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: No ``length``: :meth:`make` computes the frame's Length from the</span>
+        <span class="c1"># frame it builds, and a ``length`` keyword would instead be taken by</span>
+        <span class="c1"># ``ProtocolBase.__init__`` as the number of octets to parse back --</span>
+        <span class="c1"># the payload length alone, nine octets short of the frame.</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">'length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="s1">'flags'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">__value__</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="s1">'sid'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span>

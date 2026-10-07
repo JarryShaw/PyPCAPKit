@@ -481,6 +481,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -631,6 +632,12 @@
         <span class="n">shb</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'PCAP-NG section </span><span class="si">%d</span><span class="s1"> header read'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">))</span>
+
+        <span class="c1"># NOTE: a PCAP file has one link type and one timestamp resolution,</span>
+        <span class="c1"># where a PCAP-NG file declares them per interface, in blocks that follow.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="n">PCAPIO</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="s1">'PCAP-NG: PCAP output is not supported for a PCAP-NG input'</span><span class="p">)</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Section Header </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 

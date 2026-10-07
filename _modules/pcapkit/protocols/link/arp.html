@@ -703,8 +703,8 @@
              <span class="n">ptype_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">ptype_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">ptype_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">hlen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
-             <span class="n">plen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+             <span class="n">hlen</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">plen</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">oper</span><span class="p">:</span> <span class="s1">'Enum_Operation | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_Operation</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">,</span>
              <span class="n">oper_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">oper_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -726,8 +726,10 @@
 <span class="sd">            ptype_default: Default value of protocol type.</span>
 <span class="sd">            ptype_namespace: Namespace of protocol type.</span>
 <span class="sd">            ptype_reversed: Reversed flag of protocol type.</span>
-<span class="sd">            hlen: Hardware address length.</span>
-<span class="sd">            plen: Protocol address length.</span>
+<span class="sd">            hlen: Hardware address length; derived from the packed ``sha`` if</span>
+<span class="sd">                not given.</span>
+<span class="sd">            plen: Protocol address length; derived from the packed ``spa`` if</span>
+<span class="sd">                not given.</span>
 <span class="sd">            oper: Operation.</span>
 <span class="sd">            oper_default: Default value of operation.</span>
 <span class="sd">            oper_namespace: Namespace of operation.</span>
@@ -742,6 +744,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a packed hardware address is not ``hlen`` octets</span>
+<span class="sd">                long, or a packed protocol address is not ``plen`` octets long.</span>
+
 <span class="sd">        """</span>
         <span class="n">_htype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">htype</span><span class="p">,</span> <span class="n">htype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">htype_namespace</span><span class="p">,</span>
                                   <span class="nb">reversed</span><span class="o">=</span><span class="n">htype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -750,16 +756,29 @@
         <span class="n">_oper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">oper</span><span class="p">,</span> <span class="n">oper_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">oper_namespace</span><span class="p">,</span>
                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">oper_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="n">_sha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">sha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">)</span>
+        <span class="n">_spa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">spa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">)</span>
+        <span class="n">_tha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">tha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">)</span>
+        <span class="n">_tpa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">tpa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">)</span>
+
+        <span class="n">_hlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_sha</span><span class="p">)</span> <span class="k">if</span> <span class="n">hlen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">hlen</span>
+        <span class="n">_plen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_spa</span><span class="p">)</span> <span class="k">if</span> <span class="n">plen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plen</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'sha'</span><span class="p">,</span> <span class="n">_sha</span><span class="p">,</span> <span class="n">_hlen</span><span class="p">),</span> <span class="p">(</span><span class="s1">'tha'</span><span class="p">,</span> <span class="n">_tha</span><span class="p">,</span> <span class="n">_hlen</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s1">'spa'</span><span class="p">,</span> <span class="n">_spa</span><span class="p">,</span> <span class="n">_plen</span><span class="p">),</span> <span class="p">(</span><span class="s1">'tpa'</span><span class="p">,</span> <span class="n">_tpa</span><span class="p">,</span> <span class="n">_plen</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: [</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">] address is '</span>
+                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets, but its length field is </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_ARP</span><span class="p">(</span>
             <span class="n">htype</span><span class="o">=</span><span class="n">_htype</span><span class="p">,</span>
             <span class="n">ptype</span><span class="o">=</span><span class="n">_ptype</span><span class="p">,</span>
-            <span class="n">hlen</span><span class="o">=</span><span class="n">hlen</span><span class="p">,</span>
-            <span class="n">plen</span><span class="o">=</span><span class="n">plen</span><span class="p">,</span>
+            <span class="n">hlen</span><span class="o">=</span><span class="n">_hlen</span><span class="p">,</span>
+            <span class="n">plen</span><span class="o">=</span><span class="n">_plen</span><span class="p">,</span>
             <span class="n">oper</span><span class="o">=</span><span class="n">_oper</span><span class="p">,</span>
-            <span class="n">sha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">sha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">),</span>
-            <span class="n">spa</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">spa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">),</span>
-            <span class="n">tha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_addr_resolve</span><span class="p">(</span><span class="n">tha</span><span class="p">,</span> <span class="n">_htype</span><span class="p">),</span>
-            <span class="n">tpa</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_proto_resolve</span><span class="p">(</span><span class="n">tpa</span><span class="p">,</span> <span class="n">_ptype</span><span class="p">),</span>
+            <span class="n">sha</span><span class="o">=</span><span class="n">_sha</span><span class="p">,</span>
+            <span class="n">spa</span><span class="o">=</span><span class="n">_spa</span><span class="p">,</span>
+            <span class="n">tha</span><span class="o">=</span><span class="n">_tha</span><span class="p">,</span>
+            <span class="n">tpa</span><span class="o">=</span><span class="n">_tpa</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -896,17 +915,21 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            addr: Protocol address.</span>
+<span class="sd">            ptype: Protocol type.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or</span>
 <span class="sd">            ``0x86dd`` (IPv6), the address is validated and packed to 4 or 16</span>
-<span class="sd">            octets; otherwise, a :data:`str` is encoded, an</span>
+<span class="sd">            octets; otherwise, a :data:`str` is taken as the *hex* encoded</span>
+<span class="sd">            address that :meth:`_read_proto_resolve` returns, an</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is</span>
 <span class="sd">            packed, and anything else is returned as given.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.</span>
 <span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+<span class="sd">            ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``</span>
+<span class="sd">                is a :data:`str` that is not *hex* encoded.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            Through :func:`parse_ip_address` rather than</span>
@@ -935,7 +958,11 @@
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address: '</span>
+                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">packed</span>
         <span class="k">return</span> <span class="n">addr</span></div>

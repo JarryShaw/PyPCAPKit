@@ -2113,6 +2113,14 @@ packs and unpacks: <code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><p>Tuple of options and total length of options.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The options are emitted in the given order, <code class="docutils literal notranslate"><span class="pre">NOP</span></code> and <code class="docutils literal notranslate"><span class="pre">EOOL</span></code>
+included, so that a parsed option list re-emits the same octets.
+Padding is added only once, after the last option, when the list
+does not end on a 32-bit boundary: zero octets if the list already
+ends with <code class="docutils literal notranslate"><span class="pre">EOOL</span></code>, otherwise <code class="docutils literal notranslate"><span class="pre">NOP</span></code> options followed by an <code class="docutils literal notranslate"><span class="pre">EOOL</span></code>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

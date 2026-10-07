@@ -715,10 +715,9 @@
     <span class="c1"># NOTE: A warning rather than an error, because nobody typed these: they are</span>
     <span class="c1"># whatever ``_make_data`` returned, so the defect is a key of that mapping</span>
     <span class="c1"># disagreeing with the signature it is spread into, and the person who meets</span>
-    <span class="c1"># it cannot fix it. Raising would turn every such mismatch -- e.g. ``Frame``</span>
-    <span class="c1"># returns ``ts_src`` for ``ts_sec`` and ``L2TPv2`` ``prio`` for ``priority``</span>
-    <span class="c1"># -- into a broken ``from_data``, where the field is merely dropped; the</span>
-    <span class="c1"># warning makes that audible instead.</span>
+    <span class="c1"># it cannot fix it. Raising would turn every such mismatch into a broken</span>
+    <span class="c1"># ``from_data``, where the field is merely dropped; the warning makes that</span>
+    <span class="c1"># audible instead.</span>
     <span class="c1">#</span>
     <span class="c1"># No explicit ``stacklevel``: the default blames the innermost frame outside</span>
     <span class="c1"># :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be</span>
@@ -1270,24 +1269,42 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
+<span class="sd">            **kwargs: Construction keywords that ``data`` does not carry, such as</span>
+<span class="sd">                the ``num`` and ``header`` of</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, or the</span>
+<span class="sd">                ``num``, ``sct`` and ``ctx`` of</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`. They take</span>
+<span class="sd">                precedence over the keywords :meth:`_make_data` returns.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Protocol instance.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: If any of ``kwargs`` matches no parameter of the</span>
+<span class="sd">                protocol, as for a direct construction.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 
-        <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># NOTE: The caller typed these, so they are checked strictly here, as a</span>
+        <span class="c1"># direct construction would check them. The out-of-band keywords</span>
+        <span class="c1"># ``__init__`` consumes are left out of it.</span>
+        <span class="n">_check_construction_keywords</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'_layer'</span><span class="p">,</span> <span class="s1">'_protocol'</span><span class="p">,</span> <span class="s1">'__context__'</span><span class="p">)</span>
+        <span class="p">})</span>
 
-        <span class="c1"># NOTE: These keywords came out of ``_make_data``, not out of a caller, so</span>
-        <span class="c1"># the construction keyword check of ``__init__`` warns here instead of</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+
+        <span class="c1"># NOTE: The rest came out of ``_make_data``, not out of a caller, so the</span>
+        <span class="c1"># construction keyword check of ``__init__`` warns here instead of</span>
         <span class="c1"># raising: a key of that mapping which disagrees with the signature it is</span>
         <span class="c1"># spread into is a defect in this protocol, and the caller of</span>
         <span class="c1"># ``from_data`` can do nothing about it. Set for the duration of the call</span>

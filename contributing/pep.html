@@ -1022,6 +1022,18 @@ wheel stays lean because the suite could not run from an installed package
 anyway: the generated sample captures are not shipped, and <code class="docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>
 resolves paths from a repository root that an installed package does not have.
 Anyone wanting to run the tests wants the repository, which is where they are.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>One test is skipped on an upstream defect rather than a pcapkit one.
+<code class="docutils literal notranslate"><span class="pre">PlistRoundTripTests.test_plist_report_round_trips_through_plistlib</span></code>, in
+<code class="docutils literal notranslate"><span class="pre">tests/integration/test_output_formats.py</span></code>, reads a <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report
+back with <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>, which fails with <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span>
+<span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. <code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats
+every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as <code class="docutils literal notranslate"><span class="pre">'%Y-%m-%dT%H:%M:%S.%fZ'</span></code>, always with six
+fractional digits, and <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so its
+match returns <code class="docutils literal notranslate"><span class="pre">None</span></code>. The fix belongs upstream, as <a class="reference external" href="https://github.com/JarryShaw/DictDumper/issues/122">JarryShaw/DictDumper#122</a>; the test asserts what a
+fixed writer should produce, so un-skipping it is the whole of pcapkit’s side.</p>
+</div>
 </section>
 <section id="reassembly-beyond-ip-and-tcp">
 <h2>Reassembly Beyond IP and TCP<a class="headerlink" href="#reassembly-beyond-ip-and-tcp" title="Link to this heading">¶</a></h2>

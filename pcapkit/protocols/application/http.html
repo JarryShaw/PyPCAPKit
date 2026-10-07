@@ -588,7 +588,11 @@ and <a class="reference internal" href="httpv2.html#pcapkit.protocols.applicatio
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
+<dd class="field-odd"><p>Key-value pairs for protocol construction, including the <code class="docutils literal notranslate"><span class="pre">version</span></code>
+that <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> dispatches on.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither HTTP/1.* nor HTTP/2 data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -644,14 +648,16 @@ not, so it is left alone rather than half-implemented.</p></li>
 preface ahead of it, or an opaque HTTP/1 message body – is
 genuinely undecidable from one payload, and the honest answer is
 the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> that an escaping <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> becomes under
-<code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code>. In particular there
-is deliberately <em>no</em> heuristic on the nine-octet frame header
-(“type at most 9, reserved bit clear”): that misfires on binary
-HTTP/1 bodies, which is precisely how garbage text was classified
-HTTP/2 to begin with. A self-consistent bare frame is still parsed
-as HTTP/2, but by the fall-through below – on the parser’s own
-length/type consistency rules – rather than by a guess dressed up
-as identification.</p></li>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code>. The nine-octet frame
+header is therefore never used to <em>identify</em> HTTP/2 ahead of
+HTTP/1: as identification it misfires on binary HTTP/1 bodies,
+which is precisely how garbage text was classified HTTP/2 to begin
+with. A bare frame is parsed as HTTP/2 only by the fall-through
+below, and only if its header is one a conforming sender could
+write (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_test_http2_frame()</span></code>): a frame type <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a>
+defines, no undefined flag, and a stream that type may be sent on.
+Nine zero octets – a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame on stream 0, a protocol error
+under <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a> – are not guessed as HTTP/2.</p></li>
 </ul>
 </div>
 </dd></dl>
@@ -674,7 +680,7 @@ the tail of the preface as packet payload.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http._HTTP2_PREFACE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.</span></span><span class="sig-name descname"><span class="pre">_HTTP2_PREFACE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n'</span></span><a class="headerlink" href="#pcapkit.protocols.application.http._HTTP2_PREFACE" title="Link to this definition">¶</a></dt>
-<dd><p>The HTTP/2 connection preface (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>). A client opens every
+<dd><p>The HTTP/2 connection preface (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>). A client opens every
 HTTP/2 connection – with prior knowledge, over TLS, or after an upgrade –
 by sending exactly these 24 octets, and the sequence is <em>designed</em> to be
 identifiable without parsing: it is a well-formed HTTP/1.1 request line whose

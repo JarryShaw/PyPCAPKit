@@ -673,8 +673,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            byteorder: header byte order</span>
-<span class="sd">            lilendian: little-endian flag</span>
-<span class="sd">            bigendian: big-endian flag</span>
+<span class="sd">            lilendian: little-endian flag; overrides ``byteorder`` if given</span>
+<span class="sd">            bigendian: big-endian flag; overrides ``byteorder`` if given</span>
 <span class="sd">            nanosecond: nanosecond-resolution file flag</span>
 <span class="sd">            version: version information</span>
 <span class="sd">            version_major: major version number</span>
@@ -790,7 +790,8 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">'magic_number'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="s1">'byteorder'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+            <span class="s1">'nanosecond'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">,</span>
             <span class="s1">'version_major'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span><span class="p">,</span>
             <span class="s1">'version_minor'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span><span class="p">,</span>
             <span class="s1">'thiszone'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">thiszone</span><span class="p">,</span>
@@ -821,21 +822,20 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            byteorder: header byte order</span>
-<span class="sd">            lilendian: little-endian flag</span>
-<span class="sd">            bigendian: big-endian flag</span>
+<span class="sd">            lilendian: little-endian flag; overrides ``byteorder`` if given</span>
+<span class="sd">            bigendian: big-endian flag; overrides ``byteorder`` if given</span>
 <span class="sd">            nanosecond: nanosecond-resolution file flag</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Magic number and little-endian flag.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">lilendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bigendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">lilendian</span> <span class="o">==</span> <span class="n">bigendian</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="s1">'unresolved byte order'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">bigendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'big'</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)],</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">lilendian</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)],</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">lilendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bigendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lilendian</span> <span class="o">==</span> <span class="n">bigendian</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="s1">'unresolved byte order'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bigendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'big'</span> <span class="k">if</span> <span class="n">bigendian</span> <span class="k">else</span> <span class="s1">'little'</span>
+        <span class="k">elif</span> <span class="n">lilendian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'little'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'big'</span>
 
         <span class="k">if</span> <span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown byte order: </span><span class="si">{</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>

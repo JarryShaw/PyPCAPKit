@@ -802,8 +802,16 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>
-                                       <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
+        <span class="c1"># NOTE: A capture that ends at or inside the header has no payload</span>
+        <span class="c1"># octets, and parsing the next layer from none would default-fill a</span>
+        <span class="c1"># header that was never captured, which ``from_data`` then rebuilds</span>
+        <span class="c1"># (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
+            <span class="n">_plen</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_plen</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">_plen</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IPv4.make">
@@ -842,6 +850,7 @@
              <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv4Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
              <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -880,6 +889,8 @@
 <span class="sd">            src: Source address of the packet.</span>
 <span class="sd">            dst: Destination address of the packet.</span>
 <span class="sd">            options: Options of the packet.</span>
+<span class="sd">            total_length: Total length of the packet, header included; computed</span>
+<span class="sd">                from the header and the payload when omitted.</span>
 <span class="sd">            payload: Payload of the packet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -903,12 +914,19 @@
         <span class="n">ttl_val</span> <span class="o">=</span> <span class="n">ttl</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ttl</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ipv4_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ipv4_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
-        <span class="n">ihl</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">total_length</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">total_len</span> <span class="o">=</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">ihl</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">options_length</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: An explicit ``total_length`` is written as given, so that a</span>
+        <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
+        <span class="c1"># length the sender declared instead of the one that was recorded</span>
+        <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
+        <span class="c1"># what a plain ``IPv4(payload=...)`` wants.</span>
+        <span class="k">if</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_length</span> <span class="o">=</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv4</span><span class="p">(</span>
             <span class="n">vihl</span><span class="o">=</span><span class="p">{</span>
@@ -922,7 +940,7 @@
                 <span class="s1">'rel'</span><span class="p">:</span> <span class="n">tos_rel_val</span><span class="p">,</span>
                 <span class="s1">'ecn'</span><span class="p">:</span> <span class="n">tos_ecn_val</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_len</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'df'</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
@@ -1031,6 +1049,10 @@
             <span class="c1"># ``hdr_len`` exceeds the fixed 20-octet header (see :meth:`read`),</span>
             <span class="c1"># so read it defensively rather than assuming it always exists.</span>
             <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="c1"># NOTE: The parsed total length is passed through rather than left</span>
+            <span class="c1"># to ``make`` to recompute, so that a truncated capture rebuilds</span>
+            <span class="c1"># with the length that was on the wire (:issue:`1155`).</span>
+            <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 

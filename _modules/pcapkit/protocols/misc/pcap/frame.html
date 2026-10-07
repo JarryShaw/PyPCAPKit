@@ -957,6 +957,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            The frame index and the global header are context of the PCAP file</span>
+<span class="sd">            rather than fields of the frame, so they are not returned here: pass</span>
+<span class="sd">            them to :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` as</span>
+<span class="sd">            ``num`` and ``header``.</span>
+
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'ts_sec'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">frame_info</span><span class="o">.</span><span class="n">ts_sec</span><span class="p">,</span>

@@ -703,6 +703,7 @@
              <span class="n">hop_limit</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>  <span class="c1"># reasonable default</span>
              <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::1'</span><span class="p">,</span>
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+             <span class="n">payload_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -717,6 +718,8 @@
 <span class="sd">            hop_limit: Hop limit.</span>
 <span class="sd">            src: Source IP address.</span>
 <span class="sd">            dst: Destination IP address.</span>
+<span class="sd">            payload_length: Length of the payload, extension headers included;</span>
+<span class="sd">                computed from the payload when omitted.</span>
 <span class="sd">            payload: Payload data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -727,13 +730,21 @@
         <span class="n">next_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
                                     <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: An explicit ``payload_length`` is written as given, so that a</span>
+        <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
+        <span class="c1"># length the sender declared instead of the one that was recorded</span>
+        <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
+        <span class="c1"># what a plain ``IPv6(payload=...)`` wants.</span>
+        <span class="k">if</span> <span class="n">payload_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_IPv6</span><span class="p">(</span>
             <span class="n">hextet</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
                 <span class="s1">'class'</span><span class="p">:</span> <span class="n">traffic_class</span><span class="p">,</span>
                 <span class="s1">'label'</span><span class="p">:</span> <span class="n">flow_label</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">payload_length</span><span class="p">,</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">limit</span><span class="o">=</span><span class="n">hop_limit</span><span class="p">,</span>
             <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
@@ -802,6 +813,11 @@
             <span class="s1">'hop_limit'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span>
             <span class="s1">'src'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
+            <span class="c1"># NOTE: ``data.payload`` is the parsed payload length, passed through</span>
+            <span class="c1"># rather than left to ``make`` to recompute, so that a truncated</span>
+            <span class="c1"># capture rebuilds with the length that was on the wire</span>
+            <span class="c1"># (:issue:`1155`).</span>
+            <span class="s1">'payload_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="p">}</span></div>
 

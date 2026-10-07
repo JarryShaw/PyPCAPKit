@@ -1757,7 +1757,7 @@
 
 <div class="viewcode-block" id="HIP._read_param_dh_group_list">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_dh_group_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_dh_group_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_DHGroupListParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_dh_group_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_DHGroupListParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                                   <span class="n">options</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DHGroupListParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HIP ``DH_GROUP_LIST`` parameter.</span>
 
@@ -1783,7 +1783,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed parameter data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="n">dh_group_list</span> <span class="o">=</span> <span class="n">Data_DHGroupListParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
@@ -1910,9 +1916,12 @@
 <span class="sd">            Parsed parameter data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** a ``2`` modulo.</span>
+<span class="sd">            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is</span>
+<span class="sd">                **NOT** a ``2`` modulo.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -2141,7 +2150,7 @@
 
 <div class="viewcode-block" id="HIP._read_param_hit_suite_list">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hit_suite_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hit_suite_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HITSuiteListParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hit_suite_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HITSuiteListParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                                    <span class="n">options</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HITSuiteListParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HIP ``HIT_SUITE_LIST`` parameter.</span>
 
@@ -2167,7 +2176,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed parameter data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="n">hit_suite_list</span> <span class="o">=</span> <span class="n">Data_HITSuiteListParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
@@ -2580,9 +2595,12 @@
 <span class="sd">            Parsed parameter data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.</span>
+<span class="sd">            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is</span>
+<span class="sd">                **NOT** ``2`` modulo.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -4183,7 +4201,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">group_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_Group]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">group_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -4314,7 +4338,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_Cipher]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">cipher_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -4612,7 +4642,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">suite_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_HITSuite]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">suite_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5064,7 +5100,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: The parameter is **NOT** supported in HIPv1.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tf_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_Parameter]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">tf_type</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

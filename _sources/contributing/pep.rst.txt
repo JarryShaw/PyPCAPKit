@@ -592,6 +592,19 @@ anyway: the generated sample captures are not shipped, and ``tests/_tiers.py``
 resolves paths from a repository root that an installed package does not have.
 Anyone wanting to run the tests wants the repository, which is where they are.
 
+.. note::
+
+   One test is skipped on an upstream defect rather than a pcapkit one.
+   ``PlistRoundTripTests.test_plist_report_round_trips_through_plistlib``, in
+   ``tests/integration/test_output_formats.py``, reads a ``format='plist'`` report
+   back with :func:`plistlib.load`, which fails with ``AttributeError: 'NoneType'
+   object has no attribute 'groupdict'``. ``dictdumper``'s ``PLIST`` writer formats
+   every :class:`~datetime.datetime` as ``'%Y-%m-%dT%H:%M:%S.%fZ'``, always with six
+   fractional digits, and :mod:`plistlib`'s ``<date>`` pattern admits none, so its
+   match returns ``None``. The fix belongs upstream, as `JarryShaw/DictDumper#122
+   <https://github.com/JarryShaw/DictDumper/issues/122>`__; the test asserts what a
+   fixed writer should produce, so un-skipping it is the whole of pcapkit's side.
+
 Reassembly Beyond IP and TCP
 ----------------------------
 

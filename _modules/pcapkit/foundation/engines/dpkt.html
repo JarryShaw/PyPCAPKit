@@ -557,6 +557,9 @@
 <span class="sd">        as :mod:`dpkt` and :attr:`self._extmp &lt;DPKT._extmp&gt;`</span>
 <span class="sd">        as an iterator from :class:`dpkt.pcap.Reader`.</span>
 
+<span class="sd">        The global header is parsed and dumped first, by</span>
+<span class="sd">        :meth:`self.extractor.record_header &lt;pcapkit.foundation.extraction.Extractor.record_header&gt;`.</span>
+
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If :attr:`self.extractor._exlyr &lt;pcapkit.foundation.extraction.Extractor._exlyr&gt;`</span>
 <span class="sd">                and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
@@ -593,6 +596,9 @@
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>
+
+        <span class="c1"># extract global header</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">record_header</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAP</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dpkt: reading </span><span class="si">%s</span><span class="s1"> as PCAP'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
@@ -651,8 +657,6 @@
                 <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
-                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span>
 
         <span class="c1"># record fragments</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>

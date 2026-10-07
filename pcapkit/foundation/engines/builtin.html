@@ -548,8 +548,10 @@ method is called.</p>
 as <a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.header" title="pcapkit.foundation.engines.pcap.PCAP.header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.header</span></code></a>. Information such as PCAP version, data
 link layer protocol type and nanosecond flag are also saved on the
 current <a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP" title="pcapkit.foundation.engines.pcap.PCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP</span></code></a> engine instance.</p>
-<p>For output, the method will dump the parsed PCAP global header under
-the name of <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code>.</p>
+<p>For output, the method will create the output writer from the parsed
+PCAP global header, via <code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._open_output</span></code>, and dump the
+header under the name of <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code> – except to a PCAP writer,
+which has already written it.</p>
 </dd></dl>
 
 <dl class="py method">

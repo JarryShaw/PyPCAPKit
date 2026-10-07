@@ -488,8 +488,8 @@
 <p>The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer’s,
-and a defect programme run through the issue tracker, citing 266 issues and pull
-requests from <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/121">#121</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1050">#1050</a> as of this revision. The programme is still
+and a defect programme run through the issue tracker, citing 301 issues and pull
+requests from <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/121">#121</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1156">#1156</a> as of this revision. The programme is still
 running, so those figures are a snapshot rather than a total.</p>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so
@@ -1050,6 +1050,19 @@ qualified to <code class="docutils literal notranslate"><span class="pre">defaul
 with <code class="docutils literal notranslate"><span class="pre">40</span></code> in <code class="docutils literal notranslate"><span class="pre">Hardware</span></code>’s declared-but-unassigned range, now raises <code class="docutils literal notranslate"><span class="pre">KeyError</span></code>
 naming the original key; its test waited on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/865">#865</a> (above), then landed once
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/865">#865</a> merged. Closes <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/864">#864</a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/868">#868</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ProtoChain.__add__</span></code> returned the left operand’s cached <code class="docutils literal notranslate"><span class="pre">protocols</span></code> and
+<code class="docutils literal notranslate"><span class="pre">aliases</span></code>: once <code class="docutils literal notranslate"><span class="pre">a.protocols</span></code> had been read, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">ProtoChain(IPv4)</span></code> reported
+<code class="docutils literal notranslate"><span class="pre">chain</span> <span class="pre">==</span> <span class="pre">'Ethernet:IPv4'</span></code> but <code class="docutils literal notranslate"><span class="pre">protocols</span> <span class="pre">==</span> <span class="pre">(Ethernet,)</span></code>. <code class="docutils literal notranslate"><span class="pre">copy.copy(self)</span></code>
+carried the cache across; the result is now built fresh, as <code class="docutils literal notranslate"><span class="pre">from_list</span></code> builds one,
+and <code class="docutils literal notranslate"><span class="pre">+=</span></code> follows, since it falls back to <code class="docutils literal notranslate"><span class="pre">__add__</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1099">#1099</a>).</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">SchemaField</span></code> with no declared length handed its <code class="docutils literal notranslate"><span class="pre">-1</span></code> placeholder to the nested
+schema as that schema’s length, so every item of such a list warned
+<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>: 12 <code class="docutils literal notranslate"><span class="pre">SchemaWarning</span></code> for a two-locator HIP <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code>, 6
+for one MH CGA Parameters item. <code class="docutils literal notranslate"><span class="pre">SchemaField.unpack</span></code> now passes what is left in the
+buffer as a declared length – not <code class="docutils literal notranslate"><span class="pre">None</span></code>, which would turn a truncated item’s
+<code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> into <code class="docutils literal notranslate"><span class="pre">prepare()</span></code>’s quiet <code class="docutils literal notranslate"><span class="pre">StreamEOFError</span></code>. Fixed-length items
+are unchanged; the HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> pair, whose size is fixed, is given it in its
+own schema instead (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1140">#1140</a>, below) (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1148">#1148</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1097,6 +1110,12 @@ keys TLS key log entries by a raw bytes client random whose repr can carry all t
 characters. The upstream half is <code class="docutils literal notranslate"><span class="pre">JarryShaw/DictDumper#125</span></code>; this does not wait on
 it. The json writer’s quoting defect stands, upstream as
 <code class="docutils literal notranslate"><span class="pre">JarryShaw/DictDumper#121</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/772">#772</a>).</p></li>
+<li><p>the JSON writer emitted mapping keys unescaped, so the report of <code class="docutils literal notranslate"><span class="pre">test.pcapng</span></code> did
+not parse (<code class="docutils literal notranslate"><span class="pre">Expecting</span> <span class="pre">':'</span> <span class="pre">delimiter</span></code>): its TLS key log is keyed by a <code class="docutils literal notranslate"><span class="pre">bytes</span></code> client
+random whose repr holds <code class="docutils literal notranslate"><span class="pre">&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">\</span></code>. <code class="docutils literal notranslate"><span class="pre">escape_key</span></code> in <code class="docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common</span></code>
+now JSON-escapes keys for JSON output, as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/772">#772</a> made it XML-escape them for
+plist, and the JSON reports of all 23 <code class="docutils literal notranslate"><span class="pre">examples/captures/</span></code> files now parse. The
+upstream defect, <code class="docutils literal notranslate"><span class="pre">JarryShaw/DictDumper#121</span></code>, stands (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1152">#1152</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1350,6 +1369,28 @@ absent, then <code class="docutils literal notranslate"><span class="pre">Extrac
 module name in backticks. Only
 code that matched <code class="docutils literal notranslate"><span class="pre">import_test</span></code>’s old wording, or that expects two warnings,
 breaks.</p></li>
+<li><p>three <code class="docutils literal notranslate"><span class="pre">Extractor</span></code> defects: <code class="docutils literal notranslate"><span class="pre">Extractor.output</span></code>’s <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code> named
+<code class="docutils literal notranslate"><span class="pre">format</span></code> rather than <code class="docutils literal notranslate"><span class="pre">output</span></code>; <code class="docutils literal notranslate"><span class="pre">make_name</span></code> looked an unknown format up in the
+<code class="docutils literal notranslate"><span class="pre">__output__</span></code> <code class="docutils literal notranslate"><span class="pre">defaultdict</span></code> and so inserted it; and the Scapy engine never set
+<code class="docutils literal notranslate"><span class="pre">_offmt</span></code>, so <code class="docutils literal notranslate"><span class="pre">Extractor.format</span></code> raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> under
+<code class="docutils literal notranslate"><span class="pre">engine='scapy'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1095">#1095</a>).</p></li>
+<li><p>the DPKT, Scapy and PyShark engines call <code class="docutils literal notranslate"><span class="pre">Extractor.record_header()</span></code> at setup
+again, as they did until 2023, so the global-header step is shared with the default
+engine and sets <code class="docutils literal notranslate"><span class="pre">_offmt</span></code> for all four. <strong>Their dumped output changes</strong>: JSON, plist and tree
+reports gain the leading <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code> record (<code class="docutils literal notranslate"><span class="pre">Section</span> <span class="pre">Header</span> <span class="pre">1</span></code> for PCAP-NG)
+the default engine already writes, identical to its, and <code class="docutils literal notranslate"><span class="pre">files=True</span></code> writes that
+record’s file too; frame records are unchanged. <code class="docutils literal notranslate"><span class="pre">Extractor.format</span></code> now also answers
+on a capture with no frames. <code class="docutils literal notranslate"><span class="pre">format='pcap'</span></code> failing on every engine is a separate
+defect, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1127">#1127</a> (below) (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1104">#1104</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format='pcap'</span></code> failed on every engine with a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> from
+<code class="docutils literal notranslate"><span class="pre">PCAPIO.__init__()</span></code>, missing <code class="docutils literal notranslate"><span class="pre">protocol</span></code>: <code class="docutils literal notranslate"><span class="pre">Extractor.__init__</span></code> created the writer
+before any global header was read, so <code class="docutils literal notranslate"><span class="pre">PCAPIO</span></code> had no link type. The header step
+now creates it through <code class="docutils literal notranslate"><span class="pre">Extractor._open_output</span></code>, and <code class="docutils literal notranslate"><span class="pre">run()</span></code> opens it for engines
+with no such step; a PCAP writer takes the frame itself and skips the
+<code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code> record, so the default engine writes <code class="docutils literal notranslate"><span class="pre">in.pcap</span></code> back byte for
+byte. The third-party engines hand the writer no frame octets, so they fall back to
+JSON with a <code class="docutils literal notranslate"><span class="pre">FormatWarning</span></code>, as their flow tracing already does, and a PCAP-NG
+input raises <code class="docutils literal notranslate"><span class="pre">FormatError</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1127">#1127</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1528,6 +1569,17 @@ the <code class="docutils literal notranslate"><span class="pre">-1</span></code
 (any <code class="docutils literal notranslate"><span class="pre">proto</span></code> other than <code class="docutils literal notranslate"><span class="pre">-1</span></code>) is still refused with <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>. A
 subclass that calls either method with <code class="docutils literal notranslate"><span class="pre">-1</span></code> changes from raising to succeeding;
 no subclass in the package does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>).</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">Protocol</span></code> and <code class="docutils literal notranslate"><span class="pre">ProtocolMeta</span></code> docstrings. <code class="docutils literal notranslate"><span class="pre">Protocol</span></code> claimed to be the base
+of every protocol family, though nothing in the package subclasses it, and
+<code class="docutils literal notranslate"><span class="pre">ProtocolMeta</span></code> claimed to generate attributes its empty body does not. <code class="docutils literal notranslate"><span class="pre">Protocol</span></code>
+is now documented as the base for third-party protocols, and <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> as the
+one the families derive from (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1101">#1101</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">OSPF_CrytographicAuthentication</span></code>: the misspelling is
+corrected to <code class="docutils literal notranslate"><span class="pre">OSPF_CryptographicAuthentication</span></code>, and <code class="docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code>
+in <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.ospf</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.application.ospf</span></code> to <code class="docutils literal notranslate"><span class="pre">CryptographicAuthentication</span></code>, with
+no alias left for the old spelling. Both OSPF names also move to the application group
+of <code class="docutils literal notranslate"><span class="pre">schema.__all__</span></code> and <code class="docutils literal notranslate"><span class="pre">data.__all__</span></code>, after <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s move (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1090">#1090</a>).</p></li>
 </ul>
 </section>
 <section id="id9">
@@ -2361,6 +2413,108 @@ body as <code class="docutils literal notranslate"><span class="pre">None</span>
 <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> now hands <code class="docutils literal notranslate"><span class="pre">make</span></code> <code class="docutils literal notranslate"><span class="pre">b''</span></code> for a <code class="docutils literal notranslate"><span class="pre">None</span></code> body; <code class="docutils literal notranslate"><span class="pre">info.body</span></code> is
 still <code class="docutils literal notranslate"><span class="pre">None</span></code>, so readers see no change. <code class="docutils literal notranslate"><span class="pre">httpv2</span></code> is unaffected: its
 empty-payload frames already round-trip (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1050">#1050</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IPv6._read_ip_hextet</span></code> sliced the traffic class from <code class="docutils literal notranslate"><span class="pre">hex[0:2]</span></code> and the flow
+label from <code class="docutils literal notranslate"><span class="pre">hex[2:]</span></code>, both including the version nibble, so <code class="docutils literal notranslate"><span class="pre">6abcdef0</span></code> read as
+<code class="docutils literal notranslate"><span class="pre">(6,</span> <span class="pre">0x6a,</span> <span class="pre">0xbcdef0)</span></code>; it now reads <code class="docutils literal notranslate"><span class="pre">(6,</span> <span class="pre">0xab,</span> <span class="pre">0xcdef0)</span></code>. The parser reads these
+fields through the schema, so only a direct call was affected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1094">#1094</a>).</p></li>
+<li><p>the Mobility Header Message ID option wrote a zero fraction for every timestamp, and
+<code class="docutils literal notranslate"><span class="pre">MesgIDOption.post_process</span></code> ignored the fraction on read. <code class="docutils literal notranslate"><span class="pre">_make_opt_mesg_id</span></code> now
+writes <code class="docutils literal notranslate"><span class="pre">round(frac</span> <span class="pre">*</span> <span class="pre">2**32)</span></code>, clamped to 32 bits, and the reader adds
+<code class="docutils literal notranslate"><span class="pre">fraction</span> <span class="pre">/</span> <span class="pre">2**32</span></code> seconds, so <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> keeps sub-second precision
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1093">#1093</a>).</p></li>
+<li><p>three HIP parameter defects. <code class="docutils literal notranslate"><span class="pre">HOST_ID</span></code> packed DI-Type and DI-Length as a 4-octet
+<code class="docutils literal notranslate"><span class="pre">BitField</span></code> where <span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> section 5.2.9 has one 16-bit word, so every built
+record carried two surplus octets and read back the wrong algorithm (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1118">#1118</a>);
+with it, <code class="docutils literal notranslate"><span class="pre">make_samples.py</span></code> builds every HIP parameter. <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code> warned at six
+Cipher IDs, which section 5.2.8 allows; it now warns only above six and keeps the
+first six, as a recipient must. The maker is unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1092">#1092</a>). And the
+HIPv2-only <code class="docutils literal notranslate"><span class="pre">DH_GROUP_LIST</span></code>, <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code>, <code class="docutils literal notranslate"><span class="pre">HIT_SUITE_LIST</span></code> and
+<code class="docutils literal notranslate"><span class="pre">TRANSPORT_FORMAT_LIST</span></code> were built and parsed in a HIPv1 packet; at version 1 the
+reader and the maker now raise <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code>, as <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> and
+<code class="docutils literal notranslate"><span class="pre">HIP_TRANSFORM</span></code> already do on a version mismatch (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1133">#1133</a>).</p></li>
+<li><p>the PCAP <code class="docutils literal notranslate"><span class="pre">Header</span></code> could not rebuild itself. <code class="docutils literal notranslate"><span class="pre">_make_magic</span></code>’s explicit-endian branch
+ignored <code class="docutils literal notranslate"><span class="pre">nanosecond</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1096">#1096</a>), and <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> returned a
+<code class="docutils literal notranslate"><span class="pre">magic_number</span></code> that <code class="docutils literal notranslate"><span class="pre">make()</span></code> does not take – one of the three keys the
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a> entry above reports – so <code class="docutils literal notranslate"><span class="pre">from_data</span></code> dropped it with an
+<code class="docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code> and rebuilt every header with the host-default <code class="docutils literal notranslate"><span class="pre">d4c3b2a1</span></code>
+magic. <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> now returns <code class="docutils literal notranslate"><span class="pre">byteorder</span></code> and <code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, and every byte
+order and timestamp resolution rebuilds unchanged. <code class="docutils literal notranslate"><span class="pre">Header._read_protos</span></code> also read
+four octets whatever <code class="docutils literal notranslate"><span class="pre">size</span></code> asked for (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1125">#1125</a>). And <code class="docutils literal notranslate"><span class="pre">_make_magic</span></code> honoured
+<code class="docutils literal notranslate"><span class="pre">lilendian</span></code> and <code class="docutils literal notranslate"><span class="pre">bigendian</span></code> only as a pair, so <code class="docutils literal notranslate"><span class="pre">Header(bigendian=True)</span></code> wrote
+<code class="docutils literal notranslate"><span class="pre">d4c3b2a1</span></code> on a little-endian host; either flag alone now picks the byte order and
+overrides <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>, and equal flags still raise <code class="docutils literal notranslate"><span class="pre">EndianError</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1144">#1144</a>).</p></li>
+<li><p>TCP’s NS flag was written by <code class="docutils literal notranslate"><span class="pre">make()</span></code> but never parsed: it had been commented out
+of <code class="docutils literal notranslate"><span class="pre">Flags</span></code>, the reader and <code class="docutils literal notranslate"><span class="pre">_make_data</span></code>, with no reason recorded. Per the owner’s
+ruling it is exposed rather than removed, so <code class="docutils literal notranslate"><span class="pre">info.flags.ns</span></code> exists and
+<code class="docutils literal notranslate"><span class="pre">from_data</span></code> keeps the bit (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1098">#1098</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">from_data</span></code> round trips. <code class="docutils literal notranslate"><span class="pre">Frame._make_data</span></code> returned <code class="docutils literal notranslate"><span class="pre">ts_src</span></code> and
+<code class="docutils literal notranslate"><span class="pre">L2TPv2._make_data</span></code> <code class="docutils literal notranslate"><span class="pre">prio</span></code>, the other two keys the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a> entry reports, so
+<code class="docutils literal notranslate"><span class="pre">from_data</span></code> discarded both with an <code class="docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code> and an L2TPv2 priority
+bit was lost; they are now <code class="docutils literal notranslate"><span class="pre">ts_sec</span></code> and <code class="docutils literal notranslate"><span class="pre">priority</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1097">#1097</a>). And
+<code class="docutils literal notranslate"><span class="pre">ProtocolBase.from_data</span></code> took no keywords, so <code class="docutils literal notranslate"><span class="pre">Frame.from_data</span></code> and
+<code class="docutils literal notranslate"><span class="pre">PCAPNG.from_data</span></code>, which need <code class="docutils literal notranslate"><span class="pre">num</span></code>/<code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">num</span></code>/<code class="docutils literal notranslate"><span class="pre">sct</span></code>/<code class="docutils literal notranslate"><span class="pre">ctx</span></code>, could
+not be called at all. Extra keywords now reach the construction, overriding
+<code class="docutils literal notranslate"><span class="pre">_make_data</span></code>’s, under the construction-keyword check, so a typo raises
+<code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1126">#1126</a>). <code class="docutils literal notranslate"><span class="pre">HTTP.from_data</span></code> always raised
+<code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">HTTP</span> <span class="pre">version:</span> <span class="pre">0</span></code>, looking up a <code class="docutils literal notranslate"><span class="pre">version</span></code> key neither versioned data
+class has; it now dispatches on the data’s class. HTTP/2’s <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> also
+returned the payload
+<code class="docutils literal notranslate"><span class="pre">length</span></code>, which <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> takes as the parse length, so even a direct call
+failed as shorter than the 9-octet frame header; <code class="docutils literal notranslate"><span class="pre">make</span></code> now computes it, and all
+231 HTTP frames in three sample captures rebuild byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1154">#1154</a>).</p></li>
+<li><p>Quick-Start options did not round-trip. The IPv4, HOPOPT and IPv6-Opts readers took
+the function from <code class="docutils literal notranslate"><span class="pre">schema.func</span></code>, which only a parsed schema carries, so a built
+option raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>; HOPOPT and IPv6-Opts also sized the 8-octet option
+as 5, misreading the nonce with a <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> warning (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1091">#1091</a>).
+TCP’s Quick-Start Response reader read one octet past the option, and its maker
+produced a negative rate code below 40 kbps; such a rate now rounds down to zero,
+which <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> permits (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1119">#1119</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ethernet</span></code>, <code class="docutils literal notranslate"><span class="pre">ARP</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code> packed MAC addresses as ASCII hex text.
+<code class="docutils literal notranslate"><span class="pre">Ethernet._make_mac_addr</span></code> returned the separator-stripped hex string and
+<code class="docutils literal notranslate"><span class="pre">BytesField(length=6)</span></code> truncated it, so <code class="docutils literal notranslate"><span class="pre">Ethernet()</span></code> put <code class="docutils literal notranslate"><span class="pre">303030303030</span></code> on the
+wire for an all-zero address (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1123">#1123</a>). <code class="docutils literal notranslate"><span class="pre">ARP._make_addr_resolve</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PCAPNG._make_mac_addr</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_eui_addr</span></code> did the same; all now decode the hex
+to octets, and <code class="docutils literal notranslate"><span class="pre">from_data</span></code> rebuilds each byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1134">#1134</a>).</p></li>
+<li><p>TCP’s User Timeout maker wrote <code class="docutils literal notranslate"><span class="pre">length=3</span></code> where <span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a> and the reader require
+4, so every option it built failed to parse with <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1120">#1120</a>).</p></li>
+<li><p><strong>a breaking change to</strong> the HTTP/2 frame <code class="docutils literal notranslate"><span class="pre">length</span></code>: it counted the 9-octet frame
+header, where <span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> section 4.1 counts the payload alone, so <code class="docutils literal notranslate"><span class="pre">make()</span></code> wrote
+<code class="docutils literal notranslate"><span class="pre">00000e</span></code> for a 5-octet PRIORITY frame and <code class="docutils literal notranslate"><span class="pre">read</span></code> rejected RFC-conformant frames
+– and, since <code class="docutils literal notranslate"><span class="pre">_read_http_priority</span></code> checked for 9, pcapkit’s own PRIORITY frame.
+The length and every per-type check now exclude the header. Captures written to the
+old convention no longer parse; nine frames packed by Scapy’s <code class="docutils literal notranslate"><span class="pre">contrib.http2</span></code> now
+parse and rebuild byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1121">#1121</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">ARP.make()</span></code>: <code class="docutils literal notranslate"><span class="pre">hlen</span></code> and <code class="docutils literal notranslate"><span class="pre">plen</span></code> are derived from the
+packed <code class="docutils literal notranslate"><span class="pre">sha</span></code> and <code class="docutils literal notranslate"><span class="pre">spa</span></code> when omitted, and an address that disagrees with its length
+field raises <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> where it used to be truncated silently –
+<code class="docutils literal notranslate"><span class="pre">ARP(ptype=IPv6,</span> <span class="pre">spa='::1')</span></code> wrote <code class="docutils literal notranslate"><span class="pre">plen=4</span></code> and four octets of the address. A
+non-IP <code class="docutils literal notranslate"><span class="pre">str</span></code> protocol address packs as hex octets rather than ASCII text, as
+hardware addresses do since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1134">#1134</a>, and non-hex input raises
+<code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1139">#1139</a>).</p></li>
+<li><p>HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> built each setting pair as a <code class="docutils literal notranslate"><span class="pre">SchemaField</span></code> with no length, so a
+well-formed frame warned <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> twice per pair. The item now has its
+fixed 6-octet size, as TCP SACK and SCTP gap-ack items already do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1140">#1140</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code> took almost any binary for HTTP/2 on its fall-through: nine
+zero octets read as a DATA frame. The HTTP/2 trial now runs only on a header with a
+type <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> defines, no undefined flag, the reserved bit clear and a stream that
+type is sent on. Over 5,000 fuzzed zero-heavy buffers, HTTP/2 labels fell from 566 to
+101, every one a legal DATA header. Explicit <code class="docutils literal notranslate"><span class="pre">version=2</span></code> parsing is unchanged
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1141">#1141</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">TCP.make()</span></code>’s options: <code class="docutils literal notranslate"><span class="pre">_make_tcp_options</span></code> dropped the
+<code class="docutils literal notranslate"><span class="pre">NOP</span></code> and <code class="docutils literal notranslate"><span class="pre">EOOL</span></code> options it was given and padded each other option to 4 octets
+separately, so <code class="docutils literal notranslate"><span class="pre">from_data</span></code> rebuilt none of the 1,117 segments in <code class="docutils literal notranslate"><span class="pre">http.pcap</span></code>
+with their original header octets. Options are now emitted as given and padded once at
+the end – zero octets after a trailing <code class="docutils literal notranslate"><span class="pre">EOOL</span></code>, otherwise <code class="docutils literal notranslate"><span class="pre">NOP</span></code> options and an
+<code class="docutils literal notranslate"><span class="pre">EOOL</span></code> – so a built header can be shorter than before; every segment in six
+sample captures rebuilds, and <code class="docutils literal notranslate"><span class="pre">options-*.pcap</span></code> regenerate unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1151">#1151</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">from_data</span></code> on a capture truncated by snaplen: <code class="docutils literal notranslate"><span class="pre">IPv4</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IPv6</span></code> and <code class="docutils literal notranslate"><span class="pre">UDP</span></code> rebuilt their length field from the payload at hand, writing
+the recorded length, so <code class="docutils literal notranslate"><span class="pre">big_endian.pcap</span></code> frame 3 came back as <code class="docutils literal notranslate"><span class="pre">45000052</span></code> where
+<code class="docutils literal notranslate"><span class="pre">450004a2</span></code> was on the wire. <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> now passes the parsed length through to
+<code class="docutils literal notranslate"><span class="pre">make()</span></code>’s new <code class="docutils literal notranslate"><span class="pre">total_length</span></code> (IPv4, UDP) or <code class="docutils literal notranslate"><span class="pre">payload_length</span></code> (IPv6) keyword,
+which computes the length as before when omitted, so <code class="docutils literal notranslate"><span class="pre">IPv4(payload=...)</span></code> is
+unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1155">#1155</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -2401,7 +2555,7 @@ offsets unscaled (<a class="extlink-issue reference external" href="https://gith
 loaded its layer registry, so that engine did not dissect at all (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/409">#409</a>), and its
 IPv4 fragment offset reached reassembly unscaled (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/483">#483</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/484">#484</a>). The four
 IPv6 adapters disagreed about whether the 8-octet Fragment header belongs to <code class="docutils literal notranslate"><span class="pre">ihl</span></code>,
-<code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code>; per <span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none, and all four
+<code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code>; per <span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none, and all four
 now agree (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/415">#415</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/424">#424</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code>’s <code class="docutils literal notranslate"><span class="pre">IP.src</span></code>/<code class="docutils literal notranslate"><span class="pre">.dst</span></code> are dotted-decimal ASCII text in a
 <code class="docutils literal notranslate"><span class="pre">ctypes.c_char_p</span></code> (per <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> 0.12.0’s <code class="docutils literal notranslate"><span class="pre">ip.py</span></code>), not packed 4-byte values,
@@ -2440,6 +2594,9 @@ every root filter name single-DLT across the 157 (of 226) encapsulations this ho
 Wireshark can write. <code class="docutils literal notranslate"><span class="pre">pcapkit/toolkit/pyshark.py</span></code> reaches 100% coverage under new
 tests that fail 26 ways against the unfixed tree; live pyshark parsing stays
 unexercised, since <code class="docutils literal notranslate"><span class="pre">pyshark.FileCapture</span></code> does not run on Python 3.14 (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/850">#850</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code>’s <code class="docutils literal notranslate"><span class="pre">tcp_reassembly</span></code> set <code class="docutils literal notranslate"><span class="pre">last</span></code> one past the segment.
+<code class="docutils literal notranslate"><span class="pre">TCP_Packet.last</span></code> is inclusive, and the four other adapters set
+<code class="docutils literal notranslate"><span class="pre">seqnum</span> <span class="pre">+</span> <span class="pre">len(payload)</span> <span class="pre">-</span> <span class="pre">1</span></code>, as this one now does too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1100">#1100</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -2575,12 +2732,12 @@ since <code class="docutils literal notranslate"><span class="pre">copy2</span><
 the same <code class="docutils literal notranslate"><span class="pre">else:</span></code>. Closes <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/875">#875</a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/876">#876</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code> tracked the Mozilla NSS key-log wiki, but
 <code class="docutils literal notranslate"><span class="pre">draft-ietf-opsawg-pcapng-06</span></code> S4.7 now points at <code class="docutils literal notranslate"><span class="pre">[I-D.ietf-tls-keylogfile]</span></code>
-(draft-05), published as <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>, “The SSLKEYLOGFILE Format for TLS”, whose S4.2
+(draft-05), published as <span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>, “The SSLKEYLOGFILE Format for TLS”, whose S4.2
 creates the IANA “TLS SSLKEYLOGFILE Labels” registry. Against it, <code class="docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code>
-was missing <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> and <code class="docutils literal notranslate"><span class="pre">ECH_CONFIG</span></code> (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a> SS2.3/4.2), so
+was missing <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> and <code class="docutils literal notranslate"><span class="pre">ECH_CONFIG</span></code> (<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a> SS2.3/4.2), so
 <code class="docutils literal notranslate"><span class="pre">TLSKeyLabel('ECH_SECRET')</span></code> raised <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on a legitimate Decryption
 Secrets Block; both are added, <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> keeping the file’s <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">nosec</span> <span class="pre">B105</span></code>
-bandit convention for <code class="docutils literal notranslate"><span class="pre">*_SECRET</span></code> members. <code class="docutils literal notranslate"><span class="pre">RSA</span></code> has no row in <span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>’s
+bandit convention for <code class="docutils literal notranslate"><span class="pre">*_SECRET</span></code> members. <code class="docutils literal notranslate"><span class="pre">RSA</span></code> has no row in <span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>’s
 registry (it is an NSS-only label the NSS wiki records as removed in NSS 3.34) and
 is kept, since removing a public member is breaking, with a docstring comment
 marking it the historical exception. <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/pcapng/secrets_type.py</span></code>’s
@@ -2795,7 +2952,7 @@ lines against the file’s 580 on this entry), so a reported number could not re
 of the file, and four roles on two source lines were all reported as <code class="docutils literal notranslate"><span class="pre">line</span> <span class="pre">46</span></code>. The
 conversion now carries a source map, so every complaint cites a line of the file the
 message names, one per construct, in the entry’s order (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/588">#588</a>). Rule 2 accepted
-only the bare-number spelling of Sphinx’s <code class="docutils literal notranslate"><span class="pre">:rfc:</span></code> role, so <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a>
+only the bare-number spelling of Sphinx’s <code class="docutils literal notranslate"><span class="pre">:rfc:</span></code> role, so <span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a>
 fell past it and was reported as a role the rules do not cover; both spellings now
 convert, the anchor carried into the link target and the link text taken from
 Sphinx’s own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/592">#592</a>). Regenerating <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> is byte-identical over all
@@ -2946,6 +3103,18 @@ checks each name with <code class="docutils literal notranslate"><span class="pr
 trusts <code class="docutils literal notranslate"><span class="pre">committed_captures()</span></code> for the tracked set. A hardcoded literal that happens
 to match the tracked names still passes; the test catches a set that is wrong when it
 runs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/708">#708</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pcapkit.all.__all__</span></code> listed <code class="docutils literal notranslate"><span class="pre">OSPF</span></code>, <code class="docutils literal notranslate"><span class="pre">RARP</span></code> and <code class="docutils literal notranslate"><span class="pre">DRARP</span></code> on its Link Layer
+line after <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> moved them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1124">#1124</a>), and omitted 18 names its packages
+export, among them <code class="docutils literal notranslate"><span class="pre">ESP</span></code>, <code class="docutils literal notranslate"><span class="pre">HTTPv1</span></code>, <code class="docutils literal notranslate"><span class="pre">HTTPv2</span></code>, <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code> and <code class="docutils literal notranslate"><span class="pre">EnumRegistry</span></code>,
+so <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pcapkit.all</span> <span class="pre">import</span> <span class="pre">*</span></code> did not bind them. <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code> stays
+unlisted deliberately, so generic helpers such as <code class="docutils literal notranslate"><span class="pre">warn</span></code> do not arrive through
+<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1136">#1136</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> wrote every HTTP/2 sample frame on stream 0, which
+<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> forbids for <code class="docutils literal notranslate"><span class="pre">DATA</span></code>, <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> and the other stream-level types, so six
+of the ten frames in <code class="docutils literal notranslate"><span class="pre">options-transport.pcap</span></code> decoded as <code class="docutils literal notranslate"><span class="pre">TCP:Raw</span></code>.
+<code class="docutils literal notranslate"><span class="pre">_httpv2_build</span></code> now puts <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code>, <code class="docutils literal notranslate"><span class="pre">PING</span></code> and <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> on stream 0 and every
+other type on stream 1, with <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> promising stream 2, and all ten decode
+as <code class="docutils literal notranslate"><span class="pre">TCP:HTTP/2</span></code>; no other generated capture changes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1156">#1156</a>).</p></li>
 </ul>
 </section>
 </section>

@@ -10075,13 +10075,14 @@ sender predates <span class="target" id="index-271"></span><a class="rfc referen
 <a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> of a nested schema.
 Each entry is self-describing – a type octet, a length octet and that many
 octets of value [<span class="target" id="index-273"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.1"><strong>RFC 5949 Section 6.2.1</strong></a>] – so a nested schema would need
-a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> with no fixed length,
-and such a field is handed <code class="docutils literal notranslate"><span class="pre">-1</span></code> as its length and hands that on as the
-nested schema’s <code class="docutils literal notranslate"><span class="pre">__length__</span></code>. Every field then decrements a budget that
-started negative, and parsing a perfectly valid option emits a
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning" title="pcapkit.utilities.warnings.SchemaWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaWarning</span></code></a> per field saying
-<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>. Decoding the run directly costs a few lines and
-keeps a valid packet quiet.</p>
+a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> with no fixed length.
+Such a field sizes the nested schema by what is left of the run, which
+parses a valid option cleanly, but an entry whose length overruns the
+option would then only raise a
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning" title="pcapkit.utilities.warnings.SchemaWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaWarning</span></code></a> and come back with its
+value padded out by zero octets. Decoding the run directly costs a few
+lines and rejects that entry with
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> instead.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.ContextRequestOption.reserved">

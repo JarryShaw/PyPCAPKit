@@ -596,8 +596,9 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ,too-many-arguments</span>
                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">thiszone</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigfigs</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mh">0x40_000</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Initially dump file heads and tails.</span>
 
@@ -605,6 +606,9 @@
 <span class="sd">            protocol: data link type</span>
 <span class="sd">            byteorder: header byte order</span>
 <span class="sd">            nanosecond: nanosecond-resolution file flag</span>
+<span class="sd">            thiszone: GMT to local correction</span>
+<span class="sd">            sigfigs: accuracy of timestamps</span>
+<span class="sd">            snaplen: max length of captured packets, in octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        """</span>
@@ -612,6 +616,9 @@
             <span class="n">network</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span>
             <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+            <span class="n">thiszone</span><span class="o">=</span><span class="n">thiszone</span><span class="p">,</span>
+            <span class="n">sigfigs</span><span class="o">=</span><span class="n">sigfigs</span><span class="p">,</span>
+            <span class="n">snaplen</span><span class="o">=</span><span class="n">snaplen</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">data</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>

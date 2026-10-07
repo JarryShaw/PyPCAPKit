@@ -576,8 +576,11 @@
 <span class="sd">        link layer protocol type and nanosecond flag are also saved on the</span>
 <span class="sd">        current :class:`PCAP` engine instance.</span>
 
-<span class="sd">        For output, the method will dump the parsed PCAP global header under</span>
-<span class="sd">        the name of ``Global Header``.</span>
+<span class="sd">        For output, the method will create the output writer from the parsed</span>
+<span class="sd">        PCAP global header, via :meth:`Extractor._open_output</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._open_output&gt;`, and dump the</span>
+<span class="sd">        header under the name of ``Global Header`` -- except to a PCAP writer,</span>
+<span class="sd">        which has already written it.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init,protected-access</span>
@@ -594,12 +597,16 @@
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="k">return</span>
 
+        <span class="n">ext</span><span class="o">.</span><span class="n">_open_output</span><span class="p">(</span><span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                         <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsec</span><span class="p">,</span> <span class="n">thiszone</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">thiszone</span><span class="p">,</span>
+                         <span class="n">sigfigs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">sigfigs</span><span class="p">,</span> <span class="n">snaplen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/Global Header.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Global Header'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Global Header'</span><span class="p">)</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
+        <span class="c1"># NOTE: a PCAP writer has already written the global header on creation.</span>
+        <span class="k">if</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="s1">'pcap'</span><span class="p">:</span>
+            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Global Header'</span><span class="p">)</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span></div>
 
 
@@ -637,11 +644,14 @@
         <span class="c1"># write plist</span>
         <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
+            <span class="c1"># NOTE: a PCAP writer takes the frame itself, for its octets and</span>
+            <span class="c1"># record header; the other writers take its fields.</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">==</span> <span class="s1">'pcap'</span> <span class="k">else</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
                 <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">ofile</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
+                <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
+                <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
 
         <span class="c1"># record fragments</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>

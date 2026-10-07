@@ -1281,8 +1281,22 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
 
+        <span class="c1"># NOTE: a negative length means the field was declared without one, so</span>
+        <span class="c1"># the nested schema is sized by whatever remains in ``file`` instead.</span>
+        <span class="c1"># Passing ``-1`` on would seed its ``__length__`` negative, and every</span>
+        <span class="c1"># sub-field read would then warn ``packet length &lt; 0``. The remainder is</span>
+        <span class="c1"># measured here rather than left to ``prepare`` (by passing</span>
+        <span class="c1"># :data:`None`), because there a remainder of zero raises the quiet</span>
+        <span class="c1"># end-of-stream signal that ends a whole extraction, whereas here it</span>
+        <span class="c1"># only means the item is truncated.</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packet</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
                                                 <span class="n">nested_packet_context</span><span class="p">(</span><span class="n">packet</span><span class="p">)))</span></div>
 </div>
 

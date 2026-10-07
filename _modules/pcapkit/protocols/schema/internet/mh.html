@@ -2114,13 +2114,14 @@
 <span class="sd">        :class:`~pcapkit.corekit.fields.collections.ListField` of a nested schema.</span>
 <span class="sd">        Each entry is self-describing -- a type octet, a length octet and that many</span>
 <span class="sd">        octets of value [:rfc:`5949#section-6.2.1`] -- so a nested schema would need</span>
-<span class="sd">        a :class:`~pcapkit.corekit.fields.misc.SchemaField` with no fixed length,</span>
-<span class="sd">        and such a field is handed ``-1`` as its length and hands that on as the</span>
-<span class="sd">        nested schema's ``__length__``. Every field then decrements a budget that</span>
-<span class="sd">        started negative, and parsing a perfectly valid option emits a</span>
-<span class="sd">        :class:`~pcapkit.utilities.warnings.SchemaWarning` per field saying</span>
-<span class="sd">        ``packet length &lt; 0``. Decoding the run directly costs a few lines and</span>
-<span class="sd">        keeps a valid packet quiet.</span>
+<span class="sd">        a :class:`~pcapkit.corekit.fields.misc.SchemaField` with no fixed length.</span>
+<span class="sd">        Such a field sizes the nested schema by what is left of the run, which</span>
+<span class="sd">        parses a valid option cleanly, but an entry whose length overruns the</span>
+<span class="sd">        option would then only raise a</span>
+<span class="sd">        :class:`~pcapkit.utilities.warnings.SchemaWarning` and come back with its</span>
+<span class="sd">        value padded out by zero octets. Decoding the run directly costs a few</span>
+<span class="sd">        lines and rejects that entry with</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError` instead.</span>
 
 <span class="sd">    """</span>
 

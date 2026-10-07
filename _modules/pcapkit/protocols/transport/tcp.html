@@ -1896,7 +1896,6 @@
 <span class="sd">            ProtocolError: If length is **NOT** ``8``.</span>
 
 <span class="sd">        """</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -2634,30 +2633,29 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of options and total length of options.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            The options are emitted in the given order, ``NOP`` and ``EOOL``</span>
+<span class="sd">            included, so that a parsed option list re-emits the same octets.</span>
+<span class="sd">            Padding is added only once, after the last option, when the list</span>
+<span class="sd">            does not end on a 32-bit boundary: zero octets if the list already</span>
+<span class="sd">            ends with ``EOOL``, otherwise ``NOP`` options followed by an ``EOOL``.</span>
+
 <span class="sd">        """</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Enum_Option]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
             <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
-                        <span class="k">continue</span>
-
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_Option | bytes</span>
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                     <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">kind</span>
-                    <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
-                        <span class="k">continue</span>
-
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Option, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>  <span class="c1"># ignore padding options by default</span>
-                        <span class="k">continue</span>
-
                     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                         <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -2671,44 +2669,31 @@
 
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                    <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
+                                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_donone</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-                <span class="c1"># force alignment to 32-bit boundary</span>
-                <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-                    <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_nop</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
-                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_eool</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
 
-        <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="c1"># ignore padding options by default</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">):</span>
-                <span class="k">continue</span>
+        <span class="c1"># force alignment to 32-bit boundary</span>
+        <span class="k">if</span> <span class="n">total_length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">total_length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_mode_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
-                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_donone</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">pad_len</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
-            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-
-            <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
-
-            <span class="c1"># force alignment to 32-bit boundary</span>
-            <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
                 <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_nop</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
-
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mode_eool</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3232,7 +3217,10 @@
             <span class="n">diff</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ttl_diff</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
-        <span class="n">rate_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">40000</span><span class="p">))</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="c1"># :rfc:`4782` Section 3.1 encodes the rate as 40 kbps * 2 ** N, with</span>
+        <span class="c1"># N = 0 meaning a rate of zero; a response may report a lower rate than</span>
+        <span class="c1"># requested (Section 4.3), so a rate under 80 kbps rounds down to N = 0.</span>
+        <span class="n">rate_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">40000</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="n">diff_val</span> <span class="o">=</span> <span class="n">diff</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">Schema_QuickStartResponse</span><span class="p">(</span>
