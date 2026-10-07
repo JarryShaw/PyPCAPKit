@@ -191,7 +191,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         proto = object.__new__(HOPOPT)
 
         self.assertEqual(HOPOPT.__index__(), TransType.HOPOPT)
-        self.assertEqual(proto.__length_hint__(), 2)
+        self.assertEqual(proto.__length_hint__(), 8)
         values = HOPOPT._make_data(data)
         self.assertEqual(values['next'], TransType.UDP)
         self.assertEqual(values['options'], options)
@@ -206,7 +206,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         proto = object.__new__(IPv6_Opts)
 
         self.assertEqual(IPv6_Opts.__index__(), TransType.IPv6_Opts)
-        self.assertEqual(proto.__length_hint__(), 2)
+        self.assertEqual(proto.__length_hint__(), 8)
         values = IPv6_Opts._make_data(data)
         self.assertEqual(values['next'], TransType.UDP)
         self.assertEqual(values['options'], options)
@@ -228,7 +228,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         proto._info = data
 
         self.assertEqual(IPv6_Route.__index__(), TransType.IPv6_Route)
-        self.assertEqual(proto.__length_hint__(), 4)
+        self.assertEqual(proto.__length_hint__(), 8)
         self.assertEqual(proto.length, 24)
         values = IPv6_Route._make_data(data)
         self.assertEqual(values['next'], TransType.UDP)

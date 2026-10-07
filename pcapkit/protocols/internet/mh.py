@@ -1579,9 +1579,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # call super __post_init__
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self) -> 'Literal[6]':
-        """Return an estimated length for the object."""
-        return 6
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object.
+
+        Eight octets: the six fixed ones and the message data that
+        :rfc:`6275#section-6.1.1` counts in the first 8-octet unit.
+
+        """
+        return 8
 
     @classmethod
     def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned

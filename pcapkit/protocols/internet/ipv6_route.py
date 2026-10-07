@@ -389,9 +389,14 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         # call super __post_init__
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self) -> 'Literal[4]':
-        """Return an estimated length for the object."""
-        return 4
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object.
+
+        Eight octets: the four fixed ones and the type-specific data that
+        :rfc:`8200#section-4.4` counts in the first 8-octet unit.
+
+        """
+        return 8
 
     @classmethod
     def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
