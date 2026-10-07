@@ -8,12 +8,14 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any
+    from typing import Any, Type
 
     from typing_extensions import Literal
 
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.protocol import Packet
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
     'IPv6',
@@ -29,6 +31,8 @@ class IPv6(Protocol):
         to create an instance of this data model.
 
     """
+
+    __excluded__ = ['__exthdr__']
 
     #: Version.
     version: 'Literal[6]'
@@ -56,6 +60,10 @@ class IPv6(Protocol):
         hdr_len: 'int'
         #: Raw payload length (excluding extension headers).
         raw_len: 'int'
+        #: Extension header chain, in wire order, as pairs of the parser
+        #: class and its info. Kept apart from the per-header keys above,
+        #: which a repeated header overwrites.
+        __exthdr__: 'tuple[tuple[Type[ProtocolBase], Data], ...]'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)
