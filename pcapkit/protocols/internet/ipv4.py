@@ -366,6 +366,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              src: 'IPv4Address | str | int | bytes' = '127.0.0.1',
              dst: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
              options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             total_length: 'Optional[int]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv4':
         """Make (construct) packet data.
@@ -404,6 +405,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             src: Source address of the packet.
             dst: Destination address of the packet.
             options: Options of the packet.
+            total_length: Total length of the packet, header included; computed
+                from the header and the payload when omitted.
             payload: Payload of the packet.
             **kwargs: Arbitrary keyword arguments.
 
@@ -427,12 +430,19 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         ttl_val = ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds())
 
         if options is not None:
-            options_value, total_length = self._make_ipv4_options(options)
+            options_value, options_length = self._make_ipv4_options(options)
         else:
-            options_value, total_length = [], 0
+            options_value, options_length = [], 0
 
-        ihl = 5 + math.ceil(total_length / 4)
-        total_len = ihl * 4 + len(payload)
+        ihl = 5 + math.ceil(options_length / 4)
+
+        # NOTE: An explicit ``total_length`` is written as given, so that a
+        # ``from_data`` rebuild of a capture truncated by snaplen keeps the
+        # length the sender declared instead of the one that was recorded
+        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # what a plain ``IPv4(payload=...)`` wants.
+        if total_length is None:
+            total_length = ihl * 4 + len(payload)
 
         return Schema_IPv4(
             vihl={
@@ -446,7 +456,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'rel': tos_rel_val,
                 'ecn': tos_ecn_val,
             },
-            length=total_len,
+            length=total_length,
             id=id,
             flags={
                 'df': df,
@@ -543,6 +553,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             # ``hdr_len`` exceeds the fixed 20-octet header (see :meth:`read`),
             # so read it defensively rather than assuming it always exists.
             'options': getattr(data, 'options', None),
+            # NOTE: The parsed total length is passed through rather than left
+            # to ``make`` to recompute, so that a truncated capture rebuilds
+            # with the length that was on the wire (:issue:`1155`).
+            'total_length': data.len,
             'payload': cls._make_payload(data),
         }
 

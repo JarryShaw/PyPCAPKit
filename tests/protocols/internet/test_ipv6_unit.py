@@ -41,12 +41,14 @@ class IPv6UnitTests(unittest.TestCase):
             'label': 0x12345,
             'next': TransType.TCP,
             'limit': 32,
+            'payload': 1146,
             'src': ip_address('2001:db8::1'),
             'dst': ip_address('2001:db8::2'),
             '__next_type__': None,
         })
 
         values = IPv6._make_data(data)
+        self.assertEqual(values['payload_length'], 1146)
         self.assertEqual(values['traffic_class'], 0x2a)
         self.assertEqual(values['flow_label'], 0x12345)
         self.assertEqual(values['next'], TransType.TCP)

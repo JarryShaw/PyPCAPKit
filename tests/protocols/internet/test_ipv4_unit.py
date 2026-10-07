@@ -37,6 +37,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         data = DummyDict(
             tos=DummyDict(pre=0, thr=False, rel=False, ecn=0, **{'del': False}),
+            len=1186,
             id=7,
             flags=DummyDict(df=True, mf=False),
             offset=0,
@@ -50,6 +51,7 @@ class IPv4UnitTests(unittest.TestCase):
         )
 
         values = IPv4._make_data(data)
+        self.assertEqual(values['total_length'], 1186)
         self.assertEqual(values['id'], 7)
         self.assertEqual(values['df'], True)
         self.assertEqual(values['mf'], False)

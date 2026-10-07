@@ -227,6 +227,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
              hop_limit: 'int' = 64,  # reasonable default
              src: 'IPv6Address | str | bytes | int' = '::1',
              dst: 'IPv6Address | str | bytes | int' = '::',
+             payload_length: 'Optional[int]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6':
         """Make (construct) packet data.
@@ -241,6 +242,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             hop_limit: Hop limit.
             src: Source IP address.
             dst: Destination IP address.
+            payload_length: Length of the payload, extension headers included;
+                computed from the payload when omitted.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -251,13 +254,21 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         next_val = self._make_index(next, next_default, namespace=next_namespace,
                                     reversed=next_reversed, pack=False)
 
+        # NOTE: An explicit ``payload_length`` is written as given, so that a
+        # ``from_data`` rebuild of a capture truncated by snaplen keeps the
+        # length the sender declared instead of the one that was recorded
+        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # what a plain ``IPv6(payload=...)`` wants.
+        if payload_length is None:
+            payload_length = len(payload)
+
         return Schema_IPv6(
             hextet={
                 'version': 6,
                 'class': traffic_class,
                 'label': flow_label,
             },
-            length=len(payload),
+            length=payload_length,
             next=next_val,  # type: ignore[arg-type]
             limit=hop_limit,
             src=src,
@@ -317,6 +328,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'hop_limit': data.limit,
             'src': data.src,
             'dst': data.dst,
+            # NOTE: ``data.payload`` is the parsed payload length, passed through
+            # rather than left to ``make`` to recompute, so that a truncated
+            # capture rebuilds with the length that was on the wire
+            # (:issue:`1155`).
+            'payload_length': data.payload,
             'payload': cls._make_payload(data)
         }
 
