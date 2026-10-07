@@ -510,6 +510,11 @@ The following code snippet shows how to create a new engine class:
                    f'Frame {extractor._frnum:>3d}: {packet2chain(packet)}'
                )  # print verbose message as `Frame XXX: Ethernet:IP:TCP:...`
 
+           # NOTE: The extractor's shared global-header step parses the global
+           # header with the built-in engine and, unless output is disabled,
+           # dumps it and sets the output format that `ext.format` reports.
+           ext.record_header()
+
            # NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,
            # to read the input file and extract the network packets. The API
            # entry point returns an iterable instance, which is then converted

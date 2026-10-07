@@ -57,7 +57,8 @@ class PCAPIO(DumperBase):
         protocol: data link type
         byteorder: header byte order
         nanosecond: nanosecond-resolution file flag
-        **kwargs: arbitrary keyword arguments
+        **kwargs: further global header fields, i.e. ``thiszone``, ``sigfigs``
+            and ``snaplen``, and arbitrary keyword arguments
 
     """
     if TYPE_CHECKING:
@@ -89,7 +90,8 @@ class PCAPIO(DumperBase):
             protocol: data link type
             byteorder: header byte order
             nanosecond: nanosecond-resolution file flag
-            **kwargs: arbitrary keyword arguments
+            **kwargs: further global header fields, i.e. ``thiszone``,
+                ``sigfigs`` and ``snaplen``, and arbitrary keyword arguments
 
         """
         #: int: Frame counter.
