@@ -730,9 +730,10 @@
     <span class="c1"># concrete writer this applies to.</span>
     <span class="n">escape_strings</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
     <span class="c1"># NOTE: :class:`~dictdumper.json.JSON` escapes every string *value* it</span>
-    <span class="c1"># writes, but interpolates a mapping key into ``'"{item}": '`` raw, so a key</span>
-    <span class="c1"># carrying a ``"`` or a ``\`` closes the JSON string early (GitHub issue</span>
-    <span class="c1"># #1152). The defect is :mod:`dictdumper`'s, so it is worked around here.</span>
+    <span class="c1"># writes, but interpolates a mapping key into ``'"{item}": '`` raw: a ``"``</span>
+    <span class="c1"># in a key closes the JSON string early, and a ``\`` escapes the character</span>
+    <span class="c1"># after it (GitHub issue #1152). The defect is :mod:`dictdumper`'s, so it is</span>
+    <span class="c1"># worked around here.</span>
     <span class="n">escape_json_keys</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
     <span class="n">escape_keys</span> <span class="o">=</span> <span class="n">escape_strings</span> <span class="ow">or</span> <span class="n">escape_json_keys</span>
 

@@ -549,7 +549,7 @@ as <a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.hea
 link layer protocol type and nanosecond flag are also saved on the
 current <a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP" title="pcapkit.foundation.engines.pcap.PCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP</span></code></a> engine instance.</p>
 <p>For output, the method will create the output writer from the parsed
-PCAP global header, via <code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._open_output</span></code>, and dump the
+PCAP global header, via <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._open_output" title="pcapkit.foundation.extraction.Extractor._open_output"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._open_output</span></code></a>, and dump the
 header under the name of <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code> – except to a PCAP writer,
 which has already written it.</p>
 </dd></dl>
@@ -638,6 +638,12 @@ by <a class="reference internal" href="../extraction.html#pcapkit.foundation.ext
 directly extract the first block, which should be a section header
 block, and then save the related information into the internal
 context storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the first block is not a section header block, or if
+    the output format is PCAP.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

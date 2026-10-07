@@ -95,6 +95,17 @@ offers, and the ones that cannot say so rather than quietly doing less:
 |                                                                 | PCAP savefiles only, otherwise                                |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |
+| :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | plain :obj:`dict` -- ``json`` is written instead, with a      |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`,           | :class:`~pcapkit.utilities.warnings.FormatWarning`            |
+| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`,             |                                                               |
+| :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` and        |                                                               |
+| :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      |                                                               |
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.pcapng.PCAPNG`              | no PCAP output for a PCAP-NG input, which declares its link   |
+|                                                                 | type and timestamp resolution per interface --                |
+|                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
++-----------------------------------------------------------------+---------------------------------------------------------------+
 
 Availability
 ------------

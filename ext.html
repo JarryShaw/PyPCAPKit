@@ -1069,6 +1069,11 @@ module.</p>
                 <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">extractor</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
             <span class="p">)</span>  <span class="c1"># print verbose message as `Frame XXX: Ethernet:IP:TCP:...`</span>
 
+        <span class="c1"># NOTE: The extractor's shared global-header step parses the global</span>
+        <span class="c1"># header with the built-in engine and, unless output is disabled,</span>
+        <span class="c1"># dumps it and sets the output format that `ext.format` reports.</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">record_header</span><span class="p">()</span>
+
         <span class="c1"># NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,</span>
         <span class="c1"># to read the input file and extract the network packets. The API</span>
         <span class="c1"># entry point returns an iterable instance, which is then converted</span>

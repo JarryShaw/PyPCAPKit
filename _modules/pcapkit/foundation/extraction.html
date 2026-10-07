@@ -659,7 +659,8 @@
 
         <span class="c1">#: Input file object.</span>
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">'BufferedReader'</span>
-        <span class="c1">#: Output file object.</span>
+        <span class="c1">#: Output writer. It holds the writer class until :meth:`_open_output`</span>
+        <span class="c1">#: replaces it with the writer, or under split mode with a factory.</span>
         <span class="n">_ofile</span><span class="p">:</span> <span class="s1">'Dumper | Type[Dumper]'</span>
 
         <span class="c1">#: Position of the input stream at the previous end of stream, or</span>
@@ -1153,7 +1154,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the selected engine cannot read the input's format --</span>
-<span class="sd">                for the default engine, if it is neither PCAP nor PCAP-NG.</span>
+<span class="sd">                for the default engine, if it is neither PCAP nor PCAP-NG -- or if</span>
+<span class="sd">                the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.</span>
 
 <span class="sd">        :rtype: None</span>
 <span class="sd">        """</span>
@@ -1385,17 +1387,19 @@
         <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Extractor._open_output">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._open_output">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create the output writer.</span>
 
-<span class="sd">        The engines call this at their global-header step, passing the header's</span>
-<span class="sd">        link type, byte order and timestamp resolution as ``protocol``,</span>
-<span class="sd">        ``byteorder`` and ``nanosecond``, and the PCAP engine also its</span>
-<span class="sd">        ``thiszone``, ``sigfigs`` and ``snaplen``: :class:`~pcapkit.dumpkit.pcap.PCAPIO`</span>
-<span class="sd">        writes its own global header from them, and the other writers ignore</span>
-<span class="sd">        them. :meth:`run` calls it again, without arguments, after the engine</span>
-<span class="sd">        has started, for the engines that have no such step. Only the first</span>
-<span class="sd">        call has an effect.</span>
+<span class="sd">        The built-in engines call this at their global-header step. The PCAP</span>
+<span class="sd">        engine passes the header's fields as ``protocol``, ``byteorder``,</span>
+<span class="sd">        ``nanosecond``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
+<span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from</span>
+<span class="sd">        them, and the other writers ignore them. The PCAP-NG engine passes none.</span>
+<span class="sd">        :meth:`run` calls it again, without arguments, after the engine has</span>
+<span class="sd">        started, for the engines that have no such step. Only the first call has</span>
+<span class="sd">        an effect.</span>
 
 <span class="sd">        Under split mode, i.e. :attr:`self._flag_f &lt;Extractor._flag_f&gt;` is</span>
 <span class="sd">        :data:`True`, :attr:`self._ofile &lt;Extractor._ofile&gt;` stays a factory,</span>
@@ -1412,7 +1416,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Extractor.record_frames">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>

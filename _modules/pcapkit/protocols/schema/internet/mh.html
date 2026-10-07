@@ -1394,7 +1394,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MesgIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">MESG_ID_OPTION_TYPE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for Mobility Message Replay Protection options."""</span>
 
-    <span class="c1">#: Timestamp (seconds since January 1st, 1970, c.f., :rfc:`1305`).</span>
+    <span class="c1">#: Timestamp (seconds since January 1st, 1900, c.f., :rfc:`1305`).</span>
     <span class="n">seconds</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
     <span class="c1">#: Timestamp fractions (1/2**32 seconds per unit, c.f., :rfc:`1305`).</span>
     <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>

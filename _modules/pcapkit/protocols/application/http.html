@@ -879,9 +879,9 @@
         <span class="c1">#</span>
         <span class="c1"># Identified means *committed*: a malformed HTTP/1 message is reported as</span>
         <span class="c1"># such instead of being handed to the HTTP/2 arm, which accepts any</span>
-        <span class="c1"># self-consistent buffer of nine octets or more. Retrying an identified</span>
-        <span class="c1"># HTTP/1 payload as HTTP/2 is how HTTP/1 traffic acquires a confident</span>
-        <span class="c1"># HTTP/2 mislabel.</span>
+        <span class="c1"># self-consistent buffer of nine octets or more whose header passes</span>
+        <span class="c1"># :func:`_test_http2_frame`. Retrying an identified HTTP/1 payload as</span>
+        <span class="c1"># HTTP/2 is how HTTP/1 traffic acquires a confident HTTP/2 mislabel.</span>
         <span class="c1">#</span>
         <span class="c1"># Nothing is suppressed on this arm, deliberately: it is not a candidate</span>
         <span class="c1"># to be declined, so there is nothing to decline *to*, and</span>
@@ -915,12 +915,13 @@
         <span class="c1"># :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*</span>
         <span class="c1"># :exc:`struct.error`, so suppressing it on a non-final arm swallows</span>
         <span class="c1"># pcapkit's own signal and hands the payload to the arm below, which</span>
-        <span class="c1"># accepts anything of at least nine octets. With a fault injected at arm</span>
-        <span class="c1"># 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP</span>
-        <span class="c1"># port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2</span>
-        <span class="c1"># mislabel of HTTP/1 traffic is worse than letting the error escape to</span>
-        <span class="c1"># ``beholder``, which turns it into ``Raw``; it would also erase</span>
-        <span class="c1"># ``StructError.eof``, which ``NoPayload`` handling reads.</span>
+        <span class="c1"># accepts any self-consistent buffer whose header passes</span>
+        <span class="c1"># :func:`_test_http2_frame`. With a fault injected at arm 1 and without</span>
+        <span class="c1"># that test, a *valid* HTTP/1.1 request came back ``version='2'``, and</span>
+        <span class="c1"># over UDP port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident</span>
+        <span class="c1"># HTTP/2 mislabel of HTTP/1 traffic is worse than letting the error</span>
+        <span class="c1"># escape to ``beholder``, which turns it into ``Raw``; it would also</span>
+        <span class="c1"># erase ``StructError.eof``, which ``NoPayload`` handling reads.</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

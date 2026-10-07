@@ -45,6 +45,7 @@ extracts parameters from a PCAP file.
    .. automethod:: make_name
 
    .. automethod:: record_header
+   .. automethod:: _open_output
    .. automethod:: record_frames
 
    .. autoattribute:: __output__
@@ -63,6 +64,7 @@ extracts parameters from a PCAP file.
    .. autoattribute:: _flag_e
    .. autoattribute:: _flag_f
    .. autoattribute:: _flag_q
+   .. autoattribute:: _flag_o
    .. autoattribute:: _flag_r
    .. autoattribute:: _flag_t
    .. autoattribute:: _flag_v

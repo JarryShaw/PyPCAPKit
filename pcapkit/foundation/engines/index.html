@@ -598,6 +598,21 @@ tracing, and PCAP savefiles on disk only</p></td>
 PCAP savefiles only, otherwise
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a>,
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a>,
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a>,
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> and
+<a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
+<td><p>no PCAP output, since each frame reaches the writer as a
+plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – <code class="docutils literal notranslate"><span class="pre">json</span></code> is written instead, with a
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning" title="pcapkit.utilities.warnings.FormatWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">FormatWarning</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></p></td>
+<td><p>no PCAP output for a PCAP-NG input, which declares its link
+type and timestamp resolution per interface –
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a></p></td>
+</tr>
 </tbody>
 </table>
 </div>

@@ -528,7 +528,8 @@
 <span class="sd">        protocol: data link type</span>
 <span class="sd">        byteorder: header byte order</span>
 <span class="sd">        nanosecond: nanosecond-resolution file flag</span>
-<span class="sd">        **kwargs: arbitrary keyword arguments</span>
+<span class="sd">        **kwargs: further global header fields, i.e. ``thiszone``, ``sigfigs``</span>
+<span class="sd">            and ``snaplen``, and arbitrary keyword arguments</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -560,7 +561,8 @@
 <span class="sd">            protocol: data link type</span>
 <span class="sd">            byteorder: header byte order</span>
 <span class="sd">            nanosecond: nanosecond-resolution file flag</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+<span class="sd">            **kwargs: further global header fields, i.e. ``thiszone``,</span>
+<span class="sd">                ``sigfigs`` and ``snaplen``, and arbitrary keyword arguments</span>
 
 <span class="sd">        """</span>
         <span class="c1">#: int: Frame counter.</span>

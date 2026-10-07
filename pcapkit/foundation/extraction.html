@@ -862,7 +862,8 @@ rules it out, or the supplied engine is unknown.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the selected engine cannot read the input’s format –
-    for the default engine, if it is neither PCAP nor PCAP-NG.</p>
+    for the default engine, if it is neither PCAP nor PCAP-NG – or if
+    the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -979,6 +980,28 @@ frames.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._open_output">
+<span class="sig-name descname"><span class="pre">_open_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._open_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._open_output" title="Link to this definition">¶</a></dt>
+<dd><p>Create the output writer.</p>
+<p>The built-in engines call this at their global-header step. The PCAP
+engine passes the header’s fields as <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>:
+<a class="reference internal" href="../dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a> writes its own global header from
+them, and the other writers ignore them. The PCAP-NG engine passes none.
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> calls it again, without arguments, after the engine has
+started, for the engines that have no such step. Only the first call has
+an effect.</p>
+<p>Under split mode, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_f" title="pcapkit.foundation.extraction.Extractor._flag_f"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_f</span></code></a> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ofile" title="pcapkit.foundation.extraction.Extractor._ofile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._ofile</span></code></a> stays a factory,
+with <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> bound, that the engines call once per output file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Global header fields for the writer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.record_frames">
 <span class="sig-name descname"><span class="pre">record_frames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.record_frames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.record_frames" title="Link to this definition">¶</a></dt>
 <dd><p>Read packet frames.</p>
@@ -1085,6 +1108,13 @@ stored in memory.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_o">
+<span class="sig-name descname"><span class="pre">_flag_o</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_o" title="Link to this definition">¶</a></dt>
+<dd><p>Output opened flag. It indicates if <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._open_output" title="pcapkit.foundation.extraction.Extractor._open_output"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_open_output()</span></code></a>
+has replaced the writer class in <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ofile" title="pcapkit.foundation.extraction.Extractor._ofile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_ofile</span></code></a> with the writer.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_r">
 <span class="sig-name descname"><span class="pre">_flag_r</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_r" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembly flag. It indicates if datagram reassembly is enabled.
@@ -1135,7 +1165,8 @@ the file object after extraction.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._ofile">
 <span class="sig-name descname"><span class="pre">_ofile</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">Dumper</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">Dumper</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ofile" title="Link to this definition">¶</a></dt>
-<dd><p>Output file object.</p>
+<dd><p>Output writer. It holds the writer class until <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._open_output" title="pcapkit.foundation.extraction.Extractor._open_output"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_open_output()</span></code></a>
+replaces it with the writer, or under split mode with a factory.</p>
 </dd></dl>
 
 <dl class="py attribute">

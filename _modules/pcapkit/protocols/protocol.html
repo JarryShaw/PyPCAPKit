@@ -2328,9 +2328,9 @@
 <span class="sd">            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            instead, as an unparseable one is.</span>
 
-<span class="sd">            The captured octets are what ``file_`` holds, which may be fewer than</span>
-<span class="sd">            the ``length`` the current header declares. They are short of the</span>
-<span class="sd">            header when there are fewer than the next layer's</span>
+<span class="sd">            The captured octets are the first ``length`` of ``file_``, or all of</span>
+<span class="sd">            it when it holds fewer, as a truncated capture does. They are short</span>
+<span class="sd">            of the header when there are fewer than the next layer's</span>
 <span class="sd">            :meth:`__length_hint__ &lt;ProtocolBase.__length_hint__&gt;`, unless the</span>
 <span class="sd">            header it parsed, :attr:`length &lt;ProtocolBase.length&gt;` octets long, fits</span>
 <span class="sd">            in them anyway: for a variable-length header such as</span>

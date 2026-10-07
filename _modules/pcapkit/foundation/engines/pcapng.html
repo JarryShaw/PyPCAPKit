@@ -620,6 +620,10 @@
 <span class="sd">        block, and then save the related information into the internal</span>
 <span class="sd">        context storage.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If the first block is not a section header block, or if</span>
+<span class="sd">                the output format is PCAP.</span>
+
 <span class="sd">        """</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
