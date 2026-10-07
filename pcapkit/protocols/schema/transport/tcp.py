@@ -136,6 +136,10 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         req: int
         #: Extensibility flag.
         ext: int
+        #: Do not establish new subflows to the source address.
+        deny_join: int
+        #: Reserved flags (``D`` to ``G``).
+        reserved: int
         #: Use of HMAC-SHA1.
         hsa: int
 
@@ -144,6 +148,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Subtype.
         subtype: int
+        #: Reserved.
+        reserved: int
         #: Backup flag.
         backup: int
 
@@ -152,10 +158,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Subtype.
         subtype: int
+        #: Reserved.
+        reserved: int
 
     class MPTCPDSSFlags(TypedDict):
         """MPTCP-DSS flags."""
 
+        #: Reserved.
+        reserved: int
         #: ``DATA_FIN`` flag.
         F: int
         #: Data sequence number is 8 octets (if not set, DSN is 4 octets).
@@ -173,14 +183,18 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Subtype.
         subtype: int
-        #: IP version.
-        version: int
+        #: Reserved.
+        reserved: int
+        #: Echo flag.
+        echo: int
 
     class MPTCPSubtypePriority(TypedDict):
         """MPTCP Priority subtype field."""
 
         #: Subtype.
         subtype: int
+        #: Reserved.
+        reserved: int
         #: Backup flag.
         backup: int
 
@@ -220,17 +234,47 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If IP version is 4, a :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField`
-          instance.
-        * If IP version is 6, a :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
-          instance.
+        * If the option length is one of the IPv4 lengths, a
+          :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField` instance.
+        * If the option length is one of the IPv6 lengths, a
+          :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
+
+    Note:
+        :rfc:`8684` section 3.4.1 figure 12 has no IP version field: the
+        address family follows from the option length, which is 8 or 20 for
+        an IPv4 or IPv6 address, plus 2 with the port, plus 8 with the
+        truncated HMAC. The :rfc:`6824` ``IPVer`` nibble occupies the bits
+        :rfc:`8684` reserves and spends on ``E``, and its lengths are the
+        HMAC-less ones, so both layouts are read the same way.
 
     """
-    if pkt['test']['version'] == 4:
+    if pkt['length'] in (8, 10, 16, 18):
         return IPv4AddressField()
-    if pkt['test']['version'] == 6:
+    if pkt['length'] in (20, 22, 28, 30):
         return IPv6AddressField()
-    raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid IP version')
+    raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid length')
+
+
+def mptcp_dss_checksum(pkt: 'dict[str, Any]') -> 'bool':
+    """Condition function for :attr:`MPTCPDSS.checksum` field.
+
+    :rfc:`8684` section 3.3 makes the checksum part of the mapping only when
+    checksums were negotiated, so a mapping without one is 2 octets shorter
+    and only the option length tells the two forms apart.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        Whether the option length leaves room for the checksum after the
+        Data ACK and the mapping.
+
+    """
+    if not pkt['flags']['M']:
+        return False
+    size = 4 + ((8 if pkt['flags']['a'] else 4) if pkt['flags']['A'] else 0) \
+        + (8 if pkt['flags']['m'] else 4) + 6
+    return pkt['length'] >= size + 2
 
 
 def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -264,7 +308,8 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         8-octet form, and wire *absence* is no obstacle:
         :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len` and
         :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the sibling
-        ``M`` flag. The ``SwitchField`` form is kept for a narrower reason about
+        ``M`` flag (the checksum on the option length as well). The
+        ``SwitchField`` form is kept for a narrower reason about
         composition. A
         :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``
         forwards to the wrapped field unconditionally, never consulting the
@@ -823,7 +868,7 @@ class MPTCPUnknown(MPTCP):
         'data': (4, 4),
     })
     #: Data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 3)
 
     if TYPE_CHECKING:
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeUnknown', data: 'bytes') -> 'None': ...
@@ -842,6 +887,8 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
     flags: 'MPTCPCapableFlags' = BitField(length=1, namespace={
         'req': (0, 1),
         'ext': (1, 1),
+        'deny_join': (2, 1),
+        'reserved': (3, 4),
         'hsa': (7, 1),
     })
     # NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --
@@ -884,6 +931,7 @@ class MPTCPJoinSYN(MPTCPJoin):
     #: Subtype and flags.
     test: 'MPTCPSubtypeJoin' = BitField(length=1, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 3),
         'backup': (7, 1),
     })
     #: Address ID.
@@ -904,6 +952,7 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     #: Subtype and flags.
     test: 'MPTCPSubtypeJoin' = BitField(length=1, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 3),
         'backup': (7, 1),
     })
     #: Address ID.
@@ -921,12 +970,11 @@ class MPTCPJoinSYNACK(MPTCPJoin):
 class MPTCPJoinACK(MPTCPJoin):
     """Header schema for Multipath TCP join option for ``ACK`` connection."""
 
-    #: Subtype.
-    test: 'MPTCPSubtype' = BitField(length=1, namespace={
+    #: Subtype and reserved.
+    test: 'MPTCPSubtype' = BitField(length=2, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 12),
     })
-    #: Reserved.
-    reserved: 'bytes' = PaddingField(length=1)
     #: Sender's HMAC.
     hmac: 'bytes' = BytesField(length=20)
 
@@ -938,12 +986,14 @@ class MPTCPJoinACK(MPTCPJoin):
 class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     """Header schema for Multipath TCP DSS option."""
 
-    #: Subtype and flags.
+    #: Subtype and reserved.
     test: 'MPTCPSubtype' = BitField(length=1, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 4),
     })
     #: Flags.
     flags: 'MPTCPDSSFlags' = BitField(length=1, namespace={
+        'reserved': (0, 3),
         'F': (3, 1),
         'm': (4, 1),
         'M': (5, 1),
@@ -976,10 +1026,10 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
         UInt16Field(),
         lambda pkt: pkt['flags']['M'],
     )
-    #: Checksum.
+    #: Checksum (if negotiated, c.f. :func:`mptcp_dss_checksum`).
     checksum: 'bytes' = ConditionalField(
         BytesField(length=2),
-        lambda pkt: pkt['flags']['M'],
+        mptcp_dss_checksum,
     )
 
     if TYPE_CHECKING:
@@ -990,10 +1040,11 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
 class MPTCPAddAddress(MPTCP, code=Enum_MPTCPOption.ADD_ADDR):
     """Header schema for Multipath TCP add address option."""
 
-    #: Subtype and IP version.
+    #: Subtype and flags.
     test: 'MPTCPSubtypeAddAddress' = BitField(length=1, namespace={
         'subtype': (0, 4),
-        'version': (4, 4),
+        'reserved': (4, 3),
+        'echo': (7, 1),
     })
     #: Address ID.
     addr_id: 'int' = UInt8Field()
@@ -1004,20 +1055,26 @@ class MPTCPAddAddress(MPTCP, code=Enum_MPTCPOption.ADD_ADDR):
     #: Port.
     port: 'int' = ConditionalField(
         UInt16Field(),
-        lambda pkt: pkt['length'] in (10, 22),
+        lambda pkt: pkt['length'] in (10, 18, 22, 30),
+    )
+    #: Truncated HMAC.
+    hmac: 'bytes' = ConditionalField(
+        BytesField(length=8),
+        lambda pkt: pkt['length'] in (16, 18, 28, 30),
     )
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeAddAddress', addr_id: 'int', address: 'IPv4Address | IPv6Address', port: 'Optional[int]') -> 'None': ...
+        def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeAddAddress', addr_id: 'int', address: 'IPv4Address | IPv6Address', port: 'Optional[int]', hmac: 'Optional[bytes]') -> 'None': ...
 
 
 @schema_final
 class MPTCPRemoveAddress(MPTCP, code=Enum_MPTCPOption.REMOVE_ADDR):
     """Header schema for Multipath TCP remove address option."""
 
-    #: Subtype.
+    #: Subtype and reserved.
     test: 'MPTCPSubtype' = BitField(length=1, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 4),
     })
     #: Address ID.
     addr_id: 'list[int]' = ListField(
@@ -1036,6 +1093,7 @@ class MPTCPPriority(MPTCP, code=Enum_MPTCPOption.MP_PRIO):
     #: Subtype.
     test: 'MPTCPSubtypePriority' = BitField(length=1, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 3),
         'backup': (7, 1),
     })
     #: Address ID.
@@ -1052,9 +1110,14 @@ class MPTCPPriority(MPTCP, code=Enum_MPTCPOption.MP_PRIO):
 class MPTCPFallback(MPTCP, code=Enum_MPTCPOption.MP_FAIL):
     """Header schema for Multipath TCP fallback option."""
 
-    #: Subtype.
-    test: 'MPTCPSubtype' = BitField(length=1, namespace={
+    #: Subtype and reserved.
+    #:
+    #: :rfc:`8684` section 3.7 figure 16 follows the subtype's 4 bits with
+    #: **12** reserved bits, so the Data Sequence Number starts at the fifth
+    #: octet of the 12-octet option.
+    test: 'MPTCPSubtype' = BitField(length=2, namespace={
         'subtype': (0, 4),
+        'reserved': (4, 12),
     })
     #: Data sequence number.
     dsn: 'int' = UInt64Field()
@@ -1067,20 +1130,16 @@ class MPTCPFallback(MPTCP, code=Enum_MPTCPOption.MP_FAIL):
 class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
     """Header schema for Multipath TCP fastclose option."""
 
-    #: Subtype.
-    test: 'MPTCPSubtype' = BitField(length=1, namespace={
-        'subtype': (0, 4),
-    })
-    #: Reserved.
+    #: Subtype and reserved.
     #:
     #: :rfc:`8684` section 3.5 figure 14 spends a whole 32-bit row on
     #: ``Kind``/``Length``/``Subtype``/``(reserved)``, i.e. the subtype's 4 bits
     #: are followed by **12** reserved bits, not 4 -- so the subtype-and-reserved
-    #: part is 2 octets and the option is 12 octets in total. Declared the same
-    #: way :class:`MPTCPJoinACK` declares its own reserved octet, for the same
-    #: reason: a wider ``test`` would make the reserved bits look like part of
-    #: the subtype namespace.
-    reserved: 'bytes' = PaddingField(length=1)
+    #: part is 2 octets and the option is 12 octets in total.
+    test: 'MPTCPSubtype' = BitField(length=2, namespace={
+        'subtype': (0, 4),
+        'reserved': (4, 12),
+    })
     #: Option receiver's key.
     key: 'int' = UInt64Field()
 

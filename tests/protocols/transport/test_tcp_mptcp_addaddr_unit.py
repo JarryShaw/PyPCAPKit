@@ -69,7 +69,8 @@ from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.utilities.warnings import UnknownFieldWarning
 
 #: A spec-correct ``ADD_ADDR`` option, RFC 8684 section 3.4.1: ``Kind`` ``0x1e``
-#: (Multipath TCP), ``Length`` ``8``, ``Subtype`` ``3``/``IPVer`` ``4`` packed into one
+#: (Multipath TCP), ``Length`` ``8``, ``Subtype`` ``3``/``IPVer`` ``4`` (the :rfc:`6824`
+#: layout, which :rfc:`8684` reads as reserved bits and ``E``) packed into one
 #: octet as ``0x34``, ``Address ID`` ``1``, then the four octets of ``192.0.2.1``. Built
 #: by hand from the RFC figure, not through :meth:`TCP._make_mptcp_addaddr
 #: <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>` or any other maker, so a
@@ -208,9 +209,12 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
             length=10,
             subtype=Enum_MPTCPOption.ADD_ADDR,
             version=4,
+            reserved=2,
+            echo=False,
             addr_id=1,
             addr=ipaddress.ip_address('1.2.3.4'),
             port=443,
+            hmac=None,
         )
 
         tcp = TCP.__new__(TCP)
@@ -241,7 +245,8 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
         ``MPTCPAddAddress.test`` read the ``kind`` octet ``0x1e`` (``0001 1110``) as its
         own subtype/version octet, decoding ``version=14``, which
         :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`
-        rejects outright since it is neither 4 nor 6.
+        then rejected outright since it was neither 4 nor 6. The selector now
+        takes the address family from the option length instead (#1217).
 
         """
         from pcapkit.const.tcp.option import Option as Enum_Option

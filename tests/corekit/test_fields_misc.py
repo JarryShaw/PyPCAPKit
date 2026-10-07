@@ -55,9 +55,9 @@ ADDRESS_TYPED_SWITCH_BRANCHES = [
      'mh tcoa IPv6', {'length': 18}),
 
     ('pcapkit.protocols.schema.transport.tcp', 'MPTCPAddAddress', 'address',
-     'tcp mptcp add_addr IPv4', {'test': {'version': 4}}),
+     'tcp mptcp add_addr IPv4', {'length': 8}),
     ('pcapkit.protocols.schema.transport.tcp', 'MPTCPAddAddress', 'address',
-     'tcp mptcp add_addr IPv6', {'test': {'version': 6}}),
+     'tcp mptcp add_addr IPv6', {'length': 20}),
 ]
 
 
