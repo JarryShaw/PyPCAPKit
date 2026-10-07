@@ -321,6 +321,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Key-value pairs for protocol construction.
 
         """
+        upper = cls._make_payload(data)
+        payload = upper  # type: bytes | ProtocolBase
+
+        # NOTE: The extension headers sit between this header and the upper
+        # layer payload, so they are rebuilt in wire order ahead of it.
+        exthdr = data.get('__exthdr__')
+        if exthdr:
+            payload = b''.join(proto.from_data(info).data for proto, info in exthdr) + upper.data
+
         return {
             'traffic_class': data['class'],
             'flow_label': data.label,
@@ -333,7 +342,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # capture rebuilds with the length that was on the wire
             # (:issue:`1155`).
             'payload_length': data.payload,
-            'payload': cls._make_payload(data)
+            'payload': payload,
         }
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
@@ -380,6 +389,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         hdr_len = self.length       # header length
         raw_len = ipv6.payload      # payload length
         _protos = []                # ProtoChain buffer
+        _exthdr = []                # (parser class, info) per extension header
 
         # traverse if next header is an extension header
         payload = self.__header__.get_payload()
@@ -406,6 +416,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
+            _exthdr.append((type(next_), info))
 
             # update header & payload length
             hdr_len += next_.length  # type: ignore[assignment]
@@ -464,6 +475,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
             # update next header
             'protocol': proto,
+
+            # extension header chain in wire order, for ``from_data``; the
+            # per-header keys above cannot carry it, since a repeated header
+            # overwrites its predecessor's key
+            '__exthdr__': tuple(_exthdr),
         })
 
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
