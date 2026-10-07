@@ -1854,9 +1854,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`
             instead, as an unparseable one is.
 
-            The captured octets are what ``file_`` holds, which may be fewer than
-            the ``length`` the current header declares. They are short of the
-            header when there are fewer than the next layer's
+            The captured octets are the first ``length`` of ``file_``, or all of
+            it when it holds fewer, as a truncated capture does. They are short
+            of the header when there are fewer than the next layer's
             :meth:`__length_hint__ <ProtocolBase.__length_hint__>`, unless the
             header it parsed, :attr:`length <ProtocolBase.length>` octets long, fits
             in them anyway: for a variable-length header such as
