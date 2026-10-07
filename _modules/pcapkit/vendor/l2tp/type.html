@@ -489,10 +489,11 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Type'</span><span class="p">]</span>
 
-<span class="c1">#: L2TP packet types.</span>
+<span class="c1">#: L2TP packet types, i.e. the ``T`` bit: :rfc:`2661` §3.1 sets it "to 0 for</span>
+<span class="c1">#: a data message and 1 for a control message".</span>
 <span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mi">0</span><span class="p">:</span>  <span class="s1">'Control'</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">:</span>  <span class="s1">'Data'</span><span class="p">,</span>
+    <span class="mi">0</span><span class="p">:</span>  <span class="s1">'Data'</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">:</span>  <span class="s1">'Control'</span><span class="p">,</span>
 <span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
 
 

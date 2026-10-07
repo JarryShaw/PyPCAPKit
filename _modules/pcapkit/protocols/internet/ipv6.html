@@ -806,6 +806,15 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">upper</span>  <span class="c1"># type: bytes | ProtocolBase</span>
+
+        <span class="c1"># NOTE: The extension headers sit between this header and the upper</span>
+        <span class="c1"># layer payload, so they are rebuilt in wire order ahead of it.</span>
+        <span class="n">exthdr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__exthdr__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exthdr</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">info</span><span class="p">)</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">proto</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">exthdr</span><span class="p">)</span> <span class="o">+</span> <span class="n">upper</span><span class="o">.</span><span class="n">data</span>
+
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'traffic_class'</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">'class'</span><span class="p">],</span>
             <span class="s1">'flow_label'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
@@ -818,7 +827,7 @@
             <span class="c1"># capture rebuilds with the length that was on the wire</span>
             <span class="c1"># (:issue:`1155`).</span>
             <span class="s1">'payload_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
-            <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="s1">'payload'</span><span class="p">:</span> <span class="n">payload</span><span class="p">,</span>
         <span class="p">}</span></div>
 
 
@@ -868,6 +877,7 @@
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>       <span class="c1"># header length</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>      <span class="c1"># payload length</span>
         <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># ProtoChain buffer</span>
+        <span class="n">_exthdr</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># (parser class, info) per extension header</span>
 
         <span class="c1"># traverse if next header is an extension header</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
@@ -894,6 +904,7 @@
             <span class="c1"># record protocol name</span>
             <span class="c1"># self._protos = ProtoChain(name, chain, alias)</span>
             <span class="n">_protos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_</span><span class="p">)</span>
+            <span class="n">_exthdr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">type</span><span class="p">(</span><span class="n">next_</span><span class="p">),</span> <span class="n">info</span><span class="p">))</span>
 
             <span class="c1"># update header &amp; payload length</span>
             <span class="n">hdr_len</span> <span class="o">+=</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -952,6 +963,11 @@
 
             <span class="c1"># update next header</span>
             <span class="s1">'protocol'</span><span class="p">:</span> <span class="n">proto</span><span class="p">,</span>
+
+            <span class="c1"># extension header chain in wire order, for ``from_data``; the</span>
+            <span class="c1"># per-header keys above cannot carry it, since a repeated header</span>
+            <span class="c1"># overwrites its predecessor's key</span>
+            <span class="s1">'__exthdr__'</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_exthdr</span><span class="p">),</span>
         <span class="p">})</span>
 
         <span class="n">ipv6_exthdr</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>

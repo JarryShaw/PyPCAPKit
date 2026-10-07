@@ -2414,47 +2414,78 @@
 <div class="viewcode-block" id="HOPOPT._make_opt_mpl">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_mpl">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_MPLOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">seed_type</span><span class="p">:</span> <span class="s1">'Optional[Enum_SeedID | StdlibEnum | AenumEnum | str | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">seed_type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">seed_type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                      <span class="n">seed_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="nb">max</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">drop</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                      <span class="n">seed</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">seed</span><span class="p">:</span> <span class="s1">'Optional[int | IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MPLOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT MPL option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: option type value</span>
 <span class="sd">            opt: option data</span>
+<span class="sd">            seed_type: seed-id type (``S`` field); inferred from ``seed`` if not given</span>
+<span class="sd">            seed_type_default: default value of seed-id type</span>
+<span class="sd">            seed_type_namespace: namespace of seed-id type</span>
+<span class="sd">            seed_type_reversed: reversed flag of seed-id type</span>
 <span class="sd">            max: maximum sequence number flag</span>
 <span class="sd">            drop: drop packet flag</span>
 <span class="sd">            seq: MPL sequence number</span>
-<span class="sd">            seed: MPL seed ID</span>
+<span class="sd">            seed: MPL seed ID, ignored when the seed-id type is</span>
+<span class="sd">                :attr:`~pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS`,</span>
+<span class="sd">                as the seed is then the IPv6 source address</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the seed ID is missing or does not fit the seed-id type.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seed_type</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seed_type</span>
             <span class="nb">max</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">max</span>
             <span class="n">drop</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">drop</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">seed</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seed_id</span>
 
-        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">seed_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">seed_type</span><span class="p">,</span> <span class="n">seed_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">seed_type_namespace</span><span class="p">,</span>
+                                    <span class="nb">reversed</span><span class="o">=</span><span class="n">seed_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span>
-            <span class="n">clen</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">seed_bl</span> <span class="o">=</span> <span class="n">seed</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">seed_bl</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">:</span>
                 <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_16_BIT_UNSIGNED_INTEGER</span>
-                <span class="n">clen</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="k">elif</span> <span class="n">seed_bl</span> <span class="o">&lt;=</span> <span class="mi">64</span><span class="p">:</span>
                 <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_64_BIT_UNSIGNED_INTEGER</span>
-                <span class="n">clen</span> <span class="o">=</span> <span class="mi">10</span>
-            <span class="k">elif</span> <span class="n">seed_bl</span> <span class="o">&lt;=</span> <span class="mi">128</span><span class="p">:</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_128_BIT_UNSIGNED_INTEGER</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">:</span>
+            <span class="c1"># The seed is the IPv6 source address, which is not on the wire.</span>
+            <span class="n">seed_id</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
+            <span class="n">clen</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_16_BIT_UNSIGNED_INTEGER</span><span class="p">:</span>
+                <span class="n">clen</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_64_BIT_UNSIGNED_INTEGER</span><span class="p">:</span>
+                <span class="n">clen</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">SEEDID_128_BIT_UNSIGNED_INTEGER</span><span class="p">:</span>
                 <span class="n">clen</span> <span class="o">=</span> <span class="mi">18</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid MPL seed-id type: </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] missing MPL seed ID for type </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">seed_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">seed_id</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">clen</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too large MPL seed ID: </span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MPLOption</span><span class="p">(</span>
@@ -2466,7 +2497,7 @@
                 <span class="s1">'drop'</span><span class="p">:</span> <span class="n">drop</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed_id</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

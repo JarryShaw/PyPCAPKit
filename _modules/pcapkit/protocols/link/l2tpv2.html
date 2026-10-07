@@ -697,10 +697,10 @@
 
         <span class="n">l2tp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
             <span class="p">(</span><span class="s1">'hdr_len'</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">])</span>
         <span class="k">if</span> <span class="n">_size</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
-            <span class="c1"># l2tp['padding'] = self._read_fileng(_size)</span>
 
         <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># L2TP carries no next-protocol field -- the payload is a PPP frame,</span>
@@ -722,11 +722,13 @@
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">priority</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">length_flag</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">nr</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">offset</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_L2TP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -738,28 +740,52 @@
 <span class="sd">            type_namespace: Namespace of type.</span>
 <span class="sd">            type_reversed: Reversed namespace of type.</span>
 <span class="sd">            priority: Priority flag.</span>
-<span class="sd">            total_length: Length of the datagram, header included; the Length</span>
-<span class="sd">                field and its ``L`` flag are omitted when this is :data:`None`.</span>
+<span class="sd">            total_length: Length of the datagram, header included, written as</span>
+<span class="sd">                given; the real header-plus-payload length when :data:`None`</span>
+<span class="sd">                and the Length field is present.</span>
+<span class="sd">            length_flag: Whether the Length field and its ``L`` flag are</span>
+<span class="sd">                present. When :data:`None`, they are present if</span>
+<span class="sd">                ``total_length`` is given, or for a control message, which</span>
+<span class="sd">                :rfc:`2661` §3.1 requires to set ``L``.</span>
 <span class="sd">            tunnel_id: Tunnel ID.</span>
 <span class="sd">            session_id: Session ID.</span>
 <span class="sd">            ns: Sequence number.</span>
 <span class="sd">            nr: Acknowledgement number.</span>
 <span class="sd">            offset: Offset size.</span>
+<span class="sd">            padding: Offset pad, zero-filled or truncated to ``offset`` octets;</span>
+<span class="sd">                all zeros when :data:`None`.</span>
 <span class="sd">            payload: Payload data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``total_length`` is given with ``length_flag``</span>
+<span class="sd">                set to :data:`False`.</span>
+
 <span class="sd">        """</span>
         <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>
                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">length_flag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length_flag</span> <span class="o">=</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">type_</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Control</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">length_flag</span> <span class="ow">and</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: total_length given without the Length field'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: An explicit ``total_length`` is not checked against the octets</span>
+        <span class="c1"># at hand, so that a ``from_data`` rebuild of a capture truncated by</span>
+        <span class="c1"># snaplen keeps the length the sender declared, as UDP does</span>
+        <span class="c1"># (:issue:`1155`).</span>
+        <span class="k">if</span> <span class="n">length_flag</span> <span class="ow">and</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_length</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">seq</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_L2TP</span><span class="p">(</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'type'</span><span class="p">:</span> <span class="n">type_</span><span class="p">,</span>
-                <span class="s1">'len'</span><span class="p">:</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s1">'seq'</span><span class="p">:</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">'len'</span><span class="p">:</span> <span class="n">length_flag</span><span class="p">,</span>
+                <span class="s1">'seq'</span><span class="p">:</span> <span class="n">seq</span><span class="p">,</span>
                 <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="s1">'prio'</span><span class="p">:</span> <span class="n">priority</span><span class="p">,</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
@@ -770,6 +796,7 @@
             <span class="n">ns</span><span class="o">=</span><span class="n">ns</span><span class="p">,</span>
             <span class="n">nr</span><span class="o">=</span><span class="n">nr</span><span class="p">,</span>
             <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">padding</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -855,11 +882,16 @@
             <span class="c1"># under that key it never reached :meth:`make`, and the rebuild</span>
             <span class="c1"># dropped both the Length field and the ``L`` flag (:issue:`1172`).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="c1"># NOTE: Passed so that a control message captured without ``L``</span>
+            <span class="c1"># rebuilds as captured, rather than gaining the Length field</span>
+            <span class="c1"># :meth:`make` would give it by default.</span>
+            <span class="s1">'length_flag'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'tunnel_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tunnelid</span><span class="p">,</span>
             <span class="s1">'session_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sessionid</span><span class="p">,</span>
             <span class="s1">'ns'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">ns</span><span class="p">,</span>
             <span class="s1">'nr'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span>
             <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
+            <span class="s1">'padding'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>

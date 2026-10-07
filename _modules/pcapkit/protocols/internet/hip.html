@@ -1068,6 +1068,11 @@
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">hip</span>
+
+        <span class="c1"># NOTE: ``_decode_next_layer`` builds the protocol chain from</span>
+        <span class="c1"># :attr:`self.alias &lt;HIP.alias&gt;`, which reads ``self._info``, and</span>
+        <span class="c1"># ``__post_init__`` assigns that only once this method returns.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">hip</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hip</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 
