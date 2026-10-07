@@ -20,6 +20,8 @@ class AH(Protocol):
     next: 'TransType'
     #: Payload length.
     length: 'int'
+    #: Reserved.
+    reserved: 'int'
     #: Security parameters index.
     spi: 'int'
     #: Sequence number field.
@@ -28,4 +30,4 @@ class AH(Protocol):
     icv: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', spi: 'int', seq: 'int', icv: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, next: 'TransType', length: 'int', reserved: 'int', spi: 'int', seq: 'int', icv: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long

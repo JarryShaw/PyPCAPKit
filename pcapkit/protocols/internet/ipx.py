@@ -118,6 +118,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
              type_default: 'Optional[int]' = None,
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
+             total_length: 'Optional[int]' = None,
              dst: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              src: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              payload: 'bytes | ProtocolBase | Schema' = b'',
@@ -131,6 +132,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             type_default: Default value for undefined packet type.
             type_namespace: Namespace for packet type.
             type_reversed: Reverse namespace for packet type.
+            total_length: Packet length (header includes); computed as ``30`` plus
+                the payload length when not given.
             dst: Destination Address.
             src: Source Address.
             payload: Payload data.
@@ -142,10 +145,12 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         """
         type_val = self._make_index(type, type_default, namespace=type_namespace,
                                     reversed=type_reversed, pack=False)
+        if total_length is None:
+            total_length = 30 + len(payload)
 
         return Schema_IPX(
             chksum=chksum,
-            len=30 + len(payload),
+            len=total_length,
             count=count,
             type=type_val,  # type: ignore[arg-type]
             dst=dst,
@@ -192,10 +197,27 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             'chksum': data.chksum,
             'count': data.count,
             'type': data.type,
-            'dst': data.dst,
-            'src': data.src,
+            'total_length': data.len,
+            'dst': cls._make_ipx_address(data.dst),
+            'src': cls._make_ipx_address(data.src),
             'payload': cls._make_payload(data),
         }
+
+    @staticmethod
+    def _make_ipx_address(addr: 'Data_Address') -> 'bytes':
+        """Make IPX address field.
+
+        Args:
+            addr: Parsed IPX address field.
+
+        Returns:
+            The 12-octet IPX address: network number, node number and
+            socket number.
+
+        """
+        return (bytes.fromhex(addr.network.replace(':', ''))
+                + bytes.fromhex(addr.node.replace('-', ''))
+                + int(addr.socket).to_bytes(2, 'big', signed=False))
 
     def _read_ipx_address(self, addr: 'bytes') -> 'Data_Address':
         """Read IPX address field.

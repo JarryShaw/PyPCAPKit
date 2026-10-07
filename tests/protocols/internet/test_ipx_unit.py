@@ -20,15 +20,20 @@ class IPXUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipx_index_length_and_make_data(self) -> None:
+        from pcapkit.const.ipx.socket import Socket
         from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.data.internet.ipx import Address
         from pcapkit.protocols.internet.ipx import IPX
 
         data = DummyDict(
             chksum=b'\xff\xff',
+            len=32,
             count=42,
             type=4,
-            dst='dst-node',
-            src='src-node',
+            dst=Address(network='00:00:00:01', node='00-01-02-03-04-05',
+                        socket=Socket.get(0x0456), addr='unused'),
+            src=Address(network='0a:0b:0c:0d', node='aa-bb-cc-dd-ee-ff',
+                        socket=Socket.get(0x4004), addr='unused'),
             __next_type__=None,
         )
         proto = object.__new__(IPX)
@@ -39,8 +44,9 @@ class IPXUnitTests(unittest.TestCase):
         self.assertEqual(values['chksum'], b'\xff\xff')
         self.assertEqual(values['count'], 42)
         self.assertEqual(values['type'], 4)
-        self.assertEqual(values['dst'], 'dst-node')
-        self.assertEqual(values['src'], 'src-node')
+        self.assertEqual(values['total_length'], 32)
+        self.assertEqual(values['dst'], bytes.fromhex('00000001' '000102030405' '0456'))
+        self.assertEqual(values['src'], bytes.fromhex('0a0b0c0d' 'aabbccddeeff' '4004'))
         self.assertIn('payload', values)
 
     def test_ipx_make_builds_schema_with_addresses(self) -> None:

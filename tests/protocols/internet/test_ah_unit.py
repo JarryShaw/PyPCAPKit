@@ -25,6 +25,7 @@ class AHUnitTests(unittest.TestCase):
 
         data = DummyDict(
             next=TransType.TCP,
+            reserved=0xdead,
             spi=0x12345678,
             seq=7,
             icv=b'auth',
@@ -36,6 +37,7 @@ class AHUnitTests(unittest.TestCase):
         self.assertEqual(proto.__length_hint__(), 20)
         values = AH._make_data(data)
         self.assertEqual(values['next'], TransType.TCP)
+        self.assertEqual(values['reserved'], 0xdead)
         self.assertEqual(values['spi'], 0x12345678)
         self.assertEqual(values['seq'], 7)
         self.assertEqual(values['icv'], b'auth')
