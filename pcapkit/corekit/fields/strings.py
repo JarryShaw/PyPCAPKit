@@ -12,6 +12,7 @@ from pcapkit.utilities.exceptions import FieldValueError
 __all__ = [
     '_TextField',
     'StringField',
+    'DecodedString',
     'BitField',
     'PaddingField',
 ]
@@ -101,19 +102,33 @@ class StringField(_TextField[str]):
         length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
-        encoding: The encoding with which to decode the :obj:`bytes`.
-            If not provided, :mod:`pcapkit` will first try detecting its encoding
-            using |chardet|_. The fallback encoding is **UTF-8**.
+        encoding: The encoding with which to decode the :obj:`bytes`, and with which
+            a :obj:`str` is encoded when packing. If not provided, :mod:`pcapkit`
+            will first try detecting its encoding using |chardet|_. The fallback
+            encoding is **UTF-8**.
         errors: The error handling scheme to use for the handling of decoding errors.
-            The default is ``'strict'`` meaning that decoding errors raise a
-            :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
-            as well as any other name registered with :func:`codecs.register_error` that
-            can handle :exc:`UnicodeDecodeError`.
+            The default is ``'strict'``. Should decoding fail under it, the field
+            retries with ``'replace'`` rather than raising, so an octet the charset
+            cannot decode reads as U+FFFD -- the octets themselves are not lost,
+            see below. A codec that supports no error handler at all still raises:
+            ``idna`` reports ``Unsupported error handling: replace``, measured.
+            Other possible values are ``'ignore'`` and ``'replace'`` as well as any
+            other name registered with :func:`codecs.register_error` that can handle
+            :exc:`UnicodeDecodeError`.
         unquote: Whether to unquote the decoded string as a URL. Should decoding fail,
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Unpacking is lossless. Where re-encoding the decoded :obj:`str` would not
+    reproduce the octets it came from -- a detected charset other than UTF-8, an
+    octet the charset cannot decode, a lossy ``errors`` scheme, or a URL quoting
+    that differs from the original -- the field returns a :class:`DecodedString`,
+    which remembers those octets and packs back as exactly them. The decoded
+    *text* is whatever it has always been, U+FFFD and all: a consumer that only
+    reads the text, such as a dumper writing it back out as UTF-8, sees no
+    change. A length of ``-1`` is resolved to the number of *encoded* octets.
 
     .. |chardet| replace:: ``chardet``
     .. _chardet: https://chardet.readthedocs.io
@@ -131,6 +146,20 @@ class StringField(_TextField[str]):
         self._errors = errors
         self._unquote = unquote
 
+    def _encode(self, value: 'str') -> 'bytes':
+        """Encode a :obj:`str` value the way :meth:`pre_process` packs it.
+
+        Arguments:
+            value: Field value.
+
+        Returns:
+            Encoded field value.
+
+        """
+        if self._unquote:
+            value = urllib_parse.quote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
+        return value.encode(self._encoding or 'utf-8', self._errors)
+
     def pre_process(self, value: 'str', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
@@ -142,13 +171,18 @@ class StringField(_TextField[str]):
             Processed field value.
 
         """
-        if self._unquote:
-            value = urllib_parse.quote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
+        # NOTE: The octets a DecodedString was decoded from are used verbatim,
+        # since re-encoding its text is exactly what would not reproduce them.
+        buffer = value.raw if isinstance(value, DecodedString) else self._encode(value)
 
+        # NOTE: A negative length is resolved from the *encoded* octets, not from
+        # the character count -- the ``Ns`` template counts octets, so counting
+        # characters truncated any text that does not encode one octet per
+        # character.
         if self._length < 0:
-            self._length = len(value)
+            self._length = len(buffer)
             self._template = f'{self._length}s'
-        return value.encode(self._encoding or 'utf-8', self._errors)
+        return buffer
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'str':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
@@ -158,7 +192,8 @@ class StringField(_TextField[str]):
             packet: Packet data.
 
         Returns:
-            Processed field value.
+            Processed field value; a :class:`DecodedString` carrying ``value``
+            where :meth:`pre_process` would not otherwise reproduce it.
 
         """
         if self._unquote:
@@ -172,7 +207,51 @@ class StringField(_TextField[str]):
                 ret = value.decode(charset, self._errors)
             except UnicodeError:
                 ret = value.decode(charset, 'replace')
-        return ret
+
+        # NOTE: Encoding may itself fail -- ``errors='strict'`` over text that
+        # decoded under a lone-surrogate scheme, for one -- which is as much a
+        # failure to reproduce the octets as a mismatch is.
+        try:
+            lossless = self._encode(ret) == value
+        except UnicodeError:
+            lossless = False
+        if lossless:
+            return ret
+        return DecodedString(ret, value)
+
+
+class DecodedString(str):
+    """Decoded :class:`StringField` value that remembers its octets.
+
+    :class:`StringField` returns one where encoding the decoded text would not
+    reproduce the octets it was decoded from, so that the field packs it back as
+    exactly those octets. It is otherwise an ordinary :obj:`str`, and deliberately
+    so: it compares and hashes as its text, since the text is the value and
+    :attr:`raw` is provenance. Two of them with the same text and different octets
+    therefore compare equal -- the alternative, mixing :attr:`raw` into
+    :meth:`~object.__eq__`, would make ``info.comment == 'café'`` false against a
+    plain :obj:`str` literal, which is the comparison callers actually write.
+
+    Any string operation on one returns a plain :obj:`str`, which a field then
+    packs with its own encoding; that is intended, as an edited value is no longer
+    the text those octets held.
+
+    Args:
+        value: Decoded text.
+        raw: Octets ``value`` was decoded from.
+
+    """
+
+    #: Octets the string was decoded from.
+    raw: 'bytes'
+
+    def __new__(cls, value: 'str', raw: 'bytes') -> 'Self':
+        self = super().__new__(cls, value)
+        self.raw = raw
+        return self
+
+    def __getnewargs__(self) -> 'tuple[str, bytes]':  # type: ignore[override]
+        return str(self), self.raw
 
 
 class BitField(_TextField[Dict[str, Any]]):
