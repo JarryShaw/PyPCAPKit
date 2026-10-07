@@ -306,12 +306,23 @@ class NumberField(Field[int], Generic[_T]):
         Returns:
             Processed field value.
 
+        Notes:
+            Masking against :attr:`self._bit_mask <NumberField.bit_length>`
+            yields the unsigned pattern, so a signed field maps it back into
+            its signed range afterwards, mirroring :meth:`pre_process`. A
+            resolved signed field therefore decodes ``ffffffff`` as ``-1``
+            rather than ``4294967295``. See GitHub issue :issue:`1274`.
+
         """
         if not self._need_process:
-            return cast('int', value) & self._bit_mask
-        return int.from_bytes(
-            cast('bytes', value), self._byteorder, signed=self._signed
-        ) & self._bit_mask
+            value = cast('int', value) & self._bit_mask
+        else:
+            value = int.from_bytes(
+                cast('bytes', value), self._byteorder, signed=self._signed
+            ) & self._bit_mask
+        if self._signed and value > self._bit_mask >> 1:
+            value -= self._bit_mask + 1
+        return value
 
 
 class Int32Field(NumberField):

@@ -920,10 +920,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
             # so it is read once per field here rather than at each use.
             if isinstance(field, PayloadField):
+                # NOTE: A negative length is the unset default and takes what
+                # the declared length leaves, never less than nothing; a
+                # computed zero is an empty payload, not an unset one, or it
+                # would swallow the fields after it (:issue:`1275`).
                 length = field.length
-                payload_length = length or cast('int', packet['__length__'])
+                if length < 0:
+                    length = max(cast('int', packet['__length__']), 0)
 
-                payload = data.read(payload_length)
+                payload = data.read(length)
                 self.__buffer__[field.name] = payload
 
                 packet['__length__'] -= length
