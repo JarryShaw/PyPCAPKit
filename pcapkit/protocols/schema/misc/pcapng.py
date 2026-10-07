@@ -24,7 +24,8 @@ from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceFie
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, NumberField,
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
-from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
+from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString, PaddingField,
+                                            StringField)
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
@@ -100,6 +101,9 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Block, and is used with those link layers (e.g. PPP) where the length of
         #: the FCS can change during time.
         fcs_len: int
+        #: Bits 9 to 23, kept verbatim (checksum and segmentation offload
+        #: flags, reserved bits and unnamed link-layer-dependent errors).
+        reserved: int
         #: Link-layer-dependent error - CRC error (bit 24).
         crc_error: int
         #: Link-layer-dependent error - packet too long error (bit 25).
@@ -131,6 +135,9 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Block, and is used with those link layers (e.g. PPP) where the length of
         #: the FCS can change during time.
         fcs_len: int
+        #: Bits 9 to 23, kept verbatim (checksum and segmentation offload
+        #: flags, reserved bits and unnamed link-layer-dependent errors).
+        reserved: int
         #: Link-layer-dependent error - CRC error (bit 24).
         crc_error: int
         #: Link-layer-dependent error - packet too long error (bit 25).
@@ -500,6 +507,87 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     secrets_type = packet['secrets_type']  # type: int
     schema = DSBSecrets.registry[secrets_type]
     return SchemaField(length=packet['secrets_length'], schema=schema)
+
+
+class FlagsField(UInt32Field):
+    """32-bit flags word for protocol fields, with sub-fields numbered from the
+    least-significant bit, as the ``epb_flags`` and ``pack_flags`` options number
+    them.
+
+    Unlike :class:`~pcapkit.corekit.fields.strings.BitField`, which numbers bits
+    from the most-significant bit of the raw octets and ignores byte order, the
+    word is read as an integer in the section's byte order first.
+
+    Args:
+        namespace: Field namespace (a dict mapping field name to a tuple of
+            start bit, counted from the least-significant bit, and width).
+        callback: Callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    """
+
+    def __init__(self, namespace: 'dict[str, tuple[int, int]]',
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(callback=callback)
+
+        self._flags = namespace
+
+    def pre_process(self, value: 'dict[str, int]', packet: 'dict[str, Any]') -> 'int | bytes':  # type: ignore[override]
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        Raises:
+            FieldValueError: If a sub-field value does not fit its bits.
+
+        """
+        word = 0
+        for name, (start, size) in self._flags.items():
+            part = value[name]
+            if not 0 <= part < 1 << size:
+                raise FieldValueError(f'{type(self).__name__}: subfield {name!r} value {part!r} '
+                                      f'does not fit in {size} bit(s)')
+            word |= part << start
+        return super().pre_process(word, packet)
+
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'dict[str, int]':  # type: ignore[override]
+        """Process field value after parsing (unpacked).
+
+        Args:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        word = super().post_process(value, packet)
+        return {name: word >> start & ((1 << size) - 1) for name, (start, size) in self._flags.items()}
+
+
+#: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps
+#: bits 9 to 23 verbatim -- the checksum and segmentation offload bits 9-11, the
+#: reserved bits 12-15 and the link-layer-dependent error bits 16-23 that the
+#: data model does not name.
+PACKET_FLAGS = {
+    'direction': (0, 2),
+    'reception': (2, 3),
+    'fcs_len': (5, 4),
+    'reserved': (9, 15),
+    'crc_error': (24, 1),
+    'too_long': (25, 1),
+    'too_short': (26, 1),
+    'gap_error': (27, 1),
+    'unaligned_error': (28, 1),
+    'delimiter_error': (29, 1),
+    'preamble_error': (30, 1),
+    'symbol_error': (31, 1),
+}  # type: dict[str, tuple[int, int]]
 
 
 class OptionEnumField(EnumField):
@@ -1261,19 +1349,7 @@ class EPB_FlagsOption(_EPB_Option, code=Enum_OptionType.epb_flags):
     """Header schema for PCAP-NG ``epb_flags`` options."""
 
     #: Flags.
-    flags: 'EPBFlags' = BitField(length=4, namespace={
-        'direction': (0, 2),
-        'reception': (2, 3),
-        'fcs_len': (5, 4),
-        'crc_error': (24, 1),
-        'too_long': (25, 1),
-        'too_short': (26, 1),
-        'gap_error': (27, 1),
-        'unaligned_error': (28, 1),
-        'delimiter_error': (29, 1),
-        'preamble_error': (30, 1),
-        'symbol_error': (31, 1),
-    })
+    flags: 'EPBFlags' = FlagsField(namespace=PACKET_FLAGS, callback=byteorder_callback)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1424,6 +1500,29 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
                      length2: 'int') -> 'None': ...
 
 
+def _split_names(resol: 'str') -> 'list[str]':
+    """Split NRB record name resolution data into its zero-terminated names.
+
+    Args:
+        resol: Name resolution data, as a UTF-8
+            :class:`~pcapkit.corekit.fields.strings.StringField` decodes it.
+
+    Returns:
+        The names. They are split from the *octets* the data was decoded from,
+        so that a name that is not valid UTF-8 comes back as a
+        :class:`~pcapkit.corekit.fields.strings.DecodedString` carrying its own
+        octets; splitting the decoded text would return plain strings and lose
+        them.
+
+    """
+    raw = resol.raw if isinstance(resol, DecodedString) else resol.encode('utf-8')
+    names = []  # type: list[str]
+    for octets in raw.rstrip(b'\x00').split(b'\x00'):
+        text = octets.decode('utf-8', 'replace')
+        names.append(text if text.encode('utf-8') == octets else DecodedString(text, octets))
+    return names
+
+
 class NameResolutionRecord(EnumSchema[Enum_RecordType]):
     """Header schema for PCAP-NG NRB records."""
 
@@ -1463,7 +1562,7 @@ class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
     #: IPv4 address.
     ip: 'IPv4Address' = IPv4AddressField()
     #: Name resolution data.
-    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 4))
+    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 4), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1477,7 +1576,7 @@ class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
             Revised schema.
 
         """
-        self.names = self.resol.rstrip('\x00').split('\x00')
+        self.names = _split_names(self.resol)
         return self
 
     if TYPE_CHECKING:
@@ -1494,7 +1593,7 @@ class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
     #: IPv6 address.
     ip: 'IPv6Address' = IPv6AddressField()
     #: Name resolution data.
-    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 16))
+    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 16), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1508,7 +1607,7 @@ class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
             Revised schema.
 
         """
-        self.names = self.resol.rstrip('\x00').split('\x00')
+        self.names = _split_names(self.resol)
         return self
 
     if TYPE_CHECKING:
@@ -1532,7 +1631,7 @@ class NS_DNSNameOption(_NS_Option, code=Enum_OptionType.ns_dnsname):
     """Header schema for PCAP-NG ``ns_dnsname`` option."""
 
     #: DNS name.
-    name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']))
+    name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -2083,9 +2182,10 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
             if not line or line.startswith('#'):
                 continue
 
-            label, op, secret = line.strip().split()
-            if op != '=':
-                raise FieldValueError('invalid WireGuard key log format: {line!r}')
+            fields = line.strip().split()
+            if len(fields) != 3 or fields[1] != '=':
+                raise FieldValueError(f'invalid WireGuard key log format: {line!r}')
+            label, _, secret = fields
             label_enum = WireGuardKeyLabel(label.upper())
             entries.add(label_enum, base64.b64decode(secret))
 
@@ -2225,19 +2325,7 @@ class PACK_FlagsOption(_PACK_Option, code=Enum_OptionType.pack_flags):
     """Header schema for PCAP-NG ``pack_flags`` options."""
 
     #: Flags.
-    flags: 'PACKFlags' = BitField(length=4, namespace={
-        'direction': (0, 2),
-        'reception': (2, 3),
-        'fcs_len': (5, 4),
-        'crc_error': (24, 1),
-        'too_long': (25, 1),
-        'too_short': (26, 1),
-        'gap_error': (27, 1),
-        'unaligned_error': (28, 1),
-        'delimiter_error': (29, 1),
-        'preamble_error': (30, 1),
-        'symbol_error': (31, 1),
-    })
+    flags: 'PACKFlags' = FlagsField(namespace=PACKET_FLAGS, callback=byteorder_callback)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 

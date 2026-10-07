@@ -262,6 +262,28 @@ def _utf8_length(text: 'str') -> 'int':
     return len(text.encode('utf-8'))
 
 
+def _join_names(names: 'list[str]') -> 'str':
+    """Join NRB record names into zero-terminated name resolution data.
+
+    Args:
+        names: Host names; a :class:`~pcapkit.corekit.fields.strings.DecodedString`
+            contributes the octets it was decoded from.
+
+    Returns:
+        The name resolution data, as a
+        :class:`~pcapkit.corekit.fields.strings.DecodedString` when any name
+        carries octets that its text does not encode back to.
+
+    """
+    names = list(names) or ['']
+    text = ''.join(f'{name}\x00' for name in names)
+    raw = b''.join((name.raw if isinstance(name, DecodedString) else name.encode('utf-8')) + b'\x00'
+                   for name in names)
+    if text.encode('utf-8') == raw:
+        return text
+    return DecodedString(text, raw)
+
+
 class PacketDirection(EnumLookup, enum.IntEnum):
     """Packet direction for ``epb_flags`` options.
 
@@ -1020,6 +1042,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if self._ctx is not None:
             self._byte = self._ctx.section.byteorder
             packet['byteorder'] = self._byte
+        elif self._type == Enum_BlockType.Section_Header_Block:
+            # NOTE: A section header starts its own section, so the byte order
+            # is the one :meth:`_make_block_shb` chose rather than the host's.
+            packet.setdefault('byteorder', self._byte)
         return self.__header__.pack(packet)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
@@ -1599,6 +1625,28 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             'type': data.type,
             'block': data,
         }
+
+    @staticmethod
+    def _flags_enum(enum: 'Type[PacketDirection] | Type[PacketReception]', value: 'int',
+                    option: 'Enum_OptionType') -> 'Any':
+        """Look a flags word sub-field up in its enumeration.
+
+        Args:
+            enum: :class:`PacketDirection` or :class:`PacketReception`.
+            value: Sub-field value.
+            option: Option type, for the error message.
+
+        Returns:
+            The enumeration member.
+
+        Raises:
+            ProtocolError: If the specification assigns ``value`` no meaning.
+
+        """
+        try:
+            return enum(value)
+        except ValueError:
+            raise ProtocolError(f'PCAP-NG: [{option.name}] invalid {enum.__name__}: {value:#b}') from None
 
     @classmethod
     def _make_packet_data(cls, block: 'Data_PCAPNG') -> 'bytes | ProtocolBase':
@@ -2920,9 +2968,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         option = Data_EPB_FlagsOption(
             type=schema.type,
             length=schema.length,
-            direction=PacketDirection(schema.flags['direction']),
-            reception=PacketReception(schema.flags['reception']),
+            direction=self._flags_enum(PacketDirection, schema.flags['direction'], schema.type),
+            reception=self._flags_enum(PacketReception, schema.flags['reception'], schema.type),
             fcs_len=schema.flags['fcs_len'],
+            reserved=schema.flags['reserved'],
             crc_error=bool(schema.flags['crc_error']),
             too_long=bool(schema.flags['too_long']),
             too_short=bool(schema.flags['too_short']),
@@ -3378,9 +3427,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         option = Data_PACK_FlagsOption(
             type=schema.type,
             length=schema.length,
-            direction=PacketDirection(schema.flags['direction']),
-            reception=PacketReception(schema.flags['reception']),
+            direction=self._flags_enum(PacketDirection, schema.flags['direction'], schema.type),
+            reception=self._flags_enum(PacketReception, schema.flags['reception'], schema.type),
             fcs_len=schema.flags['fcs_len'],
+            reserved=schema.flags['reserved'],
             crc_error=bool(schema.flags['crc_error']),
             too_long=bool(schema.flags['too_long']),
             too_short=bool(schema.flags['too_short']),
@@ -3696,7 +3746,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if block is not None:
             data = block.body
 
-        length = len(data)
+        # NOTE: The body is padded to 32 bits, and Block Total Length counts it
+        # together with the 12 octets of block type and both length fields.
+        data += bytes(-len(data) % 4)
+        length = len(data) + 12
 
         return Schema_UnknownBlock(
             length=length,
@@ -3710,6 +3763,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         minor_version: 'Optional[int]' = None,
                         section_length: 'int' = -1,
                         options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        byteorder: 'Literal["big", "little"]' = sys.byteorder,
                         **kwargs: 'Any') -> 'Schema_SectionHeaderBlock':
         """Make PCAP-NG section header block (SHB).
 
@@ -3720,13 +3774,16 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             minor_version: Minor version number.
             section_length: Section length.
             options: Block options.
+            byteorder: Byte order of the section; a parsed block keeps its own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed block schema.
 
         """
-        self._byte = sys.byteorder
+        if block is not None:
+            byteorder = block.byteorder
+        self._byte = byteorder
 
         if block is not None:
             major_version = block.version.major
@@ -4958,6 +5015,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                                reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                reception_reversed: 'bool' = False,
                                fcs_len: 'int' = 0,
+                               reserved: 'int' = 0,
                                crc_error: 'bool' = False,
                                too_long: 'bool' = False,
                                too_short: 'bool' = False,
@@ -4981,6 +5039,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             reception_namespace: Namespace of packet reception.
             reception_reversed: Whether to reverse packet reception namespace.
             fcs_len: Length of FCS field, in bytes.
+            reserved: Bits 9 to 23 of the flags word, verbatim.
             crc_error: Whether CRC error occurred.
             too_long: Whether packet is too long.
             too_short: Whether packet is too short.
@@ -5006,6 +5065,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             direction_val = option.direction
             reception_val = option.reception
             fcs_len = option.fcs_len
+            reserved = option.reserved
             crc_error = option.crc_error
             too_long = option.too_long
             too_short = option.too_short
@@ -5027,6 +5087,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 'direction': getattr(direction_val, 'value', direction_val),
                 'reception': getattr(reception_val, 'value', reception_val),
                 'fcs_len': fcs_len,
+                'reserved': reserved,
                 'crc_error': int(crc_error),
                 'too_long': int(too_long),
                 'too_short': int(too_short),
@@ -5198,9 +5259,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
                                 f'but found in {self._type} block.')
-        if self._opt[type] > 0:
-            raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+        # NOTE: No only-one guard: the specification allows ``epb_verdict`` to
+        # appear multiple times, and the parser accepts every occurrence.
 
         if option is not None:
             verdict_val = option.verdict
@@ -5540,6 +5600,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                                 reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                 reception_reversed: 'bool' = False,
                                 fcs_len: 'int' = 0,
+                                reserved: 'int' = 0,
                                 crc_error: 'bool' = False,
                                 too_long: 'bool' = False,
                                 too_short: 'bool' = False,
@@ -5563,6 +5624,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             reception_namespace: Namespace of packet reception.
             reception_reversed: Whether to reverse packet reception namespace.
             fcs_len: Length of FCS field, in bytes.
+            reserved: Bits 9 to 23 of the flags word, verbatim.
             crc_error: Whether CRC error occurred.
             too_long: Whether packet is too long.
             too_short: Whether packet is too short.
@@ -5588,6 +5650,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             direction_val = option.direction
             reception_val = option.reception
             fcs_len = option.fcs_len
+            reserved = option.reserved
             crc_error = option.crc_error
             too_long = option.too_long
             too_short = option.too_short
@@ -5609,6 +5672,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 'direction': getattr(direction_val, 'value', direction_val),
                 'reception': getattr(reception_val, 'value', reception_val),
                 'fcs_len': fcs_len,
+                'reserved': reserved,
                 'crc_error': int(crc_error),
                 'too_long': int(too_long),
                 'too_short': int(too_short),
@@ -5809,11 +5873,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         if names is None:
             names = []
-        records = '\x00'.join(names) + '\x00'
+        records = _join_names(names)
 
         return Schema_IPv4Record(
             type=type,
-            length=4 + len(records),
+            length=4 + _utf8_length(records),
             ip=ip,
             resol=records,
         )
@@ -5841,11 +5905,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         if names is None:
             names = []
-        records = '\x00'.join(names) + '\x00'
+        records = _join_names(names)
 
         return Schema_IPv6Record(
             type=type,
-            length=16 + len(records),
+            length=16 + _utf8_length(records),
             ip=ip,
             resol=records,
         )
