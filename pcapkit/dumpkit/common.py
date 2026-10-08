@@ -25,6 +25,7 @@ import aenum
 import dictdumper.dumper
 import dictdumper.json
 import dictdumper.plist
+import dictdumper.tree
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
@@ -306,6 +307,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it
     # is worked around here.
     keep_none = issubclass(output, dictdumper.plist.PLIST)
+    # NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to
+    # :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`
+    # one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there
+    # (GitHub issue #1266). The defect is :mod:`dictdumper`'s, so it is worked
+    # around here.
+    tree_numbers = issubclass(output, dictdumper.tree.Tree)
 
     def escape_key(key: 'Any') -> 'Any':
         """Escape a mapping key on its way to the writer.
@@ -509,6 +516,29 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     else:
                         text.append(json.dumps(char)[1:-1] if ord(char) > 0xFFFF else f'\\u{ord(char):04x}')
                 file.write('"' + ''.join(text) + '"')
+
+        if tree_numbers:
+            def _append_number(self, value: 'int | float | complex', file: 'TextIO') -> 'None':
+                """Call this function to write number contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    A :class:`complex` value is written as ``-> (1+2j)``, with
+                    ``NaN`` and ``Infinity`` spelt in either part as
+                    :meth:`dictdumper.tree.Tree._append_number` spells them for a
+                    :class:`float`; every other number is written by the
+                    upstream writer.
+
+                """
+                if not isinstance(value, complex):
+                    return super()._append_number(value, file)
+                text = str(value).replace('nan', 'NaN').replace('inf', 'Infinity')
+                file.write(f'-> {text}')
+                return None
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
             """Check content type for function call.
