@@ -11,7 +11,8 @@ GitHub issue #1291: iterating a schema yielded the values its
 
 GitHub issue #1292: a :class:`~pcapkit.corekit.fields.misc.SchemaField` read
 its whole declared span but packed only what its nested schema consumed, so
-the octets the nested schema left unread were lost.
+the octets the nested schema left unread were lost; GitHub issue #1380: a
+schema rebuilt through ``from_dict`` still zero-filled them.
 
 Every case builds its own octets in memory and reads no capture. Everything
 from :mod:`pcapkit` is imported inside each test, after
@@ -98,10 +99,10 @@ class TestSchemaRoundTrip(unittest.TestCase):
 
         raw = bytes.fromhex('0302eeee04')
         rebuilt = outer.from_dict(outer.unpack(raw, len(raw), None).to_dict())
-        # NOTE: The width is kept but the unread octets are zero-filled, since a
-        # rebuilt schema was never unpacked; that open half is #1380, which will
-        # change this expectation to ``0302eeee04``.
-        self.assertEqual(rebuilt.pack(), bytes.fromhex('0302000004'))
+        # NOTE: The unread octets travel through ``to_dict`` as the nested
+        # value's ``__remainder__`` (#1380); a nested schema that never had any
+        # is zero-filled to the declared width.
+        self.assertEqual(rebuilt.pack(), raw)
         self.assertEqual(outer(n=3, inner=inner(x=2), tail=4).pack(), bytes.fromhex('0302000004'))
 
 
