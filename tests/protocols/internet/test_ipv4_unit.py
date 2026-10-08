@@ -1424,6 +1424,7 @@ class IPv4UnitTests(unittest.TestCase):
             # terminator is structure, and ``_read_opt_sec`` never puts it in
             # ``flags`` in the first place.
             flags=(ProtectionAuthority.GENSER, ProtectionAuthority.NSA),
+            termination=(False,),
         )
         self.assertEqual(proto._make_opt_sec(OptionNumber.SEC, sec).level,
                          ClassificationLevel.Unclassified)
@@ -1466,6 +1467,7 @@ class IPv4UnitTests(unittest.TestCase):
             flag=TSFlag.Timestamp_Only,
             timestamp=(datetime.timedelta(seconds=1), 0x80000000),
             remaining=(),
+            remainder=b'',
         )
         # An integer is the raw field, its high-order bit marking a non-standard
         # value, so it is written as is and without a warning. C.f. #1320.
@@ -1488,6 +1490,7 @@ class IPv4UnitTests(unittest.TestCase):
             flag=TSFlag.Prespecified_IP_with_Timestamp,
             timestamp=ts_map,
             remaining=(),
+            remainder=b'',
         )
         with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
             self.assertEqual(proto._make_opt_ts(OptionNumber.TS, ts_prespecified).flags['flag'],
@@ -1619,6 +1622,7 @@ class IPv4UnitTests(unittest.TestCase):
                 length=5,
                 level=ClassificationLevel.Unclassified,
                 flags=(ProtectionAuthority.GENSER, ProtectionAuthority(8)),
+                termination=(True, False),
             )),
             (OptionNumber.MTUP, mtup),
         ])
