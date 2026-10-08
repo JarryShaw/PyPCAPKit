@@ -484,10 +484,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xml.sax.saxutils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -495,6 +497,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.dumper</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.plist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.tree</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
@@ -750,6 +753,32 @@
             <span class="k">yield</span> <span class="n">name</span>
 
 
+<span class="c1">#: Most objects :meth:`DictDumper._append_fallback` expands for one top-level</span>
+<span class="c1">#: object, counting an object once per time it is met. No fallback object in the</span>
+<span class="c1">#: ``foundation``, ``dumpkit`` or ``interface`` test legs expands into more than 7.</span>
+<span class="n">FALLBACK_LIMIT</span> <span class="o">=</span> <span class="mi">10_000</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_object_name</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Name a class, module or routine for dumping, in place of its attributes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Object to name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The module-qualified name of ``value``, falling back to :func:`str`</span>
+<span class="sd">        where it carries none.</span>
+
+<span class="sd">    """</span>
+    <span class="n">qualname</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__qualname__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__name__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qualname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__module__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">module</span> <span class="o">!=</span> <span class="s1">'builtins'</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">qualname</span><span class="si">}</span><span class="s1">'</span>
+    <span class="k">return</span> <span class="n">qualname</span>
+
+
 <div class="viewcode-block" id="make_dumper">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">:</span>
@@ -790,6 +819,12 @@
     <span class="c1"># report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it</span>
     <span class="c1"># is worked around here.</span>
     <span class="n">keep_none</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
+    <span class="c1"># NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to</span>
+    <span class="c1"># :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`</span>
+    <span class="c1"># one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there</span>
+    <span class="c1"># (GitHub issue #1266). The defect is :mod:`dictdumper`'s, so it is worked</span>
+    <span class="c1"># around here.</span>
+    <span class="n">tree_numbers</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">Tree</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Escape a mapping key on its way to the writer.</span>
@@ -839,6 +874,12 @@
 
     <span class="k">class</span><span class="w"> </span><span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Customised :class:`~dictdumper.dumper.Dumper` object."""</span>
+
+        <span class="c1">#: Objects :meth:`_append_fallback` is expanding, by :func:`id` -- the</span>
+        <span class="c1">#: one being written and every one enclosing it.</span>
+        <span class="n">_fallback_path</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[set[int]]</span>
+        <span class="c1">#: Objects expanded so far for the current top-level fallback object.</span>
+        <span class="n">_fallback_count</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">"""Convert content for function call.</span>
@@ -994,6 +1035,29 @@
                         <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">char</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'</span><span class="se">\\</span><span class="s1">u</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="si">:</span><span class="s1">04x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'"'</span> <span class="o">+</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'"'</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">tree_numbers</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int | float | complex'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write number contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    A :class:`complex` value is written as ``-&gt; (1+2j)``, with</span>
+<span class="sd">                    ``NaN`` and ``Infinity`` spelt in either part as</span>
+<span class="sd">                    :meth:`dictdumper.tree.Tree._append_number` spells them for a</span>
+<span class="sd">                    :class:`float`; every other number is written by the</span>
+<span class="sd">                    upstream writer.</span>
+
+<span class="sd">                """</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_number</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'nan'</span><span class="p">,</span> <span class="s1">'NaN'</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">,</span> <span class="s1">'Infinity'</span><span class="p">)</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">'-&gt; </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["fallback"]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">            </span><span class="sd">"""Check content type for function call.</span>
 
@@ -1027,19 +1091,70 @@
 <span class="sd">                to find a suitable function for dumping and it should pair with</span>
 <span class="sd">                ``default`` for use.</span>
 
-<span class="sd">            """</span>
-            <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_iter_slots</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">):</span>
-                <span class="n">new_value</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">'unsupported object type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                <span class="n">new_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+<span class="sd">                A class, module or routine is written as its name rather than</span>
+<span class="sd">                expanded, since its attributes reach the whole type graph</span>
+<span class="sd">                (GitHub issue #1372). Every other object is expanded in full</span>
+<span class="sd">                each time it is met, except one that encloses itself: there</span>
+<span class="sd">                it is written as a ``&lt;circular reference: ...&gt;`` marker, so a</span>
+<span class="sd">                reference cycle terminates.</span>
 
+<span class="sd">            Raises:</span>
+<span class="sd">                UnsupportedCall: If a top-level fallback object expands into</span>
+<span class="sd">                    more than :data:`FALLBACK_LIMIT` objects.</span>
+
+<span class="sd">            """</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">))</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isroutine</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_append_fallback_value</span><span class="p">(</span><span class="n">_object_name</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">file</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_path</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># NOTE: the outermost fallback object owns the bookkeeping, so</span>
+                <span class="c1"># each record dumped is tracked on its own.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_count</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="mi">0</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_append_fallback</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_count</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+                <span class="k">return</span>
+
+            <span class="c1"># NOTE: an object on the path is alive, so its id is not reused.</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">marker</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;circular reference: </span><span class="si">{</span><span class="n">_object_name</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="si">}</span><span class="s1">&gt;'</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_append_fallback_value</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_count</span> <span class="o">&gt;</span> <span class="n">FALLBACK_LIMIT</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: fallback object expands into more '</span>
+                                      <span class="sa">f</span><span class="s1">'than </span><span class="si">{</span><span class="n">FALLBACK_LIMIT</span><span class="si">}</span><span class="s1"> objects; stopped at '</span>
+                                      <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_object_name</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_iter_slots</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">):</span>
+                    <span class="n">new_value</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">'unsupported object type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_append_fallback_value</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_append_fallback_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">"""Write what :meth:`_append_fallback` made of an object.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                self: Dumper instance.</span>
+<span class="sd">                value: Value to dump in place of the object.</span>
+<span class="sd">                file: File object to write.</span>
+
+<span class="sd">            """</span>
             <span class="c1"># NOTE: through :meth:`object_hook` as every other value is, so that</span>
             <span class="c1"># the keys and strings built here are escaped like theirs.</span>
-            <span class="n">new_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_func</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
-            <span class="n">func</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_func</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">func</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">DictDumper</span></div>
 

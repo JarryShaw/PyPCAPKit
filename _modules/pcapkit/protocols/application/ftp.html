@@ -501,7 +501,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -587,11 +587,24 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_REQUEST</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cmmd</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'cmmd'</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="c1"># NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive whole in one</span>
+        <span class="c1"># segment. Its first line is parsed as any reply line, and the lines</span>
+        <span class="c1"># after it are kept as received in ``lines``. A segment holding anything</span>
+        <span class="c1"># else -- no closing line, or more after it -- is refused as before.</span>
+        <span class="n">line</span><span class="p">,</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span> <span class="p">()</span>  <span class="c1"># type: bytes, tuple[bytes, ...]</span>
+        <span class="k">if</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">):</span>
+            <span class="n">first</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rest</span> <span class="ow">and</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">first</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+                    <span class="ow">and</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'more'</span><span class="p">):</span>
+                <span class="n">rest_lines</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rest</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_lines</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'code'</span><span class="p">),</span> <span class="n">rest_lines</span><span class="p">):</span>
+                    <span class="n">line</span><span class="p">,</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">rest_lines</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_REQUEST</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">raw_cmmd</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'cmmd'</span><span class="p">)</span>
             <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'args'</span><span class="p">)</span>
 
-            <span class="n">cmmd_val</span> <span class="o">=</span> <span class="n">Enum_Command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cmmd</span><span class="p">)</span>
+            <span class="n">cmmd_val</span> <span class="o">=</span> <span class="n">Enum_Command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">raw_cmmd</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
             <span class="n">args_val</span><span class="p">,</span> <span class="n">charset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
             <span class="n">ftp</span> <span class="o">=</span> <span class="n">Data_Request</span><span class="p">(</span>
@@ -599,8 +612,9 @@
                 <span class="n">cmmd</span><span class="o">=</span><span class="n">cmmd_val</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="n">args_val</span><span class="p">,</span>
                 <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
+                <span class="n">raw_cmmd</span><span class="o">=</span><span class="n">raw_cmmd</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># type: Data_FTP</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">match</span> <span class="o">:=</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'code'</span><span class="p">))</span>
             <span class="n">more</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'more'</span><span class="p">))</span>
             <span class="n">args</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'text'</span><span class="p">)</span> <span class="k">if</span> <span class="n">more</span> <span class="k">else</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'args'</span><span class="p">)</span>
@@ -614,6 +628,7 @@
                 <span class="n">more</span><span class="o">=</span><span class="n">more</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="n">args_val</span><span class="p">,</span>
                 <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
+                <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: invalid packet format'</span><span class="p">)</span>
@@ -628,6 +643,8 @@
              <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">raw_cmmd</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">lines</span><span class="p">:</span> <span class="s1">'Iterable[bytes]'</span> <span class="o">=</span> <span class="p">(),</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -636,16 +653,29 @@
 <span class="sd">        the command or code, except after the hyphen of a multi-line reply,</span>
 <span class="sd">        which the text follows immediately (:rfc:`959#section-4`).</span>
 
+<span class="sd">        Commands are case-insensitive (:rfc:`959#section-5`), so ``raw_cmmd``</span>
+<span class="sd">        is written in place of ``cmmd`` whenever the two differ only in case,</span>
+<span class="sd">        which keeps the case the command was read in.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            cmmd: FTP command.</span>
 <span class="sd">            code: FTP status code.</span>
 <span class="sd">            args: Optional FTP command arguments and/or status messages.</span>
 <span class="sd">            more: More status messages to follow for response packets.</span>
 <span class="sd">            charset: Encoding for :obj:`str` arguments, **UTF-8** if not given.</span>
+<span class="sd">            raw_cmmd: FTP command as received, in its original case.</span>
+<span class="sd">            lines: Lines of a multi-line reply after the first, each written</span>
+<span class="sd">                verbatim and terminated with CRLF; the last, and only the last,</span>
+<span class="sd">                is the closing line, ``&lt;code&gt; SP &lt;text&gt;``.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If neither or both of ``cmmd`` and ``code`` are</span>
+<span class="sd">                given, or if ``lines`` are given other than as the rest of a</span>
+<span class="sd">                multi-line reply.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cmmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -655,6 +685,8 @@
                 <span class="n">prefix</span> <span class="o">=</span> <span class="n">cmmd</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="n">cmmd</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="n">raw_cmmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">raw_cmmd</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">prefix</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">raw_cmmd</span>
 
             <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">elif</span> <span class="n">cmmd</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -664,6 +696,10 @@
             <span class="n">mf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'-'</span> <span class="k">if</span> <span class="n">more</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: invalid packet type'</span><span class="p">)</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mf</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_lines</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">lines</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: lines must close a multi-line reply'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
@@ -675,7 +711,7 @@
         <span class="c1"># the separating SP, absent with no arguments and after a hyphen</span>
         <span class="n">sep</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mf</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">' '</span>
         <span class="k">return</span> <span class="n">Schema_FTP</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s%s%s%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">mf</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s%s%s%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">mf</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 
@@ -702,8 +738,32 @@
             <span class="s1">'args'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'args'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'more'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'more'</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
             <span class="s1">'charset'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'charset'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'raw_cmmd'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'raw_cmmd'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'lines'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'lines'</span><span class="p">,</span> <span class="p">()),</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_test_lines</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether ``lines`` are the rest of a multi-line reply with ``code``.</span>
+
+<span class="sd">        A multi-line reply ends at the first line that starts with its code</span>
+<span class="sd">        followed by SP (:rfc:`959#section-4`). The lines before that one are</span>
+<span class="sd">        free text, which may begin with digits -- the code with a hyphen</span>
+<span class="sd">        included -- but, as in any reply line, carry no LF.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Reply code of the first line.</span>
+<span class="sd">            lines: Lines after the first, CRLF excluded.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the last line, and only the last, is the closing line.</span>
+
+<span class="sd">        """</span>
+        <span class="n">closing</span> <span class="o">=</span> <span class="n">code</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">closing</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">closing</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[str], Optional[str]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Decode arguments, recording how to encode them back.</span>

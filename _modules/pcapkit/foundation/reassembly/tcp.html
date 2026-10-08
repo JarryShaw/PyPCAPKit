@@ -522,21 +522,44 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        There are two coordinate systems in play here, and keeping them apart</span>
-<span class="sd">        matters. The :term:`hole descriptor list &lt;reasm.tcp.buffer&gt;` of</span>
-<span class="sd">        :rfc:`815` is kept in **absolute TCP sequence numbers**, inclusive of</span>
-<span class="sd">        both bounds, because a hole belongs to the connection's sequence space</span>
-<span class="sd">        for that direction and not to any one payload buffer: the list is held</span>
-<span class="sd">        once per buffer ID, while each acknowledgement number gets a payload</span>
-<span class="sd">        buffer of its own with an initial sequence number of its own, and that</span>
-<span class="sd">        initial sequence number is revised whenever a segment turns up below</span>
-<span class="sd">        the data already buffered. A payload buffer, on the other hand, is</span>
-<span class="sd">        indexed from zero, such that</span>
+<span class="sd">        matters. Sequence numbers -- in the :term:`hole descriptor list</span>
+<span class="sd">        &lt;reasm.tcp.buffer&gt;` of :rfc:`815`, and in each payload buffer's own</span>
+<span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` and</span>
+<span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.conflict` lists</span>
+<span class="sd">        -- are kept **unwrapped**, inclusive of both bounds: every arriving</span>
+<span class="sd">        sequence number is read modulo ``2 ** 32`` relative to the data</span>
+<span class="sd">        already buffered under its buffer ID, per :rfc:`9293#section-3.4`, and</span>
+<span class="sd">        placed on one unbounded integer line. A connection that crosses</span>
+<span class="sd">        ``2 ** 32`` therefore continues at ``2 ** 32`` rather than back at</span>
+<span class="sd">        zero. A payload buffer, on the other hand, is indexed from zero, such</span>
+<span class="sd">        that</span>
 <span class="sd">        :attr:`buffer.raw[n] &lt;pcapkit.foundation.reassembly.data.tcp.Fragment.raw&gt;`</span>
 <span class="sd">        holds the octet with sequence number</span>
 <span class="sd">        :attr:`buffer.isn &lt;pcapkit.foundation.reassembly.data.tcp.Fragment.isn&gt;`</span>
-<span class="sd">        ``+ n``. :meth:`submit` is therefore the one place that converts</span>
-<span class="sd">        between the two, subtracting that buffer's initial sequence number from</span>
-<span class="sd">        each hole bound.</span>
+<span class="sd">        ``+ n``. :meth:`submit` converts between the two, subtracting that</span>
+<span class="sd">        buffer's initial sequence number from each gap bound, and reports</span>
+<span class="sd">        conflict ranges reduced back to modulo ``2 ** 32``.</span>
+
+<span class="sd">        The hole descriptor list is held once per buffer ID, across every</span>
+<span class="sd">        acknowledgement number's payload buffer, so it describes the *stream*</span>
+<span class="sd">        rather than any one payload buffer: it decides when a stream whose FIN</span>
+<span class="sd">        has been seen is whole and may be submitted. Whether each payload</span>
+<span class="sd">        buffer is complete is a question about that buffer alone, answered</span>
+<span class="sd">        from its own</span>
+<span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` list.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        **Limitation.** Without the handshake the start of a stream is unknown,</span>
+<span class="sd">        so a FIN is taken to complete the stream once every octet from the</span>
+<span class="sd">        lowest one seen so far up to the FIN has arrived. Data that arrives</span>
+<span class="sd">        later but lies *below* everything seen before that FIN therefore opens</span>
+<span class="sd">        a buffer of its own, and the first buffer has already been reported</span>
+<span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`</span>
+<span class="sd">        although the stream was not: ``[seq 1000 A*5, FIN 1005, seq 990 B*10]``</span>
+<span class="sd">        gives ``B*10`` and ``A*5`` as two datagrams. This applies only to a</span>
+<span class="sd">        buffer begun without a SYN: once the SYN is captured, the stream's</span>
+<span class="sd">        start is the SYN's own sequence number, and a FIN completes the</span>
+<span class="sd">        stream only when every octet from there up to the FIN has arrived.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -567,6 +590,34 @@
     <span class="c1">#: So the mechanism is available and the default is off: pass ``timeout`` to</span>
     <span class="c1">#: ask for one, e.g. ``2 * 120`` for 2·MSL if that is the policy wanted.</span>
     <span class="n">__timeout__</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1">#: int: Widest gap, in octets, that merging a segment into the payload</span>
+    <span class="c1">#: buffer it is read against may zero-fill: 16 MiB. The gap is measured on</span>
+    <span class="c1">#: whichever side the segment lands, from the buffer's end to the</span>
+    <span class="c1">#: segment's start, or from the segment's end to the buffer's start.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: A segment can only legitimately open a gap as wide as the data in flight,</span>
+    <span class="c1">#: which the receive window bounds. :rfc:`7323` allows windows up to</span>
+    <span class="c1">#: ``2 ** 30``, but zero-filling a gap that wide costs 1 GiB, and real</span>
+    <span class="c1">#: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling</span>
+    <span class="c1">#: is 6 MiB -- so 16 MiB clears them with room to spare. A segment that</span>
+    <span class="c1">#: would open a wider gap is not padded to; the buffer held so far is</span>
+    <span class="c1">#: submitted and a fresh one opened for the segment instead. What that</span>
+    <span class="c1">#: means depends on whether the buffer's SYN was captured:</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: * **No SYN** -- the segment is taken to start a new stream on a reused</span>
+    <span class="c1">#:   4-tuple, and the two buffers are reported independently.</span>
+    <span class="c1">#: * **SYN captured** -- the SYN proves both are the same stream with the</span>
+    <span class="c1">#:   range in between lost, so that range is recorded in the</span>
+    <span class="c1">#:   :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` of the</span>
+    <span class="c1">#:   payload buffer the segment was read against and of the new one, and</span>
+    <span class="c1">#:   both are reported</span>
+    <span class="c1">#:   :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`</span>
+    <span class="c1">#:   (in strict mode, as a single run each). The new buffer keeps the</span>
+    <span class="c1">#:   SYN's header and counts as having seen it.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Override in a subclass to change the bound.</span>
+    <span class="n">__window__</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -612,20 +663,59 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
             <span class="p">)</span>
 
+        <span class="c1"># Read the sequence number modulo 2**32 relative to the end of the data</span>
+        <span class="c1"># it most plausibly continues -- this ACK's own payload buffer, or else</span>
+        <span class="c1"># the most recently opened one -- per :rfc:`9293#section-3.4`. Plain</span>
+        <span class="c1"># integer comparison reads a stream crossing 2**32 as a gap of about</span>
+        <span class="c1"># 4 GiB. A segment landing farther than ``__window__`` outside that</span>
+        <span class="c1"># buffer starts a new stream instead -- see ``__window__``.</span>
+        <span class="n">SHIFT</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">HDR</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span> <span class="k">if</span> <span class="n">SYN</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>  <span class="c1"># header of the buffer opened below, if any</span>
+        <span class="n">ANCHORED</span> <span class="o">=</span> <span class="n">SYN</span>                     <span class="c1"># whether that buffer's stream start is known</span>
+        <span class="n">MISSING</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]] # range a split left out of it</span>
+        <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span>
+            <span class="n">fragment</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ACK</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fragment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fragment</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="n">END</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span> <span class="o">+</span> <span class="n">fragment</span><span class="o">.</span><span class="n">len</span>
+            <span class="n">UNWRAPPED</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwrap</span><span class="p">(</span><span class="n">PSN</span><span class="p">,</span> <span class="n">END</span><span class="p">)</span>
+            <span class="c1"># the zero-filled gap merging this segment would open, either side</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">UNWRAPPED</span> <span class="o">-</span> <span class="n">END</span><span class="p">,</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span> <span class="o">-</span> <span class="p">(</span><span class="n">UNWRAPPED</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">))</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window__</span><span class="p">:</span>
+                <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anchored</span><span class="p">(</span><span class="n">old</span><span class="p">):</span>
+                    <span class="c1"># The SYN proves this is still the same stream, with the</span>
+                    <span class="c1"># range in between lost. Both halves record that range as</span>
+                    <span class="c1"># missing, so each is reported PARTIAL rather than COMPLETE.</span>
+                    <span class="n">MISSING</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">END</span><span class="p">,</span> <span class="n">UNWRAPPED</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">UNWRAPPED</span> <span class="o">&gt;</span> <span class="n">END</span>
+                                   <span class="k">else</span> <span class="p">(</span><span class="n">UNWRAPPED</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">fragment</span><span class="o">.</span><span class="n">gap</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">MISSING</span><span class="p">)</span>
+                    <span class="n">HDR</span><span class="p">,</span> <span class="n">ANCHORED</span><span class="p">,</span> <span class="n">PSN</span> <span class="o">=</span> <span class="n">old</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">UNWRAPPED</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">SHIFT</span> <span class="o">=</span> <span class="n">UNWRAPPED</span> <span class="o">-</span> <span class="n">PSN</span>
+                <span class="n">PSN</span> <span class="o">=</span> <span class="n">UNWRAPPED</span>
+
         <span class="c1"># initialise buffer with BUFID &amp; ACK</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="n">hdl</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">HoleDescriptor</span><span class="p">(</span>
+                    <span class="c1"># everything from the octet after this segment onwards is</span>
+                    <span class="c1"># still missing</span>
+                    <span class="n">first</span><span class="o">=</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+                    <span class="n">last</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ANCHORED</span><span class="p">:</span>
+                <span class="c1"># Without the handshake the stream's start is unknown, so what</span>
+                <span class="c1"># lies below this segment is open too. The sentinel lower bound</span>
+                <span class="c1"># marks this one hole as "before the capture began" rather than</span>
+                <span class="c1"># as data missing from the stream; it is what lets a segment</span>
+                <span class="c1"># arriving *below* this one leave a real hole between the two.</span>
+                <span class="n">hdl</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">PSN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
-                <span class="n">hdl</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">HoleDescriptor</span><span class="p">(</span>
-                        <span class="c1"># everything from the octet after this segment onwards</span>
-                        <span class="c1"># is still missing -- in absolute sequence numbers, so</span>
-                        <span class="c1"># that the bound stays valid for every payload buffer</span>
-                        <span class="c1"># under this buffer ID</span>
-                        <span class="n">first</span><span class="o">=</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
-                        <span class="n">last</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">],</span>
-                <span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span> <span class="k">if</span> <span class="n">SYN</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                <span class="n">hdl</span><span class="o">=</span><span class="n">hdl</span><span class="p">,</span>
+                <span class="n">hdr</span><span class="o">=</span><span class="n">HDR</span><span class="p">,</span>
                 <span class="n">ack</span><span class="o">=</span><span class="p">{</span>
                     <span class="n">ACK</span><span class="p">:</span> <span class="n">Fragment</span><span class="p">(</span>
                         <span class="n">ind</span><span class="o">=</span><span class="p">[</span>
@@ -634,8 +724,9 @@
                         <span class="n">isn</span><span class="o">=</span><span class="n">PSN</span><span class="p">,</span>
                         <span class="nb">len</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
                         <span class="n">raw</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
-                        <span class="c1"># this segment's own payload is, by definition, all real</span>
-                        <span class="n">gap</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="c1"># this segment's own payload is, by definition, all</span>
+                        <span class="c1"># real; a split stream also records what it left out</span>
+                        <span class="n">gap</span><span class="o">=</span><span class="n">MISSING</span><span class="p">,</span>
                         <span class="n">conflict</span><span class="o">=</span><span class="p">[],</span>
                     <span class="p">),</span>
                 <span class="p">},</span>
@@ -643,8 +734,8 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># initialise buffer with ACK</span>
-            <span class="k">if</span> <span class="n">ACK</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span> <span class="o">=</span> <span class="n">Fragment</span><span class="p">(</span>
+            <span class="k">if</span> <span class="n">ACK</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">ack</span><span class="p">:</span>
+                <span class="n">buffer</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span> <span class="o">=</span> <span class="n">Fragment</span><span class="p">(</span>
                     <span class="n">ind</span><span class="o">=</span><span class="p">[</span>
                         <span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">,</span>
                     <span class="p">],</span>
@@ -657,13 +748,13 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># put header into header buffer</span>
                 <span class="k">if</span> <span class="n">SYN</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+                    <span class="n">buffer</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">hdr</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
 
                 <span class="c1"># append packet index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+                <span class="n">fragment</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span>
+                <span class="n">fragment</span><span class="o">.</span><span class="n">ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
 
                 <span class="c1"># record fragment payload</span>
-                <span class="n">fragment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">PSN</span> <span class="o">&gt;=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span><span class="p">:</span>  <span class="c1"># if fragment goes after existing payload</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble_append</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">PSN</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>                    <span class="c1"># if fragment exceeds existing payload</span>
@@ -678,14 +769,88 @@
             <span class="c1"># into two adjacent holes covering the very same octets, growing</span>
             <span class="c1"># the list without bound on a long-lived connection.</span>
             <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_update_hole_descriptors</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">,</span> <span class="n">FIN</span><span class="p">,</span> <span class="n">RST</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_hole_descriptors</span><span class="p">(</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">+</span> <span class="n">SHIFT</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="n">SHIFT</span><span class="p">)</span>
 
-        <span class="c1"># when FIN/RST is set, submit buffer of this session</span>
-        <span class="k">if</span> <span class="n">FIN</span> <span class="ow">or</span> <span class="n">RST</span><span class="p">:</span>
+        <span class="c1"># A FIN fixes the end of the stream at the sequence number it occupies,</span>
+        <span class="c1"># and nothing more: data sent before it may still arrive after it. So</span>
+        <span class="c1"># the open-ended hole is cut back to end there, and the buffer is</span>
+        <span class="c1"># submitted once every octet below the FIN has arrived -- here, or on</span>
+        <span class="c1"># whichever later segment closes the last hole -- or else when the</span>
+        <span class="c1"># capture ends.</span>
+        <span class="k">if</span> <span class="n">FIN</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_hole_descriptors</span><span class="p">(</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">)</span>
+
+        <span class="c1"># An RST, unlike a FIN, aborts the connection: :rfc:`9293#section-3.10.7.4`</span>
+        <span class="c1"># has the receiver flush its segment queues and enter CLOSED, so it</span>
+        <span class="c1"># accepts nothing sent before the RST that arrives after it. The buffer</span>
+        <span class="c1"># is therefore submitted at once, as the receiver last saw it.</span>
+        <span class="k">if</span> <span class="n">RST</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream_whole</span><span class="p">(</span><span class="n">BUFID</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
             <span class="p">)</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unwrap</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Place a 32-bit sequence number on the unwrapped line near ``ref``.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            seq: sequence number as carried on the wire, i.e. modulo 2**32</span>
+<span class="sd">            ref: unwrapped sequence number the segment is expected to be near</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The integer congruent to ``seq`` modulo 2**32 that lies within</span>
+<span class="sd">            2**31 of ``ref``, which is how :rfc:`9293#section-3.4` compares</span>
+<span class="sd">            sequence numbers.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">ref</span> <span class="o">+</span> <span class="p">(</span><span class="n">seq</span> <span class="o">-</span> <span class="n">ref</span> <span class="o">+</span> <span class="mh">0x80000000</span><span class="p">)</span> <span class="o">%</span> <span class="mh">0x100000000</span> <span class="o">-</span> <span class="mh">0x80000000</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_anchored</span><span class="p">(</span><span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a buffer's stream start is known, i.e. its SYN was captured.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: :term:`buffer &lt;reasm.tcp.buffer&gt;` to look at</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`False` exactly when the hole descriptor list still opens</span>
+<span class="sd">            with the sentinel hole that a buffer begun without a SYN carries.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">hdl</span> <span class="ow">and</span> <span class="n">buf</span><span class="o">.</span><span class="n">hdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">first</span> <span class="o">==</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stream_whole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a stream has seen its FIN and every octet below it.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            BUFID: buffer identifier of the stream</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` once a FIN has cut back the open-ended hole and the</span>
+<span class="sd">            only hole left, if any, is the sentinel one below the first octet</span>
+<span class="sd">            of a capture that missed the handshake.</span>
+
+<span class="sd">        """</span>
+        <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">!=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="ow">or</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">==</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close_hole_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Cut the hole descriptor list back to end below a FIN.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            BUFID: buffer identifier of the stream</span>
+<span class="sd">            end: unwrapped sequence number the FIN occupies, i.e. one past the</span>
+<span class="sd">                last octet of the stream</span>
+
+<span class="sd">        """</span>
+        <span class="n">HDL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span>
+        <span class="n">HDL</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">hole</span> <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="k">else</span> <span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">end</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">HDL</span> <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">&lt;</span> <span class="n">end</span>
+        <span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_reassemble_append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'Fragment'</span><span class="p">,</span> <span class="n">PSN</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Merge a segment that starts at or after the buffered payload's end.</span>
@@ -734,6 +899,7 @@
             <span class="n">fragment</span><span class="o">.</span><span class="n">conflict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">conflicts</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">&gt;</span> <span class="n">OVERLAP</span><span class="p">:</span>  <span class="c1"># fragment reaches past the buffered end</span>
                 <span class="n">RAW</span> <span class="o">+=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="n">OVERLAP</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trim_gaps</span><span class="p">(</span><span class="n">GAPS</span><span class="p">,</span> <span class="n">PSN</span><span class="p">,</span> <span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">fragment</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
             <span class="n">raw</span><span class="o">=</span><span class="n">RAW</span><span class="p">,</span>       <span class="c1"># update payload datagram</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span>  <span class="c1"># update payload length</span>
@@ -799,13 +965,13 @@
             <span class="n">RAW</span><span class="p">[:</span><span class="n">OVERLAP</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
             <span class="n">fragment</span><span class="o">.</span><span class="n">conflict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">conflicts</span><span class="p">)</span>
             <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">OFFSET</span><span class="p">]</span> <span class="o">+</span> <span class="n">RAW</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="n">OFFSET</span> <span class="o">+</span> <span class="n">OVERLAP</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trim_gaps</span><span class="p">(</span><span class="n">GAPS</span><span class="p">,</span> <span class="n">PSN</span><span class="p">,</span> <span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">fragment</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
             <span class="n">raw</span><span class="o">=</span><span class="n">RAW</span><span class="p">,</span>       <span class="c1"># update payload datagram</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span>  <span class="c1"># update payload length</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_update_hole_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>
-                                  <span class="n">FIN</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">RST</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_hole_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Update the buffer-wide hole descriptor list per :rfc:`815`.</span>
 
 <span class="sd">        Called only for a segment that carries payload (``info.len &gt; 0``);</span>
@@ -814,35 +980,65 @@
 <span class="sd">        adjacent holes covering the very same octets, growing the list</span>
 <span class="sd">        without bound on a long-lived connection.</span>
 
+<span class="sd">        The end of the stream is not settled here: a FIN cuts the open-ended</span>
+<span class="sd">        hole back afterwards, in :meth:`_close_hole_descriptors`, whether or</span>
+<span class="sd">        not it carries payload.</span>
+
 <span class="sd">        Arguments:</span>
-<span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>
 <span class="sd">            BUFID: buffer identifier of the session this fragment belongs to</span>
-<span class="sd">            FIN: finish flag (termination) of the arriving segment</span>
-<span class="sd">            RST: reset connection flag (termination) of the arriving segment</span>
+<span class="sd">            first: unwrapped sequence number of the segment's first octet</span>
+<span class="sd">            last: unwrapped sequence number of the segment's last octet</span>
 
 <span class="sd">        """</span>
         <span class="n">HDL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span>                          <span class="c1"># HDL alias</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">hole</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HDL</span><span class="p">):</span>                   <span class="c1"># step one</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>                         <span class="c1"># step two</span>
+        <span class="n">new_hdl</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[HoleDescriptor]</span>
+        <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">HDL</span><span class="p">:</span>                                       <span class="c1"># step one</span>
+            <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="ow">or</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>         <span class="c1"># steps two and three</span>
+                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hole</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                         <span class="c1"># step three</span>
-                <span class="k">continue</span>
-            <span class="k">del</span> <span class="n">HDL</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>                                     <span class="c1"># step four</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                        <span class="c1"># step five</span>
-                <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
+            <span class="c1"># step four: this hole is (partly) filled and replaced by what of</span>
+            <span class="c1"># it survives, on either side of the segment</span>
+            <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                             <span class="c1"># step five</span>
+                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HoleDescriptor</span><span class="p">(</span>
                     <span class="n">first</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">,</span>
-                    <span class="n">last</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
-                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">FIN</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">RST</span><span class="p">:</span>  <span class="c1"># step six</span>
-                <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
-                    <span class="n">first</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">last</span><span class="o">=</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">))</span>
+            <span class="k">if</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>                               <span class="c1"># step six</span>
+                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HoleDescriptor</span><span class="p">(</span>
+                    <span class="n">first</span><span class="o">=</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                     <span class="n">last</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">last</span>
-                <span class="p">)</span>
-                <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
-            <span class="k">break</span>                                              <span class="c1"># step seven</span>
-        <span class="c1">#self._buffer[BUFID].hdl = HDL                         # update HDL</span>
+                <span class="p">))</span>
+            <span class="c1"># step seven: go on to the next hole, since one segment may span</span>
+            <span class="c1"># several of them</span>
+        <span class="n">HDL</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">new_hdl</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trim_gaps</span><span class="p">(</span><span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Remove a received range from a fragment's gap list, in place.</span>
+
+<span class="sd">        Only an entry lying outside :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`</span>
+<span class="sd">        -- the range a split stream left out, see :attr:`TCP.__window__` -- can</span>
+<span class="sd">        still overlap a segment once it is merged; :meth:`_merge_overlap` has</span>
+<span class="sd">        already closed every entry inside ``raw`` that the segment covers.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            gap: the fragment's gap list</span>
+<span class="sd">            first: unwrapped sequence number of the segment's first octet</span>
+<span class="sd">            last: unwrapped sequence number of the segment's last octet</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="n">last</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">still_gap</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span> <span class="ow">in</span> <span class="n">gap</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hi</span> <span class="o">&lt;</span> <span class="n">first</span> <span class="ow">or</span> <span class="n">lo</span> <span class="o">&gt;</span> <span class="n">last</span><span class="p">:</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">first</span><span class="p">:</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">lo</span><span class="p">,</span> <span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">hi</span> <span class="o">&gt;</span> <span class="n">last</span><span class="p">:</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hi</span><span class="p">))</span>
+        <span class="n">gap</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">still_gap</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_merge_overlap</span><span class="p">(</span><span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">old</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -943,37 +1139,41 @@
 
 <span class="sd">        """</span>
         <span class="n">datagram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram] # reassembled datagram</span>
-        <span class="n">HDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">hdl</span>                         <span class="c1"># hole descriptor list</span>
 
         <span class="c1"># check through every buffer with ACK</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buf</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Translate the hole descriptor list, which is kept in absolute</span>
-            <span class="c1"># sequence numbers for the whole direction, into offsets into this</span>
-            <span class="c1"># payload buffer, which is indexed from its own initial sequence</span>
-            <span class="c1"># number. Holes lying wholly outside this buffer -- the open-ended</span>
-            <span class="c1"># one past the last octet received, and any belonging to a</span>
-            <span class="c1"># different acknowledgement number's data -- drop out here; those</span>
-            <span class="c1"># straddling an edge are clipped to it rather than being allowed to</span>
-            <span class="c1"># index from the far end of the buffer as a negative bound would.</span>
+            <span class="c1"># Translate this payload buffer's own gap list, kept in unwrapped</span>
+            <span class="c1"># sequence numbers, into offsets into the buffer, which is indexed</span>
+            <span class="c1"># from its own initial sequence number. The buffer-wide hole</span>
+            <span class="c1"># descriptor list cannot answer this: it is shared by every</span>
+            <span class="c1"># acknowledgement number, so another payload buffer filling a hole</span>
+            <span class="c1"># there says nothing about this one, and it never learns of a gap</span>
+            <span class="c1"># opened below the first segment to arrive. Entries are clipped to</span>
+            <span class="c1"># the buffer rather than being allowed to index from its far end.</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
             <span class="n">holes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
-            <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">HDL</span><span class="p">:</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span>       <span class="c1"># inclusive lower bound</span>
-                <span class="n">stop</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span> <span class="o">+</span> <span class="mi">1</span>     <span class="c1"># exclusive upper bound</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">first</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span>            <span class="c1"># inclusive lower bound</span>
+                <span class="n">stop</span> <span class="o">=</span> <span class="n">last</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span> <span class="o">+</span> <span class="mi">1</span>          <span class="c1"># exclusive upper bound</span>
                 <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">length</span><span class="p">:</span>
-                    <span class="k">continue</span>                          <span class="c1"># hole misses this buffer</span>
+                    <span class="k">continue</span>                          <span class="c1"># gap lies outside the buffer</span>
                 <span class="n">holes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">length</span><span class="p">)))</span>
             <span class="n">holes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="c1"># reported in sequence space proper, i.e. modulo 2**32</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">first</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">,</span> <span class="n">last</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">)</span>
 
             <span class="c1"># How completely this buffer came out, and why it stopped. Derived</span>
             <span class="c1"># once per buffer, so the two branches cannot disagree about it.</span>
-            <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">holes</span> <span class="k">else</span> <span class="p">(</span>
+            <span class="c1"># Any gap entry counts, including one lying wholly outside ``raw``:</span>
+            <span class="c1"># that is the range a split stream left out (see ``__window__``).</span>
+            <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span> <span class="k">else</span> <span class="p">(</span>
                 <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">timeout</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
             <span class="p">)</span>
 
             <span class="c1"># if this buffer is not implemented</span>
             <span class="c1"># go through every hole and extract received payload</span>
-            <span class="k">if</span> <span class="n">holes</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">completion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
                 <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">for</span> <span class="p">(</span><span class="n">hole_start</span><span class="p">,</span> <span class="n">hole_stop</span><span class="p">)</span> <span class="ow">in</span> <span class="n">holes</span><span class="p">:</span>
@@ -996,7 +1196,7 @@
                         <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
                         <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
                         <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">conflict</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">),</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -1022,7 +1222,7 @@
                         <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
                         <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
                         <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span> <span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
-                        <span class="n">conflict</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">),</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 

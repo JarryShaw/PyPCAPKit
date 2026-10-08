@@ -516,7 +516,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">_Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
@@ -722,6 +722,7 @@
             <span class="n">receipt</span><span class="o">=</span><span class="n">header_line</span><span class="p">,</span>
             <span class="n">header</span><span class="o">=</span><span class="n">header_unpacked</span><span class="p">,</span>
             <span class="n">body</span><span class="o">=</span><span class="n">body_unpacked</span><span class="p">,</span>
+            <span class="n">raw_header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_field_lines</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)[</span><span class="mi">2</span><span class="p">]),</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_receipt</span> <span class="o">=</span> <span class="n">header_line</span><span class="o">.</span><span class="n">type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="n">header_line</span><span class="o">.</span><span class="n">version</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -744,8 +745,20 @@
              <span class="n">headers</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[str, str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">raw_line</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">raw_header</span><span class="p">:</span> <span class="s1">'Sequence[bytes]'</span> <span class="o">=</span> <span class="p">(),</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HTTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
+
+<span class="sd">        The start line and the field lines are built from the parsed values</span>
+<span class="sd">        with single SPs, ``name: value`` and UTF-8 field values. ``raw_line``</span>
+<span class="sd">        is written in place of the start line, and each ``raw_header`` entry in</span>
+<span class="sd">        place of the header field at the same position, whenever reading it</span>
+<span class="sd">        back gives the same values -- so a message rebuilds byte for byte,</span>
+<span class="sd">        whitespace, ``obs-fold`` and field-value charset included, while a</span>
+<span class="sd">        value that has been changed is written from the change. Field lines</span>
+<span class="sd">        are matched to ``headers`` by content and in order, so adding or</span>
+<span class="sd">        removing a field leaves the others as received.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            http_version: HTTP version.</span>
@@ -760,10 +773,122 @@
 <span class="sd">            body: HTTP body.</span>
 <span class="sd">            charset: Encoding for a :obj:`str` request URI or status message,</span>
 <span class="sd">                **UTF-8** if not given.</span>
+<span class="sd">            raw_line: HTTP start line as received, CRLF excluded.</span>
+<span class="sd">            raw_header: HTTP field lines as received, CRLF excluded, one per</span>
+<span class="sd">                header field and in the order of ``headers``.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the values are neither a request's nor a</span>
+<span class="sd">                response's, or if ``raw_line`` or a ``raw_header`` entry that</span>
+<span class="sd">                reads back as the given values carries a CR or LF that the</span>
+<span class="sd">                values do not (other than the CRLF of an ``obs-fold``).</span>
+
+<span class="sd">        """</span>
+        <span class="n">header_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_start_line</span><span class="p">(</span><span class="n">http_version</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+                                            <span class="n">status_default</span><span class="o">=</span><span class="n">status_default</span><span class="p">,</span>
+                                            <span class="n">status_namespace</span><span class="o">=</span><span class="n">status_namespace</span><span class="p">,</span>
+                                            <span class="n">status_reversed</span><span class="o">=</span><span class="n">status_reversed</span><span class="p">,</span>
+                                            <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raw_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">received</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_start_line</span><span class="p">(</span><span class="n">raw_line</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_start_line</span><span class="p">(</span><span class="n">received</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined]</span>
+                                         <span class="n">method</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'method'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                         <span class="n">uri</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'uri'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                         <span class="n">status</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                         <span class="n">message</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                         <span class="n">charset</span><span class="o">=</span><span class="n">received</span><span class="o">.</span><span class="n">charset</span><span class="p">)</span> <span class="o">==</span> <span class="n">header_line</span><span class="p">:</span>  <span class="c1"># type: ignore[attr-defined]</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'uri'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">received</span><span class="p">,</span> <span class="s1">'message'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>  <span class="c1"># type: str</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_check_raw</span><span class="p">(</span><span class="n">raw_line</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">header_line</span> <span class="o">=</span> <span class="n">raw_line</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span>
+
+        <span class="c1"># NOTE: Field lines are matched to the header fields by content, in</span>
+        <span class="c1"># order, rather than by position, so that adding or removing a field</span>
+        <span class="c1"># leaves the field lines around it as they were received.</span>
+        <span class="n">received_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Optional[tuple[str, str]]]</span>
+        <span class="k">for</span> <span class="n">raw_field</span> <span class="ow">in</span> <span class="n">raw_header</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">received_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_field_line</span><span class="p">(</span><span class="n">raw_field</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+                <span class="n">received_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">header_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">headers</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">():</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">received_fields</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">received_fields</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_check_raw</span><span class="p">(</span><span class="n">raw_header</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">header_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_header</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">header_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span>
+
+        <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">header_line</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header_fields</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">+</span> <span class="n">body</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_raw</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">fold</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse a raw line that would write a line break its values lack.</span>
+
+<span class="sd">        Reading a line back strips the whitespace around its tokens, and that</span>
+<span class="sd">        includes a lone CR or LF, so a raw line can read back as values that</span>
+<span class="sd">        carry no line break while writing one to the wire.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            raw: Raw start line or field line, CRLF excluded.</span>
+<span class="sd">            *values: The values ``raw`` reads back as.</span>
+<span class="sd">            fold: Whether the CRLF of an ``obs-fold``, followed by SP or HTAB,</span>
+<span class="sd">                is allowed in ``raw``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``raw`` carries a CR or LF that ``values`` do not.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">fold</span><span class="p">:</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\r\n(?=[ \t])'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'</span><span class="se">\r</span><span class="s1">'</span><span class="p">,</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">raw</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: raw line carries a CR or LF its values do not'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_start_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">http_version</span><span class="p">:</span> <span class="s1">'str | bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">method</span><span class="p">:</span> <span class="s1">'Optional[Enum_Method | str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">uri</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">status</span><span class="p">:</span> <span class="s1">'Optional[Enum_StatusCode | str | bytes | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">status_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | _Type[StdlibEnum] | _Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                         <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make an HTTP/1.* start line from its values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            http_version: HTTP version.</span>
+<span class="sd">            method: HTTP method.</span>
+<span class="sd">            uri: HTTP request URI.</span>
+<span class="sd">            status: HTTP status code.</span>
+<span class="sd">            status_default: Default HTTP status code.</span>
+<span class="sd">            status_namespace: Namespace of HTTP status code.</span>
+<span class="sd">            status_reversed: Whether to reverse the namespace.</span>
+<span class="sd">            message: HTTP status message.</span>
+<span class="sd">            charset: Encoding for a :obj:`str` request URI or status message,</span>
+<span class="sd">                **UTF-8** if not given.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The start line, CRLF included.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the values are neither a request's nor a</span>
+<span class="sd">                response's.</span>
 
 <span class="sd">        """</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">http_version</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">http_version</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">http_version</span>
@@ -797,17 +922,7 @@
             <span class="n">header_line</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'HTTP/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">status_code_val</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">msg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP packet must be either request or response.'</span><span class="p">)</span>
-
-        <span class="n">header_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">header_fields</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">headers</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">header_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span>
-
-        <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">header_line</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header_fields</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">+</span> <span class="n">body</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="n">header_line</span>
 
 <div class="viewcode-block" id="HTTP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.id">[docs]</a>
@@ -851,6 +966,8 @@
             <span class="s1">'headers'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
             <span class="s1">'body'</span><span class="p">:</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
             <span class="s1">'charset'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'charset'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'raw_line'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'raw_line'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'raw_header'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'raw_header'</span><span class="p">,</span> <span class="p">()),</span>
         <span class="p">}</span></div>
 
 
@@ -914,55 +1031,109 @@
         <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
         <span class="n">startline</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">header_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_start_line</span><span class="p">(</span><span class="n">startline</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Short for a start line of fewer than three whitespace-separated</span>
-        <span class="c1"># tokens. Raised as ``ProtocolError`` for the reason ``read`` gives</span>
-        <span class="c1"># above, with the same message this method uses below for a start line</span>
-        <span class="c1"># it cannot recognise.</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+        <span class="n">header_fields</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, str]</span>
+        <span class="k">for</span> <span class="n">raw_field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_field_lines</span><span class="p">(</span><span class="n">headerfield</span><span class="p">):</span>
+            <span class="n">header_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_field_line</span><span class="p">(</span><span class="n">raw_field</span><span class="p">))</span>
 
+        <span class="k">return</span> <span class="n">header_line</span><span class="p">,</span> <span class="n">header_fields</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_split_field_lines</span><span class="p">(</span><span class="n">headerfield</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Split the field lines of an HTTP/1.* header.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            headerfield: The header after its start line and that line's CRLF.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            One field line per header field, as received and CRLF excluded.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the first field line is an ``obs-fold``</span>
+<span class="sd">                continuation.</span>
+
+<span class="sd">        """</span>
         <span class="c1"># NOTE: A field line beginning with SP or HTAB is an ``obs-fold``</span>
-        <span class="c1"># continuation of the line before it (:rfc:`9112#section-5.2`), and is</span>
-        <span class="c1"># unfolded here -- the RFC's own remedy -- rather than treated as a field</span>
-        <span class="c1"># line of its own. Deprecated, but present in real captures. Treating a</span>
-        <span class="c1"># continuation as a field line of its own goes wrong twice: one carrying</span>
-        <span class="c1"># no colon fails the colon check below, so a valid message is refused;</span>
-        <span class="c1"># one that happens to contain a colon parses silently into a spurious</span>
-        <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``).</span>
-        <span class="c1"># Unfolded, a folded message parses to the field it actually carries.</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+        <span class="c1"># continuation of the line before it (:rfc:`9112#section-5.2`), so it is</span>
+        <span class="c1"># kept with that line rather than treated as a field line of its own,</span>
+        <span class="c1"># and unfolded by ``_read_field_line``. Deprecated, but present in real</span>
+        <span class="c1"># captures. Treating a continuation as a field line of its own goes wrong</span>
+        <span class="c1"># twice: one carrying no colon fails the colon check, so a valid message</span>
+        <span class="c1"># is refused; one that happens to contain a colon parses silently into a</span>
+        <span class="c1"># spurious extra field (``X-Long: a`` plus ``b: c``, for a folded</span>
+        <span class="c1"># ``X-Long: a b``).</span>
+        <span class="n">raw_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">headerfield</span> <span class="k">else</span> <span class="p">():</span>
             <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
                 <span class="c1"># A continuation with nothing to continue -- the first field line</span>
                 <span class="c1"># folded -- is malformed rather than unfoldable.</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_fields</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
-                <span class="c1"># NOTE: The accumulator is right-stripped as well as the</span>
-                <span class="c1"># continuation, because the production is ``obs-fold = OWS CRLF</span>
-                <span class="c1"># RWS`` and it is the *whole* obs-fold that is replaced by a</span>
-                <span class="c1"># single space -- the OWS before the CRLF belongs to the fold,</span>
-                <span class="c1"># not to the value. Stripping only the continuation would leave</span>
-                <span class="c1"># that OWS in place, so ``X: a \t\r\n\tb`` would unfold to</span>
-                <span class="c1"># ``'a \t  b'`` rather than ``'a b'``, keeping a HTAB where the</span>
-                <span class="c1"># RFC prescribes SP.</span>
-                <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">raw_fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span> <span class="o">+</span> <span class="n">line</span>
                 <span class="k">continue</span>
-            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">raw_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">raw_fields</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_field_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read one HTTP/1.* field line.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            line: Field line as received, CRLF excluded, with any ``obs-fold``</span>
+<span class="sd">                continuations still in it.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The field name and the field value, the latter unfolded and without</span>
+<span class="sd">            the optional whitespace around it.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the line is not a field line.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: The accumulator is right-stripped as well as the continuation,</span>
+        <span class="c1"># because the production is ``obs-fold = OWS CRLF RWS`` and it is the</span>
+        <span class="c1"># *whole* obs-fold that is replaced by a single space -- the RFC's own</span>
+        <span class="c1"># remedy (:rfc:`9112#section-5.2`). The OWS before the CRLF belongs to</span>
+        <span class="c1"># the fold, not to the value, so ``X: a \t\r\n\tb`` unfolds to ``'a b'``.</span>
+        <span class="n">field</span><span class="p">,</span> <span class="o">*</span><span class="n">continuations</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">continuation</span> <span class="ow">in</span> <span class="n">continuations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">continuation</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">continuation</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c1"># NOTE: Checked rather than left to ``item[1]``, and refused rather than</span>
         <span class="c1"># skipped: a field line with no colon is not a header field, and dropping</span>
         <span class="c1"># it would hand back a message whose fields are quietly not the ones on</span>
-        <span class="c1"># the wire. ``ProtocolError`` for the reason the start-line split above</span>
-        <span class="c1"># gives, and to the same message.</span>
-        <span class="n">lists</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[list[bytes]]</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
-            <span class="n">item</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
-            <span class="n">lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="c1"># the wire. ``ProtocolError`` for the reason ``read`` gives, and to the</span>
+        <span class="c1"># same message.</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_start_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startline</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Header'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read an HTTP/1.* start line.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            startline: Start line as received, CRLF excluded.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed start line.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the line is neither a request line nor a status</span>
+<span class="sd">                line.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: Short for a start line of fewer than three whitespace-separated</span>
+        <span class="c1"># tokens. Raised as ``ProtocolError`` for the reason ``read`` gives,</span>
+        <span class="c1"># with the same message this method uses below for a start line it</span>
+        <span class="c1"># cannot recognise.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="n">header_line</span><span class="p">:</span> <span class="s1">'Data_Header'</span>
@@ -979,6 +1150,7 @@
                 <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match2</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)),</span>
                 <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
+                <span class="n">raw_line</span><span class="o">=</span><span class="n">startline</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">match3</span> <span class="ow">and</span> <span class="n">match4</span><span class="p">:</span>
             <span class="n">message</span><span class="p">,</span> <span class="n">charset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">para3</span><span class="p">)</span>
@@ -988,18 +1160,11 @@
                 <span class="n">status</span><span class="o">=</span><span class="n">Enum_StatusCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">para2</span><span class="p">)),</span>
                 <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
                 <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">,</span>
+                <span class="n">raw_line</span><span class="o">=</span><span class="n">startline</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
-
-        <span class="n">header_fields</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, str]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-            <span class="n">header_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">header_line</span><span class="p">,</span> <span class="n">header_fields</span></div>
-
+        <span class="k">return</span> <span class="n">header_line</span>
 
 <div class="viewcode-block" id="HTTP._read_http_body">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_body">[docs]</a>

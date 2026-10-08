@@ -484,6 +484,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
@@ -636,6 +637,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]</span>
 
+    <span class="c1"># Read-only copy of ``__output__`` as shipped. :meth:`register_dumper`</span>
+    <span class="c1"># handed the dumper a format shipped with restores this entry, so an</span>
+    <span class="c1"># override can be undone (:issue:`1363`).</span>
+    <span class="n">_shipped_output</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__output__</span><span class="p">))</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
@@ -701,14 +707,26 @@
 <span class="sd">            the default factory the way ``cls.__output__[format]`` would, so</span>
 <span class="sd">            it stays non-inserting here as well.</span>
 
+<span class="sd">            The dumper ``format`` shipped with, as its descriptor or as the</span>
+<span class="sd">            class it names, restores the shipped entry rather than storing</span>
+<span class="sd">            the class, so an override can be undone and the deferred import</span>
+<span class="sd">            is kept (:issue:`1363`, :issue:`1364`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            format: format name</span>
 <span class="sd">            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass</span>
 <span class="sd">            ext: file extension</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="n">_restore_shipped_dumper</span><span class="p">,</span> <span class="n">_same_entry</span><span class="p">)</span>
+
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shipped</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dumper</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dumper</span><span class="p">):</span>
+            <span class="n">_restore_shipped_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a class, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>

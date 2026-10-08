@@ -567,8 +567,17 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTP.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">http_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv1.html#HTTP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTP.make" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">http_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv1.html#HTTP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTP.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
+<p>The start line and the field lines are built from the parsed values
+with single SPs, <code class="docutils literal notranslate"><span class="pre">name:</span> <span class="pre">value</span></code> and UTF-8 field values. <code class="docutils literal notranslate"><span class="pre">raw_line</span></code>
+is written in place of the start line, and each <code class="docutils literal notranslate"><span class="pre">raw_header</span></code> entry in
+place of the header field at the same position, whenever reading it
+back gives the same values – so a message rebuilds byte for byte,
+whitespace, <code class="docutils literal notranslate"><span class="pre">obs-fold</span></code> and field-value charset included, while a
+value that has been changed is written from the change. Field lines
+are matched to <code class="docutils literal notranslate"><span class="pre">headers</span></code> by content and in order, so adding or
+removing a field leaves the others as received.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -584,6 +593,9 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <li><p><strong>body</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – HTTP body.</p></li>
 <li><p><strong>charset</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Encoding for a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> request URI or status message,
 <strong>UTF-8</strong> if not given.</p></li>
+<li><p><strong>raw_line</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – HTTP start line as received, CRLF excluded.</p></li>
+<li><p><strong>raw_header</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – HTTP field lines as received, CRLF excluded, one per
+header field and in the order of <code class="docutils literal notranslate"><span class="pre">headers</span></code>.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -592,6 +604,12 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the values are neither a request’s nor a
+    response’s, or if <code class="docutils literal notranslate"><span class="pre">raw_line</span></code> or a <code class="docutils literal notranslate"><span class="pre">raw_header</span></code> entry that
+    reads back as the given values carries a CR or LF that the
+    values do not (other than the CRLF of an <code class="docutils literal notranslate"><span class="pre">obs-fold</span></code>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -782,6 +800,13 @@ neither <code class="docutils literal notranslate"><span class="pre">get</span><
 <dd><p>HTTP body.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.HTTP.raw_header">
+<span class="sig-name descname"><span class="pre">raw_header</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.HTTP.raw_header" title="Link to this definition">¶</a></dt>
+<dd><p>HTTP field lines as received, CRLF excluded and <code class="docutils literal notranslate"><span class="pre">obs-fold</span></code>
+continuations kept: one per field in <a class="reference internal" href="#pcapkit.protocols.data.application.httpv1.HTTP.header" title="pcapkit.protocols.data.application.httpv1.HTTP.header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">header</span></code></a>, in order.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -832,6 +857,12 @@ neither <code class="docutils literal notranslate"><span class="pre">get</span><
 <dd><p>Charset to encode <a class="reference internal" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.uri" title="pcapkit.protocols.data.application.httpv1.RequestHeader.uri"><code class="xref py py-attr docutils literal notranslate"><span class="pre">uri</span></code></a> with, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> for UTF-8.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.RequestHeader.raw_line">
+<span class="sig-name descname"><span class="pre">raw_line</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.RequestHeader.raw_line" title="Link to this definition">¶</a></dt>
+<dd><p>HTTP request line as received, CRLF excluded.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -867,6 +898,12 @@ neither <code class="docutils literal notranslate"><span class="pre">get</span><
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.ResponseHeader.charset">
 <span class="sig-name descname"><span class="pre">charset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.charset" title="Link to this definition">¶</a></dt>
 <dd><p>Charset to encode <a class="reference internal" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.message" title="pcapkit.protocols.data.application.httpv1.ResponseHeader.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> with, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> for UTF-8.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv1.ResponseHeader.raw_line">
+<span class="sig-name descname"><span class="pre">raw_line</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.httpv1.ResponseHeader.raw_line" title="Link to this definition">¶</a></dt>
+<dd><p>HTTP status line as received, CRLF excluded.</p>
 </dd></dl>
 
 </dd></dl>

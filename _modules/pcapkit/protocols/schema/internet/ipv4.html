@@ -490,7 +490,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -542,6 +542,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags and fragment offset field."""</span>
 
+        <span class="c1">#: Reserved flag bit.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Don't fragment flag.</span>
         <span class="n">df</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: More fragments flag.</span>
@@ -577,6 +579,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">QSTestFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Quick start test flag."""</span>
 
+        <span class="c1">#: Option length.</span>
+        <span class="n">length</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: QS function.</span>
         <span class="n">func</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -587,7 +591,9 @@
 <span class="w">        </span><span class="sd">"""Quick start nonce field."""</span>
 
         <span class="c1">#: Nonce.</span>
-        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 
@@ -687,6 +693,9 @@
 <span class="sd">        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`</span>
 <span class="sd">          instance.</span>
+<span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
+<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.UnassignedOption`</span>
+<span class="sd">          instance, sized by the option's own ``length`` octet.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The length handed to the :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
@@ -696,12 +705,21 @@
 <span class="sd">        leftover octets are read as a further, fabricated option.</span>
 
 <span class="sd">    """</span>
-    <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
-    <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+    <span class="c1"># NOTE: The enumeration admits ``0`` to ``8`` only, while the field is four</span>
+    <span class="c1"># bits wide; a function above ``8`` is just as unassigned.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
+    <span class="k">except</span> <span class="n">EnumValueError</span><span class="p">:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">QSOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
 
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">QSOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="c1"># An unassigned function has no defined layout, so the option is kept</span>
+        <span class="c1"># as raw data, sized by its own ``length`` octet: two octets at least,</span>
+        <span class="c1"># so that a shorter length reaches the reader and is rejected there.</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'length'</span><span class="p">],</span> <span class="mi">2</span><span class="p">),</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnassignedOption</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">quick_start_option_length</span><span class="p">(</span><span class="n">schema</span><span class="p">),</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -804,15 +822,15 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route: every address slot of the option, those before the pointer and</span>
+    <span class="c1">#: those at or beyond it alike.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'list[IPv4Address]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
-    <span class="c1">#: Remaining data buffer.</span>
+    <span class="c1">#: Trailing octets that do not make up a whole address slot.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>  <span class="c1"># a reasonable default</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -833,15 +851,15 @@
         <span class="s1">'oflw'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'flag'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1">#: Timestamps and internet addresses.</span>
+    <span class="c1">#: Timestamps and internet addresses: every 32-bit slot of the option,</span>
+    <span class="c1">#: those before the pointer and those at or beyond it alike.</span>
     <span class="n">ts_data</span><span class="p">:</span> <span class="s1">'list[int]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'flag'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">UInt32Field</span><span class="p">(),</span>
     <span class="p">)</span>
-    <span class="c1">#: Remaining data buffer.</span>
+    <span class="c1">#: Trailing octets that do not make up a whole 32-bit slot.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'flag'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>  <span class="c1"># 36 is the maximum length of the option data field for timestamps</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="TSOption.post_process">
@@ -880,23 +898,38 @@
 
 <span class="sd">        """</span>
         <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'flag'</span><span class="p">])</span>
+
+        <span class="c1"># NOTE: Only the slots wholly before the pointer have been filled in, so</span>
+        <span class="c1"># the rest are kept apart, as the raw 32-bit words, in ``remaining``. A</span>
+        <span class="c1"># pre-specified address is part of the option's content whether or not</span>
+        <span class="c1"># its timestamp has been filled in yet, so that flag consumes every whole</span>
+        <span class="c1"># address and timestamp pair. A paired flag never splits a pair.</span>
+        <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">:</span>
+            <span class="n">used</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">used</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ts_flag</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">IP_with_Timestamp</span><span class="p">,</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">):</span>
+            <span class="n">used</span> <span class="o">-=</span> <span class="n">used</span> <span class="o">%</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remaining</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">[</span><span class="n">used</span><span class="p">:])</span>
+
         <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">[:</span><span class="n">used</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[int | timedelta]</span>
 
             <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">ts_data</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
 
+                <span class="c1"># NOTE: A set high-order bit marks a non-standard time value,</span>
+                <span class="c1"># per :rfc:`791`, so it is kept as the raw 32-bit integer.</span>
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>  <span class="c1"># type: int | timedelta</span>
+                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span>  <span class="c1"># type: int | timedelta</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
                 <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_val</span><span class="p">)</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span>  <span class="c1"># type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]</span>
         <span class="k">elif</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">IP_with_Timestamp</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">[:</span><span class="n">used</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
@@ -906,13 +939,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>
+                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
                 <span class="n">timestamp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts_val</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">[:</span><span class="n">used</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
@@ -922,35 +954,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>
+                    <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
                 <span class="n">timestamp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts_val</span><span class="p">)</span>
-
-            <span class="c1"># extract also the prespecified IP addresses</span>
-            <span class="c1"># but set the timestamp to 0</span>
-            <span class="c1">#</span>
-            <span class="c1"># NOTE: Through ``parse_ip_address`` like the two conversions above,</span>
-            <span class="c1"># even though ``remainder`` is a</span>
-            <span class="c1"># :class:`~pcapkit.corekit.fields.strings.PaddingField`, so what it</span>
-            <span class="c1"># holds is octets rather than anything the caller named, and cannot</span>
-            <span class="c1"># launder a :obj:`bool`. It is routed through anyway because a bare</span>
-            <span class="c1"># :func:`ipaddress.ip_address` here still raises a plain</span>
-            <span class="c1"># :exc:`ValueError` for a tail that is not a whole number of 8-octet</span>
-            <span class="c1"># pairs, which no ``except BaseError`` can catch, and because leaving</span>
-            <span class="c1"># one of this method's three conversions unguarded invites the same</span>
-            <span class="c1"># defect back.</span>
-            <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span>
-            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
-                <span class="n">buf_ip</span> <span class="o">=</span> <span class="n">pad</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parse_ip_address</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="n">buf_ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid prespecified address'</span><span class="p">,</span>
-                    <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: unknown timestmap flag: </span><span class="si">{</span><span class="n">ts_flag</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
-            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">[:</span><span class="n">used</span><span class="p">]</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_flag</span> <span class="o">=</span> <span class="n">ts_flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
@@ -960,6 +971,7 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">ts_flag</span><span class="p">:</span> <span class="s1">'Enum_TSFlag'</span>
         <span class="n">data</span><span class="p">:</span> <span class="s1">'list[int] | OrderedMultiDict[IPv4Address, int]'</span>
+        <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
         <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'</span>
 
         <span class="c1"># NOTE: The keyword is ``ts_data``, the name of the field above, not</span>
@@ -1002,15 +1014,15 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route: every address slot of the option, those before the pointer and</span>
+    <span class="c1">#: those at or beyond it alike.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'list[IPv4Address]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
-    <span class="c1">#: Remaining data buffer.</span>
+    <span class="c1">#: Trailing octets that do not make up a whole address slot.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>  <span class="c1"># a reasonable default</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1042,15 +1054,15 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route: every address slot of the option, those before the pointer and</span>
+    <span class="c1">#: those at or beyond it alike.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'list[IPv4Address]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
-    <span class="c1">#: Remaining data buffer.</span>
+    <span class="c1">#: Trailing octets that do not make up a whole address slot.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pointer'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>  <span class="c1"># a reasonable default</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1128,6 +1140,7 @@
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'QSTestFlags'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
         <span class="s1">'func'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: QS data.</span>
@@ -1137,7 +1150,7 @@
 
 <div class="viewcode-block" id="_QSOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4._QSOption.post_process">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'QSOption'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'QSOption | UnassignedOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -1148,7 +1161,8 @@
 
 <span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">QSOption</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'func'</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 </div>
 
@@ -1187,6 +1201,7 @@
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1212,18 +1227,18 @@
     <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs` writes into</span>
     <span class="c1">#: ``length`` and the eight</span>
     <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` demands of it,</span>
-    <span class="c1">#: and the ``nonce`` would decode one octet early. Declared as padding rather</span>
-    <span class="c1">#: than as data because :rfc:`4782` gives it no meaning and no caller should</span>
-    <span class="c1">#: be setting it.</span>
-    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#: and the ``nonce`` would decode one octet early. Kept as an integer rather</span>
+    <span class="c1">#: than as padding, so that whatever the sender put there is written back.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span><span class="p">,</span>
-                     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1252,6 +1267,7 @@
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Flags and fragment offset.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'df'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'mf'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'offset'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>

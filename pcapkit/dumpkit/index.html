@@ -530,7 +530,15 @@ hierarchy:</p>
     click Dumper &quot;/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper&quot;
     click PCAPIO &quot;/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO&quot;
     click NotImplementedIO &quot;/pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO&quot;
-    </pre></section>
+    </pre><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tree</span></code> output (also selected as <code class="docutils literal notranslate"><span class="pre">text</span></code> and <code class="docutils literal notranslate"><span class="pre">txt</span></code>) is a lossy,
+human-readable view, and nothing reads it back. It renders <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">b''</span></code>,
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">{}</span></code> all as <code class="docutils literal notranslate"><span class="pre">NIL</span></code>, and writes a newline inside a string
+as is, breaking the layout. Use <code class="docutils literal notranslate"><span class="pre">json</span></code> or <code class="docutils literal notranslate"><span class="pre">plist</span></code> (also selected as
+<code class="docutils literal notranslate"><span class="pre">xml</span></code>) where the report has to round-trip.</p>
+</div>
+</section>
 
         </article>
       </div>

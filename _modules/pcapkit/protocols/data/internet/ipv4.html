@@ -554,13 +554,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for IPv4 Flags."""</span>
 
+    <span class="c1">#: Reserved flag bit.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Don't fragment.</span>
     <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: More fragments.</span>
     <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -598,6 +600,8 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Options, present only when the header carries any.</span>
         <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[OptionNumber, Option]'</span>
+        <span class="c1">#: Octets after the End of Option List, present along with ``options``.</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4]'</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">tos</span><span class="p">:</span> <span class="s1">'ToSField'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
@@ -701,11 +705,13 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route, i.e. the address slots before the pointer.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
+    <span class="c1">#: Address slots at or beyond the pointer.</span>
+    <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -721,11 +727,13 @@
     <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Flag.</span>
     <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span>
-    <span class="c1">#: Timestamp data.</span>
+    <span class="c1">#: Timestamp data, i.e. the slots before the pointer.</span>
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span>
+    <span class="c1">#: Slots at or beyond the pointer, as raw 32-bit words.</span>
+    <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -753,11 +761,13 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route, i.e. the address slots before the pointer.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
+    <span class="c1">#: Address slots at or beyond the pointer.</span>
+    <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -783,11 +793,13 @@
 
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Route.</span>
+    <span class="c1">#: Route, i.e. the address slots before the pointer.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
+    <span class="c1">#: Address slots at or beyond the pointer.</span>
+    <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -885,20 +897,26 @@
     <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits after the nonce.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for IPv4 Quick Start report of approved rate option."""</span>
 
+    <span class="c1">#: Not-used octet, where a request carries its TTL.</span>
+    <span class="n">unused</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits after the nonce.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">unused</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 </pre></div>
         </article>
       </div>

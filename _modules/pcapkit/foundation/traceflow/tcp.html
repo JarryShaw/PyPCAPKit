@@ -612,6 +612,9 @@
         <span class="c1">#: and cached so that :meth:`_make_segment` does not import per packet. Set</span>
         <span class="c1">#: only when ``analyse`` is on, which is the only time it is read.</span>
         <span class="n">_reasm_packet</span><span class="p">:</span> <span class="s1">'type[Any]'</span>
+        <span class="c1">#: Every flow label this tracer has handed out, created with the first</span>
+        <span class="c1">#: flow and read by :meth:`_unique_label` to keep labels unique.</span>
+        <span class="n">_labels</span><span class="p">:</span> <span class="s1">'set[str]'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -711,6 +714,12 @@
 <span class="sd">            reverse half of a bidirectional</span>
 <span class="sd">            conversation joins that flow rather than minting a label of its own.</span>
 
+<span class="sd">            A label is unique within the tracer. When a flow would repeat the</span>
+<span class="sd">            label of an earlier one -- the same endpoints opening a new flow at</span>
+<span class="sd">            the same capture timestamp -- it is suffixed with ``-1``, ``-2`` and</span>
+<span class="sd">            so on, so that each flow keeps its own output file; see</span>
+<span class="sd">            :meth:`_unique_label`.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -747,6 +756,7 @@
                 <span class="c1"># ``:`` is a path separator on Windows and a drive separator</span>
                 <span class="c1"># elsewhere in the tooling, so an IPv6 label cannot carry it</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'new TCP flow </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">""</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
@@ -802,6 +812,33 @@
         <span class="c1"># return label or output object</span>
         <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unique_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make a new flow's label unique within this tracer.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            label: the label built from the packet that opens the flow</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``label`` itself if no earlier flow carries it; otherwise ``label``</span>
+<span class="sd">            suffixed with the first of ``-1``, ``-2``, ... that is still unused.</span>
+
+<span class="sd">        The label names the flow's output file, which is opened -- and so</span>
+<span class="sd">        truncated -- when the flow starts. Two flows with one label would</span>
+<span class="sd">        therefore share one file, and the later would erase the earlier: the</span>
+<span class="sd">        same endpoints opening a second flow at the same capture timestamp, as a</span>
+<span class="sd">        unidirectional flow resumed after its FIN or a new connection reusing a</span>
+<span class="sd">        bidirectional flow's endpoints can. A label that does not collide is</span>
+<span class="sd">        returned unchanged.</span>
+
+<span class="sd">        """</span>
+        <span class="n">used</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'_labels'</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>  <span class="c1"># type: set[str]</span>
+        <span class="n">unique</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">label</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">unique</span> <span class="ow">in</span> <span class="n">used</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">unique</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">'</span>
+        <span class="n">used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unique</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Build the reassembler a new flow will feed, if analysis was asked for.</span>

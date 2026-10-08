@@ -778,6 +778,7 @@
             <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                 <span class="n">df</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'df'</span><span class="p">]),</span>
                 <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'mf'</span><span class="p">]),</span>
             <span class="p">),</span>
@@ -791,8 +792,12 @@
 
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
+            <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">'options'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">'options'</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span>
+                <span class="c1"># octets after the End of Option List, as captured</span>
+                <span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">20</span> <span class="o">+</span> <span class="n">_used</span><span class="p">:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">]),</span>
             <span class="p">])</span>
 
         <span class="c1"># update packet info</span>
@@ -839,6 +844,7 @@
              <span class="n">tos_ecn_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">tos_ecn_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">df</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -852,6 +858,7 @@
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv4Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
              <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
@@ -878,6 +885,7 @@
 <span class="sd">            tos_ecn_namespace: Namespace of ``tos_ecn``.</span>
 <span class="sd">            tos_ecn_reversed: If the namespace of ``tos_ecn`` is reversed.</span>
 <span class="sd">            id: Identification of the packet.</span>
+<span class="sd">            reserved: Reserved flag bit, i.e. the high-order bit of the flags.</span>
 <span class="sd">            df: Don't fragment flag.</span>
 <span class="sd">            mf: More fragments flag.</span>
 <span class="sd">            offset: Fragment offset.</span>
@@ -892,6 +900,9 @@
 <span class="sd">            options: Options of the packet.</span>
 <span class="sd">            total_length: Total length of the packet, header included; computed</span>
 <span class="sd">                from the header and the payload when omitted.</span>
+<span class="sd">            padding: Octets after the End of Option List, written as is when</span>
+<span class="sd">                ``options`` is a container that carries an ``EOOL``, c.f.</span>
+<span class="sd">                :meth:`_make_ipv4_options`.</span>
 <span class="sd">            payload: Payload of the packet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -915,7 +926,7 @@
         <span class="n">ttl_val</span> <span class="o">=</span> <span class="n">ttl</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ttl</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ipv4_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ipv4_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -944,6 +955,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'df'</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
                 <span class="s1">'mf'</span><span class="p">:</span> <span class="n">mf</span><span class="p">,</span>
                 <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
@@ -1038,6 +1050,7 @@
             <span class="s1">'tos_rel'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tos</span><span class="o">.</span><span class="n">rel</span><span class="p">,</span>
             <span class="s1">'tos_ecn'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tos</span><span class="o">.</span><span class="n">ecn</span><span class="p">,</span>
             <span class="s1">'id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'df'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
             <span class="s1">'mf'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>
             <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
@@ -1054,6 +1067,10 @@
             <span class="c1"># to ``make`` to recompute, so that a truncated capture rebuilds</span>
             <span class="c1"># with the length that was on the wire (:issue:`1155`).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+            <span class="c1"># NOTE: And the octets after the End of Option List, which no option</span>
+            <span class="c1"># records. The header length is not passed: it follows from the</span>
+            <span class="c1"># options and these octets, so edited options recompute it.</span>
+            <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
@@ -1158,10 +1175,10 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **LESS THAN** ``3``.</span>
+<span class="sd">            ProtocolError: If ``length`` is **LESS THAN** ``2``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_UnassignedOption</span><span class="p">(</span>
@@ -1260,6 +1277,11 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``length`` is **LESS THAN** ``3``.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            Per :rfc:`1108#section-2.4`, the low-order bit of each protection</span>
+<span class="sd">            authority octet is the field termination indicator: ``0`` on the</span>
+<span class="sd">            final octet, ``1`` when more octets follow.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
@@ -1274,11 +1296,11 @@
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: unknown protection authority: </span><span class="si">{</span><span class="n">authority</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                         <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">authority</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0x01</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">base</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0x01</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">base</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">:</span>
                     <span class="c1">#raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: remaining data')</span>
                     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: remaining data'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x01</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x01</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: field termination indicator not set'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">flags</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1328,7 +1350,8 @@
             <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">),</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[:(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">]),</span>
+            <span class="n">remaining</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:]),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -1377,6 +1400,7 @@
             <span class="n">overflow</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'oflw'</span><span class="p">],</span>
             <span class="n">flag</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ts_flag</span><span class="p">,</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">remaining</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">remaining</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -1456,7 +1480,8 @@
             <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">),</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[:(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">]),</span>
+            <span class="n">remaining</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:]),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -1533,7 +1558,8 @@
             <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">),</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[:(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">]),</span>
+            <span class="n">remaining</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">route</span><span class="p">[(</span><span class="n">schema</span><span class="o">.</span><span class="n">pointer</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:]),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -1733,7 +1759,14 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the option is malformed.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            An option whose QS function is neither of the two above has no</span>
+<span class="sd">            defined layout, so the schema keeps it as an unassigned option and</span>
+<span class="sd">            it is parsed as one, c.f. :meth:`_read_opt_unassigned`.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnassignedOption</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_unassigned</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
@@ -1750,6 +1783,7 @@
                 <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">ttl</span><span class="p">),</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">)</span>  <span class="c1"># type: Data_QSOption</span>
         <span class="k">elif</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
             <span class="n">schema_rep</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QuickStartReportOption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
@@ -1761,7 +1795,9 @@
                 <span class="n">length</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
                 <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span>
                 <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">unused</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] unknown QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1770,19 +1806,34 @@
 
 <div class="viewcode-block" id="IPv4._make_ipv4_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ipv4_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ipv4_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option'</span><span class="p">,</span>
+                           <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make options for IPv4.</span>
+
+<span class="sd">        A :obj:`list` is a fresh option list, so any ``NOP`` and ``EOOL`` in it</span>
+<span class="sd">        are dropped and the padding is generated. A container is what</span>
+<span class="sd">        :meth:`read` hands back, so its ``NOP`` and ``EOOL`` options are written</span>
+<span class="sd">        in place, as parsed.</span>
+
+<span class="sd">        Either way, the options are concatenated and then padded once, after the</span>
+<span class="sd">        last one, to the 32-bit boundary: with ``NOP`` options and a closing</span>
+<span class="sd">        ``EOOL``, or with zero octets if an ``EOOL`` has already ended the list.</span>
+<span class="sd">        ``padding`` goes after that ``EOOL`` verbatim, before any alignment; it</span>
+<span class="sd">        is dropped if no ``EOOL`` ends the list, since the reader would take its</span>
+<span class="sd">        octets for options.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            option: IPv4 options</span>
+<span class="sd">            padding: octets after the End of Option List</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of options and total length of options.</span>
 
 <span class="sd">        """</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">terminated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
             <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -1816,72 +1867,65 @@
 
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                    <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
+                                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-                <span class="c1"># force alignment to 32-bit boundary</span>
-                <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-                    <span class="c1"># NOTE: The terminator is an EOOL option *schema*, like the NOP</span>
-                    <span class="c1"># padding. The bare ``Enum_OptionNumber.EOOL`` wire code is not</span>
-                    <span class="c1"># an option, and the ``options`` field takes only schemas and</span>
-                    <span class="c1"># :obj:`bytes`, so packing would fail with ``FieldValueError:</span>
-                    <span class="c1"># Field options has invalid value`` for any option whose</span>
-                    <span class="c1"># length is not a multiple of four.</span>
-                    <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
-                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_opt</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+                <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">:</span>
+                    <span class="n">terminated</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="c1"># ignore padding options by default</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">):</span>
-                <span class="k">continue</span>
+            <span class="c1"># NOTE: Raw octets are safe here only after the EOOL: the reader</span>
+            <span class="c1"># stops there, and never looks at what follows as an option.</span>
+            <span class="k">if</span> <span class="n">terminated</span> <span class="ow">and</span> <span class="n">padding</span><span class="p">:</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'OptionConstructor'</span><span class="p">,</span>
-                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">))</span>
+        <span class="c1"># force alignment to 32-bit boundary</span>
+        <span class="c1">#</span>
+        <span class="c1"># NOTE: Once, after the last option. An EOOL after each unaligned</span>
+        <span class="c1"># option would end the list there, and every later option would be</span>
+        <span class="c1"># lost on parse. The terminator is an EOOL option *schema*, like the</span>
+        <span class="c1"># NOP padding: the ``options`` field takes only schemas and</span>
+        <span class="c1"># :obj:`bytes`, not the bare wire code.</span>
+        <span class="k">if</span> <span class="n">total_length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">total_length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
+
+            <span class="c1"># zero octets after an EOOL already in the list, as EOOL schemas</span>
+            <span class="k">if</span> <span class="n">terminated</span><span class="p">:</span>
+                <span class="n">pad_opt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_Option'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">pad_opt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_Option'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">))</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
-            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
-            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-
-            <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
-
-            <span class="c1"># force alignment to 32-bit boundary</span>
-            <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-                <span class="c1"># NOTE: An EOOL option schema rather than the bare wire code, as in</span>
-                <span class="c1"># the list branch above. This is the ``from_data`` branch, since a</span>
-                <span class="c1"># parsed packet hands its options back as a container.</span>
-                <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
-
-                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_opt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
+            <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_opt</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span></div>
 
 
 <div class="viewcode-block" id="IPv4._make_opt_unassigned">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._make_opt_unassigned">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_unassigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_UnassignedOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                             <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                             <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Option'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 unassigned options.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
-<span class="sd">            data: option payload</span>
+<span class="sd">            data: option payload, i.e. the octets after the ``length`` octet</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -1893,7 +1937,7 @@
 
         <span class="k">return</span> <span class="n">Schema_UnassignedOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -1970,10 +2014,10 @@
 <span class="sd">                reserves as a field termination indicator.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            :rfc:`1108` section 2.2 lays each protection authority octet out as</span>
+<span class="sd">            :rfc:`1108#section-2.4` lays each protection authority octet out as</span>
 <span class="sd">            seven authority bits followed by a *field termination indicator* in</span>
-<span class="sd">            bit 0: ``0`` means another octet follows, ``1`` means this is the</span>
-<span class="sd">            last. So the authority numbering skips every position that is a</span>
+<span class="sd">            the low-order bit: ``1`` means another octet follows, ``0`` means</span>
+<span class="sd">            this is the last. So the authority numbering skips every position that is a</span>
 <span class="sd">            termination bit -- 7, 15, 23 -- which is what</span>
 <span class="sd">            :meth:`_read_opt_sec` encodes by looping over ``range(7)`` per</span>
 <span class="sd">            octet, and the reason ``Field_Termination_Indicator`` is rejected</span>
@@ -2011,16 +2055,24 @@
             <span class="c1"># multiple of eight.</span>
             <span class="n">max_auth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">authorities</span><span class="p">)</span>
             <span class="n">int_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">max_auth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">int_len</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="c1"># A parsed option keeps its own width, so that octets which carry no</span>
+        <span class="c1"># authority are not dropped on rebuild.</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">int_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">int_len</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">int_len</span><span class="p">:</span>
             <span class="n">data_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">'0'</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">int_len</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)]</span>
             <span class="k">for</span> <span class="n">auth</span> <span class="ow">in</span> <span class="n">authorities</span><span class="p">:</span>
                 <span class="n">data_list</span><span class="p">[</span><span class="n">auth</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
 
-            <span class="c1"># Bit 0 of the *last* octet terminates the field. The intermediate</span>
-            <span class="c1"># octets keep their initial ``0``, meaning "another octet follows",</span>
-            <span class="c1"># so this one assignment is the whole indicator; without it the</span>
-            <span class="c1"># reader warns on every option written here.</span>
-            <span class="n">data_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
+            <span class="c1"># The low-order bit of every octet but the last is ``1``, meaning</span>
+            <span class="c1"># "another octet follows"; the last keeps its ``0``, which ends the</span>
+            <span class="c1"># field.</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">int_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">data_list</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_list</span><span class="p">),</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">int_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2039,6 +2091,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_lsr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_LSROption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">counts</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># reasonable default</span>
                       <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">remaining</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_LSROption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Loose Source and Record Route (``LSR``) option.</span>
 
@@ -2046,7 +2099,10 @@
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
 <span class="sd">            counts: maximum number of addresses to record</span>
-<span class="sd">            route: list of IPv4 addresses as recorded routes</span>
+<span class="sd">            route: list of IPv4 addresses as recorded routes, i.e. the</span>
+<span class="sd">                address slots before the pointer</span>
+<span class="sd">            remaining: list of IPv4 addresses for the address slots at or beyond</span>
+<span class="sd">                the pointer; the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2054,7 +2110,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">route</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv4Address | str | bytes | int]'</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">route</span><span class="p">)</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">route</span> <span class="ow">or</span> <span class="p">())</span>  <span class="c1"># type: list[IPv4Address | str | bytes | int]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remaining'</span><span class="p">,</span> <span class="p">())</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pointer</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2062,11 +2119,16 @@
             <span class="n">length</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">counts</span> <span class="o">*</span> <span class="mi">4</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">route</span><span class="p">),</span> <span class="n">counts</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
+            <span class="c1"># NOTE: Every address slot of the option is written, the empty ones</span>
+            <span class="c1"># as ``0.0.0.0``.</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">route</span><span class="p">[:</span><span class="n">counts</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">remaining</span> <span class="ow">or</span> <span class="p">()))[:</span><span class="n">counts</span><span class="p">]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">counts</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">slots</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">Schema_LSROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="n">route</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="n">slots</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2076,6 +2138,7 @@
                      <span class="n">counts</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                      <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[list[int | timedelta] | dict[IPv4Address, int | timedelta]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">remaining</span><span class="p">:</span> <span class="s1">'Optional[list[int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TSOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Timestamp (``TS``) option.</span>
 
@@ -2083,7 +2146,9 @@
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
 <span class="sd">            counts: maximum number of timestamps to record</span>
-<span class="sd">            timestamp: list of timestamps</span>
+<span class="sd">            timestamp: list of timestamps, i.e. the slots before the pointer</span>
+<span class="sd">            remaining: raw 32-bit words for the slots at or beyond the pointer;</span>
+<span class="sd">                the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2094,24 +2159,25 @@
             <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[int]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">option</span><span class="o">.</span><span class="n">timestamp</span><span class="p">:</span>
+                    <span class="c1"># NOTE: An integer is the raw 32-bit field, written as</span>
+                    <span class="c1"># is: a set high-order bit marks a non-standard time value.</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
+                        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                            <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">option</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
+                        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                            <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
 
+            <span class="n">ts_list</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remaining'</span><span class="p">,</span> <span class="p">())</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pointer</span>
             <span class="n">overflow</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">overflow</span>
@@ -2130,10 +2196,9 @@
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
+                        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                            <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">IP_with_Timestamp</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -2148,16 +2213,20 @@
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                            <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="k">if</span> <span class="n">ts</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span>  <span class="c1"># type: ignore[assignment]</span>
-
-                    <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid timestamp value: </span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="c1"># NOTE: Every slot of the option is written, the empty ones as zero.</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span>
+            <span class="n">ts_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">ts_list</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">remaining</span> <span class="ow">or</span> <span class="p">()))[:</span><span class="n">slots</span><span class="p">]</span>
+            <span class="n">ts_list</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">slots</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_list</span><span class="p">))</span>
 
         <span class="c1"># NOTE: ``ts_data`` is the field on</span>
         <span class="c1"># :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`; ``data`` is</span>
@@ -2217,6 +2286,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_RROption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">counts</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># reasonable default</span>
                      <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">remaining</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RROption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Record Route (``RR``) option.</span>
 
@@ -2224,7 +2294,10 @@
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
 <span class="sd">            counts: maximum number of addresses to record</span>
-<span class="sd">            route: list of IPv4 addresses as recorded routes</span>
+<span class="sd">            route: list of IPv4 addresses as recorded routes, i.e. the</span>
+<span class="sd">                address slots before the pointer</span>
+<span class="sd">            remaining: list of IPv4 addresses for the address slots at or beyond</span>
+<span class="sd">                the pointer; the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2232,7 +2305,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">route</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv4Address | str | bytes | int]'</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">route</span><span class="p">)</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">route</span> <span class="ow">or</span> <span class="p">())</span>  <span class="c1"># type: list[IPv4Address | str | bytes | int]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remaining'</span><span class="p">,</span> <span class="p">())</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pointer</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2240,11 +2314,16 @@
             <span class="n">length</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">counts</span> <span class="o">*</span> <span class="mi">4</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">route</span><span class="p">),</span> <span class="n">counts</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
+            <span class="c1"># NOTE: Every address slot of the option is written, the empty ones</span>
+            <span class="c1"># as ``0.0.0.0``.</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">route</span><span class="p">[:</span><span class="n">counts</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">remaining</span> <span class="ow">or</span> <span class="p">()))[:</span><span class="n">counts</span><span class="p">]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">counts</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">slots</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">Schema_RROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="n">route</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="n">slots</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2280,6 +2359,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ssr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_SSROption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">counts</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># reasonable default</span>
                       <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">remaining</span><span class="p">:</span> <span class="s1">'Optional[list[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SSROption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Strict Source Route (``SSR``) option.</span>
 
@@ -2287,7 +2367,10 @@
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
 <span class="sd">            counts: maximum number of addresses to record</span>
-<span class="sd">            route: list of IPv4 addresses as recorded routes</span>
+<span class="sd">            route: list of IPv4 addresses as recorded routes, i.e. the</span>
+<span class="sd">                address slots before the pointer</span>
+<span class="sd">            remaining: list of IPv4 addresses for the address slots at or beyond</span>
+<span class="sd">                the pointer; the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2295,7 +2378,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">route</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv4Address | str | bytes | int]'</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">route</span><span class="p">)</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">route</span> <span class="ow">or</span> <span class="p">())</span>  <span class="c1"># type: list[IPv4Address | str | bytes | int]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remaining'</span><span class="p">,</span> <span class="p">())</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pointer</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2303,11 +2387,16 @@
             <span class="n">length</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">counts</span> <span class="o">*</span> <span class="mi">4</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">route</span><span class="p">),</span> <span class="n">counts</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
+            <span class="c1"># NOTE: Every address slot of the option is written, the empty ones</span>
+            <span class="c1"># as ``0.0.0.0``.</span>
+            <span class="n">slots</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">route</span><span class="p">[:</span><span class="n">counts</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">remaining</span> <span class="ow">or</span> <span class="p">()))[:</span><span class="n">counts</span><span class="p">]</span>
+            <span class="n">slots</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">counts</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">slots</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="n">Schema_SSROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pointer</span><span class="o">=</span><span class="n">pointer</span><span class="p">,</span>
-            <span class="n">route</span><span class="o">=</span><span class="n">route</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="n">slots</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -2442,15 +2531,17 @@
 
 <div class="viewcode-block" id="IPv4._make_opt_qs">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption | Data_UnassignedOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">func</span><span class="p">:</span> <span class="s1">'Enum_QSFunction | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">,</span>
                      <span class="n">func_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">func_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># pylint: disable=line-too-long</span>
                      <span class="n">func_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">unused</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QSOption'</span><span class="p">:</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QSOption | Schema_UnassignedOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Quick-Start (``QS``) option.</span>
 
 <span class="sd">        Args:</span>
@@ -2462,26 +2553,37 @@
 <span class="sd">            func_reversed: reversed flag for QS function type</span>
 <span class="sd">            rate: rate (in kbps)</span>
 <span class="sd">            ttl: time to live (in seconds)</span>
+<span class="sd">            unused: the not-used fourth octet of a Report of Approved Rate</span>
 <span class="sd">            nonce: nonce value</span>
+<span class="sd">            reserved: reserved bits (``R``) after the nonce</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Constructed option schema.</span>
+<span class="sd">            Constructed option schema. An unassigned option schema if ``option``</span>
+<span class="sd">            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`,</span>
+<span class="sd">            or if ``func`` is neither of the assigned functions, in which case</span>
+<span class="sd">            the option takes the eight-octet layout of a Quick-Start Request.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``func`` does not fit in four bits.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">Data_UnassignedOption</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">option</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">func_enum</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">func</span>
             <span class="n">rate</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">rate</span>
             <span class="n">ttl</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'ttl'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">unused</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'unused'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">nonce</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">func_enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">func_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">func_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">func_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">rate_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">40000</span><span class="p">))</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">ttl_value</span> <span class="o">=</span> <span class="n">ttl</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ttl</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">func_enum</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">:</span>
-            <span class="n">ttl_value</span> <span class="o">=</span> <span class="n">ttl</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ttl</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
-
             <span class="k">return</span> <span class="n">Schema_QuickStartRequestOption</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
                 <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
@@ -2492,6 +2594,7 @@
                 <span class="n">ttl</span><span class="o">=</span><span class="n">ttl_value</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="p">{</span>
                     <span class="s1">'nonce'</span><span class="p">:</span> <span class="n">nonce</span><span class="p">,</span>
+                    <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">func_enum</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
@@ -2502,11 +2605,16 @@
                     <span class="s1">'func'</span><span class="p">:</span> <span class="n">func_enum</span><span class="p">,</span>
                     <span class="s1">'rate'</span><span class="p">:</span> <span class="n">rate_val</span><span class="p">,</span>
                 <span class="p">},</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">unused</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="p">{</span>
                     <span class="s1">'nonce'</span><span class="p">:</span> <span class="n">nonce</span><span class="p">,</span>
+                    <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid QS function: </span><span class="si">{</span><span class="n">func_enum</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">func_enum</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid QS function: </span><span class="si">{</span><span class="n">func_enum</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">([(</span><span class="n">func_enum</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">rate_val</span><span class="p">,</span> <span class="n">ttl_value</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="n">nonce</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">reserved</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedOption'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_unassigned</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

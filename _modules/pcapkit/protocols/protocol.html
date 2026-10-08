@@ -482,6 +482,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
@@ -500,6 +501,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABSENT</span><span class="p">,</span> <span class="n">AbsentType</span>  <span class="c1"># pylint: disable=unused-import</span>
@@ -513,8 +515,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
-                                          <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
+                                          <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -536,6 +539,128 @@
 
 <span class="c1"># readable characters' order list</span>
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_index_calls</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">'Callable[..., Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[tuple[int, int, str], ...]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Locate the ``_make_index`` calls in the source of ``func``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func: method calling ``_make_index``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        One ``(first_line, last_line, argument)`` triple per call whose first</span>
+<span class="sd">        argument is a plain name, with absolute line numbers. Empty if the</span>
+<span class="sd">        source of ``func`` is unavailable.</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lines</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsourcelines</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">()</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">lineno</span> <span class="o">+</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">'end_lineno'</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">attr</span> <span class="o">==</span> <span class="s1">'_make_index'</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_passes_raw</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">nested</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell if ``make()`` keywords may carry a raw :obj:`bytes` item.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: keyword arguments of ``make()``, or a value within them</span>
+<span class="sd">        nested: if ``value`` sits inside a container</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,</span>
+<span class="sd">        :obj:`tuple` or :obj:`dict` among ``value``, or a</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A</span>
+<span class="sd">        top-level :obj:`bytes` keyword (e.g. a payload) does not count.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">nested</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>  <span class="c1"># a ready-made item, which ``make()`` may pack into raw octets</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_passes_raw</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">'__packet__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_passes_raw</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_schema_slots</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Schema]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, ...]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Names of the fields of ``schema`` that hold a schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: schema class</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Names of the :class:`~pcapkit.corekit.fields.misc.SchemaField` and</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.SwitchField` fields, including</span>
+<span class="sd">        those wrapped in a :class:`~pcapkit.corekit.fields.misc.ConditionalField`.</span>
+
+<span class="sd">    """</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">):</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)):</span>
+            <span class="n">slots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slots</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_holds_raw</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell if a made schema may hold raw :obj:`bytes` in place of a schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: made schema, or a value within it</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if ``value`` holds :obj:`bytes` as a list item, or as</span>
+<span class="sd">        the value of a field that holds a schema</span>
+<span class="sd">        (:class:`~pcapkit.corekit.fields.misc.SchemaField` or</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.SwitchField`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_holds_raw</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">):</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">_holds_raw</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_raw_where_parsed</span><span class="p">(</span><span class="n">made</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">parsed</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell if ``made`` holds raw :obj:`bytes` where ``parsed`` holds a schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        made: made schema, or a value within it</span>
+<span class="sd">        parsed: the same position in the schema parsed from its packed octets</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if, at some position both share, ``made`` holds</span>
+<span class="sd">        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.schema.Schema`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">made</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">made</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_raw_where_parsed</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">other</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">made</span><span class="p">,</span> <span class="n">parsed</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">made</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_raw_where_parsed</span><span class="p">(</span><span class="n">made</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">parsed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                   <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">made</span><span class="o">.</span><span class="n">__fields__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
 
 <span class="c1">#: Keywords that configure the construction rather than naming a field, and are</span>
 <span class="c1">#: therefore consumed by :meth:`ProtocolBase.__init__</span>
@@ -1047,6 +1172,9 @@
 
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1">#: bool: If the made header may hold raw items (see :meth:`unpack`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_raw</span> <span class="o">=</span> <span class="n">_passes_raw</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_schema_slots</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)))</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -1065,10 +1193,34 @@
 <span class="sd">            global packet data to underlying methods. This is useful when</span>
 <span class="sd">            the packet data is not available in the current instance.</span>
 
+<span class="sd">            When :meth:`pack` or :meth:`from_schema` has already set</span>
+<span class="sd">            :attr:`self.__header__ &lt;Protocol.__header__&gt;`, that schema is</span>
+<span class="sd">            kept, unless it still holds raw :obj:`bytes` where parsing its</span>
+<span class="sd">            packed octets yields a schema -- e.g. a raw option given to</span>
+<span class="sd">            ``make()`` -- which :meth:`read` cannot consume. The header is</span>
+<span class="sd">            then replaced by the parsed one (:issue:`1312`).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the made header holds raw items and its packed</span>
+<span class="sd">                octets do not parse, either as a schema or by :meth:`read`.</span>
+<span class="sd">                The message carries the original error's, which is also</span>
+<span class="sd">                chained as ``__cause__``.</span>
+
 <span class="sd">        """</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[_ST]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_raw</span> <span class="ow">and</span> <span class="n">_holds_raw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">):</span>
+            <span class="c1"># NOTE: A schema may accept octets that :meth:`read` then rejects,</span>
+            <span class="c1"># e.g. an option whose length runs past the option area, so the</span>
+            <span class="c1"># read is covered too (:issue:`1394`).</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+                <span class="k">if</span> <span class="n">_raw_where_parsed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">parsed</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">parsed</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: malformed raw item given to make(): </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
@@ -1332,6 +1484,9 @@
         <span class="c1"># reference between instances.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="c1">#: bool: If a header set before :meth:`unpack` may hold raw items;</span>
+        <span class="c1">#: :meth:`pack` narrows it down for a made one.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_raw</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -2078,12 +2233,8 @@
 <span class="sd">            If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,</span>
 <span class="sd">            the namespace is inferred from the calling ``make`` method: it</span>
 <span class="sd">            is the enumeration class of the default value of the argument</span>
-<span class="sd">            that ``name`` was passed as. If several arguments were given the</span>
-<span class="sd">            same name, every one of their enumerations must have the name</span>
-<span class="sd">            and map it to the same value; otherwise</span>
-<span class="sd">            :exc:`~pcapkit.utilities.exceptions.ProtocolNotImplemented` is</span>
-<span class="sd">            raised, asking for an explicit ``*_namespace`` (see</span>
-<span class="sd">            :meth:`_make_index_namespace`).</span>
+<span class="sd">            that ``name`` was passed as, found from the call in the</span>
+<span class="sd">            caller's source (see :meth:`_make_index_namespace`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
@@ -2134,6 +2285,15 @@
 <span class="sd">        member. The candidate namespace of a match is the class of that</span>
 <span class="sd">        default value.</span>
 
+<span class="sd">        Only the argument the call passes as ``name`` is considered: the</span>
+<span class="sd">        caller's source is parsed (by ``_make_index_calls``) for the</span>
+<span class="sd">        :meth:`_make_index` call spanning the current line, and its first</span>
+<span class="sd">        argument names the method argument, so two arguments holding the</span>
+<span class="sd">        same member name each resolve against their own enumeration. Every</span>
+<span class="sd">        argument is considered when that call cannot be located (e.g. the</span>
+<span class="sd">        source is unavailable) or its first argument is not an argument of</span>
+<span class="sd">        the method (e.g. ``value = arg; self._make_index(value)``).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            name: member name given to :meth:`_make_index`</span>
 <span class="sd">            frame: frame of :meth:`_make_index`</span>
@@ -2146,9 +2306,9 @@
 <span class="sd">            candidate has ``name`` as a member.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolNotImplemented: If several arguments match and their</span>
-<span class="sd">                candidates disagree on ``name``: some lack it, or they map</span>
-<span class="sd">                it to different values.</span>
+<span class="sd">            ProtocolNotImplemented: If every argument is considered, several</span>
+<span class="sd">                arguments match and their candidates disagree on ``name``:</span>
+<span class="sd">                some lack it, or they map it to different values.</span>
 
 <span class="sd">        """</span>
         <span class="n">caller</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
@@ -2171,8 +2331,13 @@
                 <span class="k">return</span> <span class="kc">None</span>
 
             <span class="n">params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="n">lineno</span> <span class="o">=</span> <span class="n">caller</span><span class="o">.</span><span class="n">f_lineno</span>
+            <span class="n">located</span> <span class="o">=</span> <span class="p">{</span><span class="n">arg</span> <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">_make_index_calls</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="n">first</span> <span class="o">&lt;=</span> <span class="n">lineno</span> <span class="o">&lt;=</span> <span class="n">last</span><span class="p">}</span>
             <span class="n">found</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Type[StdlibEnum] | Type[AenumEnum]]</span>
             <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># once the call is located, only its own argument is a candidate</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">located</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">located</span> <span class="o">&lt;=</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">arg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">located</span><span class="p">:</span>
+                    <span class="k">continue</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
                 <span class="k">if</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s1">_namespace'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
                     <span class="k">continue</span>

@@ -596,6 +596,10 @@ unlike the <a class="reference internal" href="../extraction.html#pcapkit.founda
 reassembly and flow tracing registries; <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict.get" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.get()</span></code></a> does not invoke
 the default factory the way <code class="docutils literal notranslate"><span class="pre">cls.__output__[format]</span></code> would, so
 it stays non-inserting here as well.</p>
+<p>The dumper <code class="docutils literal notranslate"><span class="pre">format</span></code> shipped with, as its descriptor or as the
+class it names, restores the shipped entry rather than storing
+the class, so an override can be undone and the deferred import
+is kept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

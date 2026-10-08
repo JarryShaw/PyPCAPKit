@@ -806,7 +806,21 @@ the check.</p>
 <p>We used a special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> to pass the
 global packet data to underlying methods. This is useful when
 the packet data is not available in the current instance.</p>
+<p>When <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> or <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema" title="pcapkit.protocols.protocol.Protocol.from_schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_schema()</span></code></a> has already set
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a>, that schema is
+kept, unless it still holds raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> where parsing its
+packed octets yields a schema – e.g. a raw option given to
+<code class="docutils literal notranslate"><span class="pre">make()</span></code> – which <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> cannot consume. The header is
+then replaced by the parsed one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1312">#1312</a>).</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the made header holds raw items and its packed
+    octets do not parse, either as a schema or by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>.
+    The message carries the original error’s, which is also
+    chained as <code class="docutils literal notranslate"><span class="pre">__cause__</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1060,12 +1074,8 @@ module and class, or a <a class="reference internal" href="#pcapkit.protocols.pr
 <p>If <code class="docutils literal notranslate"><span class="pre">name</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>,
 the namespace is inferred from the calling <code class="docutils literal notranslate"><span class="pre">make</span></code> method: it
 is the enumeration class of the default value of the argument
-that <code class="docutils literal notranslate"><span class="pre">name</span></code> was passed as. If several arguments were given the
-same name, every one of their enumerations must have the name
-and map it to the same value; otherwise
-<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented" title="pcapkit.utilities.exceptions.ProtocolNotImplemented"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolNotImplemented</span></code></a> is
-raised, asking for an explicit <code class="docutils literal notranslate"><span class="pre">*_namespace</span></code> (see
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index_namespace()</span></code>).</p>
+that <code class="docutils literal notranslate"><span class="pre">name</span></code> was passed as, found from the call in the
+caller’s source (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index_namespace()</span></code>).</p>
 </div>
 </dd></dl>
 

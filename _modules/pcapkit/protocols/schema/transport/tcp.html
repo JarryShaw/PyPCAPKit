@@ -526,6 +526,8 @@
 
         <span class="c1">#: Data offset.</span>
         <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: ECN-nonce concealment protection.</span>
         <span class="n">ns</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -561,7 +563,9 @@
         <span class="c1">#: Start flag.</span>
         <span class="n">start</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: End flag.</span>
-        <span class="n">end</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">end</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits (``Filler``).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="QuickStartFlags">
@@ -569,6 +573,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""TCP quick start flags."""</span>
 
+        <span class="c1">#: Reserved bits.</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Rate request.</span>
         <span class="n">rate</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -579,7 +585,9 @@
 <span class="w">        </span><span class="sd">"""TCP quick start nonce."""</span>
 
         <span class="c1">#: Nonce.</span>
-        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reserved bits (``R``).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="TimeoutInfo">
@@ -1211,6 +1219,7 @@
     <span class="n">profile</span><span class="p">:</span> <span class="s1">'POCProfile'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'start'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'end'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1310,6 +1319,7 @@
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'QuickStartFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'rate'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: TTL difference.</span>
@@ -1317,6 +1327,7 @@
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QuickStartNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1816,6 +1827,7 @@
     <span class="c1">#: Data offset.</span>
     <span class="n">offset</span><span class="p">:</span> <span class="s1">'OffsetFlag'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'offset'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="s1">'ns'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: TCP flags.</span>

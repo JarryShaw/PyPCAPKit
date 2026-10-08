@@ -590,6 +590,7 @@
     <span class="c1">#: Each entry is ``(first, last)``, absolute TCP sequence numbers and both</span>
     <span class="c1">#: **inclusive** -- the same convention as :attr:`Packet.first` and</span>
     <span class="c1">#: :attr:`Packet.last`. Empty when the stream never saw a contested byte.</span>
+    <span class="c1">#: A range that crosses ``2 ** 32`` therefore has ``last &lt; first``.</span>
     <span class="c1">#:</span>
     <span class="c1">#: Resolution keeps the already-buffered bytes and discards the</span>
     <span class="c1">#: conflicting portion of whichever segment arrived later, per</span>
@@ -615,13 +616,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HoleDescriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor.</span>
 
-<span class="sd">    Both bounds are **absolute TCP sequence numbers** and both are</span>
-<span class="sd">    **inclusive**, so a hole covers ``last - first + 1`` octets. They are not</span>
-<span class="sd">    offsets into :attr:`Fragment.raw`: the descriptor list is kept once per</span>
-<span class="sd">    buffer ID, whereas each acknowledgement number's payload buffer carries an</span>
-<span class="sd">    initial sequence number of its own, so only</span>
-<span class="sd">    :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;` -- which</span>
-<span class="sd">    knows which buffer it is looking at -- can convert one to the other.</span>
+<span class="sd">    Both bounds are **unwrapped TCP sequence numbers** -- read modulo</span>
+<span class="sd">    ``2 ** 32`` relative to the data already buffered, so a stream crossing</span>
+<span class="sd">    ``2 ** 32`` continues past it -- and both are **inclusive**, so a hole</span>
+<span class="sd">    covers ``last - first + 1`` octets. They are not offsets into</span>
+<span class="sd">    :attr:`Fragment.raw`: the descriptor list is kept once per buffer ID,</span>
+<span class="sd">    across every acknowledgement number's payload buffer, and describes the</span>
+<span class="sd">    stream as a whole. It decides when a stream whose FIN has been seen is</span>
+<span class="sd">    whole; a hole whose ``first`` is ``-sys.maxsize`` stands for whatever</span>
+<span class="sd">    preceded a capture that missed the handshake, and does not count.</span>
 
 <span class="sd">    """</span>
 
@@ -647,7 +650,9 @@
     <span class="c1">#: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number</span>
     <span class="c1">#: is ``isn + n``. Revised downwards whenever a segment turns up below the</span>
     <span class="c1">#: data already buffered, so it is not necessarily the connection's own</span>
-    <span class="c1">#: initial sequence number.</span>
+    <span class="c1">#: initial sequence number. Like every sequence number held in this</span>
+    <span class="c1">#: fragment -- :attr:`gap` and :attr:`conflict` included -- it is</span>
+    <span class="c1">#: unwrapped, and so may exceed ``2 ** 32`` on a stream that crossed it.</span>
     <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Length of payload buffer.</span>
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -660,7 +665,12 @@
     <span class="c1">#: append and the reach-back prepend, the only places that ever splice a</span>
     <span class="c1">#: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap</span>
     <span class="c1">#: merge only ever shrinks or removes one, filling it from the arriving</span>
-    <span class="c1">#: segment.</span>
+    <span class="c1">#: segment. The one exception lies wholly *outside* :attr:`raw`: when a</span>
+    <span class="c1">#: stream whose SYN was captured is split rather than padded across a gap</span>
+    <span class="c1">#: wider than :attr:`TCP.__window__</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.TCP.__window__&gt;`, both halves record</span>
+    <span class="c1">#: the range left between them. Any entry at all makes the fragment</span>
+    <span class="c1">#: incomplete.</span>
     <span class="c1">#:</span>
     <span class="c1">#: This is deliberately **not** derived from</span>
     <span class="c1">#: :attr:`Buffer.hdl &lt;pcapkit.foundation.reassembly.data.tcp.Buffer.hdl&gt;`.</span>

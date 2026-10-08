@@ -505,9 +505,12 @@
     <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span>
     <span class="c1">#: HTTP body.</span>
     <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span>
+    <span class="c1">#: HTTP field lines as received, CRLF excluded and ``obs-fold``</span>
+    <span class="c1">#: continuations kept: one per field in :attr:`header`, in order.</span>
+    <span class="n">raw_header</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">'Header'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receipt</span><span class="p">:</span> <span class="s1">'Header'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">raw_header</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -537,9 +540,11 @@
     <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Charset to encode :attr:`uri` with, :obj:`None` for UTF-8.</span>
     <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
+    <span class="c1">#: HTTP request line as received, CRLF excluded.</span>
+    <span class="n">raw_line</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="s1">'Enum_Method'</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">raw_line</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -559,9 +564,11 @@
     <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Charset to encode :attr:`message` with, :obj:`None` for UTF-8.</span>
     <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
+    <span class="c1">#: HTTP status line as received, CRLF excluded.</span>
+    <span class="n">raw_line</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'HTTP_Type'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_StatusCode'</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">raw_line</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

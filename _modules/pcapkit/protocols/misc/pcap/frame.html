@@ -853,6 +853,11 @@
             <span class="n">incl_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">orig_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="c1"># NOTE: The record holds exactly ``incl_len`` octets of packet data, so a</span>
+        <span class="c1"># packet longer than that -- e.g. than the snaplen -- is cut to it rather</span>
+        <span class="c1"># than written out whole behind a clipped length.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">incl_len</span><span class="p">:</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)[:</span><span class="n">incl_len</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">Schema_Frame</span><span class="p">(</span>
             <span class="n">ts_sec</span><span class="o">=</span><span class="n">ts_sec</span><span class="p">,</span>

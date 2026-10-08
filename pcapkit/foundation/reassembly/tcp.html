@@ -524,21 +524,43 @@ expiry</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>There are two coordinate systems in play here, and keeping them apart
-matters. The <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">hole descriptor list</span></a> of
-<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> is kept in <strong>absolute TCP sequence numbers</strong>, inclusive of
-both bounds, because a hole belongs to the connection’s sequence space
-for that direction and not to any one payload buffer: the list is held
-once per buffer ID, while each acknowledgement number gets a payload
-buffer of its own with an initial sequence number of its own, and that
-initial sequence number is revised whenever a segment turns up below
-the data already buffered. A payload buffer, on the other hand, is
-indexed from zero, such that
+matters. Sequence numbers – in the <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">hole descriptor list</span></a> of <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, and in each payload buffer’s own
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.gap" title="pcapkit.foundation.reassembly.data.tcp.Fragment.gap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">gap</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.conflict" title="pcapkit.foundation.reassembly.data.tcp.Fragment.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conflict</span></code></a> lists
+– are kept <strong>unwrapped</strong>, inclusive of both bounds: every arriving
+sequence number is read modulo <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> relative to the data
+already buffered under its buffer ID, per <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4"><strong>RFC 9293 Section 3.4</strong></a>, and
+placed on one unbounded integer line. A connection that crosses
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> therefore continues at <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> rather than back at
+zero. A payload buffer, on the other hand, is indexed from zero, such
+that
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">buffer.raw[n]</span></code></a>
 holds the octet with sequence number
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.isn" title="pcapkit.foundation.reassembly.data.tcp.Fragment.isn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">buffer.isn</span></code></a>
-<code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">n</span></code>. <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> is therefore the one place that converts
-between the two, subtracting that buffer’s initial sequence number from
-each hole bound.</p>
+<code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">n</span></code>. <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> converts between the two, subtracting that
+buffer’s initial sequence number from each gap bound, and reports
+conflict ranges reduced back to modulo <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code>.</p>
+<p>The hole descriptor list is held once per buffer ID, across every
+acknowledgement number’s payload buffer, so it describes the <em>stream</em>
+rather than any one payload buffer: it decides when a stream whose FIN
+has been seen is whole and may be submitted. Whether each payload
+buffer is complete is a question about that buffer alone, answered
+from its own
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.gap" title="pcapkit.foundation.reassembly.data.tcp.Fragment.gap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">gap</span></code></a> list.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Limitation.</strong> Without the handshake the start of a stream is unknown,
+so a FIN is taken to complete the stream once every octet from the
+lowest one seen so far up to the FIN has arrived. Data that arrives
+later but lies <em>below</em> everything seen before that FIN therefore opens
+a buffer of its own, and the first buffer has already been reported
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code>
+although the stream was not: <code class="docutils literal notranslate"><span class="pre">[seq</span> <span class="pre">1000</span> <span class="pre">A*5,</span> <span class="pre">FIN</span> <span class="pre">1005,</span> <span class="pre">seq</span> <span class="pre">990</span> <span class="pre">B*10]</span></code>
+gives <code class="docutils literal notranslate"><span class="pre">B*10</span></code> and <code class="docutils literal notranslate"><span class="pre">A*5</span></code> as two datagrams. This applies only to a
+buffer begun without a SYN: once the SYN is captured, the stream’s
+start is the SYN’s own sequence number, and a FIN completes the
+stream only when every octet from there up to the FIN has arrived.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.reassembly">
@@ -599,7 +621,7 @@ abandoned it under the reassembly timeout</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>This algorithm is an adaptation of the algorithm described in
-<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>.</p>
+<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>.</p>
 </div>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -716,9 +738,9 @@ update HDL: {
 </pre></div>
 </div>
 <p>The following algorithm implement is based on the <strong>IP Datagram
-Reassembly Algorithm</strong> introduced in <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, which presents hole
+Reassembly Algorithm</strong> introduced in <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, which presents hole
 descriptors as an alternative to the <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> (fragment received bit
-table) approach used by the reassembly procedure in <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>. And
+table) approach used by the reassembly procedure in <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>. And
 here is the process:</p>
 <ol class="arabic simple">
 <li><p>Select the next hole descriptor from the hole descriptor
@@ -830,7 +852,7 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
 <p><code class="docutils literal notranslate"><span class="pre">completed</span></code> and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> are independent signals: a datagram can
 be <code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code>
 and still carry a non-empty <code class="docutils literal notranslate"><span class="pre">conflict</span></code> – the resolution of a
-conflicting overlap is first-write-wins (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>), so
+conflicting overlap is first-write-wins (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>), so
 it never leaves a hole, and a contested range that was later filled in
 around does not stop the datagram from completing. <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is
 what lets a caller tell a clean stream from a contested one, which
@@ -899,8 +921,8 @@ holes carries an empty list instead of a <code class="docutils literal notransla
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>TCP reassembly has <strong>no</strong> timeout by default: no specification gives
-stream reassembly a deadline the way <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and
-<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP fragmentation one, and an idle
+stream reassembly a deadline the way <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and
+<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP fragmentation one, and an idle
 connection is ordinary rather than pathological. <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is
 recorded regardless, so passing <code class="docutils literal notranslate"><span class="pre">timeout</span></code> to
 <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> enables the same
@@ -1096,10 +1118,11 @@ attribute then runs it and keeps the result.</p>
 segment overlapped bytes already buffered but did not repeat them.
 Each entry is <code class="docutils literal notranslate"><span class="pre">(first,</span> <span class="pre">last)</span></code>, absolute TCP sequence numbers and both
 <strong>inclusive</strong> – the same convention as <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.first" title="pcapkit.foundation.reassembly.data.tcp.Packet.first"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.first</span></code></a> and
-<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.last" title="pcapkit.foundation.reassembly.data.tcp.Packet.last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.last</span></code></a>. Empty when the stream never saw a contested byte.</p>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.last" title="pcapkit.foundation.reassembly.data.tcp.Packet.last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.last</span></code></a>. Empty when the stream never saw a contested byte.
+A range that crosses <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> therefore has <code class="docutils literal notranslate"><span class="pre">last</span> <span class="pre">&lt;</span> <span class="pre">first</span></code>.</p>
 <p>Resolution keeps the already-buffered bytes and discards the
 conflicting portion of whichever segment arrived later, per
-<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a> (“we reconstruct the segment to contain just
+<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a> (“we reconstruct the segment to contain just
 the new data”); this field is what lets a caller tell a clean stream
 from a contested one, since a contested range does not, on its own, leave a
 hole for <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="pcapkit.foundation.reassembly.data.tcp.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">completed</span></code></a> to report.</p>
@@ -1112,13 +1135,15 @@ hole for <a class="reference internal" href="#pcapkit.foundation.reassembly.data
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">HoleDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#HoleDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data model for <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">TCP</span></a> hole descriptor.</p>
-<p>Both bounds are <strong>absolute TCP sequence numbers</strong> and both are
-<strong>inclusive</strong>, so a hole covers <code class="docutils literal notranslate"><span class="pre">last</span> <span class="pre">-</span> <span class="pre">first</span> <span class="pre">+</span> <span class="pre">1</span></code> octets. They are not
-offsets into <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Fragment.raw</span></code></a>: the descriptor list is kept once per
-buffer ID, whereas each acknowledgement number’s payload buffer carries an
-initial sequence number of its own, so only
-<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> – which
-knows which buffer it is looking at – can convert one to the other.</p>
+<p>Both bounds are <strong>unwrapped TCP sequence numbers</strong> – read modulo
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> relative to the data already buffered, so a stream crossing
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> continues past it – and both are <strong>inclusive</strong>, so a hole
+covers <code class="docutils literal notranslate"><span class="pre">last</span> <span class="pre">-</span> <span class="pre">first</span> <span class="pre">+</span> <span class="pre">1</span></code> octets. They are not offsets into
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Fragment.raw</span></code></a>: the descriptor list is kept once per buffer ID,
+across every acknowledgement number’s payload buffer, and describes the
+stream as a whole. It decides when a stream whose FIN has been seen is
+whole; a hole whose <code class="docutils literal notranslate"><span class="pre">first</span></code> is <code class="docutils literal notranslate"><span class="pre">-sys.maxsize</span></code> stands for whatever
+preceded a capture that missed the handshake, and does not count.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.HoleDescriptor.first">
 <span class="sig-name descname"><span class="pre">first</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor.first" title="Link to this definition">¶</a></dt>
@@ -1151,7 +1176,9 @@ knows which buffer it is looking at – can convert one to the other.</p>
 buffer is indexed from: <code class="docutils literal notranslate"><span class="pre">raw[n]</span></code> holds the octet whose sequence number
 is <code class="docutils literal notranslate"><span class="pre">isn</span> <span class="pre">+</span> <span class="pre">n</span></code>. Revised downwards whenever a segment turns up below the
 data already buffered, so it is not necessarily the connection’s own
-initial sequence number.</p>
+initial sequence number. Like every sequence number held in this
+fragment – <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.gap" title="pcapkit.foundation.reassembly.data.tcp.Fragment.gap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">gap</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.conflict" title="pcapkit.foundation.reassembly.data.tcp.Fragment.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conflict</span></code></a> included – it is
+unwrapped, and so may exceed <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> on a stream that crossed it.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1175,7 +1202,11 @@ Only the two gap-creating sites in <a class="reference internal" href="#pcapkit.
 append and the reach-back prepend, the only places that ever splice a
 <code class="docutils literal notranslate"><span class="pre">bytearray(GAP)</span></code> filler into <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a> – add an entry; an overlap
 merge only ever shrinks or removes one, filling it from the arriving
-segment.</p>
+segment. The one exception lies wholly <em>outside</em> <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a>: when a
+stream whose SYN was captured is split rather than padded across a gap
+wider than <code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__window__</span></code>, both halves record
+the range left between them. Any entry at all makes the fragment
+incomplete.</p>
 <p>This is deliberately <strong>not</strong> derived from
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.hdl" title="pcapkit.foundation.reassembly.data.tcp.Buffer.hdl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.hdl</span></code></a>.
 <code class="docutils literal notranslate"><span class="pre">hdl</span></code> is one list shared by every acknowledgement number under the

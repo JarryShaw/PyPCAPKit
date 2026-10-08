@@ -489,6 +489,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
@@ -562,6 +563,93 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">_P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_P'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_same_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether two registry entries name the same class.</span>
+
+<span class="sd">    An entry is a class or a :class:`~pcapkit.corekit.module.ModuleDescriptor`.</span>
+<span class="sd">    Two descriptors are the same entry when they are equal, and a descriptor</span>
+<span class="sd">    and a class are when the descriptor names that class. The class is looked</span>
+<span class="sd">    up in :data:`sys.modules` rather than imported: a class someone holds has</span>
+<span class="sd">    its module loaded already, so a descriptor whose module is not loaded</span>
+<span class="sd">    cannot name it, and an optional engine that is not installed is never</span>
+<span class="sd">    imported to answer the question.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        entry: registry entry</span>
+<span class="sd">        other: registry entry to compare against</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if both name the same class.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="n">other</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">entry</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">entry</span><span class="p">,</span> <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="p">,</span> <span class="n">entry</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">other</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_restore_shipped</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">shipped</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Put the entry ``registry`` shipped with back under ``key``.</span>
+
+<span class="sd">    The public registrars call this when handed the built-in that shipped under</span>
+<span class="sd">    ``key``, so an override can be undone (:issue:`1363`). It stores the shipped</span>
+<span class="sd">    object itself, a descriptor if a descriptor shipped, and it is a silent</span>
+<span class="sd">    no-op when the incumbent already names the shipped class.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        registry: registry to restore</span>
+<span class="sd">        key: registry key</span>
+<span class="sd">        shipped: entry the registry shipped with under ``key``</span>
+<span class="sd">        kind: entry kind, for the warning message</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        RegistryWarning: If a different class is registered under ``key``; it</span>
+<span class="sd">            is overwritten.</span>
+
+<span class="sd">    """</span>
+    <span class="n">incumbent</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">,</span> <span class="n">incumbent</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+    <span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">shipped</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_restore_shipped_dumper</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                            <span class="n">shipped</span><span class="p">:</span> <span class="s1">'tuple[Any, str | None]'</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Put the dumper ``registry`` shipped with back under ``format``.</span>
+
+<span class="sd">    The ``__output__`` counterpart of :func:`_restore_shipped`: an entry is a</span>
+<span class="sd">    ``(dumper, ext)`` pair, so the shipped pair itself is stored when ``ext``</span>
+<span class="sd">    matches it, and the shipped dumper with the new ``ext`` otherwise. A</span>
+<span class="sd">    re-registration that only changes ``ext`` stays silent, as the dumper</span>
+<span class="sd">    registrars document.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        registry: ``__output__`` registry to restore</span>
+<span class="sd">        format: format name</span>
+<span class="sd">        shipped: ``(dumper, ext)`` pair the registry shipped with under ``format``</span>
+<span class="sd">        ext: file extension</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        RegistryWarning: If a different dumper is registered for ``format``;</span>
+<span class="sd">            it is overwritten.</span>
+
+<span class="sd">    """</span>
+    <span class="n">incumbent</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">incumbent</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ext</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">registry</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="n">shipped</span> <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="n">shipped</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ext</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Extractor">
@@ -740,6 +828,14 @@
         <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.traceflow.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]</span>
 
+    <span class="c1"># Read-only copies of the four registries as shipped. A public registrar</span>
+    <span class="c1"># handed the built-in a name shipped with restores this entry, so an</span>
+    <span class="c1"># override can be undone (:issue:`1363`).</span>
+    <span class="n">_shipped_output</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__output__</span><span class="p">))</span>
+    <span class="n">_shipped_engine</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__engine__</span><span class="p">))</span>
+    <span class="n">_shipped_reassembly</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__reassembly__</span><span class="p">))</span>
+    <span class="n">_shipped_traceflow</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__traceflow__</span><span class="p">))</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
@@ -873,6 +969,11 @@
 <span class="sd">            the default factory the way ``cls.__output__[format]`` would, so</span>
 <span class="sd">            it stays non-inserting here as well.</span>
 
+<span class="sd">            The dumper ``format`` shipped with, as its descriptor or as the</span>
+<span class="sd">            class it names, restores the shipped entry rather than storing</span>
+<span class="sd">            the class, so an override can be undone and the deferred import</span>
+<span class="sd">            is kept (:issue:`1363`, :issue:`1364`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            format: format name</span>
 <span class="sd">            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass</span>
@@ -886,8 +987,12 @@
 <span class="sd">                ``format``; it is overwritten.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shipped</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dumper</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dumper</span><span class="p">):</span>
+            <span class="n">_restore_shipped_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a class, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
@@ -915,13 +1020,18 @@
 <span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
 <span class="sd">            :issue:`739`).</span>
 
+<span class="sd">            The one built-in admitted is the engine ``name`` shipped with, as</span>
+<span class="sd">            its descriptor or as the class it names: it restores the shipped</span>
+<span class="sd">            entry, so an override can be undone (:issue:`1363`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            name: engine name</span>
 <span class="sd">            engine: module descriptor or an :class:`~pcapkit.foundation.engines.engine.Engine`</span>
 <span class="sd">                subclass; a class deriving only from</span>
 <span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` is refused, as</span>
 <span class="sd">                that is the base for pcapkit's own engines, which the library</span>
-<span class="sd">                registers itself (GitHub issue :issue:`1016`)</span>
+<span class="sd">                registers itself (GitHub issue :issue:`1016`), unless it is the</span>
+<span class="sd">                engine ``name`` shipped with</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RegistryError: If ``engine`` is not a class, or not an ``Engine`` subclass.</span>
@@ -931,8 +1041,14 @@
 <span class="sd">                ``name``; it is overwritten.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="c1"># The shipped built-in is matched before the descriptor is resolved, so</span>
+        <span class="c1"># restoring an optional engine does not import it (#1363).</span>
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_engine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">engine</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">:</span>
             <span class="n">engine</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+            <span class="n">_restore_shipped</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="s1">'engine'</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be a class, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="c1"># NOTE: checked against the public ``Engine``, the class third-party engines are</span>
@@ -942,7 +1058,8 @@
         <span class="c1"># base. The wider ``EngineBase`` is deliberately not accepted here: it is</span>
         <span class="c1"># the internal base of the built-ins, and a class deriving only from it</span>
         <span class="c1"># lacks the ``engine=`` hook, so the public door admits the public base</span>
-        <span class="c1"># alone (#513, #1016).</span>
+        <span class="c1"># alone (#513, #1016). The exception is the built-in a name shipped with,</span>
+        <span class="c1"># restored above, which the library registered itself (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">Engine</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be an Engine subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span></div>
@@ -994,13 +1111,18 @@
 <span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
 <span class="sd">            :issue:`739`).</span>
 
+<span class="sd">            The one built-in admitted is the class ``protocol`` shipped with,</span>
+<span class="sd">            as its descriptor or as the class it names: it restores the</span>
+<span class="sd">            shipped entry, so an override can be undone (:issue:`1363`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
 <span class="sd">            reassembly: module descriptor or a</span>
 <span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass; a class deriving</span>
 <span class="sd">                only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` is refused, as</span>
 <span class="sd">                that is the base for pcapkit's own classes, which the library registers</span>
-<span class="sd">                itself (GitHub issue :issue:`1016`)</span>
+<span class="sd">                itself (GitHub issue :issue:`1016`), unless it is the class</span>
+<span class="sd">                ``protocol`` shipped with</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RegistryError: If ``reassembly`` is not a class, or not a ``Reassembly`` subclass.</span>
@@ -1010,13 +1132,18 @@
 <span class="sd">                ``protocol``; it is overwritten.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_reassembly</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">reassembly</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">:</span>
             <span class="n">reassembly</span> <span class="o">=</span> <span class="n">reassembly</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">):</span>
+            <span class="n">_restore_shipped</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="s1">'reassembly'</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a class, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="c1"># NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in</span>
         <span class="c1"># :meth:`register_engine` above -- see #1016. Built-ins go through</span>
-        <span class="c1"># :meth:`_register_internal_reassembly`.</span>
+        <span class="c1"># :meth:`_register_internal_reassembly`, except the one a name shipped</span>
+        <span class="c1"># with, restored above (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">Reassembly</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a Reassembly subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">)</span></div>
@@ -1068,13 +1195,18 @@
 <span class="sd">            the identity guard of the code-keyed registrars (:issue:`718`,</span>
 <span class="sd">            :issue:`739`).</span>
 
+<span class="sd">            The one built-in admitted is the class ``protocol`` shipped with,</span>
+<span class="sd">            as its descriptor or as the class it names: it restores the</span>
+<span class="sd">            shipped entry, so an override can be undone (:issue:`1363`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
 <span class="sd">            traceflow: module descriptor or a</span>
 <span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass; a class deriving</span>
 <span class="sd">                only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` is refused, as</span>
 <span class="sd">                that is the base for pcapkit's own classes, which the library registers</span>
-<span class="sd">                itself (GitHub issue :issue:`1016`)</span>
+<span class="sd">                itself (GitHub issue :issue:`1016`), unless it is the class</span>
+<span class="sd">                ``protocol`` shipped with</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlow`` subclass.</span>
@@ -1084,13 +1216,18 @@
 <span class="sd">                ``protocol``; it is overwritten.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_traceflow</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">traceflow</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">:</span>
             <span class="n">traceflow</span> <span class="o">=</span> <span class="n">traceflow</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">):</span>
+            <span class="n">_restore_shipped</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="s1">'traceflow'</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow must be a class, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="c1"># NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in</span>
         <span class="c1"># :meth:`register_engine` above -- see #1016. Built-ins go through</span>
-        <span class="c1"># :meth:`_register_internal_traceflow`.</span>
+        <span class="c1"># :meth:`_register_internal_traceflow`, except the one a name shipped</span>
+        <span class="c1"># with, restored above (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow must be a TraceFlow subclass, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">)</span></div>

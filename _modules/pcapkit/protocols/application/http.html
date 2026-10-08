@@ -488,7 +488,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
@@ -644,22 +646,30 @@
 <div class="viewcode-block" id="HTTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-             <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[Literal[1, 2]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">preface</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read (parse) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            version: Version of HTTP.</span>
+<span class="sd">            preface: Construction keyword of :meth:`make`; whether a preface is</span>
+<span class="sd">                parsed is decided by the octets alone.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed packet data.</span>
+<span class="sd">            Parsed packet data. When the payload opens with the HTTP/2</span>
+<span class="sd">            connection preface, its 24 octets are recorded as ``preface``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># An explicit ``version=2`` -- what :meth:`_make_data` hands back for a</span>
+        <span class="c1"># rebuild -- may still open with the connection preface, and the</span>
+        <span class="c1"># identification in :meth:`_guess_version` is what skips it.</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">version</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_preface</span><span class="p">(</span><span class="n">length</span><span class="p">)):</span>
             <span class="n">http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_version</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -684,24 +694,47 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">version</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preface_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_http</span> <span class="o">=</span> <span class="n">http</span>
-        <span class="k">return</span> <span class="n">http</span><span class="o">.</span><span class="n">info</span></div>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">info</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preface_length</span><span class="p">:</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
+                <span class="s1">'preface'</span><span class="p">:</span> <span class="n">_HTTP2_PREFACE</span><span class="p">,</span>
+            <span class="p">})</span>
+
+        <span class="c1"># The versioned parser may have kept octets after its message as the</span>
+        <span class="c1"># next layer, e.g. the frames after an HTTP/2 frame.</span>
+        <span class="n">next_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">http</span><span class="p">,</span> <span class="s1">'_next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">next_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="n">NoPayload</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">next_</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">next_</span><span class="o">.</span><span class="n">protochain</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">info</span></div>
 
 
 <div class="viewcode-block" id="HTTP.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[1, 2]'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[1, 2]'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">preface</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            version: Version of HTTP.</span>
+<span class="sd">            preface: Whether the HTTP/2 connection preface goes ahead of the</span>
+<span class="sd">                frame; :meth:`pack` writes it.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            bytes: Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``version`` is unknown, or if ``preface`` is</span>
+<span class="sd">                requested for a version other than HTTP/2.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">preface</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: connection preface is HTTP/2 only'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -723,6 +756,22 @@
         <span class="c1"># ``make`` override that did would need a different dispatch here.</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pack (construct) packet data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed packet data, with the HTTP/2 connection preface ahead</span>
+<span class="sd">            of the frame if ``preface`` is set.</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_HTTP2_PREFACE</span> <span class="o">+</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
@@ -757,9 +806,22 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv1</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv1</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv2</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'preface'</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">)),</span> <span class="o">**</span><span class="n">HTTPv2</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP data: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_test_preface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Test whether the first ``length`` octets open with the HTTP/2 connection preface.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` if they do.</span>
+
+<span class="sd">        """</span>
+        <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="n">preface_len</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">preface_len</span><span class="p">]</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE</span>
 
 <div class="viewcode-block" id="HTTP._guess_version">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP._guess_version">[docs]</a>
@@ -830,7 +892,7 @@
         <span class="c1"># caller may hand this method fewer octets than the buffer holds, and a</span>
         <span class="c1"># preface must not be claimed out of octets outside this payload.</span>
         <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="n">preface_len</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">preface_len</span><span class="p">]</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_preface</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
 
             <span class="c1"># The preface is not a frame -- the frames begin after it</span>

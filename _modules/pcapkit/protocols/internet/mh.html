@@ -1951,6 +1951,7 @@
              <span class="n">type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | Data_MH | Schema_Packet | dict[str, Any]'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>  <span class="c1"># minimum length</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'ProtocolBase | Schema | bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
@@ -1966,6 +1967,7 @@
 <span class="sd">            type_default: Default value for Mobility Header type field.</span>
 <span class="sd">            type_namespace: Namespace of Mobility Header type field.</span>
 <span class="sd">            type_reversed: Whether the bits of Mobility Header type field is reversed.</span>
+<span class="sd">            reserved: Reserved octet after the MH type.</span>
 <span class="sd">            chksum: Checksum.</span>
 <span class="sd">            data: Message data.</span>
 <span class="sd">            payload: Payload of next layer protocol.</span>
@@ -2011,6 +2013,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data_val</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
@@ -2143,6 +2146,7 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'chksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
@@ -2167,6 +2171,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2205,7 +2210,9 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2247,6 +2254,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
@@ -2290,6 +2298,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
@@ -2337,6 +2346,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
@@ -2386,6 +2396,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
@@ -2417,6 +2428,10 @@
 <span class="sd">           |                                                               |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
+<span class="sd">        Later RFCs assign eight more of the flag bits, ``M``, ``R``, ``P``,</span>
+<span class="sd">        ``F``, ``T``, ``B``, ``S`` and ``D`` in that order (IANA *Binding</span>
+<span class="sd">        Update Flags*); the low four bits remain reserved.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed message type schema.</span>
 <span class="sd">            header: Parsed MH header schema.</span>
@@ -2429,12 +2444,22 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">ack</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'A'</span><span class="p">]),</span>
             <span class="n">home</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'H'</span><span class="p">]),</span>
             <span class="n">lla_compat</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'L'</span><span class="p">]),</span>
             <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
+            <span class="n">map_reg</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'M'</span><span class="p">]),</span>
+            <span class="n">mobile_router</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'R'</span><span class="p">]),</span>
+            <span class="n">proxy_reg</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
+            <span class="n">udp_encap</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]),</span>
+            <span class="n">tlv_format</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'T'</span><span class="p">]),</span>
+            <span class="n">bulk_binding</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'B'</span><span class="p">]),</span>
+            <span class="n">multicast</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
+            <span class="n">dmm</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'D'</span><span class="p">]),</span>
+            <span class="n">flags_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2463,6 +2488,10 @@
 <span class="sd">           |                                                               |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
+<span class="sd">        Later RFCs assign six more of the flag bits, ``R``, ``P``, ``T``,</span>
+<span class="sd">        ``B``, ``S`` and ``D`` in that order (IANA *Binding Acknowledgment</span>
+<span class="sd">        Flags*); the lowest bit remains reserved.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed message type schema.</span>
 <span class="sd">            header: Parsed MH header schema.</span>
@@ -2475,9 +2504,17 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
+            <span class="n">mobile_router</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'R'</span><span class="p">]),</span>
+            <span class="n">proxy_reg</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
+            <span class="n">tlv_format</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'T'</span><span class="p">]),</span>
+            <span class="n">bulk_binding</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'B'</span><span class="p">]),</span>
+            <span class="n">multicast</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
+            <span class="n">dmm</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'D'</span><span class="p">]),</span>
+            <span class="n">flags_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
@@ -2524,6 +2561,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
@@ -2574,6 +2612,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">ack</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'A'</span><span class="p">]),</span>
@@ -2634,6 +2673,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
             <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
@@ -2682,6 +2722,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2728,6 +2769,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2774,6 +2816,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">assign</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
@@ -2827,6 +2870,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">buffer</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
@@ -2890,6 +2934,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">addresses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">addresses</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
@@ -2937,6 +2982,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">unsolicited</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
             <span class="n">response</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'R'</span><span class="p">]),</span>
@@ -3007,6 +3053,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">br_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">br_type</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
@@ -3059,6 +3106,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
@@ -3108,6 +3156,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">unsolicited</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
@@ -3156,6 +3205,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">reason</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
@@ -3201,6 +3251,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
@@ -3266,6 +3317,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">fb_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fb_type</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3313,6 +3365,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
@@ -3353,6 +3406,7 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">info</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'I'</span><span class="p">]),</span>
@@ -3508,7 +3562,9 @@
 <span class="sd">            which sizes both the length octet and the padding data from the</span>
 <span class="sd">            option type [:rfc:`6275#section-6.2.5`]; ``clen`` is therefore</span>
 <span class="sd">            always ``0`` here for a parsed ``Pad1``, and the check below only</span>
-<span class="sd">            guards a schema built by hand.</span>
+<span class="sd">            guards a schema built by hand. A ``PadN`` whose ``Option Length``</span>
+<span class="sd">            is ``0`` is a valid two-octet padding option</span>
+<span class="sd">            [:rfc:`6275#section-6.2.3`].</span>
 
 <span class="sd">        """</span>
         <span class="n">code</span><span class="p">,</span> <span class="n">clen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span>
@@ -3516,8 +3572,6 @@
         <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
@@ -4492,6 +4546,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoffIndicatorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">hi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hi</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4774,6 +4829,7 @@
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="n">request_prefix</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -5897,6 +5953,7 @@
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">utf8</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'E'</span><span class="p">]),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
                     <span class="n">net_name</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">net_name</span><span class="p">,</span>
                     <span class="n">ap_name</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">ap_name</span><span class="p">,</span>
                 <span class="p">)</span>  <span class="c1"># type: Data_ANISuboption</span>
@@ -7300,12 +7357,14 @@
 <div class="viewcode-block" id="MH._make_msg_brr">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_brr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_brr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingRefreshRequestMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BindingRefreshRequestMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH binding refresh request (BRR) message type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            message: Message data model.</span>
+<span class="sd">            msg_reserved: Reserved field before the mobility options.</span>
 <span class="sd">            options: Mobility options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -7314,11 +7373,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">msg_reserved</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_BindingRefreshRequestMessage</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -7467,6 +7528,15 @@
                      <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">map_reg</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">mobile_router</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">proxy_reg</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">udp_encap</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">tlv_format</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">bulk_binding</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">multicast</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">dmm</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># reasonable default value</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BindingUpdateMessage'</span><span class="p">:</span>
@@ -7479,6 +7549,16 @@
 <span class="sd">            home: Home registration flag.</span>
 <span class="sd">            lla_compat: LLA compatibility flag.</span>
 <span class="sd">            key_mngt: Key management mobility option flag.</span>
+<span class="sd">            map_reg: MAP registration flag (``M``).</span>
+<span class="sd">            mobile_router: Mobile router flag (``R``).</span>
+<span class="sd">            proxy_reg: Proxy registration flag (``P``).</span>
+<span class="sd">            udp_encap: Forcing UDP encapsulation flag (``F``).</span>
+<span class="sd">            tlv_format: TLV-header format flag (``T``).</span>
+<span class="sd">            bulk_binding: Bulk binding update flag (``B``).</span>
+<span class="sd">            multicast: Multicast signaling flag (``S``).</span>
+<span class="sd">            dmm: DMM flag (``D``).</span>
+<span class="sd">            flags_reserved: Reserved bits, i.e. the low four bits of the flags</span>
+<span class="sd">                word.</span>
 <span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
 <span class="sd">            options: Mobility options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -7493,6 +7573,15 @@
             <span class="n">home</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">home</span>
             <span class="n">lla_compat</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">lla_compat</span>
             <span class="n">key_mngt</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">key_mngt</span>
+            <span class="n">map_reg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">map_reg</span>
+            <span class="n">mobile_router</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">mobile_router</span>
+            <span class="n">proxy_reg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">proxy_reg</span>
+            <span class="n">udp_encap</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">udp_encap</span>
+            <span class="n">tlv_format</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">tlv_format</span>
+            <span class="n">bulk_binding</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">bulk_binding</span>
+            <span class="n">multicast</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">multicast</span>
+            <span class="n">dmm</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">dmm</span>
+            <span class="n">flags_reserved</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">flags_reserved</span>
             <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7506,6 +7595,15 @@
                 <span class="s1">'H'</span><span class="p">:</span> <span class="n">home</span><span class="p">,</span>
                 <span class="s1">'L'</span><span class="p">:</span> <span class="n">lla_compat</span><span class="p">,</span>
                 <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
+                <span class="s1">'M'</span><span class="p">:</span> <span class="n">map_reg</span><span class="p">,</span>
+                <span class="s1">'R'</span><span class="p">:</span> <span class="n">mobile_router</span><span class="p">,</span>
+                <span class="s1">'P'</span><span class="p">:</span> <span class="n">proxy_reg</span><span class="p">,</span>
+                <span class="s1">'F'</span><span class="p">:</span> <span class="n">udp_encap</span><span class="p">,</span>
+                <span class="s1">'T'</span><span class="p">:</span> <span class="n">tlv_format</span><span class="p">,</span>
+                <span class="s1">'B'</span><span class="p">:</span> <span class="n">bulk_binding</span><span class="p">,</span>
+                <span class="s1">'S'</span><span class="p">:</span> <span class="n">multicast</span><span class="p">,</span>
+                <span class="s1">'D'</span><span class="p">:</span> <span class="n">dmm</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">flags_reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
@@ -7520,6 +7618,13 @@
                      <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                      <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">mobile_router</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">proxy_reg</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">tlv_format</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">bulk_binding</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">multicast</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">dmm</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># reasonable default value</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7533,6 +7638,14 @@
 <span class="sd">            status_namespace: Status code namespace.</span>
 <span class="sd">            status_reversed: Reverse status code namespace.</span>
 <span class="sd">            key_mngt: Key management mobility option flag.</span>
+<span class="sd">            mobile_router: Mobile router flag (``R``).</span>
+<span class="sd">            proxy_reg: Proxy registration flag (``P``).</span>
+<span class="sd">            tlv_format: TLV-header format flag (``T``).</span>
+<span class="sd">            bulk_binding: Bulk binding update flag (``B``).</span>
+<span class="sd">            multicast: Multicast signaling flag (``S``).</span>
+<span class="sd">            dmm: DMM flag (``D``).</span>
+<span class="sd">            flags_reserved: Reserved bit, i.e. the lowest bit of the flags</span>
+<span class="sd">                octet.</span>
 <span class="sd">            seq: Sequence number.</span>
 <span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
 <span class="sd">            options: Mobility options.</span>
@@ -7545,6 +7658,13 @@
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">status_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">status</span>
             <span class="n">key_mngt</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">key_mngt</span>
+            <span class="n">mobile_router</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">mobile_router</span>
+            <span class="n">proxy_reg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">proxy_reg</span>
+            <span class="n">tlv_format</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">tlv_format</span>
+            <span class="n">bulk_binding</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">bulk_binding</span>
+            <span class="n">multicast</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">multicast</span>
+            <span class="n">dmm</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">dmm</span>
+            <span class="n">flags_reserved</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">flags_reserved</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
@@ -7558,6 +7678,13 @@
             <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
+                <span class="s1">'R'</span><span class="p">:</span> <span class="n">mobile_router</span><span class="p">,</span>
+                <span class="s1">'P'</span><span class="p">:</span> <span class="n">proxy_reg</span><span class="p">,</span>
+                <span class="s1">'T'</span><span class="p">:</span> <span class="n">tlv_format</span><span class="p">,</span>
+                <span class="s1">'B'</span><span class="p">:</span> <span class="n">bulk_binding</span><span class="p">,</span>
+                <span class="s1">'S'</span><span class="p">:</span> <span class="n">multicast</span><span class="p">,</span>
+                <span class="s1">'D'</span><span class="p">:</span> <span class="n">dmm</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">flags_reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
@@ -8552,6 +8679,9 @@
 <span class="sd">            for a ``Pad1``. Copying one into the other unconverted would make a</span>
 <span class="sd">            re-made parsed ``PadN`` come back two octets too long.</span>
 
+<span class="sd">            A ``PadN`` with ``length`` ``0`` is a valid two-octet option</span>
+<span class="sd">            [:rfc:`6275#section-6.2.3`] and is kept as one.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="k">else</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
@@ -8560,10 +8690,6 @@
             <span class="c1"># raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
-        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-            <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -9518,6 +9644,7 @@
                      <span class="n">hi_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">hi_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                      <span class="n">hi_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HandoffIndicatorOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH handoff indicator option.</span>
 
@@ -9528,6 +9655,7 @@
 <span class="sd">            hi_default: Default handoff indicator.</span>
 <span class="sd">            hi_namespace: Handoff indicator namespace.</span>
 <span class="sd">            hi_reversed: Reverse handoff indicator namespace.</span>
+<span class="sd">            reserved: Reserved octet before the handoff indicator.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9536,6 +9664,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hi_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">hi</span>  <span class="c1"># type: Enum_HandoffType</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reserved</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">hi_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="n">hi_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">hi_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">hi_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -9543,6 +9672,7 @@
         <span class="k">return</span> <span class="n">Schema_HandoffIndicatorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">hi</span><span class="o">=</span><span class="n">hi_val</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -9715,6 +9845,7 @@
                            <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
                            <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv4Address'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>
                            <span class="n">request_prefix</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4HomeAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH IPv4 home address option.</span>
 
@@ -9724,6 +9855,7 @@
 <span class="sd">            prefix_length: Prefix length; ``32`` for a single address.</span>
 <span class="sd">            address: IPv4 home address.</span>
 <span class="sd">            request_prefix: Mobile network prefix request flag.</span>
+<span class="sd">            reserved: Reserved bits, i.e. the nine bits after the ``P`` flag.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9734,6 +9866,7 @@
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
             <span class="n">request_prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">request_prefix</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reserved</span>
 
         <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -9744,6 +9877,7 @@
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'prefix_length'</span><span class="p">:</span> <span class="n">prefix_length</span><span class="p">,</span>
                 <span class="s1">'P'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">request_prefix</span><span class="p">),</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -10758,13 +10892,15 @@
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">net</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_ANINetworkIdentifierSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">utf8</span><span class="p">,</span> <span class="n">net_name</span><span class="p">,</span> <span class="n">ap_name</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">utf8</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">net_name</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">ap_name</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">reserved</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">utf8</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bool'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'utf8'</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">net_name</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'net_name'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
                 <span class="n">ap_name</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ap_name'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_ANINetworkIdentifierSuboption</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">net_name</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ap_name</span><span class="p">),</span>
-                <span class="n">flags</span><span class="o">=</span><span class="p">{</span><span class="s1">'E'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">utf8</span><span class="p">)},</span> <span class="n">net_name_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">net_name</span><span class="p">),</span> <span class="n">net_name</span><span class="o">=</span><span class="n">net_name</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="p">{</span><span class="s1">'E'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">utf8</span><span class="p">),</span> <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">},</span> <span class="n">net_name_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">net_name</span><span class="p">),</span> <span class="n">net_name</span><span class="o">=</span><span class="n">net_name</span><span class="p">,</span>
                 <span class="n">ap_name_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ap_name</span><span class="p">),</span> <span class="n">ap_name</span><span class="o">=</span><span class="n">ap_name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_ANISuboption</span><span class="o">.</span><span class="n">Geo_Location</span><span class="p">:</span>

@@ -546,7 +546,8 @@
 <span class="sd">        module: module name or module descriptor or an</span>
 <span class="sd">            :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`</span>
-<span class="sd">            is refused: that is the base for pcapkit's own engines)</span>
+<span class="sd">            is refused: that is the base for pcapkit's own engines, unless it is</span>
+<span class="sd">            the engine ``name`` shipped with, which restores it)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -787,7 +788,8 @@
 <span class="sd">        module: module name or module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`</span>
-<span class="sd">            is refused: that is the base for pcapkit's own classes)</span>
+<span class="sd">            is refused: that is the base for pcapkit's own classes, unless it is</span>
+<span class="sd">            the class ``protocol`` shipped with, which restores it)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
@@ -824,7 +826,8 @@
 <span class="sd">        module: module name or module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`</span>
-<span class="sd">            is refused: that is the base for pcapkit's own classes)</span>
+<span class="sd">            is refused: that is the base for pcapkit's own classes, unless it is</span>
+<span class="sd">            the class ``protocol`` shipped with, which restores it)</span>
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>

@@ -709,6 +709,10 @@ unlike the engine, reassembly and flow tracing registries;
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict.get" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.get()</span></code></a> does not invoke
 the default factory the way <code class="docutils literal notranslate"><span class="pre">cls.__output__[format]</span></code> would, so
 it stays non-inserting here as well.</p>
+<p>The dumper <code class="docutils literal notranslate"><span class="pre">format</span></code> shipped with, as its descriptor or as the
+class it names, restores the shipped entry rather than storing
+the class, so an override can be undone and the deferred import
+is kept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -741,6 +745,9 @@ the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
 the identity guard of the code-keyed registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>).</p>
+<p>The one built-in admitted is the engine <code class="docutils literal notranslate"><span class="pre">name</span></code> shipped with, as
+its descriptor or as the class it names: it restores the shipped
+entry, so an override can be undone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -750,7 +757,8 @@ the identity guard of the code-keyed registrars (<a class="extlink-issue referen
 subclass; a class deriving only from
 <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> is refused, as
 that is the base for pcapkit’s own engines, which the library
-registers itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>)</p></li>
+registers itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>), unless it is the
+engine <code class="docutils literal notranslate"><span class="pre">name</span></code> shipped with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -776,6 +784,9 @@ the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
 the identity guard of the code-keyed registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>).</p>
+<p>The one built-in admitted is the class <code class="docutils literal notranslate"><span class="pre">protocol</span></code> shipped with,
+as its descriptor or as the class it names: it restores the
+shipped entry, so an override can be undone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -785,7 +796,8 @@ the identity guard of the code-keyed registrars (<a class="extlink-issue referen
 <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> subclass; a class deriving
 only from <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a> is refused, as
 that is the base for pcapkit’s own classes, which the library registers
-itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>)</p></li>
+itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>), unless it is the class
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> shipped with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -811,6 +823,9 @@ the replacement, so re-registering the exact same object is a
 silent no-op rather than a warning about nothing displaced –
 the identity guard of the code-keyed registrars (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/739">#739</a>).</p>
+<p>The one built-in admitted is the class <code class="docutils literal notranslate"><span class="pre">protocol</span></code> shipped with,
+as its descriptor or as the class it names: it restores the
+shipped entry, so an override can be undone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -820,7 +835,8 @@ the identity guard of the code-keyed registrars (<a class="extlink-issue referen
 <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> subclass; a class deriving
 only from <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a> is refused, as
 that is the base for pcapkit’s own classes, which the library registers
-itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>)</p></li>
+itself (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1016">#1016</a>), unless it is the class
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> shipped with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>

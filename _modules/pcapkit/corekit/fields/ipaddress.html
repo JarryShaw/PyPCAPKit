@@ -474,6 +474,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">Field</span>
@@ -841,6 +842,191 @@
 
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">_RawMaskIPv4Interface</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""IPv4 interface whose mask is not a contiguous netmask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        address: Dotted address and mask, as ``'a.b.c.d/m.m.m.m'`` or</span>
+<span class="sd">            ``'a.b.c.d/0xXXXXXXXX'``; either way the mask is read literally.</span>
+
+<span class="sd">    :class:`ipaddress.IPv4Interface` can only hold a prefix length, so it</span>
+<span class="sd">    reads a hostmask-shaped mask such as ``0.0.0.255`` as ``/24`` and rejects</span>
+<span class="sd">    a mask such as ``255.0.255.0``. This class keeps the mask octets as given</span>
+<span class="sd">    in :attr:`netmask`, so :meth:`IPv4InterfaceField.pre_process` writes them</span>
+<span class="sd">    back unchanged.</span>
+
+<span class="sd">    :func:`str`, :func:`repr` and :mod:`pickle` use the ``address/mask``</span>
+<span class="sd">    form, which :meth:`IPv4InterfaceField.pre_process` packs back to the same</span>
+<span class="sd">    octets. The mask is dotted, except when it is hostmask-shaped (ones, then</span>
+<span class="sd">    zeros, read from the low bit): :func:`ipaddress.ip_interface` would read</span>
+<span class="sd">    such a dotted mask as a hostmask, so it is written as eight hex digits</span>
+<span class="sd">    instead, e.g. ``10.0.0.1/0x000000ff``. The stdlib rejects that hex form,</span>
+<span class="sd">    so it never means anything else there.</span>
+
+<span class="sd">    Equality and ordering use the mask too. An instance sorts as the stdlib</span>
+<span class="sd">    sorts ``address/32``, then by mask, so the order stays total when mixed</span>
+<span class="sd">    with :class:`ipaddress.IPv4Interface` values.</span>
+
+<span class="sd">    Such a mask has no prefix length, so :attr:`network`, :attr:`with_prefixlen`</span>
+<span class="sd">    and the prefix length all describe the address alone (``/32``); only</span>
+<span class="sd">    :attr:`netmask`, :attr:`hostmask`, :attr:`with_netmask` and</span>
+<span class="sd">    :attr:`with_hostmask` carry the mask. :attr:`with_netmask` is always</span>
+<span class="sd">    dotted, so it is not the round-trip form; :func:`str` is.</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="n">addr</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netmask</span> <span class="o">=</span> <span class="n">_parse_literal_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hostmask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Bitwise inverse of :attr:`netmask`."""</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netmask</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0xFFFFFFFF</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_is_hostmask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netmask</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="si">}</span><span class="s1">/0x</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netmask</span><span class="p">)</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">'</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">netmask</span><span class="si">}</span><span class="s1">'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">ip</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">netmask</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">netmask</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netmask</span><span class="p">)))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="o">.</span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="o">.</span><span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="o">.</span><span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="o">.</span><span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_netmask</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether ``mask`` is a contiguous netmask (leading ones, then zeros).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: Dotted mask.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` for ``0.0.0.0`` through ``255.255.255.255`` with no gap</span>
+<span class="sd">        in the ones, :data:`False` otherwise.</span>
+
+<span class="sd">    """</span>
+    <span class="n">inverse</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0xFFFFFFFF</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">inverse</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">inverse</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_hostmask</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether ``mask`` is hostmask-shaped (leading zeros, then ones).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: Dotted mask.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` when :func:`ipaddress.ip_interface` would accept the</span>
+<span class="sd">        dotted ``mask`` as a hostmask, :data:`False` otherwise.</span>
+
+<span class="sd">    """</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c1">#: Hex spelling of a literal mask, as :func:`str` writes a hostmask-shaped one.</span>
+<span class="n">_HEX_MASK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">'0[xX][0-9a-fA-F]</span><span class="si">{8}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_literal_mask</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read a mask literally, from eight hex digits or a dotted quad.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text: ``0xXXXXXXXX`` or ``m.m.m.m``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The mask as given, never reinterpreted as a hostmask.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``text`` is neither form.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_HEX_MASK</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_interface_from_mask</span><span class="p">(</span><span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Interface'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the interface for an address and a literal mask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ip: Interface address.</span>
+<span class="sd">        mask: Mask, taken as given.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A stdlib :class:`~ipaddress.IPv4Interface` when ``mask`` is a</span>
+<span class="sd">        contiguous netmask, otherwise a :class:`_RawMaskIPv4Interface`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_is_netmask</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_RawMaskIPv4Interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_literal_interface</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IPv4Interface]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read an ``address/mask`` string with the mask taken literally.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Interface string that :func:`ipaddress.ip_interface` rejected.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The interface, or :obj:`None` if ``value`` is not an IPv4 address</span>
+<span class="sd">        followed by a dotted or ``0xXXXXXXXX`` mask.</span>
+
+<span class="sd">    """</span>
+    <span class="n">addr</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sep</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">'.'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mask</span> <span class="ow">and</span> <span class="n">_HEX_MASK</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_interface_from_mask</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">addr</span><span class="p">),</span> <span class="n">_parse_literal_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_interface_order</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'IPv4Interface'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int, int]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Sort key for an IPv4 interface, consistent with ``==``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: IPv4 interface, either from the stdlib or a</span>
+<span class="sd">            :class:`_RawMaskIPv4Interface`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The stdlib order (network address, netmask, address), with a third</span>
+<span class="sd">        element that is ``0`` for a stdlib interface and ``1 + mask`` for a</span>
+<span class="sd">        :class:`_RawMaskIPv4Interface`, whose stdlib network is</span>
+<span class="sd">        ``address/32``.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_RawMaskIPv4Interface</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span> <span class="mh">0xFFFFFFFF</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">netmask</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">network_address</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">netmask</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="IPv4InterfaceField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv4InterfaceField</span><span class="p">(</span><span class="n">_IPInterfaceField</span><span class="p">[</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">]):</span>
@@ -881,14 +1067,28 @@
 <span class="sd">                :func:`_reject_bool`), is not a valid IP interface, or is the</span>
 <span class="sd">                wrong IP version for this field.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            A string means what :func:`ipaddress.ip_interface` says it</span>
+<span class="sd">            means, so ``'10.0.0.1/0.0.0.255'`` is the hostmask spelling of</span>
+<span class="sd">            ``/24``. Only a string the stdlib rejects is read with its mask</span>
+<span class="sd">            taken literally: a dotted mask that is neither a netmask nor a</span>
+<span class="sd">            hostmask, such as ``'10.0.0.1/255.0.255.0'``, or eight hex</span>
+<span class="sd">            digits, such as ``'10.0.0.1/0x000000ff'``. Those are the forms</span>
+<span class="sd">            :func:`str` gives a :class:`_RawMaskIPv4Interface`.</span>
+
 <span class="sd">        """</span>
         <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'invalid IP interface'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IP interface'</span><span class="p">):</span>
-                <span class="n">parsed</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: IPv4Interface | IPv6Interface</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="n">literal</span> <span class="o">=</span> <span class="n">_literal_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">literal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid IP interface: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">literal</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">parsed</span>
@@ -911,18 +1111,21 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If the trailing four octets are not a valid</span>
-<span class="sd">                dotted netmask, or if the resulting interface is the wrong IP</span>
-<span class="sd">                version for this field. The leading four octets cannot</span>
-<span class="sd">                actually fail here -- they are always exactly 4 octets, fixed</span>
-<span class="sd">                by this field's length, and any such octet string is a valid</span>
-<span class="sd">                address -- but the conversion is still wrapped for</span>
-<span class="sd">                consistency with the rest of this module.</span>
+<span class="sd">            FieldValueError: If the resulting interface is the wrong IP</span>
+<span class="sd">                version for this field. The eight octets cannot actually fail</span>
+<span class="sd">                to convert here -- they are always exactly 8 octets, fixed by</span>
+<span class="sd">                this field's length, any four octets are a valid address, and</span>
+<span class="sd">                a mask that is not a netmask is kept as given -- but the</span>
+<span class="sd">                conversion is still wrapped for consistency with the rest of</span>
+<span class="sd">                this module.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The trailing four octets are a dotted netmask, as written by</span>
 <span class="sd">            :meth:`pre_process` -- not a prefix length as in</span>
-<span class="sd">            :meth:`IPv6InterfaceField.post_process`.</span>
+<span class="sd">            :meth:`IPv6InterfaceField.post_process`. When they are not a</span>
+<span class="sd">            contiguous netmask, the value is a :class:`_RawMaskIPv4Interface`</span>
+<span class="sd">            that keeps them as given, rather than an interface the stdlib</span>
+<span class="sd">            would reinterpret (``0.0.0.255`` as the hostmask of ``/24``).</span>
 
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv4 address'</span><span class="p">):</span>
@@ -930,7 +1133,7 @@
             <span class="n">mask</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
 
         <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv4 interface'</span><span class="p">):</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">_interface_from_mask</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span></div>

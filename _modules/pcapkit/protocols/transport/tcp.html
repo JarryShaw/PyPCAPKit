@@ -489,7 +489,7 @@
 <span class="sd">  4          32   ``tcp.seq``               Sequence Number</span>
 <span class="sd">  8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)</span>
 <span class="sd">  12         96   ``tcp.hdr_len``           Data Offset</span>
-<span class="sd">  12        100                             Reserved (must be ``\\x00``)</span>
+<span class="sd">  12        100   ``tcp.flags.reserved``    Reserved (must be ``\\x00``)</span>
 <span class="sd">  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)</span>
 <span class="sd">  13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)</span>
 <span class="sd">  13        105   ``tcp.flags.ece``         ECN-Echo (ECE)</span>
@@ -954,6 +954,7 @@
                 <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'rst'</span><span class="p">]),</span>
                 <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'syn'</span><span class="p">]),</span>
                 <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fin'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">offset</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="p">),</span>
             <span class="n">window_size</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">window</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
@@ -983,8 +984,13 @@
 
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
+            <span class="c1"># NOTE: the octets after an End of Option List option are kept as</span>
+            <span class="c1"># read, so that :meth:`make` rebuilds the option area -- and the</span>
+            <span class="c1"># Data Offset computed from it -- at its original length. A schema</span>
+            <span class="c1"># built by hand rather than unpacked carries no ``padding``.</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                 <span class="s1">'options'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">),</span>
+                <span class="s1">'padding'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
             <span class="p">})</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">length</span> <span class="o">-</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
@@ -1011,6 +1017,8 @@
              <span class="n">urgent</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TCP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -1033,6 +1041,9 @@
 <span class="sd">            urgent: Urgent pointer.</span>
 <span class="sd">            options: TCP options.</span>
 <span class="sd">            payload: Payload of the packet.</span>
+<span class="sd">            padding: Octets after the End of Option List option; dropped</span>
+<span class="sd">                unless ``options`` end with one.</span>
+<span class="sd">            reserved: Reserved bits 4-6 of octet 12.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1080,7 +1091,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">=</span> <span class="n">_flag</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tcp_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tcp_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
@@ -1093,6 +1104,7 @@
             <span class="n">ack</span><span class="o">=</span><span class="n">ack_no</span><span class="p">,</span>
             <span class="n">offset</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'offset'</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'ns'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ns</span><span class="p">),</span>
             <span class="p">},</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
@@ -1194,6 +1206,8 @@
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="s1">'urgent'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">urgent_pointer</span><span class="p">,</span>
             <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
+            <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
@@ -1649,6 +1663,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">start</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">profile</span><span class="p">[</span><span class="s1">'start'</span><span class="p">]),</span>
             <span class="n">end</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">profile</span><span class="p">[</span><span class="s1">'end'</span><span class="p">]),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">profile</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1907,6 +1922,8 @@
             <span class="n">req_rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">ttl_diff</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span>
             <span class="n">nonce</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
+            <span class="n">nonce_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1949,6 +1966,7 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">granularity</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'granularity'</span><span class="p">]),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -2656,11 +2674,13 @@
 
 <div class="viewcode-block" id="TCP._make_tcp_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_tcp_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tcp_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tcp_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option'</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make options for TCP.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            options: TCP options</span>
+<span class="sd">            padding: octets after the End of Option List option</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of options and total length of options.</span>
@@ -2668,9 +2688,11 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The options are emitted in the given order, ``NOP`` and ``EOOL``</span>
 <span class="sd">            included, so that a parsed option list re-emits the same octets.</span>
-<span class="sd">            Padding is added only once, after the last option, when the list</span>
-<span class="sd">            does not end on a 32-bit boundary: zero octets if the list already</span>
-<span class="sd">            ends with ``EOOL``, otherwise ``NOP`` options followed by an ``EOOL``.</span>
+<span class="sd">            ``padding`` follows them as given if they end with ``EOOL``, and is</span>
+<span class="sd">            dropped otherwise. Alignment is added only once, after that, when</span>
+<span class="sd">            the list does not end on a 32-bit boundary: zero octets if the list</span>
+<span class="sd">            already ends with ``EOOL``, otherwise ``NOP`` options followed by an</span>
+<span class="sd">            ``EOOL``.</span>
 
 <span class="sd">        """</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2716,6 +2738,13 @@
 
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+
+        <span class="c1"># NOTE: ``padding`` belongs after an End of Option List option; with</span>
+        <span class="c1"># that gone -- e.g. options edited after parsing -- it is dropped, and</span>
+        <span class="c1"># the Data Offset is computed from the options alone.</span>
+        <span class="k">if</span> <span class="n">padding</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span>
+            <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
 
         <span class="c1"># force alignment to 32-bit boundary</span>
         <span class="k">if</span> <span class="n">total_length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
@@ -3024,6 +3053,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mode_pocsp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_PartialOrderServiceProfile]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">start</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                          <span class="n">end</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PartialOrderServiceProfile'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make TCP partial order connection service profile option.</span>
 
@@ -3032,6 +3062,7 @@
 <span class="sd">            opt: option data</span>
 <span class="sd">            start: start partial order connection</span>
 <span class="sd">            end: end partial order connection</span>
+<span class="sd">            reserved: reserved bits (``Filler``, 6 bits)</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -3041,6 +3072,7 @@
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">start</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">end</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
 
         <span class="k">return</span> <span class="n">Schema_PartialOrderServiceProfile</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -3048,6 +3080,7 @@
             <span class="n">profile</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'start'</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
                 <span class="s1">'end'</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span></div>
 
@@ -3229,6 +3262,8 @@
                       <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">diff</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">nonce_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QuickStartResponse'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make TCP quick start response option.</span>
 
@@ -3238,6 +3273,8 @@
 <span class="sd">            rate: rate (in kbps)</span>
 <span class="sd">            diff: time to live (in seconds) difference</span>
 <span class="sd">            nonce: nonce value</span>
+<span class="sd">            reserved: reserved bits before the rate request (``Resv.``, 4 bits)</span>
+<span class="sd">            nonce_reserved: reserved bits after the nonce (``R``, 2 bits)</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -3248,6 +3285,8 @@
             <span class="n">rate</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">req_rate</span>
             <span class="n">diff</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ttl_diff</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
+            <span class="n">nonce_reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce_reserved</span>
 
         <span class="c1"># :rfc:`4782` Section 3.1 encodes the rate as 40 kbps * 2 ** N, with</span>
         <span class="c1"># N = 0 meaning a rate of zero; a response may report a lower rate than</span>
@@ -3259,11 +3298,13 @@
             <span class="n">kind</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'rate'</span><span class="p">:</span> <span class="n">rate_val</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">diff</span><span class="o">=</span><span class="n">diff_val</span><span class="p">,</span>
             <span class="n">nonce</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'nonce'</span><span class="p">:</span> <span class="n">nonce</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">nonce_reserved</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span></div>
 
@@ -3272,29 +3313,45 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mode_timeout">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mode_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_UserTimeout]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">timeout</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">granularity</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UserTimeout'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make TCP user timeout option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: option code</span>
 <span class="sd">            opt: option data</span>
-<span class="sd">            timeout: timeout value</span>
+<span class="sd">            timeout: timeout value (in seconds, if an :obj:`int`)</span>
+<span class="sd">            granularity: preferred unit, minutes (``G`` set) or seconds; it is</span>
+<span class="sd">                kept only while the value still fits in it -- seconds within 15</span>
+<span class="sd">                bits, minutes as a whole number of them. Otherwise, and if not</span>
+<span class="sd">                given, seconds are used when they fit in 15 bits, and minutes if</span>
+<span class="sd">                not.</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the timeout does not fit in 15 bits of minutes.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">timeout_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">granularity</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">granularity</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">timeout_val</span> <span class="o">=</span> <span class="n">timeout</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">timeout</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="n">timeout</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">timeout</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
-        <span class="n">granularity</span> <span class="o">=</span> <span class="n">timeout_val</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">15</span>
-        <span class="n">timeout_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">timeout_val</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span> <span class="k">if</span> <span class="n">granularity</span> <span class="k">else</span> <span class="n">timeout_val</span>
+        <span class="c1"># NOTE: a parsed (or requested) unit that the value no longer fits in --</span>
+        <span class="c1"># e.g. a parsed seconds option edited past 15 bits, or a minutes option</span>
+        <span class="c1"># edited to a value that is not a whole number of minutes -- falls back</span>
+        <span class="c1"># to the size-based choice, as when no unit is given at all.</span>
+        <span class="n">fits_seconds</span> <span class="o">=</span> <span class="n">seconds</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">15</span>
+        <span class="k">if</span> <span class="n">granularity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">granularity</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fits_seconds</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">granularity</span> <span class="ow">and</span> <span class="n">seconds</span> <span class="o">%</span> <span class="mi">60</span><span class="p">):</span>
+            <span class="n">granularity</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">fits_seconds</span>
+        <span class="n">timeout_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span> <span class="k">if</span> <span class="n">granularity</span> <span class="k">else</span> <span class="n">seconds</span>
 
         <span class="k">if</span> <span class="n">timeout_val</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] timeout value too large: </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] timeout value too large: </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_UserTimeout</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>

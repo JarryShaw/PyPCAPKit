@@ -4099,6 +4099,12 @@ exist; any other value is a <code class="docutils literal notranslate"><span cla
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.hip.Locator.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NotRequired" title="(in Python v3.14)"><span class="pre">NotRequired</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.hip.Locator.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits of the flags octet.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.hip.Locator.lifetime">
 <span class="sig-name descname"><span class="pre">lifetime</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.14)"><span class="pre">timedelta</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.hip.Locator.lifetime" title="Link to this definition">¶</a></dt>
 <dd><p>Lifetime.</p>
@@ -5720,6 +5726,12 @@ packing – so it is documented here rather than accepted by
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
 <p>Locator flags.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.LocatorFlags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.LocatorFlags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.LocatorFlags.preferred">
 <span class="sig-name descname"><span class="pre">preferred</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.LocatorFlags.preferred" title="Link to this definition">¶</a></dt>
 <dd><p>Preferred flag.</p>
@@ -6347,6 +6359,13 @@ verbatim so that re-serialising reproduces them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.Locator.preferred">
 <span class="sig-name descname"><span class="pre">preferred</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.Locator.preferred" title="Link to this definition">¶</a></dt>
 <dd><p>Preferred flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.Locator.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.Locator.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits – the 7 high-order bits of the flags octet, carried
+verbatim so that re-serialising reproduces them.</p>
 </dd></dl>
 
 <dl class="py attribute">

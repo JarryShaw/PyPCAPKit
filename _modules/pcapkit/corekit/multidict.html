@@ -1020,6 +1020,18 @@
 
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'Optional[dict]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'OrderedMultiDict[_KT, _VT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a deep copy of this object.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            :meth:`MultiDict.deepcopy` rebuilds from :meth:`to_dict` with</span>
+<span class="sd">            ``flat=False``, which groups the values by key. This rebuilds from</span>
+<span class="sd">            ``items(multi=True)`` instead, so the copy keeps the insertion</span>
+<span class="sd">            order of interleaved keys. :meth:`__deepcopy__` reaches it too.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">memo</span><span class="o">=</span><span class="n">memo</span><span class="p">))</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'SupportsIndex'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[type, tuple[list[tuple[_KT, _VT]]]]'</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)),)</span>
 

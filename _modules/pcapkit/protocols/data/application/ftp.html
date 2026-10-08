@@ -516,9 +516,12 @@
     <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
     <span class="c1">#: Charset to encode :attr:`args` with, :obj:`None` for UTF-8.</span>
     <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
+    <span class="c1">#: Command as received, in its original case; :attr:`cmmd` is the</span>
+    <span class="c1">#: case-insensitive lookup of it.</span>
+    <span class="n">raw_cmmd</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Literal[FTP_Type.REQUEST]'</span><span class="p">,</span> <span class="n">cmmd</span><span class="p">:</span> <span class="s1">'Command'</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Literal[FTP_Type.REQUEST]'</span><span class="p">,</span> <span class="n">cmmd</span><span class="p">:</span> <span class="s1">'Command'</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">raw_cmmd</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -538,9 +541,13 @@
     <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Charset to encode :attr:`args` with, :obj:`None` for UTF-8.</span>
     <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
+    <span class="c1">#: Lines of a multi-line reply after the first, as received and without</span>
+    <span class="c1">#: their CRLF, ending with the closing ``&lt;code&gt; SP`` line; empty unless the</span>
+    <span class="c1">#: whole reply arrived at once.</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Literal[FTP_Type.RESPONSE]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'ReturnCode'</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Literal[FTP_Type.RESPONSE]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'ReturnCode'</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

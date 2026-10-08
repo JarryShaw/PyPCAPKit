@@ -668,6 +668,11 @@ flow label itself.</p>
 canonical buffer ID, so the label names the initiator first. The
 reverse half of a bidirectional
 conversation joins that flow rather than minting a label of its own.</p>
+<p>A label is unique within the tracer. When a flow would repeat the
+label of an earlier one – the same endpoints opening a new flow at
+the same capture timestamp – it is suffixed with <code class="docutils literal notranslate"><span class="pre">-1</span></code>, <code class="docutils literal notranslate"><span class="pre">-2</span></code> and
+so on, so that each flow keeps its own output file; see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unique_label()</span></code>.</p>
 </div>
 </dd></dl>
 

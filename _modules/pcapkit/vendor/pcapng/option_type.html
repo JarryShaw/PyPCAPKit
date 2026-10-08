@@ -658,6 +658,56 @@
 <span class="s1">        except TypeError as error:</span>
 <span class="s1">            raise ValueError(str(error)) from error</span>
 
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register_alias(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Add ``name`` as a further name for the member at option code ``value``.</span>
+
+<span class="s1">        Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`</span>
+<span class="s1">        for the same reason as :meth:`register`: the base looks the</span>
+<span class="s1">        :class:`int` code up in :attr:`~aenum.Enum._value2member_map_`, whose</span>
+<span class="s1">        keys are the formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'`` strings, so it could</span>
+<span class="s1">        never find one.</span>
+
+<span class="s1">        The member is resolved as :meth:`get` resolves ``value`` with</span>
+<span class="s1">        ``namespace`` set to ``name``'s prefix: that namespace overlaid on</span>
+<span class="s1">        ``opt``. So ``register_alias(2, 'if_label')`` aliases ``if_name``,</span>
+<span class="s1">        while ``register_alias(1, 'if_note')`` aliases ``opt_comment``, since</span>
+<span class="s1">        ``if`` assigns no code 1 of its own. The alias adds a name only; the</span>
+<span class="s1">        member keeps its own name and namespace.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Option code of the existing member to alias.</span>
+<span class="s1">            name: Alias to add for it, led by the namespace to resolve</span>
+<span class="s1">                ``value`` in.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The existing member, now reachable under ``name`` as well.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If neither ``name``'s namespace nor ``opt`` assigns</span>
+<span class="s1">                ``value``, or if ``name`` is already taken.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        namespace = name.split('_', maxsplit=1)[0]</span>
+<span class="s1">        member = cls.__members_ns__.get(namespace, </span><span class="se">{{}}</span><span class="s1">).get(value)</span>
+<span class="s1">        if member is None:</span>
+<span class="s1">            member = cls.__members_ns__.get('opt', </span><span class="se">{{}}</span><span class="s1">).get(value)</span>
+<span class="s1">        if member is None:</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is not a registered </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> in namespace '</span>
+<span class="s1">                             f'</span><span class="se">{{</span><span class="s1">namespace!r</span><span class="se">}}</span><span class="s1"> or opt; use </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">.register() to mint one')</span>
+
+<span class="s1">        # NOTE: :func:`~aenum.extend_enum` builds a throwaway member through</span>
+<span class="s1">        # :meth:`__new__` to learn its value, and :meth:`__new__` files that</span>
+<span class="s1">        # throwaway in :attr:`__members_ns__` over ``member``. The alias</span>
+<span class="s1">        # resolves to ``member``, so ``member`` is put back.</span>
+<span class="s1">        member_ns = member.opt_name.split('_', maxsplit=1)[0]</span>
+<span class="s1">        try:</span>
+<span class="s1">            return extend_enum(cls, name, value, member.opt_name)</span>
+<span class="s1">        except TypeError as error:</span>
+<span class="s1">            raise ValueError(str(error)) from error</span>
+<span class="s1">        finally:</span>
+<span class="s1">            cls.__members_ns__[member_ns][value] = member</span>
+
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>

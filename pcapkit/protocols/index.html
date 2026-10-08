@@ -972,6 +972,16 @@ Should such <a class="reference internal" href="#pcapkit.protocols.schema.schema
 types, such as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
 shall not convert them into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> and remain them intact.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A schema unpacked as the value of a
+<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> that left part of
+the field’s span unread carries those octets under a
+<code class="docutils literal notranslate"><span class="pre">__remainder__</span></code> key, and the number of octets it did read under
+<code class="docutils literal notranslate"><span class="pre">__remainder_offset__</span></code>. <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.from_dict" title="pcapkit.protocols.schema.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts both back, so
+that the rebuilt field still packs them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1380">#1380</a>). The keys
+are absent otherwise.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_VT</span></code>)]</span></p>
