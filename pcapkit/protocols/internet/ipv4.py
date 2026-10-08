@@ -798,8 +798,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
             if schema.data[-1] & 0x01 == 1:
                 warn(f'{self.alias}: [OptNo {schema.type}] invalid format: field termination indicator not set', ProtocolWarning)
+            termination = tuple(bool(byte & 0x01) for byte in schema.data)
         else:
             flags = []
+            termination = ()
 
         opt = Data_SECOption(
             code=schema.type,
@@ -807,6 +809,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length=schema.length,
             level=schema.level,
             flags=tuple(flags),
+            termination=termination,
         )
 
         return opt
@@ -891,6 +894,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             flag=schema.ts_flag,
             timestamp=schema.timestamp,
             remaining=schema.remaining,
+            remainder=schema.remainder,
         )
         return opt
 
@@ -1472,10 +1476,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             here rather than written: the enumeration names it as structure, and
             a value written there would be dropped on the way back in. See :issue:`537`.
 
+            The indicators themselves are set from position, except that a
+            parsed ``option`` whose ``termination`` covers every octet written
+            gets back the bits it carried, so that a non-conforming indicator
+            rebuilds as read.
+
         """
+        termination = ()  # type: tuple[bool, ...]
         if option is not None:
             level_val = option.level
             authorities = cast('list[Enum_ProtectionAuthority]', option.flags)
+            termination = tuple(getattr(option, 'termination', ()))
         else:
             level_val = self._make_index(level, level_default, namespace=level_namespace,  # type: ignore[assignment]
                                          reversed=level_reversed, pack=False)
@@ -1518,9 +1529,15 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
             # The low-order bit of every octet but the last is ``1``, meaning
             # "another octet follows"; the last keeps its ``0``, which ends the
-            # field.
-            for index in range(int_len - 1):
-                data_list[index * 8 + 7] = b'1'
+            # field. A parsed option instead writes back the indicators it
+            # carried on the wire, conforming or not, so long as they still
+            # cover every octet written.
+            if len(termination) == int_len:
+                for index, bit in enumerate(termination):
+                    data_list[index * 8 + 7] = b'1' if bit else b'0'
+            else:
+                for index in range(int_len - 1):
+                    data_list[index * 8 + 7] = b'1'
 
             data = int(b''.join(data_list), base=2).to_bytes(int_len, 'big', signed=False)
         else:
@@ -1604,7 +1621,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     # NOTE: An integer is the raw 32-bit field, written as
                     # is: a set high-order bit marks a non-standard time value.
                     if not isinstance(ts, int):
-                        ts = math.floor(ts.total_seconds() * 1000)
+                        ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:
                             warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
                             ts = ts | 0x80000000
@@ -1613,19 +1630,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 for ip, ts in option.timestamp.items(True):
                     ts_list.append(int(ip))
                     if not isinstance(ts, int):
-                        ts = math.floor(ts.total_seconds() * 1000)
+                        ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:
                             warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
                             ts = ts | 0x80000000
                     ts_list.append(ts)
 
             ts_list += getattr(option, 'remaining', ())
+            remainder = getattr(option, 'remainder', b'')  # type: bytes
             length = option.length
             pointer = option.pointer
             overflow = option.overflow
             flag = option.flag
         else:
             ts_list = []
+            remainder = b''
             if isinstance(timestamp, list):
                 flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
                 counts = min(9, counts)  # 9 is the maximum number of timestamps
@@ -1637,7 +1656,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                         break
 
                     if not isinstance(ts, int):
-                        ts = math.floor(ts.total_seconds() * 1000)
+                        ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:
                             warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
                             ts = ts | 0x80000000
@@ -1654,7 +1673,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
                     ts_list.append(int(ip))
                     if not isinstance(ts, int):
-                        ts = math.floor(ts.total_seconds() * 1000)
+                        ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:
                             warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
                             ts = ts | 0x80000000
@@ -1686,6 +1705,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'flag': flag,
             },
             ts_data=ts_list,
+            remainder=remainder,
         )
 
     def _make_opt_e_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_ESECOption]' = None, *,

@@ -340,9 +340,11 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         length=lambda pkt: max(pkt['length'] - 4, 0) // 4 * 4,
         item_type=UInt32Field(),
     )
-    #: Trailing octets that do not make up a whole 32-bit slot.
-    remainder: 'bytes' = PaddingField(
+    #: Trailing octets that do not make up a whole 32-bit slot, kept as read
+    #: rather than packed as zeros.
+    remainder: 'bytes' = BytesField(
         length=lambda pkt: max(pkt['length'] - 4, 0) % 4,
+        default=b'',
     )
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
@@ -463,7 +465,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         # field name with an
         # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an
         # error.
-        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', ts_data: 'list[int]') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', ts_data: 'list[int]', remainder: 'bytes' = ...) -> 'None': ...
 
 
 @schema_final
