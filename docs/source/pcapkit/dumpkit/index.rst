@@ -48,3 +48,11 @@ hierarchy:
        click Dumper "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper"
        click PCAPIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
        click NotImplementedIO "/pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO"
+
+.. note::
+
+   The ``tree`` output (also selected as ``text`` and ``txt``) is a lossy,
+   human-readable view, and nothing reads it back. It renders ``''``, ``b''``,
+   :data:`None` and ``{}`` all as ``NIL``, and writes a newline inside a string
+   as is, breaking the layout. Use ``json`` or ``plist`` (also selected as
+   ``xml``) where the report has to round-trip.

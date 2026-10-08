@@ -247,6 +247,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         type: 'int'
         #: Preferred flag.
         preferred: 'bool'
+        #: Reserved bits of the flags octet.
+        reserved: 'NotRequired[int]'
         #: Lifetime.
         lifetime: 'timedelta | int'
         #: IP address.
@@ -1031,6 +1033,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 type=_loct,
                 length=_locl,
                 preferred=bool(_resp['preferred']),
+                reserved=_resp['reserved'],
                 lifetime=datetime.timedelta(seconds=_life),
                 locator=_lobj,
             ))
@@ -3157,6 +3160,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                           traffic: 'int' = 0,
                           type: 'int' = 0,
                           preferred: 'bool' = False,
+                          reserved: 'int' = 0,
                           lifetime: 'timedelta | int' = 0,
                           ip: 'IPv6Address | bytes | int | str' = '::',
                           spi: 'Optional[int]' = None,
@@ -3168,6 +3172,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 traffic: traffic type
                 type: locator type
                 preferred: preferred flag
+                reserved: the 7 reserved high-order bits of the flags octet
                 lifetime: lifetime
                 ip: IP address
                 spi: SPI
@@ -3193,6 +3198,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 type = locator.type
                 length = locator.length // 4
                 preferred = locator.preferred
+                reserved = locator.reserved
                 lifetime = math.floor(locator.lifetime.total_seconds())
             else:
                 # NOTE: Through ``parse_ip_address`` because the locator is packed
@@ -3225,6 +3231,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 type=type,
                 len=length,
                 flags={
+                    'reserved': reserved,
                     'preferred': preferred,
                 },
                 lifetime=lifetime,

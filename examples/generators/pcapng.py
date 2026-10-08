@@ -167,6 +167,12 @@ __all__ = ['generate']
 
 #: Repository root, i.e. the grandparent of the directory holding this script.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+# Resolve pcapkit from this tree rather than from the install -- see
+# make_samples.py (#1343).
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 #: Default destination directory for the fixtures.
 SAMPLE_DIR = ROOT / 'examples' / 'captures'
 #: Committed fixture the synthesised DHCP payloads are lifted from.

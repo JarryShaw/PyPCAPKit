@@ -112,6 +112,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Each entry is ``(first, last)``, absolute TCP sequence numbers and both
     #: **inclusive** -- the same convention as :attr:`Packet.first` and
     #: :attr:`Packet.last`. Empty when the stream never saw a contested byte.
+    #: A range that crosses ``2 ** 32`` therefore has ``last < first``.
     #:
     #: Resolution keeps the already-buffered bytes and discards the
     #: conflicting portion of whichever segment arrived later, per
@@ -134,13 +135,15 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
 class HoleDescriptor(Info):
     """Data model for :term:`TCP <reasm.tcp.buffer>` hole descriptor.
 
-    Both bounds are **absolute TCP sequence numbers** and both are
-    **inclusive**, so a hole covers ``last - first + 1`` octets. They are not
-    offsets into :attr:`Fragment.raw`: the descriptor list is kept once per
-    buffer ID, whereas each acknowledgement number's payload buffer carries an
-    initial sequence number of its own, so only
-    :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` -- which
-    knows which buffer it is looking at -- can convert one to the other.
+    Both bounds are **unwrapped TCP sequence numbers** -- read modulo
+    ``2 ** 32`` relative to the data already buffered, so a stream crossing
+    ``2 ** 32`` continues past it -- and both are **inclusive**, so a hole
+    covers ``last - first + 1`` octets. They are not offsets into
+    :attr:`Fragment.raw`: the descriptor list is kept once per buffer ID,
+    across every acknowledgement number's payload buffer, and describes the
+    stream as a whole. It decides when a stream whose FIN has been seen is
+    whole; a hole whose ``first`` is ``-sys.maxsize`` stands for whatever
+    preceded a capture that missed the handshake, and does not count.
 
     """
 
@@ -163,7 +166,9 @@ class Fragment(Info):
     #: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number
     #: is ``isn + n``. Revised downwards whenever a segment turns up below the
     #: data already buffered, so it is not necessarily the connection's own
-    #: initial sequence number.
+    #: initial sequence number. Like every sequence number held in this
+    #: fragment -- :attr:`gap` and :attr:`conflict` included -- it is
+    #: unwrapped, and so may exceed ``2 ** 32`` on a stream that crossed it.
     isn: 'int'
     #: Length of payload buffer.
     len: 'int'
@@ -176,7 +181,12 @@ class Fragment(Info):
     #: append and the reach-back prepend, the only places that ever splice a
     #: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap
     #: merge only ever shrinks or removes one, filling it from the arriving
-    #: segment.
+    #: segment. The one exception lies wholly *outside* :attr:`raw`: when a
+    #: stream whose SYN was captured is split rather than padded across a gap
+    #: wider than :attr:`TCP.__window__
+    #: <pcapkit.foundation.reassembly.tcp.TCP.__window__>`, both halves record
+    #: the range left between them. Any entry at all makes the fragment
+    #: incomplete.
     #:
     #: This is deliberately **not** derived from
     #: :attr:`Buffer.hdl <pcapkit.foundation.reassembly.data.tcp.Buffer.hdl>`.

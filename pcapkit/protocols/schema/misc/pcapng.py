@@ -1408,9 +1408,11 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Original packet length.
     original_len: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Packet data.
-    packet_data: 'bytes' = PayloadField(length=lambda pkt: min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF),
-                                                               pkt['original_len']))
+    #: Packet data, ``min(original_len, snaplen)`` octets; a packet cut by the
+    #: snaplen is bounded by what the block holds, less its 16 framing octets.
+    packet_data: 'bytes' = PayloadField(length=lambda pkt: max(0, min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF),
+                                                                      pkt['original_len'],
+                                                                      pkt['length'] - 16)))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - len(pkt['packet_data']) % 4) % 4)
     #: Block total length.
@@ -2105,8 +2107,10 @@ class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
     key: 'bytes' = BytesField(length=16)
     #: ZigBee PANID.
     panid: 'int' = UInt16Field(byteorder='little')
-    #: Padding.
-    padding: 'bytes' = BytesField(length=2)
+
+    # NOTE: The two zero octets after the PAN ID are the Decryption Secrets
+    # Block's own padding, which Secrets Length does not count, so they belong
+    # to :attr:`DecryptionSecretsBlock.padding_data` rather than to this schema.
 
     if TYPE_CHECKING:
         def __init__(self, key: 'bytes', panid: 'int') -> 'None': ...
@@ -2124,8 +2128,9 @@ class ZigBeeAPSKey(DSBSecrets, code=Enum_SecretsType.ZigBee_APS_Key):
     addr_low: 'int' = UInt16Field(byteorder='little')
     #: High node short address.
     addr_high: 'int' = UInt16Field(byteorder='little')
-    #: Padding.
-    padding: 'bytes' = BytesField(length=2)
+
+    # NOTE: As for :class:`ZigBeeNWKKey`, the trailing two zero octets are the
+    # block's padding, not part of the secrets.
 
     if TYPE_CHECKING:
         def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...

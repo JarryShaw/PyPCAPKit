@@ -30,10 +30,11 @@ record of what this version of ``pcapkit`` builds, and re-parsing it exercises
 ``_read_*`` against ``_make_*``.
 
 Only the codes that construct *successfully* can appear in a capture -- there
-are no octets for the ones that do not. Roughly a fifth of the space does not,
-and that shortfall is not swept up: it is recorded case by case in
-:file:`tests/protocols/test_option_roundtrip_unit.py`, against the defect that
-causes it.
+are no octets for the ones that do not. A failing case in a captured family
+makes :func:`generate` raise once the rest are written, so a broken or foreign
+library cannot pass for a smaller fixture set. Every other failure is recorded
+case by case in :file:`tests/protocols/test_option_roundtrip_unit.py`, against
+the defect that causes it.
 
 Why the case table is not a list of options
 -------------------------------------------
@@ -80,7 +81,7 @@ things would otherwise vary between runs and are pinned:
 Two deliberate deviations from the sibling generators
 ----------------------------------------------------
 
-Almost every import of :mod:`pcapkit` and of :mod:`scapy` in this module is
+Every import of :mod:`pcapkit` and of :mod:`scapy` in this module is
 inside the function that needs it, which is why :mod:`pylint`'s
 ``import-outside-toplevel`` is switched off for the file rather than argued with
 forty times. Both are load-bearing. :mod:`scapy` is needed only by
@@ -111,10 +112,9 @@ import collections
 import datetime
 import pathlib
 import signal
+import sys
 import warnings
 from typing import TYPE_CHECKING, NamedTuple
-
-from pcapkit.protocols.protocol import ProtocolBase
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator, Optional
@@ -123,6 +123,12 @@ __all__ = ['generate', 'cases', 'roundtrip', 'outcomes', 'Case', 'Outcome', 'FAM
 
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+# Resolve pcapkit from this tree rather than from the install -- see
+# make_samples.py (#1343).
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 #: Default destination directory for the generated captures.
 SAMPLE = ROOT / 'examples' / 'captures'
 
@@ -303,6 +309,7 @@ def handler(registry: 'Any', code: 'Any') -> 'Any':
         The handler registered for ``code``, or the registry's fallback.
 
     """
+    from pcapkit.protocols.protocol import ProtocolBase
     return ProtocolBase._lookup_registry(registry, code)  # pylint: disable=protected-access
 
 
@@ -1859,6 +1866,10 @@ def generate(dest: 'pathlib.Path | None' = None) -> 'list[pathlib.Path]':
     Returns:
         The paths written, in the order they were written.
 
+    Raises:
+        RuntimeError: If any captured case was left out, after the captures
+            that could be built have been written.
+
     """
     from scapy.all import wrpcap  # pylint: disable=no-name-in-module
 
@@ -1903,6 +1914,14 @@ def generate(dest: 'pathlib.Path | None' = None) -> 'list[pathlib.Path]':
         print(f'  [left out]  {label}: {unreachable[label]}')
     for label in sorted(warned):
         print(f'  [warned]    {label}: {"; ".join(warned[label])}')
+
+    # On a correct tree every captured case constructs and parses, so a case
+    # left out means the library is broken or is not this tree's (#1343). Fail
+    # rather than hand back a silently smaller fixture set.
+    if unreachable:
+        import pcapkit
+        raise RuntimeError(f'options: {len(unreachable)} case(s) left out of the captures, '
+                           f'built with pcapkit from {pathlib.Path(pcapkit.__file__).parent}')
     return written
 
 

@@ -14,10 +14,12 @@ import collections
 import datetime
 import decimal
 import enum
+import inspect
 import ipaddress
 import json
 import re
 import string
+import types
 import xml.sax.saxutils
 from typing import TYPE_CHECKING
 
@@ -25,6 +27,7 @@ import aenum
 import dictdumper.dumper
 import dictdumper.json
 import dictdumper.plist
+import dictdumper.tree
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
@@ -268,6 +271,32 @@ def _iter_slots(value: 'Any') -> 'Iterator[str]':
             yield name
 
 
+#: Most objects :meth:`DictDumper._append_fallback` expands for one top-level
+#: object, counting an object once per time it is met. No fallback object in the
+#: ``foundation``, ``dumpkit`` or ``interface`` test legs expands into more than 7.
+FALLBACK_LIMIT = 10_000
+
+
+def _object_name(value: 'Any') -> 'str':
+    """Name a class, module or routine for dumping, in place of its attributes.
+
+    Args:
+        value: Object to name.
+
+    Returns:
+        The module-qualified name of ``value``, falling back to :func:`str`
+        where it carries none.
+
+    """
+    qualname = getattr(value, '__qualname__', None) or getattr(value, '__name__', None)
+    if not isinstance(qualname, str):
+        return str(value)
+    module = getattr(value, '__module__', None)
+    if isinstance(module, str) and module != 'builtins' and not isinstance(value, types.ModuleType):
+        return f'{module}.{qualname}'
+    return qualname
+
+
 def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     """Create a customised :class:`~dictdumper.dumper.Dumper` object.
 
@@ -306,6 +335,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it
     # is worked around here.
     keep_none = issubclass(output, dictdumper.plist.PLIST)
+    # NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to
+    # :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`
+    # one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there
+    # (GitHub issue #1266). The defect is :mod:`dictdumper`'s, so it is worked
+    # around here.
+    tree_numbers = issubclass(output, dictdumper.tree.Tree)
 
     def escape_key(key: 'Any') -> 'Any':
         """Escape a mapping key on its way to the writer.
@@ -355,6 +390,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
+
+        #: Objects :meth:`_append_fallback` is expanding, by :func:`id` -- the
+        #: one being written and every one enclosing it.
+        _fallback_path = None  # type: Optional[set[int]]
+        #: Objects expanded so far for the current top-level fallback object.
+        _fallback_count = 0
 
         def object_hook(self, o: 'Any') -> 'Any':
             """Convert content for function call.
@@ -510,6 +551,29 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                         text.append(json.dumps(char)[1:-1] if ord(char) > 0xFFFF else f'\\u{ord(char):04x}')
                 file.write('"' + ''.join(text) + '"')
 
+        if tree_numbers:
+            def _append_number(self, value: 'int | float | complex', file: 'TextIO') -> 'None':
+                """Call this function to write number contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    A :class:`complex` value is written as ``-> (1+2j)``, with
+                    ``NaN`` and ``Infinity`` spelt in either part as
+                    :meth:`dictdumper.tree.Tree._append_number` spells them for a
+                    :class:`float`; every other number is written by the
+                    upstream writer.
+
+                """
+                if not isinstance(value, complex):
+                    return super()._append_number(value, file)
+                text = str(value).replace('nan', 'NaN').replace('inf', 'Infinity')
+                file.write(f'-> {text}')
+                return None
+
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
             """Check content type for function call.
 
@@ -543,18 +607,69 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 to find a suitable function for dumping and it should pair with
                 ``default`` for use.
 
-            """
-            new_value = {key: getattr(value, key) for key in _iter_slots(value)}
-            if hasattr(value, '__dict__'):
-                new_value.update(vars(value))
-            if not new_value:
-                logger.warning('unsupported object type: %s', type(value))
-                new_value = str(value)  # type: ignore[assignment]
+                A class, module or routine is written as its name rather than
+                expanded, since its attributes reach the whole type graph
+                (GitHub issue #1372). Every other object is expanded in full
+                each time it is met, except one that encloses itself: there
+                it is written as a ``<circular reference: ...>`` marker, so a
+                reference cycle terminates.
 
+            Raises:
+                UnsupportedCall: If a top-level fallback object expands into
+                    more than :data:`FALLBACK_LIMIT` objects.
+
+            """
+            if isinstance(value, (type, types.ModuleType)) or inspect.isroutine(value):
+                self._append_fallback_value(_object_name(value), file)
+                return
+
+            path = self._fallback_path
+            if path is None:
+                # NOTE: the outermost fallback object owns the bookkeeping, so
+                # each record dumped is tracked on its own.
+                self._fallback_path, self._fallback_count = set(), 0
+                try:
+                    self._append_fallback(value, file)
+                finally:
+                    self._fallback_path, self._fallback_count = None, 0
+                return
+
+            # NOTE: an object on the path is alive, so its id is not reused.
+            key = id(value)
+            if key in path:
+                marker = f'<circular reference: {_object_name(type(value))}>'
+                self._append_fallback_value(marker, file)
+                return
+            self._fallback_count += 1
+            if self._fallback_count > FALLBACK_LIMIT:
+                raise UnsupportedCall(f'{type(self).__name__}: fallback object expands into more '
+                                      f'than {FALLBACK_LIMIT} objects; stopped at '
+                                      f'{_object_name(type(value))}')
+            path.add(key)
+            try:
+                new_value = {name: getattr(value, name) for name in _iter_slots(value)}
+                if hasattr(value, '__dict__'):
+                    new_value.update(vars(value))
+                if not new_value:
+                    logger.warning('unsupported object type: %s', type(value))
+                    new_value = str(value)  # type: ignore[assignment]
+                self._append_fallback_value(new_value, file)
+            finally:
+                path.discard(key)
+
+        def _append_fallback_value(self, value: 'Any', file: 'TextIO') -> 'None':
+            """Write what :meth:`_append_fallback` made of an object.
+
+            Args:
+                self: Dumper instance.
+                value: Value to dump in place of the object.
+                file: File object to write.
+
+            """
             # NOTE: through :meth:`object_hook` as every other value is, so that
             # the keys and strings built here are escaped like theirs.
-            new_value = self.object_hook(new_value)
-            func = self._encode_func(new_value)
-            func(new_value, file)
+            value = self.object_hook(value)
+            func = self._encode_func(value)
+            func(value, file)
 
     return DictDumper

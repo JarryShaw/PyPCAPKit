@@ -492,10 +492,10 @@ class HIPUnitTests(unittest.TestCase):
                 len=48,
                 locators=[
                     hip_schema.Locator(traffic=1, type=0, len=4,
-                                       flags={'preferred': 1}, lifetime=5,
+                                       flags={'reserved': 0, 'preferred': 1}, lifetime=5,
                                        value=ip_address('2001:db8::1')),
                     hip_schema.Locator(traffic=2, type=1, len=5,
-                                       flags={'preferred': 0}, lifetime=6,
+                                       flags={'reserved': 0, 'preferred': 0}, lifetime=6,
                                        value=hip_schema.LocatorData(
                                            spi=7,
                                            ip=ip_address('2001:db8::2'),
@@ -513,7 +513,7 @@ class HIPUnitTests(unittest.TestCase):
                     type=Parameter.LOCATOR_SET,
                     len=8,
                     locators=[hip_schema.Locator(traffic=1, type=3, len=4,
-                                                 flags={'preferred': 0}, lifetime=1,
+                                                 flags={'reserved': 0, 'preferred': 0}, lifetime=1,
                                                  value=ip_address('2001:db8::1'))],
                 ),
                 version=2,
@@ -1392,10 +1392,10 @@ class HIPUnitTests(unittest.TestCase):
         ).counter, 2)
 
         locator_ipv6 = hip_data.Locator(traffic=1, type=0, length=16,
-                                        preferred=True, lifetime=dt1,
+                                        preferred=True, reserved=0, lifetime=dt1,
                                         locator=ip_address('2001:db8::1'))
         locator_data = hip_data.Locator(traffic=2, type=1, length=20,
-                                        preferred=False, lifetime=dt2,
+                                        preferred=False, reserved=0, lifetime=dt2,
                                         locator=hip_data.LocatorData(
                                             spi=7,
                                             ip=ip_address('2001:db8::2'),
@@ -1417,7 +1417,7 @@ class HIPUnitTests(unittest.TestCase):
                     critical=False,
                     length=8,
                     locator_set=(hip_data.Locator(
-                        traffic=1, type=0, length=4, preferred=False,
+                        traffic=1, type=0, length=4, preferred=False, reserved=0,
                         lifetime=dt1, locator=b'bad',
                     ),),
                 ),

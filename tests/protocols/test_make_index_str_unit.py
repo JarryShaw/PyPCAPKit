@@ -108,7 +108,8 @@ class TestMakeIndexStr(unittest.TestCase):
         self.assertEqual(ipv4(tos_thr='HIGH', tos_rel='HIGH').data, expected)
         self.assertNotEqual(ipv4().data, expected)
 
-    def test_shared_name_with_two_meanings_raises(self) -> None:
+    def test_shared_name_with_two_meanings_resolves_per_argument(self) -> None:
+        # the per-argument resolution of #1308; see test_protocol_make_unit
         enum = importlib.import_module('enum')
         exc = _attr('pcapkit.utilities.exceptions.ProtocolNotImplemented')
         protocol = _attr('pcapkit.protocols.protocol.ProtocolBase')
@@ -121,16 +122,13 @@ class TestMakeIndexStr(unittest.TestCase):
                           b: 'Any' = right.Shared, b_namespace: 'Any' = None) -> 'int':
                 return self._make_index(a, namespace=a_namespace)
 
-        with self.assertRaisesRegex(exc, r"ambiguous member name 'Shared'.*"
-                                         r"pass a_namespace= or b_namespace= explicitly"):
-            Pair.make_pair(Pair, a='Shared', b='Shared')
-        # an explicit namespace on the other argument removes the ambiguity
+        self.assertEqual(Pair.make_pair(Pair, a='Shared', b='Shared'), 1)
         self.assertEqual(Pair.make_pair(Pair, a='Shared', b='Shared', b_namespace=right), 1)
 
-        # a real make(): ``LOW`` is a ToSDelay member but not a ToSThroughput one
+        # a real make(): ``LOW`` is a ToSDelay member but not a ToSThroughput one,
+        # so ``tos_thr`` alone fails to resolve it
         ipv4 = _attr('pcapkit.protocols.internet.ipv4.IPv4')
-        with self.assertRaisesRegex(exc, r"ambiguous member name 'LOW'.*"
-                                         r"pass tos_del_namespace= or tos_thr_namespace= explicitly"):
+        with self.assertRaisesRegex(exc, r"protocol 'LOW' not implemented"):
             ipv4(tos_del='LOW', tos_thr='LOW')
 
     def test_without_inferable_enum_still_raises(self) -> None:

@@ -367,6 +367,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             incl_len = min(len(packet), self._ghdr.snaplen)
         if orig_len is None:
             orig_len = len(packet)
+        # NOTE: The record holds exactly ``incl_len`` octets of packet data, so a
+        # packet longer than that -- e.g. than the snaplen -- is cut to it rather
+        # than written out whole behind a clipped length.
+        if len(packet) > incl_len:
+            packet = bytes(packet)[:incl_len]
 
         return Schema_Frame(
             ts_sec=ts_sec,

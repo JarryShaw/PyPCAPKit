@@ -140,6 +140,9 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         #: and cached so that :meth:`_make_segment` does not import per packet. Set
         #: only when ``analyse`` is on, which is the only time it is read.
         _reasm_packet: 'type[Any]'
+        #: Every flow label this tracer has handed out, created with the first
+        #: flow and read by :meth:`_unique_label` to keep labels unique.
+        _labels: 'set[str]'
 
     ##########################################################################
     # Defaults.
@@ -231,6 +234,12 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             reverse half of a bidirectional
             conversation joins that flow rather than minting a label of its own.
 
+            A label is unique within the tracer. When a flow would repeat the
+            label of an earlier one -- the same endpoints opening a new flow at
+            the same capture timestamp -- it is suffixed with ``-1``, ``-2`` and
+            so on, so that each flow keeps its own output file; see
+            :meth:`_unique_label`.
+
         """
         # clear cache
         self.__cached__['submit'] = None
@@ -267,6 +276,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
                 # ``:`` is a path separator on Windows and a drive separator
                 # elsewhere in the tooling, so an IPv6 label cannot carry it
                 label = label.replace(':', '.')
+            label = self._unique_label(label)
             logger.debug('new TCP flow %s', label)
             self._buffer[BUFID] = Buffer(
                 fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
@@ -321,6 +331,33 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         # return label or output object
         return fpout if output else label
+
+    def _unique_label(self, label: 'str') -> 'str':
+        """Make a new flow's label unique within this tracer.
+
+        Arguments:
+            label: the label built from the packet that opens the flow
+
+        Returns:
+            ``label`` itself if no earlier flow carries it; otherwise ``label``
+            suffixed with the first of ``-1``, ``-2``, ... that is still unused.
+
+        The label names the flow's output file, which is opened -- and so
+        truncated -- when the flow starts. Two flows with one label would
+        therefore share one file, and the later would erase the earlier: the
+        same endpoints opening a second flow at the same capture timestamp, as a
+        unidirectional flow resumed after its FIN or a new connection reusing a
+        bidirectional flow's endpoints can. A label that does not collide is
+        returned unchanged.
+
+        """
+        used = self.__dict__.setdefault('_labels', set())  # type: set[str]
+        unique, count = label, 0
+        while unique in used:
+            count += 1
+            unique = f'{label}-{count}'
+        used.add(unique)
+        return unique
 
     def _make_reassembly(self) -> 'Optional[TCP_Reassembly]':
         """Build the reassembler a new flow will feed, if analysis was asked for.
