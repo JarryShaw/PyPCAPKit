@@ -459,6 +459,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If the Data Offset declares more header than the
+                data holds.
+
         """
         if length is None:
             length = len(self)
@@ -507,6 +511,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         tcp.__update__({
             'connection': self._flags,
         })
+
+        # NOTE: A Data Offset declaring more header than was captured leaves the
+        # missing octets to read as zeros, which ``from_data`` then rebuilds;
+        # rejecting it keeps the octets as captured inside the parent (:issue:`1404`).
+        if len(self) < tcp.hdr_len:
+            raise ProtocolError(f'{self.alias}: header length {tcp.hdr_len} runs past the end of '
+                                f'the data ({len(self)} octets)')
 
         _optl = tcp.hdr_len - 20
         if _optl:

@@ -56,6 +56,7 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as Data_ESECOption
@@ -283,6 +284,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If the version is not 4, or if ``ihl`` declares
+                more header than the data holds.
+
         """
         if length is None:
             length = len(self)
@@ -315,6 +320,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             src=schema.src,
             dst=schema.dst,
         )
+
+        # NOTE: An ``ihl`` declaring more header than was captured leaves the
+        # missing octets to read as zeros, which ``from_data`` then rebuilds;
+        # rejecting it keeps the octets as captured inside the parent (:issue:`1404`).
+        if len(self) < ipv4.hdr_len:
+            raise ProtocolError(f'{self.alias}: header length {ipv4.hdr_len} runs past the end of '
+                                f'the data ({len(self)} octets)')
 
         _optl = ipv4.hdr_len - 20
         if _optl:
@@ -1606,7 +1618,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     def _make_opt_ts(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TSOption]' = None, *,
                      counts: 'int' = 5,
                      overflow: 'int' = 0,
-                     timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address, int | timedelta]]' = None,
+                     timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address | str | int, int | timedelta]]' = None,
                      remaining: 'Optional[list[int]]' = None,
                      **kwargs: 'Any') -> 'Schema_TSOption':
         """Make IPv4 Timestamp (``TS``) option.
@@ -1615,13 +1627,20 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             counts: maximum number of timestamps to record
-            timestamp: list of timestamps, i.e. the slots before the pointer
+            timestamp: list of timestamps, i.e. the slots before the pointer, or
+                a mapping of the addresses to their timestamps; an address may
+                be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
+                accepts for IPv4
             remaining: raw 32-bit words for the slots at or beyond the pointer;
                 the slots left over up to ``counts`` are zero
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            FieldValueError: If an address is a :obj:`bool` or is not a valid
+                IPv4 address.
 
         """
         if option is not None:
@@ -1638,7 +1657,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     ts_list.append(ts)
             else:
                 for ip, ts in option.timestamp.items(True):
-                    ts_list.append(int(ip))
+                    ts_list.append(int(parse_ip_address(ip, f'{self.alias}: [OptNo {kind}] timestamp address',
+                                                        version=4)))
                     if not isinstance(ts, int):
                         ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:
@@ -1676,12 +1696,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 counts = min(4, counts)  # 4 is the maximum number of timestamps
                 length = 4 + counts * 8
 
-                for index, (ip, ts) in enumerate(timestamp.items()):
+                for index, (addr, ts) in enumerate(timestamp.items()):
                     if index >= counts:
                         warn(f'{self.alias}: [OptNo {kind}] too many timestamps: {len(timestamp)}', ProtocolWarning)
                         break
 
-                    ts_list.append(int(ip))
+                    ts_list.append(int(parse_ip_address(addr, f'{self.alias}: [OptNo {kind}] timestamp address',
+                                                          version=4)))
                     if not isinstance(ts, int):
                         ts = ts // datetime.timedelta(milliseconds=1)
                         if ts.bit_length() > 31:

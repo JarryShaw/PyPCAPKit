@@ -14,7 +14,10 @@ under IPv6, a :class:`~pcapkit.protocols.misc.raw.Raw` payload elsewhere -- and
 the parent rebuilds byte for byte.
 
 An option that begins at the end of the data reads nothing at all, and is still
-left to the end-of-option-list handling an over-long option area relies on.
+left to the end-of-option-list handling an over-long option area relies on. An
+IPv4 or TCP header declaring an option area past the data is rejected before its
+options are read (GitHub issue #1404), and its parent likewise keeps it as
+captured.
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -74,9 +77,10 @@ OVERRUNS = {
         bytes.fromhex('01000020 00000001 00010000 00010001 00000001 000c0010 00050000'))),
     # an unassigned kind declaring 12 octets, 8 present
     'TCP unassigned': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(bytes.fromhex('4f0caabb ccddeeff'))),
-    # an unassigned option declaring 12 octets, 8 present in a 16-octet area
+    # an unassigned option declaring 12 octets, 8 present in a complete
+    # 8-octet area, with 8 octets of payload behind it
     'IPv4 unassigned': ('pcapkit.protocols.internet.ipv4', 'IPv4',
-                        _ipv4(bytes.fromhex('1f0caabb ccddeeff'), ihl=9)),
+                        _ipv4(bytes.fromhex('1f0caabb ccddeeff'), ihl=7, payload=bytes(8))),
 }
 
 #: The same option areas with every option complete.
@@ -128,7 +132,7 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
                 protocol = self._protocol(module, name)
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    with self.assertRaisesRegex(ProtocolError, 'runs past the end of the data'):
+                    with self.assertRaisesRegex(ProtocolError, 'has an option that runs past the end of the data'):
                         protocol(data, len(data))
 
     def test_a_complete_option_still_rebuilds_byte_for_byte(self) -> None:
@@ -150,24 +154,33 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
 
                 if name == 'IPv6':
                     # an extension header is kept as raw extension data
-                    self.assertIn('runs past the end of the data', str(parsed.info.ext.error))
+                    self.assertIn('has an option that runs past the end of the data', str(parsed.info.ext.error))
                 else:
                     # any other layer is kept as a raw payload, as captured
                     self.assertIsInstance(parsed.payload, Raw)
-                    self.assertIn('runs past the end of the data', str(parsed.payload.info.error))
+                    self.assertIn('has an option that runs past the end of the data', str(parsed.payload.info.error))
                     self.assertEqual(parsed.payload.data, OVERRUNS[case][2])
                 self.assertEqual(protocol.from_data(parsed.info).data, frame)
 
-    def test_an_option_area_declared_past_the_data_still_ends_at_eool(self) -> None:
+    def test_an_option_area_declared_past_the_data_is_kept_as_captured(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import ProtocolError
 
-        # ``ihl`` declares 20 octets of options with none present: the first
-        # option begins at the end of the data, so it is end-of-option-list.
+        # ``ihl`` declares 20 octets of options with none present: reading the
+        # option area would zero-fill all 20 of them on rebuild (issue #1404).
         data = bytes.fromhex('4a00001800010000400600000a0000010a000002')
+        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+            IPv4(data, len(data))
+
+        frame = bytes.fromhex('0123456789ab fedcba987654 0800') + data
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            parsed = IPv4(data, len(data))
-        self.assertEqual(parsed.info.src.compressed, '10.0.0.1')
+            parsed = Ethernet(frame, len(frame))
+        self.assertIsInstance(parsed.payload, Raw)
+        self.assertEqual(parsed.payload.data, data)
+        self.assertEqual(Ethernet.from_data(parsed.info).data, frame)
 
 
 if __name__ == '__main__':

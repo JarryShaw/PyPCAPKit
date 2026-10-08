@@ -1981,52 +1981,60 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(tuple(unknown.timestamp), (1,))
         warn.assert_called_once()
 
-    def test_an_option_area_longer_than_the_datagram_still_parses(self) -> None:
-        """An ``ihl`` promising more options than are there is tolerated.
+    def test_an_option_area_longer_than_the_datagram_is_refused(self) -> None:
+        """An ``ihl`` promising more options than are there is refused. C.f. #431, #1404.
 
         The header below sets ``ihl`` to 10 -- a 20-octet option area -- and stops
-        after the fixed 20 octets, so there are no option octets at all. Reading
-        past them yields ``b''``, which decodes the option number as 0, and 0 is
-        IPv4's end-of-option-list, so the option loop breaks there and reports the
-        whole area as padding. That is how a datagram cut short by the snapshot
-        length parses at all, and it is why :meth:`OptionField.unpack
+        after the fixed 20 octets, so there are no option octets at all. Read by
+        the schema, the option area yields ``b''``, which decodes the option
+        number as 0, and 0 is IPv4's end-of-option-list, so the option loop breaks
+        there. That is why :meth:`OptionField.unpack
         <pcapkit.corekit.fields.collections.OptionField.unpack>` checks each
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such header into an error. C.f. #431.
 
+        :class:`~pcapkit.protocols.internet.ipv4.IPv4` itself refuses the header
+        with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 20
+        missing octets would otherwise be rebuilt as zeros (#1404).
+
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+        from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
         raw = bytes.fromhex('4a00001800010000400600000a0000010a000002')
         with time_limit():
-            proto = IPv4(raw, len(raw))
-
-        self.assertEqual(proto.info.hdr_len, 40)
+            schema = Schema_IPv4.unpack(raw)
         self.assertEqual(
-            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(opt.type, opt.length) for opt in schema.options],
             [(OptionNumber.EOOL, 1)],
         )
+
+        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+            IPv4(raw, len(raw))
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
         """A capture cut short mid-option is refused alone, and kept as captured in a frame. C.f. #431, #572, #1325.
 
-        :meth:`test_an_option_area_longer_than_the_datagram_still_parses` above
+        :meth:`test_an_option_area_longer_than_the_datagram_is_refused` above
         pins the *empty*-tail half of the #431 accommodation: an option area
         that runs out before it starts. This is the other half -- an option
         that *does* start, declares more data than the capture holds, and runs
         out partway through.
 
-        The header below sets ``ihl`` to 9 -- 16 declared octets of options --
-        for an unassigned option (code 31) declaring ``length=12``, with only
-        6 of its 10 data octets behind it. Those 4 missing octets used to be
-        read as zeros and rebuilt as if captured. :meth:`OptionField.unpack
-        <pcapkit.corekit.fields.collections.OptionField.unpack>` now refuses
-        the option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
-        instead (#1325). Inside a frame the datagram is kept as the octets
-        captured, a :class:`~pcapkit.protocols.misc.raw.Raw` payload carrying
-        that error, and rebuilds byte for byte.
+        The header below sets ``ihl`` to 7 -- 8 octets of options, all present,
+        with 8 octets of payload behind them -- for an unassigned option (code
+        31) declaring ``length=12``, with only 6 of its 10 data octets inside
+        the option area. Those 4 missing octets used to be read as zeros and
+        rebuilt as if captured. The header itself is complete, so the
+        header-length check (#1404) passes, and :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` refuses the
+        option with :exc:`~pcapkit.utilities.exceptions.ProtocolError` (#1325).
+        Inside a frame the datagram is kept as the octets captured, a
+        :class:`~pcapkit.protocols.misc.raw.Raw` payload carrying that error,
+        and rebuilds byte for byte.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -2038,18 +2046,18 @@ class IPv4UnitTests(unittest.TestCase):
 
         custom = OptionNumber.get(31)
         trailing = bytes.fromhex('aabbccddeeff')
-        raw = (bytes.fromhex('4900001c00010000400600000a0000010a000002') +
-               bytes([custom, 12]) + trailing)
+        raw = (bytes.fromhex('4700002400010000400600000a0000010a000002') +
+               bytes([custom, 12]) + trailing + bytes(8))
         with time_limit(), warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            with self.assertRaisesRegex(ProtocolError, 'runs past the end of the data'):
+            with self.assertRaisesRegex(ProtocolError, 'has an option that runs past the end of the data'):
                 IPv4(raw, len(raw))
 
             frame = bytes.fromhex('0123456789ab' 'fedcba987654' '0800') + raw
             proto = Ethernet(frame, len(frame))
 
         self.assertIsInstance(proto.payload, Raw)
-        self.assertIn('runs past the end of the data', str(proto.payload.info.error))
+        self.assertIn('has an option that runs past the end of the data', str(proto.payload.info.error))
         # the option octets are kept as captured, with nothing synthesised
         self.assertEqual(proto.payload.data, raw)
         self.assertEqual(Ethernet.from_data(proto.info).data, frame)
