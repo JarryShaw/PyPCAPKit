@@ -236,7 +236,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
 
         pcapng_reader = FakeReader()
         extractor.magic_number = PCAPNG.MAGIC_NUMBER[0]
-        with mock.patch.object(engine._expkg.pcapng, 'Reader', return_value=pcapng_reader):
+        with mock.patch('pcapkit.foundation.engines.dpkt.PCAPNGReader', return_value=pcapng_reader):
             engine.run()
         self.assertIs(engine._extmp, pcapng_reader)
 

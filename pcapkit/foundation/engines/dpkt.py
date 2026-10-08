@@ -10,36 +10,175 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _DPKT: https://dpkt.readthedocs.io
 
 """
+import decimal
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase
+from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
-__all__ = ['DPKT']
+__all__ = ['DPKT', 'PCAPNGReader']
 
 if TYPE_CHECKING:
-    from typing import Optional, Type, Union
+    from typing import IO, Iterator, Literal, Optional, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
     from dpkt.pcap import Reader as PCAPReader
-    from dpkt.pcapng import Reader as PCAPNGReader
 
+    from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.foundation.extraction import Extractor
+    from pcapkit.protocols.data.misc.pcapng import \
+        InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
+    from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
 
-    Reader = Union[PCAPReader, PCAPNGReader]
+    Reader = Union[PCAPReader, 'PCAPNGReader']
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
 
+class PCAPNGReader:
+    """PCAP-NG reader for the DPKT engine, aware of every interface.
+
+    :class:`dpkt.pcapng.Reader` reads only the first Interface Description
+    Block (IDB) of a file, and applies its link type and timestamp resolution
+    to every packet (:issue:`1379`). This reader walks the blocks itself
+    instead: it parses each Section Header Block and IDB with :mod:`pcapkit`'s
+    own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, keeps the interfaces
+    of the current section, and resolves every packet's link type,
+    ``if_tsresol`` and ``if_tsoffset`` from the interface it names. Packet
+    blocks are still decoded by `DPKT`_.
+
+    As :class:`dpkt.pcapng.Reader` does, it yields Enhanced Packet Blocks and
+    (obsolete) Packet Blocks only, and skips every other block.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    Args:
+        file: Source PCAP-NG stream, positioned at its first Section Header Block.
+
+    """
+
+    def __init__(self, file: 'IO[bytes]') -> 'None':
+        #: Source PCAP-NG stream.
+        self._file = file
+        #: Context of the current section.
+        self._ctx = cast('Context', None)
+        #: Section index number.
+        self._sect = 0
+        #: Link type of the packet last yielded.
+        self._linktype = cast('Enum_LinkType', Enum_LinkType.NULL)
+        #: Underlying block iterator.
+        self._iter = self._read()
+
+    def datalink(self) -> 'Enum_LinkType':
+        """Link type of the interface the packet last yielded was captured on."""
+        return self._linktype
+
+    def __iter__(self) -> 'PCAPNGReader':
+        return self
+
+    def __next__(self) -> 'tuple[float, bytes]':
+        return next(self._iter)
+
+    def _read(self) -> 'Iterator[tuple[float, bytes]]':
+        """Read blocks until the next packet block, and yield its timestamp and data."""
+        from pcapkit.foundation.engines.pcapng import Context
+        from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+
+        while True:
+            head = self._file.read(8)
+            if len(head) < 8:
+                return
+
+            # the SHB block type is a palindrome, so it reads the same in
+            # either byte order; any other block uses the section's order
+            byteorder: 'Literal["big", "little"]'
+            if head[:4] == b'\x0a\x0d\x0d\x0a':
+                head += self._file.read(4)
+                byteorder = 'little' if head[8:] == b'\x4d\x3c\x2b\x1a' else 'big'
+            else:
+                byteorder = self._ctx.section.byteorder
+            block_type = int.from_bytes(head[:4], byteorder)
+            length = int.from_bytes(head[4:8], byteorder)
+            if length < 12:
+                raise FormatError(f'PCAP-NG: [Block {block_type}] invalid block length: {length}')
+
+            buf = head + self._file.read(length - len(head))
+            if len(buf) < length:
+                return
+
+            if block_type == Enum_BlockType.Section_Header_Block:
+                self._sect += 1
+                shb = P_PCAPNG(buf, num=0, sct=self._sect, ctx=None)
+                self._ctx = Context(cast('Data_SectionHeaderBlock', shb.info))
+            elif block_type == Enum_BlockType.Interface_Description_Block:
+                idb = P_PCAPNG(buf, num=0, sct=self._sect, ctx=self._ctx)
+                self._ctx.interfaces.append(cast('Data_InterfaceDescriptionBlock', idb.info))
+            elif block_type in (Enum_BlockType.Enhanced_Packet_Block, Enum_BlockType.Packet_Block):
+                yield self._read_packet(buf, block_type, byteorder == 'little')
+
+    def _read_packet(self, buf: 'bytes', block_type: 'int',
+                     little: 'bool') -> 'tuple[float, bytes]':
+        """Decode a packet block with `DPKT`_, against the interface it names.
+
+        Args:
+            buf: Whole block, as read from the file.
+            block_type: Block type, an EPB or an (obsolete) Packet Block.
+            little: Whether the enclosing section is little-endian.
+
+        Returns:
+            Timestamp in seconds since the UNIX epoch, and the packet data.
+
+        Raises:
+            FormatError: If the section describes no interface of the ID the
+                block names.
+
+        """
+        import dpkt  # isort:skip
+
+        if block_type == Enum_BlockType.Enhanced_Packet_Block:
+            tag = 'EPB'
+            pkt = (dpkt.pcapng.EnhancedPacketBlockLE(buf) if little
+                   else dpkt.pcapng.EnhancedPacketBlock(buf))
+        else:
+            tag = 'Packet'
+            pkt = dpkt.pcapng.PacketBlockLE(buf) if little else dpkt.pcapng.PacketBlock(buf)
+
+        iface_id = pkt.iface_id  # pylint: disable=no-member
+        if iface_id >= len(self._ctx.interfaces):
+            raise FormatError(f'PCAP-NG: [{tag}] invalid interface ID: {iface_id}')
+        interface = self._ctx.interfaces[iface_id]
+
+        tsresol = interface.options.get(Enum_OptionType.if_tsresol)
+        tsoffset = interface.options.get(Enum_OptionType.if_tsoffset)
+        resolution = 1_000_000 if tsresol is None else tsresol.resolution
+        offset = 0 if tsoffset is None else tsoffset.offset
+
+        # same arithmetic as :meth:`PCAPNG._read_timestamp
+        # <pcapkit.protocols.misc.pcapng.PCAPNG._read_timestamp>`
+        ticks = (pkt.ts_high << 32) | pkt.ts_low
+        with localcontext(prec=64):
+            timestamp = decimal.Decimal(ticks) / resolution + offset
+
+        self._linktype = interface.linktype
+        return float(timestamp), pkt.pkt_data
+
+
 class DPKT(EngineBase['DPKTPacket']):
     """DPKT engine support.
 
-    On PCAP-NG, `DPKT`_'s reader yields Enhanced Packet Blocks and (obsolete)
+    A PCAP-NG file is read by :class:`PCAPNGReader` rather than by
+    :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the
+    timestamp resolution and offset of the interface it was captured on.
+
+    Like `DPKT`_'s reader, it yields Enhanced Packet Blocks and (obsolete)
     Packet Blocks only, and skips every other block without a warning -- the
     Simple Packet Block included. A packet carried in a Simple Packet Block is
     therefore missing from this engine's output; the default engine reads it.
@@ -89,7 +228,8 @@ class DPKT(EngineBase['DPKTPacket']):
 
         This method assigns :attr:`self._expkg <DPKT._expkg>`
         as :mod:`dpkt` and :attr:`self._extmp <DPKT._extmp>`
-        as an iterator from :class:`dpkt.pcap.Reader`.
+        as an iterator from :class:`dpkt.pcap.Reader`, or from
+        :class:`PCAPNGReader` for a PCAP-NG file.
 
         The global header is parsed and dumped first, by
         :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
@@ -139,7 +279,7 @@ class DPKT(EngineBase['DPKTPacket']):
             reader = dpkt.pcap.Reader(ext._ifile)
         elif ext.magic_number in PCAPNG.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP-NG', ext._ifnm)
-            reader = dpkt.pcapng.Reader(ext._ifile)
+            reader = PCAPNGReader(ext._ifile)
         else:
             raise FormatError(f'unsupported file format: {ext.magic_number!r}')
 
@@ -163,10 +303,11 @@ class DPKT(EngineBase['DPKTPacket']):
         ext = self._extractor
 
         reader = self._extmp
-        linktype = Enum_LinkType.get(reader.datalink())
 
-        # fetch DPKT packet
+        # fetch DPKT packet; a PCAP-NG reader reports the link type of the
+        # interface this packet was captured on, so ask only after reading it
         timestamp, pkt = cast('tuple[float, bytes]', next(reader))
+        linktype = Enum_LinkType.get(reader.datalink())
         protocol = self._get_protocol(linktype)
         try:
             packet = protocol(pkt)  # type: DPKTPacket
