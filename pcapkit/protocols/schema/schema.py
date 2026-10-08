@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NO_VALUE, FieldBase
-from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
+                                         SchemaField)
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping, final
@@ -626,10 +627,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> '_VT':
-        if name in self.__fields__:
+        # NOTE: Serves every key :meth:`__iter__` yields, not only the declared
+        # fields: a ``post_process`` may store derived values on the instance,
+        # as :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption` does, and
+        # iteration reports them, so ``dict(schema)`` must be able to read them
+        # back (:issue:`1291`). A mangled key is reachable only under the name
+        # it was mangled from, as in iteration.
+        if name in self.__fields__ or (name not in self.__builtin__ and name not in self.__map_reverse__):
             key = self.__map__.get(name, name)
             return self.__dict__[key]
-        return super().__getitem__(name)
+        raise KeyError(name)
 
     def __setattr__(self, name: 'str', value: '_VT') -> 'None':
         if name in self.__fields__:
@@ -817,6 +824,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                     self.__buffer__[field.name] = field.pack(list(data), packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
+
+                if isinstance(field, OptionField):
+                    # NOTE: The packing mirror of the ``__option_padding__`` that
+                    # :meth:`unpack` records: whatever of the declared option area
+                    # the packed options do not fill. Without it every padding
+                    # field sized from that key packs nothing, and the header
+                    # comes out shorter than its own length field says
+                    # (:issue:`1289`). An undeclared area (a negative length)
+                    # leaves no remainder.
+                    packet['__option_padding__'] = max(field.length - len(self.__buffer__[field.name]), 0)
                 continue
 
             if isinstance(field, PaddingField):
@@ -841,6 +858,24 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 temp = field.pack(data, packet)
             except NoDefaultValue:
                 temp = bytes(field.length)
+
+            if isinstance(field, SchemaField) and len(temp) < field.length:
+                # NOTE: :meth:`unpack` hands a nested schema its whole declared
+                # span, and the schema may read less of it than that. The octets
+                # it left unread are still in the buffer :meth:`unpack` stored, so
+                # they are re-emitted from there, as long as the buffer still
+                # starts with what the nested schema packs to now; otherwise, or
+                # for a schema that was never unpacked, the span is zero-filled.
+                # Either way the field keeps the width its length field declares
+                # (:issue:`1292`).
+                #
+                # A field reached through a
+                # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
+                # here: the PCAP-NG block selector declares the rest of the
+                # *stream* as its span, which is no part of the field.
+                buffer = self.__buffer__[field.name]
+                tail = buffer[len(temp):field.length] if buffer.startswith(temp) else b''
+                temp += tail + bytes(field.length - len(temp) - len(tail))
             self.__buffer__[field.name] = temp
 
         self.post_process(packet)
