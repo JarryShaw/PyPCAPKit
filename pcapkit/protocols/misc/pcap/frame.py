@@ -364,7 +364,13 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         ts_sec, ts_usec = self._make_timestamp(timestamp, ts_sec, ts_usec, nanosecond)
 
         if incl_len is None:
-            incl_len = min(len(packet), self._ghdr.snaplen)
+            # NOTE: A snaplen of 0 is no limit, not a limit of zero octets. The
+            # PCAP draft says the field "MUST NOT be zero" (draft-ietf-opsawg-pcap,
+            # section 4), and libpcap reads such a bogus value as the maximum for
+            # the link type (``pcapint_adjust_snapshot`` in ``savefile.c``); the
+            # PCAP-NG reader treats a zero ``SnapLen`` the same way.
+            snaplen = self._ghdr.snaplen
+            incl_len = min(len(packet), snaplen) if snaplen else len(packet)
         if orig_len is None:
             orig_len = len(packet)
         # NOTE: The record holds exactly ``incl_len`` octets of packet data, so a
