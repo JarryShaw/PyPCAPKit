@@ -39,6 +39,13 @@ logger = get_logger(__name__)
 class DPKT(EngineBase['DPKTPacket']):
     """DPKT engine support.
 
+    On PCAP-NG, `DPKT`_'s reader yields Enhanced Packet Blocks and (obsolete)
+    Packet Blocks only, and skips every other block without a warning -- the
+    Simple Packet Block included. A packet carried in a Simple Packet Block is
+    therefore missing from this engine's output; the default engine reads it.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
