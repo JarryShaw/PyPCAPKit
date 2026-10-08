@@ -4570,6 +4570,12 @@ the parsed schema.</p>
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
 </dl>
+<p>A Block Total Length below the 28 octets of the fixed fields reads the
+trailing copy past the block, so the two are not compared here;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._read_block_short_header</span></code> keeps
+the block as captured and compares them itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1422">#1422</a>). A block
+of 12 octets has no Byte-Order Magic and takes its byte order from its
+Block Total Length (see <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">shb_byteorder_callback()</span></code></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4625,6 +4631,27 @@ the parsed schema.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.length2">
 <span class="sig-name descname"><span class="pre">length2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">length2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.length2" title="Link to this definition">¶</a></dt>
 <dd><p>Block total length.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#InterfaceDescriptionBlock.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.post_process" title="Link to this definition">¶</a></dt>
+<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Revised schema.</p>
+</dd>
+</dl>
+<p>A Block Total Length below the 20 octets of the fixed fields reads the
+trailing copy past the block, so the two are not compared here;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._read_block_short_header</span></code> keeps
+the block as captured and compares them itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1422">#1422</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -6704,6 +6731,11 @@ one would otherwise inherit the <em>previous</em> section’s byte order. The ma
 is therefore also written back as <code class="docutils literal notranslate"><span class="pre">packet['byteorder']</span></code>, which is what the
 SHB’s own options – read by <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, after this field –
 resolve their byte order from.</p>
+<p>A Section Header Block of 12 octets has no room for the magic, and its
+place holds the trailing Block Total Length instead. That length is 12 in
+exactly one byte order, which is the one taken; <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.post_process" title="pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SectionHeaderBlock.post_process()</span></code></a>
+then rejects any block that matched this way with a length other than 12
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1422">#1422</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

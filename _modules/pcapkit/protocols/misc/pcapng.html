@@ -1152,6 +1152,14 @@
     <span class="n">SHORT_PACKET_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">,</span>
                           <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">)</span>
 
+    <span class="c1">#: Header blocks mapped to the octets their fixed fields span, so that a</span>
+    <span class="c1">#: shorter Block Total Length is kept as captured (see</span>
+    <span class="c1">#: :meth:`_read_block_short_header`).</span>
+    <span class="n">SHORT_HEADER_TYPES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="p">}</span>
+
     <span class="c1">#: Blocks that resolve an interface of their section, mapped to the tag used</span>
     <span class="c1">#: when reporting an interface ID that names no such interface. A Simple</span>
     <span class="c1">#: Packet Block carries no interface ID field and always refers to the</span>
@@ -1760,6 +1768,8 @@
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__block__</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_PACKET_TYPES</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_short</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_HEADER_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_short_header</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_block_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span>
@@ -3140,6 +3150,81 @@
                 <span class="k">else</span> <span class="n">Data_EnhancedPacketBlock</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>  <span class="c1"># type: Data_EnhancedPacketBlock | Data_PacketBlock</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'block_raw'</span><span class="p">,</span> <span class="n">body</span><span class="p">)])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">interface_id</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_short_header</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SectionHeaderBlock | Schema_InterfaceDescriptionBlock | Schema_UnknownBlock'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+        <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_PCAPNG'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SectionHeaderBlock | Data_InterfaceDescriptionBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read a PCAP-NG SHB or IDB shorter than its fixed fields.</span>
+
+<span class="sd">        The fixed fields of a Section Header Block span 28 octets and those of</span>
+<span class="sd">        an Interface Description Block 20 (see :attr:`SHORT_HEADER_TYPES`), so a</span>
+<span class="sd">        smaller Block Total Length cannot hold them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed block schema, or on the construction path the</span>
+<span class="sd">                :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` that</span>
+<span class="sd">                :meth:`_make_block_short` built.</span>
+<span class="sd">            header: Parsed PCAP-NG header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data, with the fixed fields the block holds and zero</span>
+<span class="sd">            for those it does not, and no options. The block body is kept as</span>
+<span class="sd">            ``block_raw``, which the block's ``make`` writes back verbatim, so</span>
+<span class="sd">            the block rebuilds at the length it declared (:issue:`1422`).</span>
+
+<span class="sd">            A section header keeps the byte order its Byte-Order Magic declares.</span>
+<span class="sd">            One of 12 octets has no room for the magic, and takes the byte order</span>
+<span class="sd">            in which its Block Total Length reads as 12 (see</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnknownBlock</span><span class="p">):</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">body</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># the octets unpacked for the fixed fields, which start with the</span>
+            <span class="c1"># Block Total Length and run past the end of the block</span>
+            <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">]</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> is below the '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">SHORT_HEADER_TYPES</span><span class="p">[</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">]</span><span class="si">}</span><span class="s1">-octet minimum; kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">octets</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">octets</span><span class="p">[:</span><span class="mi">4</span><span class="p">]:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length mismatch: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> != '</span>
+                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">octets</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_SectionHeaderBlock | Data_InterfaceDescriptionBlock'</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span>
+            <span class="c1"># NOTE: On the construction path :meth:`_make_block_shb` has already</span>
+            <span class="c1"># set the byte order from the data model.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_SectionHeaderBlock</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">byteorder</span>
+            <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">==</span> <span class="s1">'little'</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
+            <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">,</span> <span class="n">section_length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">HHq'</span><span class="p">,</span> <span class="p">(</span><span class="n">body</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">))[</span><span class="mi">4</span><span class="p">:</span><span class="mi">16</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SectionHeaderBlock</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_byte</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">VersionInfo</span><span class="p">(</span>
+                    <span class="n">major</span><span class="o">=</span><span class="n">major</span><span class="p">,</span>
+                    <span class="n">minor</span><span class="o">=</span><span class="n">minor</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">section_length</span><span class="o">=</span><span class="n">section_length</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">([]),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">==</span> <span class="s1">'little'</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
+            <span class="n">linktype</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">snaplen</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">HHI'</span><span class="p">,</span> <span class="p">(</span><span class="n">body</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">))[:</span><span class="mi">8</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">Data_InterfaceDescriptionBlock</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                <span class="n">linktype</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">linktype</span><span class="p">),</span>
+                <span class="n">snaplen</span><span class="o">=</span><span class="n">snaplen</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">([]),</span>
+            <span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'block_raw'</span><span class="p">,</span> <span class="n">body</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">data</span>
 
 <div class="viewcode-block" id="PCAPNG._read_pcapng_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_pcapng_options">[docs]</a>
@@ -4740,6 +4825,8 @@
             <span class="n">byteorder</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">byteorder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="n">byteorder</span>
 
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'block_raw'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_short</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">major_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span>
             <span class="n">minor_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span>
@@ -4793,6 +4880,8 @@
 <span class="sd">            Constructed block schema.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'block_raw'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_short</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">linktype_val</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">linktype</span>
             <span class="n">snaplen</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">snaplen</span>
@@ -4933,12 +5022,15 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_block_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownBlock'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make a PCAP-NG EPB or packet block (obsolete) kept as captured.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_block_short</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock | Data_SectionHeaderBlock | Data_InterfaceDescriptionBlock'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make a PCAP-NG EPB, packet block (obsolete), SHB or IDB kept as captured.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            block: Block data model, whose ``block_raw`` holds the body of a</span>
-<span class="sd">                block shorter than its fixed fields (see :meth:`_read_block_short`).</span>
+<span class="sd">                block shorter than its fixed fields (see :meth:`_read_block_short`</span>
+<span class="sd">                and :meth:`_read_block_short_header`).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed block schema, the body written back verbatim.</span>

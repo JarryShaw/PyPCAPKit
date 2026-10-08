@@ -698,15 +698,21 @@
 <span class="sd">    SHB's own options -- read by :func:`byteorder_callback`, after this field --</span>
 <span class="sd">    resolve their byte order from.</span>
 
+<span class="sd">    A Section Header Block of 12 octets has no room for the magic, and its</span>
+<span class="sd">    place holds the trailing Block Total Length instead. That length is 12 in</span>
+<span class="sd">    exactly one byte order, which is the one taken; :meth:`SectionHeaderBlock.post_process`</span>
+<span class="sd">    then rejects any block that matched this way with a length other than 12</span>
+<span class="sd">    (:issue:`1422`).</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        field: Field instance.</span>
 <span class="sd">        packet: Packet data.</span>
 
 <span class="sd">    """</span>
     <span class="n">magic</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">][</span><span class="s1">'byteorder'</span><span class="p">]</span>  <span class="c1"># type: int</span>
-    <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x1A2B3C4D</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x1A2B3C4D</span><span class="p">,</span> <span class="mh">0x0000000C</span><span class="p">):</span>
         <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-    <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x4D3C2B1A</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x4D3C2B1A</span><span class="p">,</span> <span class="mh">0x0C000000</span><span class="p">):</span>
         <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1613,16 +1619,25 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
+<span class="sd">        A Block Total Length below the 28 octets of the fixed fields reads the</span>
+<span class="sd">        trailing copy past the block, so the two are not compared here;</span>
+<span class="sd">        :meth:`PCAPNG._read_block_short_header</span>
+<span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short_header&gt;` keeps</span>
+<span class="sd">        the block as captured and compares them itself (:issue:`1422`). A block</span>
+<span class="sd">        of 12 octets has no Byte-Order Magic and takes its byte order from its</span>
+<span class="sd">        Block Total Length (see :func:`shb_byteorder_callback`).</span>
+
 <span class="sd">        """</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">28</span><span class="p">:</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">==</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">magic</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">][</span><span class="s1">'byteorder'</span><span class="p">]</span>  <span class="c1"># type: int</span>
-        <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x1A2B3C4D</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x1A2B3C4D</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0000000C</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">12</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-        <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x4D3C2B1A</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x4D3C2B1A</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0C000000</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">12</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1959,6 +1974,29 @@
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InterfaceDescriptionBlock.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock.post_process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        A Block Total Length below the 20 octets of the fixed fields reads the</span>
+<span class="sd">        trailing copy past the block, so the two are not compared here;</span>
+<span class="sd">        :meth:`PCAPNG._read_block_short_header</span>
+<span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short_header&gt;` keeps</span>
+<span class="sd">        the block as captured and compares them itself (:issue:`1422`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
