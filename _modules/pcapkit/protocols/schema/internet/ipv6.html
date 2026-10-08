@@ -474,6 +474,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6AddressField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span>
@@ -486,6 +487,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
@@ -535,7 +537,8 @@
     <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv6Address'</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="c1">#: Payload.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
-    <span class="c1">#: Octets captured past the Payload Length, such as Ethernet minimum-frame</span>
+    <span class="c1">#: Octets captured past the Payload Length (or a jumbogram's Jumbo Payload</span>
+    <span class="c1">#: Length, see :meth:`post_process`), such as Ethernet minimum-frame</span>
     <span class="c1">#: padding, c.f. :attr:`IPv4.trailer &lt;pcapkit.protocols.schema.internet.ipv4.IPv4.trailer&gt;`.</span>
     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
@@ -544,8 +547,78 @@
                      <span class="n">limit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'IPv6Address | bytes | str | int'</span><span class="p">,</span>
                      <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv6Address | bytes | str | int'</span><span class="p">,</span>
                      <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
-                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 
+<div class="viewcode-block" id="IPv6.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.schema.internet.ipv6.IPv6.post_process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        A jumbogram [:rfc:`2675`] declares a Payload Length of zero and</span>
+<span class="sd">        carries its real length in a Jumbo Payload option instead, so the</span>
+<span class="sd">        :attr:`payload` field reads nothing and every octet lands in</span>
+<span class="sd">        :attr:`trailer`. When :func:`jumbo_payload_length` finds that option,</span>
+<span class="sd">        the two are split again at the Jumbo Payload Length, and only the</span>
+<span class="sd">        octets beyond it stay in :attr:`trailer`. The octets themselves are</span>
+<span class="sd">        untouched, so the packed header is unchanged.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'payload'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="n">rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+        <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="s1">'payload'</span><span class="p">]</span> <span class="o">=</span> <span class="n">rest</span><span class="p">[:</span><span class="n">jumbo</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="s1">'trailer'</span><span class="p">]</span> <span class="o">=</span> <span class="n">rest</span><span class="p">[</span><span class="n">jumbo</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">jumbo_payload_length</span><span class="p">(</span><span class="nb">next</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[int]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="w">    </span><span class="sd">"""Find the Jumbo Payload Length of an IPv6 packet [:rfc:`2675`].</span>
+
+<span class="sd">    The Jumbo Payload option is only honoured in a Hop-by-Hop Options header</span>
+<span class="sd">    that immediately follows the IPv6 header, as :rfc:`2675#section-2` and</span>
+<span class="sd">    :rfc:`8200#section-4.1` place it there; one anywhere else is left to the</span>
+<span class="sd">    extension header that carries it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        next: Next Header of the IPv6 header.</span>
+<span class="sd">        data: Octets following the IPv6 header.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The Jumbo Payload Length, or :data:`None` if ``data`` does not start</span>
+<span class="sd">        with a Hop-by-Hop Options header carrying a well-formed (four-octet)</span>
+<span class="sd">        Jumbo Payload option.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">next</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">ptr</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="n">ptr</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ptr</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
+            <span class="n">ptr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">ptr</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ptr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Jumbo_Payload</span> <span class="ow">and</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">ptr</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span><span class="n">ptr</span> <span class="o">+</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ptr</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">size</span>
+    <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
         </article>
       </div>

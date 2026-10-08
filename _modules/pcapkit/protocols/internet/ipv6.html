@@ -506,7 +506,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Schema_IPv6</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -689,6 +692,23 @@
                 <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span>
             <span class="p">})</span>
 
+        <span class="c1"># NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero</span>
+        <span class="c1"># Payload Length, c.f. :meth:`Schema_IPv6.post_process</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.internet.ipv6.IPv6.post_process&gt;`</span>
+        <span class="c1"># (:issue:`1434`). :rfc:`2675#section-2` makes a Jumbo Payload option</span>
+        <span class="c1"># beside a non-zero Payload Length an error; such a packet is still</span>
+        <span class="c1"># kept as captured, with the Payload Length deciding its extent, since</span>
+        <span class="c1"># that is what the receiver had to go by.</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">extent</span> <span class="o">=</span> <span class="n">jumbo</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: Jumbo Payload option with non-zero Payload Length '</span>
+                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">; ignoring the Jumbo Payload Length </span><span class="si">{</span><span class="n">jumbo</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+                     <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
         <span class="c1"># update packet info</span>
         <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">__packet__</span> <span class="o">=</span> <span class="p">{}</span>
@@ -697,7 +717,7 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
 
 
 <div class="viewcode-block" id="IPv6.make">
@@ -729,7 +749,8 @@
 <span class="sd">            src: Source IP address.</span>
 <span class="sd">            dst: Destination IP address.</span>
 <span class="sd">            payload_length: Length of the payload, extension headers included;</span>
-<span class="sd">                computed from the payload when omitted.</span>
+<span class="sd">                computed from the payload when omitted, and zero (a jumbogram)</span>
+<span class="sd">                if that exceeds 65,535 octets.</span>
 <span class="sd">            payload: Payload data.</span>
 <span class="sd">            trailer: Octets after the packet, outside the Payload Length, such</span>
 <span class="sd">                as link-layer padding; written as is.</span>
@@ -746,9 +767,14 @@
         <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
         <span class="c1"># length the sender declared instead of the one that was recorded</span>
         <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
-        <span class="c1"># what a plain ``IPv6(payload=...)`` wants.</span>
+        <span class="c1"># what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too</span>
+        <span class="c1"># long for the field, i.e. a jumbogram, whose length the caller carries</span>
+        <span class="c1"># in a Jumbo Payload option of ``payload``'s Hop-by-Hop Options header</span>
+        <span class="c1"># (:rfc:`2675#section-2`).</span>
         <span class="k">if</span> <span class="n">payload_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span><span class="p">:</span>
+                <span class="n">payload_length</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv6</span><span class="p">(</span>
             <span class="n">hextet</span><span class="o">=</span><span class="p">{</span>
@@ -890,7 +916,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase] # pylint: disable=attribute-defined-outside-init</span>
 
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>       <span class="c1"># header length</span>
-        <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>      <span class="c1"># payload length</span>
+        <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>  <span class="c1"># payload length</span>
         <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># ProtoChain buffer</span>
         <span class="n">_exthdr</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># (parser class, info) per extension header</span>
 
