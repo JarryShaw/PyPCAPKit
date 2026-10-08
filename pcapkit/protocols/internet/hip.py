@@ -820,6 +820,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 meth = name[0]
             data = meth(schema, version=version, options=options)
 
+            # NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on
+            # the data model only when it is not all zeros -- the form a fresh
+            # build writes -- so that a rebuild reproduces it (:issue:`1223`).
+            # :meth:`_make_hip_param` writes it back.
+            padding = schema.__dict__.get('padding')
+            if isinstance(padding, bytes) and any(padding):
+                data.__update__([('padding', padding)])
+
             # record parameter data
             options.add(dscp, data)
             counter += len(schema)
@@ -951,6 +959,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             counter=schema.counter,
         )
         return r1_counter
@@ -1515,6 +1524,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             mode_id=tuple(schema.modes),
         )
         return nat_traversal_mode
@@ -1596,6 +1606,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             cipher=schema.cipher,
             iv=getattr(schema, 'iv', None),
             data=schema.data,
@@ -1783,6 +1794,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             msg_type=schema.msg_type,
             msg=schema.msg,
         )
@@ -2016,6 +2028,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             port=schema.port,
             protocol=schema.protocol,
             address=schema.address,
@@ -2138,6 +2151,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             suite_id=tuple(schema.suites),
         )
         return esp_transform
@@ -2257,6 +2271,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             next=schema.next,
             payload=schema.payload,
             mic=schema.mic,
@@ -2381,6 +2396,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
@@ -2689,6 +2705,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
@@ -2738,6 +2755,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
@@ -2779,6 +2797,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             ttl=datetime.timedelta(seconds=schema.ttl),
         )
         return overlay_ttl
@@ -2831,6 +2850,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
@@ -3058,6 +3078,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 meth = name[1]
 
             data = meth(code, param, version=version)
+            # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
+            padding = getattr(param, 'padding', None)
+            if isinstance(padding, bytes) and 'padding' in data.__fields__:
+                data.padding = padding
             data_packed = data.pack()
 
             parameters_list.append(data)
@@ -3131,6 +3155,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Optional[Data_R1CounterParameter]' = None, *, # pylint: disable=unused-argument
                                version: 'int',
                                counter: 'int' = 0,
+                               reserved: 'bytes' = b'\x00\x00\x00\x00',
                                **kwargs: 'Any') -> 'Schema_R1CounterParameter':
         """Make HIP ``R1_COUNTER`` parameter.
 
@@ -3139,6 +3164,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             counter: R1 generation counter
+            reserved: the four reserved octets, truncated or
+                zero-filled to 4 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -3149,9 +3176,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
 
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00\x00')
             counter = param.counter
 
         return Schema_R1CounterParameter(
+            reserved=reserved,
             type=code,
             len=12,
             counter=counter,
@@ -3773,6 +3802,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                        mode_default: 'Optional[int]' = None,
                                        mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                        mode_reversed: 'bool' = False,
+                                       reserved: 'bytes' = b'\x00\x00',
                                        **kwargs: 'Any') -> 'Schema_NATTraversalModeParameter':
         """Make HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
@@ -3784,6 +3814,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             mode_default: default mode ID
             mode_namespace: mode ID namespace
             mode_reversed: reverse mode ID namespace
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -3791,6 +3823,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             mode_id = cast('list[Enum_NATTraversal]', param.mode_id)
         else:
             if modes is None:
@@ -3802,6 +3835,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                                 reversed=mode_reversed, pack=False))
 
         return Schema_NATTraversalModeParameter(
+            reserved=reserved,
             type=code,
             len=2 + 2 * len(mode_id),
             modes=mode_id,
@@ -3841,6 +3875,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                               cipher_reversed: 'bool' = False,
                               iv: 'Optional[bytes]' = None,
                               data: 'bytes' = b'',
+                              reserved: 'bytes' = b'\x00\x00\x00\x00',
                               **kwargs: 'Any') -> 'Schema_EncryptedParameter':
         """Make HIP ``ENCRYPTED`` parameter.
 
@@ -3854,12 +3889,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             cipher_reversed: reverse cipher ID namespace
             iv: initialization vector (optional depending on cipher ID)
             data: encrypted data
+            reserved: the four reserved octets, truncated or
+                zero-filled to 4 octets
 
         Returns:
             HIP parameter schema.
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00\x00')
             cipher_id = param.cipher
             iv = param.iv
             data = param.data
@@ -3874,6 +3912,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV length must be 16 bytes for AES cipher')
 
         schema = Schema_EncryptedParameter(
+            reserved=reserved,
             type=code,
             len=4 + len(iv or b'') + len(data),
             iv=iv,
@@ -4124,6 +4163,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                  msg_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                  msg_type_reversed: 'bool' = False,
                                  msg: 'bytes' = b'',
+                                 reserved: 'bytes' = b'\x00\x00',
                                  **kwargs: 'Any') -> 'Schema_NotificationParameter':
         """Make HIP ``NOTIFICATION`` parameter.
 
@@ -4136,6 +4176,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             msg_type_namespace: notification message type namespace
             msg_type_reversed: reverse notification message type namespace
             msg: notification message
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4143,6 +4185,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             type = param.msg_type
             msg = param.msg
         else:
@@ -4150,6 +4193,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                     reversed=msg_type_reversed, pack=False)
 
         return Schema_NotificationParameter(
+            reserved=reserved,
             type=code,
             len=4 + len(msg),
             msg_type=type,
@@ -4377,6 +4421,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                              protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                              protocol_reversed: 'bool' = False,
                              address: 'IPv6Address | str | int | bytes' = '::',
+                             reserved: 'bytes' = b'\x00',
                              **kwargs: 'Any') -> 'Schema_RegFromParameter':
         """Make HIP ``REG_FROM`` parameter.
 
@@ -4390,6 +4435,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol_namespace: transport protocol namespace
             protocol_reversed: reverse transport protocol namespace
             address: IPv6 address
+            reserved: the reserved octet, truncated or
+                zero-filled to 1 octet
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4397,6 +4444,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
             port = param.port
             proto = param.protocol
             address = param.address
@@ -4405,6 +4453,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RegFromParameter(
+            reserved=reserved,
             type=code,
             len=20,
             port=port,
@@ -4490,6 +4539,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                   suite_default: 'Optional[int]' = None,
                                   suite_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                   suite_reversed: 'bool' = False,
+                                  reserved: 'bytes' = b'\x00\x00',
                                   **kwargs: 'Any') -> 'Schema_ESPTransformParameter':
         """Make HIP ``ESP_TRANSFORM`` parameter.
 
@@ -4501,6 +4551,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             suite_default: default ESP transform suite
             suite_namespace: ESP transform suite namespace
             suite_reversed: reverse ESP transform suite namespace
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4508,6 +4560,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             suite_id = cast('list[Enum_ESPTransformSuite]', param.suite_id)
         else:
             if suites is None:
@@ -4519,6 +4572,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                                  reversed=suite_reversed, pack=False))
 
         return Schema_ESPTransformParameter(
+            reserved=reserved,
             type=code,
             len=2 + 2 * len(suite_id),
             suites=suite_id,
@@ -4585,6 +4639,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                 next_reversed: 'bool' = False,
                                 payload: 'bytes' = b'',
                                 mic: 'bytes' = b'',
+                                reserved: 'bytes' = b'\x00\x00\x00',
                                 **kwargs: 'Any') -> 'Schema_PayloadMICParameter':
         """Make HIP ``PAYLOAD_MIC`` parameter.
 
@@ -4598,6 +4653,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             next_reversed: reverse next protocol namespace
             payload: payload data
             mic: message integrity code
+            reserved: the three reserved octets, truncated or
+                zero-filled to 3 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4605,6 +4662,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00')
             protocol = param.next
             payload = param.payload
             mic = param.mic
@@ -4613,6 +4671,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                         reversed=next_reversed, pack=False)
 
         return Schema_PayloadMICParameter(
+            reserved=reserved,
             type=code,
             len=8 + len(mic),
             next=protocol,
@@ -4678,6 +4737,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                               must_follow: 'bool' = False,
                               flags_reserved: 'int' = 0,
                               hit: 'Optional[list[bytes | str | int | IPv6Address]]' = None,
+                              reserved: 'bytes' = b'\x00\x00',
                               **kwargs: 'Any') -> 'Schema_RouteDstParameter':
         """Make HIP ``ROUTE_DST`` parameter.
 
@@ -4689,12 +4749,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             must_follow: must-follow flag
             flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
 
         Returns:
             HIP parameter schema.
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             symmetric = param.flags.symmetric
             must_follow = param.flags.must_follow
             flags_reserved = param.flags.reserved
@@ -4703,6 +4766,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit_list = hit if hit is not None else []
 
         return Schema_RouteDstParameter(
+            reserved=reserved,
             type=code,
             len=4 + 16 * len(hit_list),
             flags={
@@ -4945,6 +5009,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                protocol_reversed: 'bool' = False,
                                address: 'IPv6Address | str | int | bytes' = '::',
+                               reserved: 'bytes' = b'\x00',
                                **kwargs: 'Any') -> 'Schema_RelayFromParameter':
         """Make HIP ``RELAY_FROM`` parameter.
 
@@ -4958,12 +5023,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol_namespace: transport protocol namespace
             protocol_reversed: reverse transport protocol namespace
             address: relay address
+            reserved: the reserved octet, truncated or
+                zero-filled to 1 octet
 
         Returns:
             HIP parameter schema.
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
             port = param.port
             proto = param.protocol
             address = param.address
@@ -4972,6 +5040,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RelayFromParameter(
+            reserved=reserved,
             type=code,
             len=20,
             port=port,
@@ -4987,6 +5056,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                              protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                              protocol_reversed: 'bool' = False,
                              address: 'IPv6Address | str | int | bytes' = '::',
+                             reserved: 'bytes' = b'\x00',
                              **kwargs: 'Any') -> 'Schema_RelayToParameter':
         """Make HIP ``RELAY_TO`` parameter.
 
@@ -5000,6 +5070,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol_namespace: transport protocol namespace
             protocol_reversed: reverse transport protocol namespace
             address: relay address
+            reserved: the reserved octet, truncated or
+                zero-filled to 1 octet
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5007,6 +5079,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
             port = param.port
             proto = param.protocol
             address = param.address
@@ -5015,6 +5088,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RelayToParameter(
+            reserved=reserved,
             type=code,
             len=20,
             port=port,
@@ -5025,6 +5099,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayTTLParameter]' = None, *,  # pylint: disable=unused-argument
                                 version: 'int',
                                 ttl: 'int | timedelta' = 0,
+                                reserved: 'bytes' = b'\x00\x00',
                                 **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
         """Make HIP ``OVERLAY_TTL`` parameter.
 
@@ -5033,6 +5108,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             ttl: overlay time-to-live (TTL) value
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5040,11 +5117,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             ttl_val = math.floor(param.ttl.total_seconds())
         else:
             ttl_val = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
 
         return Schema_OverlayTTLParameter(
+            reserved=reserved,
             type=code,
             len=4,
             ttl=ttl_val,
@@ -5056,6 +5135,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                               must_follow: 'bool' = False,
                               flags_reserved: 'int' = 0,
                               hit: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                              reserved: 'bytes' = b'\x00\x00',
                               **kwargs: 'Any') -> 'Schema_RouteViaParameter':
         """Make HIP ``ROUTE_VIA`` parameter.
 
@@ -5067,12 +5147,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             must_follow: must-follow flag
             flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
+            reserved: the two reserved octets, truncated or
+                zero-filled to 2 octets
 
         Returns:
             HIP parameter schema.
 
         """
         if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
             symmetric = param.flags.symmetric
             must_follow = param.flags.must_follow
             flags_reserved = param.flags.reserved
@@ -5081,6 +5164,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit_list = hit if hit is not None else []
 
         return Schema_RouteViaParameter(
+            reserved=reserved,
             type=code,
             len=4 + 16 * len(hit_list),
             flags={

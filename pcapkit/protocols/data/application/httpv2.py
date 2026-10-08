@@ -89,9 +89,11 @@ class DataFrame(HTTP):
     pad_len: 'int'
     #: Frame payload.
     data: 'bytes'
+    #: Padding octets, as captured (empty unless ``PADDED``).
+    padding: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', data: 'bytes', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -127,9 +129,11 @@ class HeadersFrame(HTTP):
     weight: 'int'
     #: Header block fragment.
     fragment: 'bytes'
+    #: Padding octets, as captured (empty unless ``PADDED``).
+    padding: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', reserved: 'int', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -237,9 +241,11 @@ class PushPromiseFrame(HTTP):
     promised_sid: 'int'
     #: Header block fragment.
     fragment: 'bytes'
+    #: Padding octets, as captured (empty unless ``PADDED``).
+    padding: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', pad_len: 'int', sid: 'int', promised_reserved: 'int', promised_sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', pad_len: 'int', sid: 'int', promised_reserved: 'int', promised_sid: 'int', fragment: 'bytes', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

@@ -3013,6 +3013,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_PadOption(
             type=schema.type,
             length=size,
+            data=schema.data,
         )
         return data
 
@@ -4852,6 +4853,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_PadFlowIdentificationSuboption(
                     type=code,
                     length=size,
+                    data=pad.data,
                 )  # type: Data_FlowIdentificationSuboption
             elif code == Enum_FlowIDSuboption.BID_Reference:
                 bid_ref = cast('Schema_BIDReferenceSuboption', schema)
@@ -7824,6 +7826,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_pad(self, type: 'Enum_Option', option: 'Optional[Data_PadOption]' = None, *,
                       length: 'int' = 0,
+                      data: 'bytes' = b'',
                       **kwargs: 'Any') -> 'Schema_PadOption':
         """Make MH pad option.
 
@@ -7832,6 +7835,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             length: Value of the ``Option Length`` field, i.e. the number of
                 padding octets *after* the two octets of the option header.
+            data: The ``PadN`` option data, truncated or zero-filled to
+                ``length`` octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7852,6 +7857,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             length = 0 if option.type == Enum_Option.Pad1 else option.length - 2
+            data = getattr(option, 'data', b'')
 
         if type == Enum_Option.Pad1 and length != 0:
             # raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
@@ -7861,6 +7867,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_PadOption(
             type=type,
             length=length,
+            data=data,
         )
 
     def _make_opt_bra(self, type: 'Enum_Option', option: 'Optional[Data_BindingRefreshAdviceOption]' = None, *,
@@ -9569,7 +9576,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 pad_len = option.length - 2
             else:
                 pad_len = cast('int', kwargs.get('length', 0))
-            return Schema_PadFlowIdentificationSuboption(type=code, length=pad_len)
+            if option is not None:
+                pad_data = getattr(option, 'data', b'')
+            else:
+                pad_data = cast('bytes', kwargs.get('data', b''))
+            return Schema_PadFlowIdentificationSuboption(type=code, length=pad_len, data=pad_data)
 
         if code == Enum_FlowIDSuboption.BID_Reference:
             if option is not None:

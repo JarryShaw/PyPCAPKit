@@ -348,4 +348,28 @@ class PaddingField(BytesField):
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
+    Padding packs back as the octets it was given, so a schema unpacked from
+    non-zero padding rebuilds byte for byte. An absent or empty value packs as
+    zeros -- the default for a freshly built packet -- and a value of another
+    width is truncated or zero-filled to the field's, as :mod:`struct`'s ``s``
+    format does.
+
     """
+
+    def pack(self, value: 'Optional[bytes]', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: Field value, i.e. the padding octets as captured.
+            packet: Packet data.
+
+        Returns:
+            Packed field value: ``value`` truncated or zero-filled to the
+            field's width, or that many zero octets if ``value`` is absent or
+            empty.
+
+        """
+        length = self.length
+        if isinstance(value, (bytes, bytearray)) and value:
+            return bytes(value[:length]).ljust(length, b'\x00')
+        return bytes(length)

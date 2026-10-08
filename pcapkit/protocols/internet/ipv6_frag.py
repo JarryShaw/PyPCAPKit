@@ -144,6 +144,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         # exactly as :meth:`pcapkit.protocols.internet.ipv4.IPv4.read` does.
         ipv6_frag = Data_IPv6_Frag(
             next=schema.next,
+            reserved_octet=schema.reserved,
             offset=int(schema.flags['offset']) * 8,
             reserved=schema.flags['reserved'],
             mf=bool(schema.flags['mf']),
@@ -159,6 +160,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
              next_default: 'Optional[int]' = None,
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              next_reversed: 'bool' = False,
+             reserved_octet: 'bytes' = b'\x00',
              offset: 'int' = 0,
              reserved: 'int' = 0,
              mf: 'bool' = False,
@@ -172,6 +174,8 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             next_default: Default value of next header.
             next_namespace: Namespace of next header.
             next_reversed: If the namespace of next header is reversed.
+            reserved_octet: The reserved octet after the next header, truncated or
+                zero-filled to one octet.
             offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).
                 Note that :attr:`Data_IPv6_Frag.offset
                 <pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset>` is in
@@ -191,6 +195,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         return Schema_IPv6_Frag(
             next=next_val,  # type: ignore[arg-type]
+            reserved=reserved_octet,
             flags={
                 'offset': offset,
                 'reserved': reserved,
@@ -267,6 +272,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         # keep the data-to-schema round trip exact.
         return {
             'next': data.next,
+            'reserved_octet': getattr(data, 'reserved_octet', b'\x00'),
             'offset': data.offset // 8,
             'reserved': data.reserved,
             'mf': data.mf,

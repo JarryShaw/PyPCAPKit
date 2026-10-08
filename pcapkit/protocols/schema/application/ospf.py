@@ -53,7 +53,7 @@ class CryptographicAuthentication(Schema):
     seq: 'int' = UInt32Field()
 
     if TYPE_CHECKING:
-        def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...
+        def __init__(self, reserved: 'bytes', key_id: 'int', len: 'int', seq: 'int') -> 'None': ...
 
 
 @schema_final

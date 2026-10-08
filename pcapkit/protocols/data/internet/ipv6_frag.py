@@ -18,6 +18,8 @@ class IPv6_Frag(Protocol):
 
     #: Next header.
     next: 'TransType'
+    #: The reserved octet after the next header, as captured.
+    reserved_octet: 'bytes'
     #: Fragment offset.
     offset: 'int'
     #: Reserved bits (``Res``) between the offset and the M flag, carried
@@ -29,4 +31,4 @@ class IPv6_Frag(Protocol):
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', offset: 'int', reserved: 'int', mf: 'bool', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
+        def __init__(self, next: 'TransType', reserved_octet: 'bytes', offset: 'int', reserved: 'int', mf: 'bool', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements

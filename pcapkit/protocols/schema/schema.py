@@ -862,7 +862,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 continue
 
             if isinstance(field, PaddingField):
-                self.__buffer__[field.name] = bytes(field.length)
+                # NOTE: the octets as captured, or zeros when there are none
+                # (:issue:`1223`) -- see :meth:`PaddingField.pack
+                # <pcapkit.corekit.fields.strings.PaddingField.pack>`.
+                self.__buffer__[field.name] = field.pack(data, packet)
                 continue
 
             if isinstance(field, ConditionalField):

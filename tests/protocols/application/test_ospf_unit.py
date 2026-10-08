@@ -134,7 +134,7 @@ class OSPFUnitTests(unittest.TestCase):
         self.assertEqual(schema.length, 28)
         self.assertEqual(schema.auth_data, b'\x01' * 8)
 
-        crypto_data_model = DataCryptoAuth(key_id=2, len=20, seq=100)
+        crypto_data_model = DataCryptoAuth(reserved=b'\x00\x00', key_id=2, len=20, seq=100)
         crypto_schema_from_data = maker.make(
             auth_type=Authentication.Cryptographic_authentication,
             auth_data=crypto_data_model,

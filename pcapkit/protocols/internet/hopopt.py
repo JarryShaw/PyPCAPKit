@@ -652,6 +652,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
             length=_size,
+            pad=schema.pad,
         )
         return opt
 
@@ -991,6 +992,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce['nonce'],
                 reserved=schema_rep.nonce['reserved'],
+                unused=schema_rep.reserved,
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
@@ -1476,6 +1478,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
     def _make_opt_pad(self, code: 'Enum_Option', opt: 'Optional[Data_PadOption]' = None, *,
                       length: 'int' = 0,
+                      pad: 'bytes' = b'',
                       **kwargs: 'Any') -> 'Schema_PadOption':
         """Make HOPOPT pad option.
 
@@ -1484,6 +1487,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             opt: option data
             length: value of the ``Opt Data Len`` field, i.e. the number of
                 padding octets *after* the two octets of the option header
+            pad: the ``PadN`` option data, truncated or zero-filled to
+                ``length`` octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1503,6 +1508,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         if opt is not None:
             code = opt.type
             length = 0 if opt.type == Enum_Option.Pad1 else opt.length - 2
+            pad = getattr(opt, 'pad', b'')
 
         if code == Enum_Option.Pad1 and length != 0:
             #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
@@ -1512,6 +1518,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         return Schema_PadOption(
             type=code,
             len=length,
+            pad=pad,
         )
 
     def _make_opt_tun(self, code: 'Enum_Option', opt: 'Optional[Data_TunnelEncapsulationLimitOption]' = None, *,
@@ -1843,6 +1850,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                      ttl: 'timedelta | int' = 0,
                      nonce: 'int' = 0,
                      reserved: 'int' = 0,
+                     unused: 'bytes' = b'\x00',
                      **kwargs: 'Any') -> 'Schema_QuickStartOption | Schema_UnassignedOption':
         """Make HOPOPT QS option.
 
@@ -1857,6 +1865,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             ttl: time to live (in seconds)
             nonce: nonce value
             reserved: reserved bits (``R``) after the nonce
+            unused: the "Not Used" octet of a report of approved rate
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1872,6 +1881,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             ttl = getattr(opt, 'ttl', 0)
             nonce = getattr(opt, 'nonce', 0)
             reserved = getattr(opt, 'reserved', 0)
+            unused = getattr(opt, 'unused', b'\x00')
         else:
             func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
@@ -1901,6 +1911,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                     'func': func_enum,
                     'rate': rate_val,
                 },
+                reserved=unused,
                 nonce={
                     'nonce': nonce,
                     'reserved': reserved,

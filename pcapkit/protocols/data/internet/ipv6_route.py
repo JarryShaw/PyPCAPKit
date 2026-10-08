@@ -48,24 +48,28 @@ class UnknownType(IPv6_Route):
 class SourceRoute(IPv6_Route):
     """Data model for IPv6-Route Source Route data type."""
 
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
     #: Source addresses.
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     reserved: 'bytes', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 @info_final
 class Type2(IPv6_Route):
     """Data model for IPv6-Route Type 2 data type."""
 
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
     #: Address.
     ip: 'IPv6Address'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     reserved: 'bytes', ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 @info_final
@@ -82,7 +86,9 @@ class RPL(IPv6_Route):
     reserved: 'int'
     #: Addresses.
     ip: 'tuple[IPv6Address | bytes, ...]'
+    #: The ``Pad`` octets after the addresses, as captured.
+    padding: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
-                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', reserved: 'int', ip: 'tuple[IPv6Address | bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', reserved: 'int', ip: 'tuple[IPv6Address | bytes, ...]', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
