@@ -172,16 +172,26 @@ jobs:
           # direct children in the log above) left one.
           python - <<'PY'
           import glob, os, re, sys
-          parent, cmd = {}, {}
+          parent, cmd, atexit_ = {}, {}, {}
           log = 'coverage-processes.log'
           for line in open(log, errors='replace').readlines() if os.path.exists(log) else []:
               if m := re.match(r' *(\d+)\.\w+: New process(: cmd| parent pid): (.*)', line):
                   (parent if m[2] == ' parent pid' else cmd)[m[1]] = m[3]
+              elif m := re.match(r' *(\d+)\.\w+: (atexit|sigterm): pid: \d+, (.*)', line):
+                  atexit_[m[1]] = f'{m[2]}: {m[3]}'
           root = [p for p, c in cmd.items() if "'run', '--rcfile=.github/coverage.toml'" in c]
           workers = sorted(p for p, q in parent.items() if root and q == root[0])
           saved = set(re.findall(r'\.pid(\d+)\.', ' '.join(glob.glob('.coverage.*'))))
           missing = [p for p in root + workers if p not in saved]
           print(f'controller {root}, {len(workers)} xdist workers, missing data: {missing}')
+          # #1423: which process it was, and whether coverage's atexit handler ran
+          # in it at all -- a pid with no `atexit:` line died on a signal before
+          # saving, one with such a line reached the save and lost it afterwards.
+          # Those are different bugs, and the log that distinguishes them is kept
+          # as an artifact by the step below rather than only read here.
+          for p in missing:
+              print(f'  pid {p}: cmd {cmd.get(p, "<no cmd line logged>")}')
+              print(f'  pid {p}: {atexit_.get(p, "no atexit/sigterm entry -- died before saving")}')
           if len(root) != 1 or not workers or missing:
               why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
@@ -226,6 +236,21 @@ jobs:
           print()
           print('Per-file detail: the `coverage-html` artifact of this run.')
           PY
+
+      # #1423: the guard above fires on runs whose tests all pass, and the only
+      # record of what became of the lost process is this log -- it carries each
+      # measured process's command line, its parent, and the `atexit:` line
+      # coverage writes as it saves. Reading it off the runner is impossible once
+      # the job ends, so keep it whenever the leg ran, not only on failure: a run
+      # that passed is the baseline the failing one has to be read against.
+      - name: Upload coverage process log
+        if: ${{ !cancelled() && matrix.coverage }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-processes-log
+          path: coverage-processes.log
+          retention-days: 30
+          if-no-files-found: warn
 
       - name: Upload coverage HTML report
         if: ${{ !cancelled() && matrix.coverage }}

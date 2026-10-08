@@ -13,6 +13,14 @@
 #                data before os._exit(), which skips atexit: execnet calls it on
 #                a worker whose execution outlives shutdown, and pytest-timeout's
 #                thread method on a hung test (#1387).
+#   sigterm   -- installs a SIGTERM handler that saves the data. `patch =
+#                ["_exit"]` covers os._exit and atexit covers a clean exit, but
+#                nothing covered a signal, so a worker SIGTERMed during
+#                shutdown would leave no file -- one candidate for #1423, whose
+#                actual cause is not established. Does not help against
+#                SIGKILL -- execnet's post-timeout kill is `Popen.kill()` --
+#                which is why `tests/conftest.py` also saves at
+#                `pytest_sessionfinish` rather than relying on this alone.
 #   core      -- "ctrace", not the sys.monitoring default on 3.12+. Tests
 #                purge and re-import pcapkit, and sysmon keeps state for every
 #                generation's code objects: measured on test_http_unit.py
@@ -30,6 +38,7 @@ patch = [
     "subprocess",
     "_exit",
 ]
+sigterm = true
 core = "ctrace"
 
 [tool.coverage.report]
