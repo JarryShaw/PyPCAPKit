@@ -96,6 +96,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class LocatorFlags(TypedDict):
         """Locator flags."""
 
+        #: Reserved bits.
+        reserved: int
         #: Preferred flag.
         preferred: bool
 
@@ -594,6 +596,7 @@ class Locator(Schema):
     flags: 'LocatorFlags' = BitField(
         length=1,
         namespace={
+            'reserved': (0, 7),
             'preferred': (7, 1),
         },
     )
