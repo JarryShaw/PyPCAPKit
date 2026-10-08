@@ -357,6 +357,8 @@ class FastBindingUpdateMessage(MH):
     lla_compat: 'bool'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
+    #: Reserved bits, i.e. the 12 bits after the ``K`` flag.
+    flags_reserved: 'int'
     #: Lifetime. :rfc:`5568#section-6.2.2` counts this in seconds rather than in
     #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
@@ -366,6 +368,7 @@ class FastBindingUpdateMessage(MH):
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
+                     flags_reserved: 'int',
                      lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -381,6 +384,8 @@ class FastBindingAcknowledgmentMessage(MH):
     status: 'FastBindingAcknowledgmentStatus'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``K`` flag.
+    flags_reserved: 'int'
     #: Sequence number.
     seq: 'int'
     #: Lifetime. :rfc:`5568#section-6.2.3` counts this in seconds rather than in
@@ -391,7 +396,8 @@ class FastBindingAcknowledgmentMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     status: 'FastBindingAcknowledgmentStatus', key_mngt: 'bool', seq: 'int',
+                     status: 'FastBindingAcknowledgmentStatus', key_mngt: 'bool',
+                     flags_reserved: 'int', seq: 'int',
                      lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -434,6 +440,8 @@ class HandoverInitiateMessage(MH):
     proxy: 'bool'
     #: Forwarding flag.
     forward: 'bool'
+    #: Reserved bits, i.e. the four bits after the ``F`` flag.
+    flags_reserved: 'int'
     #: Code.
     code: 'Enum_HandoverInitiateStatus'
     #: Mobility options.
@@ -442,6 +450,7 @@ class HandoverInitiateMessage(MH):
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', assign: 'bool', buffer: 'bool', proxy: 'bool', forward: 'bool',
+                     flags_reserved: 'int',
                      code: 'Enum_HandoverInitiateStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -458,6 +467,8 @@ class HandoverAcknowledgeMessage(MH):
     proxy: 'bool'
     #: Forwarding flag.
     forward: 'bool'
+    #: Reserved bits, i.e. the five bits after the ``F`` flag.
+    flags_reserved: 'int'
     #: Code.
     code: 'Enum_HandoverACKStatus'
     #: Mobility options.
@@ -465,7 +476,7 @@ class HandoverAcknowledgeMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     seq: 'int', buffer: 'bool', proxy: 'bool', forward: 'bool',
+                     seq: 'int', buffer: 'bool', proxy: 'bool', forward: 'bool', flags_reserved: 'int',
                      code: 'Enum_HandoverACKStatus',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -479,6 +490,8 @@ class HeartbeatMessage(MH):
     unsolicited: 'bool'
     #: Response flag. Unset for a Heartbeat request, set for a response.
     response: 'bool'
+    #: Reserved bits, i.e. the 14 bits before the ``U`` flag.
+    flags_reserved: 'int'
     #: Sequence number.
     seq: 'int'
     #: Mobility options.
@@ -486,7 +499,7 @@ class HeartbeatMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     unsolicited: 'bool', response: 'bool', seq: 'int',
+                     unsolicited: 'bool', response: 'bool', flags_reserved: 'int', seq: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -530,6 +543,8 @@ class BindingRevocationMessage(MH):
     ipv4_hoa: 'bool'
     #: Global revocation flag.
     global_revocation: 'bool'
+    #: Reserved bits, i.e. the 13 bits after the ``G`` flag.
+    flags_reserved: 'int'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
@@ -537,7 +552,7 @@ class BindingRevocationMessage(MH):
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      br_type: 'Enum_BindingRevocation',
                      code: 'Enum_RevocationTrigger | Enum_RevocationStatusCode', seq: 'int',
-                     proxy: 'bool', ipv4_hoa: 'bool', global_revocation: 'bool',
+                     proxy: 'bool', ipv4_hoa: 'bool', global_revocation: 'bool', flags_reserved: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -567,6 +582,8 @@ class LocalizedRoutingAcknowledgmentMessage(MH):
     seq: 'int'
     #: Unsolicited flag.
     unsolicited: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``U`` flag.
+    flags_reserved: 'int'
     #: Status. :rfc:`6705#section-10.2` defines its values inline with no IANA
     #: registry behind them, so this field carries the module-local
     #: :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` rather than
@@ -579,7 +596,7 @@ class LocalizedRoutingAcknowledgmentMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     seq: 'int', unsolicited: 'bool', status: 'LocalizedRoutingStatus',
+                     seq: 'int', unsolicited: 'bool', flags_reserved: 'int', status: 'LocalizedRoutingStatus',
                      lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
@@ -596,13 +613,15 @@ class UpdateNotificationMessage(MH):
     ack: 'bool'
     #: Retransmission flag.
     retransmit: 'bool'
+    #: Reserved bits, i.e. the 14 bits after the ``D`` flag.
+    flags_reserved: 'int'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', reason: 'Enum_UpdateNotificationReason', ack: 'bool',
-                     retransmit: 'bool',
+                     retransmit: 'bool', flags_reserved: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -642,6 +661,8 @@ class FlowBindingMessage(MH):
     #: Acknowledgement requested flag. Only meaningful in an indication; an
     #: acknowledgement reserves the whole octet this bit is taken from.
     ack: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``A`` flag.
+    flags_reserved: 'int'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
@@ -649,7 +670,7 @@ class FlowBindingMessage(MH):
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      fb_type: 'Enum_FlowBindingType', seq: 'int',
                      code: 'Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus',
-                     ack: 'bool',
+                     ack: 'bool', flags_reserved: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -677,12 +698,14 @@ class SubscriptionResponseMessage(MH):
     #: Multicast information flag, set when the response carries active
     #: multicast subscription options.
     info: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``I`` flag.
+    flags_reserved: 'int'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     seq: 'int', info: 'bool',
+                     seq: 'int', info: 'bool', flags_reserved: 'int',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -880,11 +903,14 @@ class MultiPrefixExtension(CGAExtension):
     #: P flag. Set if a public key is included in the Public Key field of
     #: the CGA Parameter Data Structure, reset otherwise.
     flag: 'bool'
+    #: Reserved bits, i.e. the 31 bits after the ``P`` flag.
+    reserved: 'int'
     #: Prefixes.
     prefixes: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_CGAExtension', length: 'int', flag: 'bool', prefixes: 'tuple[int, ...]') -> 'None': ...
+        def __init__(self, type: 'Enum_CGAExtension', length: 'int', flag: 'bool', reserved: 'int',
+                     prefixes: 'tuple[int, ...]') -> 'None': ...
 
 
 @info_final
@@ -1106,13 +1132,15 @@ class DNSUpdateOption(Option):
     #: Remove flag. Set when the mobile node asks the home agent to remove the
     #: DNS entry rather than to create or update it.
     remove: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``R`` flag.
+    reserved: 'int'
     #: Mobile node identity, in FQDN form. Kept as :obj:`bytes` because the RFC
     #: does not say which of the two FQDN encodings is meant.
     identity: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', status: 'Enum_DNSStatusCode',
-                     remove: 'bool', identity: 'bytes') -> 'None': ...
+                     remove: 'bool', reserved: 'int', identity: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1174,12 +1202,14 @@ class IPv4AddressAcknowledgementOption(Option):
     #: Allocated prefix length. Meaningful only on success, and required to be
     #: zero on failure.
     prefix_length: 'int'
+    #: Reserved bits, i.e. the two bits after the prefix length.
+    reserved: 'int'
     #: Assigned IPv4 home address.
     address: 'IPv4Address'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     status: 'Enum_DSMIPv6HomeAddress', prefix_length: 'int',
+                     status: 'Enum_DSMIPv6HomeAddress', prefix_length: 'int', reserved: 'int',
                      address: 'IPv4Address') -> 'None': ...
 
 
@@ -1189,12 +1219,14 @@ class NATDetectionOption(Option):
 
     #: Force UDP encapsulation flag.
     force: 'bool'
+    #: Reserved bits, i.e. the 15 bits after the ``F`` flag.
+    reserved: 'int'
     #: Suggested NAT binding refresh interval, in seconds. ``0`` means the value
     #: is to be ignored, and all ones that no keep-alives are needed.
     refresh: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', force: 'bool',
+        def __init__(self, type: 'Enum_Option', length: 'int', force: 'bool', reserved: 'int',
                      refresh: 'timedelta') -> 'None': ...
 
 
@@ -1250,12 +1282,14 @@ class IPv4HomeAddressRequestOption(Option):
 
     #: Prefix length of the requested home network.
     prefix_length: 'int'
+    #: Reserved bits, i.e. the ten bits after the prefix length.
+    reserved: 'int'
     #: Requested IPv4 home address. ``0.0.0.0`` asks the local mobility anchor to
     #: allocate one.
     address: 'IPv4Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int', reserved: 'int',
                      address: 'IPv4Address') -> 'None': ...
 
 
@@ -1268,12 +1302,14 @@ class IPv4HomeAddressReplyOption(Option):
     status: 'Enum_HomeAddressReply'
     #: Prefix length of the assigned home network.
     prefix_length: 'int'
+    #: Reserved bits, i.e. the two bits after the prefix length.
+    reserved: 'int'
     #: Assigned IPv4 home address.
     address: 'IPv4Address'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', status: 'Enum_HomeAddressReply',
-                     prefix_length: 'int', address: 'IPv4Address') -> 'None': ...
+                     prefix_length: 'int', reserved: 'int', address: 'IPv4Address') -> 'None': ...
 
 
 @info_final
@@ -1294,10 +1330,12 @@ class IPv4DHCPSupportModeOption(Option):
     #: DHCP support mode. Unset means the mobile access gateway acts as a DHCP
     #: relay, set that it acts as a DHCP server.
     mode: 'Enum_DHCPSupportMode'
+    #: Reserved bits, i.e. the 15 bits before the ``S`` flag.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     mode: 'Enum_DHCPSupportMode') -> 'None': ...
+                     mode: 'Enum_DHCPSupportMode', reserved: 'int') -> 'None': ...
 
 
 @info_final
@@ -1360,12 +1398,14 @@ class TransientBindingOption(Option):
 
     #: Late path switch flag.
     late: 'bool'
+    #: Reserved bits, i.e. the seven bits before the ``L`` flag.
+    reserved: 'int'
     #: Maximum lifetime of the transient state. Counted on the wire in units of
     #: 100 milliseconds.
     lifetime: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', late: 'bool',
+        def __init__(self, type: 'Enum_Option', length: 'int', late: 'bool', reserved: 'int',
                      lifetime: 'timedelta') -> 'None': ...
 
 
@@ -1496,10 +1536,12 @@ class RedirectOption(Option):
     ipv6: 'Optional[IPv6Address]'
     #: IPv4 address of the redirected-to local mobility anchor, if carried.
     ipv4: 'Optional[IPv4Address]'
+    #: Reserved bits, i.e. the 14 bits after the ``N`` flag.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', ipv6: 'Optional[IPv6Address]',
-                     ipv4: 'Optional[IPv4Address]') -> 'None': ...
+                     ipv4: 'Optional[IPv4Address]', reserved: 'int') -> 'None': ...
 
 
 @info_final
@@ -1693,11 +1735,13 @@ class IPv4TrafficOffloadSelectorOption(Option):
     #: Offload mode flag. Unset offloads the flows matching the selector; set
     #: offloads everything except them.
     mode: 'bool'
+    #: Reserved bits, i.e. the 31 bits after the ``M`` flag.
+    reserved: 'int'
     #: Traffic selector sub-options.
     selector: 'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', mode: 'bool',
+        def __init__(self, type: 'Enum_Option', length: 'int', mode: 'bool', reserved: 'int',
                      selector: 'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]') -> 'None': ...
 
 
@@ -1710,6 +1754,8 @@ class DynamicIPMulticastSelectorOption(Option):
     #: Selector mode flag. Set routes the group locally, unset via the home
     #: network.
     mode: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``M`` flag.
+    reserved: 'int'
     #: Number of multicast address records carried in :attr:`data`.
     records: 'int'
     #: Multicast address records. These are MLD or IGMP structures belonging to
@@ -1718,7 +1764,7 @@ class DynamicIPMulticastSelectorOption(Option):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', protocol: 'int', mode: 'bool',
+        def __init__(self, type: 'Enum_Option', length: 'int', protocol: 'int', mode: 'bool', reserved: 'int',
                      records: 'int', data: 'bytes') -> 'None': ...
 
 
@@ -1728,13 +1774,15 @@ class DelegatedMNPOption(Option):
 
     #: IPv4 prefix flag, saying which family :attr:`prefix` is in.
     ipv4: 'bool'
+    #: Reserved bits, i.e. the seven bits after the ``V`` flag.
+    reserved: 'int'
     #: Prefix length.
     prefix_length: 'int'
     #: Delegated mobile network prefix, IPv4 or IPv6 as :attr:`ipv4` says.
     prefix: 'IPv4Address | IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', ipv4: 'bool',
+        def __init__(self, type: 'Enum_Option', length: 'int', ipv4: 'bool', reserved: 'int',
                      prefix_length: 'int',
                      prefix: 'IPv4Address | IPv6Address') -> 'None': ...
 
@@ -1806,12 +1854,14 @@ class PerSessionBitRateAttribute(QoSAttribute):
     service: 'bool'
     #: Guaranteed-bit-rate exclusion flag.
     exclude: 'bool'
+    #: Reserved bits, i.e. the 14 bits after the ``E`` flag.
+    reserved: 'int'
     #: Bit rate, in **bits** per second.
     rate: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_QoSAttribute', length: 'int', service: 'bool',
-                     exclude: 'bool', rate: 'int') -> 'None': ...
+                     exclude: 'bool', reserved: 'int', rate: 'int') -> 'None': ...
 
 
 @info_final
@@ -2011,11 +2061,13 @@ class MAGMultipathBindingOption(Option):
     bulk: 'bool'
     #: Registration overwrite flag.
     overwrite: 'bool'
+    #: Reserved bits, i.e. the 22 bits after the ``O`` flag.
+    reserved: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', att: 'Enum_AccessType',
                      label: 'int', bid: 'int', bulk: 'bool',
-                     overwrite: 'bool') -> 'None': ...
+                     overwrite: 'bool', reserved: 'int') -> 'None': ...
 
 
 @info_final

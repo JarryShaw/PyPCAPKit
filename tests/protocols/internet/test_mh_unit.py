@@ -425,7 +425,7 @@ class MHUnitTests(unittest.TestCase):
         ext = proto._read_cga_extensions([
             schema.UnknownExtension(type=CGAExtension.Exp_FFFD, length=2, data=b'xx'),
             schema.MultiPrefixExtension(type=CGAExtension.Multi_Prefix, length=20,
-                                        flags={'P': 1}, prefixes=[1, 2]),
+                                        flags={'P': 1, 'reserved': 0}, prefixes=[1, 2]),
         ])
         self.assertEqual(list(ext.keys()), [CGAExtension.Exp_FFFD, CGAExtension.Multi_Prefix])
         self.assertEqual(proto._read_ext_none(
@@ -434,7 +434,7 @@ class MHUnitTests(unittest.TestCase):
         ).data, b'yy')
         self.assertTrue(proto._read_ext_multiprefix(
             schema.MultiPrefixExtension(type=CGAExtension.Multi_Prefix, length=20,
-                                        flags={'P': 1}, prefixes=[1]),
+                                        flags={'P': 1, 'reserved': 0}, prefixes=[1]),
             extensions=ext,
         ).flag)
 
@@ -580,7 +580,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertTrue(proto._make_ext_multiprefix(
             CGAExtension.Multi_Prefix,
             data.MultiPrefixExtension(type=CGAExtension.Multi_Prefix,
-                                      length=20, flag=True, prefixes=(3,)),
+                                      length=20, flag=True, reserved=0, prefixes=(3,)),
         ).flags['P'])
         ext_list, ext_len = proto._make_cga_extensions([
             b'\xff\xfd\x00\x02xx',
@@ -929,7 +929,7 @@ class MHUnitTests(unittest.TestCase):
         # "the requested time in seconds", unlike the BU/BA lifetime's units
         # of 4 seconds, so it is read unscaled (c.f. #493).
         fbu = proto._read_msg_fbu(SimpleNamespace(seq=0x1234,
-                                                 flags={'A': 1, 'H': 1, 'L': 0, 'K': 1},
+                                                 flags={'A': 1, 'H': 1, 'L': 0, 'K': 1, 'reserved': 0},
                                                  lifetime=10, options=[]),
                                   header=header(Packet.Fast_Binding_Update))
         self.assertEqual(fbu.seq, 0x1234)
@@ -944,7 +944,7 @@ class MHUnitTests(unittest.TestCase):
         # which is *not* what StatusCode(1) means, hence the module-local enum.
         # The Lifetime here is likewise "the granted lifetime ... in seconds"
         # (c.f. #493), so it too is read unscaled.
-        fback = proto._read_msg_fback(SimpleNamespace(status=1, flags={'K': 1}, seq=0x1234,
+        fback = proto._read_msg_fback(SimpleNamespace(status=1, flags={'K': 1, 'reserved': 0}, seq=0x1234,
                                                      lifetime=10, options=[]),
                                      header=header(Packet.Fast_Binding_Acknowledgment))
         self.assertEqual(fback.status, 1)
@@ -969,7 +969,7 @@ class MHUnitTests(unittest.TestCase):
         # RFC 5568, section 6.2.1.1 and RFC 5949, section 6.1.1.
         hi = proto._read_msg_hi(SimpleNamespace(
             seq=0x0102,
-            flags={'S': 1, 'U': 0, 'P': 1, 'F': 0},
+            flags={'S': 1, 'U': 0, 'P': 1, 'F': 0, 'reserved': 0},
             code=HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA,
             options=[],
         ), header=header(Packet.Handover_Initiate_Message))
@@ -983,7 +983,7 @@ class MHUnitTests(unittest.TestCase):
         # RFC 5568, section 6.2.1.2 and RFC 5949, section 6.1.2.
         hack = proto._read_msg_hack(SimpleNamespace(
             seq=0x0102,
-            flags={'U': 1, 'P': 0, 'F': 1},
+            flags={'U': 1, 'P': 0, 'F': 1, 'reserved': 0},
             code=HandoverACKStatus.Handover_Accepted_NCoA_assigned,
             options=[],
         ), header=header(Packet.Handover_Acknowledge_Message))
@@ -998,9 +998,9 @@ class MHUnitTests(unittest.TestCase):
                                        lifetime=datetime.timedelta(seconds=40), options=[])
         self.assertEqual(made_fbu.seq, 7)
         self.assertEqual(made_fbu.lifetime, 40)
-        self.assertEqual(made_fbu.flags, {'A': True, 'H': True, 'L': False, 'K': True})
+        self.assertEqual(made_fbu.flags, {'A': True, 'H': True, 'L': False, 'K': True, 'reserved': 0})
         self.assertEqual(proto._make_msg_fbu(SimpleNamespace(
-            seq=8, ack=False, home=True, lla_compat=True, key_mngt=False,
+            seq=8, ack=False, home=True, lla_compat=True, key_mngt=False, flags_reserved=0,
             lifetime=datetime.timedelta(seconds=8), options=[],
         )).seq, 8)
 
@@ -1017,7 +1017,7 @@ class MHUnitTests(unittest.TestCase):
         ).status, 129)
         self.assertEqual(proto._make_msg_fback(SimpleNamespace(
             status=FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
-            key_mngt=False, seq=10, lifetime=datetime.timedelta(seconds=8), options=[],
+            key_mngt=False, flags_reserved=0, seq=10, lifetime=datetime.timedelta(seconds=8), options=[],
         )).seq, 10)
 
         self.assertEqual(proto._make_msg_fna(None, options=[]).options, ['made'])
@@ -1031,9 +1031,9 @@ class MHUnitTests(unittest.TestCase):
                                      forward=False, code=1, options=[])
         self.assertEqual(made_hi.seq, 11)
         self.assertEqual(made_hi.code, HandoverInitiateStatus.FBU_whose_source_IP_address_is_not_PCoA)
-        self.assertEqual(made_hi.flags, {'S': True, 'U': False, 'P': True, 'F': False})
+        self.assertEqual(made_hi.flags, {'S': True, 'U': False, 'P': True, 'F': False, 'reserved': 0})
         self.assertEqual(proto._make_msg_hi(SimpleNamespace(
-            seq=12, assign=False, buffer=True, proxy=False, forward=True,
+            seq=12, assign=False, buffer=True, proxy=False, forward=True, flags_reserved=0,
             code=HandoverInitiateStatus.All_available_context_transferred, options=[],
         )).seq, 12)
 
@@ -1041,9 +1041,9 @@ class MHUnitTests(unittest.TestCase):
                                          code=130, options=[])
         self.assertEqual(made_hack.seq, 13)
         self.assertEqual(made_hack.code, HandoverACKStatus.Insufficient_resources)
-        self.assertEqual(made_hack.flags, {'U': True, 'P': False, 'F': True})
+        self.assertEqual(made_hack.flags, {'U': True, 'P': False, 'F': True, 'reserved': 0})
         self.assertEqual(proto._make_msg_hack(SimpleNamespace(
-            seq=14, buffer=False, proxy=True, forward=False,
+            seq=14, buffer=False, proxy=True, forward=False, flags_reserved=0,
             code=HandoverACKStatus.Handover_Accepted_use_PCoA, options=[],
         )).seq, 14)
 
@@ -1080,12 +1080,12 @@ class MHUnitTests(unittest.TestCase):
         # -- read side: wire lifetime=100 --
 
         fbu = proto._read_msg_fbu(SimpleNamespace(
-            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0}, lifetime=100, options=[],
+            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0, 'reserved': 0}, lifetime=100, options=[],
         ), header=header(Packet.Fast_Binding_Update))
         self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=100))
 
         fback = proto._read_msg_fback(SimpleNamespace(
-            status=0, flags={'K': 0}, seq=1, lifetime=100, options=[],
+            status=0, flags={'K': 0, 'reserved': 0}, seq=1, lifetime=100, options=[],
         ), header=header(Packet.Fast_Binding_Acknowledgment))
         self.assertEqual(fback.lifetime, datetime.timedelta(seconds=100))
 

@@ -148,6 +148,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """Flags for :attr:`MultiPrefixExtension.flags`."""
 
         P: int
+        reserved: int
 
     class BindingUpdateMessageFlags(TypedDict):
         """Flags for :attr:`BindingUpdateMessage.flags`."""
@@ -185,11 +186,13 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         H: 'int'
         L: 'int'
         K: 'int'
+        reserved: 'int'
 
     class FastBindingAcknowledgmentMessageFlags(TypedDict):
         """Flags for :attr:`FastBindingAcknowledgmentMessage.flags`."""
 
         K: 'int'
+        reserved: 'int'
 
     class HandoverInitiateMessageFlags(TypedDict):
         """Flags for :attr:`HandoverInitiateMessage.flags`."""
@@ -198,6 +201,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         U: 'int'
         P: 'int'
         F: 'int'
+        reserved: 'int'
 
     class HandoverAcknowledgeMessageFlags(TypedDict):
         """Flags for :attr:`HandoverAcknowledgeMessage.flags`."""
@@ -205,12 +209,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         U: 'int'
         P: 'int'
         F: 'int'
+        reserved: 'int'
 
     class HeartbeatMessageFlags(TypedDict):
         """Flags for :attr:`HeartbeatMessage.flags`."""
 
         U: 'int'
         R: 'int'
+        reserved: 'int'
 
     class FixedPointTimestamp(TypedDict):
         """Fixed-point timestamp of :attr:`TimestampOption.timestamp`."""
@@ -224,32 +230,38 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         P: 'int'
         V: 'int'
         G: 'int'
+        reserved: 'int'
 
     class LocalizedRoutingAcknowledgmentMessageFlags(TypedDict):
         """Flags for :attr:`LocalizedRoutingAcknowledgmentMessage.flags`."""
 
         U: 'int'
+        reserved: 'int'
 
     class FlowBindingMessageFlags(TypedDict):
         """Flags for :attr:`FlowBindingMessage.flags`."""
 
         A: 'int'
+        reserved: 'int'
 
     class UpdateNotificationMessageFlags(TypedDict):
         """Flags for :attr:`UpdateNotificationMessage.flags`."""
 
         A: 'int'
         D: 'int'
+        reserved: 'int'
 
     class SubscriptionResponseMessageFlags(TypedDict):
         """Flags for :attr:`SubscriptionResponseMessage.flags`."""
 
         I: 'int'
+        reserved: 'int'
 
     class DNSUpdateOptionFlags(TypedDict):
         """Flags for :attr:`DNSUpdateOption.flags`."""
 
         R: 'int'
+        reserved: 'int'
 
     class IPv4HomeAddressOptionFlags(TypedDict):
         """Prefix length and flags of :attr:`IPv4HomeAddressOption.flags`."""
@@ -265,22 +277,26 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         :attr:`IPv4HomeAddressReplyOption.flags`."""
 
         prefix_length: 'int'
+        reserved: 'int'
 
     class NATDetectionOptionFlags(TypedDict):
         """Flags for :attr:`NATDetectionOption.flags`."""
 
         F: 'int'
+        reserved: 'int'
 
     class IPv4DHCPSupportModeOptionFlags(TypedDict):
         """Flags for :attr:`IPv4DHCPSupportModeOption.flags`."""
 
         S: 'int'
+        reserved: 'int'
 
     class RedirectOptionFlags(TypedDict):
         """Flags for :attr:`RedirectOption.flags`."""
 
         K: 'int'
         N: 'int'
+        reserved: 'int'
 
     class BindingIdentifierOptionFlags(TypedDict):
         """Flag and priority of :attr:`BindingIdentifierOption.flags`."""
@@ -292,6 +308,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         """Flags for :attr:`TransientBindingOption.flags`."""
 
         L: 'int'
+        reserved: 'int'
 
     class ModeFlagOnly(TypedDict):
         """A lone ``M`` mode flag, as in
@@ -299,17 +316,20 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         :attr:`IPv4TrafficOffloadSelectorOption.flags`."""
 
         M: 'int'
+        reserved: 'int'
 
     class DelegatedMNPOptionFlags(TypedDict):
         """Flags for :attr:`DelegatedMNPOption.flags`."""
 
         V: 'int'
+        reserved: 'int'
 
     class MAGMultipathBindingOptionFlags(TypedDict):
         """Flags for :attr:`MAGMultipathBindingOption.flags`."""
 
         B: 'int'
         O: 'int'
+        reserved: 'int'
 
     class ANINetworkIdentifierFlags(TypedDict):
         """Flags for :attr:`ANINetworkIdentifierSuboption.flags`."""
@@ -328,6 +348,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         S: 'int'
         E: 'int'
+        reserved: 'int'
 
     class AllocationRetentionPriorityFields(TypedDict):
         """Priority fields of :attr:`AllocationRetentionPriorityAttribute.priority`."""
@@ -850,6 +871,7 @@ class MultiPrefixExtension(CGAExtension, code=Enum_CGAExtension.Multi_Prefix):
     #: Flags.
     flags: 'MultiPrefixExtensionFlags' = BitField(length=4, namespace={
         'P': (0, 1),
+        'reserved': (1, 31),
     })
     #: Prefixes.
     prefixes: 'list[int]' = ListField(
@@ -1046,6 +1068,7 @@ class DNSUpdateOption(Option, code=Enum_Option.DNS_UPDATE_TYPE):
     #: Flags.
     flags: 'DNSUpdateOptionFlags' = BitField(length=1, namespace={
         'R': (0, 1),
+        'reserved': (1, 7),
     })
     #: Mobile node identity, in FQDN form.
     identity: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
@@ -1217,6 +1240,7 @@ class IPv4AddressAcknowledgementOption(Option, code=Enum_Option.IPv4_Address_Ack
     #: Prefix length, with 2 reserved bits below it.
     flags: 'PrefixLengthOnly' = BitField(length=1, namespace={
         'prefix_length': (0, 6),
+        'reserved': (6, 2),
     })
     #: IPv4 home address.
     address: 'IPv4Address' = IPv4AddressField()
@@ -1234,6 +1258,7 @@ class NATDetectionOption(Option, code=Enum_Option.NAT_Detection):
     #: Flags.
     flags: 'NATDetectionOptionFlags' = BitField(length=2, namespace={
         'F': (0, 1),
+        'reserved': (1, 15),
     })
     #: Suggested NAT binding refresh time, in seconds.
     refresh: 'int' = UInt32Field()
@@ -1326,6 +1351,7 @@ class IPv4HomeAddressRequestOption(Option, code=Enum_Option.IPv4_Home_Address_Re
     #: Prefix length, with 10 reserved bits below it.
     flags: 'PrefixLengthOnly' = BitField(length=2, namespace={
         'prefix_length': (0, 6),
+        'reserved': (6, 10),
     })
     #: Requested IPv4 home address.
     address: 'IPv4Address' = IPv4AddressField()
@@ -1344,6 +1370,7 @@ class IPv4HomeAddressReplyOption(Option, code=Enum_Option.IPv4_Home_Address_Repl
     #: Prefix length, with 2 reserved bits below it.
     flags: 'PrefixLengthOnly' = BitField(length=1, namespace={
         'prefix_length': (0, 6),
+        'reserved': (6, 2),
     })
     #: Assigned IPv4 home address.
     address: 'IPv4Address' = IPv4AddressField()
@@ -1375,6 +1402,7 @@ class IPv4DHCPSupportModeOption(Option, code=Enum_Option.IPv4_DHCP_Support_Mode)
     #: Flags. The ``S`` bit is the **last** bit of the option, not the first
     #: [:rfc:`5844#section-3.3.4`].
     flags: 'IPv4DHCPSupportModeOptionFlags' = BitField(length=2, namespace={
+        'reserved': (0, 15),
         'S': (15, 1),
     })
 
@@ -1462,6 +1490,7 @@ class TransientBindingOption(Option, code=Enum_Option.Transient_Binding):
 
     #: Flags.
     flags: 'TransientBindingOptionFlags' = BitField(length=1, namespace={
+        'reserved': (0, 7),
         'L': (7, 1),
     })
     #: Maximum lifetime of the transient state, in units of 100 milliseconds.
@@ -1679,6 +1708,7 @@ class RedirectOption(Option, code=Enum_Option.Redirect_Mobility_Option):
     flags: 'RedirectOptionFlags' = BitField(length=2, namespace={
         'K': (0, 1),
         'N': (1, 1),
+        'reserved': (2, 14),
     })
     #: IPv6 address of the redirected-to LMA, present when ``K`` is set.
     ipv6: 'Optional[IPv6Address]' = ConditionalField(
@@ -1934,6 +1964,7 @@ class IPv4TrafficOffloadSelectorOption(Option, code=Enum_Option.IPv4_Traffic_Off
     #: Flags.
     flags: 'ModeFlagOnly' = BitField(length=4, namespace={
         'M': (0, 1),
+        'reserved': (1, 31),
     })
     #: Traffic selector, carried as the traffic selector sub-option of
     #: :rfc:`6089#section-4.2.1.4`. Optional in a proxy binding update and
@@ -1970,6 +2001,7 @@ class DynamicIPMulticastSelectorOption(Option, code=Enum_Option.Dynamic_IP_Multi
     #: Flags.
     flags: 'ModeFlagOnly' = BitField(length=1, namespace={
         'M': (0, 1),
+        'reserved': (1, 7),
     })
     #: Number of multicast address records.
     records: 'int' = UInt16Field()
@@ -1988,6 +2020,7 @@ class DelegatedMNPOption(Option, code=Enum_Option.Delegated_Mobile_Network_Prefi
     #: Flags.
     flags: 'DelegatedMNPOptionFlags' = BitField(length=1, namespace={
         'V': (0, 1),
+        'reserved': (1, 7),
     })
     #: Prefix length.
     prefix_length: 'int' = UInt8Field()
@@ -2111,6 +2144,7 @@ class PerSessionBitRateAttribute(
     flags: 'SessionBitRateFlags' = BitField(length=2, namespace={
         'S': (0, 1),
         'E': (1, 1),
+        'reserved': (2, 14),
     })
     #: Bit rate, in bits per second.
     rate: 'int' = UInt32Field()
@@ -2378,6 +2412,7 @@ class MAGMultipathBindingOption(Option, code=Enum_Option.MAG_Multipath_Binding):
     flags: 'MAGMultipathBindingOptionFlags' = BitField(length=3, namespace={
         'B': (0, 1),
         'O': (1, 1),
+        'reserved': (2, 22),
     })
 
     if TYPE_CHECKING:
@@ -2731,6 +2766,7 @@ class FastBindingUpdateMessage(Packet, code=Enum_Packet.Fast_Binding_Update):
         'H': (1, 1),
         'L': (2, 1),
         'K': (3, 1),
+        'reserved': (4, 12),
     })
     #: Lifetime, in seconds [:rfc:`5568#section-6.2.2`].
     lifetime: 'int' = UInt16Field()
@@ -2771,6 +2807,7 @@ class FastBindingAcknowledgmentMessage(Packet, code=Enum_Packet.Fast_Binding_Ack
     #: Flags.
     flags: 'FastBindingAcknowledgmentMessageFlags' = BitField(length=1, namespace={
         'K': (0, 1),
+        'reserved': (1, 7),
     })
     #: Sequence number.
     seq: 'int' = UInt16Field()
@@ -2832,6 +2869,7 @@ class HandoverInitiateMessage(Packet, code=Enum_Packet.Handover_Initiate_Message
         'U': (1, 1),
         'P': (2, 1),
         'F': (3, 1),
+        'reserved': (4, 4),
     })
     #: Code.
     code: 'Enum_HandoverInitiateStatus' = EnumField(length=1, namespace=Enum_HandoverInitiateStatus)
@@ -2860,6 +2898,7 @@ class HandoverAcknowledgeMessage(Packet, code=Enum_Packet.Handover_Acknowledge_M
         'U': (0, 1),
         'P': (1, 1),
         'F': (2, 1),
+        'reserved': (3, 5),
     })
     #: Code.
     code: 'Enum_HandoverACKStatus' = EnumField(length=1, namespace=Enum_HandoverACKStatus)
@@ -2883,6 +2922,7 @@ class HeartbeatMessage(Packet, code=Enum_Packet.Heartbeat_Message):
 
     #: Flags.
     flags: 'HeartbeatMessageFlags' = BitField(length=2, namespace={
+        'reserved': (0, 14),
         'U': (14, 1),
         'R': (15, 1),
     })
@@ -2955,6 +2995,7 @@ class BindingRevocationMessage(Packet, code=Enum_Packet.Binding_Revocation_Messa
         'P': (0, 1),
         'V': (1, 1),
         'G': (2, 1),
+        'reserved': (3, 13),
     })
     #: Mobility options.
     options: 'list[Option]' = OptionField(
@@ -3020,6 +3061,7 @@ class LocalizedRoutingAcknowledgmentMessage(
     #: Flags.
     flags: 'LocalizedRoutingAcknowledgmentMessageFlags' = BitField(length=1, namespace={
         'U': (0, 1),
+        'reserved': (1, 7),
     })
     #: Status, c.f.,
     #: :class:`pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.
@@ -3054,6 +3096,7 @@ class UpdateNotificationMessage(Packet, code=Enum_Packet.Update_Notification):
     flags: 'UpdateNotificationMessageFlags' = BitField(length=2, namespace={
         'A': (0, 1),
         'D': (1, 1),
+        'reserved': (2, 14),
     })
     #: Mobility options.
     options: 'list[Option]' = OptionField(
@@ -3123,6 +3166,7 @@ class FlowBindingMessage(Packet, code=Enum_Packet.Flow_Binding_Message):
     #: Flags.
     flags: 'FlowBindingMessageFlags' = BitField(length=1, namespace={
         'A': (0, 1),
+        'reserved': (1, 7),
     })
     #: Mobility options.
     options: 'list[Option]' = OptionField(
@@ -3176,6 +3220,7 @@ class SubscriptionResponseMessage(Packet, code=Enum_Packet.Subscription_Response
     #: Flags.
     flags: 'SubscriptionResponseMessageFlags' = BitField(length=1, namespace={
         'I': (0, 1),
+        'reserved': (1, 7),
     })
     #: Mobility options.
     options: 'list[Option]' = OptionField(

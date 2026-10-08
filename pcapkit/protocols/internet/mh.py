@@ -2094,6 +2094,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             home=bool(schema.flags['H']),
             lla_compat=bool(schema.flags['L']),
             key_mngt=bool(schema.flags['K']),
+            flags_reserved=schema.flags['reserved'],
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
         )
@@ -2149,6 +2150,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             chksum=header.chksum,
             status=FastBindingAcknowledgmentStatus(schema.status),
             key_mngt=bool(schema.flags['K']),
+            flags_reserved=schema.flags['reserved'],
             seq=schema.seq,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
@@ -2286,6 +2288,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             buffer=bool(schema.flags['U']),
             proxy=bool(schema.flags['P']),
             forward=bool(schema.flags['F']),
+            flags_reserved=schema.flags['reserved'],
             code=schema.code,
             options=self._read_mh_options(schema.options),
         )
@@ -2336,6 +2339,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             buffer=bool(schema.flags['U']),
             proxy=bool(schema.flags['P']),
             forward=bool(schema.flags['F']),
+            flags_reserved=schema.flags['reserved'],
             code=schema.code,
             options=self._read_mh_options(schema.options),
         )
@@ -2440,6 +2444,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             chksum=header.chksum,
             unsolicited=bool(schema.flags['U']),
             response=bool(schema.flags['R']),
+            flags_reserved=schema.flags['reserved'],
             seq=schema.seq,
             options=self._read_mh_options(schema.options),
         )
@@ -2512,6 +2517,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             proxy=bool(schema.flags['P']),
             ipv4_hoa=bool(schema.flags['V']),
             global_revocation=bool(schema.flags['G']),
+            flags_reserved=schema.flags['reserved'],
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2605,6 +2611,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             chksum=header.chksum,
             seq=schema.seq,
             unsolicited=bool(schema.flags['U']),
+            flags_reserved=schema.flags['reserved'],
             status=LocalizedRoutingStatus(schema.status),
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
@@ -2653,6 +2660,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reason=schema.reason,
             ack=bool(schema.flags['A']),
             retransmit=bool(schema.flags['D']),
+            flags_reserved=schema.flags['reserved'],
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2759,6 +2767,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq=schema.seq,
             code=schema.code,
             ack=bool(schema.flags['A']),
+            flags_reserved=schema.flags['reserved'],
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2840,6 +2849,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             chksum=header.chksum,
             seq=schema.seq,
             info=bool(schema.flags['I']),
+            flags_reserved=schema.flags['reserved'],
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -3740,6 +3750,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             status=schema.status,
             remove=bool(schema.flags['R']),
+            reserved=schema.flags['reserved'],
             identity=schema.identity,
         )
         return data
@@ -4210,6 +4221,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             status=schema.status,
             prefix_length=schema.flags['prefix_length'],
+            reserved=schema.flags['reserved'],
             address=schema.address,
         )
         return data
@@ -4251,6 +4263,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             force=bool(schema.flags['F']),
+            reserved=schema.flags['reserved'],
             refresh=datetime.timedelta(seconds=schema.refresh),
         )
         return data
@@ -4425,6 +4438,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             prefix_length=schema.flags['prefix_length'],
+            reserved=schema.flags['reserved'],
             address=schema.address,
         )
         return data
@@ -4467,6 +4481,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             status=schema.status,
             prefix_length=schema.flags['prefix_length'],
+            reserved=schema.flags['reserved'],
             address=schema.address,
         )
         return data
@@ -4540,6 +4555,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             mode=Enum_DHCPSupportMode(schema.flags['S']),
+            reserved=schema.flags['reserved'],
         )
         return data
 
@@ -4720,6 +4736,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             late=bool(schema.flags['L']),
+            reserved=schema.flags['reserved'],
             lifetime=datetime.timedelta(milliseconds=schema.lifetime * 100),
         )
         return data
@@ -5004,6 +5021,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             ipv6=schema.ipv6,
             ipv4=schema.ipv4,
+            reserved=schema.flags['reserved'],
         )
         return data
 
@@ -5382,6 +5400,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             mode=bool(schema.flags['M']),
+            reserved=schema.flags['reserved'],
             selector=self._read_fid_suboptions(schema.selector),
         )
         return data
@@ -5437,6 +5456,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             protocol=schema.protocol,
             mode=bool(schema.flags['M']),
+            reserved=schema.flags['reserved'],
             records=schema.records,
             data=schema.data,
         )
@@ -5489,6 +5509,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             ipv4=ipv4,
+            reserved=schema.flags['reserved'],
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -5627,6 +5648,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     length=self._mh_option_length(session.length),
                     service=bool(session.flags['S']),
                     exclude=bool(session.flags['E']),
+                    reserved=session.flags['reserved'],
                     rate=session.rate,
                 )  # type: Data_QoSAttribute
             elif code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
@@ -6014,6 +6036,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             bid=schema.bid,
             bulk=bulk,
             overwrite=overwrite,
+            reserved=schema.flags['reserved'],
         )
         return data
 
@@ -6468,6 +6491,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_extension_length(schema.length),
             flag=bool(schema.flags['P']),
+            reserved=schema.flags['reserved'],
             prefixes=tuple(schema.prefixes),
         )
         return data
@@ -6901,6 +6925,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       key_mngt: 'bool' = False,
                       lifetime: 'int | timedelta' = 4,  # reasonable default value
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_FastBindingUpdateMessage':
         """Make MH fast binding update (FBU) message type.
 
@@ -6916,6 +6941,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 one counts seconds rather than units of 4 seconds
                 [:rfc:`5568#section-6.2.2`], so the value is not scaled.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the 12 bits after the ``K`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -6928,6 +6954,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             home = message.home
             lla_compat = message.lla_compat
             key_mngt = message.key_mngt
+            flags_reserved = message.flags_reserved
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
         else:
@@ -6941,6 +6968,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'H': home,
                 'L': lla_compat,
                 'K': key_mngt,
+                'reserved': flags_reserved,
             },
             lifetime=lifetime_val,
             options=self._make_mh_options(options),
@@ -6955,6 +6983,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                         seq: 'int' = 0,
                         lifetime: 'int | timedelta' = 4,  # reasonable default value
                         options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                        flags_reserved: 'int' = 0,
                         **kwargs: 'Any') -> 'Schema_FastBindingAcknowledgmentMessage':
         """Make MH fast binding acknowledgment (FBack) message type.
 
@@ -6972,6 +7001,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 one counts seconds rather than units of 4 seconds
                 [:rfc:`5568#section-6.2.3`], so the value is not scaled.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the seven bits after the ``K`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -6981,6 +7011,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if message is not None:
             status_val = message.status
             key_mngt = message.key_mngt
+            flags_reserved = message.flags_reserved
             seq = message.seq
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
@@ -6994,6 +7025,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status=status_val,
             flags={
                 'K': key_mngt,
+                'reserved': flags_reserved,
             },
             seq=seq,
             lifetime=lifetime_val,
@@ -7055,6 +7087,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                      code_reversed: 'bool' = False,
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HandoverInitiateMessage':
         """Make MH handover initiate (HI) message type.
 
@@ -7070,6 +7103,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code_namespace: Code namespace.
             code_reversed: Reverse code namespace.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the four bits after the ``F`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7082,6 +7116,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             buffer = message.buffer
             proxy = message.proxy
             forward = message.forward
+            flags_reserved = message.flags_reserved
             code_val = message.code
             options = message.options
         else:
@@ -7096,6 +7131,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'U': buffer,
                 'P': proxy,
                 'F': forward,
+                'reserved': flags_reserved,
             },
             code=code_val,
             options=self._make_mh_options(options),
@@ -7111,6 +7147,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                        code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                        code_reversed: 'bool' = False,
                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       flags_reserved: 'int' = 0,
                        **kwargs: 'Any') -> 'Schema_HandoverAcknowledgeMessage':
         """Make MH handover acknowledge (HAck) message type.
 
@@ -7125,6 +7162,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code_namespace: Code namespace.
             code_reversed: Reverse code namespace.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the five bits after the ``F`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7136,6 +7174,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             buffer = message.buffer
             proxy = message.proxy
             forward = message.forward
+            flags_reserved = message.flags_reserved
             code_val = message.code
             options = message.options
         else:
@@ -7149,6 +7188,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'U': buffer,
                 'P': proxy,
                 'F': forward,
+                'reserved': flags_reserved,
             },
             code=code_val,
             options=self._make_mh_options(options),
@@ -7189,6 +7229,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      response: 'bool' = False,
                      seq: 'int' = 0,
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HeartbeatMessage':
         """Make MH heartbeat message type.
 
@@ -7198,6 +7239,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             response: Response flag; unset makes this a heartbeat request.
             seq: Sequence number.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the 14 bits before the ``U`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7207,6 +7249,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if message is not None:
             unsolicited = message.unsolicited
             response = message.response
+            flags_reserved = message.flags_reserved
             seq = message.seq
             options = message.options
         else:
@@ -7216,6 +7259,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'U': unsolicited,
                 'R': response,
+                'reserved': flags_reserved,
             },
             seq=seq,
             options=self._make_mh_options(options),
@@ -7235,6 +7279,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       ipv4_hoa: 'bool' = False,
                       global_revocation: 'bool' = False,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_BindingRevocationMessage':
         """Make MH binding revocation (BRM) message type.
 
@@ -7255,6 +7300,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ipv4_hoa: IPv4 home address binding only flag.
             global_revocation: Global revocation flag.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the 13 bits after the ``G`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7268,6 +7314,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             proxy = message.proxy
             ipv4_hoa = message.ipv4_hoa
             global_revocation = message.global_revocation
+            flags_reserved = message.flags_reserved
             options = message.options
         else:
             br_type_val = self._make_index(br_type, br_type_default, namespace=br_type_namespace,  # type: ignore[assignment]
@@ -7284,6 +7331,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'P': proxy,
                 'V': ipv4_hoa,
                 'G': global_revocation,
+                'reserved': flags_reserved,
             },
             options=self._make_mh_options(options),
         )
@@ -7332,6 +7380,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       status_reversed: 'bool' = False,
                       lifetime: 'int | timedelta' = 0,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_LocalizedRoutingAcknowledgmentMessage':
         """Make MH localized routing acknowledgment (LRA) message type.
 
@@ -7347,6 +7396,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime: Lifetime, in seconds or as a
                 :class:`~datetime.timedelta`.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the seven bits after the ``U`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7356,6 +7406,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if message is not None:
             seq = message.seq
             unsolicited = message.unsolicited
+            flags_reserved = message.flags_reserved
             status_val = message.status  # type: int
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
@@ -7369,6 +7420,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq=seq,
             flags={
                 'U': unsolicited,
+                'reserved': flags_reserved,
             },
             status=status_val,
             lifetime=lifetime_val,
@@ -7384,6 +7436,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       ack: 'bool' = False,
                       retransmit: 'bool' = False,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_UpdateNotificationMessage':
         """Make MH update notification (UPN) message type.
 
@@ -7397,6 +7450,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ack: Acknowledgement requested flag.
             retransmit: Retransmission flag.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the 14 bits after the ``D`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7408,6 +7462,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reason_val = message.reason  # type: Enum_UpdateNotificationReason
             ack = message.ack
             retransmit = message.retransmit
+            flags_reserved = message.flags_reserved
             options = message.options
         else:
             reason_val = self._make_index(reason, reason_default, namespace=reason_namespace,  # type: ignore[assignment]
@@ -7420,6 +7475,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'A': ack,
                 'D': retransmit,
+                'reserved': flags_reserved,
             },
             options=self._make_mh_options(options),
         )
@@ -7475,6 +7531,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       code_reversed: 'bool' = False,
                       ack: 'bool' = False,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_FlowBindingMessage':
         """Make MH flow binding (FB) message type.
 
@@ -7493,6 +7550,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ack: Acknowledgement requested flag. Meaningful only in an
                 indication.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the seven bits after the ``A`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7504,6 +7562,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq = message.seq
             code_val = message.code  # type: Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus
             ack = message.ack
+            flags_reserved = message.flags_reserved
             options = message.options
         else:
             fb_type_val = self._make_index(fb_type, fb_type_default, namespace=fb_type_namespace,  # type: ignore[assignment]
@@ -7518,6 +7577,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code=code_val,
             flags={
                 'A': ack,
+                'reserved': flags_reserved,
             },
             options=self._make_mh_options(options),
         )
@@ -7553,6 +7613,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      seq: 'int' = 0,
                      info: 'bool' = False,
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_SubscriptionResponseMessage':
         """Make MH subscription response (SR) message type.
 
@@ -7561,6 +7622,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq: Sequence number, echoed from the query.
             info: Multicast information flag.
             options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the seven bits after the ``I`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7570,6 +7632,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if message is not None:
             seq = message.seq
             info = message.info
+            flags_reserved = message.flags_reserved
             options = message.options
         else:
             options = options or []
@@ -7578,6 +7641,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq=seq,
             flags={
                 'I': info,
+                'reserved': flags_reserved,
             },
             options=self._make_mh_options(options),
         )
@@ -8547,6 +8611,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       status_reversed: 'bool' = False,
                       remove: 'bool' = False,
                       identity: 'bytes' = b'',
+                      reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_DNSUpdateOption':
         """Make MH DNS-UPDATE-TYPE option.
 
@@ -8559,6 +8624,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_reversed: Reverse status namespace.
             remove: Remove flag.
             identity: Mobile node identity, in FQDN form.
+            reserved: Reserved bits, i.e. the seven bits after the ``R`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8568,6 +8634,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             status_val = option.status  # type: Enum_DNSStatusCode
             remove = option.remove
+            reserved = option.reserved
             identity = option.identity
         else:
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
@@ -8577,7 +8644,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=2 + len(identity),
             status=status_val,
-            flags={'R': int(remove)},
+            flags={'R': int(remove), 'reserved': reserved},
             identity=identity,
         )
 
@@ -8906,6 +8973,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                            status_reversed: 'bool' = False,
                            prefix_length: 'int' = 32,
                            address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                           reserved: 'int' = 0,
                            **kwargs: 'Any') -> 'Schema_IPv4AddressAcknowledgementOption':
         """Make MH IPv4 address acknowledgement option.
 
@@ -8918,6 +8986,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_reversed: Reverse status namespace.
             prefix_length: Allocated prefix length.
             address: Assigned IPv4 home address.
+            reserved: Reserved bits, i.e. the two bits after the prefix length.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8927,6 +8996,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             status_val = option.status  # type: Enum_DSMIPv6HomeAddress
             prefix_length = option.prefix_length
+            reserved = option.reserved
             address = option.address
         else:
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
@@ -8939,13 +9009,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6,
             status=status_val,
-            flags={'prefix_length': prefix_length},
+            flags={'prefix_length': prefix_length, 'reserved': reserved},
             address=address,
         )
 
     def _make_opt_nat(self, type: 'Enum_Option', option: 'Optional[Data_NATDetectionOption]' = None, *,
                       force: 'bool' = False,
                       refresh: 'int | timedelta' = 0,
+                      reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_NATDetectionOption':
         """Make MH NAT detection option.
 
@@ -8955,6 +9026,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             force: Force UDP encapsulation flag.
             refresh: Suggested NAT binding refresh interval, in seconds or as a
                 :class:`~datetime.timedelta`.
+            reserved: Reserved bits, i.e. the 15 bits after the ``F`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8963,6 +9035,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             force = option.force
+            reserved = option.reserved
             refresh_val = math.ceil(option.refresh.total_seconds())
         else:
             refresh_val = refresh if isinstance(refresh, int) else math.ceil(refresh.total_seconds())
@@ -8970,7 +9043,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_NATDetectionOption(
             type=type,
             length=6,
-            flags={'F': int(force)},
+            flags={'F': int(force), 'reserved': reserved},
             refresh=refresh_val,
         )
 
@@ -9102,6 +9175,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                                           option: 'Optional[Data_IPv4HomeAddressRequestOption]' = None, *,
                                prefix_length: 'int' = 32,
                                address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                               reserved: 'int' = 0,
                                **kwargs: 'Any') -> 'Schema_IPv4HomeAddressRequestOption':
         """Make MH IPv4 home address request option.
 
@@ -9110,6 +9184,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length of the requested home network.
             address: Requested IPv4 home address.
+            reserved: Reserved bits, i.e. the ten bits after the prefix length.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9118,6 +9193,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             prefix_length = option.prefix_length
+            reserved = option.reserved
             address = option.address
 
         if prefix_length > 32:
@@ -9126,7 +9202,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_IPv4HomeAddressRequestOption(
             type=type,
             length=6,
-            flags={'prefix_length': prefix_length},
+            flags={'prefix_length': prefix_length, 'reserved': reserved},
             address=address,
         )
 
@@ -9137,6 +9213,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                status_reversed: 'bool' = False,
                                prefix_length: 'int' = 32,
                                address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                               reserved: 'int' = 0,
                                **kwargs: 'Any') -> 'Schema_IPv4HomeAddressReplyOption':
         """Make MH IPv4 home address reply option.
 
@@ -9149,6 +9226,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_reversed: Reverse status namespace.
             prefix_length: Prefix length of the assigned home network.
             address: Assigned IPv4 home address.
+            reserved: Reserved bits, i.e. the two bits after the prefix length.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9158,6 +9236,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             status_val = option.status  # type: Enum_HomeAddressReply
             prefix_length = option.prefix_length
+            reserved = option.reserved
             address = option.address
         else:
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
@@ -9170,7 +9249,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6,
             status=status_val,
-            flags={'prefix_length': prefix_length},
+            flags={'prefix_length': prefix_length, 'reserved': reserved},
             address=address,
         )
 
@@ -9204,6 +9283,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                             mode_default: 'Optional[int]' = None,
                             mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                             mode_reversed: 'bool' = False,
+                            reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_IPv4DHCPSupportModeOption':
         """Make MH IPv4 DHCP support mode option.
 
@@ -9214,6 +9294,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             mode_default: Default DHCP support mode.
             mode_namespace: DHCP support mode namespace.
             mode_reversed: Reverse DHCP support mode namespace.
+            reserved: Reserved bits, i.e. the 15 bits before the ``S`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9222,6 +9303,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             mode_val = int(option.mode)
+            reserved = option.reserved
         else:
             mode_val = self._make_index(mode, mode_default, namespace=mode_namespace,
                                         reversed=mode_reversed, pack=False)
@@ -9232,7 +9314,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_IPv4DHCPSupportModeOption(
             type=type,
             length=2,
-            flags={'S': mode_val},
+            flags={'S': mode_val, 'reserved': reserved},
         )
 
     def _make_opt_cr(self, type: 'Enum_Option', option: 'Optional[Data_ContextRequestOption]' = None, *,
@@ -9365,6 +9447,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_transient(self, type: 'Enum_Option', option: 'Optional[Data_TransientBindingOption]' = None, *,
                             late: 'bool' = False,
                             lifetime: 'int | timedelta' = 0,
+                            reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_TransientBindingOption':
         """Make MH transient binding option.
 
@@ -9374,6 +9457,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             late: Late path switch flag.
             lifetime: Maximum lifetime of the transient state, in units of 100
                 milliseconds or as a :class:`~datetime.timedelta`.
+            reserved: Reserved bits, i.e. the seven bits before the ``L`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9382,6 +9466,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             late = option.late
+            reserved = option.reserved
             lifetime_val = math.ceil(option.lifetime.total_seconds() * 10)
         else:
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(
@@ -9393,7 +9478,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_TransientBindingOption(
             type=type,
             length=2,
-            flags={'L': int(late)},
+            flags={'L': int(late), 'reserved': reserved},
             lifetime=lifetime_val,
         )
 
@@ -9609,6 +9694,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_redirect(self, type: 'Enum_Option', option: 'Optional[Data_RedirectOption]' = None, *,
                            ipv6: 'Optional[bytes | str | int | IPv6Address]' = None,
                            ipv4: 'Optional[bytes | str | int | IPv4Address]' = None,
+                           reserved: 'int' = 0,
                            **kwargs: 'Any') -> 'Schema_RedirectOption':
         """Make MH redirect mobility option.
 
@@ -9617,6 +9703,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             ipv6: IPv6 address of the redirected-to local mobility anchor.
             ipv4: IPv4 address of the redirected-to local mobility anchor.
+            reserved: Reserved bits, i.e. the 14 bits after the ``N`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9630,6 +9717,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             ipv6 = option.ipv6
             ipv4 = option.ipv4
+            reserved = option.reserved
 
         if (ipv6 is None) == (ipv4 is None):
             raise ProtocolError(f'{self.alias}: [OptNo {type}] exactly one of the IPv6 and '
@@ -9641,6 +9729,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'K': int(ipv6 is not None),
                 'N': int(ipv4 is not None),
+                'reserved': reserved,
             },
             ipv6=ipv6,
             ipv4=ipv4,
@@ -9940,6 +10029,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                                      option: 'Optional[Data_IPv4TrafficOffloadSelectorOption]' = None, *,
                           mode: 'bool' = False,
                           selector: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]]' = None,
+                          reserved: 'int' = 0,
                           **kwargs: 'Any') -> 'Schema_IPv4TrafficOffloadSelectorOption':
         """Make MH IPv4 traffic offload selector option.
 
@@ -9948,6 +10038,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             mode: Offload mode flag.
             selector: Traffic selector sub-options.
+            reserved: Reserved bits, i.e. the 31 bits after the ``M`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9956,6 +10047,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             mode = option.mode
+            reserved = option.reserved
             selector = option.selector
         else:
             selector = selector or []
@@ -9967,7 +10059,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_IPv4TrafficOffloadSelectorOption(
             type=type,
             length=length,
-            flags={'M': int(mode)},
+            flags={'M': int(mode), 'reserved': reserved},
             selector=entries,
         )
 
@@ -9977,6 +10069,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                             mode: 'bool' = False,
                             records: 'int' = 0,
                             data: 'bytes' = b'',
+                            reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_DynamicIPMulticastSelectorOption':
         """Make MH dynamic IP multicast selector option.
 
@@ -9987,6 +10080,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             mode: Selector mode flag.
             records: Number of multicast address records in ``data``.
             data: Multicast address records, opaque to this module.
+            reserved: Reserved bits, i.e. the seven bits after the ``M`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9996,6 +10090,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             protocol = option.protocol
             mode = option.mode
+            reserved = option.reserved
             records = option.records
             data = option.data
 
@@ -10003,7 +10098,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=4 + len(data),
             protocol=protocol,
-            flags={'M': int(mode)},
+            flags={'M': int(mode), 'reserved': reserved},
             records=records,
             data=data,
         )
@@ -10011,6 +10106,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_dmnp(self, type: 'Enum_Option', option: 'Optional[Data_DelegatedMNPOption]' = None, *,
                        prefix_length: 'int' = 64,
                        prefix: 'bytes | str | int | IPv4Address | IPv6Address' = '::',
+                       reserved: 'int' = 0,
                        **kwargs: 'Any') -> 'Schema_DelegatedMNPOption':
         """Make MH delegated mobile network prefix option.
 
@@ -10019,6 +10115,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Delegated mobile network prefix.
+            reserved: Reserved bits, i.e. the seven bits after the ``V`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10031,6 +10128,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = option.reserved
             prefix_length = option.prefix_length
             prefix = option.prefix
 
@@ -10050,7 +10148,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_DelegatedMNPOption(
             type=type,
             length=6 if ipv4 else 18,
-            flags={'V': int(ipv4)},
+            flags={'V': int(ipv4), 'reserved': reserved},
             prefix_length=prefix_length,
             prefix=addr,
         )
@@ -10172,13 +10270,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             if option is not None:
                 session = cast('Data_PerSessionBitRateAttribute', option)
                 service, exclude, rate = session.service, session.exclude, session.rate
+                reserved = session.reserved
             else:
                 service = cast('bool', kwargs.get('service', False))
                 exclude = cast('bool', kwargs.get('exclude', False))
+                reserved = cast('int', kwargs.get('reserved', 0))
                 rate = cast('int', kwargs.get('rate', 0))
             return Schema_PerSessionBitRateAttribute(
                 type=code, length=6,
-                flags={'S': int(service), 'E': int(exclude)}, rate=rate)
+                flags={'S': int(service), 'E': int(exclude), 'reserved': reserved}, rate=rate)
 
         if code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
                     Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
@@ -10543,6 +10643,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                          bid: 'int' = 1,
                          bulk: 'bool' = False,
                          overwrite: 'bool' = False,
+                         reserved: 'int' = 0,
                          **kwargs: 'Any') -> 'Schema_MAGMultipathBindingOption':
         """Make MH MAG multipath binding option.
 
@@ -10557,6 +10658,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             bid: Binding identifier; ``0`` and ``255`` are reserved.
             bulk: Bulk re-registration flag.
             overwrite: Registration overwrite flag.
+            reserved: Reserved bits, i.e. the 22 bits after the ``O`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10573,6 +10675,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             bid = option.bid
             bulk = option.bulk
             overwrite = option.overwrite
+            reserved = option.reserved
         else:
             att_val = self._make_index(att, att_default, namespace=att_namespace,  # type: ignore[assignment]
                                        reversed=att_reversed, pack=False)
@@ -10590,6 +10693,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'B': int(bulk),
                 'O': int(overwrite),
+                'reserved': reserved,
             },
         )
 
@@ -10882,6 +10986,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_ext_multiprefix(self, type: 'Enum_CGAExtension', option: 'Optional[Data_MultiPrefixExtension]' = None, *,
                               flag: 'bool' = False,
                               prefixes: 'Optional[list[int]]' = None,
+                              reserved: 'int' = 0,
                               **kwargs: 'Any') -> 'Schema_MultiPrefixExtension':
         """Make CGA multi-prefix extension.
 
@@ -10890,6 +10995,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Extension data model.
             flag: Public key flag.
             prefixes: Prefixes.
+            reserved: Reserved bits, i.e. the 31 bits after the ``P`` flag.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10898,6 +11004,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             flag = option.flag
+            reserved = option.reserved
             # NOTE: ``list()`` rather than a cast: the data model stores the
             # prefixes as a :obj:`tuple`, which
             # :class:`~pcapkit.corekit.fields.collections.ListField` refuses to
@@ -10919,6 +11026,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=4 + len(prefixes) * 8,
             flags={
                 'P': int(flag),
+                'reserved': reserved,
             },
             prefixes=prefixes,
         )
