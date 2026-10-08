@@ -211,15 +211,21 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     SHB's own options -- read by :func:`byteorder_callback`, after this field --
     resolve their byte order from.
 
+    A Section Header Block of 12 octets has no room for the magic, and its
+    place holds the trailing Block Total Length instead. That length is 12 in
+    exactly one byte order, which is the one taken; :meth:`SectionHeaderBlock.post_process`
+    then rejects any block that matched this way with a length other than 12
+    (:issue:`1422`).
+
     Args:
         field: Field instance.
         packet: Packet data.
 
     """
     magic = packet['match']['byteorder']  # type: int
-    if magic == 0x1A2B3C4D:
+    if magic in (0x1A2B3C4D, 0x0000000C):
         field._byteorder = 'big'
-    elif magic == 0x4D3C2B1A:
+    elif magic in (0x4D3C2B1A, 0x0C000000):
         field._byteorder = 'little'
     else:
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
@@ -1076,16 +1082,25 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
         Returns:
             Revised schema.
 
+        A Block Total Length below the 28 octets of the fixed fields reads the
+        trailing copy past the block, so the two are not compared here;
+        :meth:`PCAPNG._read_block_short_header
+        <pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short_header>` keeps
+        the block as captured and compares them itself (:issue:`1422`). A block
+        of 12 octets has no Byte-Order Magic and takes its byte order from its
+        Block Total Length (see :func:`shb_byteorder_callback`).
+
         """
-        self = cast('Self', super().post_process(packet))
+        if self.length >= 28:
+            self = cast('Self', super().post_process(packet))
 
         if self.section_length == 0xFFFF_FFFF_FFFF_FFFF:
             self.section_length = -1
 
         magic = packet['match']['byteorder']  # type: int
-        if magic == 0x1A2B3C4D:
+        if magic == 0x1A2B3C4D or (magic == 0x0000000C and self.length == 12):
             self.byteorder = 'big'
-        elif magic == 0x4D3C2B1A:
+        elif magic == 0x4D3C2B1A or (magic == 0x0C000000 and self.length == 12):
             self.byteorder = 'little'
         else:
             raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
@@ -1364,6 +1379,26 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
         length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        A Block Total Length below the 20 octets of the fixed fields reads the
+        trailing copy past the block, so the two are not compared here;
+        :meth:`PCAPNG._read_block_short_header
+        <pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short_header>` keeps
+        the block as captured and compares them itself (:issue:`1422`).
+
+        """
+        if self.length < 20:
+            return self
+        return super().post_process(packet)
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', linktype: 'int', snaplen: 'int',
