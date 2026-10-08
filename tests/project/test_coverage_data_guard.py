@@ -26,7 +26,13 @@ import subprocess  # nosec: B404
 import sys
 import tempfile
 import textwrap
+import types
+import typing
 import unittest
+import unittest.mock
+
+if typing.TYPE_CHECKING:
+    import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
@@ -154,6 +160,61 @@ class CoverageDataGuardTests(unittest.TestCase):
     def test_the_child_lookup_allows_a_padded_pid(self) -> None:
         """The real-log test above finds its child under a pid shorter than the padding."""
         self.assertEqual(CHILD.search(_entry(9832, 9800, "['-c']"))[1], '9832')
+
+    def test_a_missing_worker_is_named_with_its_fate(self) -> None:
+        """#1423: the failure says which process it was and whether its atexit save ran."""
+        log = (_entry(100, 1, CONTROLLER_CMD) + _entry(101, 100, "['-c']")
+               + _entry(102, 100, "['-c']") + _entry(103, 100, "['-c']")
+               + '  102.ab12: atexit: pid: 102, instance: <Coverage data_file=x>\n')
+        self.write(log, [100, 101])
+        result = self.run_guard()
+        self.assertIn("pid 102: cmd ['-c']", result.stdout)
+        self.assertIn('pid 102: atexit: instance: <Coverage data_file=x>', result.stdout)
+        self.assertIn('pid 103: no atexit/sigterm entry -- died before saving', result.stdout)
+        self.assert_fails("no data file from pid ['102', '103']")
+
+    def test_the_process_log_is_kept_as_an_artifact(self) -> None:
+        """The log is the only record of a lost worker's fate once the runner is gone (#1423)."""
+        text = WORKFLOW.read_text(encoding='utf-8')
+        step = text.split('- name: Upload coverage process log', 1)[1]
+        step = step.split('\n      - name:', 1)[0]
+        self.assertIn('if: ${{ !cancelled() && matrix.coverage }}', step)
+        self.assertIn(f'path: {LOG}', step)
+
+
+class WorkerSessionFinishSaveTests(unittest.TestCase):
+    """#1423: an xdist worker writes its data at session finish, not only at exit."""
+
+    def finish(self, *, worker: bool) -> int:
+        """Run the conftest hook under a stand-in auto-started coverage; return its saves."""
+        import coverage  # pylint: disable=import-outside-toplevel
+
+        from tests import conftest  # pylint: disable=import-outside-toplevel
+
+        cov = unittest.mock.Mock()
+        sentinel = object()
+        before = getattr(coverage.process_startup, 'coverage', sentinel)
+        coverage.process_startup.coverage = cov  # type: ignore[attr-defined]
+        try:
+            config = types.SimpleNamespace(**({'workerinput': {}} if worker else {}))
+            conftest.pytest_sessionfinish(typing.cast('pytest.Session',
+                                                      types.SimpleNamespace(config=config)))
+        finally:
+            if before is sentinel:
+                del coverage.process_startup.coverage  # type: ignore[attr-defined]
+            else:
+                coverage.process_startup.coverage = before  # type: ignore[attr-defined]
+        return int(cov.save.call_count)
+
+    @unittest.skipUnless(_has_coverage(), 'needs coverage 7.10+ (`[run] patch`)')
+    def test_a_worker_saves(self) -> None:
+        """The file exists before shutdown, so a death there cannot lose it whole."""
+        self.assertEqual(self.finish(worker=True), 1)
+
+    @unittest.skipUnless(_has_coverage(), 'needs coverage 7.10+ (`[run] patch`)')
+    def test_the_controller_does_not(self) -> None:
+        """The controller saves at its own exit; only workers die after reporting."""
+        self.assertEqual(self.finish(worker=False), 0)
 
 
 if __name__ == '__main__':

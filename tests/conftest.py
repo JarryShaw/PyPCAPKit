@@ -168,6 +168,51 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     _pin_module_snapshot()
 
 
+def pytest_sessionfinish(session: 'pytest.Session') -> 'None':
+    """Write an xdist worker's coverage data out before the process can die (#1423).
+
+    The coverage leg of ``unit-tests.yml`` measures each worker through
+    coverage's ``patch = ["subprocess"]`` hook, and that measurement is saved by
+    an :mod:`atexit` handler -- so it is written *after* the worker has already
+    reported its results and told the controller it is finished. Anything that
+    kills the process in that window takes the whole worker's data with it, and
+    takes it silently: pytest has its results, so every test still passes, while
+    ``coverage combine`` merges one file fewer and reports the rest as the whole.
+    That is #1387, and the guard in ``Report coverage`` turns it into a failed
+    step rather than a quietly low number -- four times on 2026-10-08.
+
+    Saving here closes the window instead of policing it. :func:`cov.save` is
+    safe to call mid-run (coverage's own long-running-process recipe), and the
+    later ``atexit`` save appends to the same file, so the data file exists from
+    this point on and a worker that dies during shutdown costs at most the arcs
+    executed after this hook.
+
+    A no-op outside that one leg: it returns immediately unless the process is
+    an xdist worker (``workerinput``) whose coverage was auto-started by the
+    subprocess patch.
+
+    Args:
+        session: The pytest session, for its config's ``workerinput``.
+
+    """
+    if not hasattr(session.config, 'workerinput'):
+        return
+    try:
+        import coverage  # pylint: disable=import-outside-toplevel
+    except ImportError:  # pragma: no cover
+        return
+    cov = getattr(coverage.process_startup, 'coverage', None)
+    if cov is None:
+        return
+    try:
+        cov.save()
+    except Exception:  # pragma: no cover  # pylint: disable=broad-except
+        # Deliberately broad, as in `pytest_sessionstart`: a failure to flush
+        # early must not fail a run whose tests have already passed. The atexit
+        # save still gets its turn, and the guard still catches a lost file.
+        pass
+
+
 @pytest.fixture(autouse=True)
 def restore_module_table() -> 'Iterator[None]':
     """Put the :mod:`pcapkit` region of :data:`sys.modules` back to a known-good state.

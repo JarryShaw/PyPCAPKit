@@ -49,6 +49,10 @@ class CoverageRcfileTests(unittest.TestCase):
         self.assertIs(run.get('parallel'), True)
         self.assertIn('subprocess', run.get('patch', ()))
 
+    def test_a_sigterm_saves_the_data(self) -> None:
+        """A worker SIGTERMed during shutdown otherwise leaves no data file (#1423)."""
+        self.assertIs(self.rcfile['run'].get('sigterm'), True)
+
     def test_the_core_is_ctrace(self) -> None:
         """sysmon grew one module's peak RSS from 0.40 to 4.17 GiB and killed the runner (#1064)."""
         self.assertEqual(self.rcfile['run'].get('core'), 'ctrace')
