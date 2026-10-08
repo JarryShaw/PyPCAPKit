@@ -1143,6 +1143,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             meth = name[0]
         block = meth(schema.block, header=schema)
 
+        # NOTE: An option or record area holding a malformed entry is kept as
+        # the octets captured, as one :obj:`bytes` item (see
+        # :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField`), and
+        # parses as no options. The octets are kept on the block as
+        # ``options_raw`` or ``records_raw``, which the block's ``make`` writes
+        # back verbatim (:issue:`1325`).
+        for name in ('records', 'options'):
+            area = getattr(schema.block, name, None)
+            if isinstance(area, list) and len(area) == 1 and isinstance(area[0], bytes):
+                block.__update__([(f'{name}_raw', area[0])])
+
         if not _read:
             # move backward to the beginning of the packet
             self._file.seek(0, io.SEEK_SET)
@@ -1625,6 +1636,21 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             'type': data.type,
             'block': data,
         }
+
+    @staticmethod
+    def _block_area(block: 'Data_PCAPNG', name: 'str') -> 'Any':
+        """Option or record area of a parsed block, for its ``make``.
+
+        Args:
+            block: Block data model.
+            name: ``'options'`` or ``'records'``.
+
+        Returns:
+            The area's octets if :meth:`read` kept it as captured, as
+            ``<name>_raw``; otherwise the parsed ``<name>``.
+
+        """
+        return getattr(block, f'{name}_raw', getattr(block, name))
 
     @staticmethod
     def _flags_enum(enum: 'Type[PacketDirection] | Type[PacketReception]', value: 'int',
@@ -2382,6 +2408,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         options = OrderedMultiDict()  # type: Option
+
+        # an area kept as captured holds no options to read
+        if any(isinstance(schema, bytes) for schema in options_schema):
+            return options
 
         for schema in options_schema:
             type = schema.type
@@ -3478,6 +3508,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         records = OrderedMultiDict()  # type: Record
 
+        # an area kept as captured holds no records to read
+        if any(isinstance(schema, bytes) for schema in records_schema):
+            return records
+
         for schema in records_schema:
             type = schema.type
             name = self._lookup_registry(self.__record__, type)
@@ -3789,7 +3823,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             major_version = block.version.major
             minor_version = block.version.minor
             section_length = block.section_length
-            options = block.options
+            options = self._block_area(block, 'options')
         else:
             if major_version is None:
                 major_version = version[0]
@@ -3838,7 +3872,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if block is not None:
             linktype_val = block.linktype
             snaplen = block.snaplen
-            options = block.options
+            options = self._block_area(block, 'options')
         else:
             linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[assignment]
                                             reversed=linktype_reversed, pack=False)
@@ -3886,7 +3920,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             captured_len = block.captured_len
             original_len = block.original_len
             packet_data = self._make_packet_data(block)
-            options = block.options
+            options = self._block_area(block, 'options')
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
         if captured_len is None:
@@ -3980,8 +4014,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if block is not None:
-            records = block.records
-            options = block.options
+            records = self._block_area(block, 'records')
+            options = self._block_area(block, 'options')
 
         if records is not None:
             records_value, records_length = self._make_nrb_records(records)
@@ -4021,7 +4055,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if block is not None:
             interface_id = block.interface_id
             timestamp = block.timestamp_epoch
-            options = block.options
+            options = self._block_area(block, 'options')
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
         # NOTE: ``isb_starttime`` and ``isb_endtime`` are scaled by the
@@ -4120,7 +4154,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if block is not None:
             secrets_type_val = block.secrets_type
             secrets_data = block.secrets_data
-            options = block.options
+            options = self._block_area(block, 'options')
         else:
             secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[assignment]
                                                 reversed=secrets_type_reversed, pack=False)
@@ -4250,7 +4284,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             captured_len = block.captured_len
             original_len = block.original_len
             packet_data = self._make_packet_data(block)
-            options = block.options
+            options = self._block_area(block, 'options')
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
         if captured_len is None:
@@ -4287,7 +4321,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length2=total_length + 32 + packet_len,
         )
 
-    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]',
+    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes] | bytes',
                              namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.
 
@@ -4299,6 +4333,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Tuple of options and total length of options.
 
         """
+        # an option area kept as captured is written back verbatim
+        if isinstance(options, bytes):
+            return [options], len(options)
+
         has_endofopt = False
         total_length = 0
         if isinstance(options, list):
@@ -5725,7 +5763,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data=hash,
         )
 
-    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':
+    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes] | bytes') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':
         """Make name resolution records for PCAP-NG.
 
         Args:
@@ -5735,6 +5773,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Tuple of name resolution records and total length of the records.
 
         """
+        # a record area kept as captured is written back verbatim
+        if isinstance(records, bytes):
+            return [records], len(records)
+
         has_record_end = False
         total_length = 0
         if isinstance(records, list):

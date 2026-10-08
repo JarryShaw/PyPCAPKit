@@ -140,13 +140,22 @@ class TestPCAPNGLengths(PCAPNGTestCase):
         self.assertEqual(frame.info.len, 16)
 
     def test_custom_option_shorter_than_pen_is_rejected(self) -> None:
-        """#1284: Option Length 3 cannot hold the 4-octet PEN."""
-        from pcapkit.utilities.exceptions import ProtocolError
+        """#1284: Option Length 3 cannot hold the 4-octet PEN.
+
+        Its PEN and padding run past the eight-octet option area, so the area
+        is kept as captured rather than read as an option (#1325), and the
+        block rebuilds byte for byte.
+        """
+        import warnings
 
         octets = H('0a0d0d0a 24000000 4d3c2b1a 0100 0000 ffffffffffffffff'
                    'ad0b0300 61626300 24000000')
-        with self.assertRaisesRegex(ProtocolError, r'opt_custom\] invalid length'):
-            self._parse(octets)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            block = self._parse(octets).info
+            self.assertEqual(len(block.options), 0)
+            self.assertEqual(block.options_raw, H('ad0b0300 61626300'))
+            self.assertRebuilds(octets)
 
 
 #: A big-endian section header with no options -- the repro of #1272.

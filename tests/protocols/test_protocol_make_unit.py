@@ -156,10 +156,12 @@ class TestMakeRawItems(unittest.TestCase):
 
     def test_malformed_raw_item_raises_protocol_error(self) -> None:
         # ESP_INFO needs a 12-octet body; an 8-octet one is a parse error,
-        # reported as such rather than as an AttributeError on raw bytes
+        # reported as such rather than as an AttributeError on raw bytes. Its
+        # fields read past the octets given, which the option field refuses
+        # (#1325) before the reader sees them.
         hip = _attr('pcapkit.protocols.internet.hip.HIP')
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
-        with self.assertRaisesRegex(exc, r'\[ParamNo 65\] invalid format'):
+        with self.assertRaisesRegex(exc, r'runs past the end of the data'):
             hip(extension=True, parameters=[b'\x00\x41\x00\x08' + bytes(8)])
 
 

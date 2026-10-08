@@ -1382,54 +1382,35 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(mss.mss, 1460)
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
-        """An option declaring more data than its option area holds is tolerated. C.f. #431, #572.
+        """An option declaring more data than its option area holds is refused alone, and kept in a datagram. C.f. #431, #572, #1325.
 
         :meth:`test_an_option_area_longer_than_the_segment_still_parses` above
         pins the *empty*-tail half of the #431 accommodation: an option area
         that runs out before it starts, so the type byte decodes as 0 and the
-        loop reads end-of-option-list. Nothing pinned the other half -- an
-        option that *does* start, declares more data than its own option area
-        actually holds, and runs out partway through its ``data`` field,
-        rather than one with no options at all. A candidate fix for #554 (PR
-        #571) turned that into an unwrapped ``FieldValueError`` while the rest
-        of the suite stayed green, because nothing exercised it.
+        loop reads end-of-option-list. This is the other half -- an option that
+        *does* start, declares more data than its option area holds, and runs
+        out partway through its ``data`` field.
 
         The segment below sets a data offset of 7 -- 8 octets of option area
-        -- for a reserved option kind (``0x4f``, which resolves to
-        ``Option.Reserved_79``) declaring ``length=12``, which asks
-        :class:`~pcapkit.protocols.schema.transport.tcp.UnassignedOption`'s
-        ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
-        10 octets here) for more than the 6 octets actually behind it.
-        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
-        tail-pads the short read with zero octets rather than raising, so the
-        option parses with its declared ``length`` intact and a ``data`` value
-        of the six real octets followed by four zero ones -- the zeros go where
-        the octets that were never read would have been, which before #604 was
-        the other way round. That is reachable
-        here because :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
-        pads the short read with zero octets rather than raising, so the
-        option parses with its declared ``length`` intact and a ``data`` value
-        of the six real octets followed by four zero ones. The zeros go on the
-        *tail*, where the octets that were never read would have been; before
-        #604 they were placed at the front, which for a numeric field corrupted
-        the value outright. That is reachable here because
-        :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
-        sizes each parsed option by ``len(schema)`` -- what it actually
-        consumed (8 octets) -- rather than by its self-reported ``length``, so
-        its own ``TCP: invalid format`` threshold never sees the shortfall --
-        unlike IPv4's equivalent check, which sums the *declared* lengths
-        instead and does see it (see
-        ``IPv4UnitTests.test_a_truncated_option_still_parses_its_declared_length``).
-        ``length=32`` (30 octets of data wanted, still only 6 available) is
-        checked alongside 12 because the pad width tracks ``length - 2``: 32
-        yields 24 trailing zero octets where 12 yields 4, pinning that the
-        padding scales with the declared length rather than being a fixed 4.
+        -- for a reserved option kind (``0x4f``, ``Option.Reserved_79``)
+        declaring ``length=12`` or ``length=32``, with only 6 data octets
+        behind it. The missing octets used to be read as zeros, 4 or 24 of
+        them, and rebuilt as if captured. :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` now refuses
+        the option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+        instead (#1325). Inside an IPv4 datagram the segment is kept as the
+        octets captured, a :class:`~pcapkit.protocols.misc.raw.Raw` payload
+        carrying that error, and rebuilds byte for byte.
 
         """
         import struct
+        import warnings
 
         from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
         def segment(data_offset: 'int', options: 'bytes') -> 'bytes':
@@ -1438,29 +1419,22 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         custom = Option.get(0x4f)
         trailing = bytes.fromhex('aabbccddeeff')
-        for declared_length, zeroes in ((12, 4), (32, 24)):
+        for declared_length in (12, 32):
             with self.subTest(declared_length=declared_length):
                 raw = segment(7, bytes([custom, declared_length]) + trailing)
-                with time_limit():
-                    proto = TCP(raw, len(raw))
+                datagram = (bytes.fromhex('4500') + struct.pack('!H', 20 + len(raw))
+                            + bytes.fromhex('000100004006' '0000' '0a000001' '0a000002') + raw)
+                with time_limit(), warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    with self.assertRaisesRegex(ProtocolError, 'runs past the end of the data'):
+                        TCP(raw, len(raw))
+                    proto = IPv4(datagram, len(datagram))
 
-                self.assertEqual(proto.info.hdr_len, 28)
-                self.assertEqual(
-                    [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
-                    [(custom, declared_length)],
-                )
-                unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
-                                   if code == custom)
-                # The six octets actually behind the option come first, where
-                # they were read, and the zeros synthesised for the ones that
-                # were not follow them. Before #604 they arrived the other way
-                # round; since ``trailing`` is non-zero and ``zeroes`` is
-                # non-zero for both declared lengths, this assertion tells the
-                # two orders apart rather than holding for either. See #604 and
-                # ``FieldBaseShortReadPaddingSideTests`` in
-                # ``tests/corekit/test_fields_field.py``.
-                self.assertEqual(unassigned.data, trailing + b'\x00' * zeroes)
-                self.assertEqual(bytes(proto.__header__), raw)
+                self.assertIsInstance(proto.payload, Raw)
+                self.assertIn('runs past the end of the data', str(proto.payload.info.error))
+                # the option octets are kept as captured, with nothing synthesised
+                self.assertEqual(proto.payload.data, raw)
+                self.assertEqual(IPv4.from_data(proto.info).data, datagram)
 
     def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
         """Parsing must not write to the shared ``TCP.__option__``.

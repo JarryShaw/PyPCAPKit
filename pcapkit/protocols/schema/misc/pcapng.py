@@ -62,7 +62,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, DefaultDict, Iterable, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Optional, Type
 
     from typing_extensions import Literal, Self
 
@@ -251,12 +251,11 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     for a read -- there are no octets here -- and zero says that, where a
     negative says something :mod:`struct` cannot express.
 
-    Clamping rather than refusing is the choice :func:`bounded_option` and
-    :func:`bounded_area` already made, for the reason their docstrings give: a
-    block read has no catch point above :meth:`FieldBase.unpack
+    Flooring rather than refusing is the choice :func:`bounded_area` makes too:
+    a block read has no catch point above :meth:`FieldBase.unpack
     <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
     whole extraction rather than one block, so a capture cut short by its
-    snapshot length must keep parsing. The end of the file is the one case that is *not* a clamp, since
+    snapshot length must keep parsing. The end of the file is the one case that is *not* a floor, since
     there no block is being read at all -- see :meth:`PCAPNG._check_block_floor
     <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>`, which reports it
     as the :exc:`~pcapkit.utilities.exceptions.StreamEOFError` the frame loop
@@ -264,11 +263,11 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
 
     Note:
         Unlike :func:`bounded_option` this needs no ``__length__`` opt-out for
-        the packing path, because it floors a *difference* rather than clamping
+        the packing path, because it floors a *difference* rather than checking
         against the remaining area: a negative difference is not a legitimate
         thing to pack either -- ``struct.pack('-8s', ...)`` raises exactly as
-        ``calcsize`` does -- where clamping against the remainder would have
-        shortened a perfectly good option.
+        ``calcsize`` does -- where checking against the remainder would have
+        refused a perfectly good option.
 
         That distinction is what keeps the three decryption-secrets payloads --
         :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and
@@ -294,72 +293,34 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
 
 
 def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
-    """Clamp an option or record payload to the octets its area still declares.
+    """Refuse an option or record payload that runs past its area.
 
     Args:
         length: Callback computing the payload's nominal length, as the option's
             or record's own declared length field gives it.
 
     Returns:
-        A callback returning that length, never past the octets the enclosing
-        option or record area has left to give.
+        A callback returning that length.
 
-    An option's length is a 16-bit wire field, so it can declare up to 65,535
-    octets of payload from four octets of option header. Nothing bounds that
-    against the area the option sits in: :meth:`OptionField.unpack
-    <pcapkit.corekit.fields.collections.OptionField.unpack>` subtracts each
-    option's *parsed* size from the area it was given but never checks the
-    declared size against it, and :meth:`FieldBase.unpack
-    <pcapkit.corekit.fields.field.FieldBase.unpack>` zero-pads any shortfall
-    within :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`
-    unconditionally -- deliberately, since that ceiling is the full span of a
-    16-bit length and a capture cut short by its snapshot length must still
-    parse. Repeating such an option across many blocks therefore synthesised
-    padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each
-    with one option declaring 65,535 against none present, produced 131,070,000
-    octets of zero padding, an amplification of 1,637x linear in the block
-    count. The field layer's own budget already covers the 32-bit band.
+    Raises:
+        ProtocolError: If the payload declares more octets than the enclosing
+            option or record area has left.
 
-    The bound has to come from this layer because the field layer cannot see
-    it. What distinguishes the crafted case from the legitimate one is not the
-    shortfall's size -- both are inside a 16-bit length, which is why a plain
-    ``len(buffer) < length`` rejection does not work -- but whether the option
-    is inconsistent with the framing the block itself declares. Block Total
-    Length is authoritative and cross-checked against its own trailing copy, so
-    the area is ``length`` less the fixed fields, ``captured_len`` and its
-    padding; an option declaring more payload than that area has left is
-    malformed however complete the file behind it is. A snapshot-truncated
-    capture says so through ``captured_len`` instead, and leaves its options
-    whole, so it never trips this.
-
-    Clamping rather than refusing keeps a capture cut short by its snapshot
-    length parsing: a block read has no catch point above
-    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
-    so one refusal aborts the whole extraction rather than one block, and a
-    truncated capture would stop parsing at the cut instead of reporting the
-    frames before it. The clamp is
-    also history-independent -- it reads only this block's own declared framing
-    -- which a running threshold would not be.
+    An option's length is a 16-bit wire field, so one four-octet option header
+    can declare 65,535 octets of payload. Read as declared, every shortfall
+    would be zero-padded at the field layer, and the zeros rebuilt as if they
+    had been captured (#594, #1325). So a payload that runs past the area is
+    refused here instead. Inside a block, :class:`OptionAreaField` then keeps
+    the whole option area as the octets captured, so the block still parses and
+    rebuilds byte for byte.
 
     Note:
-        The clamp is skipped when ``__length__`` is absent or negative, which is
+        The check is skipped when ``__length__`` is absent or negative, which is
         what :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
-        leaves it as when no length is known. That matters here in a way it does
-        not for :func:`pcapkit.protocols.schema.transport.sctp.bounded`, whose
-        list fields ignore their length while packing: these are
-        :class:`~pcapkit.corekit.fields.strings.BytesField` and
-        :class:`~pcapkit.corekit.fields.strings.StringField` payloads, and
-        :meth:`FieldBase.pack <pcapkit.corekit.fields.field.FieldBase.pack>`
-        packs them through ``struct.pack('<n>s', ...)``, which truncates
-        silently. A clamp applied while packing would therefore shorten a
-        perfectly good option rather than reject it.
-
-        The nominal length still goes through :func:`nonnegative` first, on both
-        paths, since an option declaring less payload than the part of itself it
-        describes -- ``length`` below the four octets of an ``epb_hash`` or an
-        ``ns_dnsIP4addr`` record's own fields -- makes the subtraction negative
-        before there is anything to clamp it against, and a negative is not an
-        amount to read or to pack.
+        leaves it as when no length is known. The nominal length still goes
+        through :func:`nonnegative` first, on both paths, since an option
+        declaring less payload than the part of itself it describes makes the
+        subtraction negative.
 
     """
     floored = nonnegative(length)
@@ -371,11 +332,48 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
         if not isinstance(remaining, int) or remaining < 0 or nominal <= remaining:
             return nominal
 
-        warn(f'PCAP-NG: option declares {nominal} octet(s) of payload with '
-             f'{remaining} octet(s) left in its area; reading {remaining}',
-             SchemaWarning, stacklevel=stacklevel())
-        return remaining
+        raise ProtocolError(f'PCAP-NG: option declares {nominal} octet(s) of payload '
+                            f'with {remaining} octet(s) left in its area')
     return callback
+
+
+class OptionAreaField(OptionField):
+    """Option list that keeps a malformed option area as the octets captured.
+
+    An option in the area that runs past it, or past the data, raises
+    :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
+    :meth:`OptionField.unpack <pcapkit.corekit.fields.collections.OptionField.unpack>`
+    or :func:`bounded_option`. A block has no catch point above its fields, so
+    raising would abort the whole extraction. This field instead returns the
+    area as a single :obj:`bytes` item, which packs back verbatim, and reports
+    no padding after it (#1325).
+
+    """
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Any]':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: Field buffer.
+            packet: Packet data.
+
+        Returns:
+            Unpacked field value, or the whole area as one :obj:`bytes` item if
+            an option in it is malformed.
+
+        """
+        if isinstance(buffer, bytes):
+            buffer = io.BytesIO(buffer)
+        start = buffer.tell()
+        try:
+            return super().unpack(buffer, packet)
+        except ProtocolError as error:
+            buffer.seek(start, io.SEEK_SET)
+            raw = buffer.read(max(self._length, 0))
+            warn(f'PCAP-NG: {error}; option area of {len(raw)} octet(s) kept as captured',
+                 ProtocolWarning, stacklevel=stacklevel())
+            self._option_padding = 0
+            return [raw]
 
 
 def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
@@ -388,16 +386,15 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
     Returns:
         A callback returning that span, never past the octets left of the block.
 
-    :func:`bounded_option` bounds a payload by the area, and the area by the
-    block's declared Block Total Length. That closes the band only while the
-    declared length is itself backed by real octets, and nothing checks that:
-    ``BlockType.post_process`` compares ``length`` against its own trailing copy
-    and never against the file. A block declaring 1,000,000 octets while holding
-    36 therefore sizes its option area at 999,964, an option inside it declaring
-    65,535 is under that and is not clamped, and 65,535 octets of zeros are
-    synthesised from 36 -- measured, 1,820x, with no warning. Clamping the area
-    to ``__length__`` as well removes the step: the payload is then bounded by
-    the octets the block was actually handed, whatever it declared.
+    :func:`bounded_option` refuses a payload that runs past the area, and the
+    area is sized from the block's declared Block Total Length. Nothing checks
+    that length against the file: ``BlockType.post_process`` compares
+    ``length`` only against its own trailing copy. A block declaring 1,000,000
+    octets while holding 36 would therefore size its option area at 999,964,
+    read the trailing Block Total Length into it, and leave that field to be
+    zero-filled. Clamping the area to ``__length__`` keeps the trailing length
+    out of the area, so the area holds exactly the octets the block was handed
+    for it, whatever it declared.
 
     This is a no-op on every well-formed block rather than a second guess at the
     area. At the option field the only field still to come is the trailing Block
@@ -993,7 +990,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     #: Section length.
     section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFF_FFFF_FFFF_FFFF)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         length=nonnegative(lambda pkt: pkt['length'] - 28),
         base_schema=_OPT_Option,
         type_name='type',
@@ -1317,7 +1314,7 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
     #: Snap length.
     snaplen: 'int' = UInt32Field(default=0, callback=byteorder_callback)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         length=nonnegative(lambda pkt: pkt['length'] - 20),
         base_schema=_IF_Option,
         type_name='type',
@@ -1449,7 +1446,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     #: Padding.
     padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         # NOTE: The padding is recomputed here rather than read back from
         # ``padding_data``: a PaddingField is written straight into the schema
         # buffer while packing and never lands in the packet data, so its name
@@ -1668,7 +1665,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     #: Record total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Name resolution records.
-    records: 'list[NameResolutionRecord]' = OptionField(
+    records: 'list[NameResolutionRecord]' = OptionAreaField(
         length=nonnegative(lambda pkt: pkt['length'] - 12),
         base_schema=NameResolutionRecord,
         type_name='type',
@@ -1676,7 +1673,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
         eool=Enum_RecordType.nrb_record_end,
     )
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)),  # key from OptionField
         base_schema=_NS_Option,
         type_name='type',
@@ -1828,7 +1825,7 @@ class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statisti
     #: Timestamp (lower 32 bits).
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         length=nonnegative(lambda pkt: pkt['length'] - 24),
         base_schema=_ISB_Option,
         type_name='type',
@@ -2262,7 +2259,7 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
     #: Padding.
     padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
         length=nonnegative(lambda pkt: pkt['length'] - 20 - pkt['secrets_length']
@@ -2373,7 +2370,7 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     #: Padding.
     padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
     #: Options.
-    options: 'list[Option]' = OptionField(
+    options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
         length=bounded_area(lambda pkt: pkt['length'] - 32 - pkt['captured_length']
