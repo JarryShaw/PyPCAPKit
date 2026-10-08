@@ -185,7 +185,8 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), [], [])},
+                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'),
+                               [(2, 3), (7, 8), (99, 100)], [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -205,7 +206,8 @@ class TCPReassemblyTests(unittest.TestCase):
                 b'tcp-header',
                 {
                     500: Fragment([], 0, 0, bytearray(), [], []),
-                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), [], [(2, 3)]),
+                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'),
+                                  [(0, 0), (4, 5), (7, 7)], [(2, 3)]),
                 },
                 1000.0,
             ),
@@ -228,7 +230,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([3], 0, 3, bytearray(b'abc'), [], [])},
+                {500: Fragment([3], 0, 3, bytearray(b'abc'), [(2, 3)], [])},
                 1000.0,
             ),
             bufid=bufid,

@@ -114,7 +114,7 @@ class PCAPEngineTests(unittest.TestCase):
                 self.assertEqual(sink.records[-1][1], 'Global Header')
                 extractor._open_output.assert_called_once_with(
                     protocol=LinkType.ETHERNET, byteorder='little', nanosecond=True,
-                    thiszone=-3600, sigfigs=1, snaplen=65535)
+                    version=VersionInfo(2, 4), thiszone=-3600, sigfigs=1, snaplen=65535)
 
         quiet, sink = make_extractor(_flag_q=True)
         engine = PCAP(quiet)

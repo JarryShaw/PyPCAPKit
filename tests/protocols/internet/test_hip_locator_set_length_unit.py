@@ -231,7 +231,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         from pcapkit.protocols.schema.internet.hip import (Locator, LocatorSetParameter,
                                                            locator_set_padding_len)
 
-        locator = Locator(traffic=0, type=0, len=4, flags={'preferred': False},
+        locator = Locator(traffic=0, type=0, len=4, flags={'reserved': 0, 'preferred': False},
                           lifetime=0, value=b'\x20\x01\x0d\xb8' + b'\x00' * 11 + b'\x01')
         schema = LocatorSetParameter(type=Parameter.LOCATOR_SET, len=9,
                                      locators=[locator])

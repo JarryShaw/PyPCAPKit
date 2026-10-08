@@ -31,7 +31,7 @@ class QSFunction(Vendor):
     """QS Functions"""
 
     #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 0 <= value <= 8'
+    FLAG = 'isinstance(value, int) and 0 <= value <= 15'
 
     def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.

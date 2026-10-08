@@ -14,6 +14,7 @@ import abc
 import collections
 import os
 import sys
+import types
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from dictdumper.dumper import Dumper
@@ -161,6 +162,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         },
     )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
+    # Read-only copy of ``__output__`` as shipped. :meth:`register_dumper`
+    # handed the dumper a format shipped with restores this entry, so an
+    # override can be undone (:issue:`1363`).
+    _shipped_output = types.MappingProxyType(dict(__output__))
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -226,14 +232,26 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             the default factory the way ``cls.__output__[format]`` would, so
             it stays non-inserting here as well.
 
+            The dumper ``format`` shipped with, as its descriptor or as the
+            class it names, restores the shipped entry rather than storing
+            the class, so an override can be undone and the deferred import
+            is kept (:issue:`1363`, :issue:`1364`).
+
         Arguments:
             format: format name
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
 
         """
-        if isinstance(dumper, ModuleDescriptor):
+        from pcapkit.foundation.extraction import (  # pylint: disable=import-outside-toplevel
+            _restore_shipped_dumper, _same_entry)
+
+        shipped = cls._shipped_output.get(format)
+        if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
             dumper = dumper.klass
+        if shipped is not None and _same_entry(shipped[0], dumper):
+            _restore_shipped_dumper(cls.__output__, format, shipped, ext)
+            return
         if not isinstance(dumper, type):
             raise RegistryError(f'dumper must be a class, not {dumper!r}')
         if not issubclass(dumper, Dumper):

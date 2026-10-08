@@ -37,7 +37,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         strict: if :data:`True`, report a datagram that is not completely
             reassembled as the tuple of its received runs; otherwise as one
             contiguous payload, its holes zero-filled -- or, while the total
-            length is unknown, only the prefix up to the first hole
+            length is unknown, only the prefix up to the first hole. Receipt
+            is tracked in 8-octet blocks, so the partial last block of a
+            snaplen-truncated fragment is not counted as received: it is left
+            out of the runs and ends the prefix, but once the total length is
+            known the contiguous payload keeps its real octets, with only the
+            rest of the hole zero-filled
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
@@ -132,15 +137,24 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # append packet index
         buf.index.append(info.num)
 
+        # The fragment's data length is what its header declares, but only the
+        # octets the capture actually holds can be written: a snaplen-truncated
+        # fragment carries fewer, and anything past the declared length is not
+        # fragment data. The data buffer is preallocated, so the write is also
+        # clipped to it -- its length never changes.
+        length = TL - IHL
+        held = max(min(len(info.payload), length, len(buf.datagram) - FO), 0)
+        payload = info.payload[:held]
+
         # put data into data buffer
         start = FO
-        stop = TL - IHL + FO
+        stop = FO + held
 
         # Find where this fragment disagrees with what the buffer already
         # holds *before* writing it -- ``buf.RCVBT`` and ``buf.TDL`` still
         # describe the state as every earlier fragment left it, which is
         # exactly what :meth:`_detect_conflicts` needs.
-        conflicts = self._detect_conflicts(buf.RCVBT, buf.TDL, buf.datagram, info.payload, start, stop)
+        conflicts = self._detect_conflicts(buf.RCVBT, buf.TDL, buf.datagram, payload, start, stop)
         if conflicts:
             buf.conflict.extend(conflicts)
 
@@ -150,23 +164,31 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # payload always overwrites here; ``conflicts`` above is what records
         # that it *disagreed* with what it overwrote, which is the part RFC 791
         # leaves unrecorded.
-        buf.datagram[start:stop] = info.payload
+        buf.datagram[start:stop] = payload
 
-        # set RCVBT bits (in 8 octets)
+        # Set RCVBT bits (in 8 octets) for the blocks this fragment actually
+        # filled. A fragment held in full marks its last block even when it is
+        # short, as the final fragment's is; a truncated one leaves its partial
+        # last block clear, since the octets after the cut are a real hole.
         start = FO // 8
-        stop = FO // 8 + (TL - IHL + 7) // 8
-        buf.RCVBT[start:stop] = b'\x01' * (stop - start)
+        if held == length:
+            stop = (FO + held + 7) // 8
+        else:
+            stop = (FO + held) // 8
+        stop = min(stop, len(buf.RCVBT))
+        if stop > start:
+            buf.RCVBT[start:stop] = b'\x01' * (stop - start)
 
-        # get total data length (header excludes)
-        TDL = 0
+        # get total data length (header excludes); it stays ``-1`` until the
+        # fragment with MF clear has arrived, and ``0`` is a valid length
         if not MF:
-            TDL = TL - IHL + FO
-            buf.__update__(TDL=TDL)
+            buf.__update__(TDL=TL - IHL + FO)
+        TDL = buf.TDL
 
         # when datagram is reassembled in whole
         start = 0
         stop = (TDL + 7) // 8
-        if TDL and all(buf.RCVBT[start:stop]):
+        if TDL >= 0 and all(buf.RCVBT[start:stop]):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
@@ -270,7 +292,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
         start = 0
         stop = (TDL + 7) // 8
-        flag = checked or (TDL > 0 and all(RCVBT[start:stop]))
+        flag = checked or (TDL >= 0 and all(RCVBT[start:stop]))
         ret = []  # type: list[Datagram[_AT]]
 
         # How completely this datagram came out, and why it stopped. Derived once,
@@ -283,16 +305,21 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         if not flag and self._flag_s:
             data = []  # type: list[bytes]
             byte = bytearray()
-            # extract received payload
+            # extract received payload; a run never extends past the total
+            # data length once it is known
+            limit = TDL if TDL >= 0 else len(datagram)
             for (bctr, bit) in enumerate(RCVBT):
                 if bit:     # received bit
                     this = bctr * 8
-                    that = this + 8
+                    that = min(this + 8, limit)
                     byte += datagram[this:that]
                 else:       # missing bit
                     if byte:    # strip empty payload
                         data.append(bytes(byte))
                     byte = bytearray()
+            # the last run may reach the end of the bit table
+            if byte:
+                data.append(bytes(byte))
             # strip empty packets
             if data or header:
                 packet = Datagram(
@@ -317,12 +344,14 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             # fragment with **MF** clear has arrived -- until then it is still its
             # initial ``-1``. Which case this is decides how much of the buffer
             # there is to report.
-            if TDL > 0:
+            if TDL >= 0:
                 # The length is known. Report it, holes and all: the gaps read as
                 # zeros, exactly as they do in the TCP reassembler's loose mode.
                 # This is the reason ``strict=False`` exists -- a caller who
                 # wants the gaps *marked* rather than
-                # zero-filled uses ``strict=True`` and gets the runs.
+                # zero-filled uses ``strict=True`` and gets the runs. A truncated
+                # fragment's partial last block is not marked received, but the
+                # octets it did write are real and are reported here as they are.
                 stop = TDL
             else:
                 # The length is not known. Slicing ``datagram[:-1]`` here would
@@ -341,7 +370,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 # precisely because their offsets cannot be conveyed in a blob.
                 #
                 # ``RCVBT`` records receipt in 8-octet units, so the prefix ends at
-                # the first clear bit.
+                # the first clear bit -- which leaves out a truncated fragment's
+                # partial last block, octets that the known-length case above
+                # does report.
                 received = 0
                 for bit in RCVBT:
                     if not bit:

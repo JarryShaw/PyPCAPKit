@@ -64,6 +64,25 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. _DPKT: https://dpkt.readthedocs.io
 
+.. important::
+
+   On PCAP-NG, `DPKT`_ yields **Enhanced Packet Blocks and (obsolete) Packet
+   Blocks only**. ``dpkt.pcapng.Reader.__iter__`` skips every other block type
+   without a warning (``# just ignore other blocks``, as of ``dpkt`` 1.9.8), and
+   that includes the **Simple Packet Block**, which carries a packet just as an
+   Enhanced Packet Block does. Such packets are silently missing from this
+   engine's output, and the frames after them are numbered as if they had never
+   been captured.
+
+   Reading :file:`examples/captures/test.pcapng` -- four Enhanced Packet Blocks
+   and one Simple Packet Block, across two sections -- this engine gives four
+   frames where the default engine and
+   :class:`~pcapkit.foundation.engines.scapy.Scapy` give five; the missing one is
+   frame 4, the Simple Packet Block. The second Section Header Block is not the
+   cause: the Enhanced Packet Block after it is read. This is a limitation of
+   `DPKT`_, not of :mod:`pcapkit`, so read a capture that may contain Simple
+   Packet Blocks with the default engine instead.
+
 .. autoclass:: pcapkit.foundation.engines.dpkt.DPKT
    :no-members:
    :show-inheritance:

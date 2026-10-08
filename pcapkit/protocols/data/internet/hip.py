@@ -177,13 +177,16 @@ class Locator(Data):
     length: 'int'
     #: Preferred flag.
     preferred: 'bool'
+    #: Reserved bits -- the 7 high-order bits of the flags octet, carried
+    #: verbatim so that re-serialising reproduces them.
+    reserved: 'int'
     #: Locator lifetime.
     lifetime: 'timedelta'
     #: Locator data.
     locator: 'LocatorData | IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', lifetime: 'timedelta', locator: 'LocatorData | IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
+        def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', reserved: 'int', lifetime: 'timedelta', locator: 'LocatorData | IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final

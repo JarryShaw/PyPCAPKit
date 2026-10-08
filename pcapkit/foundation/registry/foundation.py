@@ -74,7 +74,8 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
         module: module name or module descriptor or an
             :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class
             deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`
-            is refused: that is the base for pcapkit's own engines)
+            is refused: that is the base for pcapkit's own engines, unless it is
+            the engine ``name`` shipped with, which restores it)
         class\_: class name
 
     """
@@ -291,7 +292,8 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
         module: module name or module descriptor or a
             :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class
             deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
-            is refused: that is the base for pcapkit's own classes)
+            is refused: that is the base for pcapkit's own classes, unless it is
+            the class ``protocol`` shipped with, which restores it)
         class\_: class name
 
     """
@@ -325,7 +327,8 @@ def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescripto
         module: module name or module descriptor or a
             :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class
             deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
-            is refused: that is the base for pcapkit's own classes)
+            is refused: that is the base for pcapkit's own classes, unless it is
+            the class ``protocol`` shipped with, which restores it)
         class\_: class name
 
     """
