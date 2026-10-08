@@ -38,52 +38,16 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
-#: Bit fields known to leave bits unnamed, as ``schema.field`` (relative to
+#: Bit fields allowed to leave bits unnamed, as ``schema.field`` (relative to
 #: :mod:`pcapkit.protocols.schema`) -> the ``(start, length)`` bit ranges left
-#: uncovered. An entry must match exactly: once a site is fixed, its entry has
-#: to go, and a site that changes shape has to be looked at again.
+#: uncovered. Every known site has been fixed, so this is empty, and it must
+#: stay empty unless a new gap is filed as a GitHub issue. An entry must match
+#: exactly: once its site is fixed the entry has to go, and a site that changes
+#: shape has to be looked at again.
 #:
-#: Every entry below packs its unnamed bits as zero, so a parsed packet with
-#: any of them set does not rebuild byte-exactly. Naming them means carrying
-#: a ``reserved`` value through the protocol's reader, data model and
-#: ``make()``, which lies outside the schema files.
-KNOWN_GAPS: 'dict[str, tuple[tuple[int, int], ...]]' = {
-    # HIP [RFC 7401]: the 3 reserved bits between Version and the fixed 1 bit
-    # of the version octet, and the 14 reserved bits of ROUTE_DST/ROUTE_VIA
-    # flags [RFC 6028]. Needs pcapkit/protocols/internet/hip.py and
-    # pcapkit/protocols/data/internet/hip.py.
-    'internet.hip.HIP.ver': ((4, 3),),
-    'internet.hip.RouteDstParameter.flags': ((2, 14),),
-    'internet.hip.RouteViaParameter.flags': ((2, 14),),
-    # Mobility Header: reserved bits of 24 message and option flag fields.
-    # Needs pcapkit/protocols/internet/mh.py and
-    # pcapkit/protocols/data/internet/mh.py -- a family-wide change that wants
-    # its own review.
-    'internet.mh.BindingRevocationMessage.flags': ((3, 13),),
-    'internet.mh.DNSUpdateOption.flags': ((1, 7),),
-    'internet.mh.DelegatedMNPOption.flags': ((1, 7),),
-    'internet.mh.DynamicIPMulticastSelectorOption.flags': ((1, 7),),
-    'internet.mh.FastBindingAcknowledgmentMessage.flags': ((1, 7),),
-    'internet.mh.FastBindingUpdateMessage.flags': ((4, 12),),
-    'internet.mh.FlowBindingMessage.flags': ((1, 7),),
-    'internet.mh.HandoverAcknowledgeMessage.flags': ((3, 5),),
-    'internet.mh.HandoverInitiateMessage.flags': ((4, 4),),
-    'internet.mh.HeartbeatMessage.flags': ((0, 14),),
-    'internet.mh.IPv4AddressAcknowledgementOption.flags': ((6, 2),),
-    'internet.mh.IPv4DHCPSupportModeOption.flags': ((0, 15),),
-    'internet.mh.IPv4HomeAddressReplyOption.flags': ((6, 2),),
-    'internet.mh.IPv4HomeAddressRequestOption.flags': ((6, 10),),
-    'internet.mh.IPv4TrafficOffloadSelectorOption.flags': ((1, 31),),
-    'internet.mh.LocalizedRoutingAcknowledgmentMessage.flags': ((1, 7),),
-    'internet.mh.MAGMultipathBindingOption.flags': ((2, 22),),
-    'internet.mh.MultiPrefixExtension.flags': ((1, 31),),
-    'internet.mh.NATDetectionOption.flags': ((1, 15),),
-    'internet.mh.PerSessionBitRateAttribute.flags': ((2, 14),),
-    'internet.mh.RedirectOption.flags': ((2, 14),),
-    'internet.mh.SubscriptionResponseMessage.flags': ((1, 7),),
-    'internet.mh.TransientBindingOption.flags': ((0, 7),),
-    'internet.mh.UpdateNotificationMessage.flags': ((2, 14),),
-}
+#: A gap packs its unnamed bits as zero, so a parsed packet with any of them
+#: set does not rebuild byte-exactly.
+KNOWN_GAPS: 'dict[str, tuple[tuple[int, int], ...]]' = {}
 
 
 def _gaps(width: 'int', namespace: 'dict[str, tuple[int, int]]') -> 'tuple[tuple[int, int], ...]':
