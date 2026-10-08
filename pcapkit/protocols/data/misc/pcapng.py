@@ -40,6 +40,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
+    from datetime import timedelta as dt_timedelta
     from datetime import timezone as dt_timezone
     from decimal import Decimal
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
@@ -240,11 +241,14 @@ class IF_TSResolOption(Option):
 class IF_TZoneOption(Option):
     """Data model for PCAP-NG file ``if_tzone`` options."""
 
-    #: Time zone.
-    timezone: 'dt_timezone'
+    #: Time zone. An offset of 24 hours or more, which no
+    #: :class:`~datetime.timezone` can hold, is kept as captured as a
+    #: :class:`~datetime.timedelta`.
+    timezone: 'dt_timezone | dt_timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', timezone: 'dt_timezone') -> None: ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int',
+                     timezone: 'dt_timezone | dt_timedelta') -> None: ...
 
 
 @info_final
