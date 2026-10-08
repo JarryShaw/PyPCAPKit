@@ -1682,7 +1682,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         options = self._get_interface(interface_id).options
         tzone = cast('Optional[Data_IF_TZoneOption]',
                      options.get(Enum_OptionType.if_tzone))
-        if tzone is None:
+        # an ``if_tzone`` kept as captured (a :class:`~datetime.timedelta` of 24
+        # hours or more) names no zone a datetime can be rendered in
+        if tzone is None or not isinstance(tzone.timezone, datetime.timezone):
             return datetime.timezone.utc
         return tzone.timezone
 
@@ -1742,7 +1744,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # *rendered* in -- which is all a ``tzinfo`` can affect on an aware
             # datetime. It never moves the instant itself.
             ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
-        except ValueError:
+        # an epoch past what ``datetime`` or the platform's ``time_t`` holds,
+        # e.g. from an extreme ``if_tsoffset``, raises any of these three
+        except (ValueError, OverflowError, OSError):
             warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
                  ProtocolWarning, stacklevel=stacklevel())
             ts_datetime = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
@@ -3057,10 +3061,20 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [if_tzone] invalid length (expected 4, got {schema.length})')
 
+        offset = datetime.timedelta(seconds=schema.tzone)
+        try:
+            timezone = datetime.timezone(offset)  # type: datetime.timezone | datetime.timedelta
+        except ValueError:
+            # a :class:`~datetime.timezone` holds strictly less than 24 hours;
+            # the signed 32-bit field holds far more, so keep it as captured
+            warn(f'PCAP-NG: [if_tzone] offset of {schema.tzone} second(s) is not within 24 hours '
+                 f'of UTC; kept as captured', ProtocolWarning, stacklevel=stacklevel())
+            timezone = offset
+
         option = Data_IF_TZoneOption(
             type=schema.type,
             length=schema.length,
-            timezone=datetime.timezone(datetime.timedelta(seconds=schema.tzone)),
+            timezone=timezone,
         )
         return option
 
