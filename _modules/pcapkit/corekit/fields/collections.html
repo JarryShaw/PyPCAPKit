@@ -479,7 +479,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'ListField'</span><span class="p">,</span> <span class="s1">'OptionField'</span><span class="p">,</span>
@@ -497,6 +497,44 @@
 
 <span class="n">_TL</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TL'</span><span class="p">,</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="s1">'FieldBase'</span><span class="p">,</span> <span class="s1">'bytes'</span><span class="p">)</span>
 <span class="n">_TS</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_ShortReadTracker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stream proxy recording whether a read came back short.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file: Stream to read from.</span>
+
+<span class="sd">    Only the ``read``, ``seek`` and ``tell`` calls that</span>
+<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` and</span>
+<span class="sd">    :meth:`OptionField.unpack` make are delegated.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'_file'</span><span class="p">,</span> <span class="s1">'short'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">file</span>
+        <span class="c1">#: bool: Whether a read since the last reset returned fewer octets than</span>
+        <span class="c1">#: it asked for.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">short</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read ``size`` octets, noting a short read."""</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">short</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">whence</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Seek the underlying stream."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">whence</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Tell the underlying stream's position."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="ListField">
@@ -848,6 +886,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If an option consumes nothing from ``buffer``, since</span>
 <span class="sd">                the loop below has then no way to get past it.</span>
+<span class="sd">            ProtocolError: If an option that begins with octets present reads</span>
+<span class="sd">                past the end of the data.</span>
 
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
@@ -907,8 +947,24 @@
         <span class="c1"># number of octets to rewind to get back to the front of the option.</span>
         <span class="n">type_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_field</span>
 
+        <span class="c1"># NOTE: An option whose declared length runs past the octets behind it</span>
+        <span class="c1"># reads short, and every field reading off the end pads the missing</span>
+        <span class="c1"># octets with zeros, so the option would rebuild octets that were never</span>
+        <span class="c1"># there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH</span>
+        <span class="c1"># ``PadN`` declaring 3 with none. Nothing downstream can tell, because</span>
+        <span class="c1"># the schema records the zeros as values. C.f. #1325.</span>
+        <span class="c1">#</span>
+        <span class="c1"># So the stream is read through a proxy that notes any short read, and</span>
+        <span class="c1"># an option that began with at least one octet present and then read</span>
+        <span class="c1"># short is rejected. An option that begins at the end of the data reads</span>
+        <span class="c1"># nothing at all and is left to the end-of-option-list and progress</span>
+        <span class="c1"># handling below, which is what an option area declared longer than its</span>
+        <span class="c1"># octets relies on.</span>
+        <span class="n">tracker</span> <span class="o">=</span> <span class="n">file</span> <span class="o">=</span> <span class="n">_ShortReadTracker</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TS]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tracker</span><span class="o">.</span><span class="n">short</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">type_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># unpack option type using base schema</span>
                 <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
@@ -929,6 +985,13 @@
 
             <span class="c1"># unpack option using option schema</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
+            <span class="k">if</span> <span class="n">tracker</span><span class="o">.</span><span class="n">short</span> <span class="ow">and</span> <span class="n">consumed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has an option that runs past the end of '</span>
+                    <span class="sa">f</span><span class="s1">'the data: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1"> at offset </span><span class="si">{</span><span class="n">offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s1"> of '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">, with only </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="si">}</span><span class="s1"> octet(s) '</span>
+                    <span class="sa">f</span><span class="s1">'of it present'</span>
+                <span class="p">)</span>
             <span class="n">new_packet</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
             <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 

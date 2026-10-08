@@ -1126,8 +1126,18 @@
 <span class="sd">            code: TCP option code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1142,8 +1152,18 @@
 <span class="sd">            code: MPTCP option code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__mp_option__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 

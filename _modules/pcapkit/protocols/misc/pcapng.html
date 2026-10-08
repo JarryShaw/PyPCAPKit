@@ -1650,6 +1650,17 @@
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">block</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: An option or record area holding a malformed entry is kept as</span>
+        <span class="c1"># the octets captured, as one :obj:`bytes` item (see</span>
+        <span class="c1"># :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField`), and</span>
+        <span class="c1"># parses as no options. The octets are kept on the block as</span>
+        <span class="c1"># ``options_raw`` or ``records_raw``, which the block's ``make`` writes</span>
+        <span class="c1"># back verbatim (:issue:`1325`).</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'records'</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">):</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">area</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_raw'</span><span class="p">,</span> <span class="n">area</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_read</span><span class="p">:</span>
             <span class="c1"># move backward to the beginning of the packet</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
@@ -2148,6 +2159,21 @@
             <span class="s1">'block'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="s1">'Data_PCAPNG'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Option or record area of a parsed block, for its ``make``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block: Block data model.</span>
+<span class="sd">            name: ``'options'`` or ``'records'``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The area's octets if :meth:`read` kept it as captured, as</span>
+<span class="sd">            ``&lt;name&gt;_raw``; otherwise the parsed ``&lt;name&gt;``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_raw'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_flags_enum</span><span class="p">(</span><span class="n">enum</span><span class="p">:</span> <span class="s1">'Type[PacketDirection] | Type[PacketReception]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2943,6 +2969,10 @@
 
 <span class="sd">        """</span>
         <span class="n">options</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Option</span>
+
+        <span class="c1"># an area kept as captured holds no options to read</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options_schema</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">options</span>
 
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options_schema</span><span class="p">:</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
@@ -4156,6 +4186,10 @@
 <span class="sd">        """</span>
         <span class="n">records</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Record</span>
 
+        <span class="c1"># an area kept as captured holds no records to read</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">records_schema</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">records</span>
+
         <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">records_schema</span><span class="p">:</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__record__</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
@@ -4500,7 +4534,7 @@
             <span class="n">major_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">major</span>
             <span class="n">minor_version</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">minor</span>
             <span class="n">section_length</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">section_length</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">major_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">major_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -4552,7 +4586,7 @@
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">linktype_val</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">linktype</span>
             <span class="n">snaplen</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">snaplen</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">linktype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">linktype</span><span class="p">,</span> <span class="n">linktype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">linktype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                             <span class="nb">reversed</span><span class="o">=</span><span class="n">linktype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -4603,7 +4637,7 @@
             <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">captured_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -4703,8 +4737,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">records</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">records</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'records'</span><span class="p">)</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">records</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">records_value</span><span class="p">,</span> <span class="n">records_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nrb_records</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
@@ -4747,7 +4781,7 @@
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">interface_id</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">interface_id</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
         <span class="c1"># NOTE: ``isb_starttime`` and ``isb_endtime`` are scaled by the</span>
@@ -4852,7 +4886,7 @@
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">secrets_type_val</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_type</span>
             <span class="n">secrets_data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_data</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">secrets_type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">secrets_type</span><span class="p">,</span> <span class="n">secrets_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">secrets_type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                                 <span class="nb">reversed</span><span class="o">=</span><span class="n">secrets_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -4988,7 +5022,7 @@
             <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
 
         <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">captured_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -5028,7 +5062,7 @@
 
 <div class="viewcode-block" id="PCAPNG._make_pcapng_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pcapng_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]'</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pcapng_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes] | bytes'</span><span class="p">,</span>
                              <span class="n">namespace</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_Option | bytes], int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make options for PCAP-NG.</span>
 
@@ -5040,6 +5074,10 @@
 <span class="sd">            Tuple of options and total length of options.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># an option area kept as captured is written back verbatim</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">options</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
         <span class="n">has_endofopt</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -6583,7 +6621,7 @@
 
 <div class="viewcode-block" id="PCAPNG._make_nrb_records">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_nrb_records">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_nrb_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="s1">'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_NameResolutionRecord | bytes], int]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_nrb_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="s1">'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes] | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_NameResolutionRecord | bytes], int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make name resolution records for PCAP-NG.</span>
 
 <span class="sd">        Args:</span>
@@ -6593,6 +6631,10 @@
 <span class="sd">            Tuple of name resolution records and total length of the records.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># a record area kept as captured is written back verbatim</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">records</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+
         <span class="n">has_record_end</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>

@@ -689,8 +689,12 @@ the next fields can be aware of such informations.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an option consumes nothing from <code class="docutils literal notranslate"><span class="pre">buffer</span></code>, since
-    the loop below has then no way to get past it.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an option consumes nothing from <code class="docutils literal notranslate"><span class="pre">buffer</span></code>, since
+    the loop below has then no way to get past it.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If an option that begins with octets present reads
+    past the end of the data.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

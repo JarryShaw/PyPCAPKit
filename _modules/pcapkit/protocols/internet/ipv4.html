@@ -993,8 +993,18 @@
 <span class="sd">            code: IPv4 option code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1302,8 +1312,10 @@
 
             <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x01</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: field termination indicator not set'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="n">termination</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">termination</span> <span class="o">=</span> <span class="p">()</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SECOption</span><span class="p">(</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -1311,6 +1323,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="n">level</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">flags</span><span class="p">),</span>
+            <span class="n">termination</span><span class="o">=</span><span class="n">termination</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">opt</span></div>
@@ -1401,6 +1414,7 @@
             <span class="n">flag</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ts_flag</span><span class="p">,</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
             <span class="n">remaining</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">remaining</span><span class="p">,</span>
+            <span class="n">remainder</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">remainder</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
@@ -2024,10 +2038,17 @@
 <span class="sd">            here rather than written: the enumeration names it as structure, and</span>
 <span class="sd">            a value written there would be dropped on the way back in. See :issue:`537`.</span>
 
+<span class="sd">            The indicators themselves are set from position, except that a</span>
+<span class="sd">            parsed ``option`` whose ``termination`` covers every octet written</span>
+<span class="sd">            gets back the bits it carried, so that a non-conforming indicator</span>
+<span class="sd">            rebuilds as read.</span>
+
 <span class="sd">        """</span>
+        <span class="n">termination</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: tuple[bool, ...]</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">level_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">level</span>
             <span class="n">authorities</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_ProtectionAuthority]'</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+            <span class="n">termination</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'termination'</span><span class="p">,</span> <span class="p">()))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">level_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">level_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">level_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">level_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -2070,9 +2091,15 @@
 
             <span class="c1"># The low-order bit of every octet but the last is ``1``, meaning</span>
             <span class="c1"># "another octet follows"; the last keeps its ``0``, which ends the</span>
-            <span class="c1"># field.</span>
-            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">int_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">data_list</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
+            <span class="c1"># field. A parsed option instead writes back the indicators it</span>
+            <span class="c1"># carried on the wire, conforming or not, so long as they still</span>
+            <span class="c1"># cover every octet written.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">termination</span><span class="p">)</span> <span class="o">==</span> <span class="n">int_len</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">termination</span><span class="p">):</span>
+                    <span class="n">data_list</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span> <span class="k">if</span> <span class="n">bit</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">'0'</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">int_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">data_list</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_list</span><span class="p">),</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">int_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2162,7 +2189,7 @@
                     <span class="c1"># NOTE: An integer is the raw 32-bit field, written as</span>
                     <span class="c1"># is: a set high-order bit marks a non-standard time value.</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                             <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
@@ -2171,19 +2198,21 @@
                 <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">option</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                             <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
 
             <span class="n">ts_list</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remaining'</span><span class="p">,</span> <span class="p">())</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'remainder'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>  <span class="c1"># type: bytes</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pointer</span>
             <span class="n">overflow</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">overflow</span>
             <span class="n">flag</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">flag</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span>  <span class="c1"># type: ignore[assignment]</span>
                 <span class="n">counts</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>  <span class="c1"># 9 is the maximum number of timestamps</span>
@@ -2195,7 +2224,7 @@
                         <span class="k">break</span>
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                             <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
@@ -2212,7 +2241,7 @@
 
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                        <span class="n">ts</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                        <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp value is too large: </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                             <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">|</span> <span class="mh">0x80000000</span>
@@ -2244,6 +2273,7 @@
                 <span class="s1">'flag'</span><span class="p">:</span> <span class="n">flag</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">ts_data</span><span class="o">=</span><span class="n">ts_list</span><span class="p">,</span>
+            <span class="n">remainder</span><span class="o">=</span><span class="n">remainder</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

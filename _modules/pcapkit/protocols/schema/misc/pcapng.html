@@ -532,7 +532,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -739,12 +739,11 @@
 <span class="sd">    for a read -- there are no octets here -- and zero says that, where a</span>
 <span class="sd">    negative says something :mod:`struct` cannot express.</span>
 
-<span class="sd">    Clamping rather than refusing is the choice :func:`bounded_option` and</span>
-<span class="sd">    :func:`bounded_area` already made, for the reason their docstrings give: a</span>
-<span class="sd">    block read has no catch point above :meth:`FieldBase.unpack</span>
+<span class="sd">    Flooring rather than refusing is the choice :func:`bounded_area` makes too:</span>
+<span class="sd">    a block read has no catch point above :meth:`FieldBase.unpack</span>
 <span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`, so one refusal aborts the</span>
 <span class="sd">    whole extraction rather than one block, so a capture cut short by its</span>
-<span class="sd">    snapshot length must keep parsing. The end of the file is the one case that is *not* a clamp, since</span>
+<span class="sd">    snapshot length must keep parsing. The end of the file is the one case that is *not* a floor, since</span>
 <span class="sd">    there no block is being read at all -- see :meth:`PCAPNG._check_block_floor</span>
 <span class="sd">    &lt;pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor&gt;`, which reports it</span>
 <span class="sd">    as the :exc:`~pcapkit.utilities.exceptions.StreamEOFError` the frame loop</span>
@@ -752,11 +751,11 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Unlike :func:`bounded_option` this needs no ``__length__`` opt-out for</span>
-<span class="sd">        the packing path, because it floors a *difference* rather than clamping</span>
+<span class="sd">        the packing path, because it floors a *difference* rather than checking</span>
 <span class="sd">        against the remaining area: a negative difference is not a legitimate</span>
 <span class="sd">        thing to pack either -- ``struct.pack('-8s', ...)`` raises exactly as</span>
-<span class="sd">        ``calcsize`` does -- where clamping against the remainder would have</span>
-<span class="sd">        shortened a perfectly good option.</span>
+<span class="sd">        ``calcsize`` does -- where checking against the remainder would have</span>
+<span class="sd">        refused a perfectly good option.</span>
 
 <span class="sd">        That distinction is what keeps the three decryption-secrets payloads --</span>
 <span class="sd">        :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and</span>
@@ -782,72 +781,34 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bounded_option</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Clamp an option or record payload to the octets its area still declares.</span>
+<span class="w">    </span><span class="sd">"""Refuse an option or record payload that runs past its area.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Callback computing the payload's nominal length, as the option's</span>
 <span class="sd">            or record's own declared length field gives it.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A callback returning that length, never past the octets the enclosing</span>
-<span class="sd">        option or record area has left to give.</span>
+<span class="sd">        A callback returning that length.</span>
 
-<span class="sd">    An option's length is a 16-bit wire field, so it can declare up to 65,535</span>
-<span class="sd">    octets of payload from four octets of option header. Nothing bounds that</span>
-<span class="sd">    against the area the option sits in: :meth:`OptionField.unpack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.collections.OptionField.unpack&gt;` subtracts each</span>
-<span class="sd">    option's *parsed* size from the area it was given but never checks the</span>
-<span class="sd">    declared size against it, and :meth:`FieldBase.unpack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;` zero-pads any shortfall</span>
-<span class="sd">    within :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`</span>
-<span class="sd">    unconditionally -- deliberately, since that ceiling is the full span of a</span>
-<span class="sd">    16-bit length and a capture cut short by its snapshot length must still</span>
-<span class="sd">    parse. Repeating such an option across many blocks therefore synthesised</span>
-<span class="sd">    padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each</span>
-<span class="sd">    with one option declaring 65,535 against none present, produced 131,070,000</span>
-<span class="sd">    octets of zero padding, an amplification of 1,637x linear in the block</span>
-<span class="sd">    count. The field layer's own budget already covers the 32-bit band.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the payload declares more octets than the enclosing</span>
+<span class="sd">            option or record area has left.</span>
 
-<span class="sd">    The bound has to come from this layer because the field layer cannot see</span>
-<span class="sd">    it. What distinguishes the crafted case from the legitimate one is not the</span>
-<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why a plain</span>
-<span class="sd">    ``len(buffer) &lt; length`` rejection does not work -- but whether the option</span>
-<span class="sd">    is inconsistent with the framing the block itself declares. Block Total</span>
-<span class="sd">    Length is authoritative and cross-checked against its own trailing copy, so</span>
-<span class="sd">    the area is ``length`` less the fixed fields, ``captured_len`` and its</span>
-<span class="sd">    padding; an option declaring more payload than that area has left is</span>
-<span class="sd">    malformed however complete the file behind it is. A snapshot-truncated</span>
-<span class="sd">    capture says so through ``captured_len`` instead, and leaves its options</span>
-<span class="sd">    whole, so it never trips this.</span>
-
-<span class="sd">    Clamping rather than refusing keeps a capture cut short by its snapshot</span>
-<span class="sd">    length parsing: a block read has no catch point above</span>
-<span class="sd">    :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`,</span>
-<span class="sd">    so one refusal aborts the whole extraction rather than one block, and a</span>
-<span class="sd">    truncated capture would stop parsing at the cut instead of reporting the</span>
-<span class="sd">    frames before it. The clamp is</span>
-<span class="sd">    also history-independent -- it reads only this block's own declared framing</span>
-<span class="sd">    -- which a running threshold would not be.</span>
+<span class="sd">    An option's length is a 16-bit wire field, so one four-octet option header</span>
+<span class="sd">    can declare 65,535 octets of payload. Read as declared, every shortfall</span>
+<span class="sd">    would be zero-padded at the field layer, and the zeros rebuilt as if they</span>
+<span class="sd">    had been captured (#594, #1325). So a payload that runs past the area is</span>
+<span class="sd">    refused here instead. Inside a block, :class:`OptionAreaField` then keeps</span>
+<span class="sd">    the whole option area as the octets captured, so the block still parses and</span>
+<span class="sd">    rebuilds byte for byte.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The clamp is skipped when ``__length__`` is absent or negative, which is</span>
+<span class="sd">        The check is skipped when ``__length__`` is absent or negative, which is</span>
 <span class="sd">        what :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`</span>
-<span class="sd">        leaves it as when no length is known. That matters here in a way it does</span>
-<span class="sd">        not for :func:`pcapkit.protocols.schema.transport.sctp.bounded`, whose</span>
-<span class="sd">        list fields ignore their length while packing: these are</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.strings.BytesField` and</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.strings.StringField` payloads, and</span>
-<span class="sd">        :meth:`FieldBase.pack &lt;pcapkit.corekit.fields.field.FieldBase.pack&gt;`</span>
-<span class="sd">        packs them through ``struct.pack('&lt;n&gt;s', ...)``, which truncates</span>
-<span class="sd">        silently. A clamp applied while packing would therefore shorten a</span>
-<span class="sd">        perfectly good option rather than reject it.</span>
-
-<span class="sd">        The nominal length still goes through :func:`nonnegative` first, on both</span>
-<span class="sd">        paths, since an option declaring less payload than the part of itself it</span>
-<span class="sd">        describes -- ``length`` below the four octets of an ``epb_hash`` or an</span>
-<span class="sd">        ``ns_dnsIP4addr`` record's own fields -- makes the subtraction negative</span>
-<span class="sd">        before there is anything to clamp it against, and a negative is not an</span>
-<span class="sd">        amount to read or to pack.</span>
+<span class="sd">        leaves it as when no length is known. The nominal length still goes</span>
+<span class="sd">        through :func:`nonnegative` first, on both paths, since an option</span>
+<span class="sd">        declaring less payload than the part of itself it describes makes the</span>
+<span class="sd">        subtraction negative.</span>
 
 <span class="sd">    """</span>
     <span class="n">floored</span> <span class="o">=</span> <span class="n">nonnegative</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
@@ -859,11 +820,48 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">nominal</span> <span class="o">&lt;=</span> <span class="n">remaining</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">nominal</span>
 
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: option declares </span><span class="si">{</span><span class="n">nominal</span><span class="si">}</span><span class="s1"> octet(s) of payload with '</span>
-             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1"> octet(s) left in its area; reading </span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
-             <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">remaining</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: option declares </span><span class="si">{</span><span class="n">nominal</span><span class="si">}</span><span class="s1"> octet(s) of payload '</span>
+                            <span class="sa">f</span><span class="s1">'with </span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1"> octet(s) left in its area'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">callback</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OptionAreaField</span><span class="p">(</span><span class="n">OptionField</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Option list that keeps a malformed option area as the octets captured.</span>
+
+<span class="sd">    An option in the area that runs past it, or past the data, raises</span>
+<span class="sd">    :exc:`~pcapkit.utilities.exceptions.ProtocolError` from</span>
+<span class="sd">    :meth:`OptionField.unpack &lt;pcapkit.corekit.fields.collections.OptionField.unpack&gt;`</span>
+<span class="sd">    or :func:`bounded_option`. A block has no catch point above its fields, so</span>
+<span class="sd">    raising would abort the whole extraction. This field instead returns the</span>
+<span class="sd">    area as a single :obj:`bytes` item, which packs back verbatim, and reports</span>
+<span class="sd">    no padding after it (#1325).</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            buffer: Field buffer.</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Unpacked field value, or the whole area as one :obj:`bytes` item if</span>
+<span class="sd">            an option in it is malformed.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ProtocolError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">; option area of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">raw</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bounded_area</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
@@ -876,16 +874,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        A callback returning that span, never past the octets left of the block.</span>
 
-<span class="sd">    :func:`bounded_option` bounds a payload by the area, and the area by the</span>
-<span class="sd">    block's declared Block Total Length. That closes the band only while the</span>
-<span class="sd">    declared length is itself backed by real octets, and nothing checks that:</span>
-<span class="sd">    ``BlockType.post_process`` compares ``length`` against its own trailing copy</span>
-<span class="sd">    and never against the file. A block declaring 1,000,000 octets while holding</span>
-<span class="sd">    36 therefore sizes its option area at 999,964, an option inside it declaring</span>
-<span class="sd">    65,535 is under that and is not clamped, and 65,535 octets of zeros are</span>
-<span class="sd">    synthesised from 36 -- measured, 1,820x, with no warning. Clamping the area</span>
-<span class="sd">    to ``__length__`` as well removes the step: the payload is then bounded by</span>
-<span class="sd">    the octets the block was actually handed, whatever it declared.</span>
+<span class="sd">    :func:`bounded_option` refuses a payload that runs past the area, and the</span>
+<span class="sd">    area is sized from the block's declared Block Total Length. Nothing checks</span>
+<span class="sd">    that length against the file: ``BlockType.post_process`` compares</span>
+<span class="sd">    ``length`` only against its own trailing copy. A block declaring 1,000,000</span>
+<span class="sd">    octets while holding 36 would therefore size its option area at 999,964,</span>
+<span class="sd">    read the trailing Block Total Length into it, and leave that field to be</span>
+<span class="sd">    zero-filled. Clamping the area to ``__length__`` keeps the trailing length</span>
+<span class="sd">    out of the area, so the area holds exactly the octets the block was handed</span>
+<span class="sd">    for it, whatever it declared.</span>
 
 <span class="sd">    This is a no-op on every well-formed block rather than a second guess at the</span>
 <span class="sd">    area. At the option field the only field still to come is the trailing Block</span>
@@ -1525,7 +1522,7 @@
     <span class="c1">#: Section length.</span>
     <span class="n">section_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">Int64Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">28</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_OPT_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -1912,7 +1909,7 @@
     <span class="c1">#: Snap length.</span>
     <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_IF_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -2068,7 +2065,7 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: The padding is recomputed here rather than read back from</span>
         <span class="c1"># ``padding_data``: a PaddingField is written straight into the schema</span>
         <span class="c1"># buffer while packing and never lands in the packet data, so its name</span>
@@ -2326,7 +2323,7 @@
     <span class="c1">#: Record total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Name resolution records.</span>
-    <span class="n">records</span><span class="p">:</span> <span class="s1">'list[NameResolutionRecord]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">records</span><span class="p">:</span> <span class="s1">'list[NameResolutionRecord]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">NameResolutionRecord</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -2334,7 +2331,7 @@
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_end</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>  <span class="c1"># key from OptionField</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_NS_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -2516,7 +2513,7 @@
     <span class="c1">#: Timestamp (lower 32 bits).</span>
     <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">24</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_ISB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -2986,7 +2983,7 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span>
@@ -3112,7 +3109,7 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
         <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span>

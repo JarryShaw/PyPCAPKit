@@ -863,8 +863,18 @@
 <span class="sd">            code: HOPOPT option code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1264,6 +1274,7 @@
             <span class="n">cmpt_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpt_len</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">level</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="n">pad</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpt_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -2118,6 +2129,7 @@
                           <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                           <span class="n">bitmap</span><span class="p">:</span> <span class="s1">'Optional[bytes | tuple[int, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">pad</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CALIPSOOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HOPOPT calipso option.</span>
 
@@ -2130,6 +2142,7 @@
 <span class="sd">            bitmap: compartment bitmap, as :obj:`bytes` or as the</span>
 <span class="sd">                :obj:`tuple` of octets the reader stores; its length must be a</span>
 <span class="sd">                multiple of 4 octets</span>
+<span class="sd">            pad: octets after the compartment bitmap, counted in ``Opt Data Len``</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2148,6 +2161,7 @@
             <span class="n">level</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">level</span>
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
             <span class="n">bitmap</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">pad</span>
         <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap length: '</span>
@@ -2155,12 +2169,13 @@
 
         <span class="k">return</span> <span class="n">Schema_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">),</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">cmpt_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
             <span class="n">bitmap</span><span class="o">=</span><span class="n">bitmap_bytes</span> <span class="k">if</span> <span class="n">bitmap_bytes</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
