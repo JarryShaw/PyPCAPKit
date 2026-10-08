@@ -904,22 +904,27 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             The guard matches :func:`register_protocol
             <pcapkit.foundation.registry.protocols.register_protocol>`'s: it
             fires only when the incumbent differs from the replacement, so
-            re-registering the exact same class object under the same ``code``
-            is a silent no-op rather than a warning about nothing displaced.
-            The comparison is a plain ``is`` that resolves nothing, so an
-            incumbent left as an unresolved
-            :class:`~pcapkit.corekit.module.ModuleDescriptor` still reports as
-            different from the class it names, and the deferred import stays
-            deferred.
+            handing back the entry already stored under ``code`` -- the same
+            class object, or a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+            equal to the stored one -- is a silent no-op rather than a warning
+            about nothing displaced, and the stored entry is kept as it is
+            (:issue:`1364`). The comparison runs before ``protocol`` is
+            resolved and resolves nothing, so a stored descriptor stays
+            deferred, and an incumbent left as an unresolved descriptor still
+            reports as different from the class it names.
 
         """
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and (incumbent is protocol or (
+                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
+                and incumbent == protocol)):
+            return
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)

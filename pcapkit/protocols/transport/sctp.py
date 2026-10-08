@@ -618,16 +618,22 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 <pcapkit.protocols.transport.transport.Transport.register>` it
                 overrides, an unresolved
                 :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent
-                counts as different from the class it names.
+                counts as different from the class it names; handing back the
+                stored entry, or a descriptor equal to it, is a silent no-op
+                that keeps it.
 
         """
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and (incumbent is protocol or (
+                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
+                and incumbent == protocol)):
+            return
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
             warn(f'payload protocol identifier {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)

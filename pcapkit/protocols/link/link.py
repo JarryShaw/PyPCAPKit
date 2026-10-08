@@ -138,13 +138,17 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
                 guard this shares with ``register_protocol``.
 
         """
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and (incumbent is protocol or (
+                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
+                and incumbent == protocol)):
+            return
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)

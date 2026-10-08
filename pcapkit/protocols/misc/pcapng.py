@@ -996,18 +996,23 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 entry and its replacement so a caller can tell *what* was lost.
                 Fires only when the incumbent differs from the replacement, and
                 an unresolved module descriptor counts as different from the
-                class it names. This registry is separate from the PCAP one, so
+                class it names; handing back the stored entry, or a descriptor
+                equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
                 :func:`~pcapkit.foundation.registry.protocols.register_linktype`
                 writing to both cannot make either warn about the other.
 
         """
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and (incumbent is protocol or (
+                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
+                and incumbent == protocol)):
+            return
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)
