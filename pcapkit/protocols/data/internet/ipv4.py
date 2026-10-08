@@ -225,11 +225,13 @@ class TSOption(Option):
     overflow: 'int'
     #: Flag.
     flag: 'TSFlag'
-    #: Timestamp data.
+    #: Timestamp data, i.e. the slots before the pointer.
     timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'
+    #: Slots at or beyond the pointer, as raw 32-bit words.
+    remaining: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]', remaining: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

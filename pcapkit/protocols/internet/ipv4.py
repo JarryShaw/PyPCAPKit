@@ -890,6 +890,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             overflow=schema.flags['oflw'],
             flag=schema.ts_flag,
             timestamp=schema.timestamp,
+            remaining=schema.remaining,
         )
         return opt
 
@@ -1579,6 +1580,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                      counts: 'int' = 5,
                      overflow: 'int' = 0,
                      timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address, int | timedelta]]' = None,
+                     remaining: 'Optional[list[int]]' = None,
                      **kwargs: 'Any') -> 'Schema_TSOption':
         """Make IPv4 Timestamp (``TS``) option.
 
@@ -1586,7 +1588,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             counts: maximum number of timestamps to record
-            timestamp: list of timestamps
+            timestamp: list of timestamps, i.e. the slots before the pointer
+            remaining: raw 32-bit words for the slots at or beyond the pointer;
+                the slots left over up to ``counts`` are zero
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1615,6 +1619,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                             ts = ts | 0x80000000
                     ts_list.append(ts)
 
+            ts_list += getattr(option, 'remaining', ())
             length = option.length
             pointer = option.pointer
             overflow = option.overflow
@@ -1659,6 +1664,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             else:
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: {timestamp}')
             pointer = 5 + len(ts_list) * 4
+
+            # NOTE: Every slot of the option is written, the empty ones as zero.
+            slots = (length - 4) // 4
+            ts_list = (ts_list + list(remaining or ()))[:slots]
+            ts_list += [0] * (slots - len(ts_list))
 
         # NOTE: ``ts_data`` is the field on
         # :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`; ``data`` is

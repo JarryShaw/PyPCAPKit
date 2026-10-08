@@ -334,15 +334,15 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         'oflw': (0, 4),
         'flag': (4, 4),
     })
-    #: Timestamps and internet addresses.
+    #: Timestamps and internet addresses: every 32-bit slot of the option,
+    #: those before the pointer and those at or beyond it alike.
     ts_data: 'list[int]' = ListField(
-        length=lambda pkt: pkt['pointer'] - 5 if pkt['flags']['flag'] != 3 else pkt['length'] - 4,
+        length=lambda pkt: max(pkt['length'] - 4, 0) // 4 * 4,
         item_type=UInt32Field(),
     )
-    #: Remaining data buffer.
+    #: Trailing octets that do not make up a whole 32-bit slot.
     remainder: 'bytes' = PaddingField(
-        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1 if pkt['flags']['flag'] != 3 else 0,
-        default=bytes(36),  # 36 is the maximum length of the option data field for timestamps
+        length=lambda pkt: max(pkt['length'] - 4, 0) % 4,
     )
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
@@ -379,8 +379,22 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
 
         """
         ts_flag = Enum_TSFlag.get(self.flags['flag'])
+
+        # NOTE: Only the slots wholly before the pointer have been filled in, so
+        # the rest are kept apart, as the raw 32-bit words, in ``remaining``. A
+        # pre-specified address is part of the option's content whether or not
+        # its timestamp has been filled in yet, so that flag consumes every whole
+        # address and timestamp pair. A paired flag never splits a pair.
+        if ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
+            used = len(self.ts_data)
+        else:
+            used = min(max(self.pointer - 5, 0) // 4, len(self.ts_data))
+        if ts_flag in (Enum_TSFlag.IP_with_Timestamp, Enum_TSFlag.Prespecified_IP_with_Timestamp):
+            used -= used % 2
+        self.remaining = tuple(self.ts_data[used:])
+
         if ts_flag == Enum_TSFlag.Timestamp_Only:
-            ts_data = self.ts_data
+            ts_data = self.ts_data[:used]
             self.data = []
             ts_list = []  # type: list[int | timedelta]
 
@@ -396,7 +410,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 ts_list.append(ts_val)
             timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
         elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
-            ts_data = self.ts_data
+            ts_data = self.ts_data[:used]
             self.data = OrderedMultiDict()
             timestamp = OrderedMultiDict()
 
@@ -411,7 +425,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
         elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
-            ts_data = self.ts_data
+            ts_data = self.ts_data[:used]
             self.data = OrderedMultiDict()
             timestamp = OrderedMultiDict()
 
@@ -425,30 +439,10 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
-
-            # extract also the prespecified IP addresses
-            # but set the timestamp to 0
-            #
-            # NOTE: Through ``parse_ip_address`` like the two conversions above,
-            # even though ``remainder`` is a
-            # :class:`~pcapkit.corekit.fields.strings.PaddingField`, so what it
-            # holds is octets rather than anything the caller named, and cannot
-            # launder a :obj:`bool`. It is routed through anyway because a bare
-            # :func:`ipaddress.ip_address` here still raises a plain
-            # :exc:`ValueError` for a tail that is not a whole number of 8-octet
-            # pairs, which no ``except BaseError`` can catch, and because leaving
-            # one of this method's three conversions unguarded invites the same
-            # defect back.
-            pad = self.remainder
-            for index in range(0, len(pad), 8):
-                buf_ip = pad[index:index + 4]
-                self.data.add(parse_ip_address(  # type: ignore[arg-type]
-                    buf_ip, f'IPv4: [OptNo {self.type}] invalid prespecified address',
-                    version=4), 0)
         else:
             warn(f'IPv4: [OptNo {self.type}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
-            self.data = self.ts_data
-            timestamp = tuple(self.ts_data)
+            self.data = self.ts_data[:used]
+            timestamp = tuple(self.data)
 
         self.ts_flag = ts_flag
         self.timestamp = timestamp
@@ -457,6 +451,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
     if TYPE_CHECKING:
         ts_flag: 'Enum_TSFlag'
         data: 'list[int] | OrderedMultiDict[IPv4Address, int]'
+        remaining: 'tuple[int, ...]'
         timestamp: 'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'
 
         # NOTE: The keyword is ``ts_data``, the name of the field above, not
