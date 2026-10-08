@@ -3622,6 +3622,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -5593,6 +5594,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PadFlowIdentificationSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">pad</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>  <span class="c1"># type: Data_FlowIdentificationSuboption</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">BID_Reference</span><span class="p">:</span>
                 <span class="n">bid_ref</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_BIDReferenceSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
@@ -8751,6 +8753,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_pad">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_PadOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PadOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH pad option.</span>
 
@@ -8759,6 +8762,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            length: Value of the ``Option Length`` field, i.e. the number of</span>
 <span class="sd">                padding octets *after* the two octets of the option header.</span>
+<span class="sd">            data: The ``PadN`` option data, truncated or zero-filled to</span>
+<span class="sd">                ``length`` octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8779,6 +8784,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">option</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="k">else</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')</span>
@@ -8788,6 +8794,7 @@
         <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -10631,7 +10638,11 @@
                 <span class="n">pad_len</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pad_len</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">Schema_PadFlowIdentificationSuboption</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pad_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pad_data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Schema_PadFlowIdentificationSuboption</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pad_data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">BID_Reference</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

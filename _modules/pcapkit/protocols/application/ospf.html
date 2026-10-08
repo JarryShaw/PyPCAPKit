@@ -878,6 +878,7 @@
 
 <span class="sd">        """</span>
         <span class="n">auth</span> <span class="o">=</span> <span class="n">Data_CryptographicAuthentication</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">key_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -911,6 +912,7 @@
             <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Data_CryptographicAuthentication</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">(</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">),</span>
                 <span class="n">key_id</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
                 <span class="nb">len</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
                 <span class="n">seq</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>

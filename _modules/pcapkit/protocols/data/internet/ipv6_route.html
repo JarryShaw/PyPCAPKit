@@ -526,12 +526,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SourceRoute</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for IPv6-Route Source Route data type."""</span>
 
+    <span class="c1">#: The four reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Source addresses.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Routing'</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
 
@@ -541,12 +543,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Type2</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for IPv6-Route Type 2 data type."""</span>
 
+    <span class="c1">#: The four reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Address.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Routing'</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
 
@@ -566,10 +570,12 @@
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Addresses.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address | bytes, ...]'</span>
+    <span class="c1">#: The ``Pad`` octets after the addresses, as captured.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Routing'</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address | bytes, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+                     <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address | bytes, ...]'</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 </pre></div>
         </article>

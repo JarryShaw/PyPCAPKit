@@ -1047,6 +1047,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
@@ -1098,6 +1099,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
@@ -1170,6 +1172,7 @@
             <span class="n">pad</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
 
@@ -1210,6 +1213,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_SourceRoute]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">ip</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SourceRoute'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv6-Route Source Route data.</span>
 
@@ -1218,6 +1222,8 @@
 <span class="sd">            route: route data</span>
 <span class="sd">            dst: destination IPv6 address</span>
 <span class="sd">            ip: list of IPv6 addresses</span>
+<span class="sd">            reserved: the four reserved octets, truncated or zero-filled to</span>
+<span class="sd">                four octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -1226,10 +1232,12 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv6Address | str | bytes | int]'</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ip</span>
 
         <span class="k">return</span> <span class="n">Schema_SourceRoute</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -1239,6 +1247,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Routing'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[Data_Type2]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                          <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Type2'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv6-Route Type 2 data.</span>
 
@@ -1247,6 +1256,8 @@
 <span class="sd">            route: route data</span>
 <span class="sd">            dst: destination IPv6 address</span>
 <span class="sd">            ip: home address</span>
+<span class="sd">            reserved: the four reserved octets, truncated or zero-filled to</span>
+<span class="sd">                four octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -1255,8 +1266,10 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address | str | bytes | int'</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_Type2</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -1267,6 +1280,7 @@
                             <span class="n">dst</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">ip</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPL'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv6-Route RPL Source data.</span>
 
@@ -1276,6 +1290,8 @@
 <span class="sd">            dst: destination IPv6 address</span>
 <span class="sd">            ip: list of IPv6 addresses</span>
 <span class="sd">            reserved: reserved bits after ``Pad``</span>
+<span class="sd">            padding: the ``Pad`` octets after the addresses, truncated or</span>
+<span class="sd">                zero-filled to ``Pad`` octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -1291,6 +1307,7 @@
             <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_e</span>
             <span class="n">pad</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">pad</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">reserved</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
             <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">addr</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">ip</span>
             <span class="p">]</span>
@@ -1360,6 +1377,7 @@
                 <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">addresses</span><span class="o">=</span><span class="n">ip_val</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

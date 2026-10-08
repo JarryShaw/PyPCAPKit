@@ -631,12 +631,13 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">Data_Chunk</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCause</span> <span class="k">as</span> <span class="n">Data_ErrorCause</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Data_Parameter</span>
@@ -648,6 +649,9 @@
     <span class="n">Chunks</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Chunk</span><span class="p">,</span> <span class="n">Data_Chunk</span><span class="p">]</span>
     <span class="n">Parameters</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">Data_Parameter</span><span class="p">]</span>
     <span class="n">Causes</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_CauseCode</span><span class="p">,</span> <span class="n">Data_ErrorCause</span><span class="p">]</span>
+
+    <span class="n">Data_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'Data_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Data</span><span class="p">)</span>
+    <span class="n">Schema_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'Schema_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Schema</span><span class="p">)</span>
 
     <span class="n">ChunkParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Chunk</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Chunks</span><span class="p">,</span> <span class="s1">'chunks'</span><span class="p">)],</span> <span class="n">Data_Chunk</span><span class="p">]</span>
     <span class="n">ChunkConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Chunk</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_Chunk</span><span class="p">]),</span>
@@ -673,6 +677,42 @@
         <span class="n">_crc</span> <span class="o">=</span> <span class="p">(</span><span class="n">_crc</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="mh">0x82F63B78</span> <span class="k">if</span> <span class="n">_crc</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">CRC32C_TABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_crc</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">_index</span><span class="p">,</span> <span class="n">_crc</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_T'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_T'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Keep a chunk's, parameter's or cause's non-zero trailing padding.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Parsed schema.</span>
+<span class="sd">        data: Data model read from ``schema``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``data``, with a ``padding`` attribute holding the trailing padding as</span>
+<span class="sd">        captured if it is not all zeros -- the form a fresh build writes</span>
+<span class="sd">        (:issue:`1223`). :func:`_restore_padding` writes it back.</span>
+
+<span class="sd">    """</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="n">padding</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_restore_padding</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_T'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_T'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write back the trailing padding :func:`_keep_padding` kept, if any.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data model the schema was made from, if any.</span>
+<span class="sd">        schema: Constructed schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``schema``, with its padding set from ``data``.</span>
+
+<span class="sd">    """</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'padding'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+        <span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+    <span class="k">return</span> <span class="n">schema</span>
 
 
 <div class="viewcode-block" id="SCTP">
@@ -1404,7 +1444,7 @@
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_chunk_donone</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">chunks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">))</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">chunks</span></div>
 
 
@@ -1469,7 +1509,7 @@
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_chunk_donone</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SCTP._read_sctp_parameters">
@@ -1496,7 +1536,7 @@
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_param_donone</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">))</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">parameters</span></div>
 
 
@@ -1550,7 +1590,7 @@
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_donone</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SCTP._read_sctp_causes">
@@ -1577,7 +1617,7 @@
                             <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cause_donone</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">causes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">causes</span><span class="o">=</span><span class="n">causes</span><span class="p">))</span>
+            <span class="n">causes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">causes</span><span class="o">=</span><span class="n">causes</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">causes</span></div>
 
 
@@ -1631,7 +1671,7 @@
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cause_donone</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_nested_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="s1">'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>

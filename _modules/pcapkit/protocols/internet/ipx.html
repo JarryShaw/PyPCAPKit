@@ -583,6 +583,15 @@
             <span class="n">src</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipx_address</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
         <span class="p">)</span>
 
+        <span class="c1"># NOTE: Octets captured past the Packet Length belong to this layer,</span>
+        <span class="c1"># since its own length field is what leaves them out of the payload: an</span>
+        <span class="c1"># Ethernet carrier hands the whole rest of its frame here, padding</span>
+        <span class="c1"># included, and the rebuild keeps them as captured (:issue:`1433`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">ipx</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipx</span><span class="p">,</span> <span class="n">ipx</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ipx</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">30</span><span class="p">)</span></div>
 
 
@@ -599,6 +608,7 @@
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">src</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPX'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -614,6 +624,8 @@
 <span class="sd">            dst: Destination Address.</span>
 <span class="sd">            src: Source Address.</span>
 <span class="sd">            payload: Payload data.</span>
+<span class="sd">            trailer: Octets after the packet, outside the Packet Length, such as</span>
+<span class="sd">                link-layer padding; written as is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -633,6 +645,7 @@
             <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
             <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -684,6 +697,8 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_ipx_address</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
             <span class="s1">'src'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_ipx_address</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="c1"># NOTE: And the octets captured past the Packet Length (:issue:`1433`).</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 

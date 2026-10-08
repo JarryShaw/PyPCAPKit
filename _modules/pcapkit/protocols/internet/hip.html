@@ -1315,6 +1315,14 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
+            <span class="c1"># NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on</span>
+            <span class="c1"># the data model only when it is not all zeros -- the form a fresh</span>
+            <span class="c1"># build writes -- so that a rebuild reproduces it (:issue:`1223`).</span>
+            <span class="c1"># :meth:`_make_hip_param` writes it back.</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">):</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="n">padding</span><span class="p">)])</span>
+
             <span class="c1"># record parameter data</span>
             <span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dscp</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
             <span class="n">counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
@@ -1455,6 +1463,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">counter</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">r1_counter</span></div>
@@ -2049,6 +2058,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">mode_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">modes</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">nat_traversal_mode</span></div>
@@ -2136,6 +2146,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">cipher</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cipher</span><span class="p">,</span>
             <span class="n">iv</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'iv'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -2335,6 +2346,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">msg_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
             <span class="n">msg</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2586,6 +2598,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
@@ -2717,6 +2730,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">suite_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suites</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">esp_transform</span></div>
@@ -2845,6 +2859,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
             <span class="n">mic</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">mic</span><span class="p">,</span>
@@ -2978,6 +2993,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
                 <span class="n">symmetric</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'symmetric'</span><span class="p">]),</span>
                 <span class="n">must_follow</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'must_follow'</span><span class="p">]),</span>
@@ -3310,6 +3326,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3362,6 +3379,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3406,6 +3424,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ttl</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">overlay_ttl</span></div>
@@ -3461,6 +3480,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
                 <span class="n">symmetric</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'symmetric'</span><span class="p">]),</span>
                 <span class="n">must_follow</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'must_follow'</span><span class="p">]),</span>
@@ -3703,6 +3723,10 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+            <span class="c1"># NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'padding'</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
             <span class="n">data_packed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
 
             <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -3785,6 +3809,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_r1_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_R1CounterParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                                <span class="n">counter</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                               <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_R1CounterParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``R1_COUNTER`` parameter.</span>
 
@@ -3793,6 +3818,8 @@
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
 <span class="sd">            counter: R1 generation counter</span>
+<span class="sd">            reserved: the four reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 4 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -3803,9 +3830,11 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid parameter'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">counter</span>
 
         <span class="k">return</span> <span class="n">Schema_R1CounterParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
             <span class="n">counter</span><span class="o">=</span><span class="n">counter</span><span class="p">,</span>
@@ -4457,6 +4486,7 @@
                                        <span class="n">mode_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                        <span class="n">mode_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                        <span class="n">mode_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NATTraversalModeParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``NAT_TRAVERSAL_MODE`` parameter.</span>
 
@@ -4468,6 +4498,8 @@
 <span class="sd">            mode_default: default mode ID</span>
 <span class="sd">            mode_namespace: mode ID namespace</span>
 <span class="sd">            mode_reversed: reverse mode ID namespace</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -4475,6 +4507,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">mode_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_NATTraversal]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">mode_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">modes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -4486,6 +4519,7 @@
                                                 <span class="nb">reversed</span><span class="o">=</span><span class="n">mode_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">Schema_NATTraversalModeParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mode_id</span><span class="p">),</span>
             <span class="n">modes</span><span class="o">=</span><span class="n">mode_id</span><span class="p">,</span>
@@ -4531,6 +4565,7 @@
                               <span class="n">cipher_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                               <span class="n">iv</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_EncryptedParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``ENCRYPTED`` parameter.</span>
 
@@ -4544,12 +4579,15 @@
 <span class="sd">            cipher_reversed: reverse cipher ID namespace</span>
 <span class="sd">            iv: initialization vector (optional depending on cipher ID)</span>
 <span class="sd">            data: encrypted data</span>
+<span class="sd">            reserved: the four reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 4 octets</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">cipher</span>
             <span class="n">iv</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">iv</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">data</span>
@@ -4564,6 +4602,7 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] IV length must be 16 bytes for AES cipher'</span><span class="p">)</span>
 
         <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_EncryptedParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">iv</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="n">iv</span><span class="o">=</span><span class="n">iv</span><span class="p">,</span>
@@ -4826,6 +4865,7 @@
                                  <span class="n">msg_type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                  <span class="n">msg_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                  <span class="n">msg</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                 <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NotificationParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``NOTIFICATION`` parameter.</span>
 
@@ -4838,6 +4878,8 @@
 <span class="sd">            msg_type_namespace: notification message type namespace</span>
 <span class="sd">            msg_type_reversed: reverse notification message type namespace</span>
 <span class="sd">            msg: notification message</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -4845,6 +4887,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">msg_type</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">msg</span>
         <span class="k">else</span><span class="p">:</span>
@@ -4852,6 +4895,7 @@
                                     <span class="nb">reversed</span><span class="o">=</span><span class="n">msg_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_NotificationParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">),</span>
             <span class="n">msg_type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -5097,6 +5141,7 @@
                              <span class="n">protocol_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                              <span class="n">protocol_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                              <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RegFromParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``REG_FROM`` parameter.</span>
 
@@ -5110,6 +5155,8 @@
 <span class="sd">            protocol_namespace: transport protocol namespace</span>
 <span class="sd">            protocol_reversed: reverse transport protocol namespace</span>
 <span class="sd">            address: IPv6 address</span>
+<span class="sd">            reserved: the reserved octet, truncated or</span>
+<span class="sd">                zero-filled to 1 octet</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5117,6 +5164,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">port</span>
             <span class="n">proto</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">protocol</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">address</span>
@@ -5125,6 +5173,7 @@
                                      <span class="nb">reversed</span><span class="o">=</span><span class="n">protocol_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_RegFromParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
@@ -5219,6 +5268,7 @@
                                   <span class="n">suite_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                   <span class="n">suite_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                   <span class="n">suite_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ESPTransformParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``ESP_TRANSFORM`` parameter.</span>
 
@@ -5230,6 +5280,8 @@
 <span class="sd">            suite_default: default ESP transform suite</span>
 <span class="sd">            suite_namespace: ESP transform suite namespace</span>
 <span class="sd">            suite_reversed: reverse ESP transform suite namespace</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5237,6 +5289,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">suite_id</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_ESPTransformSuite]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">suite_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">suites</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -5248,6 +5301,7 @@
                                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">suite_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">Schema_ESPTransformParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">suite_id</span><span class="p">),</span>
             <span class="n">suites</span><span class="o">=</span><span class="n">suite_id</span><span class="p">,</span>
@@ -5323,6 +5377,7 @@
                                 <span class="n">next_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                                 <span class="n">mic</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PayloadMICParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``PAYLOAD_MIC`` parameter.</span>
 
@@ -5336,6 +5391,8 @@
 <span class="sd">            next_reversed: reverse next protocol namespace</span>
 <span class="sd">            payload: payload data</span>
 <span class="sd">            mic: message integrity code</span>
+<span class="sd">            reserved: the three reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 3 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5343,6 +5400,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">next</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">payload</span>
             <span class="n">mic</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">mic</span>
@@ -5351,6 +5409,7 @@
                                         <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_PayloadMICParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">mic</span><span class="p">),</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
@@ -5425,6 +5484,7 @@
                               <span class="n">must_follow</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                               <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">hit</span><span class="p">:</span> <span class="s1">'Optional[list[bytes | str | int | IPv6Address]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RouteDstParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``ROUTE_DST`` parameter.</span>
 
@@ -5436,12 +5496,15 @@
 <span class="sd">            must_follow: must-follow flag</span>
 <span class="sd">            flags_reserved: the 14 reserved low-order bits of ``Flags``</span>
 <span class="sd">            hit: list of HITs</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">symmetric</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">symmetric</span>
             <span class="n">must_follow</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">must_follow</span>
             <span class="n">flags_reserved</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
@@ -5450,6 +5513,7 @@
             <span class="n">hit_list</span> <span class="o">=</span> <span class="n">hit</span> <span class="k">if</span> <span class="n">hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_RouteDstParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">hit_list</span><span class="p">),</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
@@ -5716,6 +5780,7 @@
                                <span class="n">protocol_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                <span class="n">protocol_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                               <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RelayFromParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``RELAY_FROM`` parameter.</span>
 
@@ -5729,12 +5794,15 @@
 <span class="sd">            protocol_namespace: transport protocol namespace</span>
 <span class="sd">            protocol_reversed: reverse transport protocol namespace</span>
 <span class="sd">            address: relay address</span>
+<span class="sd">            reserved: the reserved octet, truncated or</span>
+<span class="sd">                zero-filled to 1 octet</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">port</span>
             <span class="n">proto</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">protocol</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">address</span>
@@ -5743,6 +5811,7 @@
                                      <span class="nb">reversed</span><span class="o">=</span><span class="n">protocol_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_RelayFromParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
@@ -5761,6 +5830,7 @@
                              <span class="n">protocol_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                              <span class="n">protocol_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                              <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address | str | int | bytes'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RelayToParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``RELAY_TO`` parameter.</span>
 
@@ -5774,6 +5844,8 @@
 <span class="sd">            protocol_namespace: transport protocol namespace</span>
 <span class="sd">            protocol_reversed: reverse transport protocol namespace</span>
 <span class="sd">            address: relay address</span>
+<span class="sd">            reserved: the reserved octet, truncated or</span>
+<span class="sd">                zero-filled to 1 octet</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5781,6 +5853,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">port</span>
             <span class="n">proto</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">protocol</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">address</span>
@@ -5789,6 +5862,7 @@
                                      <span class="nb">reversed</span><span class="o">=</span><span class="n">protocol_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_RelayToParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
             <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
@@ -5802,6 +5876,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_overlay_ttl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_OverlayTTLParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                                 <span class="n">ttl</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_OverlayTTLParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``OVERLAY_TTL`` parameter.</span>
 
@@ -5810,6 +5885,8 @@
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
 <span class="sd">            ttl: overlay time-to-live (TTL) value</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5817,11 +5894,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">ttl_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ttl_val</span> <span class="o">=</span> <span class="n">ttl</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ttl</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ttl</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">Schema_OverlayTTLParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">ttl</span><span class="o">=</span><span class="n">ttl_val</span><span class="p">,</span>
@@ -5836,6 +5915,7 @@
                               <span class="n">must_follow</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                               <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                               <span class="n">hit</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | bytes | str | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RouteViaParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``ROUTE_VIA`` parameter.</span>
 
@@ -5847,12 +5927,15 @@
 <span class="sd">            must_follow: must-follow flag</span>
 <span class="sd">            flags_reserved: the 14 reserved low-order bits of ``Flags``</span>
 <span class="sd">            hit: list of HITs</span>
+<span class="sd">            reserved: the two reserved octets, truncated or</span>
+<span class="sd">                zero-filled to 2 octets</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">symmetric</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">symmetric</span>
             <span class="n">must_follow</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">must_follow</span>
             <span class="n">flags_reserved</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
@@ -5861,6 +5944,7 @@
             <span class="n">hit_list</span> <span class="o">=</span> <span class="n">hit</span> <span class="k">if</span> <span class="n">hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_RouteViaParameter</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">hit_list</span><span class="p">),</span>
             <span class="n">flags</span><span class="o">=</span><span class="p">{</span>

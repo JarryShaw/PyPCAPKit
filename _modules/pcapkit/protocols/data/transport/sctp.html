@@ -581,7 +581,12 @@
     <span class="c1">#: Cause code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'CauseCode'</span>
     <span class="c1">#: Cause length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
+        <span class="c1">#: not all zeros.</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -784,7 +789,12 @@
     <span class="c1">#: Parameter type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'ParameterType'</span>
     <span class="c1">#: Parameter length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
+        <span class="c1">#: not all zeros.</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -922,7 +932,12 @@
     <span class="c1">#: Chunk type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span>
     <span class="c1">#: Chunk length, excluding any trailing padding.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
+        <span class="c1">#: not all zeros.</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 

@@ -478,6 +478,7 @@
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
@@ -572,6 +573,9 @@
         <span class="n">_ctx</span><span class="p">:</span> <span class="s1">'Context'</span>
         <span class="c1">#: File context storage.</span>
         <span class="n">_ctx_list</span><span class="p">:</span> <span class="s1">'list[Context]'</span>
+        <span class="c1">#: Number of non-packet blocks of each kind written so far, counted</span>
+        <span class="c1">#: across the whole file rather than per section.</span>
+        <span class="n">_block_count</span><span class="p">:</span> <span class="s1">'collections.Counter[str]'</span>
 
     <span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">b</span><span class="s1">'</span><span class="se">\x0a\x0d\x0d\x0a</span><span class="s1">'</span><span class="p">,</span>
@@ -604,6 +608,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_block_count</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
 
@@ -694,19 +699,19 @@
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_InterfaceDescriptionBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Interface Description </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Interface Description'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_NameResolutionBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Name Resolution </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Name Resolution'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">systemd_Journal_Export_Block</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">journals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_SystemdJournalExportBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'systemd Journal Export </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">journals</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'systemd Journal Export'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_DecryptionSecretsBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Decryption Secrets </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">secrets</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Decryption Secrets'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span>
                 <span class="c1"># NOTE: The interface ID is bounds-checked while the block is</span>
@@ -717,12 +722,12 @@
                 <span class="n">isb_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_InterfaceStatisticsBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">statistics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isb_info</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">isb_info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Interface Statistics </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">statistics</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">isb_info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Interface Statistics'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">,</span>
                                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">custom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_CustomBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Custom </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">custom</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Custom'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span>
                 <span class="c1"># NOTE: as for the ISB above, the interface ID has already been</span>
@@ -747,7 +752,7 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">unknown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Data_UnknownBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Unknown </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Unknown'</span><span class="p">))</span>
 
         <span class="c1"># increment frame number</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -791,6 +796,26 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_block_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name the next non-packet block of the given kind.</span>
+
+<span class="sd">        The per-section context lists (e.g. ``Context.interfaces``) restart</span>
+<span class="sd">        with every Section Header Block, so numbering a block by their length</span>
+<span class="sd">        gives the first IDB of every section the same name. The output dumpers</span>
+<span class="sd">        key by name, so a repeated name overwrites the earlier block (#1256).</span>
+<span class="sd">        The number is therefore counted across the whole file instead; for a</span>
+<span class="sd">        single-section file it is the same number as before.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kind: The kind of the block, e.g. ``'Interface Description'``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The block name, ``'&lt;kind&gt; &lt;n&gt;'`` with ``n`` starting at 1.</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_block_count</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_count</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_PCAPNG'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Write the parsed block into output file.</span>

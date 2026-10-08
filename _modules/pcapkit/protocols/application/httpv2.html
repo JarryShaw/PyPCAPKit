@@ -1103,6 +1103,7 @@
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">sid</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1164,6 +1165,7 @@
             <span class="n">stream_dependency</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_dep</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">weight</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">weight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PRIORITY</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1385,6 +1387,7 @@
             <span class="n">promised_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">promised_sid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">],</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">PADDED</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
@@ -1613,6 +1616,7 @@
                         <span class="n">padded</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">pad_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                         <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_DataFrame, Flags]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HTTP/2 ``DATA`` frame.</span>
 
@@ -1622,6 +1626,8 @@
 <span class="sd">            padded: Padded flag, implied by a non-zero ``pad_len``.</span>
 <span class="sd">            pad_len: Padding length.</span>
 <span class="sd">            data: Frame data.</span>
+<span class="sd">            padding: Padding octets, truncated or zero-filled to ``pad_len``</span>
+<span class="sd">                octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1634,6 +1640,7 @@
 
             <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="n">flags</span> <span class="o">=</span> <span class="n">Schema_DataFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">end_stream</span><span class="p">:</span>
@@ -1644,6 +1651,7 @@
         <span class="k">return</span> <span class="n">Schema_DataFrame</span><span class="p">(</span>
             <span class="n">pad_len</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">flags</span></div>
 
 
@@ -1658,6 +1666,7 @@
                            <span class="n">sid_dep</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="n">weight</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                           <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_HeadersFrame, Flags]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HTTP/2 ``HEADERS`` frame.</span>
 
@@ -1671,6 +1680,8 @@
 <span class="sd">            sid_dep: Dependency stream identifier.</span>
 <span class="sd">            weight: Priority weight value.</span>
 <span class="sd">            fragment: Header block fragment.</span>
+<span class="sd">            padding: Padding octets, truncated or zero-filled to ``pad_len``</span>
+<span class="sd">                octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1688,6 +1699,7 @@
             <span class="n">sid_dep</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">stream_dependency</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">weight</span>
             <span class="n">fragment</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">fragment</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">priority</span> <span class="o">=</span> <span class="n">sid_dep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">sid_dep</span> <span class="o">=</span> <span class="n">sid_dep</span> <span class="ow">or</span> <span class="mi">0</span>
@@ -1710,6 +1722,7 @@
             <span class="p">},</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">weight</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">flags</span></div>
 
 
@@ -1844,6 +1857,7 @@
                                 <span class="n">promised_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                 <span class="n">promised_sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                 <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_PushPromiseFrame, Flags]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HTTP/2 ``PUSH_PROMISE`` frame.</span>
 
@@ -1855,6 +1869,8 @@
 <span class="sd">            promised_reserved: Reserved bit of the promised stream identifier.</span>
 <span class="sd">            promised_sid: Promised stream identifier.</span>
 <span class="sd">            fragment: Header block fragment.</span>
+<span class="sd">            padding: Padding octets, truncated or zero-filled to ``pad_len``</span>
+<span class="sd">                octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1868,6 +1884,7 @@
             <span class="n">promised_reserved</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">promised_reserved</span>
             <span class="n">promised_sid</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">promised_sid</span>
             <span class="n">fragment</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">fragment</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="n">flags</span> <span class="o">=</span> <span class="n">Schema_PushPromiseFrame</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">end_headers</span><span class="p">:</span>
@@ -1882,6 +1899,7 @@
                 <span class="s1">'sid'</span><span class="p">:</span> <span class="n">promised_sid</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">flags</span></div>
 
 

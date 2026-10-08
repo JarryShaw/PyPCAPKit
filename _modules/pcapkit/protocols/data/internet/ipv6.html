@@ -532,6 +532,9 @@
         <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="c1">#: Raw payload length (excluding extension headers).</span>
         <span class="n">raw_len</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="c1">#: Octets captured past the Payload Length, present only when there</span>
+        <span class="c1">#: are any.</span>
+        <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Extension header chain, in wire order, as pairs of the parser</span>
         <span class="c1">#: class and its info. Kept apart from the per-header keys above,</span>
         <span class="c1">#: which a repeated header overwrites.</span>

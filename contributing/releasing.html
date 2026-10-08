@@ -527,7 +527,7 @@ landed and is ready to go out.</p>
 (<code class="docutils literal notranslate"><span class="pre">:494-514</span></code>) asserts the two agree, and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job (<code class="docutils literal notranslate"><span class="pre">:362-376</span></code>) calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
 <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs the <strong>full</strong> suite rather than the tiered
-subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1214-1283</span></code>).
+subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1402-1471</span></code>).
 That gate runs whenever a release will – a moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is exactly
 what makes <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence read “not yet published” – and every
 publishing job requires it to have succeeded (<code class="docutils literal notranslate"><span class="pre">:392,493,573,674</span></code>), so a
@@ -536,7 +536,7 @@ Either run the script, or move both fields by hand in the same commit.</p>
 <p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
 the Release, and every upload are the workflow’s job from here. Two other
 checks run unconditionally on the same path, though neither is a step in <em>this</em>
-process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1074-1095</span></code>) fails outright if
+process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1262-1283</span></code>) fails outright if
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
 <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and the release-body step warns, without
 failing, if that entry’s heading still reads “unreleased”

@@ -557,7 +557,12 @@
     <span class="c1">#: Critical flag.</span>
     <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Content length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
+        <span class="c1">#: not all zeros.</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -635,11 +640,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">R1CounterParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``R1_COUNTER`` parameter."""</span>
 
+    <span class="c1">#: The four reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: R1 counter.</span>
     <span class="n">counter</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">counter</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">counter</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -864,11 +871,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NATTraversalModeParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mode IDs</span>
     <span class="n">mode_id</span><span class="p">:</span> <span class="s1">'tuple[NATTraversal, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="s1">'tuple[NATTraversal, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">mode_id</span><span class="p">:</span> <span class="s1">'tuple[NATTraversal, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -892,6 +901,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">EncryptedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``ENCRYPTED`` parameter."""</span>
 
+    <span class="c1">#: The four reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Cipher ID.</span>
     <span class="n">cipher</span><span class="p">:</span> <span class="s1">'Cipher'</span>
     <span class="c1">#: Initialization vector.</span>
@@ -900,7 +911,7 @@
     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">cipher</span><span class="p">:</span> <span class="s1">'Cipher'</span><span class="p">,</span> <span class="n">iv</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
@@ -988,13 +999,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NotificationParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``NOTIFICATION`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Notify message type.</span>
     <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'NotifyMessage'</span>
     <span class="c1">#: Notification data.</span>
     <span class="n">msg</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'NotifyMessage'</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'NotifyMessage'</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1098,6 +1111,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RegFromParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``REG_FROM`` parameter."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Port.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Protocol.</span>
@@ -1106,7 +1121,7 @@
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1144,11 +1159,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ESPTransformParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``ESP_TRANSFORM`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: ESP transform.</span>
     <span class="n">suite_id</span><span class="p">:</span> <span class="s1">'tuple[ESPTransformSuite, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">suite_id</span><span class="p">:</span> <span class="s1">'tuple[ESPTransformSuite, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">suite_id</span><span class="p">:</span> <span class="s1">'tuple[ESPTransformSuite, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1186,6 +1203,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PayloadMICParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``PAYLOAD_MIC`` parameter."""</span>
 
+    <span class="c1">#: The three reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Next header</span>
     <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span>
     <span class="c1">#: Payload data.</span>
@@ -1194,7 +1213,7 @@
     <span class="n">mic</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">mic</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">mic</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1251,13 +1270,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RouteDstParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``ROUTE_DST`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span>
     <span class="c1">#: Destination address.</span>
     <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1371,6 +1392,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RelayFromParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``RELAY_FROM`` parameter."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Port.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Protocol.</span>
@@ -1379,7 +1402,7 @@
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1389,6 +1412,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RelayToParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``RELAY_TO`` parameter."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Port.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Protocol.</span>
@@ -1397,7 +1422,7 @@
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1407,11 +1432,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">OverlayTTLParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``OVERLAY_TTL`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: TTL value.</span>
     <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1421,13 +1448,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RouteViaParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HIP ``ROUTE_VIA`` parameter."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span>
     <span class="c1">#: HIT addresses.</span>
     <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="n">hit</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 

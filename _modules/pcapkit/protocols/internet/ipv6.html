@@ -681,6 +681,14 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">})</span>  <span class="c1"># type: Data_IPv6</span>
 
+        <span class="c1"># NOTE: Octets captured past the Payload Length are kept as captured,</span>
+        <span class="c1"># c.f. :meth:`IPv4.read &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`</span>
+        <span class="c1"># (:issue:`1209`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
+                <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span>
+            <span class="p">})</span>
+
         <span class="c1"># update packet info</span>
         <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">__packet__</span> <span class="o">=</span> <span class="p">{}</span>
@@ -706,6 +714,7 @@
              <span class="n">dst</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
              <span class="n">payload_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -722,6 +731,8 @@
 <span class="sd">            payload_length: Length of the payload, extension headers included;</span>
 <span class="sd">                computed from the payload when omitted.</span>
 <span class="sd">            payload: Payload data.</span>
+<span class="sd">            trailer: Octets after the packet, outside the Payload Length, such</span>
+<span class="sd">                as link-layer padding; written as is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -751,6 +762,7 @@
             <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -829,6 +841,8 @@
             <span class="c1"># (:issue:`1155`).</span>
             <span class="s1">'payload_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="n">payload</span><span class="p">,</span>
+            <span class="c1"># NOTE: And the octets captured past the Payload Length (:issue:`1209`).</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 

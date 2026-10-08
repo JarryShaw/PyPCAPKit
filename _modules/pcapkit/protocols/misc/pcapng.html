@@ -2208,7 +2208,9 @@
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tzone</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TZoneOption]'</span><span class="p">,</span>
                      <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tzone</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">tzone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># an ``if_tzone`` kept as captured (a :class:`~datetime.timedelta` of 24</span>
+        <span class="c1"># hours or more) names no zone a datetime can be rendered in</span>
+        <span class="k">if</span> <span class="n">tzone</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
         <span class="k">return</span> <span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span>
 
@@ -2268,7 +2270,9 @@
             <span class="c1"># *rendered* in -- which is all a ``tzinfo`` can affect on an aware</span>
             <span class="c1"># datetime. It never moves the instant itself.</span>
             <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ts_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tzone</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># an epoch past what ``datetime`` or the platform's ``time_t`` holds,</span>
+        <span class="c1"># e.g. from an extreme ``if_tsoffset``, raises any of these three</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1">] invalid timestamp: </span><span class="si">{</span><span class="n">timestamp_epoch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
@@ -3663,10 +3667,20 @@
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_tzone] invalid length (expected 4, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
 
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tzone</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">timezone</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>  <span class="c1"># type: datetime.timezone | datetime.timedelta</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># a :class:`~datetime.timezone` holds strictly less than 24 hours;</span>
+            <span class="c1"># the signed 32-bit field holds far more, so keep it as captured</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [if_tzone] offset of </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">tzone</span><span class="si">}</span><span class="s1"> second(s) is not within 24 hours '</span>
+                 <span class="sa">f</span><span class="s1">'of UTC; kept as captured'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="n">timezone</span> <span class="o">=</span> <span class="n">offset</span>
+
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_IF_TZoneOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">timezone</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tzone</span><span class="p">)),</span>
+            <span class="n">timezone</span><span class="o">=</span><span class="n">timezone</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">option</span></div>
 

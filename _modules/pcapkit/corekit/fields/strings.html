@@ -853,7 +853,34 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
-<span class="sd">    """</span></div>
+<span class="sd">    Padding packs back as the octets it was given, so a schema unpacked from</span>
+<span class="sd">    non-zero padding rebuilds byte for byte. An absent or empty value packs as</span>
+<span class="sd">    zeros -- the default for a freshly built packet -- and a value of another</span>
+<span class="sd">    width is truncated or zero-filled to the field's, as :mod:`struct`'s ``s``</span>
+<span class="sd">    format does.</span>
+
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="PaddingField.pack">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField.pack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Pack field value into :obj:`bytes`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Field value, i.e. the padding octets as captured.</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Packed field value: ``value`` truncated or zero-filled to the</span>
+<span class="sd">            field's width, or that many zero octets if ``value`` is absent or</span>
+<span class="sd">            empty.</span>
+
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="n">length</span><span class="p">])</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
         </article>

@@ -812,6 +812,15 @@
                 <span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">20</span> <span class="o">+</span> <span class="n">_used</span><span class="p">:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">]),</span>
             <span class="p">])</span>
 
+        <span class="c1"># NOTE: Octets captured past the Total Length belong to this layer,</span>
+        <span class="c1"># since its own length field is what leaves them out of the payload: an</span>
+        <span class="c1"># Ethernet carrier hands the whole rest of its frame here, padding</span>
+        <span class="c1"># included, and the rebuild keeps them as captured (:issue:`1209`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
         <span class="c1"># update packet info</span>
         <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">__packet__</span> <span class="o">=</span> <span class="p">{}</span>
@@ -872,6 +881,7 @@
              <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -916,6 +926,8 @@
 <span class="sd">                ``options`` is a container that carries an ``EOOL``, c.f.</span>
 <span class="sd">                :meth:`_make_ipv4_options`.</span>
 <span class="sd">            payload: Payload of the packet.</span>
+<span class="sd">            trailer: Octets after the packet, outside the Total Length, such as</span>
+<span class="sd">                link-layer padding; written as is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -979,6 +991,7 @@
             <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -1094,6 +1107,8 @@
             <span class="c1"># options and these octets, so edited options recompute it.</span>
             <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="c1"># NOTE: And the octets captured past the Total Length (:issue:`1209`).</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 

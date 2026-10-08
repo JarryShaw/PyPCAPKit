@@ -7415,8 +7415,10 @@ subclass instance.</p></li>
 <p>Data model for PCAP-NG file <code class="docutils literal notranslate"><span class="pre">if_tzone</span></code> options.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.IF_TZoneOption.timezone">
-<span class="sig-name descname"><span class="pre">timezone</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.14)"><span class="pre">timezone</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.IF_TZoneOption.timezone" title="Link to this definition">¶</a></dt>
-<dd><p>Time zone.</p>
+<span class="sig-name descname"><span class="pre">timezone</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.14)"><span class="pre">timezone</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.14)"><span class="pre">timedelta</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.IF_TZoneOption.timezone" title="Link to this definition">¶</a></dt>
+<dd><p>Time zone. An offset of 24 hours or more, which no
+<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timezone</span></code></a> can hold, is kept as captured as a
+<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>

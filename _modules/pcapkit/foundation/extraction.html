@@ -1297,6 +1297,58 @@
 
 <span class="sd">        :rtype: None</span>
 <span class="sd">        """</span>
+        <span class="n">eng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'using engine </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">eng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
+
+            <span class="c1"># start iteration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP-NG file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># start engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
+
+        <span class="c1"># start iteration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[EngineBase]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Settle which extraction engine will actually run.</span>
+
+<span class="sd">        An engine that is unknown, not installed, or rules itself out via</span>
+<span class="sd">        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">        is replaced by the default one, and :attr:`self._exnam</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._exnam&gt;` is updated to match.</span>
+<span class="sd">        :meth:`__init__` calls this before choosing the output format, so that</span>
+<span class="sd">        the choice reflects the engine that runs rather than the one requested.</span>
+
+<span class="sd">        Calling it again is silent: a fallback has already set the name to</span>
+<span class="sd">        ``'default'``, and an engine that passed the checks passes them again.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not</span>
+<span class="sd">                available: its dependency is not installed, its</span>
+<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">                rules it out, or the supplied engine is unknown.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The engine class to run, or :data:`None` for the default engine,</span>
+<span class="sd">            which :meth:`run` picks from the input's magic number.</span>
+
+<span class="sd">        """</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'requested extraction engine: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__engine__</span><span class="p">:</span>  <span class="c1"># check if engine is supported</span>
@@ -1319,14 +1371,7 @@
                      <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_test</span><span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'using engine </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">eng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
-
-                <span class="c1"># start iteration</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span>
-                <span class="k">return</span>
+                <span class="k">return</span> <span class="n">eng</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># ``import_test`` has already warned that the package is absent;</span>
                 <span class="c1"># warning again here would report one problem twice.</span>
@@ -1336,23 +1381,7 @@
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s1">; '</span>
                  <span class="s1">'using default engine instead'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'magic number </span><span class="si">%r</span><span class="s1"> identifies a PCAP-NG file'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'EngineBase[_P]'</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-
-        <span class="c1"># start engine</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
-
-        <span class="c1"># start iteration</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
-
+        <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Extractor.import_test">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.import_test">[docs]</a>
@@ -1700,6 +1729,12 @@
 <span class="sd">                  one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</span>
 <span class="sd">                * If output file format is not supported.</span>
 
+<span class="sd">                In each case the engine is the one that will actually run: a</span>
+<span class="sd">                requested engine that is unavailable falls back to the default</span>
+<span class="sd">                engine first, which supports PCAP output.</span>
+
+<span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the requested extraction</span>
+<span class="sd">                engine is not available, c.f. :meth:`run`.</span>
 <span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
 <span class="sd">                requested while the extraction engine is PyShark.</span>
 
@@ -1711,14 +1746,20 @@
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'tree'</span>
 
+        <span class="c1"># NOTE: the engine is settled first, because the format checks below and</span>
+        <span class="c1"># in the trace settings depend on which engine *runs*: an unavailable</span>
+        <span class="c1"># one falls back to the default engine, which writes PCAP perfectly well.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="p">(</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
+
         <span class="c1"># NOTE: the third-party engines' adapters hand the output writer each</span>
         <span class="c1"># frame as a plain :obj:`dict` built by ``packet2dict``, which carries</span>
         <span class="c1"># neither the frame's octets nor its record header, so there is nothing</span>
         <span class="c1"># for the PCAP writer to write. The flow tracer has the same limitation,</span>
         <span class="c1"># and is given the same replacement below.</span>
-        <span class="k">if</span> <span class="p">((</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">)):</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
                  <span class="s2">"using 'format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
 
@@ -1768,7 +1809,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="s1">'null'</span>                              <span class="c1"># extract til protocol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>       <span class="c1"># extract til layer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="p">(</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>                   <span class="c1"># caller supplied context</span>
 
         <span class="k">if</span> <span class="n">reassembly</span><span class="p">:</span>
