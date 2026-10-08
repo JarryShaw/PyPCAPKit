@@ -75,7 +75,9 @@ tier and runs on a fresh checkout with nothing generated.
 from __future__ import annotations
 
 import os
+import pathlib
 import struct
+import sys
 import tempfile
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -84,6 +86,14 @@ if TYPE_CHECKING:
 
 __all__ = ['cases', 'probe', 'outcomes', 'Case', 'Outcome', 'Family', 'FAMILIES',
           'KNOWN_DEGRADED', 'code_name']
+
+#: Repository root, i.e. the grandparent of the directory holding this file.
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+# Resolve pcapkit from this tree rather than from the install -- see
+# make_samples.py (#1343).
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 #: Fixed capture start time, kept for parity with :mod:`examples.generators.options`
 #: even though nothing here is written to disk.

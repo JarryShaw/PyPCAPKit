@@ -117,14 +117,18 @@ the drop.
 """
 from __future__ import annotations
 
+import importlib
 import pathlib
 import re
 import unittest
 
-from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
-from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
-from pcapkit.corekit.module import NULL, NullType
-from pcapkit.protocols.protocol import ABSENT, AbsentType
+from tests._support import reimport_once_per_class
+
+# ``pcapkit`` is deliberately not imported at module load. GitHub issue #1332: the
+# plain-unittest ordering legs leave a freshly re-imported ``pcapkit`` in
+# ``sys.modules``, so a sentinel bound here would be the *old* import's object and
+# every ``assertIs`` against the canonical one would fail. The sentinels are read
+# through :func:`_sentinels` after :func:`~tests._support.reimport_once_per_class`.
 
 #: Repository root, for the two tests that read a file rather than import it.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -134,8 +138,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: below used to name a different module here (``pcapkit.corekit.module``,
 #: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
 #: ``pcapkit.protocols.protocol`` respectively); all four now report this one.
-import pcapkit.corekit.sentinels as sentinels
-
 CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
@@ -145,12 +147,7 @@ CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 #: All four now share :data:`CANONICAL_MODULE` as their defining module, which is
 #: why a per-entry module column is no longer part of this tuple -- see
 #: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
-SENTINELS = (
-    ('NULL', NULL, NullType),
-    ('NO_VALUE', NO_VALUE, NoValueType),
-    ('NO_DEFAULT', NO_DEFAULT, NoDefaultType),
-    ('ABSENT', ABSENT, AbsentType),
-)
+#: Built by :func:`_sentinels` from the live import, not at module load.
 
 #: The public three of :data:`SENTINELS`, as ``(module, object name, type name)``.
 #: ``ABSENT`` is absent from it deliberately: it is private, so it is exported
@@ -161,6 +158,27 @@ PUBLIC_SENTINELS = (
     ('pcapkit.corekit.fields.field', 'NO_VALUE', 'NoValueType'),
     ('pcapkit.corekit.enum', 'NO_DEFAULT', 'NoDefaultType'),
 )
+
+
+def _sentinels() -> 'tuple[tuple[str, object, type], ...]':
+    """:data:`SENTINELS`, read from the ``pcapkit`` import that is live now."""
+    enum = importlib.import_module('pcapkit.corekit.enum')
+    field = importlib.import_module('pcapkit.corekit.fields.field')
+    module = importlib.import_module('pcapkit.corekit.module')
+    protocol = importlib.import_module('pcapkit.protocols.protocol')
+    return (
+        ('NULL', module.NULL, module.NullType),
+        ('NO_VALUE', field.NO_VALUE, field.NoValueType),
+        ('NO_DEFAULT', enum.NO_DEFAULT, enum.NoDefaultType),
+        ('ABSENT', protocol.ABSENT, protocol.AbsentType),
+    )
+
+
+class _ReimportCase(unittest.TestCase):
+    """Base: give each test class one fresh ``pcapkit`` import (GitHub issue #1332)."""
+
+    def setUp(self) -> 'None':
+        reimport_once_per_class(self)
 
 
 def _expected_type_name(instance_name: 'str') -> 'str':
@@ -214,7 +232,7 @@ def _sentinel_section() -> 'str':
     return path.read_text(encoding='utf-8')
 
 
-class SentinelExportTests(unittest.TestCase):
+class SentinelExportTests(_ReimportCase):
     """``__all__`` names the object and not the type, per module."""
 
     def test_module_exports_the_object_and_not_the_type(self) -> 'None':
@@ -279,15 +297,14 @@ class SentinelExportTests(unittest.TestCase):
         test above and break every ``is`` check the sentinel exists for.
 
         """
+        canonical = importlib.import_module(CANONICAL_MODULE)
         for module, obj, _ in PUBLIC_SENTINELS:
             namespace = _star_import(module)
             with self.subTest(module=module):
-                # Matched on the instance name alone: every entry in ``SENTINELS``
-                # now shares :data:`CANONICAL_MODULE`, so a ``where == module``
-                # filter against the *shim* location would no longer distinguish
-                # them -- the instance names themselves already do.
-                expected = next(instance for name, instance, _ in SENTINELS if name == obj)
-                self.assertIs(namespace[obj], expected)
+                # Taken from the defining module, never from the shim being star-imported:
+                # both sides of the comparison would otherwise read the same shim attribute
+                # and the check could not fail if a shim defined its own object.
+                self.assertIs(namespace[obj], getattr(canonical, obj))
 
     def test_every_sentinel_type_is_still_importable_by_name(self) -> 'None':
         """The exact extent of the breaking change: ``import *`` narrows, nothing else.
@@ -297,7 +314,7 @@ class SentinelExportTests(unittest.TestCase):
         relies on that -- this module's own imports are the demonstration.
 
         """
-        for name, instance, type_ in SENTINELS:
+        for name, instance, type_ in _sentinels():
             with self.subTest(sentinel=name):
                 self.assertIs(type(instance), type_)
                 self.assertEqual(type_.__module__, CANONICAL_MODULE)
@@ -323,7 +340,7 @@ class SentinelExportTests(unittest.TestCase):
         self.assertNotIn('ABSENT', _star_import('pcapkit.protocols.protocol'))
 
 
-class SentinelPopulationTests(unittest.TestCase):
+class SentinelPopulationTests(_ReimportCase):
     """There are four, they follow the naming rule, and the docs say so."""
 
     def test_every_sentinel_follows_the_naming_convention(self) -> 'None':
@@ -332,7 +349,7 @@ class SentinelPopulationTests(unittest.TestCase):
         The house convention set under GitHub issue #857, kept uniform so that a
         future maintainer adding a sentinel can derive the type's name mechanically.
         """
-        for name, _, type_ in SENTINELS:
+        for name, _, type_ in _sentinels():
             with self.subTest(sentinel=name):
                 self.assertEqual(type_.__name__, _expected_type_name(name))
 
@@ -363,7 +380,7 @@ class SentinelPopulationTests(unittest.TestCase):
 
         """
         pattern = re.compile(r'^[A-Z][A-Z0-9_]*$')
-        for name, _, _ in SENTINELS:
+        for name, _, _ in _sentinels():
             with self.subTest(sentinel=name):
                 self.assertRegex(name, pattern)
 
@@ -380,7 +397,7 @@ class SentinelPopulationTests(unittest.TestCase):
         """
         section = _sentinel_section()
 
-        for name, _, type_ in SENTINELS:
+        for name, _, type_ in _sentinels():
             with self.subTest(sentinel=name):
                 self.assertIn(f'``{name}``', section)
                 self.assertIn(f'``{type_.__name__}``', section)
@@ -428,7 +445,7 @@ class SentinelPopulationTests(unittest.TestCase):
 
         # The ruling itself, against the module it governs rather than against prose:
         # every public sentinel's instance is exported and its type is not.
-        exported = set(sentinels.__all__)
+        exported = set(importlib.import_module(CANONICAL_MODULE).__all__)
         for _, instance_name, type_name in PUBLIC_SENTINELS:
             with self.subTest(sentinel=instance_name):
                 self.assertIn(instance_name, exported,
@@ -466,10 +483,10 @@ class SentinelPopulationTests(unittest.TestCase):
         table = table[:table.index('\n\n', table.index('- Defined in'))]
 
         rows = re.findall(r'^   \* - (\S+)$', table, re.MULTILINE)
-        self.assertEqual(rows, ['Instance'] + [f'``{name}``' for name, _, _ in SENTINELS])
+        self.assertEqual(rows, ['Instance'] + [f'``{name}``' for name, _, _ in _sentinels()])
 
 
-class SentinelBehaviourTests(unittest.TestCase):
+class SentinelBehaviourTests(_ReimportCase):
     """The per-sentinel differences
     :file:`docs/source/contributing/conventions/sentinel-convention.rst`
     documents.
@@ -482,7 +499,8 @@ class SentinelBehaviourTests(unittest.TestCase):
 
     def test_the_absent_value_sentinels_are_falsy(self) -> 'None':
         """``NULL``, ``NO_VALUE`` and ``ABSENT`` each stand for an absent value."""
-        for sentinel in (NULL, NO_VALUE, ABSENT):
+        live = {name: obj for name, obj, _ in _sentinels()}
+        for sentinel in (live['NULL'], live['NO_VALUE'], live['ABSENT']):
             with self.subTest(sentinel=repr(sentinel)):
                 self.assertFalse(sentinel)
 
@@ -494,7 +512,7 @@ class SentinelBehaviourTests(unittest.TestCase):
         prevent.
 
         """
-        self.assertTrue(NO_DEFAULT)
+        self.assertTrue(_sentinels()[2][1])
 
     def test_the_private_sentinel_reprs_as_its_own_name(self) -> 'None':
         """``<absent>``, not ``<object object at 0x...>``.
@@ -504,12 +522,14 @@ class SentinelBehaviourTests(unittest.TestCase):
         does not.
 
         """
-        self.assertEqual(repr(ABSENT), '<absent>')
-        self.assertNotIn('0x', repr(ABSENT))
-        self.assertNotIn('__repr__', vars(NoValueType))
+        live = _sentinels()
+        absent, no_value_type = live[3][1], live[1][2]
+        self.assertEqual(repr(absent), '<absent>')
+        self.assertNotIn('0x', repr(absent))
+        self.assertNotIn('__repr__', vars(no_value_type))
 
 
-class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
+class NoValueIsTheDocumentedFieldDefaultTests(_ReimportCase):
     """Why the ruling reaches ``NO_VALUE`` at all.
 
     ``NO_VALUE``'s own comment in :mod:`pcapkit.corekit.fields.field` reads *"Default
@@ -530,6 +550,7 @@ class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
 
     def test_an_undefaulted_field_reports_the_sentinel(self) -> 'None':
         """``is``, not ``==`` -- the whole point of a sentinel."""
+        from pcapkit.corekit.fields.field import NO_VALUE
         from pcapkit.corekit.fields.strings import BytesField
 
         self.assertIs(BytesField(length=4).default, NO_VALUE)
@@ -542,6 +563,7 @@ class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
         exactly the confusion the sentinel exists to prevent.
 
         """
+        from pcapkit.corekit.fields.field import NO_VALUE
         from pcapkit.corekit.fields.strings import BytesField
 
         field = BytesField(length=4)
