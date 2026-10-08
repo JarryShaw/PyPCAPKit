@@ -451,6 +451,10 @@ jobs:
     timeout-minutes: 30
     env:
       ENGINE: ${{ matrix.engine }}
+      # Read by the apt plan step; see the note above it.
+      APT_PACKAGES: ${{ matrix.engine == 'PyShark' && 'tshark' || matrix.engine == 'PCAP_CT' && 'libpcap0.8' || matrix.engine == 'PyPCAP' && 'build-essential libpcap-dev' || '' }}
+      APT_SET: ${{ matrix.engine }}
+      APT_CACHE_SAVE: 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -497,37 +501,102 @@ jobs:
       # compile failure against the 3.12+ C API rather than merely "no
       # compiler was present to try".
       #
-      # `timeout-minutes` bounds this step because an apt stall in it used to
+      # `timeout-minutes` bounds the apt steps because an apt stall used to
       # eat the whole job: per #974, a PCAP_CT cell fetched its InRelease
       # metadata and then went silent for 29m52s until the job's own 30-minute
       # cap killed it, which reports `cancelled` and so fails `Required checks
-      # passed` -- an unrelated mirror turning a green PR red. Stalls in
-      # `apt-get update` have had the same all-or-nothing shape.
+      # passed` -- an unrelated mirror turning a green PR red. Deliberately
+      # *not* `-o Acquire::Retries=3 -o Acquire::http::Timeout=30`, which #974
+      # proposed: both are noble's defaults already (apt 2.8.3:
+      # `Acquire::Retries` 3 in apt-pkg/acquire-item.cc, `TimeOut(30)` in
+      # methods/basehttp.cc), and that per-`select()` timeout never fires on a
+      # mirror that trickles. Hence `timeout(1)` around each apt command: 60s
+      # update, 180s install (#1306), two attempts, 480s inside the 10-minute
+      # cap, which stays the hang detector. `dpkg --configure -a` precedes the
+      # retry.
       #
-      # 10 minutes, with one retry inside it. These are whole-step wall times,
-      # both attempts included, so they bound no single attempt. On 2026-10-07
-      # this step failed at 141s (job 112943258387, #1306, PyShark,
-      # 18:17:51Z-18:20:12Z) and the parity one at 155s (job 112948578234,
-      # #1307, 18:31:41Z-18:34:16Z, 27.9 MB of archives with
-      # `azure.archive.ubuntu.com` logging `Ign:` every 30s). Across the runs
-      # sampled, failures ran 91s to 194s, most at 187-194s: the band the old
-      # 45s/90s bounds cut off. So 60s update, 180s install (~27 MB at >=0.15
-      # MB/s), two attempts, 480s worst case -- only 120s under the 600s step
-      # cap, and steps past 200s are on record, so the cap rather than that
-      # margin is the hang detector. `dpkg --configure -a` precedes the retry.
+      # #1432: a slow mirror, not a dead one, kept failing it. On 2026-10-08
+      # `azure.archive.ubuntu.com` served ~75 kB/s (4.2 MB in 57s ahead of the
+      # 23.7 MB libwireshark17t64) while its indexes came at 4-10 MB/s, so
+      # `timeout 180` killed *both* attempts, three times (jobs 113323976331,
+      # 113470461084, 113485425256). tshark's 27.9 MB at that rate is ~380s,
+      # which no bound leaving two attempts inside the cap reaches, and the
+      # retry went back to the same mirror. So, around the unchanged install:
       #
-      # Deliberately *not* passing `-o Acquire::Retries=3 -o
-      # Acquire::http::Timeout=30`, which #974 proposed: both are already the
-      # defaults in noble's apt (2.8.3: `Acquire::Retries` 3 in
-      # apt-pkg/acquire-item.cc, `TimeOut(30)` in methods/basehttp.cc), so they
-      # would change nothing while reading like protection. Their being in
-      # force is also why the #974 stall ran to 29m52s: whatever hung is not
-      # something apt's per-`select()` data timeout governs, which is why the
-      # bound here is `timeout(1)` around the whole command.
+      # * **The .deb files are cached** (`actions/cache`, which the read-only
+      #   token suffices for), so a warm run downloads nothing. The plan step
+      #   runs `apt-get update`, then keys on a digest of the `Inst` lines of
+      #   `apt-get install -s` -- every package and exact version this image
+      #   still lacks -- plus ImageOS, arch and APT_SET. Any new version
+      #   changes the key, so a stale set is never an exact hit. `restore-keys`
+      #   falls back to the newest older set for the same image and APT_SET;
+      #   apt uses a cached file only when its size and hash match the signed
+      #   index and downloads the rest, and only the versions now installed are
+      #   collected into the new entry, by one job per key (APT_CACHE_SAVE).
+      #   ImageVersion is left out: the digest already moves when the image's
+      #   installed set does, and the weekly image rollout would otherwise force
+      #   a cold miss.
+      # * **On a miss, attempt 2 goes to another mirror.** apt fails over
+      #   within /etc/apt/apt-mirrors.txt (the image's `mirror+file:` list:
+      #   azure, then archive.ubuntu.com, then security.ubuntu.com) only on an
+      #   error, never on slowness, so azure is dropped from it before the
+      #   retry. apt keeps the killed attempt's partial file and resumes it
+      #   with `Range`/`If-Range`.
+      #
+      # A cache only supplies bytes apt verifies, and the install runs in full
+      # on a hit, so a real install failure still fails; a cache-service error
+      # is only a warning from actions/cache. The 180s bound is unchanged: with
+      # the above it binds only on a cold miss, and TestAptRetry in
+      # tests/project/test_unit_tests_queue.py pins it. APT_PACKAGES (the job's
+      # env, read by the plan step) must name what the install step installs,
+      # or the key describes the wrong set -- a lost cache, not a wrong install.
+      #
+      # `pypcap-parity` runs the same steps; every body but the install's is
+      # byte-identical to these.
+      - name: Plan this engine's system packages
+        id: apt-plan
+        if: env.APT_PACKAGES != ''
+        timeout-minutes: 4
+        run: |
+          set -eu
+          for attempt in 1 2; do
+            if sudo timeout 60 apt-get update; then
+              break
+            fi
+            echo "::warning title=apt-get update attempt $attempt of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
+            [ "$attempt" = 1 ] || exit 1
+          done
+          # shellcheck disable=SC2086
+          sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
+          plan=$(printf '%s\n' "$sim" | grep '^Inst ' | sort || true)
+          printf 'To download:\n%s\n' "${plan:-(nothing)}"
+          if [ -n "$plan" ]; then
+            prefix="apt-debs-${ImageOS:-unknown}-${RUNNER_ARCH}-${APT_SET}-"
+            echo "restore-prefix=$prefix" >> "$GITHUB_OUTPUT"
+            echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore this engine's cached .deb files
+        id: apt-cache
+        if: steps.apt-plan.outputs.key != ''
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/apt-debs/*.deb
+          key: ${{ steps.apt-plan.outputs.key }}
+          restore-keys: ${{ steps.apt-plan.outputs.restore-prefix }}
+
+      - name: Seed apt's archive with this engine's cached .deb files
+        if: steps.apt-cache.outputs.cache-matched-key != ''
+        run: |
+          set -eu
+          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
+          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
+
       - name: Install this engine's system packages
         timeout-minutes: 10
         run: |
           set -eu
+          mirrors=/etc/apt/apt-mirrors.txt
           apt_install() {
             for attempt in 1 2; do
               if sudo timeout 60 apt-get update \
@@ -536,6 +605,11 @@ jobs:
               fi
               echo "::warning title=apt attempt $attempt of 2 failed (${ENGINE})::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
               sudo dpkg --configure -a || true
+              if [ "$attempt" = 1 ] && [ -f "$mirrors" ] \
+                 && grep -v 'azure\.archive\.ubuntu\.com' "$mirrors" | grep -q '^http' \
+                 && sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"; then
+                echo "::warning title=apt retry on a fallback mirror (${ENGINE})::Retrying against $(head -n 1 "$mirrors" | cut -f 1) instead of azure.archive.ubuntu.com, resuming the partial download."
+              fi
             done
             return 1
           }
@@ -547,6 +621,36 @@ jobs:
           elif [ "$ENGINE" = "PyPCAP" ]; then
             apt_install build-essential libpcap-dev
           fi
+
+      - name: Collect this engine's installed .deb files for the cache
+        if: >-
+          env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
+          && steps.apt-cache.outputs.cache-hit != 'true'
+        run: |
+          set -eu
+          out="$RUNNER_TEMP/apt-debs"
+          rm -rf "$out"
+          mkdir -p "$out"
+          for deb in /var/cache/apt/archives/*.deb; do
+            [ -e "$deb" ] || continue
+            pkg=$(dpkg-deb -f "$deb" Package)
+            ver=$(dpkg-deb -f "$deb" Version)
+            arch=$(dpkg-deb -f "$deb" Architecture)
+            # shellcheck disable=SC2016
+            if [ "$(dpkg-query -W -f '${Version}' "$pkg:$arch" 2>/dev/null || true)" = "$ver" ]; then
+              cp "$deb" "$out/"
+            fi
+          done
+          echo "Collected $(find "$out" -name '*.deb' | wc -l) .deb files"
+
+      - name: Save this engine's .deb files to the cache
+        if: >-
+          env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
+          && steps.apt-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/apt-debs/*.deb
+          key: ${{ steps.apt-plan.outputs.key }}
 
       # The per-cell script: one (Python version, engine) cell, start to
       # finish, in a venv of its own. Written to a file so each cell runs as a
@@ -752,6 +856,13 @@ jobs:
     needs: [changes]
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      # Read by the apt plan step; see `engine-tests`'s note on it.
+      APT_PACKAGES: build-essential libpcap-dev tshark
+      APT_SET: pypcap-parity
+      # Both cells install the same set under the same key; only one saves it,
+      # or the other's save fails with `Unable to reserve cache`.
+      APT_CACHE_SAVE: ${{ matrix.python-version == '3.10' }}
     strategy:
       fail-fast: false
       matrix:
@@ -785,17 +896,59 @@ jobs:
       # postinst otherwise blocks on the "allow non-superusers to capture
       # packets" prompt.
       #
-      # `timeout-minutes` and the retry for the reason given on `engine-tests`'s
-      # own install step -- see the note there, which this step shares
-      # wholesale, including the 10-minute cap (under this job's 45) and the
-      # 60s/180s bounds. It was not the leg that stalled in #974, but it has
-      # since failed the same way, at 155s, on 2026-10-07: #1307's job
-      # 112948578234, the second instance cited in that note.
+      # The apt steps -- plan, restore, seed, install, collect, save -- are
+      # `engine-tests`'s, for the reasons in the note above its plan step:
+      # bounds, retry, .deb cache and fallback mirror alike, with APT_SET
+      # keeping this job's cache entries apart. This job was not the leg that
+      # stalled in #974, but it has since failed the same way: at 155s on
+      # 2026-10-07 (#1307's job 112948578234), and on 2026-10-08 with
+      # `timeout 180` killing both attempts (#1432, jobs 113323976331 and
+      # 113485425256).
+      - name: Plan the system packages
+        id: apt-plan
+        if: env.APT_PACKAGES != ''
+        timeout-minutes: 4
+        run: |
+          set -eu
+          for attempt in 1 2; do
+            if sudo timeout 60 apt-get update; then
+              break
+            fi
+            echo "::warning title=apt-get update attempt $attempt of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
+            [ "$attempt" = 1 ] || exit 1
+          done
+          # shellcheck disable=SC2086
+          sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
+          plan=$(printf '%s\n' "$sim" | grep '^Inst ' | sort || true)
+          printf 'To download:\n%s\n' "${plan:-(nothing)}"
+          if [ -n "$plan" ]; then
+            prefix="apt-debs-${ImageOS:-unknown}-${RUNNER_ARCH}-${APT_SET}-"
+            echo "restore-prefix=$prefix" >> "$GITHUB_OUTPUT"
+            echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore the cached .deb files
+        id: apt-cache
+        if: steps.apt-plan.outputs.key != ''
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/apt-debs/*.deb
+          key: ${{ steps.apt-plan.outputs.key }}
+          restore-keys: ${{ steps.apt-plan.outputs.restore-prefix }}
+
+      - name: Seed apt's archive with the cached .deb files
+        if: steps.apt-cache.outputs.cache-matched-key != ''
+        run: |
+          set -eu
+          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
+          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
+
       - name: Install libpcap headers, a C toolchain, and tshark
         timeout-minutes: 10
         run: |
           set -eu
           echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
+          mirrors=/etc/apt/apt-mirrors.txt
           for attempt in 1 2; do
             if sudo timeout 60 apt-get update \
                && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends build-essential libpcap-dev tshark; then
@@ -803,8 +956,43 @@ jobs:
             fi
             echo "::warning title=apt attempt $attempt of 2 failed::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
             sudo dpkg --configure -a || true
+            if [ "$attempt" = 1 ] && [ -f "$mirrors" ] \
+               && grep -v 'azure\.archive\.ubuntu\.com' "$mirrors" | grep -q '^http' \
+               && sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"; then
+              echo "::warning title=apt retry on a fallback mirror::Retrying against $(head -n 1 "$mirrors" | cut -f 1) instead of azure.archive.ubuntu.com, resuming the partial download."
+            fi
           done
           exit 1
+
+      - name: Collect the installed .deb files for the cache
+        if: >-
+          env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
+          && steps.apt-cache.outputs.cache-hit != 'true'
+        run: |
+          set -eu
+          out="$RUNNER_TEMP/apt-debs"
+          rm -rf "$out"
+          mkdir -p "$out"
+          for deb in /var/cache/apt/archives/*.deb; do
+            [ -e "$deb" ] || continue
+            pkg=$(dpkg-deb -f "$deb" Package)
+            ver=$(dpkg-deb -f "$deb" Version)
+            arch=$(dpkg-deb -f "$deb" Architecture)
+            # shellcheck disable=SC2016
+            if [ "$(dpkg-query -W -f '${Version}' "$pkg:$arch" 2>/dev/null || true)" = "$ver" ]; then
+              cp "$deb" "$out/"
+            fi
+          done
+          echo "Collected $(find "$out" -name '*.deb' | wc -l) .deb files"
+
+      - name: Save the .deb files to the cache
+        if: >-
+          env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
+          && steps.apt-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/apt-debs/*.deb
+          key: ${{ steps.apt-plan.outputs.key }}
 
       - name: Install package, test and generator dependencies
         run: |
