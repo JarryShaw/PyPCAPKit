@@ -50,21 +50,44 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
     Note:
         There are two coordinate systems in play here, and keeping them apart
-        matters. The :term:`hole descriptor list <reasm.tcp.buffer>` of
-        :rfc:`815` is kept in **absolute TCP sequence numbers**, inclusive of
-        both bounds, because a hole belongs to the connection's sequence space
-        for that direction and not to any one payload buffer: the list is held
-        once per buffer ID, while each acknowledgement number gets a payload
-        buffer of its own with an initial sequence number of its own, and that
-        initial sequence number is revised whenever a segment turns up below
-        the data already buffered. A payload buffer, on the other hand, is
-        indexed from zero, such that
+        matters. Sequence numbers -- in the :term:`hole descriptor list
+        <reasm.tcp.buffer>` of :rfc:`815`, and in each payload buffer's own
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` and
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.conflict` lists
+        -- are kept **unwrapped**, inclusive of both bounds: every arriving
+        sequence number is read modulo ``2 ** 32`` relative to the data
+        already buffered under its buffer ID, per :rfc:`9293#section-3.4`, and
+        placed on one unbounded integer line. A connection that crosses
+        ``2 ** 32`` therefore continues at ``2 ** 32`` rather than back at
+        zero. A payload buffer, on the other hand, is indexed from zero, such
+        that
         :attr:`buffer.raw[n] <pcapkit.foundation.reassembly.data.tcp.Fragment.raw>`
         holds the octet with sequence number
         :attr:`buffer.isn <pcapkit.foundation.reassembly.data.tcp.Fragment.isn>`
-        ``+ n``. :meth:`submit` is therefore the one place that converts
-        between the two, subtracting that buffer's initial sequence number from
-        each hole bound.
+        ``+ n``. :meth:`submit` converts between the two, subtracting that
+        buffer's initial sequence number from each gap bound, and reports
+        conflict ranges reduced back to modulo ``2 ** 32``.
+
+        The hole descriptor list is held once per buffer ID, across every
+        acknowledgement number's payload buffer, so it describes the *stream*
+        rather than any one payload buffer: it decides when a stream whose FIN
+        has been seen is whole and may be submitted. Whether each payload
+        buffer is complete is a question about that buffer alone, answered
+        from its own
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` list.
+
+    Warning:
+        **Limitation.** Without the handshake the start of a stream is unknown,
+        so a FIN is taken to complete the stream once every octet from the
+        lowest one seen so far up to the FIN has arrived. Data that arrives
+        later but lies *below* everything seen before that FIN therefore opens
+        a buffer of its own, and the first buffer has already been reported
+        :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+        although the stream was not: ``[seq 1000 A*5, FIN 1005, seq 990 B*10]``
+        gives ``B*10`` and ``A*5`` as two datagrams. This applies only to a
+        buffer begun without a SYN: once the SYN is captured, the stream's
+        start is the SYN's own sequence number, and a FIN completes the
+        stream only when every octet from there up to the FIN has arrived.
 
     """
     if TYPE_CHECKING:
@@ -95,6 +118,34 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     #: So the mechanism is available and the default is off: pass ``timeout`` to
     #: ask for one, e.g. ``2 * 120`` for 2·MSL if that is the policy wanted.
     __timeout__ = math.inf
+
+    #: int: Widest gap, in octets, that merging a segment into the payload
+    #: buffer it is read against may zero-fill: 16 MiB. The gap is measured on
+    #: whichever side the segment lands, from the buffer's end to the
+    #: segment's start, or from the segment's end to the buffer's start.
+    #:
+    #: A segment can only legitimately open a gap as wide as the data in flight,
+    #: which the receive window bounds. :rfc:`7323` allows windows up to
+    #: ``2 ** 30``, but zero-filling a gap that wide costs 1 GiB, and real
+    #: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling
+    #: is 6 MiB -- so 16 MiB clears them with room to spare. A segment that
+    #: would open a wider gap is not padded to; the buffer held so far is
+    #: submitted and a fresh one opened for the segment instead. What that
+    #: means depends on whether the buffer's SYN was captured:
+    #:
+    #: * **No SYN** -- the segment is taken to start a new stream on a reused
+    #:   4-tuple, and the two buffers are reported independently.
+    #: * **SYN captured** -- the SYN proves both are the same stream with the
+    #:   range in between lost, so that range is recorded in the
+    #:   :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` of the
+    #:   payload buffer the segment was read against and of the new one, and
+    #:   both are reported
+    #:   :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`
+    #:   (in strict mode, as a single run each). The new buffer keeps the
+    #:   SYN's header and counts as having seen it.
+    #:
+    #: Override in a subclass to change the bound.
+    __window__ = 1 << 24
 
     ##########################################################################
     # Methods.
@@ -138,20 +189,59 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID)
             )
 
+        # Read the sequence number modulo 2**32 relative to the end of the data
+        # it most plausibly continues -- this ACK's own payload buffer, or else
+        # the most recently opened one -- per :rfc:`9293#section-3.4`. Plain
+        # integer comparison reads a stream crossing 2**32 as a gap of about
+        # 4 GiB. A segment landing farther than ``__window__`` outside that
+        # buffer starts a new stream instead -- see ``__window__``.
+        SHIFT = 0
+        HDR = info.header if SYN else b''  # header of the buffer opened below, if any
+        ANCHORED = SYN                     # whether that buffer's stream start is known
+        MISSING = []  # type: list[tuple[int, int]] # range a split left out of it
+        if BUFID in self._buffer:
+            buffer = self._buffer[BUFID]
+            fragment = buffer.ack.get(ACK)
+            if fragment is None:
+                fragment = next(reversed(buffer.ack.values()))
+            END = fragment.isn + fragment.len
+            UNWRAPPED = self._unwrap(PSN, END)
+            # the zero-filled gap merging this segment would open, either side
+            if max(UNWRAPPED - END, fragment.isn - (UNWRAPPED + info.len)) > self.__window__:
+                old = self._buffer.pop(BUFID)
+                if self._anchored(old):
+                    # The SYN proves this is still the same stream, with the
+                    # range in between lost. Both halves record that range as
+                    # missing, so each is reported PARTIAL rather than COMPLETE.
+                    MISSING.append((END, UNWRAPPED - 1) if UNWRAPPED > END
+                                   else (UNWRAPPED + info.len, fragment.isn - 1))
+                    fragment.gap.extend(MISSING)
+                    HDR, ANCHORED, PSN = old.hdr, True, UNWRAPPED
+                self._dtgram.extend(self.submit(old, bufid=BUFID))
+            else:
+                SHIFT = UNWRAPPED - PSN
+                PSN = UNWRAPPED
+
         # initialise buffer with BUFID & ACK
         if BUFID not in self._buffer:
+            hdl = [
+                HoleDescriptor(
+                    # everything from the octet after this segment onwards is
+                    # still missing
+                    first=PSN + info.len,
+                    last=sys.maxsize,
+                ),
+            ]
+            if not ANCHORED:
+                # Without the handshake the stream's start is unknown, so what
+                # lies below this segment is open too. The sentinel lower bound
+                # marks this one hole as "before the capture began" rather than
+                # as data missing from the stream; it is what lets a segment
+                # arriving *below* this one leave a real hole between the two.
+                hdl.insert(0, HoleDescriptor(first=-sys.maxsize, last=PSN - 1))
             self._buffer[BUFID] = Buffer(
-                hdl=[
-                    HoleDescriptor(
-                        # everything from the octet after this segment onwards
-                        # is still missing -- in absolute sequence numbers, so
-                        # that the bound stays valid for every payload buffer
-                        # under this buffer ID
-                        first=PSN + info.len,
-                        last=sys.maxsize,
-                    ),
-                ],
-                hdr=info.header if SYN else b'',
+                hdl=hdl,
+                hdr=HDR,
                 ack={
                     ACK: Fragment(
                         ind=[
@@ -160,8 +250,9 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         isn=PSN,
                         len=info.len,
                         raw=info.payload,
-                        # this segment's own payload is, by definition, all real
-                        gap=[],
+                        # this segment's own payload is, by definition, all
+                        # real; a split stream also records what it left out
+                        gap=MISSING,
                         conflict=[],
                     ),
                 },
@@ -169,8 +260,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             )
         else:
             # initialise buffer with ACK
-            if ACK not in self._buffer[BUFID].ack:
-                self._buffer[BUFID].ack[ACK] = Fragment(
+            if ACK not in buffer.ack:
+                buffer.ack[ACK] = Fragment(
                     ind=[
                         info.num,
                     ],
@@ -183,13 +274,13 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             else:
                 # put header into header buffer
                 if SYN:  # pragma: no cover
-                    self._buffer[BUFID].__update__(hdr=info.header)
+                    buffer.__update__(hdr=info.header)
 
                 # append packet index
-                self._buffer[BUFID].ack[ACK].ind.append(info.num)
+                fragment = buffer.ack[ACK]
+                fragment.ind.append(info.num)
 
                 # record fragment payload
-                fragment = self._buffer[BUFID].ack[ACK]
                 if PSN >= fragment.isn:  # if fragment goes after existing payload
                     self._reassemble_append(info, fragment, PSN)
                 else:                    # if fragment exceeds existing payload
@@ -204,13 +295,87 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # into two adjacent holes covering the very same octets, growing
             # the list without bound on a long-lived connection.
             if info.len > 0:
-                self._update_hole_descriptors(info, BUFID, FIN, RST)
+                self._update_hole_descriptors(BUFID, info.first + SHIFT, info.last + SHIFT)
 
-        # when FIN/RST is set, submit buffer of this session
-        if FIN or RST:
+        # A FIN fixes the end of the stream at the sequence number it occupies,
+        # and nothing more: data sent before it may still arrive after it. So
+        # the open-ended hole is cut back to end there, and the buffer is
+        # submitted once every octet below the FIN has arrived -- here, or on
+        # whichever later segment closes the last hole -- or else when the
+        # capture ends.
+        if FIN:
+            self._close_hole_descriptors(BUFID, PSN + info.len)
+
+        # An RST, unlike a FIN, aborts the connection: :rfc:`9293#section-3.10.7.4`
+        # has the receiver flush its segment queues and enter CLOSED, so it
+        # accepts nothing sent before the RST that arrives after it. The buffer
+        # is therefore submitted at once, as the receiver last saw it.
+        if RST or self._stream_whole(BUFID):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID)
             )
+
+    @staticmethod
+    def _unwrap(seq: 'int', ref: 'int') -> 'int':
+        """Place a 32-bit sequence number on the unwrapped line near ``ref``.
+
+        Arguments:
+            seq: sequence number as carried on the wire, i.e. modulo 2**32
+            ref: unwrapped sequence number the segment is expected to be near
+
+        Returns:
+            The integer congruent to ``seq`` modulo 2**32 that lies within
+            2**31 of ``ref``, which is how :rfc:`9293#section-3.4` compares
+            sequence numbers.
+
+        """
+        return ref + (seq - ref + 0x80000000) % 0x100000000 - 0x80000000
+
+    @staticmethod
+    def _anchored(buf: 'Buffer') -> 'bool':
+        """Whether a buffer's stream start is known, i.e. its SYN was captured.
+
+        Arguments:
+            buf: :term:`buffer <reasm.tcp.buffer>` to look at
+
+        Returns:
+            :data:`False` exactly when the hole descriptor list still opens
+            with the sentinel hole that a buffer begun without a SYN carries.
+
+        """
+        return not (buf.hdl and buf.hdl[0].first == -sys.maxsize)
+
+    def _stream_whole(self, BUFID: 'BufferID') -> 'bool':
+        """Whether a stream has seen its FIN and every octet below it.
+
+        Arguments:
+            BUFID: buffer identifier of the stream
+
+        Returns:
+            :data:`True` once a FIN has cut back the open-ended hole and the
+            only hole left, if any, is the sentinel one below the first octet
+            of a capture that missed the handshake.
+
+        """
+        for hole in self._buffer[BUFID].hdl:
+            if hole.first != -sys.maxsize or hole.last == sys.maxsize:
+                return False
+        return True
+
+    def _close_hole_descriptors(self, BUFID: 'BufferID', end: 'int') -> 'None':
+        """Cut the hole descriptor list back to end below a FIN.
+
+        Arguments:
+            BUFID: buffer identifier of the stream
+            end: unwrapped sequence number the FIN occupies, i.e. one past the
+                last octet of the stream
+
+        """
+        HDL = self._buffer[BUFID].hdl
+        HDL[:] = [
+            hole if hole.last < end else HoleDescriptor(first=hole.first, last=end - 1)
+            for hole in HDL if hole.first < end
+        ]
 
     def _reassemble_append(self, info: 'Packet', fragment: 'Fragment', PSN: 'int') -> 'None':
         """Merge a segment that starts at or after the buffered payload's end.
@@ -259,6 +424,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             fragment.conflict.extend(conflicts)
             if info.len > OVERLAP:  # fragment reaches past the buffered end
                 RAW += info.payload[OVERLAP:]
+        self._trim_gaps(GAPS, PSN, PSN + info.len - 1)
         fragment.__update__(
             raw=RAW,       # update payload datagram
             len=len(RAW),  # update payload length
@@ -324,13 +490,13 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             RAW[:OVERLAP] = merged
             fragment.conflict.extend(conflicts)
             RAW = info.payload[:OFFSET] + RAW + info.payload[OFFSET + OVERLAP:]
+        self._trim_gaps(GAPS, PSN, PSN + info.len - 1)
         fragment.__update__(
             raw=RAW,       # update payload datagram
             len=len(RAW),  # update payload length
         )
 
-    def _update_hole_descriptors(self, info: 'Packet', BUFID: 'BufferID',
-                                  FIN: 'bool', RST: 'bool') -> 'None':
+    def _update_hole_descriptors(self, BUFID: 'BufferID', first: 'int', last: 'int') -> 'None':
         """Update the buffer-wide hole descriptor list per :rfc:`815`.
 
         Called only for a segment that carries payload (``info.len > 0``);
@@ -339,35 +505,65 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         adjacent holes covering the very same octets, growing the list
         without bound on a long-lived connection.
 
+        The end of the stream is not settled here: a FIN cuts the open-ended
+        hole back afterwards, in :meth:`_close_hole_descriptors`, whether or
+        not it carries payload.
+
         Arguments:
-            info: :term:`info <reasm.tcp.packet>` dict of the arriving segment
             BUFID: buffer identifier of the session this fragment belongs to
-            FIN: finish flag (termination) of the arriving segment
-            RST: reset connection flag (termination) of the arriving segment
+            first: unwrapped sequence number of the segment's first octet
+            last: unwrapped sequence number of the segment's last octet
 
         """
         HDL = self._buffer[BUFID].hdl                          # HDL alias
-        for (index, hole) in enumerate(HDL):                   # step one
-            if info.first > hole.last:                         # step two
+        new_hdl = []  # type: list[HoleDescriptor]
+        for hole in HDL:                                       # step one
+            if first > hole.last or last < hole.first:         # steps two and three
+                new_hdl.append(hole)
                 continue
-            if info.last < hole.first:                         # step three
-                continue
-            del HDL[index]                                     # step four
-            if info.first > hole.first:                        # step five
-                new_hole = HoleDescriptor(
+            # step four: this hole is (partly) filled and replaced by what of
+            # it survives, on either side of the segment
+            if first > hole.first:                             # step five
+                new_hdl.append(HoleDescriptor(
                     first=hole.first,
-                    last=info.first - 1,
-                )
-                HDL.insert(index, new_hole)
-                index += 1
-            if info.last < hole.last and not FIN and not RST:  # step six
-                new_hole = HoleDescriptor(
-                    first=info.last + 1,
+                    last=first - 1,
+                ))
+            if last < hole.last:                               # step six
+                new_hdl.append(HoleDescriptor(
+                    first=last + 1,
                     last=hole.last
-                )
-                HDL.insert(index, new_hole)
-            break                                              # step seven
-        #self._buffer[BUFID].hdl = HDL                         # update HDL
+                ))
+            # step seven: go on to the next hole, since one segment may span
+            # several of them
+        HDL[:] = new_hdl
+
+    @staticmethod
+    def _trim_gaps(gap: 'list[tuple[int, int]]', first: 'int', last: 'int') -> 'None':
+        """Remove a received range from a fragment's gap list, in place.
+
+        Only an entry lying outside :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`
+        -- the range a split stream left out, see :attr:`TCP.__window__` -- can
+        still overlap a segment once it is merged; :meth:`_merge_overlap` has
+        already closed every entry inside ``raw`` that the segment covers.
+
+        Arguments:
+            gap: the fragment's gap list
+            first: unwrapped sequence number of the segment's first octet
+            last: unwrapped sequence number of the segment's last octet
+
+        """
+        if first > last:
+            return
+        still_gap = []  # type: list[tuple[int, int]]
+        for (lo, hi) in gap:
+            if hi < first or lo > last:
+                still_gap.append((lo, hi))
+                continue
+            if lo < first:
+                still_gap.append((lo, first - 1))
+            if hi > last:
+                still_gap.append((last + 1, hi))
+        gap[:] = still_gap
 
     @staticmethod
     def _merge_overlap(gap: 'list[tuple[int, int]]', old: 'bytes', new: 'bytes',
@@ -466,37 +662,41 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         """
         datagram = []  # type: list[Datagram] # reassembled datagram
-        HDL = buf.hdl                         # hole descriptor list
 
         # check through every buffer with ACK
         for (ack, buffer) in buf.ack.items():
-            # Translate the hole descriptor list, which is kept in absolute
-            # sequence numbers for the whole direction, into offsets into this
-            # payload buffer, which is indexed from its own initial sequence
-            # number. Holes lying wholly outside this buffer -- the open-ended
-            # one past the last octet received, and any belonging to a
-            # different acknowledgement number's data -- drop out here; those
-            # straddling an edge are clipped to it rather than being allowed to
-            # index from the far end of the buffer as a negative bound would.
+            # Translate this payload buffer's own gap list, kept in unwrapped
+            # sequence numbers, into offsets into the buffer, which is indexed
+            # from its own initial sequence number. The buffer-wide hole
+            # descriptor list cannot answer this: it is shared by every
+            # acknowledgement number, so another payload buffer filling a hole
+            # there says nothing about this one, and it never learns of a gap
+            # opened below the first segment to arrive. Entries are clipped to
+            # the buffer rather than being allowed to index from its far end.
             length = len(buffer.raw)
             holes = []  # type: list[tuple[int, int]]
-            for hole in HDL:
-                start = hole.first - buffer.isn       # inclusive lower bound
-                stop = hole.last - buffer.isn + 1     # exclusive upper bound
+            for (first, last) in buffer.gap:
+                start = first - buffer.isn            # inclusive lower bound
+                stop = last - buffer.isn + 1          # exclusive upper bound
                 if stop <= 0 or start >= length:
-                    continue                          # hole misses this buffer
+                    continue                          # gap lies outside the buffer
                 holes.append((max(start, 0), min(stop, length)))
             holes.sort()
+            # reported in sequence space proper, i.e. modulo 2**32
+            conflict = tuple((first & 0xFFFFFFFF, last & 0xFFFFFFFF)
+                             for (first, last) in buffer.conflict)
 
             # How completely this buffer came out, and why it stopped. Derived
             # once per buffer, so the two branches cannot disagree about it.
-            completion = Completion.COMPLETE if not holes else (
+            # Any gap entry counts, including one lying wholly outside ``raw``:
+            # that is the range a split stream left out (see ``__window__``).
+            completion = Completion.COMPLETE if not buffer.gap else (
                 Completion.TIMEOUT if timeout else Completion.PARTIAL
             )
 
             # if this buffer is not implemented
             # go through every hole and extract received payload
-            if holes and self._flag_s:
+            if completion is not Completion.COMPLETE and self._flag_s:
                 data = []  # type: list[bytes]
                 start = 0
                 for (hole_start, hole_stop) in holes:
@@ -519,7 +719,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         header=buf.hdr,
                         payload=tuple(data),
                         packet=None,
-                        conflict=tuple(buffer.conflict),
+                        conflict=conflict,
                     )
                     datagram.append(packet)
 
@@ -545,7 +745,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         header=buf.hdr,
                         payload=bytes(payload),
                         packet=Deferred(self.protocol.analyze, (bufid[1], bufid[3]), bytes(payload)),
-                        conflict=tuple(buffer.conflict),
+                        conflict=conflict,
                     )
                     datagram.append(packet)
 
