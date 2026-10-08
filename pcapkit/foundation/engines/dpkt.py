@@ -168,7 +168,22 @@ class DPKT(EngineBase['DPKTPacket']):
         # fetch DPKT packet
         timestamp, pkt = cast('tuple[float, bytes]', next(reader))
         protocol = self._get_protocol(linktype)
-        packet = protocol(pkt)  # type: DPKTPacket
+        try:
+            packet = protocol(pkt)  # type: DPKTPacket
+        except Exception as exc:  # pylint: disable=broad-except
+            # NOTE: Caught broadly, as :meth:`ProtocolBase.analyze
+            # <pcapkit.protocols.protocol.ProtocolBase.analyze>` does: dpkt raises
+            # more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads
+            # ``frag_off`` from whatever header follows an IPv6 Fragment header,
+            # so a Fragment header followed by ESP or Destination Options raises
+            # :exc:`AttributeError` (:issue:`1351`). The frame is kept as a raw
+            # packet, so one undecodable frame does not end the extraction and
+            # the frame numbering still matches the other engines, which fall
+            # back to a raw payload in the same way.
+            warn(f'Frame {ext._frnum + 1}: dpkt cannot parse the frame '
+                 f'({type(exc).__name__}: {exc}); kept as raw data',
+                 DPKTWarning, stacklevel=stacklevel())
+            packet = self._get_raw_protocol()(pkt)
 
         # DPKT hands the record's timestamp back beside its octets and only the
         # octets become a packet, so the frame would otherwise not know when it was
@@ -251,18 +266,23 @@ class DPKT(EngineBase['DPKTPacket']):
         else:
             warn('unrecognised link layer protocol; all analysis functions ignored',
                  DPKTWarning, stacklevel=stacklevel())
-
-            class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
-                """Raw packet."""
-
-                def __len__(ext) -> 'int':
-                    return len(ext.data)
-
-                def __bytes__(ext) -> 'bytes':
-                    return ext.data
-
-                def unpack(ext, buf: 'bytes') -> 'None':
-                    ext.data = buf
-
-            pkg = RawPacket
+            pkg = self._get_raw_protocol()
         return pkg
+
+    def _get_raw_protocol(self) -> 'Type[DPKTPacket]':
+        """Returns a protocol that keeps the packet as raw data."""
+        dpkt = self._expkg
+
+        class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
+            """Raw packet."""
+
+            def __len__(ext) -> 'int':
+                return len(ext.data)
+
+            def __bytes__(ext) -> 'bytes':
+                return ext.data
+
+            def unpack(ext, buf: 'bytes') -> 'None':
+                ext.data = buf
+
+        return RawPacket
