@@ -97,6 +97,9 @@ class HIP(Protocol):
     type: 'Packet'
     #: Version.
     version: 'int'
+    #: Reserved bits -- the three bits between ``Version`` and the fixed
+    #: low-order bit, carried verbatim so that re-serialising reproduces them.
+    reserved: 'int'
     #: Checksum.
     chksum: 'bytes'
     #: Control
@@ -110,7 +113,7 @@ class HIP(Protocol):
         #: HIP parameters.
         parameters: 'OrderedMultiDict[Enum_Parameter, Parameter]'
 
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', version: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', version: 'int', reserved: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -641,9 +644,12 @@ class Flags(Data):
     symmetric: 'bool'
     #: Must follow flag.
     must_follow: 'bool'
+    #: Reserved bits -- the 14 low-order bits of ``Flags``, carried verbatim
+    #: so that re-serialising reproduces them.
+    reserved: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, symmetric: 'bool', must_follow: 'bool') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, symmetric: 'bool', must_follow: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
