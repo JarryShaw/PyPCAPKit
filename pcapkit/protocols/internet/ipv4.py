@@ -510,8 +510,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             code: IPv4 option code.
             meth: Method name or callable to parse and/or construct the option.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__option__:
+        incumbent = cls.__option__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 

@@ -1520,8 +1520,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code: MH message type code.
             meth: Method name or callable to parse and/or construct the message.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__message__:
+        incumbent = cls.__message__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'message type {code} already registered, overwriting', RegistryWarning)
         cls.__message__[code] = meth
 
@@ -1533,8 +1543,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code: MH option code.
             meth: Method name or callable to parse and/or construct the option.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__option__:
+        incumbent = cls.__option__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 
@@ -1546,8 +1566,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code: CGA extension code.
             meth: Method name or callable to parse and/or construct the extension.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__extension__:
+        incumbent = cls.__extension__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'extension {code} already registered, overwriting', RegistryWarning)
         cls.__extension__[code] = meth
 

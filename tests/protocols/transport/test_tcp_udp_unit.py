@@ -322,9 +322,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         original = TCP.__dict__['__option__'][Option.End_of_Option_List]
         try:
             with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
-                TCP.register_option(Option.End_of_Option_List, 'eool')
+                TCP.register_option(Option.End_of_Option_List, 'nop')
             warn.assert_called_once()
-            self.assertEqual(TCP.__dict__['__option__'][Option.End_of_Option_List], 'eool')
+            self.assertEqual(TCP.__dict__['__option__'][Option.End_of_Option_List], 'nop')
         finally:
             TCP.__dict__['__option__'][Option.End_of_Option_List] = original
 
@@ -335,9 +335,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         original = TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE]
         try:
             with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
-                TCP.register_mp_option(MPTCPOption.MP_CAPABLE, 'capable')
+                TCP.register_mp_option(MPTCPOption.MP_CAPABLE, 'join')
             warn.assert_called_once()
-            self.assertEqual(TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE], 'capable')
+            self.assertEqual(TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE], 'join')
         finally:
             TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE] = original
 

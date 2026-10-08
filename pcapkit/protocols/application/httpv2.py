@@ -471,8 +471,18 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             code: HTTP frame type code.
             meth: Method name or callable to parse and/or construct the frame.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__frame__:
+        incumbent = cls.__frame__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'HTTP/2: [Type {code}] frame already registered', RegistryWarning)
         cls.__frame__[code] = meth
 

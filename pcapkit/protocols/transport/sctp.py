@@ -641,8 +641,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: SCTP chunk type.
             meth: Method name or callable to parse and/or construct the chunk.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__chunk__:
+        incumbent = cls.__chunk__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'chunk {code} already registered, overwriting', RegistryWarning)
         cls.__chunk__[code] = meth
 
@@ -654,8 +664,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: SCTP chunk parameter type.
             meth: Method name or callable to parse and/or construct the parameter.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__parameter__:
+        incumbent = cls.__parameter__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'parameter {code} already registered, overwriting', RegistryWarning)
         cls.__parameter__[code] = meth
 
@@ -667,8 +687,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: SCTP error cause code.
             meth: Method name or callable to parse and/or construct the cause.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__cause__:
+        incumbent = cls.__cause__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'error cause {code} already registered, overwriting', RegistryWarning)
         cls.__cause__[code] = meth
 
