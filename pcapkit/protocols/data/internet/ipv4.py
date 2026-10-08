@@ -124,6 +124,8 @@ class IPv4(Protocol):
         options: 'OrderedMultiDict[OptionNumber, Option]'
         #: Octets after the End of Option List, present along with ``options``.
         padding: 'bytes'
+        #: Octets captured past the Total Length, present only when there are any.
+        trailer: 'bytes'
 
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
