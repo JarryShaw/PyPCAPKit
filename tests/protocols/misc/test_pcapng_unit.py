@@ -4408,37 +4408,35 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual([entry.category.__name__ for entry in caught
                           if entry.category.__name__ == 'SchemaWarning'], [])
 
-    def test_a_journal_binary_field_cut_short_of_its_length_is_reported(self) -> None:
+    def _assert_journal_kept(self, entry: bytes, reason: str):
+        """Assert that ``entry`` is kept as captured, for ``reason``; return the warnings."""
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        entries, caught = self._extract_journal(entry)
+        kept = [item for item in caught if item.category is ProtocolWarning
+                and 'kept as captured' in str(item.message)]
+        self.assertEqual(len(kept), 1, [str(item.message) for item in caught])
+        self.assertIn(reason, str(kept[0].message))
+        self.assertEqual(entries, ())
+        return caught
+
+    def test_a_journal_binary_field_cut_short_of_its_length_is_kept_as_captured(self) -> None:
         """The reviewer's case: fewer than eight octets for a 64-bit length.
 
         ``struct.unpack('<Q', ...)`` refuses a short buffer with a bare
-        :exc:`struct.error`, which is neither in
-        :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError` -- so it cost
-        the whole extraction rather than this one entry. Swept over every
+        :exc:`struct.error`, which cost the whole extraction rather than this one
+        entry. The entry is kept as captured instead (#1413), and so is the one
+        whose prefix the block's own padding made up to eight, since that
+        zero-length field has no terminator behind it. Swept over every
         shortfall, since the boundary is the whole point.
 
         """
-        from pcapkit.utilities.warnings import SchemaWarning
-
         for supplied in range(8):
             with self.subTest(prefix_octets=supplied):
-                entries, caught = self._extract_journal(b'MESSAGE\n' + bytes(supplied))
-
-                schema_warnings = [entry for entry in caught
-                                   if entry.category is SchemaWarning]
                 if supplied + (-(8 + supplied) % 4) >= 8:
-                    # the block's own padding made the prefix up to eight,
-                    # giving a valid zero-length field -- but one with nothing
-                    # behind it in the buffer to hold its terminator
-                    self.assertEqual(len(schema_warnings), 1)
-                    self.assertIn('is not followed by', str(schema_warnings[0].message))
-                    self.assertEqual(len(entries), 1)
-                    self.assertEqual(entries[0]['MESSAGE'], b'')
-                    continue
-                self.assertEqual(len(schema_warnings), 1)
-                self.assertIn('of the 8 it needs', str(schema_warnings[0].message))
-                self.assertEqual(len(entries), 1)
-                self.assertEqual(len(entries[0]), 0)
+                    self._assert_journal_kept(b'MESSAGE\n' + bytes(supplied), 'is not followed by')
+                else:
+                    self._assert_journal_kept(b'MESSAGE\n' + bytes(supplied), 'of the 8 it needs')
 
     def test_a_well_formed_journal_binary_field_still_reads_its_value(self) -> None:
         """The guard is a shortfall check, not a refusal of binary fields."""
@@ -4460,107 +4458,46 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         and the extraction says so and carries on (#1406).
 
         """
-        from pcapkit.utilities.warnings import ProtocolWarning, SchemaWarning
+        from pcapkit.utilities.warnings import SchemaWarning
 
         # ``b'BINARY\n' + 8 octets + b'abc\n'`` is 19 octets, so the block pads it
         # with one NUL and five octets follow the length prefix
         for declared in (6, 1 << 10, 1 << 30, 1 << 62, 1 << 63, 2 ** 64 - 1):
             with self.subTest(declared=declared, expect='kept'):
-                entries, caught = self._extract_journal(
-                    b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
-
+                caught = self._assert_journal_kept(b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n',
+                                                   f'declares {declared} octet(s) with 5 left')
                 self.assertEqual([entry for entry in caught if entry.category is SchemaWarning], [])
-                kept = [entry for entry in caught if entry.category is ProtocolWarning
-                        and 'kept as captured' in str(entry.message)]
-                self.assertEqual(len(kept), 1)
-                self.assertIn(f'declares {declared} octet(s) with 5 left', str(kept[0].message))
-                self.assertEqual(entries, ())
 
-        # and a length the entry can satisfy is read exactly -- the check
-        # reaches only what the entry holds, padding included, so it must not
-        # fire on a field that fits. Only ``declared == 3`` leaves the real
-        # trailing newline immediately behind the value; every other cut lands
-        # on "abc" itself or the pad octet, which the terminator check reports.
-        remainder = b'abc\n\x00'
+        # and a length the entry can satisfy is read exactly -- but only
+        # ``declared == 3`` leaves the real trailing newline immediately behind
+        # the value; every other cut lands on "abc" itself or the pad octet,
+        # so the entry is kept as captured too (#1413)
         for declared in range(6):
-            with self.subTest(declared=declared, expect='untouched'):
-                entries, caught = self._extract_journal(
-                    b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
-
-                schema_warnings = [entry for entry in caught
-                                   if entry.category is SchemaWarning]
-                if remainder[declared:declared + 1] == b'\n':
-                    self.assertEqual(schema_warnings, [])
+            with self.subTest(declared=declared, expect='fits'):
+                entry = b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n'
+                if declared == 3:
+                    entries, caught = self._extract_journal(entry)
+                    self.assertEqual(entries[0]['BINARY'], b'abc')
+                    self.assertEqual([item for item in caught if item.category is SchemaWarning], [])
                 else:
-                    self.assertIn('is not followed by', str(schema_warnings[0].message))
-                    # a bad terminator ends only this entry -- the walk
-                    # keeps going, looking for the next one's separator
-                    # (#722's scope, not #728's outer abort) -- so for
-                    # declared in (0, 1) the one padding octet left behind
-                    # is walked too and short-prefixes a bogus field of its
-                    # own; only that it is the short-prefix warning is
-                    # pinned here, not how many times it fires
-                    for extra in schema_warnings[1:]:
-                        self.assertIn('of the 8 it needs', str(extra.message))
-                self.assertEqual(entries[0]['BINARY'], remainder[:declared])
+                    self._assert_journal_kept(entry, 'is not followed by')
 
-    def test_a_bad_terminator_ends_only_its_own_entry_not_the_whole_walk(self) -> None:
-        """#728 review: a bad terminator used to abort the whole block.
+    def test_a_bad_terminator_keeps_the_entry_as_captured(self) -> None:
+        """A binary field's value followed by anything but its newline (#1413).
 
-        The rewrite that walks the entry end to end, rather than pre-slicing
-        it on ``b'\\n\\n'``, added a ``malformed`` flag that broke the *outer*
-        per-entry loop on a bad terminator -- so #722's per-entry check
-        silently widened into a per-block one, and a well-formed entry behind
-        a corrupted one was dropped entirely, which
-        :meth:`test_a_journal_binary_field_declaring_more_than_its_entry_is_kept_as_captured`
-        above cannot show because its bad terminator always lands at the
-        block's own end. There is nothing between the corrupted octet and
-        ``GOOD=1`` here -- not even the format's own separator -- so recovery
-        must come from the walk itself continuing, not from resynchronising on
-        a blank line it happens to find.
+        The walk used to end only that entry's field collection and carry on,
+        which dropped the bad octet from the rebuild. The whole entry is kept as
+        captured instead, with or without a separator behind the bad octet.
 
         """
-        entries, caught = self._extract_journal(
-            b'DATA\n' + struct.pack('<Q', 3) + b'abcQ' + b'GOOD=1\n')
+        for tail in (b'GOOD=1\n', b'\n\nGOOD=1\n'):
+            with self.subTest(tail=tail):
+                self._assert_journal_kept(b'DATA\n' + struct.pack('<Q', 3) + b'abcQ' + tail,
+                                          'is not followed by')
 
-        self.assertEqual(len(entries), 2)
-        self.assertEqual(entries[0]['DATA'], b'abc')
-        self.assertEqual(entries[1]['GOOD'], '1')
-        schema_warnings = [item for item in caught
-                            if item.category.__name__ == 'SchemaWarning']
-        self.assertEqual(len(schema_warnings), 1)
-        self.assertIn('is not followed by', str(schema_warnings[0].message))
-
-    def test_a_bad_terminator_before_a_real_separator_still_reaches_the_next_entry(self) -> None:
-        """The same recovery, with the block's actual entry separator present.
-
-        A well-formed ``\\n\\n`` here is one entry's real trailing newline
-        plus the separator blank line behind it, each consumed by a distinct
-        read within *that* entry's own inner loop -- see
-        :meth:`test_a_binary_field_ending_the_first_of_two_entries_is_not_warned`.
-        A bad terminator instead ends the current entry's inner loop
-        immediately, before it gets a chance to look for that separator, so
-        each of the two octets behind the corrupted byte is read as its own
-        line by a fresh, otherwise-empty entry -- pinned here as the two
-        empty dicts between ``DATA`` and ``GOOD``. That is one entry more
-        than main's delimiter-based split produces for the same bytes, but it
-        drops nothing: the count is pinned so a future change to the walk
-        that starts silently discarding ``GOOD=1`` again is caught even
-        though it is not the last entry.
-
-        """
-        entries, caught = self._extract_journal(
-            b'DATA\n' + struct.pack('<Q', 3) + b'abcQ' + b'\n\n' + b'GOOD=1\n')
-
-        self.assertEqual(len(entries), 4)
-        self.assertEqual(entries[0]['DATA'], b'abc')
-        self.assertEqual(entries[1], {})
-        self.assertEqual(entries[2], {})
-        self.assertEqual(entries[3]['GOOD'], '1')
-        schema_warnings = [item for item in caught
-                            if item.category.__name__ == 'SchemaWarning']
-        self.assertEqual(len(schema_warnings), 1)
-        self.assertIn('is not followed by', str(schema_warnings[0].message))
+    def test_a_binary_field_ending_the_entry_without_its_terminator_is_kept(self) -> None:
+        """#1413: a value filling the entry exactly, with no closing newline."""
+        self._assert_journal_kept(b'BIN\n' + struct.pack('<Q', 4) + b'abc\n', 'is not followed by')
 
     def test_journal_fields_following_a_binary_field_are_not_discarded(self) -> None:
         """#704: skipping a binary field's terminator used to skip everything.
@@ -4701,73 +4638,40 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual([item for item in caught
                           if item.category.__name__ == 'SchemaWarning'], [])
 
-    def test_a_journal_field_that_is_not_utf8_is_replaced_and_reported(self) -> None:
+    def test_a_journal_field_that_is_not_utf8_is_reported_and_kept_as_captured(self) -> None:
         """One bad octet in one field used to cost the whole extraction.
 
         :exc:`UnicodeDecodeError` is a :exc:`ValueError`, so it is neither in
-        :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`. Asserted for
-        all three sites that decode -- a field name, a key and a value.
+        :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`. The octet is
+        reported, and since the replaced text would not rebuild it, the entry is
+        kept as captured. Asserted for all three sites that decode -- a field
+        name, a key and a value.
 
         """
         from pcapkit.utilities.warnings import SchemaWarning
 
-        cases = {
-            'key': (b'ME\xffSAGE=hello\n', 'ME�SAGE', 'hello'),
-            'value': (b'MESSAGE=hel\xfflo\n', 'MESSAGE', 'hel�lo'),
-            'binary field name': (b'BIN\xffARY\n' + struct.pack('<Q', 3) + b'abc\n',
-                                  'BIN�ARY', b'abc'),
-        }
-
-        for site, (entry, key, value) in cases.items():
+        for site, entry in {'key': b'ME\xffSAGE=hello\n',
+                            'value': b'MESSAGE=hel\xfflo\n',
+                            'binary field name': b'BIN\xffARY\n' + struct.pack('<Q', 3) + b'abc\n'}.items():
             with self.subTest(site=site):
-                entries, caught = self._extract_journal(entry)
-
-                schema_warnings = [item for item in caught
-                                   if item.category is SchemaWarning]
+                caught = self._assert_journal_kept(entry, 'does not rebuild')
+                schema_warnings = [item for item in caught if item.category is SchemaWarning]
                 self.assertEqual(len(schema_warnings), 1)
                 self.assertIn('is not UTF-8', str(schema_warnings[0].message))
-                self.assertEqual(entries[0][key], value)
 
-    def test_a_journal_entry_missing_its_final_newline_does_not_return_padding(self) -> None:
-        """#794: no trailing newline lets the block's own padding read as data.
+    def test_a_journal_entry_missing_its_final_newline_is_kept_as_captured(self) -> None:
+        """#794, #1413: no trailing newline, so nothing rebuilds the last field.
 
-        The block pads its content to a 32-bit boundary with NULs, and the
-        existing padding-only-line guard only fires when the real content
-        ahead of it ended with its own newline, putting the padding on a
-        line of its own. Without that newline, ``readline()`` runs straight
-        through the field's value and into the padding behind it, returning
-        both together -- and ``bytes.strip()`` still will not touch the NUL
-        octets, since they are not ASCII whitespace. Swept over every
-        padding count the alignment rule can produce (0-3 octets), keyed by
-        how many octets ``MESSAGE=...`` needs trimmed from ``entry`` to land
-        on each remainder mod four.
+        The block's own NUL padding then sits on the same line as the field, so
+        reading it as data returned padding, and stripping it lost the missing
+        newline. Swept over every padding count the alignment rule can produce
+        (0-3 octets), and over a bare ``KEY`` with no ``=``.
 
         """
-        from pcapkit.utilities.warnings import SchemaWarning
-
-        cases = {
-            0: b'MESSAGE=abcd',    # 12 octets, already a multiple of four
-            1: b'MESSAGE=abc',     # 11 octets, one NUL pads it to 12
-            2: b'MESSAGE=hi',      # 10 octets, two NULs pad it to 12
-            3: b'MESSAGE=hello',   # 13 octets, three NULs pad it to 16
-        }
-
-        for pad_octets, entry in cases.items():
-            with self.subTest(pad_octets=pad_octets):
-                entries, caught = self._extract_journal(entry)
-
-                self.assertEqual(len(entries), 1)
-                self.assertEqual(entries[0]['MESSAGE'], entry.split(b'=', 1)[1].decode())
-
-                schema_warnings = [item for item in caught
-                                   if item.category is SchemaWarning]
-                if pad_octets == 0:
-                    # nothing was stripped, so there is nothing to warn about
-                    self.assertEqual(schema_warnings, [])
-                else:
-                    self.assertEqual(len(schema_warnings), 1)
-                    self.assertIn('has no terminating newline', str(schema_warnings[0].message))
-                    self.assertIn(f'last {pad_octets} NUL octet(s)', str(schema_warnings[0].message))
+        for entry in (b'MESSAGE=abcd', b'MESSAGE=abc', b'MESSAGE=hi', b'MESSAGE=hello',
+                      b'KEY', b'KEYS', b'A=1\nKEY'):
+            with self.subTest(entry=entry):
+                self._assert_journal_kept(entry, 'has no terminating newline')
 
     def test_a_terminated_journal_value_ending_in_a_nul_octet_is_kept_whole(self) -> None:
         """A legitimate value ending in NUL is not the same shape as padding.
@@ -4786,44 +4690,21 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual([item for item in caught
                           if item.category.__name__ == 'SchemaWarning'], [])
 
-    def test_a_terminator_less_line_whose_raw_tail_is_whitespace_has_zero_padding(self) -> None:
-        """Cross-review on #795: gating on ``raw_line``, not ``line``, matters.
+    def test_a_terminator_less_line_whose_raw_tail_is_whitespace_is_kept_as_captured(self) -> None:
+        """Cross-review on #795: a whitespace tail is not a newline.
 
-        ``line`` is ``raw_line.strip()`` -- ASCII whitespace already gone from
-        both ends. The first cut of #794's fix checked ``raw_line`` for the
-        missing newline but then counted padding off ``line``, so whenever
-        the entry's real last octet was itself ASCII whitespace (not the
-        newline the format wants, but whitespace all the same), ``strip()``
-        had already eaten it, exposing whatever NUL octets came *before* it
-        as if they were now the tail -- and those get read as block padding
-        that never existed. Padding is NUL, never whitespace, and
-        ``bytes.strip()`` does not touch NUL, so a ``raw_line`` ending in
-        whitespace is proof on its own that the true padding is zero: the
-        block's own last octet, unpadded, IS that whitespace. Swept over
-        every octet :meth:`bytes.strip` treats as ASCII whitespace -- space,
-        CR, tab, vtab and formfeed -- against a value that ends in NUL for a
-        genuine reason of its own -- a NUL is valid UTF-8 -- rather than by
-        accident.
+        ``bytes.strip()`` would take the whitespace and expose NUL octets
+        before it as if they were padding. The line has no terminating newline,
+        so the entry is kept as captured, whatever octet it ends in. Swept over
+        every octet :meth:`bytes.strip` treats as ASCII whitespace other than
+        the newline.
 
         """
-        from pcapkit.utilities.warnings import SchemaWarning
-
-        cases = {
-            'space': (b'MESSAGE=hi\x00 ', 'hi\x00'),
-            'CR': (b'MESSAGE=hi\x00\r', 'hi\x00'),
-            'tab': (b'MESSAGE=\x00\x00\x00\t', '\x00\x00\x00'),
-            'vtab': (b'MESSAGE=hi\x00\x0b', 'hi\x00'),
-            'formfeed': (b'MESSAGE=\x00\x00\x00\x0c', '\x00\x00\x00'),
-        }
-
-        for tail, (entry, expected) in cases.items():
+        for tail, entry in {'space': b'MESSAGE=hi\x00 ', 'CR': b'MESSAGE=hi\x00\r',
+                            'tab': b'MESSAGE=\x00\x00\x00\t', 'vtab': b'MESSAGE=hi\x00\x0b',
+                            'formfeed': b'MESSAGE=\x00\x00\x00\x0c'}.items():
             with self.subTest(tail=tail):
-                entries, caught = self._extract_journal(entry)
-
-                self.assertEqual(len(entries), 1)
-                self.assertEqual(entries[0]['MESSAGE'], expected)
-                self.assertEqual([item for item in caught
-                                  if item.category is SchemaWarning], [])
+                self._assert_journal_kept(entry, 'has no terminating newline')
 
     def test_a_journal_binary_value_ending_in_nul_octets_is_unreachable_by_794(self) -> None:
         """A binary field's value is read by its own length, never by line.
