@@ -99,7 +99,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
 
     temp = ['__map__', '__map_reverse__', '__builtin__',
             '__fields__', '__buffer__', '__updated__',
-            '__payload__', '__finalised__']
+            '__payload__', '__finalised__', '__remainder__', '__remainder_offset__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
         temp.extend(el for el in dir(obj) if el not in cls.__fields__)
@@ -374,6 +374,11 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         __buffer__: 'dict[str, bytes]'
         #: Flag for whether the schema is recently updated.
         __updated__: 'bool'
+        #: Octets of an enclosing :class:`~pcapkit.corekit.fields.misc.SchemaField`
+        #: span that this nested schema left unread; set only when non-empty.
+        __remainder__: 'bytes'
+        #: Octets this nested schema read before :attr:`__remainder__`.
+        __remainder_offset__: 'int'
 
     #: Flag for finalised class initialisation.
     __finalised__: 'FinalisedState' = FinalisedState.NONE
@@ -554,6 +559,13 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             data_iter = itertools.chain(dict_, kwargs.items())
 
         for (key, value) in data_iter:
+            # NOTE: Not a field, but what :meth:`to_dict` emits for the octets an
+            # enclosing ``SchemaField`` span held beyond this schema, and where,
+            # so that a rebuilt schema still re-emits them (:issue:`1380`).
+            if key in ('__remainder__', '__remainder_offset__'):
+                self.__dict__[key] = value
+                continue
+
             if key not in self.__buffer__:
                 warn(f'{key!r} is not a valid field name', UnknownFieldWarning)
                 continue
@@ -691,6 +703,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
             shall not convert them into :obj:`dict` and remain them intact.
 
+        Note:
+            A schema unpacked as the value of a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` that left part of
+            the field's span unread carries those octets under a
+            ``__remainder__`` key, and the number of octets it did read under
+            ``__remainder_offset__``. :meth:`from_dict` accepts both back, so
+            that the rebuilt field still packs them (:issue:`1380`). The keys
+            are absent otherwise.
+
         """
         dict_ = {}  # type: dict[str, Any]
         for (key, value) in self.__dict__.items():
@@ -702,6 +723,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 dict_[out_key] = value.to_dict()
             else:
                 dict_[out_key] = value
+
+        for key in ('__remainder__', '__remainder_offset__'):
+            if key in self.__dict__:
+                dict_[key] = self.__dict__[key]
         return dict_
 
     def to_bytes(self) -> 'bytes':
@@ -862,19 +887,31 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             if isinstance(field, SchemaField) and len(temp) < field.length:
                 # NOTE: :meth:`unpack` hands a nested schema its whole declared
                 # span, and the schema may read less of it than that. The octets
-                # it left unread are still in the buffer :meth:`unpack` stored, so
-                # they are re-emitted from there, as long as the buffer still
-                # starts with what the nested schema packs to now; otherwise, or
-                # for a schema that was never unpacked, the span is zero-filled.
+                # it left unread travel with the nested value as its
+                # ``__remainder__`` -- on the schema itself, or as a key of the
+                # mapping :meth:`to_dict` made of it -- so they are re-emitted
+                # from there, as long as the nested schema still packs to the
+                # ``__remainder_offset__`` octets it was parsed at. Re-emitting
+                # them after a nested schema that has shrunk or grown would put
+                # stale octets at a shifted offset, so then, or for a schema that
+                # never had any, the rest of the span is zero-filled.
                 # Either way the field keeps the width its length field declares
-                # (:issue:`1292`).
+                # (:issue:`1292`), and a schema rebuilt through :meth:`from_dict`
+                # packs what the parsed one did (:issue:`1380`).
                 #
                 # A field reached through a
                 # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
                 # here: the PCAP-NG block selector declares the rest of the
                 # *stream* as its span, which is no part of the field.
-                buffer = self.__buffer__[field.name]
-                tail = buffer[len(temp):field.length] if buffer.startswith(temp) else b''
+                if isinstance(data, Schema):
+                    record = data.__dict__  # type: Mapping[str, Any]
+                elif isinstance(data, collections.abc.Mapping):
+                    record = data
+                else:
+                    record = {}
+                tail = record.get('__remainder__', b'')
+                if record.get('__remainder_offset__') != len(temp) or len(temp) + len(tail) > field.length:
+                    tail = b''
                 temp += tail + bytes(field.length - len(temp) - len(tail))
             self.__buffer__[field.name] = temp
 
@@ -998,6 +1035,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             self.__buffer__[field.name] = byte
 
             value = field.unpack(byte, packet.copy())
+            if isinstance(field, SchemaField) and isinstance(value, Schema):
+                # NOTE: Kept on the nested schema rather than only in
+                # ``__buffer__``, so that the octets it left unread go wherever
+                # the value goes, :meth:`to_dict` included; see :meth:`pack`.
+                # The width read is summed from the nested buffers rather than
+                # taken with :func:`len`, which may pack the schema again.
+                consumed = sum(map(len, value.__buffer__.values()))
+                if len(byte) > consumed:
+                    value.__dict__['__remainder__'] = byte[consumed:]
+                    value.__dict__['__remainder_offset__'] = consumed
             setattr(self, field.name, value)
 
             packet[field.name] = value
