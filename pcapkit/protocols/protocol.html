@@ -643,13 +643,14 @@ counts as different from the class it names.</p>
 <p class="admonition-title">Note</p>
 <p>The guard matches <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>’s: it
 fires only when the incumbent differs from the replacement, so
-re-registering the exact same class object under the same <code class="docutils literal notranslate"><span class="pre">code</span></code>
-is a silent no-op rather than a warning about nothing displaced.
-The comparison is a plain <code class="docutils literal notranslate"><span class="pre">is</span></code> that resolves nothing, so an
-incumbent left as an unresolved
-<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> still reports as
-different from the class it names, and the deferred import stays
-deferred.</p>
+handing back the entry already stored under <code class="docutils literal notranslate"><span class="pre">code</span></code> – the same
+class object, or a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+equal to the stored one – is a silent no-op rather than a warning
+about nothing displaced, and the stored entry is kept as it is
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>). The comparison runs before <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is
+resolved and resolves nothing, so a stored descriptor stays
+deferred, and an incumbent left as an unresolved descriptor still
+reports as different from the class it names.</p>
 </div>
 </dd></dl>
 

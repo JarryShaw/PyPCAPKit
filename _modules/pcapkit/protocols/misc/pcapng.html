@@ -1147,6 +1147,11 @@
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">,</span>
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">)</span>
 
+    <span class="c1">#: Packet blocks whose fixed fields span 32 octets, so that a shorter Block</span>
+    <span class="c1">#: Total Length is kept as captured (see :meth:`_read_block_short`).</span>
+    <span class="n">SHORT_PACKET_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">,</span>
+                          <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">)</span>
+
     <span class="c1">#: Blocks that resolve an interface of their section, mapped to the tag used</span>
     <span class="c1">#: when reporting an interface ID that names no such interface. A Simple</span>
     <span class="c1">#: Packet Block carries no interface ID field and always refers to the</span>
@@ -1485,18 +1490,23 @@
 <span class="sd">                entry and its replacement so a caller can tell *what* was lost.</span>
 <span class="sd">                Fires only when the incumbent differs from the replacement, and</span>
 <span class="sd">                an unresolved module descriptor counts as different from the</span>
-<span class="sd">                class it names. This registry is separate from the PCAP one, so</span>
+<span class="sd">                class it names; handing back the stored entry, or a descriptor</span>
+<span class="sd">                equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so</span>
 <span class="sd">                :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
 <span class="sd">                writing to both cannot make either warn about the other.</span>
 
 <span class="sd">        """</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">incumbent</span> <span class="ow">is</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">incumbent</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">protocol</span><span class="p">)):</span>
+            <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a class, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
                  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
@@ -1748,7 +1758,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__block__</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_PACKET_TYPES</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_short</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_block_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span>
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_unknown</span><span class="p">))</span>
@@ -2032,7 +2044,13 @@
 <span class="sd">        See Also:</span>
 <span class="sd">            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            A packet block kept as captured has no payload (see</span>
+<span class="sd">            :meth:`_read_block_short`).</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">Schema_UnknownBlock</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span></div>
 
 
@@ -2709,6 +2727,12 @@
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] packet data of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> octet(s) '</span>
                  <span class="sa">f</span><span class="s1">'exceeds the snaplen of </span><span class="si">{</span><span class="n">snaplen</span><span class="si">}</span><span class="s1">; kept as captured'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="c1"># NOTE: Likewise for more packet data than the original length, padding</span>
+        <span class="c1"># aside (:issue:`1414`).</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">original_len</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] packet data of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> octet(s) '</span>
+                 <span class="sa">f</span><span class="s1">'exceeds the original length of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">original_len</span><span class="si">}</span><span class="s1">; kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -3051,6 +3075,71 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">interface_id</span><span class="p">),</span>
                                        <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EnhancedPacketBlock | Schema_PacketBlock | Schema_UnknownBlock'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_PCAPNG'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read a PCAP-NG EPB or packet block (obsolete) shorter than its fixed fields.</span>
+
+<span class="sd">        The fixed fields of either block span 32 octets, so a smaller Block</span>
+<span class="sd">        Total Length cannot hold them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed block schema, or on the construction path the</span>
+<span class="sd">                :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` that</span>
+<span class="sd">                :meth:`_make_block_short` built.</span>
+<span class="sd">            header: Parsed PCAP-NG header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data, with the fixed fields the block holds and zero</span>
+<span class="sd">            for those it does not, no packet data and no options. The block body</span>
+<span class="sd">            is kept as ``block_raw``, which the block's ``make`` writes back</span>
+<span class="sd">            verbatim, so the block rebuilds at the length it declared</span>
+<span class="sd">            (:issue:`1414`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnknownBlock</span><span class="p">):</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">body</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># the octets unpacked for the fixed fields, which start with the</span>
+            <span class="c1"># Block Total Length and run past the end of the block</span>
+            <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">]</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> is below the '</span>
+                 <span class="sa">f</span><span class="s1">'32-octet minimum; kept as captured'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">octets</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">octets</span><span class="p">[:</span><span class="mi">4</span><span class="p">]:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length mismatch: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> != '</span>
+                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">octets</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="p">:</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+        <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">==</span> <span class="s1">'little'</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="n">body</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">20</span><span class="p">))[:</span><span class="mi">20</span><span class="p">]</span>
+        <span class="n">drop_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span>
+            <span class="n">interface_id</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">,</span> <span class="n">original_len</span> <span class="o">=</span> \
+                <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">HHIIII'</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interface_id</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">,</span> <span class="n">original_len</span> <span class="o">=</span> \
+                <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">IIIII'</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
+        <span class="n">timestamp</span><span class="p">,</span> <span class="n">timestamp_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_timestamp</span><span class="p">(</span><span class="n">timestamp_high</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">,</span>
+                                                          <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'length'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="s1">'section_number'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sect</span><span class="p">,</span>
+            <span class="s1">'number'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
+            <span class="s1">'interface_id'</span><span class="p">:</span> <span class="n">interface_id</span><span class="p">,</span>
+            <span class="s1">'timestamp'</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span>
+            <span class="s1">'timestamp_epoch'</span><span class="p">:</span> <span class="n">timestamp_epoch</span><span class="p">,</span>
+            <span class="s1">'captured_len'</span><span class="p">:</span> <span class="n">captured_len</span><span class="p">,</span>
+            <span class="s1">'original_len'</span><span class="p">:</span> <span class="n">original_len</span><span class="p">,</span>
+            <span class="s1">'options'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">([]),</span>
+        <span class="p">}</span>  <span class="c1"># type: dict[str, Any]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">Data_PacketBlock</span><span class="p">(</span><span class="n">drop_count</span><span class="o">=</span><span class="n">drop_count</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span>
+                <span class="k">else</span> <span class="n">Data_EnhancedPacketBlock</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>  <span class="c1"># type: Data_EnhancedPacketBlock | Data_PacketBlock</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'block_raw'</span><span class="p">,</span> <span class="n">body</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">interface_id</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="PCAPNG._read_pcapng_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_pcapng_options">[docs]</a>
@@ -4752,6 +4841,8 @@
 <span class="sd">            Constructed block schema.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'block_raw'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_short</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">interface_id</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">interface_id</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span>
@@ -4841,6 +4932,19 @@
             <span class="n">length2</span><span class="o">=</span><span class="n">packet_len</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_block_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make a PCAP-NG EPB or packet block (obsolete) kept as captured.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block: Block data model, whose ``block_raw`` holds the body of a</span>
+<span class="sd">                block shorter than its fixed fields (see :meth:`_read_block_short`).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed block schema, the body written back verbatim.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_unknown</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">block_raw</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
 
 <div class="viewcode-block" id="PCAPNG._make_block_nrb">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_block_nrb">[docs]</a>
@@ -4954,23 +5058,7 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">entries</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-                <span class="n">tmp_buf</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                        <span class="n">buf</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s%s</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span>
-                            <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)),</span>
-                            <span class="n">val</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="n">tmp_buf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
-
-                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">))</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">Schema_SystemdJournalExportBlock</span><span class="o">.</span><span class="n">dump_entries</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
         <span class="c1"># NOTE: The entry MUST be zero-padded to 32 bits, and the Block Total</span>
         <span class="c1"># Length counts that padding, as the ``entry`` field reads it back.</span>
         <span class="n">data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
@@ -5140,6 +5228,8 @@
         <span class="n">warn</span><span class="p">(</span><span class="s1">'PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '</span>
              <span class="s1">'Simple Packet Block instead.'</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'block_raw'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_short</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">interface_id</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">interface_id</span>
             <span class="n">drop_count</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">drop_count</span>

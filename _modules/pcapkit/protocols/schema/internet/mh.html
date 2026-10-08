@@ -622,7 +622,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">MultiPrefixExtensionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`MultiPrefixExtension.flags`."""</span>
 
-        <span class="n">P</span><span class="p">:</span> <span class="nb">int</span></div>
+        <span class="n">P</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="BindingUpdateMessageFlags">
@@ -668,7 +669,8 @@
         <span class="n">A</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">H</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">L</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentMessageFlags">
@@ -676,7 +678,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`FastBindingAcknowledgmentMessage.flags`."""</span>
 
-        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="HandoverInitiateMessageFlags">
@@ -687,7 +690,8 @@
         <span class="n">S</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">P</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="HandoverAcknowledgeMessageFlags">
@@ -697,7 +701,8 @@
 
         <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">P</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="HeartbeatMessageFlags">
@@ -706,7 +711,8 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`HeartbeatMessage.flags`."""</span>
 
         <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">R</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">R</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="FixedPointTimestamp">
@@ -725,7 +731,8 @@
 
         <span class="n">P</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="n">V</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">G</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">G</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="LocalizedRoutingAcknowledgmentMessageFlags">
@@ -733,7 +740,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">LocalizedRoutingAcknowledgmentMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`LocalizedRoutingAcknowledgmentMessage.flags`."""</span>
 
-        <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">U</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="FlowBindingMessageFlags">
@@ -741,7 +749,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">FlowBindingMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`FlowBindingMessage.flags`."""</span>
 
-        <span class="n">A</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">A</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="UpdateNotificationMessageFlags">
@@ -750,7 +759,8 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`UpdateNotificationMessage.flags`."""</span>
 
         <span class="n">A</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">D</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">D</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="SubscriptionResponseMessageFlags">
@@ -758,7 +768,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">SubscriptionResponseMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`SubscriptionResponseMessage.flags`."""</span>
 
-        <span class="n">I</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">I</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="DNSUpdateOptionFlags">
@@ -766,7 +777,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">DNSUpdateOptionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`DNSUpdateOption.flags`."""</span>
 
-        <span class="n">R</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">R</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="IPv4HomeAddressOptionFlags">
@@ -787,7 +799,8 @@
 <span class="sd">        :attr:`IPv4HomeAddressRequestOption.flags` and</span>
 <span class="sd">        :attr:`IPv4HomeAddressReplyOption.flags`."""</span>
 
-        <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="NATDetectionOptionFlags">
@@ -795,7 +808,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">NATDetectionOptionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`NATDetectionOption.flags`."""</span>
 
-        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">F</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="IPv4DHCPSupportModeOptionFlags">
@@ -803,7 +817,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">IPv4DHCPSupportModeOptionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`IPv4DHCPSupportModeOption.flags`."""</span>
 
-        <span class="n">S</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">S</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="RedirectOptionFlags">
@@ -812,7 +827,8 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`RedirectOption.flags`."""</span>
 
         <span class="n">K</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">N</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">N</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="BindingIdentifierOptionFlags">
@@ -829,7 +845,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">TransientBindingOptionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`TransientBindingOption.flags`."""</span>
 
-        <span class="n">L</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">L</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="ModeFlagOnly">
@@ -839,7 +856,8 @@
 <span class="sd">        :attr:`DynamicIPMulticastSelectorOption.flags` and</span>
 <span class="sd">        :attr:`IPv4TrafficOffloadSelectorOption.flags`."""</span>
 
-        <span class="n">M</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">M</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="DelegatedMNPOptionFlags">
@@ -847,7 +865,8 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">DelegatedMNPOptionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flags for :attr:`DelegatedMNPOption.flags`."""</span>
 
-        <span class="n">V</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">V</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="MAGMultipathBindingOptionFlags">
@@ -856,7 +875,8 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`MAGMultipathBindingOption.flags`."""</span>
 
         <span class="n">B</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">O</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">O</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="ANINetworkIdentifierFlags">
@@ -883,7 +903,8 @@
 <span class="w">        </span><span class="sd">"""Flags for :attr:`PerSessionBitRateAttribute.flags`."""</span>
 
         <span class="n">S</span><span class="p">:</span> <span class="s1">'int'</span>
-        <span class="n">E</span><span class="p">:</span> <span class="s1">'int'</span></div>
+        <span class="n">E</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 
 <div class="viewcode-block" id="AllocationRetentionPriorityFields">
@@ -1499,6 +1520,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'MultiPrefixExtensionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Prefixes.</span>
     <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'list[int]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
@@ -1728,6 +1750,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'DNSUpdateOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'R'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Mobile node identity, in FQDN form.</span>
     <span class="n">identity</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
@@ -1932,6 +1955,7 @@
     <span class="c1">#: Prefix length, with 2 reserved bits below it.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'PrefixLengthOnly'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'prefix_length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: IPv4 home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
@@ -1952,6 +1976,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'NATDetectionOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Suggested NAT binding refresh time, in seconds.</span>
     <span class="n">refresh</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
@@ -2056,6 +2081,7 @@
     <span class="c1">#: Prefix length, with 10 reserved bits below it.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'PrefixLengthOnly'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'prefix_length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Requested IPv4 home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
@@ -2077,6 +2103,7 @@
     <span class="c1">#: Prefix length, with 2 reserved bits below it.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'PrefixLengthOnly'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'prefix_length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Assigned IPv4 home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
@@ -2114,6 +2141,7 @@
     <span class="c1">#: Flags. The ``S`` bit is the **last** bit of the option, not the first</span>
     <span class="c1">#: [:rfc:`5844#section-3.3.4`].</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'IPv4DHCPSupportModeOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
         <span class="s1">'S'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
 
@@ -2213,6 +2241,7 @@
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'TransientBindingOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
         <span class="s1">'L'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Maximum lifetime of the transient state, in units of 100 milliseconds.</span>
@@ -2466,6 +2495,7 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'RedirectOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'N'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: IPv6 address of the redirected-to LMA, present when ``K`` is set.</span>
     <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
@@ -2763,6 +2793,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'ModeFlagOnly'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'M'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Traffic selector, carried as the traffic selector sub-option of</span>
     <span class="c1">#: :rfc:`6089#section-4.2.1.4`. Optional in a proxy binding update and</span>
@@ -2802,6 +2833,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'ModeFlagOnly'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'M'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Number of multicast address records.</span>
     <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -2823,6 +2855,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'DelegatedMNPOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'V'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Prefix length.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
@@ -2964,6 +2997,7 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'SessionBitRateFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'S'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'E'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Bit rate, in bits per second.</span>
     <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
@@ -3270,6 +3304,7 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'MAGMultipathBindingOptionFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'B'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'O'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span>
     <span class="p">})</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -3677,6 +3712,7 @@
         <span class="s1">'H'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'L'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Lifetime, in seconds [:rfc:`5568#section-6.2.2`].</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -3720,6 +3756,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -3790,6 +3827,7 @@
         <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HandoverInitiateStatus</span><span class="p">)</span>
@@ -3821,6 +3859,7 @@
         <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'F'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HandoverACKStatus</span><span class="p">)</span>
@@ -3847,6 +3886,7 @@
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'HeartbeatMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
         <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'R'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
@@ -3925,6 +3965,7 @@
         <span class="s1">'P'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'V'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'G'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
@@ -3996,6 +4037,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'LocalizedRoutingAcknowledgmentMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'U'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Status, c.f.,</span>
     <span class="c1">#: :class:`pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.</span>
@@ -4033,6 +4075,7 @@
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'UpdateNotificationMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'A'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'D'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
@@ -4108,6 +4151,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'FlowBindingMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'A'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
@@ -4167,6 +4211,7 @@
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'SubscriptionResponseMessageFlags'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'I'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>

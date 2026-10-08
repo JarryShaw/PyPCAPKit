@@ -859,6 +859,8 @@
     <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Key management mobility capability flag.</span>
     <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 12 bits after the ``K`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Lifetime. :rfc:`5568#section-6.2.2` counts this in seconds rather than in</span>
     <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
@@ -868,6 +870,7 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -886,6 +889,8 @@
     <span class="n">status</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span>
     <span class="c1">#: Key management mobility capability flag.</span>
     <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``K`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Lifetime. :rfc:`5568#section-6.2.3` counts this in seconds rather than in</span>
@@ -896,7 +901,8 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">status</span><span class="p">:</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">,</span> <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -948,6 +954,8 @@
     <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Forwarding flag.</span>
     <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the four bits after the ``F`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span>
     <span class="c1">#: Mobility options.</span>
@@ -956,6 +964,7 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">assign</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -975,6 +984,8 @@
     <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Forwarding flag.</span>
     <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the five bits after the ``F`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span>
     <span class="c1">#: Mobility options.</span>
@@ -982,7 +993,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -999,6 +1010,8 @@
     <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Response flag. Unset for a Heartbeat request, set for a response.</span>
     <span class="n">response</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 14 bits before the ``U`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
@@ -1006,7 +1019,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1056,6 +1069,8 @@
     <span class="n">ipv4_hoa</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Global revocation flag.</span>
     <span class="n">global_revocation</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 13 bits after the ``G`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
@@ -1063,7 +1078,7 @@
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">br_type</span><span class="p">:</span> <span class="s1">'Enum_BindingRevocation'</span><span class="p">,</span>
                      <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_RevocationTrigger | Enum_RevocationStatusCode'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ipv4_hoa</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">global_revocation</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">proxy</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">ipv4_hoa</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">global_revocation</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1099,6 +1114,8 @@
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Unsolicited flag.</span>
     <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``U`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Status. :rfc:`6705#section-10.2` defines its values inline with no IANA</span>
     <span class="c1">#: registry behind them, so this field carries the module-local</span>
     <span class="c1">#: :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` rather than</span>
@@ -1111,7 +1128,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'LocalizedRoutingStatus'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">unsolicited</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'LocalizedRoutingStatus'</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -1131,13 +1148,15 @@
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Retransmission flag.</span>
     <span class="n">retransmit</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 14 bits after the ``D`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="s1">'Enum_UpdateNotificationReason'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
-                     <span class="n">retransmit</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">retransmit</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1183,6 +1202,8 @@
     <span class="c1">#: Acknowledgement requested flag. Only meaningful in an indication; an</span>
     <span class="c1">#: acknowledgement reserves the whole octet this bit is taken from.</span>
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``A`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
@@ -1190,7 +1211,7 @@
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">fb_type</span><span class="p">:</span> <span class="s1">'Enum_FlowBindingType'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus'</span><span class="p">,</span>
-                     <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1224,12 +1245,14 @@
     <span class="c1">#: Multicast information flag, set when the response carries active</span>
     <span class="c1">#: multicast subscription options.</span>
     <span class="n">info</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``I`` flag.</span>
+    <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1478,11 +1501,14 @@
     <span class="c1">#: P flag. Set if a public key is included in the Public Key field of</span>
     <span class="c1">#: the CGA Parameter Data Structure, reset otherwise.</span>
     <span class="n">flag</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 31 bits after the ``P`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Prefixes.</span>
     <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_CGAExtension'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_CGAExtension'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">prefixes</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1755,13 +1781,15 @@
     <span class="c1">#: Remove flag. Set when the mobile node asks the home agent to remove the</span>
     <span class="c1">#: DNS entry rather than to create or update it.</span>
     <span class="n">remove</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``R`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobile node identity, in FQDN form. Kept as :obj:`bytes` because the RFC</span>
     <span class="c1">#: does not say which of the two FQDN encodings is meant.</span>
     <span class="n">identity</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_DNSStatusCode'</span><span class="p">,</span>
-                     <span class="n">remove</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">identity</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">remove</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">identity</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1835,12 +1863,14 @@
     <span class="c1">#: Allocated prefix length. Meaningful only on success, and required to be</span>
     <span class="c1">#: zero on failure.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits, i.e. the two bits after the prefix length.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Assigned IPv4 home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_DSMIPv6HomeAddress'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_DSMIPv6HomeAddress'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1853,12 +1883,14 @@
 
     <span class="c1">#: Force UDP encapsulation flag.</span>
     <span class="n">force</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 15 bits after the ``F`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Suggested NAT binding refresh interval, in seconds. ``0`` means the value</span>
     <span class="c1">#: is to be ignored, and all ones that no keep-alives are needed.</span>
     <span class="n">refresh</span><span class="p">:</span> <span class="s1">'timedelta'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">refresh</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1926,12 +1958,14 @@
 
     <span class="c1">#: Prefix length of the requested home network.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits, i.e. the ten bits after the prefix length.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Requested IPv4 home address. ``0.0.0.0`` asks the local mobility anchor to</span>
     <span class="c1">#: allocate one.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1947,12 +1981,14 @@
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_HomeAddressReply'</span>
     <span class="c1">#: Prefix length of the assigned home network.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reserved bits, i.e. the two bits after the prefix length.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Assigned IPv4 home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_HomeAddressReply'</span><span class="p">,</span>
-                     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1979,10 +2015,12 @@
     <span class="c1">#: DHCP support mode. Unset means the mobile access gateway acts as a DHCP</span>
     <span class="c1">#: relay, set that it acts as a DHCP server.</span>
     <span class="n">mode</span><span class="p">:</span> <span class="s1">'Enum_DHCPSupportMode'</span>
+    <span class="c1">#: Reserved bits, i.e. the 15 bits before the ``S`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">mode</span><span class="p">:</span> <span class="s1">'Enum_DHCPSupportMode'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">mode</span><span class="p">:</span> <span class="s1">'Enum_DHCPSupportMode'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2060,12 +2098,14 @@
 
     <span class="c1">#: Late path switch flag.</span>
     <span class="n">late</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits before the ``L`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Maximum lifetime of the transient state. Counted on the wire in units of</span>
     <span class="c1">#: 100 milliseconds.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">late</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">late</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2229,10 +2269,12 @@
     <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span>
     <span class="c1">#: IPv4 address of the redirected-to local mobility anchor, if carried.</span>
     <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address]'</span>
+    <span class="c1">#: Reserved bits, i.e. the 14 bits after the ``N`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[IPv6Address]'</span><span class="p">,</span>
-                     <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address]'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2468,11 +2510,13 @@
     <span class="c1">#: Offload mode flag. Unset offloads the flows matching the selector; set</span>
     <span class="c1">#: offloads everything except them.</span>
     <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 31 bits after the ``M`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Traffic selector sub-options.</span>
     <span class="n">selector</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">selector</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2488,6 +2532,8 @@
     <span class="c1">#: Selector mode flag. Set routes the group locally, unset via the home</span>
     <span class="c1">#: network.</span>
     <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``M`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Number of multicast address records carried in :attr:`data`.</span>
     <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Multicast address records. These are MLD or IGMP structures belonging to</span>
@@ -2496,7 +2542,7 @@
     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">records</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2509,13 +2555,15 @@
 
     <span class="c1">#: IPv4 prefix flag, saying which family :attr:`prefix` is in.</span>
     <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the seven bits after the ``V`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Prefix length.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Delegated mobile network prefix, IPv4 or IPv6 as :attr:`ipv4` says.</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -2605,12 +2653,14 @@
     <span class="n">service</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Guaranteed-bit-rate exclusion flag.</span>
     <span class="n">exclude</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 14 bits after the ``E`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Bit rate, in **bits** per second.</span>
     <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
-                     <span class="n">exclude</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">exclude</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2849,11 +2899,13 @@
     <span class="n">bulk</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Registration overwrite flag.</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reserved bits, i.e. the 22 bits after the ``O`` flag.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">att</span><span class="p">:</span> <span class="s1">'Enum_AccessType'</span><span class="p">,</span>
                      <span class="n">label</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">bid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
-                     <span class="n">overwrite</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">overwrite</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

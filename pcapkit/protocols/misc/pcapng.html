@@ -905,7 +905,8 @@ already registered against PCAP-NG blocks, naming the displaced
 entry and its replacement so a caller can tell <em>what</em> was lost.
 Fires only when the incumbent differs from the replacement, and
 an unresolved module descriptor counts as different from the
-class it names. This registry is separate from the PCAP one, so
+class it names; handing back the stored entry, or a descriptor
+equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
 writing to both cannot make either warn about the other.</p>
 </dd>
@@ -1172,6 +1173,11 @@ protocol chain of the current packet (frame).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>This is a wrapper function for <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.Schema.get_payload()</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A packet block kept as captured has no payload (see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_block_short()</span></code>).</p>
 </div>
 </dd></dl>
 
@@ -4694,6 +4700,27 @@ the parsed schema.</p>
 <dd><p>Block total length.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#EnhancedPacketBlock.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.post_process" title="Link to this definition">¶</a></dt>
+<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Revised schema.</p>
+</dd>
+</dl>
+<p>A Block Total Length below the 32 octets of the fixed fields reads the
+trailing copy past the block, so the two are not compared here;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._read_block_short</span></code> keeps the block
+as captured and compares them itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1414">#1414</a>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -4889,95 +4916,41 @@ block holds; see <code class="xref py py-func docutils literal notranslate"><spa
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Two ways the entry data runs out mid-field are reported rather than
-raised, for the reason <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code> gives: a bare
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> is neither one of
-<a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> nor an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so it
-would abort the whole extraction rather than this one entry.</p>
-<p>A line of nothing but NUL octets is the block’s own 32-bit padding
-and ends the entry. <code class="docutils literal notranslate"><span class="pre">bytes.strip()</span></code> takes only ASCII whitespace,
-so those octets would survive it and be read as the <em>name</em> of a
-binary field – which would make every journal entry whose length is
-not a multiple of four raise, valid or not, since the padding that
-follows it has no 64-bit length prefix behind it to unpack. A
-14-octet <code class="docutils literal notranslate"><span class="pre">MESSAGE=hello\n</span></code> entry is as ordinary as this block
-gets.</p>
-<p>A name line whose 64-bit length prefix is itself cut short ends the
-entry too. There is nothing to read past the end of the entry, so
-stopping at it is what keeps the truncated block parsing.</p>
-<p>A binary field’s length is the widest declared length in the format,
-and nothing else bounds it against the entry holding it: at <code class="docutils literal notranslate"><span class="pre">2**63</span></code>
-and above <code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BytesIO.read()</span></code> refuses it outright with a bare
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OverflowError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">fit</span> <span class="pre">'int'</span> <span class="pre">into</span> <span class="pre">an</span> <span class="pre">index-sized</span>
-<span class="pre">integer</span></code>), and below that it silently returns whatever is there, so
-the same malformed prefix would be either fatal or invisible
-depending only on its magnitude. A length past the octets the entry
-has left raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>
-instead, and the whole entry is then kept as the octets captured, as
-the one <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> item of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.data" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, which the block’s <code class="docutils literal notranslate"><span class="pre">make</span></code>
-writes back verbatim. Clamping the field would rebuild a different
-length prefix and a terminator that was never there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1406">#1406</a>,
-the #1325 ruling that <code class="xref py py-class docutils literal notranslate"><span class="pre">OptionAreaField</span></code> applies to option
-areas).</p>
-<p>Field names, keys and values are decoded with <code class="docutils literal notranslate"><span class="pre">errors='replace'</span></code>
-rather than strictly. A non-UTF-8 octet in any of the three would
-raise a bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> – a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so
-foreign on both counts, and fatal to the whole extraction over one
-bad octet in one field. <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> is the option this module’s own
-<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField" title="pcapkit.corekit.fields.strings.StringField"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringField</span></code></a> already takes for
-the same problem, and a value that is not text is a value the writer
-should have emitted as a <em>binary</em> field, so the entry is malformed
-however it is read.</p>
 <p>The entry is walked once, end to end, rather than split apart with
 <code class="docutils literal notranslate"><span class="pre">self.entry.split(b'\n\n')</span></code>: that delimits a <em>length-prefixed</em>
 format by content, which a binary field’s own bytes need no escaping
-to defeat. A value that itself contains <code class="docutils literal notranslate"><span class="pre">b'\n\n'</span></code> would be cut
-in the middle of its own data, turning what followed it into a bogus
-field in a fabricated second entry; a value 2,570 octets long is
-worse, since <code class="docutils literal notranslate"><span class="pre">struct.pack('&lt;Q',</span> <span class="pre">2570)</span> <span class="pre">==</span>
-<span class="pre">b'\n\n\x00\x00\x00\x00\x00\x00'</span></code> puts the separator <em>inside
-the length prefix itself</em>. A length-prefixed field’s bytes are never
-inspected for structure, only counted out by the prefix that names
-them, and a blank line – found by <em>reading</em>, not by splitting – is
-what starts the next entry. The one-octet terminator that must follow
-a binary field’s value is checked, and a warning is raised when it is
-missing.</p>
-<p>A trailing separator – a blank line with nothing behind it – is
-tracked explicitly, so a blank line actually read, rather than the
-block’s own NUL padding or plain end of data, still starts the next
-entry, even an empty one. Otherwise a rebuild would lose that one
-octet and write a <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> one short of what was read.</p>
-<p>The NUL-only guard above ends the entry on a line of <em>nothing but</em>
-NUL padding, but only catches it when the content ahead of the
-padding ended with its own newline, which puts the padding on a line
-by itself for <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> to return alone. An entry
-whose last field is missing that trailing newline, as the format
-requires, has no such separation: <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> runs straight
-through the field’s own bytes and into the padding behind them,
-returning both as one line, and <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes.strip" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytes.strip()</span></code></a> still will not
-take the NUL octets off since they are not ASCII whitespace.
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> returns a line without its own trailing
-newline only at end of stream, so a terminator-less line is
-necessarily the buffer’s last one; a binary field’s <em>name</em> landing on
-such a line fails its own 8-octet length-prefix read for the same
-reason, nothing being left behind it to hold one, so the guard below
-firing on that shape of line too is harmless. A binary field’s
-<em>value</em>, once its name and length prefix are known, is read by that
-length prefix directly, never by scanning for a line ending, so real
-block padding immediately behind one cannot land inside it this way:
-the one-octet terminator check is always reached in that case, and
-either reads the real separator newline and passes silently, or reads
-padding’s first octet instead, fails, and reports it. Block padding
-is always 0-3 octets, whatever the last field turns out to be, so at
-most the trailing three octets of a terminator-less line are stripped
-as padding and warned about, and only when the line’s own raw,
-unstripped tail is itself NUL – anything past three such octets, or a
-line whose actual last octet is not NUL at all, cannot be padding and
-is left as data. This cannot tell a padding octet from a text value
-that itself legitimately ends in one – NUL is valid UTF-8 – but
-that entry is already malformed for lacking the newline the format
-mandates, and returning the block’s own padding as field data is the
-one outcome that must not survive it.</p>
+to defeat (<code class="docutils literal notranslate"><span class="pre">struct.pack('&lt;Q',</span> <span class="pre">2570)</span> <span class="pre">==</span>
+<span class="pre">b'\n\n\x00\x00\x00\x00\x00\x00'</span></code> puts the separator inside
+the length prefix itself). A binary field’s value is counted out by
+its prefix and never inspected; a blank line – found by <em>reading</em> –
+starts the next entry, even an empty one behind a trailing separator.
+A line of nothing but NUL octets at the end of the entry is the
+block’s own 32-bit padding and ends it.</p>
+<p>The walk is strict (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1406">#1406</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1413">#1413</a>, the #1325 ruling
+that <code class="xref py py-class docutils literal notranslate"><span class="pre">OptionAreaField</span></code> applies to option areas). Any of the
+following raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>,
+and the whole entry is then kept as the octets captured, as the one
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> item of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.data" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, which the block’s <code class="docutils literal notranslate"><span class="pre">make</span></code> writes
+back verbatim:</p>
+<ul class="simple">
+<li><p>a line, text field or binary field name, with no terminating
+newline, e.g. a bare <code class="docutils literal notranslate"><span class="pre">KEY</span></code> at the end of the entry;</p></li>
+<li><p>a binary field whose 64-bit length prefix is cut short, or declares
+more octets than the entry has left – at <code class="docutils literal notranslate"><span class="pre">2**63</span></code> and above
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BytesIO.read()</span></code> would refuse it with a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OverflowError</span></code></a>;</p></li>
+<li><p>a binary field’s value not followed by the newline that
+terminates it, including one that ends the entry;</p></li>
+<li><p>any other entry that the parsed fields would not rebuild octet
+for octet, e.g. a field that is not UTF-8.</p></li>
+</ul>
+<p>A <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OverflowError</span></code></a> or
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> is neither one of
+<a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> nor an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so any of
+them would abort the whole extraction rather than this one entry.
+Field names, keys and values are therefore decoded with
+<code class="docutils literal notranslate"><span class="pre">errors='replace'</span></code> and reported, which the rebuild check then
+catches, rather than strictly.</p>
 </div>
 </dd></dl>
 
@@ -4993,8 +4966,27 @@ one outcome that must not survive it.</p>
 <dd class="field-even"><p>The journal entries.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If a binary field declares a length past the octets
-    left in the entry.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the entry is malformed, as <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.post_process" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>
+    lists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.dump_entries">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dump_entries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#SystemdJournalExportBlock.dump_entries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.dump_entries" title="Link to this definition">¶</a></dt>
+<dd><p>Serialise journal entries, without the block’s 32-bit padding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>entries</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]</span>) – The journal entries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each field as <code class="docutils literal notranslate"><span class="pre">KEY=value\n</span></code>, or for a binary value as the name,
+a newline, its 64-bit little-endian length, the value and a newline,
+with one blank line between entries.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -5195,6 +5187,27 @@ the custom data, its padding to a 32-bit boundary, and any options.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.PacketBlock.length2">
 <span class="sig-name descname"><span class="pre">length2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">length2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PacketBlock.length2" title="Link to this definition">¶</a></dt>
 <dd><p>Block total length.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.PacketBlock.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#PacketBlock.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PacketBlock.post_process" title="Link to this definition">¶</a></dt>
+<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Revised schema.</p>
+</dd>
+</dl>
+<p>A Block Total Length below the 32 octets of the fixed fields reads the
+trailing copy past the block, so the two are not compared here;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._read_block_short</span></code> keeps the block
+as captured and compares them itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1414">#1414</a>).</p>
 </dd></dl>
 
 </dd></dl>

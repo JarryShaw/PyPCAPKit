@@ -831,7 +831,9 @@ message names both. As with the port-keyed
 <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport.register" title="pcapkit.protocols.transport.transport.Transport.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.register</span></code></a> it
 overrides, an unresolved
 <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> incumbent
-counts as different from the class it names.</p>
+counts as different from the class it names; handing back the
+stored entry, or a descriptor equal to it, is a silent no-op
+that keeps it.</p>
 </dd>
 </dl>
 </dd></dl>

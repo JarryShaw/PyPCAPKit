@@ -2121,6 +2121,29 @@
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
+<div class="viewcode-block" id="EnhancedPacketBlock.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.post_process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        A Block Total Length below the 32 octets of the fixed fields reads the</span>
+<span class="sd">        trailing copy past the block, so the two are not compared here;</span>
+<span class="sd">        :meth:`PCAPNG._read_block_short</span>
+<span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short&gt;` keeps the block</span>
+<span class="sd">        as captured and compares them itself (:issue:`1414`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2138,17 +2161,20 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        ``min(original_len, snaplen)``, bounded by the octets the block holds</span>
-<span class="sd">        less its 16 framing octets. A block that holds more than the snaplen</span>
-<span class="sd">        and its padding keeps the excess as packet data instead, so no octet</span>
-<span class="sd">        is dropped and the trailing Block Total Length is read where it sits</span>
-<span class="sd">        (:issue:`1384`).</span>
+<span class="sd">        less its 16 framing octets. A block that holds more than that length</span>
+<span class="sd">        and its padding -- past the snaplen (:issue:`1384`) or past</span>
+<span class="sd">        ``original_len`` (:issue:`1414`) -- keeps the excess as packet data</span>
+<span class="sd">        instead, so no octet is dropped and the trailing Block Total Length is</span>
+<span class="sd">        read where it sits.</span>
 
 <span class="sd">    """</span>
     <span class="n">area</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">)</span>
     <span class="n">size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'original_len'</span><span class="p">],</span> <span class="n">area</span><span class="p">)</span>
     <span class="n">snaplen</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">snaplen</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="ow">and</span> <span class="n">area</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">snaplen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">snaplen</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
         <span class="n">size</span> <span class="o">=</span> <span class="n">snaplen</span>
+    <span class="k">if</span> <span class="n">area</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">area</span>
     <span class="k">return</span> <span class="n">size</span>
 
 
@@ -2626,108 +2652,52 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Two ways the entry data runs out mid-field are reported rather than</span>
-<span class="sd">            raised, for the reason :func:`nonnegative` gives: a bare</span>
-<span class="sd">            :exc:`struct.error` is neither one of</span>
-<span class="sd">            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it</span>
-<span class="sd">            would abort the whole extraction rather than this one entry.</span>
-
-<span class="sd">            A line of nothing but NUL octets is the block's own 32-bit padding</span>
-<span class="sd">            and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,</span>
-<span class="sd">            so those octets would survive it and be read as the *name* of a</span>
-<span class="sd">            binary field -- which would make every journal entry whose length is</span>
-<span class="sd">            not a multiple of four raise, valid or not, since the padding that</span>
-<span class="sd">            follows it has no 64-bit length prefix behind it to unpack. A</span>
-<span class="sd">            14-octet ``MESSAGE=hello\\n`` entry is as ordinary as this block</span>
-<span class="sd">            gets.</span>
-
-<span class="sd">            A name line whose 64-bit length prefix is itself cut short ends the</span>
-<span class="sd">            entry too. There is nothing to read past the end of the entry, so</span>
-<span class="sd">            stopping at it is what keeps the truncated block parsing.</span>
-
-<span class="sd">            A binary field's length is the widest declared length in the format,</span>
-<span class="sd">            and nothing else bounds it against the entry holding it: at ``2**63``</span>
-<span class="sd">            and above :meth:`io.BytesIO.read` refuses it outright with a bare</span>
-<span class="sd">            :exc:`OverflowError` (``cannot fit 'int' into an index-sized</span>
-<span class="sd">            integer``), and below that it silently returns whatever is there, so</span>
-<span class="sd">            the same malformed prefix would be either fatal or invisible</span>
-<span class="sd">            depending only on its magnitude. A length past the octets the entry</span>
-<span class="sd">            has left raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`</span>
-<span class="sd">            instead, and the whole entry is then kept as the octets captured, as</span>
-<span class="sd">            the one :obj:`bytes` item of :attr:`data`, which the block's ``make``</span>
-<span class="sd">            writes back verbatim. Clamping the field would rebuild a different</span>
-<span class="sd">            length prefix and a terminator that was never there (:issue:`1406`,</span>
-<span class="sd">            the #1325 ruling that :class:`OptionAreaField` applies to option</span>
-<span class="sd">            areas).</span>
-
-<span class="sd">            Field names, keys and values are decoded with ``errors='replace'``</span>
-<span class="sd">            rather than strictly. A non-UTF-8 octet in any of the three would</span>
-<span class="sd">            raise a bare :exc:`UnicodeDecodeError` -- a :exc:`ValueError`, so</span>
-<span class="sd">            foreign on both counts, and fatal to the whole extraction over one</span>
-<span class="sd">            bad octet in one field. ``'replace'`` is the option this module's own</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.strings.StringField` already takes for</span>
-<span class="sd">            the same problem, and a value that is not text is a value the writer</span>
-<span class="sd">            should have emitted as a *binary* field, so the entry is malformed</span>
-<span class="sd">            however it is read.</span>
-
 <span class="sd">            The entry is walked once, end to end, rather than split apart with</span>
 <span class="sd">            ``self.entry.split(b'\\n\\n')``: that delimits a *length-prefixed*</span>
 <span class="sd">            format by content, which a binary field's own bytes need no escaping</span>
-<span class="sd">            to defeat. A value that itself contains ``b'\\n\\n'`` would be cut</span>
-<span class="sd">            in the middle of its own data, turning what followed it into a bogus</span>
-<span class="sd">            field in a fabricated second entry; a value 2,570 octets long is</span>
-<span class="sd">            worse, since ``struct.pack('&lt;Q', 2570) ==</span>
-<span class="sd">            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside</span>
-<span class="sd">            the length prefix itself*. A length-prefixed field's bytes are never</span>
-<span class="sd">            inspected for structure, only counted out by the prefix that names</span>
-<span class="sd">            them, and a blank line -- found by *reading*, not by splitting -- is</span>
-<span class="sd">            what starts the next entry. The one-octet terminator that must follow</span>
-<span class="sd">            a binary field's value is checked, and a warning is raised when it is</span>
-<span class="sd">            missing.</span>
+<span class="sd">            to defeat (``struct.pack('&lt;Q', 2570) ==</span>
+<span class="sd">            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator inside</span>
+<span class="sd">            the length prefix itself). A binary field's value is counted out by</span>
+<span class="sd">            its prefix and never inspected; a blank line -- found by *reading* --</span>
+<span class="sd">            starts the next entry, even an empty one behind a trailing separator.</span>
+<span class="sd">            A line of nothing but NUL octets at the end of the entry is the</span>
+<span class="sd">            block's own 32-bit padding and ends it.</span>
 
-<span class="sd">            A trailing separator -- a blank line with nothing behind it -- is</span>
-<span class="sd">            tracked explicitly, so a blank line actually read, rather than the</span>
-<span class="sd">            block's own NUL padding or plain end of data, still starts the next</span>
-<span class="sd">            entry, even an empty one. Otherwise a rebuild would lose that one</span>
-<span class="sd">            octet and write a :attr:`length` one short of what was read.</span>
+<span class="sd">            The walk is strict (:issue:`1406`, :issue:`1413`, the #1325 ruling</span>
+<span class="sd">            that :class:`OptionAreaField` applies to option areas). Any of the</span>
+<span class="sd">            following raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,</span>
+<span class="sd">            and the whole entry is then kept as the octets captured, as the one</span>
+<span class="sd">            :obj:`bytes` item of :attr:`data`, which the block's ``make`` writes</span>
+<span class="sd">            back verbatim:</span>
 
-<span class="sd">            The NUL-only guard above ends the entry on a line of *nothing but*</span>
-<span class="sd">            NUL padding, but only catches it when the content ahead of the</span>
-<span class="sd">            padding ended with its own newline, which puts the padding on a line</span>
-<span class="sd">            by itself for :meth:`~io.BytesIO.readline` to return alone. An entry</span>
-<span class="sd">            whose last field is missing that trailing newline, as the format</span>
-<span class="sd">            requires, has no such separation: :meth:`readline` runs straight</span>
-<span class="sd">            through the field's own bytes and into the padding behind them,</span>
-<span class="sd">            returning both as one line, and :meth:`bytes.strip` still will not</span>
-<span class="sd">            take the NUL octets off since they are not ASCII whitespace.</span>
-<span class="sd">            :meth:`~io.BytesIO.readline` returns a line without its own trailing</span>
-<span class="sd">            newline only at end of stream, so a terminator-less line is</span>
-<span class="sd">            necessarily the buffer's last one; a binary field's *name* landing on</span>
-<span class="sd">            such a line fails its own 8-octet length-prefix read for the same</span>
-<span class="sd">            reason, nothing being left behind it to hold one, so the guard below</span>
-<span class="sd">            firing on that shape of line too is harmless. A binary field's</span>
-<span class="sd">            *value*, once its name and length prefix are known, is read by that</span>
-<span class="sd">            length prefix directly, never by scanning for a line ending, so real</span>
-<span class="sd">            block padding immediately behind one cannot land inside it this way:</span>
-<span class="sd">            the one-octet terminator check is always reached in that case, and</span>
-<span class="sd">            either reads the real separator newline and passes silently, or reads</span>
-<span class="sd">            padding's first octet instead, fails, and reports it. Block padding</span>
-<span class="sd">            is always 0-3 octets, whatever the last field turns out to be, so at</span>
-<span class="sd">            most the trailing three octets of a terminator-less line are stripped</span>
-<span class="sd">            as padding and warned about, and only when the line's own raw,</span>
-<span class="sd">            unstripped tail is itself NUL -- anything past three such octets, or a</span>
-<span class="sd">            line whose actual last octet is not NUL at all, cannot be padding and</span>
-<span class="sd">            is left as data. This cannot tell a padding octet from a text value</span>
-<span class="sd">            that itself legitimately ends in one -- NUL is valid UTF-8 -- but</span>
-<span class="sd">            that entry is already malformed for lacking the newline the format</span>
-<span class="sd">            mandates, and returning the block's own padding as field data is the</span>
-<span class="sd">            one outcome that must not survive it.</span>
+<span class="sd">            * a line, text field or binary field name, with no terminating</span>
+<span class="sd">              newline, e.g. a bare ``KEY`` at the end of the entry;</span>
+<span class="sd">            * a binary field whose 64-bit length prefix is cut short, or declares</span>
+<span class="sd">              more octets than the entry has left -- at ``2**63`` and above</span>
+<span class="sd">              :meth:`io.BytesIO.read` would refuse it with a bare</span>
+<span class="sd">              :exc:`OverflowError`;</span>
+<span class="sd">            * a binary field's value not followed by the newline that</span>
+<span class="sd">              terminates it, including one that ends the entry;</span>
+<span class="sd">            * any other entry that the parsed fields would not rebuild octet</span>
+<span class="sd">              for octet, e.g. a field that is not UTF-8.</span>
+
+<span class="sd">            A :exc:`struct.error`, :exc:`OverflowError` or</span>
+<span class="sd">            :exc:`UnicodeDecodeError` is neither one of</span>
+<span class="sd">            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so any of</span>
+<span class="sd">            them would abort the whole extraction rather than this one entry.</span>
+<span class="sd">            Field names, keys and values are therefore decoded with</span>
+<span class="sd">            ``errors='replace'`` and reported, which the rebuild check then</span>
+<span class="sd">            catches, rather than strictly.</span>
 
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_entries</span><span class="p">()</span>
+            <span class="n">rebuilt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dump_entries</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'list[OrderedMultiDict[str, str | bytes]]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">rebuilt</span><span class="p">,</span> <span class="n">rebuilt</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">rebuilt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'PCAP-NG: [systemd Journal Export] parsed entry does not '</span>
+                                    <span class="s1">'rebuild to the octets captured'</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">ProtocolError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">; journal entry of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) kept as captured'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -2744,8 +2714,8 @@
 <span class="sd">            The journal entries.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If a binary field declares a length past the octets</span>
-<span class="sd">                left in the entry.</span>
+<span class="sd">            ProtocolError: If the entry is malformed, as :meth:`post_process`</span>
+<span class="sd">                lists.</span>
 
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[OrderedMultiDict[str, str | bytes]]</span>
@@ -2756,99 +2726,74 @@
             <span class="c1"># a blank line that was actually *read* -- as opposed to the</span>
             <span class="c1"># block's own NUL padding, or simply running out of octets --</span>
             <span class="c1"># is the separator the format puts between entries, so it</span>
-            <span class="c1"># starts another one, even an empty one, however little is</span>
-            <span class="c1"># left behind it</span>
+            <span class="c1"># starts another one, even an empty one</span>
             <span class="n">separator</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">raw_line</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-                <span class="n">line</span> <span class="o">=</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
-                    <span class="n">separator</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">raw_line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">raw_line</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
+                    <span class="n">separator</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
                     <span class="k">break</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
-                    <span class="c1"># the format requires this line's own trailing newline,</span>
-                    <span class="c1"># and it is missing -- so nothing separates its data from</span>
-                    <span class="c1"># the block's 32-bit alignment padding that immediately</span>
-                    <span class="c1"># follows it, unlike the padding-only line above, which</span>
-                    <span class="c1"># only exists as its own line *because* a real newline</span>
-                    <span class="c1"># put it there. Padding is at most three octets (0-3, to</span>
-                    <span class="c1"># round the entry up to the next multiple of four), so at</span>
-                    <span class="c1"># most the last three octets of `line` can be it; strip</span>
-                    <span class="c1"># only that many. Anything past that cannot be padding</span>
-                    <span class="c1"># and is left as the data the sender actually sent.</span>
-                    <span class="c1">#</span>
-                    <span class="c1"># gated on the *raw*, unstripped line ending in NUL: pad</span>
-                    <span class="c1"># octets are the only NULs to strip, and it is `raw_line`,</span>
-                    <span class="c1"># not `line`, that names the entry's actual last octet.</span>
-                    <span class="c1"># `line` is `raw_line.strip()`, which has already dropped</span>
-                    <span class="c1"># ASCII whitespace from both ends -- so if the entry's</span>
-                    <span class="c1"># real last octet were itself whitespace, `line`'s tail</span>
-                    <span class="c1"># would no longer match `raw_line`'s, and NUL octets</span>
-                    <span class="c1"># further in would be mistaken for the tail. Padding is</span>
-                    <span class="c1"># always NUL, never whitespace, so a `raw_line` ending in</span>
-                    <span class="c1"># anything else -- ordinary trailing whitespace included</span>
-                    <span class="c1"># -- proves the true padding is zero, and nothing here</span>
-                    <span class="c1"># may be stripped.</span>
-                    <span class="c1"># the outer gate above already requires `raw_line` --</span>
-                    <span class="c1"># and therefore `line`, since `bytes.strip()` cannot</span>
-                    <span class="c1"># remove a trailing NUL -- to end in one, so this loop</span>
-                    <span class="c1"># always runs at least once and `pad_octets` is never 0</span>
-                    <span class="c1"># here; there is no zero-padding case left to guard</span>
-                    <span class="c1"># against once the gate has passed.</span>
-                    <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span>
-                    <span class="n">pad_octets</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">while</span> <span class="n">pad_octets</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">stripped</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
-                        <span class="n">stripped</span> <span class="o">=</span> <span class="n">stripped</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="n">pad_octets</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] entry field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
-                         <span class="sa">f</span><span class="s1">'has no terminating newline; treating its last '</span>
-                         <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">pad_octets</span><span class="si">}</span><span class="s1"> NUL octet(s) as the block</span><span class="se">\'</span><span class="s1">s own alignment '</span>
-                         <span class="s1">'padding, not data'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                    <span class="n">line</span> <span class="o">=</span> <span class="n">stripped</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] entry field </span><span class="si">{</span><span class="n">raw_line</span><span class="si">!r}</span><span class="s1"> '</span>
+                                        <span class="s1">'has no terminating newline'</span><span class="p">)</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">raw_line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="n">line_split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'='</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line_split</span>
                     <span class="n">entry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">prefix</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
-                             <span class="sa">f</span><span class="s1">'declares its length in </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) of the 8 it '</span>
-                             <span class="sa">f</span><span class="s1">'needs; ending the entry'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
-                             <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                        <span class="k">break</span>
+                    <span class="k">continue</span>
 
-                    <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: int</span>
-                    <span class="n">available</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
-                                            <span class="sa">f</span><span class="s1">'declares </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> left in its entry'</span><span class="p">)</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
+                                        <span class="sa">f</span><span class="s1">'declares its length in </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) of the 8 it needs'</span><span class="p">)</span>
 
-                    <span class="n">entry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: int</span>
+                <span class="n">available</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
+                                        <span class="sa">f</span><span class="s1">'declares </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> left in its entry'</span><span class="p">)</span>
+                <span class="n">entry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
 
-                    <span class="c1"># the one octet the format puts here to terminate the</span>
-                    <span class="c1"># field. the reader's position is well defined -- exactly</span>
-                    <span class="c1"># length + 1 octets past where the field name started --</span>
-                    <span class="c1"># so a bad octet here ends only this entry's field</span>
-                    <span class="c1"># collection: it does not abort the walk, which keeps</span>
-                    <span class="c1"># looking for the next entry's separator from here.</span>
-                    <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field '</span>
-                             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> is not followed by the newline that '</span>
-                             <span class="sa">f</span><span class="s1">'terminates it; ending the entry'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
-                             <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
+                                        <span class="s1">'is not followed by the newline that terminates it'</span><span class="p">)</span>
 
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">total</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">separator</span><span class="p">:</span>
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="SystemdJournalExportBlock.dump_entries">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.dump_entries">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dump_entries</span><span class="p">(</span><span class="n">entries</span><span class="p">:</span> <span class="s1">'list[OrderedMultiDict[str, str | bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Serialise journal entries, without the block's 32-bit padding.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entries: The journal entries.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Each field as ``KEY=value\\n``, or for a binary value as the name,</span>
+<span class="sd">            a newline, its 64-bit little-endian length, the value and a newline,</span>
+<span class="sd">            with one blank line between entries.</span>
+
+<span class="sd">        """</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="n">tmp_buf</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">tmp_buf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tmp_buf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s%s</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)),</span> <span class="n">val</span><span class="p">))</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SystemdJournalExportBlock._decode_text">
@@ -3211,6 +3156,29 @@
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PacketBlock.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.PacketBlock.post_process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        A Block Total Length below the 32 octets of the fixed fields reads the</span>
+<span class="sd">        trailing copy past the block, so the two are not compared here;</span>
+<span class="sd">        :meth:`PCAPNG._read_block_short</span>
+<span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short&gt;` keeps the block</span>
+<span class="sd">        as captured and compares them itself (:issue:`1414`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
