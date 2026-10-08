@@ -8,6 +8,7 @@ This module contains the implementation for PCAP-NG file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
+import collections
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
@@ -97,6 +98,9 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         _ctx: 'Context'
         #: File context storage.
         _ctx_list: 'list[Context]'
+        #: Number of non-packet blocks of each kind written so far, counted
+        #: across the whole file rather than per section.
+        _block_count: 'collections.Counter[str]'
 
     MAGIC_NUMBER = (
         b'\x0a\x0d\x0d\x0a',
@@ -129,6 +133,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     def __init__(self, extractor: 'Extractor') -> 'None':
         self._ctx = None  # type: ignore[assignment]
         self._ctx_list = []
+        self._block_count = collections.Counter()
 
         super().__init__(extractor)
 
@@ -214,19 +219,19 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
             elif block.info.type == Enum_BlockType.Interface_Description_Block:
                 self._ctx.interfaces.append(cast('Data_InterfaceDescriptionBlock', block.info))
-                self._write_file(block.info, name=f'Interface Description {len(self._ctx.interfaces)}')
+                self._write_file(block.info, name=self._block_name('Interface Description'))
 
             elif block.info.type == Enum_BlockType.Name_Resolution_Block:
                 self._ctx.names.append(cast('Data_NameResolutionBlock', block.info))
-                self._write_file(block.info, name=f'Name Resolution {len(self._ctx.names)}')
+                self._write_file(block.info, name=self._block_name('Name Resolution'))
 
             elif block.info.type == Enum_BlockType.systemd_Journal_Export_Block:
                 self._ctx.journals.append(cast('Data_SystemdJournalExportBlock', block.info))
-                self._write_file(block.info, name=f'systemd Journal Export {len(self._ctx.journals)}')
+                self._write_file(block.info, name=self._block_name('systemd Journal Export'))
 
             elif block.info.type == Enum_BlockType.Decryption_Secrets_Block:
                 self._ctx.secrets.append(cast('Data_DecryptionSecretsBlock', block.info))
-                self._write_file(block.info, name=f'Decryption Secrets {len(self._ctx.secrets)}')
+                self._write_file(block.info, name=self._block_name('Decryption Secrets'))
 
             elif block.info.type == Enum_BlockType.Interface_Statistics_Block:
                 # NOTE: The interface ID is bounds-checked while the block is
@@ -237,12 +242,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 isb_info = cast('Data_InterfaceStatisticsBlock', block.info)
                 self._ctx.statistics.append(isb_info)
 
-                self._write_file(isb_info, name=f'Interface Statistics {len(self._ctx.statistics)}')
+                self._write_file(isb_info, name=self._block_name('Interface Statistics'))
 
             elif block.info.type in (Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
                                     Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files):
                 self._ctx.custom.append(cast('Data_CustomBlock', block.info))
-                self._write_file(block.info, name=f'Custom {len(self._ctx.custom)}')
+                self._write_file(block.info, name=self._block_name('Custom'))
 
             elif block.info.type == Enum_BlockType.Enhanced_Packet_Block:
                 # NOTE: as for the ISB above, the interface ID has already been
@@ -267,7 +272,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
             else:
                 self._ctx.unknown.append(cast('Data_UnknownBlock', block.info))
-                self._write_file(block.info, name=f'Unknown {len(self._ctx.unknown)}')
+                self._write_file(block.info, name=self._block_name('Unknown'))
 
         # increment frame number
         ext._frnum += 1
@@ -310,6 +315,26 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _block_name(self, kind: 'str') -> 'str':
+        """Name the next non-packet block of the given kind.
+
+        The per-section context lists (e.g. ``Context.interfaces``) restart
+        with every Section Header Block, so numbering a block by their length
+        gives the first IDB of every section the same name. The output dumpers
+        key by name, so a repeated name overwrites the earlier block (#1256).
+        The number is therefore counted across the whole file instead; for a
+        single-section file it is the same number as before.
+
+        Args:
+            kind: The kind of the block, e.g. ``'Interface Description'``.
+
+        Returns:
+            The block name, ``'<kind> <n>'`` with ``n`` starting at 1.
+
+        """
+        self._block_count[kind] += 1
+        return f'{kind} {self._block_count[kind]}'
 
     def _write_file(self, block: 'Data_PCAPNG', *, name: 'str') -> 'None':
         """Write the parsed block into output file.
