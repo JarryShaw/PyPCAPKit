@@ -401,25 +401,10 @@ EXPECTED_FAILURES = {
     # path set. And an EPB, SPB or PB rebuilt from its data model lost its
     # packet data. All of them round-trip now.
 
-    # The two key-log secrets used to fail for #1271, which is fixed: lines
-    # ended with ``os.sep``, and the body carried ``datetime.now()``. That
-    # unmasked #1279: ``_make_block_dsb`` never pads the secrets data, so the
-    # newline-terminated logs this suite builds give a Block Total Length that
-    # is not a multiple of four. The logs' header comment embeds
-    # ``pcapkit.__version__``, so the length varies by release and the
-    # fragment names only the block and the check.
-    #
-    # A release whose version string happens to make the log a multiple of four
-    # octets long turns these 'OK' without #1279 being fixed. If they start
-    # passing, check the log length before deleting them.
-    **{
-        f'pcapng-secrets/{name}': Gap(
-            'CONSTRUCT', ('PCAP-NG: [Block 10]', 'invalid length'),
-            'pcapkit/protocols/misc/pcapng.py _make_block_dsb -- the block '
-            'length omits the pad that DecryptionSecretsBlock.padding_data in '
-            'pcapkit/protocols/schema/misc/pcapng.py reads (#1279)')
-        for name in ('TLS_Key_Log', 'WireGuard_Key_Log')
-    },
+    # The two key-log secrets failed for #1271 (``os.sep`` line endings and a
+    # ``datetime.now()`` body), then for #1279: ``_make_block_dsb`` never padded
+    # the secrets data, so a log whose length is not a multiple of four gave a
+    # Block Total Length that is not either. Both are fixed.
 }
 
 

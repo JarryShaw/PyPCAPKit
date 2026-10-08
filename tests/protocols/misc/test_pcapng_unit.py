@@ -2203,7 +2203,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._make_block_epb(packet_data=b'abcdef').captured_len, 6)
         self.assertEqual(pcapng._make_block_nrb().records, [])
         self.assertEqual(pcapng._make_block_systemd().entry, b'')
-        self.assertEqual(pcapng._make_block_systemd(entries=b'raw').entry, b'raw')
+        # the entry is zero-padded to 32 bits (#1280)
+        self.assertEqual(pcapng._make_block_systemd(entries=b'raw').entry, b'raw\x00')
         self.assertEqual(pcapng._make_block_packet(packet_data=b'abcdef').captured_length, 6)
 
         def assert_wrong_block(method: str, code: OptionType, correct: BlockType, **kwargs: object) -> None:

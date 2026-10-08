@@ -38,6 +38,7 @@ from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
@@ -243,6 +244,22 @@ def _option_key(code: 'Enum_OptionType') -> 'Union[Enum_OptionType, Tuple[str, i
     if code.opt_name:
         return (code.opt_name, code.opt_value)
     return code
+
+
+def _utf8_length(text: 'str') -> 'int':
+    """Return the number of octets a UTF-8 :class:`~pcapkit.corekit.fields.strings.StringField` packs ``text`` as.
+
+    Args:
+        text: String value; a :class:`~pcapkit.corekit.fields.strings.DecodedString`
+            packs as the octets it was decoded from.
+
+    Returns:
+        Length of the encoded value, in octets.
+
+    """
+    if isinstance(text, DecodedString):
+        return len(text.raw)
+    return len(text.encode('utf-8'))
 
 
 class PacketDirection(EnumLookup, enum.IntEnum):
@@ -1033,6 +1050,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             if self._ctx is not None:
                 self._byte = self._ctx.section.byteorder
                 packet['byteorder'] = self._byte
+                # NOTE: A Simple Packet Block's data is ``min(original_len,
+                # snaplen)`` octets, with the snaplen of interface 0.
+                # A snaplen of zero means no limit.
+                interfaces = getattr(self._ctx, 'interfaces', None)
+                if interfaces and interfaces[0].snaplen:
+                    packet.setdefault('snaplen', interfaces[0].snaplen)
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
 
         data = self.read(length, **kwargs)
@@ -2422,7 +2445,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed option data.
 
+        Raises:
+            ProtocolError: If the option is shorter than its 4-octet private
+                enterprise number, which Option Length includes.
+
         """
+        if schema.length < 4:
+            raise ProtocolError(f'PCAP-NG: [opt_custom] invalid length (expected at least 4, got {schema.length})')
+
         option = Data_CustomOption(
             type=schema.type,
             length=schema.length,
@@ -3806,10 +3836,16 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             if self._ctx is None:
                 snaplen = 0xFFFF_FFFF_FFFF_FFFF
             else:
-                snaplen = self._get_interface(interface_id).snaplen
+                # a snaplen of zero means no limit
+                snaplen = self._get_interface(interface_id).snaplen or 0xFFFF_FFFF_FFFF_FFFF
             captured_len = min(len(packet_data), snaplen)
         if original_len is None:
             original_len = len(packet_data)
+        # NOTE: Packet Data holds exactly Captured Packet Length octets, so a
+        # packet longer than that -- e.g. than the interface's snaplen -- is cut
+        # to it rather than written out whole behind a clipped length.
+        if len(packet_data) > captured_len:
+            packet_data = bytes(packet_data)[:captured_len]
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         if options is not None:
@@ -3851,6 +3887,16 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         if original_len is None:
             original_len = len(packet_data)
+        # NOTE: An SPB always belongs to interface 0, and its Packet Data is
+        # ``min(original_len, snaplen)`` octets long -- the length the parser
+        # reads back -- so a longer packet is cut to it.
+        if self._ctx is None or not self._ctx.interfaces:
+            snaplen = 0xFFFF_FFFF_FFFF_FFFF
+        else:
+            snaplen = self._ctx.interfaces[0].snaplen or 0xFFFF_FFFF_FFFF_FFFF
+        captured_len = min(original_len, snaplen)
+        if len(packet_data) > captured_len:
+            packet_data = bytes(packet_data)[:captured_len]
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         return Schema_SimplePacketBlock(
@@ -3980,6 +4026,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
                 temp.append(b''.join(tmp_buf))
             data = b'\n'.join(temp)
+        # NOTE: The entry MUST be zero-padded to 32 bits, and the Block Total
+        # Length counts that padding, as the ``entry`` field reads it back.
+        data += bytes(-len(data) % 4)
 
         return Schema_SystemdJournalExportBlock(
             length=len(data) + 12,
@@ -4038,7 +4087,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             secrets_data_val = secrets_data
         else:
             raise ProtocolError(f'PCAP-NG: [DSB] secrets {secrets_type_val} invalid format')
+        # NOTE: Secrets Length excludes the padding to the next 32-bit boundary,
+        # which ``padding_data`` writes and the block length has to include.
         secrets_length = len(secrets_data_val)
+        secrets_padded = secrets_length + -secrets_length % 4
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='dsb')
@@ -4046,12 +4098,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = [], 0
 
         return Schema_DecryptionSecretsBlock(
-            length=total_length + secrets_length + 20,
+            length=total_length + secrets_padded + 20,
             secrets_type=secrets_type_val,
             secrets_length=secrets_length,
             secrets_data=secrets_data_val,
             options=options_value,
-            length2=total_length + secrets_length + 20,
+            length2=total_length + secrets_padded + 20,
         )
 
     def _make_block_cb(self, block: 'Optional[Data_CustomBlock]' = None, *,
@@ -4148,10 +4200,16 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             if self._ctx is None:
                 snaplen = 0xFFFF_FFFF_FFFF_FFFF
             else:
-                snaplen = self._get_interface(interface_id).snaplen
+                # a snaplen of zero means no limit
+                snaplen = self._get_interface(interface_id).snaplen or 0xFFFF_FFFF_FFFF_FFFF
             captured_len = min(len(packet_data), snaplen)
         if original_len is None:
             original_len = len(packet_data)
+        # NOTE: Packet Data holds exactly Captured Packet Length octets, so a
+        # packet longer than that -- e.g. than the interface's snaplen -- is cut
+        # to it rather than written out whole behind a clipped length.
+        if len(packet_data) > captured_len:
+            packet_data = bytes(packet_data)[:captured_len]
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         if options is not None:
@@ -4328,7 +4386,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_CommentOption(
             type=type,
-            length=len(comment),
+            length=_utf8_length(comment),
             comment=comment,
         )
 
@@ -4387,7 +4445,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_NameOption(
             type=type,
-            length=len(name),
+            length=_utf8_length(name),
             name=name,
         )
 
@@ -4418,7 +4476,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_DescriptionOption(
             type=type,
-            length=len(description),
+            length=_utf8_length(description),
             description=description,
         )
 
@@ -4731,7 +4789,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_OSOption(
             type=type,
-            length=len(os),
+            length=_utf8_length(os),
             os=os,
         )
 
@@ -4824,7 +4882,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_HardwareOption(
             type=type,
-            length=len(hardware),
+            length=_utf8_length(hardware),
             hardware=hardware,
         )
 
@@ -5185,7 +5243,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_NS_DNSNameOption(
             type=type,
-            length=len(name),
+            length=_utf8_length(name),
             name=name,
         )
 
