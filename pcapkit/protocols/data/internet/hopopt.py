@@ -118,12 +118,14 @@ class CALIPSOOption(Option):
     level: 'int'
     #: Checksum.
     checksum: 'bytes'
+    #: Octets after the compartment bitmap that ``Opt Data Len`` covers.
+    pad: 'bytes'
 
     if TYPE_CHECKING:
         #: Compartment bitmap.
         cmpt_bitmap: 'bytes'
 
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes', pad: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class SMFDPDOption(Option):

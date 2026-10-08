@@ -469,12 +469,13 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
         BytesField(length=lambda pkt: pkt['cmpt_len'] * 4),
         lambda pkt: pkt['cmpt_len'] > 0,
     )
-    #: Padding.
-    pad: 'bytes' = PaddingField(length=calipso_pad_len)
+    #: Octets that ``Opt Data Len`` covers past the compartment bitmap, kept as
+    #: read rather than packed as zeros.
+    pad: 'bytes' = BytesField(length=calipso_pad_len, default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', domain: 'int', cmpt_len: 'int',
-                     level: 'int', checksum: 'bytes', bitmap: 'Optional[bytes]') -> 'None': ...
+                     level: 'int', checksum: 'bytes', bitmap: 'Optional[bytes]', pad: 'bytes' = ...) -> 'None': ...
 
 
 @schema_final
