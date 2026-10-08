@@ -109,6 +109,15 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             src=self._read_ipx_address(schema.src),
         )
 
+        # NOTE: Octets captured past the Packet Length belong to this layer,
+        # since its own length field is what leaves them out of the payload: an
+        # Ethernet carrier hands the whole rest of its frame here, padding
+        # included, and the rebuild keeps them as captured (:issue:`1433`).
+        if schema.trailer:
+            ipx.__update__([
+                ('trailer', schema.trailer),
+            ])
+
         return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)
 
     def make(self,
@@ -122,6 +131,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
              dst: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              src: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPX':
         """Make (construct) packet data.
 
@@ -137,6 +147,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             dst: Destination Address.
             src: Source Address.
             payload: Payload data.
+            trailer: Octets after the packet, outside the Packet Length, such as
+                link-layer padding; written as is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -156,6 +168,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             dst=dst,
             src=src,
             payload=payload,
+            trailer=trailer,
         )
 
     ##########################################################################
@@ -201,6 +214,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             'dst': cls._make_ipx_address(data.dst),
             'src': cls._make_ipx_address(data.src),
             'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Packet Length (:issue:`1433`).
+            'trailer': data.get('trailer', b''),
         }
 
     @staticmethod

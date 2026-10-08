@@ -34,7 +34,13 @@ class IPX(Schema):
     src: 'bytes' = BytesField(length=12)
     #: Payload.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['len'] - 30)
+    #: Octets captured past the Packet Length, such as Ethernet minimum-frame
+    #: padding. A :class:`~pcapkit.corekit.fields.misc.PayloadField` with no
+    #: length takes whatever the payload leaves on unpack and writes its value
+    #: verbatim on pack, so the octets survive whatever they hold.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, chksum: 'bytes', len: 'int', count: 'int', type: 'Enum_Packet',
-                     dst: 'bytes', src: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     dst: 'bytes', src: 'bytes', payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> 'None': ...

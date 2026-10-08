@@ -53,4 +53,8 @@ class IPX(Protocol):
     src: 'Address'
 
     if TYPE_CHECKING:
+        #: Octets captured past the Packet Length, present only when there are
+        #: any.
+        trailer: 'bytes'
+
         def __init__(self, chksum: 'bytes', len: 'int', count: 'int', type: 'Packet', dst: 'Address', src: 'Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
