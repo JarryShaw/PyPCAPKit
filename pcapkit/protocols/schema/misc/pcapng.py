@@ -1502,6 +1502,26 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        A Block Total Length below the 32 octets of the fixed fields reads the
+        trailing copy past the block, so the two are not compared here;
+        :meth:`PCAPNG._read_block_short
+        <pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short>` keeps the block
+        as captured and compares them itself (:issue:`1414`).
+
+        """
+        if self.length < 32:
+            return self
+        return super().post_process(packet)
+
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', timestamp_high: 'int',
                      timestamp_low: 'int', captured_len: 'int', original_len: 'int',
@@ -1518,17 +1538,20 @@ def _spb_data_length(packet: 'dict[str, Any]') -> 'int':
 
     Returns:
         ``min(original_len, snaplen)``, bounded by the octets the block holds
-        less its 16 framing octets. A block that holds more than the snaplen
-        and its padding keeps the excess as packet data instead, so no octet
-        is dropped and the trailing Block Total Length is read where it sits
-        (:issue:`1384`).
+        less its 16 framing octets. A block that holds more than that length
+        and its padding -- past the snaplen (:issue:`1384`) or past
+        ``original_len`` (:issue:`1414`) -- keeps the excess as packet data
+        instead, so no octet is dropped and the trailing Block Total Length is
+        read where it sits.
 
     """
     area = max(0, packet['length'] - 16)
     size = min(packet['original_len'], area)
     snaplen = packet.get('snaplen')
-    if snaplen is not None and snaplen < size and area <= (snaplen + 3) // 4 * 4:
+    if snaplen is not None and snaplen < size:
         size = snaplen
+    if area > (size + 3) // 4 * 4:
+        size = area
     return size
 
 
@@ -1933,108 +1956,52 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             Revised schema.
 
         Note:
-            Two ways the entry data runs out mid-field are reported rather than
-            raised, for the reason :func:`nonnegative` gives: a bare
-            :exc:`struct.error` is neither one of
-            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it
-            would abort the whole extraction rather than this one entry.
-
-            A line of nothing but NUL octets is the block's own 32-bit padding
-            and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,
-            so those octets would survive it and be read as the *name* of a
-            binary field -- which would make every journal entry whose length is
-            not a multiple of four raise, valid or not, since the padding that
-            follows it has no 64-bit length prefix behind it to unpack. A
-            14-octet ``MESSAGE=hello\\n`` entry is as ordinary as this block
-            gets.
-
-            A name line whose 64-bit length prefix is itself cut short ends the
-            entry too. There is nothing to read past the end of the entry, so
-            stopping at it is what keeps the truncated block parsing.
-
-            A binary field's length is the widest declared length in the format,
-            and nothing else bounds it against the entry holding it: at ``2**63``
-            and above :meth:`io.BytesIO.read` refuses it outright with a bare
-            :exc:`OverflowError` (``cannot fit 'int' into an index-sized
-            integer``), and below that it silently returns whatever is there, so
-            the same malformed prefix would be either fatal or invisible
-            depending only on its magnitude. A length past the octets the entry
-            has left raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
-            instead, and the whole entry is then kept as the octets captured, as
-            the one :obj:`bytes` item of :attr:`data`, which the block's ``make``
-            writes back verbatim. Clamping the field would rebuild a different
-            length prefix and a terminator that was never there (:issue:`1406`,
-            the #1325 ruling that :class:`OptionAreaField` applies to option
-            areas).
-
-            Field names, keys and values are decoded with ``errors='replace'``
-            rather than strictly. A non-UTF-8 octet in any of the three would
-            raise a bare :exc:`UnicodeDecodeError` -- a :exc:`ValueError`, so
-            foreign on both counts, and fatal to the whole extraction over one
-            bad octet in one field. ``'replace'`` is the option this module's own
-            :class:`~pcapkit.corekit.fields.strings.StringField` already takes for
-            the same problem, and a value that is not text is a value the writer
-            should have emitted as a *binary* field, so the entry is malformed
-            however it is read.
-
             The entry is walked once, end to end, rather than split apart with
             ``self.entry.split(b'\\n\\n')``: that delimits a *length-prefixed*
             format by content, which a binary field's own bytes need no escaping
-            to defeat. A value that itself contains ``b'\\n\\n'`` would be cut
-            in the middle of its own data, turning what followed it into a bogus
-            field in a fabricated second entry; a value 2,570 octets long is
-            worse, since ``struct.pack('<Q', 2570) ==
-            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside
-            the length prefix itself*. A length-prefixed field's bytes are never
-            inspected for structure, only counted out by the prefix that names
-            them, and a blank line -- found by *reading*, not by splitting -- is
-            what starts the next entry. The one-octet terminator that must follow
-            a binary field's value is checked, and a warning is raised when it is
-            missing.
+            to defeat (``struct.pack('<Q', 2570) ==
+            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator inside
+            the length prefix itself). A binary field's value is counted out by
+            its prefix and never inspected; a blank line -- found by *reading* --
+            starts the next entry, even an empty one behind a trailing separator.
+            A line of nothing but NUL octets at the end of the entry is the
+            block's own 32-bit padding and ends it.
 
-            A trailing separator -- a blank line with nothing behind it -- is
-            tracked explicitly, so a blank line actually read, rather than the
-            block's own NUL padding or plain end of data, still starts the next
-            entry, even an empty one. Otherwise a rebuild would lose that one
-            octet and write a :attr:`length` one short of what was read.
+            The walk is strict (:issue:`1406`, :issue:`1413`, the #1325 ruling
+            that :class:`OptionAreaField` applies to option areas). Any of the
+            following raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+            and the whole entry is then kept as the octets captured, as the one
+            :obj:`bytes` item of :attr:`data`, which the block's ``make`` writes
+            back verbatim:
 
-            The NUL-only guard above ends the entry on a line of *nothing but*
-            NUL padding, but only catches it when the content ahead of the
-            padding ended with its own newline, which puts the padding on a line
-            by itself for :meth:`~io.BytesIO.readline` to return alone. An entry
-            whose last field is missing that trailing newline, as the format
-            requires, has no such separation: :meth:`readline` runs straight
-            through the field's own bytes and into the padding behind them,
-            returning both as one line, and :meth:`bytes.strip` still will not
-            take the NUL octets off since they are not ASCII whitespace.
-            :meth:`~io.BytesIO.readline` returns a line without its own trailing
-            newline only at end of stream, so a terminator-less line is
-            necessarily the buffer's last one; a binary field's *name* landing on
-            such a line fails its own 8-octet length-prefix read for the same
-            reason, nothing being left behind it to hold one, so the guard below
-            firing on that shape of line too is harmless. A binary field's
-            *value*, once its name and length prefix are known, is read by that
-            length prefix directly, never by scanning for a line ending, so real
-            block padding immediately behind one cannot land inside it this way:
-            the one-octet terminator check is always reached in that case, and
-            either reads the real separator newline and passes silently, or reads
-            padding's first octet instead, fails, and reports it. Block padding
-            is always 0-3 octets, whatever the last field turns out to be, so at
-            most the trailing three octets of a terminator-less line are stripped
-            as padding and warned about, and only when the line's own raw,
-            unstripped tail is itself NUL -- anything past three such octets, or a
-            line whose actual last octet is not NUL at all, cannot be padding and
-            is left as data. This cannot tell a padding octet from a text value
-            that itself legitimately ends in one -- NUL is valid UTF-8 -- but
-            that entry is already malformed for lacking the newline the format
-            mandates, and returning the block's own padding as field data is the
-            one outcome that must not survive it.
+            * a line, text field or binary field name, with no terminating
+              newline, e.g. a bare ``KEY`` at the end of the entry;
+            * a binary field whose 64-bit length prefix is cut short, or declares
+              more octets than the entry has left -- at ``2**63`` and above
+              :meth:`io.BytesIO.read` would refuse it with a bare
+              :exc:`OverflowError`;
+            * a binary field's value not followed by the newline that
+              terminates it, including one that ends the entry;
+            * any other entry that the parsed fields would not rebuild octet
+              for octet, e.g. a field that is not UTF-8.
+
+            A :exc:`struct.error`, :exc:`OverflowError` or
+            :exc:`UnicodeDecodeError` is neither one of
+            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so any of
+            them would abort the whole extraction rather than this one entry.
+            Field names, keys and values are therefore decoded with
+            ``errors='replace'`` and reported, which the rebuild check then
+            catches, rather than strictly.
 
         """
         self = cast('Self', super().post_process(packet))
 
         try:
             self.data = self._read_entries()
+            rebuilt = self.dump_entries(cast('list[OrderedMultiDict[str, str | bytes]]', self.data))
+            if self.entry not in (rebuilt, rebuilt + bytes(-len(rebuilt) % 4)):
+                raise ProtocolError('PCAP-NG: [systemd Journal Export] parsed entry does not '
+                                    'rebuild to the octets captured')
         except ProtocolError as error:
             warn(f'{error}; journal entry of {len(self.entry)} octet(s) kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
@@ -2048,8 +2015,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             The journal entries.
 
         Raises:
-            ProtocolError: If a binary field declares a length past the octets
-                left in the entry.
+            ProtocolError: If the entry is malformed, as :meth:`post_process`
+                lists.
 
         """
         data = []  # type: list[OrderedMultiDict[str, str | bytes]]
@@ -2060,99 +2027,71 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             # a blank line that was actually *read* -- as opposed to the
             # block's own NUL padding, or simply running out of octets --
             # is the separator the format puts between entries, so it
-            # starts another one, even an empty one, however little is
-            # left behind it
+            # starts another one, even an empty one
             separator = False
 
             while True:
                 raw_line = entry_data.readline()
-                line = raw_line.strip()
-                if not line:
-                    separator = bool(raw_line)
+                if raw_line == b'\n':
+                    separator = True
                     break
-                if not line.strip(b'\x00'):
+                if not raw_line.strip(b'\x00'):
                     break
-
-                if not raw_line.endswith(b'\n') and raw_line.endswith(b'\x00'):
-                    # the format requires this line's own trailing newline,
-                    # and it is missing -- so nothing separates its data from
-                    # the block's 32-bit alignment padding that immediately
-                    # follows it, unlike the padding-only line above, which
-                    # only exists as its own line *because* a real newline
-                    # put it there. Padding is at most three octets (0-3, to
-                    # round the entry up to the next multiple of four), so at
-                    # most the last three octets of `line` can be it; strip
-                    # only that many. Anything past that cannot be padding
-                    # and is left as the data the sender actually sent.
-                    #
-                    # gated on the *raw*, unstripped line ending in NUL: pad
-                    # octets are the only NULs to strip, and it is `raw_line`,
-                    # not `line`, that names the entry's actual last octet.
-                    # `line` is `raw_line.strip()`, which has already dropped
-                    # ASCII whitespace from both ends -- so if the entry's
-                    # real last octet were itself whitespace, `line`'s tail
-                    # would no longer match `raw_line`'s, and NUL octets
-                    # further in would be mistaken for the tail. Padding is
-                    # always NUL, never whitespace, so a `raw_line` ending in
-                    # anything else -- ordinary trailing whitespace included
-                    # -- proves the true padding is zero, and nothing here
-                    # may be stripped.
-                    # the outer gate above already requires `raw_line` --
-                    # and therefore `line`, since `bytes.strip()` cannot
-                    # remove a trailing NUL -- to end in one, so this loop
-                    # always runs at least once and `pad_octets` is never 0
-                    # here; there is no zero-padding case left to guard
-                    # against once the gate has passed.
-                    stripped = line
-                    pad_octets = 0
-                    while pad_octets < 3 and stripped.endswith(b'\x00'):
-                        stripped = stripped[:-1]
-                        pad_octets += 1
-                    warn(f'PCAP-NG: [systemd Journal Export] entry field {line!r} '
-                         f'has no terminating newline; treating its last '
-                         f'{pad_octets} NUL octet(s) as the block\'s own alignment '
-                         'padding, not data', SchemaWarning, stacklevel=stacklevel())
-                    line = stripped
+                if not raw_line.endswith(b'\n'):
+                    raise ProtocolError(f'PCAP-NG: [systemd Journal Export] entry field {raw_line!r} '
+                                        'has no terminating newline')
+                line = raw_line[:-1]
 
                 line_split = line.split(b'=', maxsplit=1)
                 if len(line_split) == 2:
                     key, value = line_split
                     entry.add(self._decode_text(key), self._decode_text(value))
-                else:
-                    prefix = entry_data.read(8)
-                    if len(prefix) < 8:
-                        warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
-                             f'declares its length in {len(prefix)} octet(s) of the 8 it '
-                             f'needs; ending the entry', SchemaWarning,
-                             stacklevel=stacklevel())
-                        break
+                    continue
 
-                    length = struct.unpack('<Q', prefix)[0]  # type: int
-                    available = total - entry_data.tell()
-                    if length > available:
-                        raise ProtocolError(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
-                                            f'declares {length} octet(s) with {available} left in its entry')
+                prefix = entry_data.read(8)
+                if len(prefix) < 8:
+                    raise ProtocolError(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                                        f'declares its length in {len(prefix)} octet(s) of the 8 it needs')
 
-                    entry.add(self._decode_text(line), entry_data.read(length))
+                length = struct.unpack('<Q', prefix)[0]  # type: int
+                available = total - entry_data.tell()
+                if length > available:
+                    raise ProtocolError(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                                        f'declares {length} octet(s) with {available} left in its entry')
+                entry.add(self._decode_text(line), entry_data.read(length))
 
-                    # the one octet the format puts here to terminate the
-                    # field. the reader's position is well defined -- exactly
-                    # length + 1 octets past where the field name started --
-                    # so a bad octet here ends only this entry's field
-                    # collection: it does not abort the walk, which keeps
-                    # looking for the next entry's separator from here.
-                    terminator = entry_data.read(1)
-                    if terminator != b'\n':
-                        warn(f'PCAP-NG: [systemd Journal Export] binary field '
-                             f'{line!r} is not followed by the newline that '
-                             f'terminates it; ending the entry', SchemaWarning,
-                             stacklevel=stacklevel())
-                        break
+                if entry_data.read(1) != b'\n':
+                    raise ProtocolError(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                                        'is not followed by the newline that terminates it')
 
             data.append(entry)
             if entry_data.tell() >= total and not separator:
                 break
         return data
+
+    @staticmethod
+    def dump_entries(entries: 'list[OrderedMultiDict[str, str | bytes]]') -> 'bytes':
+        """Serialise journal entries, without the block's 32-bit padding.
+
+        Args:
+            entries: The journal entries.
+
+        Returns:
+            Each field as ``KEY=value\\n``, or for a binary value as the name,
+            a newline, its 64-bit little-endian length, the value and a newline,
+            with one blank line between entries.
+
+        """
+        temp = []  # type: list[bytes]
+        for entry in entries:
+            tmp_buf = []  # type: list[bytes]
+            for key, val in entry.items(multi=True):
+                if isinstance(val, str):
+                    tmp_buf.append(f'{key}={val}\n'.encode())
+                else:
+                    tmp_buf.append(b'%s\n%s%s\n' % (key.encode(), struct.pack('<Q', len(val)), val))
+            temp.append(b''.join(tmp_buf))
+        return b'\n'.join(temp)
 
     @staticmethod
     def _decode_text(octets: 'bytes') -> 'str':
@@ -2469,6 +2408,26 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
         length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        A Block Total Length below the 32 octets of the fixed fields reads the
+        trailing copy past the block, so the two are not compared here;
+        :meth:`PCAPNG._read_block_short
+        <pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short>` keeps the block
+        as captured and compares them itself (:issue:`1414`).
+
+        """
+        if self.length < 32:
+            return self
+        return super().post_process(packet)
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', drop_count: 'int',

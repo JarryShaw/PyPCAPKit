@@ -660,6 +660,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     Enum_BlockType.Simple_Packet_Block,
                     Enum_BlockType.Packet_Block)
 
+    #: Packet blocks whose fixed fields span 32 octets, so that a shorter Block
+    #: Total Length is kept as captured (see :meth:`_read_block_short`).
+    SHORT_PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
+                          Enum_BlockType.Packet_Block)
+
     #: Blocks that resolve an interface of their section, mapped to the tag used
     #: when reporting an interface ID that names no such interface. A Simple
     #: Packet Block carries no interface ID field and always refers to the
@@ -1240,7 +1245,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             self._ctx = None
 
         name = self._lookup_registry(self.__block__, schema.type)
-        if isinstance(name, str):
+        if schema.type in self.SHORT_PACKET_TYPES and schema.block.length < 32:
+            meth = cast('BlockParser', self._read_block_short)
+        elif isinstance(name, str):
             meth_name = f'_read_block_{name}'
             meth = cast('BlockParser',
                         getattr(self, meth_name, self._read_block_unknown))
@@ -1512,7 +1519,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         See Also:
             This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
 
+        Note:
+            A packet block kept as captured has no payload (see
+            :meth:`_read_block_short`).
+
         """
+        if isinstance(self.__header__.block, Schema_UnknownBlock):
+            return b''
         return self.__header__.block.get_payload()
 
     @staticmethod
@@ -2168,6 +2181,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             warn(f'PCAP-NG: [Block {header.type}] packet data of {data.captured_len} octet(s) '
                  f'exceeds the snaplen of {snaplen}; kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
+        # NOTE: Likewise for more packet data than the original length, padding
+        # aside (:issue:`1414`).
+        if data.captured_len > (data.original_len + 3) // 4 * 4:
+            warn(f'PCAP-NG: [Block {header.type}] packet data of {data.captured_len} octet(s) '
+                 f'exceeds the original length of {data.original_len}; kept as captured',
+                 ProtocolWarning, stacklevel=stacklevel())
         return self._decode_next_layer(data, self._get_linktype(0), data.captured_len)  # type: ignore[return-value]
 
     def _read_block_nrb(self, schema: 'Schema_NameResolutionBlock', *,
@@ -2491,6 +2510,71 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                  ProtocolWarning, stacklevel=stacklevel())
         return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
                                        schema.captured_length)  # type: ignore[return-value]
+
+    def _read_block_short(self, schema: 'Schema_EnhancedPacketBlock | Schema_PacketBlock | Schema_UnknownBlock', *,
+                          header: 'Schema_PCAPNG') -> 'Data_EnhancedPacketBlock | Data_PacketBlock':
+        """Read a PCAP-NG EPB or packet block (obsolete) shorter than its fixed fields.
+
+        The fixed fields of either block span 32 octets, so a smaller Block
+        Total Length cannot hold them.
+
+        Args:
+            schema: Parsed block schema, or on the construction path the
+                :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` that
+                :meth:`_make_block_short` built.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data, with the fixed fields the block holds and zero
+            for those it does not, no packet data and no options. The block body
+            is kept as ``block_raw``, which the block's ``make`` writes back
+            verbatim, so the block rebuilds at the length it declared
+            (:issue:`1414`).
+
+        """
+        if isinstance(schema, Schema_UnknownBlock):
+            body = schema.body
+        else:
+            # the octets unpacked for the fixed fields, which start with the
+            # Block Total Length and run past the end of the block
+            octets = bytes(schema)
+            body = octets[4:schema.length - 8]
+            warn(f'PCAP-NG: [Block {header.type}] block length {schema.length} is below the '
+                 f'32-octet minimum; kept as captured', ProtocolWarning, stacklevel=stacklevel())
+            if octets[schema.length - 8:schema.length - 4] != octets[:4]:
+                warn(f'PCAP-NG: [Block {header.type}] block length mismatch: {schema.length} != '
+                     f'{octets[schema.length - 8:schema.length - 4].hex()}', ProtocolWarning,
+                     stacklevel=stacklevel())
+
+        endian = '<' if self._byte == 'little' else '>'
+        fields = (body + bytes(20))[:20]
+        drop_count = 0
+        if header.type == Enum_BlockType.Packet_Block:
+            interface_id, drop_count, timestamp_high, timestamp_low, captured_len, original_len = \
+                struct.unpack(f'{endian}HHIIII', fields)
+        else:
+            interface_id, timestamp_high, timestamp_low, captured_len, original_len = \
+                struct.unpack(f'{endian}IIIII', fields)
+        timestamp, timestamp_epoch = self._read_timestamp(timestamp_high, timestamp_low,
+                                                          interface_id=interface_id)
+
+        kwargs = {
+            'type': header.type,
+            'length': schema.length,
+            'section_number': self._sect,
+            'number': self._fnum,
+            'interface_id': interface_id,
+            'timestamp': timestamp,
+            'timestamp_epoch': timestamp_epoch,
+            'captured_len': captured_len,
+            'original_len': original_len,
+            'options': self._read_pcapng_options([]),
+        }  # type: dict[str, Any]
+        data = (Data_PacketBlock(drop_count=drop_count, **kwargs)
+                if header.type == Enum_BlockType.Packet_Block
+                else Data_EnhancedPacketBlock(**kwargs))  # type: Data_EnhancedPacketBlock | Data_PacketBlock
+        data.__update__([('block_raw', body)])
+        return self._decode_next_layer(data, self._get_linktype(interface_id), 0)  # type: ignore[return-value]
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.
@@ -4034,6 +4118,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed block schema.
 
         """
+        if block is not None and hasattr(block, 'block_raw'):
+            return self._make_block_short(block)  # type: ignore[return-value]
         if block is not None:
             interface_id = block.interface_id
             timestamp = block.timestamp_epoch
@@ -4119,6 +4205,19 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             packet_data=packet_data,
             length2=packet_len + 16,
         )
+
+    def _make_block_short(self, block: 'Data_EnhancedPacketBlock | Data_PacketBlock') -> 'Schema_UnknownBlock':
+        """Make a PCAP-NG EPB or packet block (obsolete) kept as captured.
+
+        Args:
+            block: Block data model, whose ``block_raw`` holds the body of a
+                block shorter than its fixed fields (see :meth:`_read_block_short`).
+
+        Returns:
+            Constructed block schema, the body written back verbatim.
+
+        """
+        return self._make_block_unknown(data=block.block_raw)  # type: ignore[union-attr]
 
     def _make_block_nrb(self, block: 'Optional[Data_NameResolutionBlock]' = None, *,
                         records: 'Optional[Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]]' = None,
@@ -4224,23 +4323,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         elif isinstance(entries, bytes):
             data = entries
         else:
-            temp = []  # type: list[bytes]
-            for entry in entries:
-                tmp_buf = []  # type: list[bytes]
-
-                for key, val in entry.items(multi=True):
-                    if isinstance(val, str):
-                        buf = f'{key}={val}\n'.encode()
-                    else:
-                        buf = b'%s\n%s%s\n' % (
-                            key.encode(),
-                            struct.pack('<Q', len(val)),
-                            val,
-                        )
-                    tmp_buf.append(buf)
-
-                temp.append(b''.join(tmp_buf))
-            data = b'\n'.join(temp)
+            data = Schema_SystemdJournalExportBlock.dump_entries(entries)
         # NOTE: The entry MUST be zero-padded to 32 bits, and the Block Total
         # Length counts that padding, as the ``entry`` field reads it back.
         data += bytes(-len(data) % 4)
@@ -4401,6 +4484,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
              'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
 
+        if block is not None and hasattr(block, 'block_raw'):
+            return self._make_block_short(block)  # type: ignore[return-value]
         if block is not None:
             interface_id = block.interface_id
             drop_count = block.drop_count
