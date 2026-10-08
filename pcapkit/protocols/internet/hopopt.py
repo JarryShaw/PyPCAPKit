@@ -755,7 +755,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         """
         if schema.len < 8 and schema.len % 8 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-        if schema.cmpt_len % 2 != 0:
+        # ``Cmpt Length`` counts 32-bit words and may be odd [:rfc:`5570#section-5.2`];
+        # it only has to fit inside ``Opt Data Len``
+        if schema.len < 8 + schema.cmpt_len * 4:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_CALIPSOOption(
@@ -1584,9 +1586,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             domain: CALIPSO domain of interpretation
             level: sensitivity level
             checksum: checksum of the option
-            bitmap: compartment bitmap, as :obj:`bytes` or as the
-                :obj:`tuple` of octets the reader stores; its length must be a
-                multiple of 4 octets
+            bitmap: compartment bitmap, as a bytes-like object or as an
+                iterable of octets, such as the :obj:`tuple` the reader stores;
+                its length must be a multiple of 4 octets
             pad: octets after the compartment bitmap, counted in ``Opt Data Len``
             **kwargs: arbitrary keyword arguments
 
@@ -1594,7 +1596,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the bitmap is not a whole number of 32-bit words.
+            ProtocolError: If the bitmap is not bytes-like or an iterable of
+                octets, or is not a whole number of 32-bit words, if ``pad`` is not :obj:`bytes`,
+                or if the option data would exceed the 255 octets
+                ``Opt Data Len`` can count.
 
         Note:
             ``Cmpt Length`` on the wire counts 32-bit words [:rfc:`5570#section-5.1`],
@@ -1607,10 +1612,34 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
             pad = opt.pad
-        bitmap_bytes = bytes(bitmap) if bitmap is not None else b''
+        if bitmap is None:
+            bitmap_bytes = b''
+        elif isinstance(bitmap, (int, str)):
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap type: '
+                                f'{type(bitmap).__name__}')
+        else:
+            try:  # bytes-like object
+                bitmap_bytes = bytes(memoryview(bitmap))
+            except TypeError:  # iterable of octets
+                try:
+                    octets = tuple(bitmap)
+                except TypeError as exc:
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap type: '
+                                        f'{type(bitmap).__name__}') from exc
+                for octet in octets:
+                    if isinstance(octet, bool) or not isinstance(octet, int) or not 0 <= octet <= 255:
+                        raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap '
+                                            f'octet: {octet!r}')
+                bitmap_bytes = bytes(octets)
         if len(bitmap_bytes) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap length: '
                                 f'{len(bitmap_bytes)}')
+        if not isinstance(pad, (bytes, bytearray)):
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO pad type: '
+                                f'{type(pad).__name__}')
+        if 8 + len(bitmap_bytes) + len(pad) > 255:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] too long CALIPSO option data: '
+                                f'{8 + len(bitmap_bytes) + len(pad)}')
 
         return Schema_CALIPSOOption(
             type=code,
