@@ -60,8 +60,8 @@ class IPv6(Protocol):
         hdr_len: 'int'
         #: Raw payload length (excluding extension headers).
         raw_len: 'int'
-        #: Octets captured past the Payload Length, present only when there
-        #: are any.
+        #: Octets captured past the Payload Length -- or, for a jumbogram,
+        #: past the Jumbo Payload Length -- present only when there are any.
         trailer: 'bytes'
         #: Extension header chain, in wire order, as pairs of the parser
         #: class and its info. Kept apart from the per-header keys above,

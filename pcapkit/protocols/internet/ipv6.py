@@ -36,7 +36,10 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.utilities.decorators import beholder
+from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -215,6 +218,23 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 'trailer': schema.trailer,
             })
 
+        # NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero
+        # Payload Length, c.f. :meth:`Schema_IPv6.post_process
+        # <pcapkit.protocols.schema.internet.ipv6.IPv6.post_process>`
+        # (:issue:`1434`). :rfc:`2675#section-2` makes a Jumbo Payload option
+        # beside a non-zero Payload Length an error; such a packet is still
+        # kept as captured, with the Payload Length deciding its extent, since
+        # that is what the receiver had to go by.
+        extent = schema.length
+        jumbo = jumbo_payload_length(schema.next, schema.get_payload() + schema.trailer)
+        if jumbo is not None:
+            if schema.length == 0:
+                extent = jumbo
+            else:
+                warn(f'{self.alias}: Jumbo Payload option with non-zero Payload Length '
+                     f'{schema.length}; ignoring the Jumbo Payload Length {jumbo}',
+                     ProtocolWarning, stacklevel=stacklevel())
+
         # update packet info
         if __packet__ is None:
             __packet__ = {}
@@ -223,7 +243,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'dst': ipv6.dst,
         })
 
-        return self._decode_next_layer(ipv6, schema.next, ipv6.payload, packet=__packet__)  # pylint: disable=no-member
+        return self._decode_next_layer(ipv6, schema.next, extent, packet=__packet__)  # pylint: disable=no-member
 
     def make(self,
              traffic_class: 'int' = 0,
@@ -252,7 +272,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             src: Source IP address.
             dst: Destination IP address.
             payload_length: Length of the payload, extension headers included;
-                computed from the payload when omitted.
+                computed from the payload when omitted, and zero (a jumbogram)
+                if that exceeds 65,535 octets.
             payload: Payload data.
             trailer: Octets after the packet, outside the Payload Length, such
                 as link-layer padding; written as is.
@@ -269,9 +290,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
         # length the sender declared instead of the one that was recorded
         # (:issue:`1155`). Computed from the octets at hand otherwise, which is
-        # what a plain ``IPv6(payload=...)`` wants.
+        # what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too
+        # long for the field, i.e. a jumbogram, whose length the caller carries
+        # in a Jumbo Payload option of ``payload``'s Hop-by-Hop Options header
+        # (:rfc:`2675#section-2`).
         if payload_length is None:
             payload_length = len(payload)
+            if payload_length > 0xFFFF:
+                payload_length = 0
 
         return Schema_IPv6(
             hextet={
@@ -401,7 +427,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase] # pylint: disable=attribute-defined-outside-init
 
         hdr_len = self.length       # header length
-        raw_len = ipv6.payload      # payload length
+        raw_len = ipv6.payload if length is None else length  # payload length
         _protos = []                # ProtoChain buffer
         _exthdr = []                # (parser class, info) per extension header
 
