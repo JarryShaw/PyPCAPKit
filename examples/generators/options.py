@@ -99,7 +99,9 @@ degenerates into a loop making no progress, ``HOPOPT``'s ``SMF_DPD`` reaches it,
 and without a deadline ``make samples`` does not fail -- it *hangs*, taking the
 whole build with it. A signal is what interrupts it, because the loop is pure
 Python and holds the GIL for the whole of an iteration, so no watchdog thread
-would ever get to run.
+would ever get to run. The deadline is wall-clock time, so a stalled runner
+can trip it on a case that normally takes milliseconds (#1428):
+:data:`TIMEOUT_SCALE_ENV` stretches it without disarming it.
 
 """
 
@@ -110,6 +112,8 @@ from __future__ import annotations
 
 import collections
 import datetime
+import math
+import os
 import pathlib
 import signal
 import sys
@@ -149,9 +153,23 @@ SRC_IP6 = '2001:db8::1'
 DST_IP6 = '2001:db8::2'
 
 #: Seconds a single case may take before :func:`roundtrip` gives up on it and
-#: records ``'TIMEOUT'``. Generous next to a working case, which takes low
-#: single-digit milliseconds, and short enough that a whole sweep still ends.
-DEADLINE = 5
+#: records ``'TIMEOUT'``, before :data:`TIMEOUT_SCALE_ENV` stretches it. A working
+#: case takes low single-digit milliseconds, so this is headroom for a stalled
+#: runner rather than for slow code (#1428), and it matches the per-case budget
+#: :file:`tests/protocols/test_option_roundtrip_unit.py` gives the same cycle. A
+#: case that never finishes still trips it, so a sweep still ends.
+DEADLINE = 30
+
+#: Environment variable multiplying every :func:`roundtrip` deadline -- the same
+#: one :func:`tests._support.scale_timeout` reads, so one setting stretches the
+#: suite's hang guards and this one together. Read here rather than imported,
+#: because this module runs as a standalone script with no :mod:`tests` package.
+TIMEOUT_SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'
+
+#: Longest deadline :func:`scale_deadline` hands out: one day, as in
+#: :mod:`tests._support`. :func:`signal.alarm` takes a C ``int`` and raises
+#: :exc:`OverflowError` past it, after the handler would already be installed.
+MAX_DEADLINE = 86400
 
 #: Fixed instant handed to any constructor that would otherwise read the clock.
 #: Timezone-aware and in the past, so it is stable and unambiguous.
@@ -224,7 +242,8 @@ CAPTURABLE = ('OK', 'RECONSTRUCT', 'MISMATCH')
 #: * ``'RECONSTRUCT'`` -- ``_make_*`` could not consume what ``_read_*``
 #:   produced. This is the step a construct-then-parse test cannot see.
 #: * ``'MISMATCH'`` -- both directions worked and the octets differed.
-#: * ``'TIMEOUT'`` -- the case did not finish inside :data:`DEADLINE`.
+#: * ``'TIMEOUT'`` -- the case did not finish inside :data:`DEADLINE`, as
+#:   stretched by :data:`TIMEOUT_SCALE_ENV`.
 STATUSES = ('OK', 'CONSTRUCT', 'PARSE', 'RECONSTRUCT', 'MISMATCH', 'TIMEOUT')
 
 
@@ -1685,8 +1704,9 @@ def roundtrip(case: 'Case', deadline: 'int' = DEADLINE) -> 'Outcome':
 
     Args:
         case: The case to exercise.
-        deadline: Whole seconds to allow, or ``0`` for no deadline. See the
-            module docstring for why there is one at all.
+        deadline: Whole seconds to allow, or ``0`` for no deadline. A non-zero
+            deadline is stretched by :data:`TIMEOUT_SCALE_ENV`. See the module
+            docstring for why there is one at all.
 
     Returns:
         An :class:`Outcome` naming the step that failed, or ``'OK'``.
@@ -1752,8 +1772,51 @@ def roundtrip(case: 'Case', deadline: 'int' = DEADLINE) -> 'Outcome':
     return Outcome(case, 'OK', '', octets, warned)
 
 
+def scale_deadline(seconds: 'int') -> 'int':
+    """Stretch a per-case deadline by :data:`TIMEOUT_SCALE_ENV`.
+
+    The same contract as :func:`tests._support.scale_timeout`, restated because
+    this module cannot import from :mod:`tests`. Read on every call, so a test
+    can set the variable for itself. Unset or blank, the deadline applies as
+    written. A value that is not a positive finite number is refused rather than
+    ignored: falling back to ``1`` would quietly undo a scale CI asked for, and a
+    zero would disarm the guard. A scale stretching the deadline past
+    :data:`MAX_DEADLINE` is refused the same way.
+
+    Args:
+        seconds: The deadline as given to :func:`roundtrip`.
+
+    Returns:
+        Whole seconds, at least one -- :func:`signal.alarm` counts in whole
+        seconds, and an alarm of zero is no alarm at all.
+
+    Raises:
+        ValueError: If :data:`TIMEOUT_SCALE_ENV` is malformed, or scales
+            ``seconds`` past :data:`MAX_DEADLINE`.
+
+    """
+    raw = os.environ.get(TIMEOUT_SCALE_ENV, '').strip()
+    try:
+        scale = float(raw) if raw else 1.0
+    except ValueError:
+        scale = math.nan
+    if not (math.isfinite(scale) and scale > 0):
+        raise ValueError(f'{TIMEOUT_SCALE_ENV} must be a positive number, not {raw!r}')
+    # Compared before rounding: the product of two finite floats can still be
+    # infinite, and ``math.ceil`` raises on that rather than returning.
+    scaled = seconds * scale
+    if not scaled <= MAX_DEADLINE:
+        raise ValueError(f'{TIMEOUT_SCALE_ENV}={raw!r} stretches a {seconds}s deadline '
+                         f'past the {MAX_DEADLINE}s ceiling')
+    return max(1, math.ceil(scaled))
+
+
 class _deadline:  # pylint: disable=invalid-name
     """Raise :exc:`TimeoutError` in the body after ``seconds`` seconds.
+
+    ``seconds`` is stretched by :func:`scale_deadline` on entry, and the
+    :exc:`TimeoutError` names the stretched value -- the seconds actually
+    allowed.
 
     Written as a class rather than a :func:`contextlib.contextmanager` so that
     it can be entered alongside :func:`warnings.catch_warnings` in one ``with``
@@ -1767,8 +1830,9 @@ class _deadline:  # pylint: disable=invalid-name
     """
 
     def __init__(self, seconds: 'int') -> 'None':
-        #: Whole seconds to allow. :func:`signal.alarm` counts in whole
-        #: seconds, so this cannot usefully be fractional.
+        #: Whole seconds to allow: as given, then as scaled once entered.
+        #: :func:`signal.alarm` counts in whole seconds, so this cannot usefully
+        #: be fractional.
         self.seconds = seconds
         #: Whether the alarm was actually armed, and so needs disarming.
         self.armed = False
@@ -1778,6 +1842,9 @@ class _deadline:  # pylint: disable=invalid-name
     def __enter__(self) -> '_deadline':
         if self.seconds <= 0 or not hasattr(signal, 'SIGALRM'):
             return self
+        # Scaled before the handler goes in, so a malformed scale raises with
+        # nothing installed that would need restoring.
+        self.seconds = scale_deadline(self.seconds)
 
         def expire(signum: 'int', frame: 'Any') -> 'None':
             raise TimeoutError(f'did not finish within {self.seconds}s')
@@ -1802,7 +1869,8 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None,
 
     Args:
         families: Families to enumerate; :data:`FAMILIES` if not given.
-        deadline: Whole seconds to allow each case.
+        deadline: Whole seconds to allow each case, before
+            :data:`TIMEOUT_SCALE_ENV` stretches it.
 
     Yields:
         One :class:`Outcome` per case, in case order.
