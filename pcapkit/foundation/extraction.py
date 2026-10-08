@@ -811,6 +811,57 @@ class Extractor(Generic[_P]):
 
         :rtype: None
         """
+        eng = self._select_engine()
+        if eng is not None:
+            logger.debug('using engine %s (%s)', eng.name, eng.module)
+            self._exeng = eng(self)
+            self._exeng.run()
+            self._open_output()
+
+            # start iteration
+            self.record_frames()
+            return
+
+        if self._magic in PCAP_Engine.MAGIC_NUMBER:
+            logger.debug('magic number %r identifies a PCAP file', self._magic)
+            self._exeng = cast('EngineBase[_P]', PCAP_Engine(self))
+        elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
+            logger.debug('magic number %r identifies a PCAP-NG file', self._magic)
+            self._exeng = cast('EngineBase[_P]', PCAPNG_Engine(self))
+        else:
+            raise FormatError(f'unknown file format: {self._magic!r}')
+
+        # start engine
+        self._exeng.run()
+        self._open_output()
+
+        # start iteration
+        self.record_frames()
+
+    def _select_engine(self) -> 'Optional[Type[EngineBase]]':
+        """Settle which extraction engine will actually run.
+
+        An engine that is unknown, not installed, or rules itself out via
+        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+        is replaced by the default one, and :attr:`self._exnam
+        <pcapkit.foundation.extraction.Extractor._exnam>` is updated to match.
+        :meth:`__init__` calls this before choosing the output format, so that
+        the choice reflects the engine that runs rather than the one requested.
+
+        Calling it again is silent: a fallback has already set the name to
+        ``'default'``, and an engine that passed the checks passes them again.
+
+        Warns:
+            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
+                available: its dependency is not installed, its
+                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+                rules it out, or the supplied engine is unknown.
+
+        Returns:
+            The engine class to run, or :data:`None` for the default engine,
+            which :meth:`run` picks from the input's magic number.
+
+        """
         logger.debug('requested extraction engine: %s', self._exnam)
 
         if self._exnam in self.__engine__:  # check if engine is supported
@@ -833,14 +884,7 @@ class Extractor(Generic[_P]):
                      EngineWarning, stacklevel=stacklevel())
                 self._exnam = 'default'
             elif self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
-                logger.debug('using engine %s (%s)', eng.name, eng.module)
-                self._exeng = eng(self)
-                self._exeng.run()
-                self._open_output()
-
-                # start iteration
-                self.record_frames()
-                return
+                return eng
             else:
                 # ``import_test`` has already warned that the package is absent;
                 # warning again here would report one problem twice.
@@ -850,22 +894,7 @@ class Extractor(Generic[_P]):
             warn(f'unsupported extraction engine: {self._exnam}; '
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
             self._exnam = 'default'  # using default/pcapkit engine
-
-        if self._magic in PCAP_Engine.MAGIC_NUMBER:
-            logger.debug('magic number %r identifies a PCAP file', self._magic)
-            self._exeng = cast('EngineBase[_P]', PCAP_Engine(self))
-        elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
-            logger.debug('magic number %r identifies a PCAP-NG file', self._magic)
-            self._exeng = cast('EngineBase[_P]', PCAPNG_Engine(self))
-        else:
-            raise FormatError(f'unknown file format: {self._magic!r}')
-
-        # start engine
-        self._exeng.run()
-        self._open_output()
-
-        # start iteration
-        self.record_frames()
+        return None
 
     @staticmethod
     def import_test(engine: 'str', *, name: 'Optional[str]' = None) -> 'Optional[ModuleType]':
@@ -1196,6 +1225,12 @@ class Extractor(Generic[_P]):
                   one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
                 * If output file format is not supported.
 
+                In each case the engine is the one that will actually run: a
+                requested engine that is unavailable falls back to the default
+                engine first, which supports PCAP output.
+
+            pcapkit.utilities.warnings.EngineWarning: If the requested extraction
+                engine is not available, c.f. :meth:`run`.
             pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
                 requested while the extraction engine is PyShark.
 
@@ -1207,14 +1242,20 @@ class Extractor(Generic[_P]):
         if format is None:
             format = 'tree'
 
+        # NOTE: the engine is settled first, because the format checks below and
+        # in the trace settings depend on which engine *runs*: an unavailable
+        # one falls back to the default engine, which writes PCAP perfectly well.
+        self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
+        self._select_engine()
+
         # NOTE: the third-party engines' adapters hand the output writer each
         # frame as a plain :obj:`dict` built by ``packet2dict``, which carries
         # neither the frame's octets nor its record header, so there is nothing
         # for the PCAP writer to write. The flow tracer has the same limitation,
         # and is given the same replacement below.
-        if ((engine or 'default').lower() in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
+        if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
                 and format in ('pcap', 'cap')):
-            warn(f"'Extractor(engine={engine})' does not support 'format={format}'; "
+            warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "
                  "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
             format = 'json'
 
@@ -1264,7 +1305,6 @@ class Extractor(Generic[_P]):
 
         self._exptl = protocol or 'null'                              # extract til protocol
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
-        self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
         self._exctx = ContextRegistry.make(context)                   # caller supplied context
 
         if reassembly:

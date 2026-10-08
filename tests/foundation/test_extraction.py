@@ -1067,13 +1067,17 @@ class ExtractorTests(unittest.TestCase):
         """An ``Extractor`` built for tracing, with ``run`` patched out.
 
         Nothing is extracted, so no engine needs to be installed -- the format
-        substitution under test happens in the constructor. Returns the extractor
-        and the patched module-level ``warn``.
+        substitution under test happens in the constructor. ``_select_engine`` is
+        patched out too, so the requested engine is taken as the one that runs;
+        otherwise an engine missing here would fall back to the default one,
+        which keeps PCAP (#1264). Returns the extractor and the patched
+        module-level ``warn``.
 
         """
         from pcapkit.foundation.extraction import Extractor
 
-        with mock.patch.object(Extractor, 'run'):
+        with mock.patch.object(Extractor, 'run'), \
+                mock.patch.object(Extractor, '_select_engine', return_value=None):
             with mock.patch('pcapkit.foundation.extraction.warn') as warn:
                 extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{tag}'),
                                       format='json', auto=False, nofile=True, trace=True,
