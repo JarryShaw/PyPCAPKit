@@ -525,8 +525,8 @@ def _ipv4_parse(octets: 'bytes') -> 'Any':
 def _ipv4_extract(parsed: 'Any') -> 'Any':
     from pcapkit.corekit.multidict import OrderedMultiDict
 
-    # EOOL and NOP are dropped by ``_make_ipv4_options`` as padding, so the
-    # header they produce has no options at all and ``info`` carries no
+    # ``_make_ipv4_options`` drops EOOL and NOP from a fresh option list as
+    # padding, so the header a case builds from either has no options at all and ``info`` carries no
     # ``options`` attribute. An empty collection is the honest reading of that,
     # and it keeps the two padding codes from being reported as parse failures.
     return getattr(parsed.info, 'options', OrderedMultiDict())
@@ -558,9 +558,10 @@ def _ipv6_option_overrides() -> 'dict[Any, dict[str, Any]]':
     # HOPOPT and IPv6-Opts key on the same enumeration and behave identically
     # on every code, so one table serves both.
     return {
-        # ``nonce=0`` gives a zero-octet nonce. Only widths 3, 5, 6 and 7 pack
-        # at all, because a callable-length NumberField never clears the flag
-        # that says "hand struct a bytes"; 0xFFFFFF is three octets.
+        # The nonce is sized to its bit length rounded up to whole octets, at
+        # least one, so the default ``nonce=0`` is a one-octet zero. A
+        # three-octet value exercises a multi-octet width; every width from 1
+        # to 16 octets builds and round-trips.
         Enum_Option.ILNP_Nonce: {'nonce': 0xFFFFFF},
         Enum_Option.Line_Identification_Option: {'id': b'line-1'},
     }
@@ -1163,10 +1164,14 @@ def _httpv2_extract(parsed: 'Any') -> 'Any':
 def _httpv2_rebuild(frame: 'Any') -> 'Any':
     from pcapkit.protocols.application.httpv2 import HTTP
 
-    # ``flags`` is deliberately not passed on: ``HTTP.make`` rebinds it from
-    # the ``_make_http_*`` return whenever ``frame`` is a mapping or a Data
-    # object, so passing it would be silently ignored.
-    return HTTP(type=frame.type, sid=frame.sid, frame=frame)
+    # ``HTTP.make`` ORs ``flags`` into the bits the ``_make_http_*`` constructor
+    # derives from ``frame``, and that constructor knows only the flags its
+    # frame type defines. So the raw flags octet is passed on, as
+    # ``HTTP._make_data`` does, or a bit the type leaves undefined is dropped.
+    # ``reserved`` is passed on for the same reason: ``make`` defaults it to 0.
+    return HTTP(type=frame.type, sid=frame.sid, reserved=frame.reserved,
+                flags=frame.flags.__value__ if frame.flags is not None else 0,
+                frame=frame)
 
 
 ###############################################################################
@@ -1625,21 +1630,17 @@ FAMILY_MAP = {family.label: family for family in FAMILIES}
 
 #: Codes deliberately left out of the case list, with the reason.
 #:
-#: The padding options are dropped by every ``_make_*_options`` in the tree --
-#: it discards them and inserts its own padding to reach the alignment the
-#: protocol wants -- so a case for one would assert only that construction
-#: ignores its own input, which it does. They are kept for TCP, where the
-#: dropping is symmetric and the case is a genuine round trip of an
-#: option-less header, and skipped where a second padding code would merely
-#: duplicate the first.
+#: Every padding option has a case except PadN in HOPOPT and IPv6-Opts. Their
+#: ``_make_*_options`` keep the padding of parsed options in place, but drop
+#: any in a list of fresh options and insert their own to reach 8-octet
+#: alignment. A case is built from such a list, so the Pad1 and PadN cases
+#: would both emit the same option-less header; Pad1 is kept, PadN skipped.
+#: ``_make_tcp_options`` emits ``EOOL`` and ``NOP`` as given, so the TCP
+#: padding cases are distinct headers and both round-trip.
 SKIP = {
-    ('tcp-option', 'End_of_Option_List'): 'padding, dropped by _make_tcp_options',
-    ('tcp-option', 'No_Operation'): 'padding, dropped by _make_tcp_options',
     # Multipath TCP is the envelope for the whole tcp-mptcp family, so a case
     # here would silently duplicate whichever subtype it defaulted to.
     ('tcp-option', 'Multipath_TCP'): 'envelope for the tcp-mptcp family',
-    # Pad1 and PadN are both discarded by _make_hopopt_options, so the two
-    # cases emit byte-identical option-less headers.
     ('hopopt-option', 'PadN'): 'padding, indistinguishable from Pad1 here',
     ('ipv6-opts-option', 'PadN'): 'padding, indistinguishable from Pad1 here',
 }
