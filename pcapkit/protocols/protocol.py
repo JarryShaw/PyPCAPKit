@@ -727,19 +727,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Raises:
             ProtocolError: If the made header holds raw items and its packed
-                octets do not parse.
+                octets do not parse, either as a schema or by :meth:`read`.
+                The message carries the original error's, which is also
+                chained as ``__cause__``.
 
         """
         packet = kwargs.get('__packet__', {})  # packet data
         if cast('Optional[_ST]', self.__header__) is None:
             self.__header__ = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         elif self._make_raw and _holds_raw(self.__header__):
+            # NOTE: A schema may accept octets that :meth:`read` then rejects,
+            # e.g. an option whose length runs past the option area, so the
+            # read is covered too (:issue:`1394`).
             try:
                 parsed = cast('_ST', type(self.__header__).unpack(io.BytesIO(self._data), length, packet))  # type: ignore[call-arg,misc]
+                if _raw_where_parsed(self.__header__, parsed):
+                    self.__header__ = parsed
+                return self.read(length, **kwargs)
             except (BaseError, struct.error) as error:  # pylint: disable=no-member
-                raise ProtocolError(f'{type(self).__name__}: malformed raw item given to make()') from error
-            if _raw_where_parsed(self.__header__, parsed):
-                self.__header__ = parsed
+                raise ProtocolError(f'{type(self).__name__}: malformed raw item given to make(): {error}') from error
         return self.read(length, **kwargs)
 
     @staticmethod
