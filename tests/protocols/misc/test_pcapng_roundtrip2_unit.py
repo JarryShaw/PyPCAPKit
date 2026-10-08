@@ -243,12 +243,13 @@ class TestPCAPNGModelling(PCAPNGTestCase):
             self.assertEqual(flags.direction, PacketDirection.OUTBOUND)
             self.assertRebuilds(octets)
 
-    def test_undefined_direction_is_rejected(self) -> None:
-        """#1273: direction ``0b11`` raises an in-library error."""
-        from pcapkit.utilities.exceptions import ProtocolError
+    def test_undefined_direction_is_kept(self) -> None:
+        """#1382: direction ``0b11`` is kept as an unassigned member and rebuilds."""
+        from pcapkit.const.pcapng.option_type import OptionType
 
-        with self.assertRaisesRegex(ProtocolError, r'invalid PacketDirection'):
-            self._parse(_epb_with_options(H('0200 0400 03000000')))
+        octets = _epb_with_options(H('0200 0400 03000000'))
+        self.assertEqual(self._parse(octets).info.options[OptionType.epb_flags].direction, 0b11)
+        self.assertRebuilds(octets)
 
     def test_nrb_names_decode_as_utf8(self) -> None:
         """#1277: record names are UTF-8, not a guessed charset."""

@@ -108,16 +108,16 @@ class PCAPNGUnitTests(unittest.TestCase):
         )
         try:
             with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
-                PCAPNG.register_block(BlockType.Section_Header_Block, 'shb')
-                PCAPNG.register_option(OptionType.opt_endofopt, 'endofopt')
-                PCAPNG.register_record(RecordType.nrb_record_end, 'end')
-                PCAPNG.register_secrets(SecretsType.TLS_Key_Log, 'tls')
+                PCAPNG.register_block(BlockType.Section_Header_Block, 'shb_w1401')
+                PCAPNG.register_option(OptionType.opt_endofopt, 'endofopt_w1401')
+                PCAPNG.register_record(RecordType.nrb_record_end, 'end_w1401')
+                PCAPNG.register_secrets(SecretsType.TLS_Key_Log, 'tls_w1401')
 
             self.assertEqual(warn.call_count, 4)
-            self.assertEqual(block_map[BlockType.Section_Header_Block], 'shb')
-            self.assertEqual(option_map[_option_key(OptionType.opt_endofopt)], 'endofopt')
-            self.assertEqual(record_map[RecordType.nrb_record_end], 'end')
-            self.assertEqual(secrets_map[SecretsType.TLS_Key_Log], 'tls')
+            self.assertEqual(block_map[BlockType.Section_Header_Block], 'shb_w1401')
+            self.assertEqual(option_map[_option_key(OptionType.opt_endofopt)], 'endofopt_w1401')
+            self.assertEqual(record_map[RecordType.nrb_record_end], 'end_w1401')
+            self.assertEqual(secrets_map[SecretsType.TLS_Key_Log], 'tls_w1401')
         finally:
             block_map[BlockType.Section_Header_Block] = originals[0]
             option_map[_option_key(OptionType.opt_endofopt)] = originals[1]
@@ -134,7 +134,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         original = record_map[RecordType.nrb_record_end]
         try:
             with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
-                PCAPNG.register_record(RecordType.nrb_record_end, 'end')
+                PCAPNG.register_record(RecordType.nrb_record_end, 'end_w1401')
         finally:
             record_map[RecordType.nrb_record_end] = original
 
@@ -922,7 +922,10 @@ class PCAPNGUnitTests(unittest.TestCase):
             'direction': PacketDirection.INBOUND.value,
             'reception': PacketReception.UNICAST.value,
             'fcs_len': 4,
-            'reserved': 0,  # bits 9-23, kept since #1273
+            'checksum_not_ready': 0,
+            'checksum_valid': 0,
+            'tcp_segmentation_offloaded': 0,
+            'reserved': 0,  # bits 12-23, kept since #1273
             'crc_error': 1,
             'too_long': 0,
             'too_short': 1,
@@ -1627,6 +1630,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._sect = 2
         pcapng._fnum = 3
         pcapng._opt = collections.Counter()
+        pcapng._ctx = None  # the SPB reader looks up interface 0's snaplen
         pcapng._get_linktype = lambda interface_id=0: LinkType.ETHERNET
         pcapng._read_timestamp = lambda high, low, interface_id=0: (
             datetime.datetime.fromtimestamp(high + low, datetime.timezone.utc),
@@ -2288,7 +2292,10 @@ class PCAPNGUnitTests(unittest.TestCase):
             direction=PacketDirection.INBOUND,
             reception=PacketReception.MULTICAST,
             fcs_len=3,
-            reserved=0,  # bits 9-23, kept since #1273
+            checksum_not_ready=False,
+            checksum_valid=False,
+            tcp_segmentation_offloaded=False,
+            reserved=0,  # bits 12-23, kept since #1273
             crc_error=True,
             too_long=True,
             too_short=False,
@@ -2376,7 +2383,10 @@ class PCAPNGUnitTests(unittest.TestCase):
             direction=PacketDirection.OUTBOUND,
             reception=PacketReception.BROADCAST,
             fcs_len=1,
-            reserved=0,  # bits 9-23, kept since #1273
+            checksum_not_ready=False,
+            checksum_valid=False,
+            tcp_segmentation_offloaded=False,
+            reserved=0,  # bits 12-23, kept since #1273
             crc_error=True,
             too_long=False,
             too_short=True,
@@ -4311,7 +4321,10 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual(schema.captured_len, 0xFFFFFF)
         self.assertEqual(len(schema.options), 0)
         self.assertEqual(schema.padding_opts, b'')
-        self.assertTrue(caught)
+        # #1405: the packet data is bounded by the block, so nothing goes
+        # negative and the trailing Block Total Length is read where it sits.
+        self.assertEqual(schema.packet_data, bytes(8))
+        self.assertEqual(schema.length2, len(raw) + 4)  # the length counts the block type
 
     def test_a_block_total_length_below_its_own_floor_does_not_reach_struct(self) -> None:
         """The other shape: a declared length under the block's fixed fields.
@@ -4437,32 +4450,33 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual([entry for entry in caught
                           if entry.category.__name__ == 'SchemaWarning'], [])
 
-    def test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped(self) -> None:
+    def test_a_journal_binary_field_declaring_more_than_its_entry_is_kept_as_captured(self) -> None:
         """A 64-bit length was either fatal or invisible, by magnitude alone.
 
         At ``2**63`` and above :meth:`io.BytesIO.read` refuses the length outright
         with a bare :exc:`OverflowError`; below that it silently returned whatever
         happened to be there. Both are the same malformed prefix, so both get the
-        same answer: clamp to the octets the entry has left, and say so.
+        same answer: the whole entry is kept as captured, parses as no entries,
+        and the extraction says so and carries on (#1406).
 
         """
-        from pcapkit.utilities.warnings import SchemaWarning
+        from pcapkit.utilities.warnings import ProtocolWarning, SchemaWarning
 
         # ``b'BINARY\n' + 8 octets + b'abc\n'`` is 19 octets, so the block pads it
         # with one NUL and five octets follow the length prefix
         for declared in (6, 1 << 10, 1 << 30, 1 << 62, 1 << 63, 2 ** 64 - 1):
-            with self.subTest(declared=declared, expect='clamped'):
+            with self.subTest(declared=declared, expect='kept'):
                 entries, caught = self._extract_journal(
                     b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
 
-                schema_warnings = [entry for entry in caught
-                                   if entry.category is SchemaWarning]
-                self.assertEqual(len(schema_warnings), 1)
-                self.assertIn(f'declares {declared} octet(s) with 5 left',
-                              str(schema_warnings[0].message))
-                self.assertEqual(entries[0]['BINARY'], b'abc\n\x00')
+                self.assertEqual([entry for entry in caught if entry.category is SchemaWarning], [])
+                kept = [entry for entry in caught if entry.category is ProtocolWarning
+                        and 'kept as captured' in str(entry.message)]
+                self.assertEqual(len(kept), 1)
+                self.assertIn(f'declares {declared} octet(s) with 5 left', str(kept[0].message))
+                self.assertEqual(entries, ())
 
-        # and a length the entry can satisfy is read exactly -- the clamp
+        # and a length the entry can satisfy is read exactly -- the check
         # reaches only what the entry holds, padding included, so it must not
         # fire on a field that fits. Only ``declared == 3`` leaves the real
         # trailing newline immediately behind the value; every other cut lands
@@ -4498,7 +4512,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         per-entry loop on a bad terminator -- so #722's per-entry check
         silently widened into a per-block one, and a well-formed entry behind
         a corrupted one was dropped entirely, which
-        :meth:`test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped`
+        :meth:`test_a_journal_binary_field_declaring_more_than_its_entry_is_kept_as_captured`
         above cannot show because its bad terminator always lands at the
         block's own end. There is nothing between the corrupted octet and
         ``GOOD=1`` here -- not even the format's own separator -- so recovery
