@@ -1350,41 +1350,44 @@ class TCPUDPUnitTests(unittest.TestCase):
             with time_limit():
                 TCP(bad, len(bad))
 
-    def test_an_option_area_longer_than_the_segment_still_parses(self) -> None:
-        """A data offset promising more options than are there is tolerated.
+    def test_an_option_area_longer_than_the_segment_is_refused(self) -> None:
+        """A data offset promising more options than are there is refused. C.f. #431, #1404.
 
         The segment below declares a data offset of 10 -- a 20-octet option area --
-        and carries four option octets. Reading past them yields ``b''``, which
-        decodes the option kind as 0, and 0 is TCP's end-of-option-list, so the
-        option loop breaks there and reports the remaining 16 octets as padding.
-        That is how a capture cut short by the snapshot length parses at all, and
-        it is why :meth:`OptionField.unpack
+        and carries four option octets. Read by the schema, the option area yields
+        ``b''`` past them, which decodes the option kind as 0, and 0 is TCP's
+        end-of-option-list, so the option loop breaks there. That is why
+        :meth:`OptionField.unpack
         <pcapkit.corekit.fields.collections.OptionField.unpack>` checks each
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such segment into an error.
 
+        :class:`~pcapkit.protocols.transport.tcp.TCP` itself refuses the segment
+        with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 16
+        missing octets would otherwise be rebuilt as zeros (#1404).
+
         """
         from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
         from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
         raw = bytes.fromhex('00501f900000000100000002a002ffff00000000020405b4')
         with time_limit():
-            proto = TCP(raw, len(raw))
-
-        self.assertEqual(proto.info.hdr_len, 40)
+            schema = Schema_TCP.unpack(raw)
         self.assertEqual(
-            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(opt.kind, opt.length) for opt in schema.options],
             [(Option.Maximum_Segment_Size, 4), (Option.End_of_Option_List, 1)],
         )
-        mss = next(opt for code, opt in proto.info.options.items(multi=True)
-                   if code == Option.Maximum_Segment_Size)
-        self.assertEqual(mss.mss, 1460)
+
+        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+            TCP(raw, len(raw))
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
         """An option declaring more data than its option area holds is refused alone, and kept in a datagram. C.f. #431, #572, #1325.
 
-        :meth:`test_an_option_area_longer_than_the_segment_still_parses` above
+        :meth:`test_an_option_area_longer_than_the_segment_is_refused` above
         pins the *empty*-tail half of the #431 accommodation: an option area
         that runs out before it starts, so the type byte decodes as 0 and the
         loop reads end-of-option-list. This is the other half -- an option that
@@ -1426,12 +1429,12 @@ class TCPUDPUnitTests(unittest.TestCase):
                             + bytes.fromhex('000100004006' '0000' '0a000001' '0a000002') + raw)
                 with time_limit(), warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    with self.assertRaisesRegex(ProtocolError, 'runs past the end of the data'):
+                    with self.assertRaisesRegex(ProtocolError, 'has an option that runs past the end of the data'):
                         TCP(raw, len(raw))
                     proto = IPv4(datagram, len(datagram))
 
                 self.assertIsInstance(proto.payload, Raw)
-                self.assertIn('runs past the end of the data', str(proto.payload.info.error))
+                self.assertIn('has an option that runs past the end of the data', str(proto.payload.info.error))
                 # the option octets are kept as captured, with nothing synthesised
                 self.assertEqual(proto.payload.data, raw)
                 self.assertEqual(IPv4.from_data(proto.info).data, datagram)
