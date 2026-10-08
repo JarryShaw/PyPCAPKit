@@ -82,6 +82,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: Version.
         version: int
+        #: Reserved bits.
+        reserved: int
         #: Reversed bit.
         bit_1: Literal[1]
 
@@ -116,6 +118,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         symmetric: int
         #: Must-follow flag.
         must_follow: int
+        #: Reserved bits.
+        reserved: int
 
 
 def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -1300,8 +1304,9 @@ class RouteDstParameter(Parameter, code=Enum_Parameter.ROUTE_DST):
 
     #: Flags.
     flags: 'RouteFlags' = BitField(length=2, namespace={
-            'symmetric': (0, 1),
-            'must_follow': (1, 1),
+        'symmetric': (0, 1),
+        'must_follow': (1, 1),
+        'reserved': (2, 14),
     })
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
@@ -1474,6 +1479,7 @@ class RouteViaParameter(Parameter, code=Enum_Parameter.ROUTE_VIA):
     flags: 'RouteFlags' = BitField(length=2, namespace={
         'symmetric': (0, 1),
         'must_follow': (1, 1),
+        'reserved': (2, 14),
     })
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
@@ -1565,6 +1571,7 @@ class HIP(Schema):
         length=1,
         namespace={
             'version': (0, 4),
+            'reserved': (4, 3),
             'bit_1': (7, 1),
         },
     )

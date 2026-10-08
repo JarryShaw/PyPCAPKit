@@ -18,7 +18,7 @@ Octets      Bits        Name                    Description
   2          16                             Reserved (``\\x00``)
   2          17   ``hip.type``              Packet Type
   3          24   ``hip.version``           Version
-  3          28                             Reserved
+  3          28   ``hip.reserved``          Reserved
   3          31                             Reserved (``\\x01``)
   4          32   ``hip.chksum``            Checksum
   6          48   ``hip.control``           Controls
@@ -582,6 +582,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             length=schema.len * 8 + 8,
             type=Enum_Packet(schema.pkt['type']),
             version=schema.ver['version'],
+            reserved=schema.ver['reserved'],
             chksum=schema.checksum,
             control=Data_Control(
                 anonymous=bool(schema.control['anonymous']),
@@ -616,6 +617,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              packet_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              packet_reversed: 'bool' = False,
              version: 'int' = 2,
+             version_reserved: 'int' = 0,
              checksum: 'bytes' = b'\x00\x00',
              controls_anonymous: 'bool' = False,
              controls_reserved: 'int' = 0,
@@ -636,6 +638,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             packet_namespace: Namespace for HIP packet type.
             packet_reversed: If the HIP packet type is reversed.
             version: HIP version.
+            version_reserved: The 3 reserved bits between ``Version`` and the
+                fixed low-order bit.
             checksum: Checksum.
             controls_anonymous: If the sender is anonymous.
             controls_reserved: The 15 reserved high-order bits of ``Controls``.
@@ -674,6 +678,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             ver = {
                 'bit_1': 1,
                 'version': version,
+                'reserved': version_reserved,
             },
             checksum=checksum,
             control = {
@@ -775,6 +780,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             'next': data.next,
             'packet': data.type,
             'version': data.version,
+            'version_reserved': data.reserved,
             'checksum': data.chksum,
             'controls_anonymous': data.control.anonymous,
             'controls_reserved': data.control.reserved,
@@ -2378,6 +2384,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
+                reserved=schema.flags['reserved'],
             ),
             hit=tuple(schema.hit),
         )
@@ -2827,6 +2834,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
+                reserved=schema.flags['reserved'],
             ),
             hit=tuple(schema.hit),
         )
@@ -4668,6 +4676,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                               version: 'int',
                               symmetric: 'bool' = False,
                               must_follow: 'bool' = False,
+                              flags_reserved: 'int' = 0,
                               hit: 'Optional[list[bytes | str | int | IPv6Address]]' = None,
                               **kwargs: 'Any') -> 'Schema_RouteDstParameter':
         """Make HIP ``ROUTE_DST`` parameter.
@@ -4678,6 +4687,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             symmetric: symmetric flag
             must_follow: must-follow flag
+            flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
 
         Returns:
@@ -4687,6 +4697,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             symmetric = param.flags.symmetric
             must_follow = param.flags.must_follow
+            flags_reserved = param.flags.reserved
             hit_list = cast('list[bytes | str | int | IPv6Address]', param.hit)
         else:
             hit_list = hit if hit is not None else []
@@ -4697,6 +4708,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags={
                 'symmetric': int(symmetric),
                 'must_follow': int(must_follow),
+                'reserved': flags_reserved,
             },
             hit=hit_list,
         )
@@ -5042,6 +5054,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                               version: 'int',
                               symmetric: 'bool' = False,
                               must_follow: 'bool' = False,
+                              flags_reserved: 'int' = 0,
                               hit: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
                               **kwargs: 'Any') -> 'Schema_RouteViaParameter':
         """Make HIP ``ROUTE_VIA`` parameter.
@@ -5052,6 +5065,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             symmetric: symmetric flag
             must_follow: must-follow flag
+            flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
 
         Returns:
@@ -5061,6 +5075,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             symmetric = param.flags.symmetric
             must_follow = param.flags.must_follow
+            flags_reserved = param.flags.reserved
             hit_list = cast('list[IPv6Address | bytes | str | int]', param.hit)
         else:
             hit_list = hit if hit is not None else []
@@ -5071,6 +5086,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags={
                 'symmetric': int(symmetric),
                 'must_follow': int(must_follow),
+                'reserved': flags_reserved,
             },
             hit=hit_list,
         )

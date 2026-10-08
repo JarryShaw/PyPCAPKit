@@ -31,6 +31,7 @@ class HIPUnitTests(unittest.TestCase):
             next=TransType.TCP,
             type=Packet.I1,
             version=2,
+            reserved=0,
             chksum=b'\x12\x34',
             control=DummyDict(anonymous=True, reserved=0),
             shit=b'source-hit',
@@ -57,6 +58,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(values['next'], TransType.TCP)
         self.assertEqual(values['packet'], Packet.I1)
         self.assertEqual(values['version'], 2)
+        self.assertEqual(values['version_reserved'], 0)
         self.assertEqual(values['checksum'], b'\x12\x34')
         self.assertEqual(values['controls_anonymous'], True)
         self.assertEqual(values['shit'], b'source-hit')
@@ -86,7 +88,7 @@ class HIPUnitTests(unittest.TestCase):
             next=TransType.UDP,
             len=4,
             pkt={'bit_0': 0, 'type': Packet.I1},
-            ver={'bit_1': 1, 'version': 2},
+            ver={'bit_1': 1, 'version': 2, 'reserved': 0},
             checksum=b'\x12\x34',
             control={'anonymous': 1, 'reserved': 0},
             shit=1,
@@ -110,7 +112,7 @@ class HIPUnitTests(unittest.TestCase):
                 next=TransType.UDP,
                 len=4,
                 pkt={'bit_0': 1, 'type': Packet.I1},
-                ver={'bit_1': 1, 'version': 2},
+                ver={'bit_1': 1, 'version': 2, 'reserved': 0},
                 checksum=b'\x00\x00',
                 control={'anonymous': 0},
                 shit=0,
@@ -125,7 +127,7 @@ class HIPUnitTests(unittest.TestCase):
                 next=TransType.UDP,
                 len=4,
                 pkt={'bit_0': 0, 'type': Packet.I1},
-                ver={'bit_1': 0, 'version': 2},
+                ver={'bit_1': 0, 'version': 2, 'reserved': 0},
                 checksum=b'\x00\x00',
                 control={'anonymous': 0},
                 shit=0,
@@ -215,7 +217,7 @@ class HIPUnitTests(unittest.TestCase):
             next=TransType.UDP,
             len=5,
             pkt={'bit_0': 0, 'type': Packet.I1},
-            ver={'bit_1': 1, 'version': 2},
+            ver={'bit_1': 1, 'version': 2, 'reserved': 0},
             checksum=b'\x12\x34',
             control={'anonymous': 1, 'reserved': 0},
             shit=1,
@@ -763,7 +765,7 @@ class HIPUnitTests(unittest.TestCase):
         ).id, 99)
         self.assertTrue(proto._read_param_route_dst(
             hip_schema.RouteDstParameter(type=Parameter.ROUTE_DST, len=20,
-                                         flags={'symmetric': 1, 'must_follow': 1},
+                                         flags={'symmetric': 1, 'must_follow': 1, 'reserved': 0},
                                          hit=[ip_address('2001:db8::20')]),
             version=2,
             options=options,
@@ -820,7 +822,7 @@ class HIPUnitTests(unittest.TestCase):
         ).ttl, datetime.timedelta(seconds=30))
         self.assertTrue(proto._read_param_route_via(
             hip_schema.RouteViaParameter(type=Parameter.ROUTE_VIA, len=20,
-                                         flags={'symmetric': 1, 'must_follow': 0},
+                                         flags={'symmetric': 1, 'must_follow': 0, 'reserved': 0},
                                          hit=[ip_address('2001:db8::40')]),
             version=2,
             options=options,
@@ -889,7 +891,7 @@ class HIPUnitTests(unittest.TestCase):
              hip_schema.AckDataParameter(type=Parameter.ACK_DATA, len=5, ack=[1])),
             (proto._read_param_route_dst,
              hip_schema.RouteDstParameter(type=Parameter.ROUTE_DST, len=5,
-                                          flags={'symmetric': 1, 'must_follow': 1},
+                                          flags={'symmetric': 1, 'must_follow': 1, 'reserved': 0},
                                           hit=[])),
             (proto._read_param_hip_transport_mode,
              hip_schema.HIPTransportModeParameter(type=Parameter.HIP_TRANSPORT_MODE,
@@ -907,7 +909,7 @@ class HIPUnitTests(unittest.TestCase):
              hip_schema.OverlayTTLParameter(type=Parameter.OVERLAY_TTL, len=3, ttl=30)),
             (proto._read_param_route_via,
              hip_schema.RouteViaParameter(type=Parameter.ROUTE_VIA, len=5,
-                                          flags={'symmetric': 1, 'must_follow': 0},
+                                          flags={'symmetric': 1, 'must_follow': 0, 'reserved': 0},
                                           hit=[])),
             (proto._read_param_from,
              hip_schema.FromParameter(type=Parameter.FROM, len=15,
@@ -1702,7 +1704,7 @@ class HIPUnitTests(unittest.TestCase):
                                         critical=False, length=8, id=99),
             version=2,
         ).id, 99)
-        flags = hip_data.Flags(symmetric=True, must_follow=True)
+        flags = hip_data.Flags(symmetric=True, must_follow=True, reserved=0)
         self.assertTrue(proto._make_param_route_dst(
             Parameter.ROUTE_DST,
             hip_data.RouteDstParameter(type=Parameter.ROUTE_DST,
