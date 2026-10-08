@@ -694,8 +694,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: HIP parameter code.
             meth: Method name or callable to parse and/or construct the parameter.
 
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
         """
-        if code in cls.__parameter__:
+        incumbent = cls.__parameter__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
             warn(f'parameter {code} already registered, overwriting', RegistryWarning)
         cls.__parameter__[code] = meth
 

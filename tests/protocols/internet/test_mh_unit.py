@@ -54,9 +54,9 @@ class MHUnitTests(unittest.TestCase):
         original = MH.__dict__['__message__'][Packet.Binding_Refresh_Request]
         try:
             with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
-                MH.register_message(Packet.Binding_Refresh_Request, 'brr')
+                MH.register_message(Packet.Binding_Refresh_Request, 'hoti')
             warn.assert_called_once()
-            self.assertEqual(MH.__dict__['__message__'][Packet.Binding_Refresh_Request], 'brr')
+            self.assertEqual(MH.__dict__['__message__'][Packet.Binding_Refresh_Request], 'hoti')
         finally:
             MH.__dict__['__message__'][Packet.Binding_Refresh_Request] = original
 
@@ -67,9 +67,9 @@ class MHUnitTests(unittest.TestCase):
         original = MH.__dict__['__option__'][Option.Pad1]
         try:
             with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
-                MH.register_option(Option.Pad1, 'pad')
+                MH.register_option(Option.Pad1, 'bra')
             warn.assert_called_once()
-            self.assertEqual(MH.__dict__['__option__'][Option.Pad1], 'pad')
+            self.assertEqual(MH.__dict__['__option__'][Option.Pad1], 'bra')
         finally:
             MH.__dict__['__option__'][Option.Pad1] = original
 
@@ -80,9 +80,9 @@ class MHUnitTests(unittest.TestCase):
         original = MH.__dict__['__extension__'][CGAExtension.Multi_Prefix]
         try:
             with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
-                MH.register_extension(CGAExtension.Multi_Prefix, 'multiprefix')
+                MH.register_extension(CGAExtension.Multi_Prefix, 'exp')
             warn.assert_called_once()
-            self.assertEqual(MH.__dict__['__extension__'][CGAExtension.Multi_Prefix], 'multiprefix')
+            self.assertEqual(MH.__dict__['__extension__'][CGAExtension.Multi_Prefix], 'exp')
         finally:
             MH.__dict__['__extension__'][CGAExtension.Multi_Prefix] = original
 

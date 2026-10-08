@@ -1102,9 +1102,9 @@ class IPv4UnitTests(unittest.TestCase):
         original = registry[OptionNumber.EOOL]
         try:
             with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
-                IPv4.register_option(OptionNumber.EOOL, 'eool')
+                IPv4.register_option(OptionNumber.EOOL, 'nop')
             warn.assert_called_once()
-            self.assertEqual(registry[OptionNumber.EOOL], 'eool')
+            self.assertEqual(registry[OptionNumber.EOOL], 'nop')
         finally:
             registry[OptionNumber.EOOL] = original
 
@@ -1120,8 +1120,13 @@ class IPv4UnitTests(unittest.TestCase):
             warn.assert_not_called()
             self.assertEqual(registry[custom], 'unassigned')
 
+            # Handing back the entry just stored is no overwrite either (#1362).
             with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
                 IPv4.register_option(custom, 'unassigned')
+            warn.assert_not_called()
+
+            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+                IPv4.register_option(custom, 'nop')
             warn.assert_called_once()
         finally:
             registry.pop(custom, None)

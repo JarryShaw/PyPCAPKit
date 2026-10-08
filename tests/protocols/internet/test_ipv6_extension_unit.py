@@ -63,9 +63,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         original = HOPOPT.__dict__['__option__'][Option.Pad1]
         try:
             with mock.patch('pcapkit.protocols.internet.hopopt.warn') as warn:
-                HOPOPT.register_option(Option.Pad1, 'pad')
+                HOPOPT.register_option(Option.Pad1, 'tun')
             warn.assert_called_once()
-            self.assertEqual(HOPOPT.__dict__['__option__'][Option.Pad1], 'pad')
+            self.assertEqual(HOPOPT.__dict__['__option__'][Option.Pad1], 'tun')
         finally:
             HOPOPT.__dict__['__option__'][Option.Pad1] = original
 
@@ -76,9 +76,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         original = IPv6_Opts.__dict__['__option__'][Option.Pad1]
         try:
             with mock.patch('pcapkit.protocols.internet.ipv6_opts.warn') as warn:
-                IPv6_Opts.register_option(Option.Pad1, 'pad')
+                IPv6_Opts.register_option(Option.Pad1, 'tun')
             warn.assert_called_once()
-            self.assertEqual(IPv6_Opts.__dict__['__option__'][Option.Pad1], 'pad')
+            self.assertEqual(IPv6_Opts.__dict__['__option__'][Option.Pad1], 'tun')
         finally:
             IPv6_Opts.__dict__['__option__'][Option.Pad1] = original
 
@@ -89,9 +89,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         original = IPv6_Route.__dict__['__routing__'][Routing.Source_Route]
         try:
             with mock.patch('pcapkit.protocols.internet.ipv6_route.warn') as warn:
-                IPv6_Route.register_routing(Routing.Source_Route, 'src')
+                IPv6_Route.register_routing(Routing.Source_Route, 'rpl')
             warn.assert_called_once()
-            self.assertEqual(IPv6_Route.__dict__['__routing__'][Routing.Source_Route], 'src')
+            self.assertEqual(IPv6_Route.__dict__['__routing__'][Routing.Source_Route], 'rpl')
         finally:
             IPv6_Route.__dict__['__routing__'][Routing.Source_Route] = original
 

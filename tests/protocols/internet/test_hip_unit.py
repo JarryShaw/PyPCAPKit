@@ -239,9 +239,9 @@ class HIPUnitTests(unittest.TestCase):
         original = registry[Parameter.ESP_INFO]
         try:
             with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
-                HIP.register_parameter(Parameter.ESP_INFO, 'esp_info')
+                HIP.register_parameter(Parameter.ESP_INFO, 'unassigned')
             warn.assert_called_once()
-            self.assertEqual(registry[Parameter.ESP_INFO], 'esp_info')
+            self.assertEqual(registry[Parameter.ESP_INFO], 'unassigned')
         finally:
             registry[Parameter.ESP_INFO] = original
 
@@ -257,8 +257,13 @@ class HIPUnitTests(unittest.TestCase):
             warn.assert_not_called()
             self.assertEqual(registry[custom], 'unassigned')
 
+            # Handing back the entry just stored is no overwrite either (#1362).
             with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
                 HIP.register_parameter(custom, 'unassigned')
+            warn.assert_not_called()
+
+            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+                HIP.register_parameter(custom, 'esp_info')
             warn.assert_called_once()
         finally:
             registry.pop(custom, None)

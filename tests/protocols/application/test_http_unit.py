@@ -1839,7 +1839,7 @@ class HTTPUnitTests(unittest.TestCase):
         try:
             schema = proto.make(type=Frame.DATA, flags=0x01, sid=3, frame=b'data')
             with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
-                HTTPv2.register_frame(Frame.DATA, 'data')
+                HTTPv2.register_frame(Frame.DATA, 'headers')
 
             self.assertEqual(HTTPv2.id(), ('HTTP', 'HTTPv2'))
             self.assertEqual(proto.alias, 'HTTP/2')
